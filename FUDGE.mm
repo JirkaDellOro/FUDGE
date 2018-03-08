@@ -1,6 +1,6 @@
 <map version="1.0.1">
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1283093380553" ID="ID_1723255651" MODIFIED="1519981806451" TEXT="FUDGE">
+<node CREATED="1283093380553" ID="ID_1723255651" MODIFIED="1520499903526" TEXT="FUDGE">
 <edge COLOR="#006666"/>
 <hook NAME="AutomaticEdgeColor"/>
 <hook NAME="MapStyle">
@@ -52,7 +52,7 @@
 </stylenode>
 </map_styles>
 </hook>
-<node CREATED="1519980459055" FOLDED="true" ID="ID_1508151389" MODIFIED="1519981813828" POSITION="right" TEXT="General Info">
+<node CREATED="1519980459055" FOLDED="true" ID="ID_1508151389" MODIFIED="1520499958721" POSITION="right" TEXT="General Info">
 <edge COLOR="#006666"/>
 <node CREATED="1519980472563" ID="ID_502278214" MODIFIED="1519981806451" TEXT="FUDGE means Furtwangen University Didactic Game Engine">
 <edge COLOR="#006666"/>
@@ -93,7 +93,7 @@
 <edge COLOR="#006666"/>
 </node>
 </node>
-<node CREATED="1519981138686" FOLDED="true" ID="ID_894632498" MODIFIED="1519981813079" POSITION="right" TEXT="Paradigms">
+<node CREATED="1519981138686" FOLDED="true" ID="ID_894632498" MODIFIED="1520499961086" POSITION="right" TEXT="Paradigms">
 <edge COLOR="#006666"/>
 <node CREATED="1519981143486" ID="ID_1612958640" MODIFIED="1519981806451" TEXT="Composition over Inheritance (COI)">
 <edge COLOR="#006666"/>
@@ -104,6 +104,15 @@
 <node CREATED="1519981167500" FOLDED="true" ID="ID_417993702" MODIFIED="1519981806451" TEXT="Game-Scripting with TypeScript">
 <edge COLOR="#006666"/>
 <node CREATED="1519981197294" ID="ID_1919438545" MODIFIED="1519981208404" TEXT="Definition files must be created"/>
+</node>
+</node>
+<node CREATED="1520499908333" FOLDED="true" ID="ID_873125860" MODIFIED="1520500076984" POSITION="left" TEXT="Components">
+<node CREATED="1520499914584" FOLDED="true" ID="ID_1843821330" MODIFIED="1520500076328" TEXT="Animation">
+<node CREATED="1520499917830" ID="ID_181217642" MODIFIED="1520499973040" TEXT="dopesheet &amp; curveeditor as in Unity"/>
+<node CREATED="1520499930909" ID="ID_1104935536" MODIFIED="1520499945516" TEXT="additional labels as in Animate"/>
+<node CREATED="1520499974457" ID="ID_1520716064" MODIFIED="1520499993608" TEXT="timebased at 1/60th of a second"/>
+<node CREATED="1520500002629" ID="ID_42293744" MODIFIED="1520500055293" TEXT="most properties can be animated"/>
+<node CREATED="1520500057557" ID="ID_1674974383" MODIFIED="1520500074334" TEXT="identification by name and/or type"/>
 </node>
 </node>
 </node>
