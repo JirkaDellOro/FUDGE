@@ -10,7 +10,7 @@ To be evaluated for advantages and tested
 # Attaching Script-Objects
 ## Demonstrated
 A rudimentary GameObject-class was implemented, that can hold a reference to one script-object. Should later be replaced by a list of references. Using the namespace properties for creating objects from classnames enables recontruction of a scene from e.g. a json file. No references to instances need to be saved.
-##Alternatives
+## Alternatives
 ?
 # Events
 ## Demonstrated
