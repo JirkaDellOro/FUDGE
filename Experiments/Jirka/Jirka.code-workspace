@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "DomScene"
+		},
+		{
+			"path": "JSONTest"
 		}
 	],
 	"settings": {}

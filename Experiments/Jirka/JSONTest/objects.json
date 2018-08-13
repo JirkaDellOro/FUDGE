@@ -1,0 +1,22 @@
+{
+    "name": "Parent",
+    "children": [
+        {
+            "name": "Child0",
+            "children": []
+        },
+        {
+            "name": "Child1",
+            "children": [
+                {
+                    "name": "Grand00",
+                    "children": []
+                },
+                {
+                    "name": "Grand01",
+                    "children": []
+                }
+            ]
+        }
+    ]
+}
