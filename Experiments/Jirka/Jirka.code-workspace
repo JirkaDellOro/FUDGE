@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "JSONTest"
+		},
+		{
+			"path": "WebGLTest1"
 		}
 	],
 	"settings": {}
