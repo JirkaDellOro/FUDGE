@@ -12,7 +12,7 @@ https://blogs.unity3d.com/2018/08/15/webassembly-is-here/
 ## Optimization
 - Memory management and garbage collection  
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_Management#Garbage_collection  
-- High Performance Code
+- High Performance Code  
 http://buildnewgames.com/garbage-collector-friendly-code/
 - Fast and efficient Javascript  
 https://www.smashingmagazine.com/2012/11/writing-fast-memory-efficient-javascript/  
