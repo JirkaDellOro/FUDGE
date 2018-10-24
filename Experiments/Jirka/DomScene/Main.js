@@ -24,15 +24,24 @@ var DomScene;
         parent.addEventListener("fudge-event", printEventInfo, false);
         parent.addEventListener("fudge-event", printEventInfo, true);
         child.addEventListener("fudge-event", printEventInfo, false);
-        child.dispatchEvent(new Event("fudge-event", { bubbles: true }));
+        let e = new Event("fudge-event", { bubbles: true });
+        let startTime = performance.now();
+        for (let i = 0; i < 10000; i++)
+            child.dispatchEvent(e);
+        let endTime = performance.now();
+        console.log(endTime - startTime);
+        console.log(child.count);
+        console.log(parent.count);
     }
     function printEventInfo(_event) {
-        console.log(_event);
+        //console.log(_event);
+        _event.target.count++;
     }
     class FudgeNode extends HTMLElement {
         constructor(_name) {
             super();
             this.name = _name;
+            this.count = 0;
         }
     }
 })(DomScene || (DomScene = {}));
