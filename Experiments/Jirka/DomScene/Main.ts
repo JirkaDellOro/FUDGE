@@ -14,7 +14,7 @@ namespace DomScene {
         // now it's possible to create nodes as extensions of HTMLElement
         let parent: FudgeNode = new FudgeNode("Parent");
         parent.id = "Parent";
-        console.dir(parent);
+        console.dir(parent); 
         let child: FudgeNode = new FudgeNode("Child");
         child.id = "Child";
         console.dir(child);
