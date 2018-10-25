@@ -27,19 +27,30 @@ namespace DomScene {
         parent.addEventListener("fudge-event", printEventInfo, false);
         parent.addEventListener("fudge-event", printEventInfo, true);
         child.addEventListener("fudge-event", printEventInfo, false);
-        child.dispatchEvent(new Event("fudge-event", { bubbles: true }));
+
+        let e: Event = new Event("fudge-event", { bubbles: true });
+        let startTime: number = performance.now();
+        for (let i: number = 0; i < 10000; i++)
+            child.dispatchEvent(e);
+        let endTime: number = performance.now();
+        console.log(endTime - startTime);
+        console.log(child.count);
+        console.log(parent.count);
     }
 
     function printEventInfo(_event: Event): void {
-        console.log(_event);
+        //console.log(_event);
+        (<FudgeNode>_event.target).count++;
     }
 
     class FudgeNode extends HTMLElement {
         name: string;
-        
+        count: number;
+
         constructor(_name: string) {
             super();
             this.name = _name;
+            this.count = 0;
         }
     }
 }

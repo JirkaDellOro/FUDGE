@@ -1,0 +1,15 @@
+{
+  "name": "shoppinglist",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Lukas",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^3.0.1",
+    "npm": "^6.4.1"
+  }
+}
