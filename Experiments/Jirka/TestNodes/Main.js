@@ -1,60 +1,60 @@
 /**
  * Performance tests for various types of nodes that my build a 3D-scene
  */
-var TestNodes;
-(function (TestNodes) {
+var EventSystem;
+(function (EventSystem) {
     window.addEventListener("load", init);
     function init(_event) {
-        let parent = new NodeSimple("Parent");
-        console.dir(parent);
-        let child = new NodeSimple("Child");
-        console.dir(child);
-        let child2 = new NodeSimple("Child2");
-        console.dir(child2);
-        // create a minimal hierarchy
-        parent.appendChild(child);
-        parent.appendChild(child2);
-        console.log(parent);
-        // send an event around and listen on capture, target and bubbling phase
-        parent.addEventListener("fudge-event", printEventInfo, false);
-        parent.addEventListener("fudge-event", printEventInfo, true);
-        child.addEventListener("fudge-event", printEventInfo, false);
-        child.addEventListener("fudge-event", printEventInfo, true);
-        child2.addEventListener("fudge-event", printEventInfo, false);
-        child2.addEventListener("fudge-event", printEventInfo, true);
+        let root = new FudgeNode("Root");
+        root.addEventListener("fudge", handleEvent, false);
+        root.addEventListener("fudge", handleEvent, true);
+        let final = createHierarchy(root, 3, 10);
+        final.addEventListener("fudge", handleEvent, false);
+        final.addEventListener("fudge", handleEvent, true);
+        console.log(root);
         {
-            let e = new EventSimple("fudge-event", { bubbles: true });
+            let e = new FudgeEvent("fudge", { bubbles: true });
             let startTime = performance.now();
             for (let i = 0; i < 10000; i++)
-                child.dispatchEvent(e);
+                final.dispatchEvent(e);
             let endTime = performance.now();
-            console.log(endTime - startTime);
-            console.log(child.count);
-            console.log(parent.count);
+            console.log("Event on final: " + (endTime - startTime));
+            console.log("Count of final:" + final.count);
+            console.log("Count of root:" + root.count);
         }
         {
-            let e = new EventSimple("fudge-event", { bubbles: true });
+            let e = new FudgeEvent("fudge", { bubbles: true });
             let startTime = performance.now();
             for (let i = 0; i < 10000; i++)
-                parent.broadcastEvent(e);
+                root.broadcastEvent(e);
             let endTime = performance.now();
-            console.log(endTime - startTime);
-            console.log(child.count);
-            console.log(child2.count);
-            console.log(parent.count);
+            console.log("Event on final: " + (endTime - startTime));
+            console.log("Count of final:" + final.count);
+            console.log("Count of root:" + root.count);
         }
     }
-    function printEventInfo(_event) {
+    function createHierarchy(_root, _levels, _nChildren) {
+        let level = _levels - 1;
+        let child = _root;
+        for (let i = 0; i < _nChildren; i++) {
+            child = new FudgeNode(_root.name + "|" + i);
+            _root.appendChild(child);
+            if (level > 0)
+                child = createHierarchy(child, level, _nChildren);
+        }
+        return child;
+    }
+    function handleEvent(_event) {
         //console.log(_target);
         _event.targetEx.count++;
     }
-    class NodeSimple {
+    class FudgeNode {
         constructor(_name) {
             this.name = _name;
             this.count = 0;
             this.children = [];
-            this.listeners = {};
-            this.captures = {};
+            this.listeners = new Map();
+            this.captures = new Map();
             parent = null;
         }
         appendChild(_child) {
@@ -80,31 +80,42 @@ var TestNodes;
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
             // capture phase
-            for (let i = ancestors.length - 1; i >= 0; i--)
-                for (let handler of ancestors[i].captures[_event.type] || [])
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let captures = ancestors[i].captures[_event.type] || [];
+                for (let handler of captures)
                     handler(_event);
+            }
             // target phase
-            for (let handler of this.listeners[_event.type] || [])
+            let listeners = this.listeners[_event.type] || [];
+            for (let handler of listeners)
                 handler(_event);
             // bubble phase
             for (let i = 0; i < ancestors.length; i++) {
-                for (let handler of ancestors[i].listeners[_event.type] || [])
+                let listeners = ancestors[i].listeners[_event.type] || [];
+                for (let handler of listeners)
                     handler(_event);
             }
         }
         broadcastEvent(_event) {
-            if (!_event.targetEx)
-                _event.targetEx = this;
+            _event.targetEx = this;
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
             // capture phase only
-            for (let handler of this.captures[_event.type] || [])
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
                 handler(_event);
+            // slower...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
             // same for children
             for (let child of this.children) {
-                child.broadcastEvent(_event);
+                child.broadcastEventRecursive(_event);
             }
         }
     }
-    class EventSimple extends Event {
+    class FudgeEvent extends Event {
     }
-})(TestNodes || (TestNodes = {}));
+})(EventSystem || (EventSystem = {}));
 //# sourceMappingURL=Main.js.map
