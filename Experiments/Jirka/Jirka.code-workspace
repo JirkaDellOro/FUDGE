@@ -20,6 +20,33 @@
 		},
 		{
 			"path": "Shapes"
+		},
+		{
+			"path": "Animate"
+		},
+		{
+			"path": "ClassGetterSetter"
+		},
+		{
+			"path": "Console"
+		},
+		{
+			"path": "Curves"
+		},
+		{
+			"path": "Generics"
+		},
+		{
+			"path": "ImagesAndSound"
+		},
+		{
+			"path": "RenderHTMLandSVG"
+		},
+		{
+			"path": "ResponsiveCanvas"
+		},
+		{
+			"path": "Vector"
 		}
 	],
 	"settings": {}

@@ -9,6 +9,14 @@
             "problemMatcher": [
                 "$tsc"
             ]
+        },
+        {
+            "type": "typescript",
+            "tsconfig": "Shapes\\tsconfig.json",
+            "option": "watch",
+            "problemMatcher": [
+                "$tsc-watch"
+            ]
         }
     ]
 }

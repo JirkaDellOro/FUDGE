@@ -1,25 +1,20 @@
-var CPoint = (function () {
-    function CPoint() {
+class CPoint {
+    constructor() {
         this.x = 10;
         this.y = 10;
     }
-    Object.defineProperty(CPoint.prototype, "$x", {
-        get: function () {
-            console.log("Getter called");
-            return this.x;
-        },
-        set: function (_x) {
-            console.log("Setter called");
-            this.x = _x;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    CPoint.prototype.test = function () {
+    set $x(_x) {
+        console.log("Setter called");
+        this.x = _x;
+    }
+    get $x() {
+        console.log("Getter called");
+        return this.x;
+    }
+    test() {
         console.log("Hallo");
-    };
-    return CPoint;
-}());
+    }
+}
 var c = new CPoint();
 c.x = 10;
 c.$x = 20;

@@ -30,6 +30,6 @@ var d: CPoint[] = [];
 
 printClass(c);
 
-function printClass(_a: IPoint): void {
+function printClass(_a: CPoint): void {
     console.log(_a);
 }
