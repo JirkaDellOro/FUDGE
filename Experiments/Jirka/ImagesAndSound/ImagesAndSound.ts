@@ -26,3 +26,4 @@ module ImagesAndSound {
             started = true;
         }
     }
+}
