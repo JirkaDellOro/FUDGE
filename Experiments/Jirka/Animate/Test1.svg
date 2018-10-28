@@ -1,0 +1,28 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none" x="0px" y="0px" width="550px" height="400px" viewBox="0 0 550 400">
+<defs>
+<g id="Segment_0_Layer0_0_FILL">
+<path fill="#000000" stroke="none" d="
+M 111.55 -100.4
+L 111.55 -124.15
+Q 111.15 -124.15 110.8 -124.15 84.6 -124.15 62.65 -115.8 39.7 -107.05 22 -89.35 4.3 -71.65 -4.45 -48.65 -12.8 -26.7 -12.8 -0.4
+L 11.05 -0.4
+Q 11.05 -44.6 38.95 -72.5 66.85 -100.4 111.05 -100.4 111.3 -100.4 111.55 -100.4 Z"/>
+</g>
+
+<path id="Segment_0_Layer0_0_1_STROKES" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 11.05 -0.4
+Q 11.05 -44.6 38.95 -72.5 66.85 -100.4 111.05 -100.4 111.3 -100.4 111.55 -100.4
+L 111.55 -124.15
+Q 111.15 -124.15 110.8 -124.15 84.6 -124.15 62.65 -115.8 39.7 -107.05 22 -89.35 4.3 -71.65 -4.45 -48.65 -12.8 -26.7 -12.8 -0.4
+L 11.05 -0.4 Z"/>
+</defs>
+
+<g transform="matrix( 1, 0, 0, 1, 257.55,191.8) ">
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#Segment_0_Layer0_0_FILL"/>
+
+<use xlink:href="#Segment_0_Layer0_0_1_STROKES"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>HFU</title>
+	</head>
+	<body>
+		<script src="../Setup.js"></script>
+		<script src="RenderHTMLandSVG.js"></script>
+		<p>
+			<!-- an external bitmap loaded from server -->
+			<img id="bmp" src="bmp.png" />
+			<!-- an external svg-file loaded from server -->
+			<img id="svg" src="svg.svg" />
+			<!-- svg integrated in the html file -->
+			<span id="svghtml">
+				<svg width="240" height="50" xmlns="http://www.w3.org/2000/svg">
+					<text x="0" y="50" style="font-size:38px">
+						SVG in HTML
+					</text>
+					<circle cx="10" cy="10" r="20" stroke="black" stroke-width="3" fill="red" ></circle>
+				</svg>
+			</span>
+			<!-- html to be integrated in svg via script -->
+			<span id="html" style="font-size: 38px">
+				HTML<em> in </em><span style='color:white; text-shadow:0 0 2px blue;'>SVG</span>
+			</span>
+		</p>
+	</body>
+</html>

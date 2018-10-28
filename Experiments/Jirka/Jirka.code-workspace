@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "EventSystem"
+		},
+		{
+			"path": "Shapes"
 		}
 	],
 	"settings": {}
