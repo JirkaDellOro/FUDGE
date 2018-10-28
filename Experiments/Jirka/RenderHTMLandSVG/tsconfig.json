@@ -5,5 +5,9 @@
     },
     "exclude": [
         "node_modules"
+    ],
+    "include": [
+        "*",
+        "../Setup.ts"
     ]
 }

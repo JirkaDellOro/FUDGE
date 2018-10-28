@@ -30,9 +30,9 @@ var Curves;
     }
     function mousedown(_event) {
         var hit = new V2(Setup.pointerX, Setup.pointerY);
-        for (var i_1 = 0; i_1 < controlPoint.length; i_1++) {
-            if (controlPoint[i_1].testHit(hit)) {
-                iDragging = i_1;
+        for (let i = 0; i < controlPoint.length; i++) {
+            if (controlPoint[i].testHit(hit)) {
+                iDragging = i;
             }
         }
     }

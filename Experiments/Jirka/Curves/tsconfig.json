@@ -8,6 +8,7 @@
     ],
     "include": [
         "*",
+        "../Vector/*.ts",
         "../Setup.ts"
     ]
 }

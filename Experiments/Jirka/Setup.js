@@ -67,11 +67,9 @@ var EVENTTYPE;
     EVENTTYPE[EVENTTYPE["LOAD"] = 8] = "LOAD";
 })(EVENTTYPE || (EVENTTYPE = {}));
 ;
-var Setup = (function () {
-    function Setup() {
-    }
+class Setup {
     /** Creates the canvas and sets up tracking for mouse, touch and keys */
-    Setup.init = function () {
+    static init() {
         document.body.style.margin = "0"; //"{margin=0;padding=0;}"
         var c = document.createElement("canvas");
         c.id = "crc2";
@@ -87,18 +85,18 @@ var Setup = (function () {
         window.addEventListener("keyup", Setup.trackKeypress);
         window.addEventListener("keydown", Setup.trackKeypress);
         window.addEventListener("load", Setup.printLinks);
-    };
-    Setup.getEventTypeString = function (_eventtype) {
+    }
+    static getEventTypeString(_eventtype) {
         var eventString = EVENTTYPE[_eventtype].toLowerCase();
         return eventString;
-    };
+    }
     /** Maintains the array of currenty pressed keys */
-    Setup.trackKeypress = function (_event) {
+    static trackKeypress(_event) {
         _event.preventDefault();
         Setup.keyPressed[_event.keyCode] = (_event.type == "keydown");
-    };
+    }
     /** Maps mouse events to mouseX, mouseY and mousePress */
-    Setup.updateMouse = function (_event) {
+    static updateMouse(_event) {
         _event.preventDefault();
         var rect = crc2.canvas.getBoundingClientRect();
         Setup.pointerX = _event.clientX - rect.left;
@@ -107,9 +105,9 @@ var Setup = (function () {
             Setup.pointerPress = _event.button + 1;
         if (_event.type == "mouseup")
             Setup.pointerPress = 0;
-    };
+    }
     /** Maps touch events to mouseX, mouseY and mousePress */
-    Setup.updateMouseByTouch = function (_event) {
+    static updateMouseByTouch(_event) {
         _event.preventDefault();
         Setup.pointerPress = _event.touches.length;
         if (_event.touches.length == 0)
@@ -117,43 +115,43 @@ var Setup = (function () {
         var rect = crc2.canvas.getBoundingClientRect();
         Setup.pointerX = _event.touches[0].pageX - rect.left;
         Setup.pointerY = _event.touches[0].pageY - rect.top;
-    };
+    }
     /** Returns true if the requested key is currently pressed on the keyboard */
-    Setup.getKeyPressed = function (_keyCode) {
+    static getKeyPressed(_keyCode) {
         return this.keyPressed[_keyCode] == true;
-    };
+    }
     /** Initializes the painter-object with the given size */
-    Setup.size = function (_width, _height) {
+    static size(_width, _height) {
         crc2.canvas.width = _width;
         crc2.canvas.height = _height;
         crc2.save();
         crc2.fillStyle = "#a0a0a0";
         crc2.fillRect(0, 0, _width, _height);
         crc2.restore();
-    };
+    }
     /** Sets the title of the browsertab */
-    Setup.title = function (_title) {
+    static title(_title) {
         document.title = _title;
-    };
+    }
     /**
      * Calls the function given as _callback
      * after the time given as _milliseconds has passed
      */
-    Setup.setTimeout = function (_callback, _milliseconds) {
+    static setTimeout(_callback, _milliseconds) {
         Setup.timeout = window.setTimeout(_callback, _milliseconds);
-    };
+    }
     /**
      * Clears the timeout so no subsequent callback will happen
      */
-    Setup.clearTimeout = function () {
+    static clearTimeout() {
         window.clearTimeout(Setup.timeout);
         Setup.timeout = -1;
-    };
+    }
     /**
      * Calls the function given as _listenerfunction
      * when an event of the type _eventtype occurs
      */
-    Setup.addEventListener = function (_eventtype, _listenerfunction) {
+    static addEventListener(_eventtype, _listenerfunction) {
         var e = this.getEventTypeString(_eventtype);
         if (this.listener[e])
             window.removeEventListener(e, this.listener[e]);
@@ -162,18 +160,18 @@ var Setup = (function () {
             _listenerfunction.call(null, _event);
         };
         window.addEventListener(e, this.listener[e]);
-    };
+    }
     /**
      * Stops the propagation of the event to the handlers of Setup
      * thus enabling standard behaviour of html-elements
      */
-    Setup.stopPropagation = function (_event) {
+    static stopPropagation(_event) {
         _event.stopPropagation();
-    };
+    }
     /**
      * Prints the links to the source-files below canvas on load
      */
-    Setup.printLinks = function (_event) {
+    static printLinks(_event) {
         var scriptTags = document.getElementsByTagName("script");
         var names = new Array();
         var spacer = " | ";
@@ -225,18 +223,17 @@ var Setup = (function () {
                 link.click();
             }
         });
-    };
-    /** Current horizontal mouse or touch position */
-    Setup.pointerX = 0;
-    /** Current vertical mouse or touch position */
-    Setup.pointerY = 0;
-    /** Number of touches or mouse button currently pressed
-        (0=None, 1=Left, 2=Middle, 3=Right) */
-    Setup.pointerPress = 0;
-    Setup.listener = {};
-    Setup.keyPressed = {};
-    Setup.timeout = -1;
-    return Setup;
-}());
+    }
+}
+/** Current horizontal mouse or touch position */
+Setup.pointerX = 0;
+/** Current vertical mouse or touch position */
+Setup.pointerY = 0;
+/** Number of touches or mouse button currently pressed
+    (0=None, 1=Left, 2=Middle, 3=Right) */
+Setup.pointerPress = 0;
+Setup.listener = {};
+Setup.keyPressed = {};
+Setup.timeout = -1;
 Setup.init();
 //# sourceMappingURL=Setup.js.map

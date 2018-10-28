@@ -3,21 +3,19 @@ function printType(_p) {
     console.log(typeof (p) == typeof (_p));
     return p;
 }
-var GenericsTest = (function () {
-    function GenericsTest() {
+class GenericsTest {
+    constructor() {
         //
     }
-    GenericsTest.prototype.getT = function () {
+    getT() {
         return this.t;
-    };
-    return GenericsTest;
-}());
-var TypedArrayHandler = (function () {
-    function TypedArrayHandler() {
+    }
+}
+class TypedArrayHandler {
+    constructor() {
         this.arr = new Array(10);
     }
-    return TypedArrayHandler;
-}());
+}
 var tah = new TypedArrayHandler();
 tah.arr[0] = "123";
 var res = printType("Hallo");
