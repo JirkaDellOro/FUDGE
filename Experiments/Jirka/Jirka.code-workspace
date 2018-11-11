@@ -47,6 +47,9 @@
 		},
 		{
 			"path": "ResponsiveCanvas"
+		},
+		{
+			"path": "NameSpace"
 		}
 	],
 	"settings": {}
