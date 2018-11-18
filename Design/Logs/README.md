@@ -7,5 +7,5 @@ Contents/Issues
 # Nov 13th 2018
 Contents/Issues
 # Sep 13th 2018
-First meeting. Basic structure for scenetree and components
+First meeting. Basic structure for scenetree and components. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Whiteboard_Scenetree.jpg)
 
