@@ -1,4 +1,4 @@
-This folder contains the logs of the core-developer meetings.
+This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
