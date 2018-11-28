@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta charset="utf8">
+<title>planet diagram</title>
+<link type="text/css" href="../../resources/webgl-tutorials.css" rel="stylesheet" />
+<style>
+canvas { border: 1px solid black; }
+</style>
+</head>
+<body>
+<p><canvas id="c" width="400" height="500"></canvas></p>
+</body>
+<script src="/3rdparty/hand-1.3.7.js"></script>
+<!--
+for most samples webgl-utils only provides shader compiling/linking and
+canvas resizing because why clutter the examples with code that's the same in every sample.
+See http://webgl2fundamentals.org/webgl/lessons/webgl-boilerplate.html
+and http://webgl2fundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+for webgl-utils, m3, m4, and webgl-lessons-ui.
+-->
+<script src="../../resources/webgl-utils.js"></script>
+<script src="../../resources/webgl-lessons-helper.js"></script> <!-- you can and should delete this script. it is only used on the site to help with errors -->
+<script src="canvas-wrapper.js"></script>
+<script src="2d-scene-graph-diagram.js"></script>
+<script>
+"use strict";
+
+function main() {
+  var root = {
+    name: "center of universe",
+    translation: [0, 0],
+    children: [
+      {
+        name: "andromeda galaxy",
+        translation: [-5, 1],
+        children: [
+        ],
+      },
+      {
+        name: "milky way galaxy",
+        translation: [5, 1],
+        children: [
+          {
+            name: "betelgeuse",
+            translation: [-10, 1],
+            children: [
+            ],
+          },
+          {
+            name: "sun",
+            translation: [-4, 1],
+            children: [
+              {
+                name: "earth",
+                translation: [-5, 1],
+                children: [
+                  {
+                    name: "moon",
+                    translation: [-1, 1],
+                    children: [
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "venus",
+                translation: [0, 1],
+                children: [
+                ],
+              },
+              {
+                name: "mars",
+                translation: [5, 1],
+                children: [
+                  {
+                    name: "phobos",
+                    translation: [-3, 1],
+                    children: [
+                    ],
+                  },
+                  {
+                    name: "deimos",
+                    translation: [3, 1],
+                    children: [
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: "alpha centari",
+            translation: [3, 1],
+            children: [
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  var xSpread = 16;
+  var ySpread = 100;
+  function updateTranslation(node) {
+    node.translation[0] *= xSpread;
+    node.translation[1] *= ySpread;
+    node.rotation = 0;
+    node.children.forEach(updateTranslation);
+  }
+  updateTranslation(root);
+  renderSceneGraph(root);
+}
+main();
+</script>
+</html>
+
