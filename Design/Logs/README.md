@@ -2,6 +2,10 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Dec 4th 2018
+Contents/Issues
+# Nov 27th 2018
+Contents/Issues
 # Nov 20th 2018
 Contents/Issues
 # Nov 13th 2018
