@@ -3,7 +3,7 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
 # Dec 4th 2018
-Contents/Issues
+[Things to remember and Lukas' Jobs](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Notizen_LS.txt)  
 # Nov 27th 2018
 Contents/Issues
 # Nov 20th 2018
