@@ -3,7 +3,9 @@
 
 ///<reference path="library.js">
 
-declare function createProgramFromSources(gl: WebGL2RenderingContext, shaders: string[]): WebGLProgram;
+// declare function createProgramFromSources(gl: WebGL2RenderingContext, shaders: string[]): WebGLProgram;
+
+import * as webglutils from "../XX_Boilerplate/webgl-utils";
 
 window.addEventListener("load", init);
 
@@ -59,7 +61,7 @@ function init() {
         return;
     }
 
-    let program = createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource]);
+    let program = webglutils.createProgramFromSources(gl, [vertexShaderSource, fragmentShaderSource]);
 
 }
 
