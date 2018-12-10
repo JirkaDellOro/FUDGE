@@ -1,9 +1,9 @@
-var WebGL2Test1;
-(function (WebGL2Test1) {
+var WebGL2Test3;
+(function (WebGL2Test3) {
     window.addEventListener("load", init);
     var canvas;
-    var vertexShaderSource = "#version 300 es\n     \n        // an attribute is an input (in) to a vertex shader.\n        // It will receive data from a buffer\n        in vec4 a_position;\n         \n        // all shaders have a main function\n        void main() {\n         \n          // gl_Position is a special variable a vertex shader\n          // is responsible for setting\n          gl_Position = a_position;\n        }\n        ";
-    var fragmentShaderSource = "#version 300 es\n         \n        // fragment shaders don't have a default precision so we need\n        // to pick one. mediump is a good default. It means \"medium precision\"\n        precision mediump float;\n\n        uniform vec4 u_color;\n         \n        // we need to declare an output for the fragment shader\n        out vec4 outColor;\n         \n        void main() {\n          // Just set the output to a constant redish-purple\n          outColor = vec4(1, 0, 0.5, 1);\n        }\n        ";
+    var vertexShaderSource = "#version 300 es\n     \n        // an attribute is an input (in) to a vertex shader.\n        // It will receive data from a buffer\n        in vec2 a_position;\n \n        uniform vec2 u_resolution;\n       \n        void main() {\n          // convert the position from pixels to 0.0 to 1.0\n          vec2 zeroToOne = a_position / u_resolution;\n       \n          // convert from 0->1 to 0->2\n          vec2 zeroToTwo = zeroToOne * 2.0;\n       \n          // convert from 0->2 to -1->+1 (clipspace)\n          vec2 clipSpace = zeroToTwo - 1.0;\n       \n          gl_Position = vec4(clipSpace, 0, 1);\n        }\n        ";
+    var fragmentShaderSource = "#version 300 es\n         \n        // fragment shaders don't have a default precision so we need\n        // to pick one. mediump is a good default. It means \"medium precision\"\n        precision mediump float;\n\n        uniform vec4 u_color;\n         \n        // we need to declare an output for the fragment shader\n        out vec4 outColor;\n         \n        void main() {\n          // Just set the output to a constant redish-purple\n          outColor = u_color;\n        }\n        ";
     function init() {
         canvas = document.getElementById("c");
         var gl = canvas.getContext("webgl2");
@@ -14,18 +14,11 @@ var WebGL2Test1;
         var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
         var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
         var program = createProgram(gl, vertexShader, fragmentShader);
+        var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
         var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
         var positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        var positions = [
-            -1, -1,
-            0, 0.5,
-            0.7, 0,
-            1, 1,
-            0.9, 1,
-            1, 0.9
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+        // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
         var vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
         gl.enableVertexAttribArray(positionAttributeLocation);
@@ -40,11 +33,17 @@ var WebGL2Test1;
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(program);
+        var colorLocation = gl.getUniformLocation(program, "u_color");
+        gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+        for (var i = 0; i < 50; i++) {
+            setRectangle(gl, Math.random() * 400, Math.random() * 400, Math.random() * 400, Math.random() * 400);
+            gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), Math.random());
+            var primitiveType = gl.TRIANGLES;
+            offset = 0;
+            var count = 6;
+            gl.drawArrays(primitiveType, offset, count);
+        }
         gl.bindVertexArray(vao);
-        var primitiveType = gl.TRIANGLES;
-        offset = 0;
-        var count = 6;
-        gl.drawArrays(primitiveType, offset, count);
     }
     function createShader(gl, type, source) {
         var shader = gl.createShader(type);
@@ -87,5 +86,5 @@ var WebGL2Test1;
             x2, y2
         ]), gl.STATIC_DRAW);
     }
-})(WebGL2Test1 || (WebGL2Test1 = {}));
+})(WebGL2Test3 || (WebGL2Test3 = {}));
 //# sourceMappingURL=test.js.map
