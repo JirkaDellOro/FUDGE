@@ -65,28 +65,28 @@ var drawTypes;
     var DrawPath = /** @class */ (function (_super) {
         __extends(DrawPath, _super);
         function DrawPath(path, color, name, order) {
-            if (color === void 0) { color = "black"; }
+            if (color === void 0) { color = "rgba(0,0,0,0)"; }
             if (name === void 0) { name = ""; }
             if (order === void 0) { order = 0; }
             var _this = _super.call(this, color, name, order) || this;
             _this.path = path;
             // console.debug("Created new DrawPath Object ↓");
             // console.debug(this);
-            _this.checkIfClosed();
+            _this.closed = _this.checkIfClosed();
+            console.debug("closed: " + _this.closed);
             return _this;
         }
         DrawPath.prototype.checkIfClosed = function () {
-            console.debug(this.path.length);
-            console.debug(this.path[0]);
-            console.debug(this.path.slice(-1)[0]);
             if (this.path.length > 0 &&
                 this.path[0].startPoint.equals(this.path.slice(-1)[0].endPoint)) {
-                this.closed = true;
+                for (var i = 0; i < this.path.length - 1; i++) {
+                    if (!this.path[i].endPoint.equals(this.path[i + 1].startPoint)) {
+                        return false;
+                    }
+                }
+                return true;
             }
-            else {
-                this.closed = false;
-            }
-            console.debug("closed: " + this.closed);
+            return false;
         };
         DrawPath.prototype.draw = function (context) {
             context.beginPath();
@@ -98,6 +98,8 @@ var drawTypes;
                     console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
                 }
                 context.closePath();
+                context.fillStyle = this.color;
+                context.fill();
             }
             else {
                 for (var _b = 0, _c = this.path; _b < _c.length; _b++) {
@@ -107,8 +109,6 @@ var drawTypes;
                     console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
                 }
             }
-            context.fillStyle = this.color;
-            context.fill();
             context.stroke();
         };
         return DrawPath;

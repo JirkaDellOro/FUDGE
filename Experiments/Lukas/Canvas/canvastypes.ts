@@ -47,28 +47,28 @@ namespace drawTypes {
         public path: DrawLine[];
         public closed: boolean;
 
-        constructor(path: DrawLine[], color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0) {
+        constructor(path: DrawLine[], color: string | CanvasGradient | CanvasPattern = "rgba(0,0,0,0)", name = "", order = 0) {
             super(color, name, order);
             this.path = path;
 
             // console.debug("Created new DrawPath Object ↓");
             // console.debug(this);
 
-            this.checkIfClosed();
+            this.closed = this.checkIfClosed();
+            console.debug("closed: " + this.closed);
         }
 
-        checkIfClosed(): void {
-            console.debug(this.path.length);
-            console.debug(this.path[0]);
-            console.debug(this.path.slice(-1)[0]);
+        checkIfClosed(): boolean {
             if (this.path.length > 0 &&
                 this.path[0].startPoint.equals(this.path.slice(-1)[0].endPoint)) {
-                this.closed = true;
-            } else {
-                this.closed = false;
+                for (let i: number = 0; i < this.path.length - 1; i++) {
+                    if (!this.path[i].endPoint.equals(this.path[i + 1].startPoint)) {
+                        return false;
+                    }
+                }
+                return true;
             }
-            console.debug("closed: " + this.closed);
-
+            return false;
         }
 
         draw(context: CanvasRenderingContext2D): void {
@@ -82,6 +82,8 @@ namespace drawTypes {
                 }
 
                 context.closePath()
+                context.fillStyle = this.color;
+                context.fill();
             } else {
                 for (let line of this.path) {
                     context.moveTo(line.startPoint.x, line.startPoint.y);
@@ -89,8 +91,6 @@ namespace drawTypes {
                     console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
                 }
             }
-            context.fillStyle = this.color;
-            context.fill();
             context.stroke();
         }
     }
