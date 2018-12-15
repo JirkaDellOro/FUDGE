@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+    	"target": "es6",
+        "module": "commonjs",
+        // "noImplicitAny": true,
+        // "removeComments": true,
+        // "preserveConstEnums": true,
+        "sourceMap": true,
+        "outDir": "./scripts",
+        "baseUrl": "./scripts",
+        // "moduleResolution": "node"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,0 +1,33 @@
+<!-- <script src="../../scripts/phonegap/phonegap-create.renderer.js"></script> -->
+<script>
+	require('../../scripts/phonegap/phonegap-create.renderer.js');
+</script>
+<style>
+	.flex-container {
+		display: flex;
+		flex-direction: column;
+		margin: 15px 0;
+	}
+
+	input {
+		display: block;
+	}
+</style>
+
+<h1>Create PhoneGap Application</h1>
+
+<p>Create your App...</p>
+
+<div class="input-container">
+	<div class="flex-container">
+		<label for="app-name">App-Name</label>
+		<input type="text" name="app-name" id="app-name" />
+	</div>
+
+	<div class="flex-container">
+		<label for="app-dir">Directory Path</label>
+		<input type="file" name="app-dir" id="app-dir" webkitdirectory mozdirectory msdirectory odirectory directory />
+	</div>
+
+	<button type="submit" id="create-phonegap-dir">Create empty Project</button>
+</div>

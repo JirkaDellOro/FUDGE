@@ -1,0 +1,17 @@
+{
+	"name": "web-phonegap-ar",
+	"version": "1.0.0",
+	"description": "Creating AR PhoneGap Apps with Electron",
+	"main": "index.js",
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"lint": "tslint -c tslint.json -p tsconfig.json",
+		"start": "npm run build && electron ./scripts/index.js"
+	},
+	"author": "Kathrin Fuhrer <kathrin.fuhrer@gmx.de>",
+	"devDependencies": {
+		"electron": "^2.0.0",
+		"typescript": "^3.1.6"
+	}
+}
