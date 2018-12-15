@@ -3,7 +3,7 @@
 import Line = DrawTypes.DrawLine;
 import Vector2 = DrawTypes.Vector2;
 import Path = DrawTypes.DrawPath;
-
+import Point = DrawTypes.DrawPoint;
 
 window.addEventListener("load", init);
 
@@ -20,9 +20,17 @@ let crc: CanvasRenderingContext2D;
 
 let paths: Path[] = [];
 
+let currentlySelectedPath: Path;
+
+let points: Point[] = [];
+
+let currentlySelectedPoint: Point;
+
 function init() {
     let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("myCanvas");
-    canvas.addEventListener("mousedown", mousedown)
+    canvas.addEventListener("mousedown", mousedown);
+    canvas.addEventListener("mousemove", mousemove);
+    canvas.addEventListener("mouseup", mouseup);
 
     crc = canvas.getContext("2d");
 
@@ -46,26 +54,69 @@ function init() {
         paths.push(path);
     }
 
+    redrawAll();
+
+}
+
+function redrawAll() {
+    crc.clearRect(0, 0, 500, 500);
     paths.sort(Path.sort);
 
     for (let path of paths) {
         path.draw(crc);
     }
-
 }
 
 function mousedown(_event: MouseEvent) {
-    let foundPath: Path;
-    for (let path of paths) {
-        if (crc.isPointInPath(path.getPath2D(), _event.clientX, _event.clientY)) {
-            foundPath = path;
+    let selPoint: Point;
+    for (let point of points) {
+        if (crc.isPointInPath(point.getPath2D(), _event.clientX, _event.clientY)) {
+            selPoint = point;
         }
     }
+    if (selPoint) {
+        selectPoint(selPoint);
+    } else {
+        let foundPath: Path;
+        for (let path of paths) {
+            if (crc.isPointInPath(path.getPath2D(), _event.clientX, _event.clientY)) {
+                foundPath = path;
+            }
+        }
+        if (foundPath) {
+            console.debug("clicked on " + foundPath.name);
+            selectPath(foundPath);
 
-    console.log("clicked on " + foundPath.name);
-
+        }
+    }
 }
 
-function RandomRange(min: number, max: number): number {
-    return (Math.random() * (max + min)) - min;
-}
+    function RandomRange(min: number, max: number): number {
+        return Math.floor((Math.random() * (max + min)) - min);
+    }
+
+    function selectPath(pathToSelect: Path): void {
+        if (!pathToSelect) return;
+        currentlySelectedPath = pathToSelect;
+        redrawAll();
+        points = currentlySelectedPath.returnAndDrawCornerPoints(crc);
+    }
+
+    function selectPoint(pointToSelect: Point) {
+        if (!pointToSelect) return;
+        currentlySelectedPoint = pointToSelect;
+    }
+
+    function mousemove(_event: MouseEvent) {
+        if (!currentlySelectedPoint) return;
+        currentlySelectedPoint.parent.changePoint(currentlySelectedPoint.point, new Vector2(_event.clientX, _event.clientY));
+        redrawAll();
+        currentlySelectedPoint.point = new Vector2(_event.clientX, _event.clientY);
+        console.log(currentlySelectedPath);
+        currentlySelectedPath.returnAndDrawCornerPoints(crc);
+    }
+
+    function mouseup() {
+        if (!currentlySelectedPoint) return;
+        currentlySelectedPoint = null;
+    }

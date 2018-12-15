@@ -74,11 +74,14 @@ var DrawTypes;
             // console.debug(this);
             _this.closed = _this.checkIfClosed();
             console.debug("closed: " + _this.closed);
+            _this.generatePoints();
             return _this;
         }
         DrawPath.prototype.addLine = function (line) {
             this.path.push(line);
+            line.parent = this;
             this.closed = this.checkIfClosed();
+            this.generatePoints();
         };
         DrawPath.prototype.checkIfClosed = function () {
             if (this.path.length > 0 &&
@@ -94,7 +97,6 @@ var DrawTypes;
         };
         DrawPath.prototype.draw = function (context) {
             this.path2d = new Path2D();
-            console.log(this.name, this.closed, this.color);
             if (this.closed) {
                 this.path2d.moveTo(this.path[0].startPoint.x, this.path[0].startPoint.y);
                 for (var _i = 0, _a = this.path; _i < _a.length; _i++) {
@@ -122,6 +124,39 @@ var DrawTypes;
         DrawPath.sort = function (a, b) {
             return a.order - b.order;
         };
+        DrawPath.prototype.generatePoints = function () {
+            this.points = [];
+            for (var _i = 0, _a = this.path; _i < _a.length; _i++) {
+                var line = _a[_i];
+                var p = new Path2D();
+                p.arc(line.startPoint.x, line.startPoint.y, 5, 0, 2 * Math.PI);
+                p.closePath();
+                this.points.push(new DrawPoint(p, line.startPoint, this));
+            }
+            // console.log(this.points);
+        };
+        DrawPath.prototype.returnAndDrawCornerPoints = function (context) {
+            for (var _i = 0, _a = this.points; _i < _a.length; _i++) {
+                var point = _a[_i];
+                context.fillStyle = "rgb(0,0,0)";
+                context.fill();
+                context.stroke(point.getPath2D());
+            }
+            return this.points;
+        };
+        DrawPath.prototype.changePoint = function (oldPoint, newPoint) {
+            for (var _i = 0, _a = this.path; _i < _a.length; _i++) {
+                var line = _a[_i];
+                if (line.startPoint.equals(oldPoint)) {
+                    line.startPoint = newPoint;
+                    line.startBezierPoint = newPoint;
+                }
+                else if (line.endPoint.equals(oldPoint)) {
+                    line.endPoint = newPoint;
+                    line.endBezierPoint = newPoint;
+                }
+            }
+        };
         return DrawPath;
     }(DrawObject));
     DrawTypes.DrawPath = DrawPath;
@@ -139,5 +174,17 @@ var DrawTypes;
         return DrawLine;
     }());
     DrawTypes.DrawLine = DrawLine;
+    var DrawPoint = /** @class */ (function () {
+        function DrawPoint(path, point, parent) {
+            this.path = path;
+            this.point = point;
+            this.parent = parent;
+        }
+        DrawPoint.prototype.getPath2D = function () {
+            return this.path;
+        };
+        return DrawPoint;
+    }());
+    DrawTypes.DrawPoint = DrawPoint;
 })(DrawTypes || (DrawTypes = {}));
 //# sourceMappingURL=canvastypes.js.map

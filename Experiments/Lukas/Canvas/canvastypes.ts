@@ -47,6 +47,7 @@ module DrawTypes {
 		public path: DrawLine[];
 		public closed: boolean;
 		private path2d: Path2D;
+		private points: DrawPoint[];
 
 		constructor(path: DrawLine[], color: string | CanvasGradient | CanvasPattern = "rgba(0,0,0,0)", name = "", order = 0) {
 			super(color, name, order);
@@ -57,11 +58,14 @@ module DrawTypes {
 
 			this.closed = this.checkIfClosed();
 			console.debug("closed: " + this.closed);
+			this.generatePoints();
 		}
 
 		addLine(line: DrawLine): void {
 			this.path.push(line);
+			line.parent = this;
 			this.closed = this.checkIfClosed();
+			this.generatePoints();
 		}
 
 		checkIfClosed(): boolean {
@@ -79,7 +83,6 @@ module DrawTypes {
 
 		draw(context: CanvasRenderingContext2D): void {
 			this.path2d = new Path2D();
-			console.log(this.name, this.closed, this.color);
 			if (this.closed) {
 				this.path2d.moveTo(this.path[0].startPoint.x, this.path[0].startPoint.y);
 
@@ -104,8 +107,40 @@ module DrawTypes {
 			return this.path2d;
 		}
 
-		static sort(a: DrawObject, b:DrawObject): number{
+		static sort(a: DrawObject, b: DrawObject): number {
 			return a.order - b.order;
+		}
+
+		generatePoints(){
+			this.points = [];
+			for (let line of this.path) {
+				let p: Path2D = new Path2D();
+				p.arc(line.startPoint.x, line.startPoint.y, 5, 0, 2 * Math.PI);
+				p.closePath();
+				this.points.push(new DrawPoint(p, line.startPoint, this));
+			}
+			// console.log(this.points);
+		}
+
+		returnAndDrawCornerPoints(context: CanvasRenderingContext2D): DrawPoint[] {
+			for(let point of this.points){
+				context.fillStyle = "rgb(0,0,0)";
+				context.fill();
+				context.stroke(point.getPath2D());
+			}
+			return this.points;
+		}
+
+		changePoint(oldPoint: Vector2, newPoint:Vector2){					//KRÜCKE!!! UNBEDINGT ÄNDERN!
+			for(let line of this.path){
+				if (line.startPoint.equals(oldPoint)){
+					line.startPoint = newPoint;
+					line.startBezierPoint = newPoint;
+				} else if (line.endPoint.equals(oldPoint)){
+					line.endPoint = newPoint;
+					line.endBezierPoint = newPoint;
+				}
+			}
 		}
 	}
 
@@ -129,6 +164,22 @@ module DrawTypes {
 			this.endBezierPoint = endBezierPoint ? endBezierPoint : endPoint;
 			// console.debug("Created new DrawLine Object ↓");
 			// console.debug(this);
+		}
+	}
+
+	export class DrawPoint {
+		private path: Path2D;
+		public point: Vector2;
+		public parent: DrawPath;
+
+		constructor(path: Path2D, point: Vector2, parent: DrawPath) {
+			this.path = path;
+			this.point = point;
+			this.parent = parent;
+		}
+
+		getPath2D(): Path2D {
+			return this.path;
 		}
 	}
 }
