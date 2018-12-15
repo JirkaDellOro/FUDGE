@@ -2,6 +2,7 @@ import { PhoneGap } from './phonegap.class';
 
 // namespace WebPhonegapAR {
 	// const PhoneGap = require('./phonegap.class');
+	let pg:PhoneGap;
 
 	window.addEventListener('load', () => {
 		init();
@@ -29,9 +30,30 @@ import { PhoneGap } from './phonegap.class';
 		});
 	}
 
-	function createPhoneGapProject(name: string, dir: string) {
+	async function createPhoneGapProject(name: string, dir: string) {
 		console.log(dir);
-		const pg = new PhoneGap(name, dir);
-		pg.createProject();
+		pg = new PhoneGap(name, dir);
+		try {
+			const projectCreated = await pg.createProject();
+			// if(projectCreated) {
+				createServeProjectBtn();
+			// }
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	function createServeProjectBtn() {
+		let body = document.getElementsByTagName('body')[0];
+		let runBtn = document.createElement('button');
+		runBtn.setAttribute('id', 'serve-phonegap-btn');
+		runBtn.innerHTML = 'Serve project';
+
+		runBtn.addEventListener('click', function(event) {
+			pg.serveProject();
+		});
+
+		body.appendChild(document.createElement('br'));
+		body.appendChild(runBtn);
 	}
 // }
