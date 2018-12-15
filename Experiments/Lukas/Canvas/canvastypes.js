@@ -14,8 +14,18 @@ var __extends = (this && this.__extends) || (function () {
 var drawTypes;
 (function (drawTypes) {
     var Vector2 = /** @class */ (function () {
-        function Vector2() {
+        function Vector2(x, y) {
+            if (y === void 0) { y = 0; }
+            this.x = x;
+            this.y = y;
         }
+        Vector2.prototype.equals = function (obj) {
+            if (this.x != obj.x)
+                return false;
+            if (this.y != obj.y)
+                return false;
+            return true;
+        };
         return Vector2;
     }());
     drawTypes.Vector2 = Vector2;
@@ -60,20 +70,45 @@ var drawTypes;
             if (order === void 0) { order = 0; }
             var _this = _super.call(this, color, name, order) || this;
             _this.path = path;
-            console.debug(_this);
+            // console.debug("Created new DrawPath Object ↓");
+            // console.debug(this);
+            _this.checkIfClosed();
             return _this;
         }
+        DrawPath.prototype.checkIfClosed = function () {
+            console.debug(this.path.length);
+            console.debug(this.path[0]);
+            console.debug(this.path.slice(-1)[0]);
+            if (this.path.length > 0 &&
+                this.path[0].startPoint.equals(this.path.slice(-1)[0].endPoint)) {
+                this.closed = true;
+            }
+            else {
+                this.closed = false;
+            }
+            console.debug("closed: " + this.closed);
+        };
         DrawPath.prototype.draw = function (context) {
             context.beginPath();
-            for (var _i = 0, _a = this.path; _i < _a.length; _i++) {
-                var line = _a[_i];
-                context.moveTo(line.startPoint.x, line.startPoint.y);
-                context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.x, line.endBezierPoint.x, line.endBezierPoint.x, line.endPoint.x, line.endPoint.x);
-            }
-            if (closed) {
+            if (this.closed) {
+                context.moveTo(this.path[0].startPoint.x, this.path[0].startPoint.y);
+                for (var _i = 0, _a = this.path; _i < _a.length; _i++) {
+                    var line = _a[_i];
+                    context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                    console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                }
                 context.closePath();
             }
+            else {
+                for (var _b = 0, _c = this.path; _b < _c.length; _b++) {
+                    var line = _c[_b];
+                    context.moveTo(line.startPoint.x, line.startPoint.y);
+                    context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                    console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                }
+            }
             context.fillStyle = this.color;
+            context.fill();
             context.stroke();
         };
         return DrawPath;
@@ -87,9 +122,10 @@ var drawTypes;
             this.endPoint = endPoint;
             this.width = width;
             this.color = color;
-            this.startBezierPoint = startBezierPoint;
-            this.endBezierPoint = endBezierPoint;
-            console.debug(this);
+            this.startBezierPoint = (startBezierPoint) ? startBezierPoint : startPoint;
+            this.endBezierPoint = endBezierPoint ? endBezierPoint : endPoint;
+            // console.debug("Created new DrawLine Object ↓");
+            // console.debug(this);
         }
         return DrawLine;
     }());

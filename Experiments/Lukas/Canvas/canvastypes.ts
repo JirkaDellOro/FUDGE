@@ -3,6 +3,17 @@ namespace drawTypes {
     export class Vector2 {
         public x: number;
         public y: number;
+
+        constructor(x: number, y: number = 0) {
+            this.x = x;
+            this.y = y;
+        }
+
+        equals(obj: Vector2): boolean {
+            if (this.x != obj.x) return false;
+            if (this.y != obj.y) return false;
+            return true;
+        }
     }
 
     export class DrawObject {
@@ -10,7 +21,7 @@ namespace drawTypes {
         public name: String;
         public order: number;
 
-        constructor(color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0){
+        constructor(color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0) {
             this.color = color;
             this.name = name;
             this.order = order;
@@ -36,22 +47,50 @@ namespace drawTypes {
         public path: DrawLine[];
         public closed: boolean;
 
-        constructor(path: DrawLine[], color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0){
+        constructor(path: DrawLine[], color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0) {
             super(color, name, order);
             this.path = path;
-            console.debug(this);
+
+            // console.debug("Created new DrawPath Object ↓");
+            // console.debug(this);
+
+            this.checkIfClosed();
         }
 
-        draw(context: CanvasRenderingContext2D) {
-            context.beginPath();
-            for (let line of this.path) {
-                context.moveTo(line.startPoint.x, line.startPoint.y);
-                context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.x, line.endBezierPoint.x, line.endBezierPoint.x, line.endPoint.x, line.endPoint.x);
+        checkIfClosed(): void {
+            console.debug(this.path.length);
+            console.debug(this.path[0]);
+            console.debug(this.path.slice(-1)[0]);
+            if (this.path.length > 0 &&
+                this.path[0].startPoint.equals(this.path.slice(-1)[0].endPoint)) {
+                this.closed = true;
+            } else {
+                this.closed = false;
             }
-            if (closed) {
+            console.debug("closed: " + this.closed);
+
+        }
+
+        draw(context: CanvasRenderingContext2D): void {
+            context.beginPath();
+            if (this.closed) {
+                context.moveTo(this.path[0].startPoint.x, this.path[0].startPoint.y);
+
+                for (let line of this.path) {
+                    context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                    console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                }
+
                 context.closePath()
+            } else {
+                for (let line of this.path) {
+                    context.moveTo(line.startPoint.x, line.startPoint.y);
+                    context.bezierCurveTo(line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                    console.debug("drew line: ", line.startPoint.x, line.startPoint.y, line.startBezierPoint.x, line.startBezierPoint.y, line.endBezierPoint.x, line.endBezierPoint.y, line.endPoint.x, line.endPoint.y);
+                }
             }
             context.fillStyle = this.color;
+            context.fill();
             context.stroke();
         }
     }
@@ -67,14 +106,15 @@ namespace drawTypes {
         // public stroke: CanvasFillStrokeStyles;
         public cap: CanvasLineCap;
 
-        constructor(startPoint: Vector2, endPoint: Vector2, width: number = 1, color: string | CanvasGradient | CanvasPattern = "black", startBezierPoint?: Vector2, endBezierPoint?: Vector2){
+        constructor(startPoint: Vector2, endPoint: Vector2, width: number = 1, color: string | CanvasGradient | CanvasPattern = "black", startBezierPoint?: Vector2, endBezierPoint?: Vector2) {
             this.startPoint = startPoint;
             this.endPoint = endPoint;
             this.width = width;
             this.color = color;
-            this.startBezierPoint = startBezierPoint;
-            this.endBezierPoint = endBezierPoint;
-            console.debug(this);
+            this.startBezierPoint = (startBezierPoint) ? startBezierPoint : startPoint;
+            this.endBezierPoint = endBezierPoint ? endBezierPoint : endPoint;
+            // console.debug("Created new DrawLine Object ↓");
+            // console.debug(this);
         }
     }
 }

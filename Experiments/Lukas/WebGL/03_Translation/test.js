@@ -2,8 +2,12 @@ var WebGL2Test3;
 (function (WebGL2Test3) {
     window.addEventListener("load", init);
     var canvas;
-    var vertexShaderSource = "#version 300 es\n     \n        // an attribute is an input (in) to a vertex shader.\n        // It will receive data from a buffer\n        in vec2 a_position;\n \n        uniform vec2 u_resolution;\n       \n        void main() {\n          // convert the position from pixels to 0.0 to 1.0\n          vec2 zeroToOne = a_position / u_resolution;\n       \n          // convert from 0->1 to 0->2\n          vec2 zeroToTwo = zeroToOne * 2.0;\n       \n          // convert from 0->2 to -1->+1 (clipspace)\n          vec2 clipSpace = zeroToTwo - 1.0;\n       \n          gl_Position = vec4(clipSpace, 0, 1);\n        }\n        ";
-    var fragmentShaderSource = "#version 300 es\n         \n        // fragment shaders don't have a default precision so we need\n        // to pick one. mediump is a good default. It means \"medium precision\"\n        precision mediump float;\n\n        uniform vec4 u_color;\n         \n        // we need to declare an output for the fragment shader\n        out vec4 outColor;\n         \n        void main() {\n          // Just set the output to a constant redish-purple\n          outColor = u_color;\n        }\n        ";
+    var translation = [0, 0];
+    var width = 50;
+    var height = 30;
+    var color = [Math.random(), Math.random(), Math.random(), 1];
+    var vertexShaderSource = "#version 300 es\n\t \n\t\t// an attribute is an input (in) to a vertex shader.\n\t\t// It will receive data from a buffer\n\t\tin vec2 a_position;\n \n\t\tuniform vec2 u_resolution;\n\t   \n\t\tvoid main() {\n\t\t  // convert the position from pixels to 0.0 to 1.0\n\t\t  vec2 zeroToOne = a_position / u_resolution;\n\t   \n\t\t  // convert from 0->1 to 0->2\n\t\t  vec2 zeroToTwo = zeroToOne * 2.0;\n\t   \n\t\t  // convert from 0->2 to -1->+1 (clipspace)\n\t\t  vec2 clipSpace = zeroToTwo - 1.0;\n\t   \n\t\t  gl_Position = vec4(clipSpace, 0, 1);\n\t\t}\n\t\t";
+    var fragmentShaderSource = "#version 300 es\n\t\t \n\t\t// fragment shaders don't have a default precision so we need\n\t\t// to pick one. mediump is a good default. It means \"medium precision\"\n\t\tprecision mediump float;\n\n\t\tuniform vec4 u_color;\n\t\t \n\t\t// we need to declare an output for the fragment shader\n\t\tout vec4 outColor;\n\t\t \n\t\tvoid main() {\n\t\t  // Just set the output to a constant redish-purple\n\t\t  outColor = u_color;\n\t\t}\n\t\t";
     function init() {
         canvas = document.getElementById("c");
         var gl = canvas.getContext("webgl2");
