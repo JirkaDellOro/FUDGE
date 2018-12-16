@@ -4,7 +4,7 @@ var Vector2 = DrawTypes.Vector2;
 var Path = DrawTypes.DrawPath;
 var Point = DrawTypes.DrawPoint;
 window.addEventListener("load", init);
-var crc;
+let crc;
 // let l1: Line = new Line(new Vector2(100, 100), new Vector2(200, 200), new Vector2(100, 100), new Vector2(100, 200));
 // let l2: Line = new Line(new Vector2(200, 200), new Vector2(300, 100), new Vector2(200, 200), new Vector2(300, 200));
 // let l3: Line = new Line(new Vector2(300, 100), new Vector2(200, 0));
@@ -13,28 +13,29 @@ var crc;
 // let l5: Line = new Line(new Vector2(0, 0), new Vector2(200, 200), new Vector2(100, 100), new Vector2(100, 200));
 // let l6: Line = new Line(new Vector2(100, 100), new Vector2(200, 200), new Vector2(100, 100), new Vector2(100, 200));
 // let exPath2: Path = new Path([l5,l6], "hotpink", "test");
-var paths = [];
-var currentlySelectedPath;
-var points = [];
-var currentlySelectedPoint;
-var originalPos;
+let paths = [];
+let currentlySelectedPath;
+let points = [];
+let currentlySelectedPoint;
+let originalPos;
 function init() {
-    var canvas = document.getElementById("myCanvas");
+    let canvas = document.getElementById("myCanvas");
     canvas.addEventListener("mousedown", mousedown);
     canvas.addEventListener("mousemove", mousemove);
     canvas.addEventListener("mouseup", mouseup);
     crc = canvas.getContext("2d");
+    // console.log("init");
     // crc.beginPath();
     // crc.moveTo(0, 0);
     // crc.lineTo(100, 100);
     // crc.stroke();
     // exPath.draw(crc);
     // exPath2.draw(crc);
-    for (var i = 0; i < 3; i++) {
-        var previousEnd = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
-        var path = new Path([previousEnd], "black", Utils.RandomColor(), "path" + i, i);
-        for (var k = 0; k < 2; k++) {
-            var newEnd = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
+    for (let i = 0; i < 3; i++) {
+        let previousEnd = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
+        let path = new Path([previousEnd], "black", Utils.RandomColor(), "path" + i, i);
+        for (let k = 0; k < 2; k++) {
+            let newEnd = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
             path.addLineToEnd(previousEnd, newEnd, newEnd);
             previousEnd = newEnd;
         }
@@ -46,15 +47,13 @@ function init() {
 function redrawAll() {
     crc.clearRect(0, 0, 500, 500);
     paths.sort(Path.sort);
-    for (var _i = 0, paths_1 = paths; _i < paths_1.length; _i++) {
-        var path = paths_1[_i];
+    for (let path of paths) {
         path.draw(crc);
     }
 }
 function mousedown(_event) {
-    var foundPath;
-    for (var _i = 0, paths_2 = paths; _i < paths_2.length; _i++) {
-        var path = paths_2[_i];
+    let foundPath;
+    for (let path of paths) {
         if (crc.isPointInPath(path.getPath2D(), _event.clientX, _event.clientY)) {
             foundPath = path;
         }
@@ -76,7 +75,7 @@ function mouseup() {
 function mousemove(_event) {
     if (!currentlySelectedPath)
         return;
-    currentlySelectedPath.move(originalPos.x - _event.clientX, originalPos.y - _event.clientY);
+    currentlySelectedPath.move(_event.clientX - originalPos.x, _event.clientY - originalPos.y);
     redrawAll();
     originalPos = new Vector2(_event.clientX, _event.clientY);
 }

@@ -73,18 +73,18 @@ module DrawTypes {
 		move(d: Vector2): Path2D;
 		move(dx: number, dy: number): Path2D;
 		move(dordx: number | Vector2, dy?: number): Path2D {
+			let deltaX: number;
+			let deltaY: number;
 			if (typeof dordx == "number") {
-				for (let i: number = 0; i < this.points.length; i++) {
-					// console.log("two coords", point, dordx, dy);
-					this.points[i].x -= dordx;
-					this.points[i].y -= dy;
-					// console.log(point);
-				}
+				deltaX = dordx;
+				deltaY = dy;
 			} else {
-				for (let point of this.points) {
-					point.x -= dordx.x;
-					point.y -= dordx.y;
-				}
+				deltaX = dordx.x;
+				deltaY = dordx.y;
+			}
+			for (let point of this.points) {
+				point.x += deltaX;
+				point.y += deltaY;
 			}
 			this.generatePath2D();
 			return this.path2d;

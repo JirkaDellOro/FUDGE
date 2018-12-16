@@ -36,6 +36,8 @@ function init() {
 
     crc = canvas.getContext("2d");
 
+    // console.log("init");
+
     // crc.beginPath();
     // crc.moveTo(0, 0);
     // crc.lineTo(100, 100);
@@ -97,7 +99,7 @@ function mouseup(){
 
 function mousemove(_event: MouseEvent){
     if(!currentlySelectedPath) return;
-    currentlySelectedPath.move(originalPos.x - _event.clientX, originalPos.y - _event.clientY);
+    currentlySelectedPath.move(_event.clientX - originalPos.x, _event.clientY - originalPos.y);
     redrawAll();
     originalPos = new Vector2(_event.clientX, _event.clientY);
 }

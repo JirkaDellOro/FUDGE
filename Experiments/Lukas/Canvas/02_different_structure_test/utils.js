@@ -4,9 +4,8 @@ var Utils;
         return Math.floor((Math.random() * (max + min)) - min);
     }
     Utils.RandomRange = RandomRange;
-    function RandomColor(includeAlpha) {
-        if (includeAlpha === void 0) { includeAlpha = false; }
-        var c = "rgba(";
+    function RandomColor(includeAlpha = false) {
+        let c = "rgba(";
         c += RandomRange(0, 255) + ",";
         c += RandomRange(0, 255) + ",";
         c += RandomRange(0, 255) + ",";
