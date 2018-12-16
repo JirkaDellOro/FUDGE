@@ -65,7 +65,9 @@ var DrawTypes;
                 deltaX = dordx.x;
                 deltaY = dordx.y;
             }
+            console.log("move", deltaX, deltaY);
             for (let point of this.points) {
+                console.log(point);
                 point.x += deltaX;
                 point.y += deltaY;
             }
@@ -95,7 +97,7 @@ var DrawTypes;
             this.parent = parent;
         }
         */
-        constructor(x, y, parent) {
+        constructor(x, y, parent = null) {
             this.x = x;
             this.y = y;
             this.parent = parent;

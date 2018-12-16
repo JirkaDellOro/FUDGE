@@ -36,10 +36,10 @@ function init() {
         let path = new Path([previousEnd], "black", Utils.RandomColor(), "path" + i, i);
         for (let k = 0; k < 2; k++) {
             let newEnd = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
-            path.addLineToEnd(previousEnd, newEnd, newEnd);
+            path.addLineToEnd(new Point(previousEnd.x, previousEnd.y), new Point(newEnd.x, newEnd.y), new Point(newEnd.x, newEnd.y));
             previousEnd = newEnd;
         }
-        path.addLineToEnd(previousEnd, path.points[0], path.points[0]);
+        path.addLineToEnd(new Point(previousEnd.x, previousEnd.y), new Point(path.points[0].x, path.points[0].y), new Point(path.points[0].x, path.points[0].y));
         paths.push(path);
     }
     redrawAll();
