@@ -82,9 +82,7 @@ module DrawTypes {
 				deltaX = dordx.x;
 				deltaY = dordx.y;
 			}
-			console.log("move", deltaX, deltaY);
 			for (let point of this.points) {
-				console.log(point);
 				point.x += deltaX;
 				point.y += deltaY;
 			}
