@@ -2,6 +2,7 @@
 <!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
 <node CREATED="1283093380553" ID="ID_1723255651" MODIFIED="1520499903526" TEXT="FUDGE">
 <edge COLOR="#006666"/>
+<hook NAME="AutomaticEdgeColor"/>
 <hook NAME="MapStyle">
 <properties SHOW_NOTE_ICONS="true"/>
 <map_styles>
@@ -51,7 +52,6 @@
 </stylenode>
 </map_styles>
 </hook>
-<hook NAME="AutomaticEdgeColor"/>
 <node CREATED="1519980459055" FOLDED="true" ID="ID_1508151389" MODIFIED="1542450953809" POSITION="right" TEXT="General Info">
 <edge COLOR="#006666"/>
 <node CREATED="1519980472563" ID="ID_502278214" MODIFIED="1519981806451" TEXT="FUDGE means Furtwangen University Didactic Game Engine">
@@ -128,7 +128,7 @@
 <node CREATED="1535983982881" FOLDED="true" ID="ID_373953930" MODIFIED="1542450980319" POSITION="right" TEXT="Resources">
 <node CREATED="1535983992505" ID="ID_1159463404" LINK="https://webgl2fundamentals.org/" MODIFIED="1535984002096" TEXT="https://webgl2fundamentals.org/"/>
 </node>
-<node CREATED="1520499908333" FOLDED="true" ID="ID_873125860" MODIFIED="1542451002870" POSITION="left" TEXT="Components">
+<node CREATED="1520499908333" FOLDED="true" ID="ID_873125860" MODIFIED="1545142225704" POSITION="left" TEXT="Components">
 <node CREATED="1520499914584" FOLDED="true" ID="ID_1843821330" MODIFIED="1542450987708" TEXT="Animation">
 <node CREATED="1520499917830" ID="ID_181217642" MODIFIED="1520499973040" TEXT="dopesheet &amp; curveeditor as in Unity"/>
 <node CREATED="1520499930909" ID="ID_1104935536" MODIFIED="1520499945516" TEXT="additional labels as in Animate"/>
@@ -154,6 +154,9 @@
 </node>
 <node CREATED="1530085591951" FOLDED="true" ID="ID_1935321792" MODIFIED="1542450999149" TEXT="Virtual User Interface">
 <node CREATED="1530085604119" ID="ID_1536480736" MODIFIED="1530085615260" TEXT="HTML-Pages in space"/>
+</node>
+<node CREATED="1545142211016" FOLDED="true" ID="ID_1603227860" MODIFIED="1545142221281" TEXT="Audio">
+<node CREATED="1545142213939" ID="ID_1481293280" MODIFIED="1545142219248" TEXT="WebAudio-API"/>
 </node>
 </node>
 <node CREATED="1534788567207" FOLDED="true" ID="ID_319799368" MODIFIED="1541957652419" POSITION="left" TEXT="Handling">
