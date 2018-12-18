@@ -13,5 +13,8 @@
 	"devDependencies": {
 		"electron": "^2.0.0",
 		"typescript": "^3.1.6"
+	},
+	"dependencies": {
+		"xml2js": "^0.4.19"
 	}
 }

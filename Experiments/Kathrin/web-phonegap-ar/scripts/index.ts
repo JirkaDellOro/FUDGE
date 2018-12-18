@@ -17,6 +17,12 @@ const mainMenuTpl = [
 				click() {
 					changeMainWindowContent('CreatePhoneGapApp');
 				},
+			}, 
+			{
+				label: 'Open PhoneGap-App',
+				click() {
+					changeMainWindowContent('OpenPhoneGapApp');
+				},
 			},
 			{
 				accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
@@ -67,6 +73,9 @@ function changeMainWindowContent(content: string) {
 			break;
 		case 'CreatePhoneGapApp':
 			file = 'phonegap/phonegap-create.html';
+			break;
+		case 'OpenPhoneGapApp':
+			file = 'phonegap/phonegap-open.html';
 			break;
 		default:
 			break;

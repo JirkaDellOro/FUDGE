@@ -14,36 +14,26 @@ window.addEventListener('load', () => {
     init();
 });
 function init() {
-    const domAppName = document.getElementById('app-name');
-    // const domAppDir: HTMLInputElement = document.getElementById('app-dir') as HTMLElement;
     const domAppDir = document.getElementById('app-dir');
-    const domSubmitBtn = document.getElementById('create-phonegap-dir');
+    const domSubmitBtn = document.getElementById('open-phonegap-dir');
     domSubmitBtn.addEventListener('click', (event) => {
-        const appName = domAppName.value;
         const appDir = domAppDir.files[0].path;
-        if (appName == null && appDir == null) {
-            alert('Bitte App-Name und App-Verzeichnis angeben.');
-        }
-        else if (appName == null) {
-            alert('Bitte App-Name angeben.');
-        }
-        else if (appDir == null) {
+        if (appDir == null) {
             alert('Bitte App-Verzeichnis angeben');
         }
         else {
-            createPhoneGapProject(appName, appDir);
+            openPhoneGapProject(appDir);
         }
     });
 }
-function createPhoneGapProject(name, dir) {
+function openPhoneGapProject(dir) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(dir);
-        pg = new phonegap_class_1.PhoneGap(name, dir);
+        pg = new phonegap_class_1.PhoneGap();
         try {
-            const projectCreated = yield pg.createProject();
-            // if(projectCreated) {
+            console.log('open project');
+            let opened = yield pg.openProject(dir);
             createServeProjectBtn();
-            // }
         }
         catch (error) {
             console.error(error);
@@ -51,14 +41,16 @@ function createPhoneGapProject(name, dir) {
     });
 }
 function createServeProjectBtn() {
-    let body = document.getElementsByTagName('body')[0];
-    let runBtn = document.createElement('button');
-    runBtn.setAttribute('id', 'serve-phonegap-btn');
-    runBtn.innerHTML = 'Serve project';
-    runBtn.addEventListener('click', function (event) {
-        pg.serveProject();
-    });
-    body.appendChild(document.createElement('br'));
-    body.appendChild(runBtn);
+    if (!document.getElementById('serve-phonegap-btn')) {
+        let body = document.getElementsByTagName('body')[0];
+        let runBtn = document.createElement('button');
+        runBtn.setAttribute('id', 'serve-phonegap-btn');
+        runBtn.innerHTML = 'Serve project';
+        runBtn.addEventListener('click', function (event) {
+            pg.serveProject();
+        });
+        body.appendChild(document.createElement('br'));
+        body.appendChild(runBtn);
+    }
 }
-//# sourceMappingURL=phonegap-create.renderer.js.map
+//# sourceMappingURL=phonegap-open.renderer.js.map

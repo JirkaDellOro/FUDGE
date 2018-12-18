@@ -1,0 +1,32 @@
+<script>
+	require('../../scripts/phonegap/phonegap-open.renderer.js');
+</script>
+
+<style>
+	.flex-container {
+		display: flex;
+		flex-direction: column;
+		margin: 15px 0;
+
+		> * {
+			margin: 5px 0;
+		}
+	}
+
+	input {
+		display: block;
+	}
+</style>
+
+<h1>Open existing PhoneGap Application</h1>
+
+<p>Open your App...</p>
+
+<div class="input-container">
+	<div class="flex-container">
+		<label for="app-dir">Path to project</label>
+		<input type="file" name="app-dir" id="app-dir" webkitdirectory mozdirectory msdirectory odirectory directory />
+	</div>
+
+	<button type="submit" id="open-phonegap-dir">Open project</button>
+</div>
