@@ -2,6 +2,8 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Dec 18th 2018
+[error with the child_process.spawn and child_process.exec](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_KF.txt)  
 # Dec 11th 2018
 Issue with a Typescript error [#10](https://github.com/JirkaDellOro/FUDGE/issues/10)  
 # Dec 4th 2018
