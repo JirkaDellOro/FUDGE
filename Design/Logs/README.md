@@ -3,7 +3,7 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
 # Dec 11th 2018
-Contents/Issues
+Issue with a Typescript error [#10](https://github.com/JirkaDellOro/FUDGE/issues/10)  
 # Dec 4th 2018
 [General thoughts about the Engine and the Animator (and Lukas' Jobs)](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Notizen_LS.md)  
 [General Information about about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Protokoll_TD)
