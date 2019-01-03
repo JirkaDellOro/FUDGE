@@ -16,4 +16,4 @@ Contents/Issues
 [Some more general information about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_KF.txt)
 # Sep 13th 2018
 First meeting. Basic structure for scenetree and components. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Whiteboard_Scenetree.jpg)  
-[General informations about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Notizen_KF.txt)
+[General information about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Notizen_KF.txt)
