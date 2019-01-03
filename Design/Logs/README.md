@@ -10,9 +10,10 @@ Contents/Issues
 # Nov 27th 2018
 [Some Information about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181127_Protokoll_TD)
 # Nov 20th 2018
-Contents/Issues
+[General contents of the meeting](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181120_Notizen_KF.txt)
 # Nov 13th 2018
-[General thoughts about the Engine, the Animator and the 2D Vector Editor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_LS.md)
+[General thoughts about the Engine, the Animator and the 2D Vector Editor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_LS.md)  
+[Some more general information about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_KF.txt)
 # Sep 13th 2018
-First meeting. Basic structure for scenetree and components. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Whiteboard_Scenetree.jpg)
-
+First meeting. Basic structure for scenetree and components. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Whiteboard_Scenetree.jpg)  
+[General informations about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Notizen_KF.txt)
