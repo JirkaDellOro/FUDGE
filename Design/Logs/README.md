@@ -4,6 +4,7 @@ This readme-file describes in a few words the contents of each log and the major
 
 # Dec 18th 2018
 [error with the child_process.spawn and child_process.exec](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_KF.txt)  
+[First prototype of the vectoreditor, problems with it and further plans with it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_LS.md)
 # Dec 11th 2018
 Issue with a Typescript error [#10](https://github.com/JirkaDellOro/FUDGE/issues/10)  
 # Dec 4th 2018
