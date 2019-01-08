@@ -4,7 +4,7 @@ This readme-file describes in a few words the contents of each log and the major
 
 
 # Jan 8th 2019
-
+[Datenstrukturplanung Vektoreditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190108_Notizen_LS.md)
 # Dec 18th 2018
 [error with the child_process.spawn and child_process.exec](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_KF.txt)  
 [First prototype of the vectoreditor, problems with it and further plans with it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_LS.md)
