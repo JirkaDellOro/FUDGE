@@ -5,6 +5,9 @@ Hier bin ich auf der Suche nach einer Lösung!
 
 Ich hab mich dazu noch einmal detailliert mit den Unity-Plugins von Vuforia (markerbased), ARCore (markerless and markerbased) und kudan (markerless) auseinandergesetzt, um daraus Erkenntnisse ziehen zu können, wie AR-Anwendungen in GameEngines (im speziellen Fall Unity) aufgebaut werden und diese für die Electron-Anwendung "kopieren" zu können.  
 
+Die bei der letzten Besprechung erwähnte Übersicht wie WebXR, ARCore, etc. zusammenhängt liegt hier:  
+[Übersicht Zusammenhänge WebXR, ARCore](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190115-WebXR-ARCore-WebGL-JS_KF.jpg)  
+
 Für die PhoneGap-Prozesse habe ich eine Tabelle erstellt mit allen möglichen Befehlen des CLI, diese müssen jedoch nicht alle in die Anwendung integriert werden. Hier werden die wichtigsten abgebildet, die dick markierten werden auf jeden Fall benötigt. Der Befehl **build** könnte integriert werden, muss aber nicht. Denn es besteht die Möglichkeit, dass das Projekt in die PhoneGap-Cloud hochgeladen werden muss, um dieses dort dann zu erstellen. Auf diesem Weg hat man keine Probleme mit SDK Installation, MacOS Zertifikaten etc. - der Entwickler muss es dort aber manuell hochladen...
 
 | Befehle |	Beschreibung |
