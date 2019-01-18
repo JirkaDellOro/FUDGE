@@ -9,4 +9,4 @@ Only working with following dependencies:
 -   Using ARCore supported Phone Version 8.0 or later - full list (here)[https://developers.google.com/ar/discover/supported-devices]
 -   ARCore installed
 
-(3D-Model)[https://poly.google.com/view/dK08uQ8-Zm9] by (Naomi Chen)[https://poly.google.com/user/f8cGQY15_-g] / (CC-BY)[https://creativecommons.org/licenses/by/2.0/]
+[3D-Model](https://poly.google.com/view/dK08uQ8-Zm9) by [Naomi Chen](https://poly.google.com/user/f8cGQY15_-g) / [CC-BY](https://creativecommons.org/licenses/by/2.0/)
