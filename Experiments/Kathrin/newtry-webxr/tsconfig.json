@@ -1,0 +1,16 @@
+{
+	"version": "2.1.4",
+	"compilerOptions": {
+		// "lib": ["es5", "es6", "dom", "dom.iterable", "scripthost"],
+		"target": "es6",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		// "noImplicitAny": true,
+		// "removeComments": true,
+		// "preserveConstEnums": true,
+		"sourceMap": true,
+		"outDir": "./src/",
+		"baseUrl": "./src/"
+	},
+	"exclude": ["node_modules"]
+}

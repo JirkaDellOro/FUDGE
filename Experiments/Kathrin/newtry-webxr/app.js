@@ -205,7 +205,7 @@ class App {
 		}
 	}
 
-	async onClick(event) {
+	onClick(event) {
 		let rayOrigin = new THREE.Vector3();
 		let rayDirection = new THREE.Vector3();
 
