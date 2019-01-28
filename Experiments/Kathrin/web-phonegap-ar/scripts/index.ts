@@ -1,99 +1,123 @@
-import { app, BrowserWindow, Menu } from 'electron';
-import * as path from 'path';
+import { app, BrowserWindow, Menu, ipcMain } from "electron";
+import * as path from "path";
 
 let mainWindow: any;
 const mainMenuTpl = [
 	{
-		label: 'File',
+		label: "File",
 		submenu: [
 			{
-				label: 'Create AR-App',
+				label: "Create new AR project",
 				click() {
-					changeMainWindowContent('CreateAR');
-				},
+					// changeMainWindowContent("CreateAR");
+					openNewWindow("ar/ar.html", "Create new AR project");
+				}
 			},
 			{
-				label: 'Create PhoneGap-App',
+				label: "Create new phonegap project",
 				click() {
-					changeMainWindowContent('CreatePhoneGapApp');
-				},
-			}, 
-			{
-				label: 'Open PhoneGap-App',
-				click() {
-					changeMainWindowContent('OpenPhoneGapApp');
-				},
+					// changeMainWindowContent("CreatePhoneGapApp");
+					openNewWindow("phonegap/phonegap-create.html", "Create new phonegap project");
+				}
 			},
 			{
-				accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-				label: 'Quit',
+				label: "Open existing phonegap project",
+				click() {
+					// changeMainWindowContent("OpenPhoneGapApp");
+					openNewWindow("phonegap/phonegap-open.html", "Open existing phonegap project");
+				}
+			},
+			{
+				accelerator: process.platform === "darwin" ? "Command+Q" : "Ctrl+Q",
+				label: "Quit",
 				click() {
 					app.quit();
-				},
-			},
-		],
-	},
+				}
+			}
+		]
+	}
 ];
 
 initializeApp();
 
 // add dev tools when not in production
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
 	mainMenuTpl.push({
-		label: 'DevTools',
-		submenu: [{
-			accelerator: process.platform === 'darwin' ? 'Command+I' : 'Ctrl+I',
-			label: 'Toggle DevTools',
-			click() {
-				mainWindow.toggleDevTools();
-			},
-		}],
+		label: "DevTools",
+		submenu: [
+			{
+				accelerator: process.platform === "darwin" ? "Command+I" : "Ctrl+I",
+				label: "Toggle DevTools",
+				click() {
+					mainWindow.toggleDevTools();
+				}
+			}
+		]
 	});
 }
 
 function initializeApp() {
-
-	app.on('ready', () => {
+	app.on("ready", () => {
 		createMainWindow();
-		// xrSession = new XRSession();
 	});
 
-	app.on('window-all-closed', () => {
-		if (process.platform !== 'darwin') {
+	app.on("window-all-closed", () => {
+		if (process.platform !== "darwin") {
 			app.quit();
 		}
 	});
 }
 
 function changeMainWindowContent(content: string) {
-	let file = '';
+	let file = "";
 	switch (content) {
-		case 'CreateAR':
-			file = 'ar/ar.html';
+		case "CreateAR":
+			file = "ar/ar.html";
 			break;
-		case 'CreatePhoneGapApp':
-			file = 'phonegap/phonegap-create.html';
+		case "CreatePhoneGapApp":
+			file = "phonegap/phonegap-create.html";
 			break;
-		case 'OpenPhoneGapApp':
-			file = 'phonegap/phonegap-open.html';
+		case "OpenPhoneGapApp":
+			file = "phonegap/phonegap-open.html";
 			break;
 		default:
 			break;
 	}
-	mainWindow.loadFile(path.join(__dirname, '../templates/' + file));
+	mainWindow.loadFile(path.join(__dirname, "../templates/" + file));
+}
+
+function openNewWindow(file: string, winTitle?: string) {
+	let title: string = winTitle ? winTitle : "FUDGE";
+	let win: any = new BrowserWindow({
+		width: 360,
+		height: 640,
+		resizable: false,
+		minimizable: false,
+		title: title,
+		parent: mainWindow,
+		titleBarStyle: "hidden"
+	});
+
+	win.setMenu(null);
+	win.openDevTools();
+
+	win.on("closed", (event: Event) => {
+		win = null;
+	});
+
+	win.loadFile(path.join(__dirname, "../templates/" + file));
 }
 
 function createMainWindow() {
 	mainWindow = new BrowserWindow({
 		height: 900,
 		webPreferences: {
-			experimentalCanvasFeatures: true,
 			experimentalFeatures: true,
 			nodeIntegration: true,
 			plugins: true,
-			webSecurity: false,
+			webSecurity: false
 		},
-		width: 1200,
+		width: 1200
 	});
 
 	// app.commandLine.appendSwitch('--enable-webxr');
@@ -102,10 +126,14 @@ function createMainWindow() {
 	const mainMenu = Menu.buildFromTemplate(mainMenuTpl);
 	Menu.setApplicationMenu(mainMenu);
 
-	mainWindow.loadFile(path.join(__dirname, '../templates/index.html'));
+	mainWindow.loadFile(path.join(__dirname, "../templates/index.html"));
 	mainWindow.openDevTools();
 
-	mainWindow.on('closed', () => {
+	ipcMain.on("opened-pg-project", (event, data) => {
+		mainWindow.webContents.send("opened-pg-project", data);
+	});
+
+	mainWindow.on("closed", () => {
 		mainWindow = null;
 	});
 }

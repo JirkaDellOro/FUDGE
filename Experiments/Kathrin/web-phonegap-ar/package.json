@@ -11,8 +11,9 @@
 	},
 	"author": "Kathrin Fuhrer <kathrin.fuhrer@gmx.de>",
 	"devDependencies": {
-		"electron": "^2.0.0",
-		"typescript": "^3.1.6"
+		"@types/electron": "^1.6.10",
+		"electron": "^4.0.2",
+		"typescript": "^3.2.4"
 	},
 	"dependencies": {
 		"xml2js": "^0.4.19"

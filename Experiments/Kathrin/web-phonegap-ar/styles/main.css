@@ -1,0 +1,107 @@
+@import url("https://fonts.googleapis.com/css?family=Quicksand:400,700&subset=latin-ext");
+
+body {
+	font-size: 16px;
+	font-family: "Quicksand", sans-serif;
+	margin: 15px;
+}
+
+div,
+span {
+	box-sizing: border-box;
+}
+
+h1 {
+	font-weight: 400;
+	margin-top: 0;
+}
+
+h2 {
+	font-weight: 400;
+	text-transform: uppercase;
+	font-size: 1rem;
+	margin-top: 0;
+}
+
+.content {
+	margin: 15px 0px;
+}
+
+.flex-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-container.row {
+	flex-direction: row;
+}
+.flex-container.justify-between {
+	justify-content: space-between;
+}
+.flex-container.align-center {
+	align-items: center;
+}
+
+.flex-container > * {
+	margin: 5px 0;
+}
+
+input {
+	display: block;
+}
+
+.project-info-container {
+	padding: 15px;
+	background-color: green;
+	color: white;
+	display: none;
+}
+
+.opened-pg-project {
+	background-color: rgba(255, 255, 255, 0.3);
+	padding: 10px;
+}
+
+.project-name {
+	font-weight: 800;
+}
+
+button,
+.custom-file-input {
+	display: block;
+	box-sizing: border-box;
+	border: none;
+	background-color: green;
+	padding: 10px;
+	color: white;
+	outline: none;
+	border-radius: 3px;
+	font-size: 1rem;
+	font-family: "Quicksand", sans-serif;
+	font-weight: 400;
+	width: 100%;
+	text-align: center;
+	cursor: pointer;
+	margin: 0px;
+	margin-bottom: 5px;
+}
+
+input[type="file"] {
+	display: none;
+}
+
+.chose-path-container {
+	display: none;
+}
+
+.chose-path {
+	font-weight: 700;
+}
+
+.project-btn-container {
+	display: none;
+}
+
+.show {
+	display: block !important;
+}

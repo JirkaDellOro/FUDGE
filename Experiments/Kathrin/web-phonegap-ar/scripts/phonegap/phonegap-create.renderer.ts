@@ -1,27 +1,27 @@
-import { PhoneGap } from './phonegap.class';
+import { PhoneGap } from "./phonegap.class";
 
-let pg:PhoneGap;
+let pg: PhoneGap;
 
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
 	init();
 });
 
 function init() {
-	const domAppName: HTMLInputElement = document.getElementById('app-name') as HTMLInputElement;
+	const domAppName: HTMLInputElement = document.getElementById("app-name") as HTMLInputElement;
 	// const domAppDir: HTMLInputElement = document.getElementById('app-dir') as HTMLElement;
-	const domAppDir: HTMLInputElement = document.getElementById('app-dir') as HTMLInputElement;
-	const domSubmitBtn: HTMLElement = document.getElementById('create-phonegap-dir');
+	const domAppDir: HTMLInputElement = document.getElementById("app-dir") as HTMLInputElement;
+	const domSubmitBtn: HTMLElement = document.getElementById("create-phonegap-dir");
 
-	domSubmitBtn.addEventListener('click', (event: any) => {
+	domSubmitBtn.addEventListener("click", (event: any) => {
 		const appName: string = domAppName.value;
 		const appDir: string = domAppDir.files[0].path;
 
 		if (appName == null && appDir == null) {
-			alert('Bitte App-Name und App-Verzeichnis angeben.');
+			alert("Bitte App-Name und App-Verzeichnis angeben.");
 		} else if (appName == null) {
-			alert('Bitte App-Name angeben.');
+			alert("Bitte App-Name angeben.");
 		} else if (appDir == null) {
-			alert('Bitte App-Verzeichnis angeben');
+			alert("Bitte App-Verzeichnis angeben");
 		} else {
 			createPhoneGapProject(appName, appDir);
 		}
@@ -34,7 +34,7 @@ async function createPhoneGapProject(name: string, dir: string) {
 	try {
 		const projectCreated = await pg.createProject();
 		// if(projectCreated) {
-			createServeProjectBtn();
+		createServeProjectBtn();
 		// }
 	} catch (error) {
 		console.error(error);
@@ -42,15 +42,15 @@ async function createPhoneGapProject(name: string, dir: string) {
 }
 
 function createServeProjectBtn() {
-	let body = document.getElementsByTagName('body')[0];
-	let runBtn = document.createElement('button');
-	runBtn.setAttribute('id', 'serve-phonegap-btn');
-	runBtn.innerHTML = 'Serve project';
+	let body = document.getElementsByTagName("body")[0];
+	let runBtn = document.createElement("button");
+	runBtn.setAttribute("id", "serve-phonegap-btn");
+	runBtn.innerHTML = "Serve project";
 
-	runBtn.addEventListener('click', function(event) {
+	runBtn.addEventListener("click", function(event) {
 		pg.serveProject();
 	});
 
-	body.appendChild(document.createElement('br'));
+	body.appendChild(document.createElement("br"));
 	body.appendChild(runBtn);
 }

@@ -8,49 +8,92 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const electron_1 = require("electron");
 const phonegap_class_1 = require("./phonegap.class");
 let pg;
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
     init();
 });
 function init() {
-    const domAppDir = document.getElementById('app-dir');
-    const domSubmitBtn = document.getElementById('open-phonegap-dir');
-    domSubmitBtn.addEventListener('click', (event) => {
+    const domAppDir = document.getElementById("app-dir");
+    const domSubmitBtn = document.getElementById("open-phonegap-dir");
+    domAppDir.addEventListener("change", (event) => {
+        console.log("directory changed");
+        document.querySelector(".chose-path").innerHTML = domAppDir.files[0].name;
+        document.querySelector(".chose-path-container").classList.add("show");
+    });
+    domSubmitBtn.addEventListener("click", (event) => {
         const appDir = domAppDir.files[0].path;
         if (appDir == null) {
-            alert('Bitte App-Verzeichnis angeben');
+            alert("Please select app directory");
         }
         else {
+            console.log("open phonegap project");
             openPhoneGapProject(appDir);
         }
     });
 }
 function openPhoneGapProject(dir) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(dir);
         pg = new phonegap_class_1.PhoneGap();
-        try {
-            console.log('open project');
-            let opened = yield pg.openProject(dir);
-            createServeProjectBtn();
-        }
-        catch (error) {
-            console.error(error);
-        }
+        yield pg
+            .openProject(dir)
+            .then((opened) => {
+            if (opened.getResult()) {
+                // createServeProjectBtn();
+                sendPgObjectToMain();
+            }
+            else {
+                alert(opened.getMessage());
+            }
+        })
+            .catch(error => {
+            console.log("An unknown error occurred" + error);
+        });
     });
 }
-function createServeProjectBtn() {
-    if (!document.getElementById('serve-phonegap-btn')) {
-        let body = document.getElementsByTagName('body')[0];
-        let runBtn = document.createElement('button');
-        runBtn.setAttribute('id', 'serve-phonegap-btn');
-        runBtn.innerHTML = 'Serve project';
-        runBtn.addEventListener('click', function (event) {
-            pg.serveProject();
-        });
-        body.appendChild(document.createElement('br'));
-        body.appendChild(runBtn);
-    }
+// function createServeProjectBtn() {
+// 	if (!document.getElementById("serve-phonegap-btn")) {
+// 		let runBtn = document.createElement("button");
+// 		runBtn.setAttribute("id", "serve-phonegap-btn");
+// 		runBtn.innerHTML = "Serve project";
+// 		runBtn.addEventListener("click", event => {
+// 			pg.serveProject().then(serveProcess => {
+// 				console.log(serveProcess);
+// 				if (serveProcess) {
+// 					createKillServeProcessBtn();
+// 				}
+// 			});
+// 		});
+// 		document.body.appendChild(document.createElement("br"));
+// 		document.body.appendChild(runBtn);
+// 	}
+// }
+// function createKillServeProcessBtn() {
+// 	if (!document.getElementById("kill-serve-btn")) {
+// 		let killBtn = document.createElement("button");
+// 		killBtn.setAttribute("id", "kill-serve-btn");
+// 		killBtn.innerHTML = "Kill serve process";
+// 		killBtn.addEventListener("click", event => {
+// 			pg.killServeProcess().then((msg: ReturnMessage) => {
+// 				if (msg.getResult()) {
+// 					removeKillServeProcessBtn();
+// 				} else {
+// 					alert(msg.getMessage);
+// 				}
+// 			});
+// 		});
+// 		document.body.appendChild(document.createElement("br"));
+// 		document.body.appendChild(killBtn);
+// 	}
+// }
+// function removeKillServeProcessBtn() {
+// 	let killBtn: HTMLElement = document.getElementById("kill-serve-btn");
+// 	killBtn.remove();
+// }
+function sendPgObjectToMain() {
+    electron_1.ipcRenderer.send("opened-pg-project", pg);
+    let win = electron_1.remote.getCurrentWindow();
+    win.close();
 }
 //# sourceMappingURL=phonegap-open.renderer.js.map

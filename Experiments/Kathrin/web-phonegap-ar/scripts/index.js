@@ -5,97 +5,121 @@ const path = require("path");
 let mainWindow;
 const mainMenuTpl = [
     {
-        label: 'File',
+        label: "File",
         submenu: [
             {
-                label: 'Create AR-App',
+                label: "Create new AR project",
                 click() {
-                    changeMainWindowContent('CreateAR');
-                },
+                    // changeMainWindowContent("CreateAR");
+                    openNewWindow("ar/ar.html", "Create new AR project");
+                }
             },
             {
-                label: 'Create PhoneGap-App',
+                label: "Create new phonegap project",
                 click() {
-                    changeMainWindowContent('CreatePhoneGapApp');
-                },
+                    // changeMainWindowContent("CreatePhoneGapApp");
+                    openNewWindow("phonegap/phonegap-create.html", "Create new phonegap project");
+                }
             },
             {
-                label: 'Open PhoneGap-App',
+                label: "Open existing phonegap project",
                 click() {
-                    changeMainWindowContent('OpenPhoneGapApp');
-                },
+                    // changeMainWindowContent("OpenPhoneGapApp");
+                    openNewWindow("phonegap/phonegap-open.html", "Open existing phonegap project");
+                }
             },
             {
-                accelerator: process.platform === 'darwin' ? 'Command+Q' : 'Ctrl+Q',
-                label: 'Quit',
+                accelerator: process.platform === "darwin" ? "Command+Q" : "Ctrl+Q",
+                label: "Quit",
                 click() {
                     electron_1.app.quit();
-                },
-            },
-        ],
-    },
+                }
+            }
+        ]
+    }
 ];
 initializeApp();
 // add dev tools when not in production
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
     mainMenuTpl.push({
-        label: 'DevTools',
-        submenu: [{
-                accelerator: process.platform === 'darwin' ? 'Command+I' : 'Ctrl+I',
-                label: 'Toggle DevTools',
+        label: "DevTools",
+        submenu: [
+            {
+                accelerator: process.platform === "darwin" ? "Command+I" : "Ctrl+I",
+                label: "Toggle DevTools",
                 click() {
                     mainWindow.toggleDevTools();
-                },
-            }],
+                }
+            }
+        ]
     });
 }
 function initializeApp() {
-    electron_1.app.on('ready', () => {
+    electron_1.app.on("ready", () => {
         createMainWindow();
-        // xrSession = new XRSession();
     });
-    electron_1.app.on('window-all-closed', () => {
-        if (process.platform !== 'darwin') {
+    electron_1.app.on("window-all-closed", () => {
+        if (process.platform !== "darwin") {
             electron_1.app.quit();
         }
     });
 }
 function changeMainWindowContent(content) {
-    let file = '';
+    let file = "";
     switch (content) {
-        case 'CreateAR':
-            file = 'ar/ar.html';
+        case "CreateAR":
+            file = "ar/ar.html";
             break;
-        case 'CreatePhoneGapApp':
-            file = 'phonegap/phonegap-create.html';
+        case "CreatePhoneGapApp":
+            file = "phonegap/phonegap-create.html";
             break;
-        case 'OpenPhoneGapApp':
-            file = 'phonegap/phonegap-open.html';
+        case "OpenPhoneGapApp":
+            file = "phonegap/phonegap-open.html";
             break;
         default:
             break;
     }
-    mainWindow.loadFile(path.join(__dirname, '../templates/' + file));
+    mainWindow.loadFile(path.join(__dirname, "../templates/" + file));
+}
+function openNewWindow(file, winTitle) {
+    let title = winTitle ? winTitle : "FUDGE";
+    let win = new electron_1.BrowserWindow({
+        width: 360,
+        height: 640,
+        resizable: false,
+        minimizable: false,
+        title: title,
+        parent: mainWindow,
+        titleBarStyle: "hidden"
+    });
+    win.setMenu(null);
+    win.openDevTools();
+    win.on("closed", (event) => {
+        win = null;
+    });
+    win.loadFile(path.join(__dirname, "../templates/" + file));
 }
 function createMainWindow() {
     mainWindow = new electron_1.BrowserWindow({
         height: 900,
         webPreferences: {
-            experimentalCanvasFeatures: true,
             experimentalFeatures: true,
             nodeIntegration: true,
             plugins: true,
-            webSecurity: false,
+            webSecurity: false
         },
-        width: 1200,
+        width: 1200
     });
     // app.commandLine.appendSwitch('--enable-webxr');
     // app.commandLine.appendSwitch('--enable-webxr-hit-test');
     const mainMenu = electron_1.Menu.buildFromTemplate(mainMenuTpl);
     electron_1.Menu.setApplicationMenu(mainMenu);
-    mainWindow.loadFile(path.join(__dirname, '../templates/index.html'));
+    mainWindow.loadFile(path.join(__dirname, "../templates/index.html"));
     mainWindow.openDevTools();
-    mainWindow.on('closed', () => {
+    electron_1.ipcMain.on("opened-pg-project", (event, data) => {
+        mainWindow.webContents.send("opened-pg-project", data);
+    });
+    mainWindow.on("closed", () => {
         mainWindow = null;
     });
 }

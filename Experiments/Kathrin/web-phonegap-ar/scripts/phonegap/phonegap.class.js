@@ -13,14 +13,22 @@ const child_process = require("child_process");
 const util = require("util");
 const fs = require("fs");
 const xml2js = require("xml2js");
-// namespace WebPhonegapAR {
+const os = require("os");
+const electron = require("electron");
+const utils_class_1 = require("../utils/utils.class");
 class PhoneGap {
-    constructor(name, dir) {
+    constructor(name = "", dir = "", data) {
         this.exec = util.promisify(child_process.exec);
-        this.spawn = child_process.spawn;
-        this.appName = name ? name : '';
+        this.appName = name;
         this.dirPath = dir;
-        this.appFolderName = this.appName.replace(/\s/g, '-');
+        this.appFolderName = this.appName.replace(/\s/g, "-");
+        if (data) {
+            this.appName = data.appName ? data.appName : name;
+            this.dirPath = data.dirPath ? data.dirPath : dir;
+            this.appFolderName = data.appFolderName ? data.appFolderName : this.appName.replace(/\s/g, "-");
+            this.pathToProject = data.pathToProject ? data.pathToProject : undefined;
+            this.fileInfo = data.fileInfo ? data.fileInfo : undefined;
+        }
     }
     getAppName() {
         return this.appName;
@@ -34,142 +42,207 @@ class PhoneGap {
     checkDependencies() {
         return __awaiter(this, void 0, void 0, function* () {
             let result;
-            if (typeof (this.nodeVersion) === undefined && typeof (this.phonegapVersion) === undefined) {
+            if (typeof this.nodeVersion === undefined && typeof this.phonegapVersion === undefined) {
                 this.nodeVersion = yield Promise.resolve(this.checkNodeVersion());
                 this.phonegapVersion = yield Promise.resolve(this.checkPhonegapVersion());
             }
-            if (this.nodeVersion == '' && this.phonegapVersion == '') {
-                console.log('Bitte Node.js und PhoneGap installieren');
-                result = false;
+            if (this.nodeVersion == "" && this.phonegapVersion == "") {
+                result = new utils_class_1.ReturnMessage(false, "Please install node.js and phonegap.");
             }
-            else if (this.nodeVersion == '') {
-                console.log('Bitte Node.js installieren');
-                result = false;
+            else if (this.nodeVersion == "") {
+                result = new utils_class_1.ReturnMessage(false, "Please install node.js.");
             }
-            else if (this.phonegapVersion == '') {
-                console.log('Bitte PhoneGap installieren');
-                result = false;
+            else if (this.phonegapVersion == "") {
+                console.log("Bitte PhoneGap installieren");
+                result = new utils_class_1.ReturnMessage(false, "Please install phonegap");
             }
             else {
-                console.log('Alle Dependencies installiert!');
-                result = true;
+                result = new utils_class_1.ReturnMessage(true, "All necessary dependencies installed.");
             }
             return result;
         });
     }
     checkNodeVersion() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr } = yield this.exec('node --version');
-            return stdout == null ? '' : stdout;
+            const { stdout, stderr } = yield this.exec("node --version");
+            return stdout == null ? "" : stdout;
         });
     }
     checkPhonegapVersion() {
         return __awaiter(this, void 0, void 0, function* () {
-            const { stdout, stderr } = yield this.exec('phonegap --version');
-            return stdout == null ? '' : stdout;
+            const { stdout, stderr } = yield this.exec("phonegap --version");
+            return stdout == null ? "" : stdout;
         });
     }
     openProject(filepath) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.dirPath = filepath.substr(0, filepath.lastIndexOf('\\'));
-            this.appFolderName = filepath.substr(filepath.lastIndexOf('\\') + 1, filepath.length);
+            this.dirPath = filepath.substr(0, filepath.lastIndexOf("\\"));
+            this.appFolderName = filepath.substr(filepath.lastIndexOf("\\") + 1, filepath.length);
             this.pathToProject = filepath;
-            let infoFile = filepath + '\\config.xml';
-            yield fs.readFile(infoFile, (error, data_xml) => {
-                if (!error) {
-                    let parser = new xml2js.Parser();
-                    parser.parseString(data_xml, (error, data) => {
+            let infoFile = filepath + "\\config.xml";
+            return new Promise((resolve, reject) => {
+                try {
+                    fs.readFile(infoFile, (error, data_xml) => {
                         if (!error) {
-                            this.fileInfo = data.widget;
-                            this.appName = this.fileInfo.name[0];
-                            console.log('opened');
-                            return true;
+                            let parser = new xml2js.Parser();
+                            parser.parseString(data_xml, (error, data) => {
+                                if (!error) {
+                                    this.fileInfo = data.widget;
+                                    this.appName = this.fileInfo.name[0];
+                                    resolve(new utils_class_1.ReturnMessage(true, "Opened project."));
+                                }
+                                else {
+                                    reject(new utils_class_1.ReturnMessage(false, "Could not open config.xml. Is this a PhoneGap-Project?"));
+                                }
+                            });
                         }
                         else {
-                            console.error('Could not open config.xml - Is this a PhoneGap-Project');
-                            return false;
+                            reject(new utils_class_1.ReturnMessage(false, "Error while reading config.xml " + error));
                         }
                     });
                 }
-                else {
-                    console.error('Error while reading file: ' + error);
-                    return false;
+                catch (error) {
+                    reject(new utils_class_1.ReturnMessage(false, "Could not open read file. " + error));
                 }
             });
         });
     }
     createProject() {
         return __awaiter(this, void 0, void 0, function* () {
-            let openDir = 'cd ' + this.dirPath;
+            let openDir = "cd " + this.dirPath;
             let checkDep;
+            let result = new utils_class_1.ReturnMessage(false, "Something with dependencies");
             try {
                 checkDep = yield this.checkDependencies();
-                if (checkDep) {
+                if (checkDep.getResult()) {
                     const { stdout, stderr } = yield this.exec(openDir);
                     if (stdout != null) {
-                        console.log('entered directory');
-                        this.createProjectDirectory();
+                        console.log("entered directory");
+                        result = yield this.createProjectDirectory();
                     }
                     else {
-                        console.log('Path not found');
+                        result = new utils_class_1.ReturnMessage(false, "Could not find project path.");
                     }
                 }
+                return result;
             }
             catch (error) {
-                console.log('Error: ' + error);
+                console.log("Error: " + error);
             }
         });
     }
     createProjectDirectory() {
         return __awaiter(this, void 0, void 0, function* () {
-            let command = 'phonegap create ' + this.appFolderName + ' --name "' + this.appName + '"';
+            let command = "phonegap create " + this.appFolderName + ' --name "' + this.appName + '"';
             try {
                 const { stdout, stderr } = yield this.exec(command, { cwd: this.dirPath });
                 if (stdout) {
-                    this.pathToProject = this.dirPath + '\\' + this.appFolderName;
-                    console.log('Created Phonegap Project');
+                    this.pathToProject = this.dirPath + "\\" + this.appFolderName;
+                    console.log("Created Phonegap Project");
+                    return new utils_class_1.ReturnMessage(true, "Created phonegap project.");
+                }
+                else {
+                    return new utils_class_1.ReturnMessage(false, "Could not create project.");
                 }
             }
             catch (error) {
-                console.log('Error: Project could not be created. Check if your ProjectPath already exists.');
+                console.log("Error: Project could not be created. Check if your ProjectPath already exists.");
+                return new utils_class_1.ReturnMessage(false, "Project could not be created. Check if your project path already exists.");
             }
         });
     }
     serveProject(port = 1234) {
         return __awaiter(this, void 0, void 0, function* () {
-            // let command = 'phonegap serve --port ' + port;
-            let command = 'phonegap';
+            let command;
+            if (os.platform() === "win32") {
+                command = "phonegap.cmd";
+            }
+            else {
+                command = "phonegap";
+            }
             let options = {
                 cwd: this.pathToProject
             };
             let args = [];
-            args.push('serve');
-            args.push('--port');
+            args.push("serve");
+            args.push("--port");
             args.push(port);
-            // console.log(command, options, args);
             try {
-                // const {stdout, stderr} = await this.exec(command, {cwd: this.pathToProject});
-                // if(stdout) {
-                // 	console.log(stdout);
-                // }
-                // if(stderr) {
-                // 	console.log(stderr);
-                // }
-                //############################# ?????? ###################################################
-                let serve = child_process.spawnSync(command, args, options);
-                serve.on('message', (message) => {
-                    console.log(message);
-                });
-                // serve.stderr.on('data', (error) => {
-                // 	console.error(error);
-                // });
+                this.serveProcess = yield child_process.spawn(command, args, options);
+                console.log(this.serveProcess.pid);
+                this.createProjectWindow("http://localhost:" + port);
+                return this.serveProcess;
             }
             catch (error) {
-                console.log('Error: Could not run project.', error);
+                console.log("Error: Could not run project.", error);
+                return false;
             }
+        });
+    }
+    createProjectWindow(url) {
+        this.projectWindow = new electron.remote.BrowserWindow({
+            width: 360,
+            height: 640,
+            resizable: false,
+            closable: false,
+            title: this.appName,
+            titleBarStyle: "hidden"
+        });
+        this.projectWindow.setMenu(null);
+        this.projectWindow.on("closed", () => {
+            this.projectWindow = null;
+        });
+        this.projectWindow.loadURL(url);
+    }
+    killServeProcess() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.serveProcess !== undefined && !this.serveProcess.killed) {
+                if (os.platform() === "win32") {
+                    yield child_process.execSync("taskkill /F /T /PID " + this.serveProcess.pid);
+                    this.serveProcess.killed = true;
+                }
+                else {
+                    this.serveProcess.kill();
+                }
+                this.projectWindow.destroy();
+                return new utils_class_1.ReturnMessage(true, "Process (" + this.serveProcess.pid + ") killed.");
+            }
+            else {
+                return new utils_class_1.ReturnMessage(false, "No active serve process found on this project.");
+            }
+        });
+    }
+    buildProjectForAndroid() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.getBuildForAndroidDependencies();
+            let command;
+            if (os.platform() === "win32") {
+                command = "phonegap.cmd";
+            }
+            else {
+                command = "phonegap";
+            }
+            let options = {
+                cwd: this.pathToProject
+            };
+            let args = [];
+            args.push("build");
+            args.push("android");
+            try {
+                this.buildProcess = yield child_process.spawn(command, args, options);
+                console.log(this.buildProcess);
+            }
+            catch (error) {
+                console.log(error);
+            }
+            return new utils_class_1.ReturnMessage(false, "Error");
+        });
+    }
+    getBuildForAndroidDependencies() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new utils_class_1.ReturnMessage(false, "No dependencies found for building android-application");
         });
     }
 }
 exports.PhoneGap = PhoneGap;
-// }
 //# sourceMappingURL=phonegap.class.js.map

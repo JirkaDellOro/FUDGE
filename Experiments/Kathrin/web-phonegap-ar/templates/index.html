@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Web, PhoneGap & AR</title>
-  </head>
-  <body>
-    <h1>Create Augmented Reality-Apps (AR) with Electron</h1>
-    
-    <script>
-		require('../scripts/index.renderer.js');
-	</script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Web, PhoneGap & AR</title>
+		<link href="../styles/main.css" rel="stylesheet" />
+	</head>
+	<body>
+		<h1>Sample Application for buliding AR-Apps with FUDGE</h1>
+		<h2>This will be the main window of FUDGE. FUDGE will be a game editor for students that is currently in progress.</h2>
+
+		<div id="project-info" class="project-info-container">
+			<div id="opened-project" class="opened-pg-project">
+				Opened the following phonegap project: <span class="project-name"></span>
+			</div>
+		</div>
+
+		<div id="project-btn-container" class="project-btn-container content">
+			<div class="serve-container flex-container row justify-between">
+				<input type="number" value="1234" placeholder="1234" id="serve-port" />
+				<button id="serve-project" value="serve-project">Serve project (run locally)</button>
+			</div>
+		</div>
+
+		<script>
+			require("../scripts/index.renderer.js");
+		</script>
+	</body>
 </html>
