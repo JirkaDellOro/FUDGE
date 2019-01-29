@@ -10,8 +10,12 @@
 		<h2>This will be the main window of FUDGE. FUDGE will be a game editor for students that is currently in progress.</h2>
 
 		<div id="project-info" class="project-info-container">
+			<p>Some project information</p>
 			<div id="opened-project" class="opened-pg-project">
 				Opened the following phonegap project: <span class="project-name"></span>
+			</div>
+			<div id="created-project" class="created-pg-project">
+				Created the following phonegap project and opened it: <span class="project-name"></span>
 			</div>
 		</div>
 
@@ -20,7 +24,14 @@
 				<input type="number" value="1234" placeholder="1234" id="serve-port" />
 				<button id="serve-project" value="serve-project">Serve project (run locally)</button>
 			</div>
+			<div class="build-container flex-container row justify-between">
+				<button id="build-project" value="build-project">Build project (android)</button>
+			</div>
 		</div>
+
+		<div id="terminal" class="result-container hide"></div>
+
+		<div id="loading" class="hide"><img src="../assets/loading.svg" /></div>
 
 		<script>
 			require("../scripts/index.renderer.js");

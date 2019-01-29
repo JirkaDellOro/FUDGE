@@ -129,11 +129,18 @@ function createMainWindow() {
 	mainWindow.loadFile(path.join(__dirname, "../templates/index.html"));
 	mainWindow.openDevTools();
 
-	ipcMain.on("opened-pg-project", (event, data) => {
-		mainWindow.webContents.send("opened-pg-project", data);
-	});
+	sendingDataToRenderer();
 
 	mainWindow.on("closed", () => {
 		mainWindow = null;
+	});
+}
+
+function sendingDataToRenderer() {
+	ipcMain.on("opened-pg-project", (event, data) => {
+		mainWindow.webContents.send("opened-pg-project", data);
+	});
+	ipcMain.on("created-pg-project", (event, data) => {
+		mainWindow.webContents.send("created-pg-project", data);
 	});
 }

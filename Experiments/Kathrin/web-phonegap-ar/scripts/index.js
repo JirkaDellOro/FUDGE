@@ -116,11 +116,17 @@ function createMainWindow() {
     electron_1.Menu.setApplicationMenu(mainMenu);
     mainWindow.loadFile(path.join(__dirname, "../templates/index.html"));
     mainWindow.openDevTools();
+    sendingDataToRenderer();
+    mainWindow.on("closed", () => {
+        mainWindow = null;
+    });
+}
+function sendingDataToRenderer() {
     electron_1.ipcMain.on("opened-pg-project", (event, data) => {
         mainWindow.webContents.send("opened-pg-project", data);
     });
-    mainWindow.on("closed", () => {
-        mainWindow = null;
+    electron_1.ipcMain.on("created-pg-project", (event, data) => {
+        mainWindow.webContents.send("created-pg-project", data);
     });
 }
 //# sourceMappingURL=index.js.map

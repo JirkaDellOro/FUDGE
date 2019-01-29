@@ -14,11 +14,20 @@
 			<div class="flex-container">
 				<label for="app-dir" class="custom-file-input">
 					Select project path
-					<input type="file" name="app-dir" id="app-dir" webkitdirectory mozdirectory msdirectory odirectory directory />
+					<input
+						type="file"
+						name="app-dir"
+						id="app-dir"
+						webkitdirectory
+						mozdirectory
+						msdirectory
+						odirectory
+						directory
+					/>
 				</label>
 			</div>
 
-			<button type="submit" id="open-phonegap-dir">Open project</button>
+			<button type="submit" class="action-btn" id="open-phonegap-dir">Open project</button>
 		</div>
 		<script>
 			require("../../scripts/phonegap/phonegap-open.renderer.js");

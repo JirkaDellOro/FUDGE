@@ -23,6 +23,8 @@ export class PhoneGap {
 	private buildProcess: child_process.ChildProcess;
 	private projectWindow: any;
 
+	private processEvent: CustomEvent;
+
 	constructor(name: string = "", dir: string = "", data?: PhoneGap) {
 		this.appName = name;
 		this.dirPath = dir;
@@ -34,6 +36,8 @@ export class PhoneGap {
 			this.appFolderName = data.appFolderName ? data.appFolderName : this.appName.replace(/\s/g, "-");
 			this.pathToProject = data.pathToProject ? data.pathToProject : undefined;
 			this.fileInfo = data.fileInfo ? data.fileInfo : undefined;
+			this.serveProcess = data.serveProcess ? data.serveProcess : undefined;
+			this.buildProcess = data.buildProcess ? data.buildProcess : undefined;
 		}
 	}
 
@@ -47,6 +51,14 @@ export class PhoneGap {
 
 	public getDirPath(): string {
 		return this.dirPath;
+	}
+
+	public getServeProcess(): child_process.ChildProcess {
+		return this.serveProcess;
+	}
+
+	public getBuildProcess(): child_process.ChildProcess {
+		return this.buildProcess;
 	}
 
 	private async checkDependencies(): Promise<ReturnMessage> {
@@ -147,7 +159,7 @@ export class PhoneGap {
 		}
 	}
 
-	public async serveProject(port: number = 1234): Promise<boolean | child_process.ChildProcess> {
+	public async serveProject(port: number = 1234): Promise<ReturnMessage> {
 		let command: string;
 		if (os.platform() === "win32") {
 			command = "phonegap.cmd";
@@ -168,10 +180,9 @@ export class PhoneGap {
 			this.serveProcess = await child_process.spawn(command, args, options);
 			console.log(this.serveProcess.pid);
 			this.createProjectWindow("http://localhost:" + port);
-			return this.serveProcess;
+			return new ReturnMessage(true, "Run project locally on port " + port + " pid: " + this.serveProcess.pid);
 		} catch (error) {
-			console.log("Error: Could not run project.", error);
-			return false;
+			return new ReturnMessage(false, "Could not run project locally: " + error);
 		}
 	}
 
@@ -208,8 +219,7 @@ export class PhoneGap {
 		}
 	}
 
-	public async buildProjectForAndroid(): Promise<ReturnMessage> {
-		this.getBuildForAndroidDependencies();
+	public async buildProjectForAndroid(terminal: HTMLElement): Promise<ReturnMessage> {
 		let command: string;
 		if (os.platform() === "win32") {
 			command = "phonegap.cmd";
@@ -227,14 +237,33 @@ export class PhoneGap {
 
 		try {
 			this.buildProcess = await child_process.spawn(command, args, options);
-			console.log(this.buildProcess);
+
+			this.buildProcess.stdout.on("data", (data: any) => {
+				this.setProcessDataEvent(data);
+				terminal.dispatchEvent(this.processEvent);
+			});
+
+			this.buildProcess.stderr.on("data", (data: any) => {
+				this.setProcessDataEvent(data);
+				terminal.dispatchEvent(this.processEvent);
+			});
+
+			this.buildProcess.on("close", (code: number) => {
+				this.setProcessDataEvent(code, "process-end");
+				terminal.dispatchEvent(this.processEvent);
+			});
 		} catch (error) {
 			console.log(error);
 		}
 		return new ReturnMessage(false, "Error");
 	}
 
-	private async getBuildForAndroidDependencies(): Promise<ReturnMessage> {
-		return new ReturnMessage(false, "No dependencies found for building android-application");
+	private setProcessDataEvent(data: string | number, name?: string) {
+		let eventName = name ? name : "process-data";
+		this.processEvent = new CustomEvent(eventName, {
+			detail: {
+				data: data
+			}
+		});
 	}
 }

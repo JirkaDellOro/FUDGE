@@ -1,30 +1,44 @@
-<script>
-	require("../../scripts/phonegap/phonegap-create.renderer.js");
-</script>
+<html>
+	<head>
+		<link href="../../styles/main.css" rel="stylesheet" />
+	</head>
+	<body>
+		<h1>Create a new phonegap application</h1>
+		<p>Enter a name for the new project and choose a path to save the project.</p>
 
-<style>
-	.flex-container {
-		display: flex;
-		flex-direction: column;
-		margin: 15px 0;
-	}
+		<div class="input-container">
+			<div class="flex-container content">
+				<input type="text" name="app-name" placeholder="Your project name" id="app-name" />
+			</div>
 
-	input {
-		display: block;
-	}
-</style>
+			<div class="content">
+				<div class="chose-path-container">
+					<p>Your directory path: <span class="chose-path"></span></p>
+				</div>
+				<div class="flex-container">
+					<label for="app-dir" class="custom-file-input">
+						Select path to new project
+						<input
+							type="file"
+							name="app-dir"
+							id="app-dir"
+							webkitdirectory
+							mozdirectory
+							msdirectory
+							odirectory
+							directory
+						/>
+					</label>
+				</div>
+			</div>
 
-<h1>Create PhoneGap Application</h1>
+			<button type="submit" class="action-btn" id="create-phonegap-dir">Create project</button>
+		</div>
 
-<p>Create your App...</p>
+		<div id="loading" class="hide"><img src="../../assets/loading.svg" /></div>
 
-<div class="input-container">
-	<div class="flex-container"><label for="app-name">App-Name</label> <input type="text" name="app-name" id="app-name" /></div>
-
-	<div class="flex-container">
-		<label for="app-dir">Directory Path</label>
-		<input type="file" name="app-dir" id="app-dir" webkitdirectory mozdirectory msdirectory odirectory directory />
-	</div>
-
-	<button type="submit" id="create-phonegap-dir">Create empty Project</button>
-</div>
+		<script>
+			require("../../scripts/phonegap/phonegap-create.renderer.js");
+		</script>
+	</body>
+</html>

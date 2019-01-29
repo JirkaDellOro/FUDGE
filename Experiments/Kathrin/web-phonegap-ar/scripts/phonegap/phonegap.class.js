@@ -28,6 +28,8 @@ class PhoneGap {
             this.appFolderName = data.appFolderName ? data.appFolderName : this.appName.replace(/\s/g, "-");
             this.pathToProject = data.pathToProject ? data.pathToProject : undefined;
             this.fileInfo = data.fileInfo ? data.fileInfo : undefined;
+            this.serveProcess = data.serveProcess ? data.serveProcess : undefined;
+            this.buildProcess = data.buildProcess ? data.buildProcess : undefined;
         }
     }
     getAppName() {
@@ -38,6 +40,12 @@ class PhoneGap {
     }
     getDirPath() {
         return this.dirPath;
+    }
+    getServeProcess() {
+        return this.serveProcess;
+    }
+    getBuildProcess() {
+        return this.buildProcess;
     }
     checkDependencies() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -171,11 +179,10 @@ class PhoneGap {
                 this.serveProcess = yield child_process.spawn(command, args, options);
                 console.log(this.serveProcess.pid);
                 this.createProjectWindow("http://localhost:" + port);
-                return this.serveProcess;
+                return new utils_class_1.ReturnMessage(true, "Run project locally on port " + port + " pid: " + this.serveProcess.pid);
             }
             catch (error) {
-                console.log("Error: Could not run project.", error);
-                return false;
+                return new utils_class_1.ReturnMessage(false, "Could not run project locally: " + error);
             }
         });
     }
@@ -212,9 +219,8 @@ class PhoneGap {
             }
         });
     }
-    buildProjectForAndroid() {
+    buildProjectForAndroid(terminal) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.getBuildForAndroidDependencies();
             let command;
             if (os.platform() === "win32") {
                 command = "phonegap.cmd";
@@ -230,7 +236,18 @@ class PhoneGap {
             args.push("android");
             try {
                 this.buildProcess = yield child_process.spawn(command, args, options);
-                console.log(this.buildProcess);
+                this.buildProcess.stdout.on("data", (data) => {
+                    this.setProcessDataEvent(data);
+                    terminal.dispatchEvent(this.processEvent);
+                });
+                this.buildProcess.stderr.on("data", (data) => {
+                    this.setProcessDataEvent(data);
+                    terminal.dispatchEvent(this.processEvent);
+                });
+                this.buildProcess.on("close", (code) => {
+                    this.setProcessDataEvent(code, "process-end");
+                    terminal.dispatchEvent(this.processEvent);
+                });
             }
             catch (error) {
                 console.log(error);
@@ -238,9 +255,12 @@ class PhoneGap {
             return new utils_class_1.ReturnMessage(false, "Error");
         });
     }
-    getBuildForAndroidDependencies() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new utils_class_1.ReturnMessage(false, "No dependencies found for building android-application");
+    setProcessDataEvent(data, name) {
+        let eventName = name ? name : "process-data";
+        this.processEvent = new CustomEvent(eventName, {
+            detail: {
+                data: data
+            }
         });
     }
 }

@@ -1,9 +1,21 @@
 @import url("https://fonts.googleapis.com/css?family=Quicksand:400,700&subset=latin-ext");
+html {
+	font-family: "Quicksand", sans-serif;
+}
+
+html * {
+	outline: none;
+}
 
 body {
 	font-size: 16px;
 	font-family: "Quicksand", sans-serif;
 	margin: 15px;
+}
+
+p {
+	margin-top: 0px;
+	margin-bottom: 3px;
 }
 
 div,
@@ -48,18 +60,24 @@ h2 {
 
 input {
 	display: block;
+	line-height: 1;
+	padding: 5px;
+	font-size: 16px;
+	font-family: "Quicksand", sans-serif;
 }
 
 .project-info-container {
 	padding: 15px;
 	background-color: green;
 	color: white;
-	display: none;
+	display: block;
 }
 
-.opened-pg-project {
+.opened-pg-project,
+.created-pg-project {
 	background-color: rgba(255, 255, 255, 0.3);
 	padding: 10px;
+	display: none;
 }
 
 .project-name {
@@ -86,6 +104,10 @@ button,
 	margin-bottom: 5px;
 }
 
+.action-btn {
+	background-color: orange;
+}
+
 input[type="file"] {
 	display: none;
 }
@@ -102,6 +124,24 @@ input[type="file"] {
 	display: none;
 }
 
+#terminal {
+	background-color: #434343;
+	color: #f3f3f3;
+	padding: 5px;
+	line-height: 1.8;
+	font-family: "Consolas", monospace;
+}
+
 .show {
 	display: block !important;
+}
+
+#loading {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+}
+
+.hide {
+	display: none !important;
 }
