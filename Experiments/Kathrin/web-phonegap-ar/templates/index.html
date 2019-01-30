@@ -19,17 +19,31 @@
 			</div>
 		</div>
 
-		<div id="project-btn-container" class="project-btn-container content">
-			<div class="serve-container flex-container row justify-between">
-				<input type="number" value="1234" placeholder="1234" id="serve-port" />
+		<div id="project-btn-container" class="project-btn-container content hide">
+			<div class="serve-container flex-container">
+				<input type="number" value="" placeholder="Port (1234)" id="serve-port" />
 				<button id="serve-project" value="serve-project">Serve project (run locally)</button>
+				<button id="kill-serve-project" class="hide" value="kill-serve-project">Kill serve process</button>
 			</div>
-			<div class="build-container flex-container row justify-between">
+			<div class="build-container flex-container">
 				<button id="build-project" value="build-project">Build project (android)</button>
+			</div>
+			<div class="run-container flex-container">
+				<button id="run-project" value="run-project">Run project on android</button>
+			</div>
+			<div class="install-container flex-container">
+				<button id="install-project" value="install-project">
+					<span>Install project (android)</span><span class="little-note">[DEPRECATED]</span>
+				</button>
+			</div>
+			<div class="clear-terminal-container flex-container">
+				<button id="clear-terminal" value="clear-terminal">Clear terminal</button>
 			</div>
 		</div>
 
 		<div id="terminal" class="result-container hide"></div>
+
+		<div id="result" class="result-container content hide"></div>
 
 		<div id="loading" class="hide"><img src="../assets/loading.svg" /></div>
 
