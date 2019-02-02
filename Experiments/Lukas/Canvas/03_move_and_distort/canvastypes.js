@@ -1,24 +1,13 @@
 var DrawTypes;
 (function (DrawTypes) {
-    class Vector2 {
-        constructor(x, y = 0) {
-            this.x = x;
-            this.y = y;
-        }
-        equals(obj) {
-            if (this.x != obj.x)
-                return false;
-            if (this.y != obj.y)
-                return false;
-            return true;
-        }
-    }
-    DrawTypes.Vector2 = Vector2;
     class DrawObject {
         constructor(color = "black", name = "", order = 0) {
             this.color = color;
             this.name = name;
             this.order = order;
+        }
+        static sort(a, b) {
+            return a.order - b.order;
         }
     }
     DrawTypes.DrawObject = DrawObject;
@@ -53,9 +42,6 @@ var DrawTypes;
         addLineToEnd(bcp1, bcp2, end) {
             this.points.push(bcp1, bcp2, end);
             this.generatePath2D();
-        }
-        static sort(a, b) {
-            return a.order - b.order;
         }
         getPath2D() {
             return this.path2d;

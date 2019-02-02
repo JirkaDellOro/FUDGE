@@ -13,5 +13,19 @@ var Utils;
         return c;
     }
     Utils.RandomColor = RandomColor;
+    class Vector2 {
+        constructor(x, y = 0) {
+            this.x = x;
+            this.y = y;
+        }
+        equals(obj) {
+            if (this.x != obj.x)
+                return false;
+            if (this.y != obj.y)
+                return false;
+            return true;
+        }
+    }
+    Utils.Vector2 = Vector2;
 })(Utils || (Utils = {}));
 //# sourceMappingURL=utils.js.map

@@ -1,7 +1,7 @@
 // import { drawTypes } from "./canvastypes";
 
+import Vector2 = Utils.Vector2;
 import Line = DrawTypes.DrawLine;
-import Vector2 = DrawTypes.Vector2;
 import Path = DrawTypes.DrawPath;
 import Point = DrawTypes.DrawPoint;
 

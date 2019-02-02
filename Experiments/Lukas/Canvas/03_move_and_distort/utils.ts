@@ -13,4 +13,20 @@ module Utils {
 
         return c;
     }
+
+    export class Vector2 {
+		public x: number;
+		public y: number;
+
+		constructor(x: number, y: number = 0) {
+			this.x = x;
+			this.y = y;
+		}
+
+		equals(obj: Vector2): boolean {
+			if (this.x != obj.x) return false;
+			if (this.y != obj.y) return false;
+			return true;
+		}
+	}
 }

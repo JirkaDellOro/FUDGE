@@ -1,6 +1,6 @@
 // import { drawTypes } from "./canvastypes";
+var Vector2 = Utils.Vector2;
 var Line = DrawTypes.DrawLine;
-var Vector2 = DrawTypes.Vector2;
 var Path = DrawTypes.DrawPath;
 var Point = DrawTypes.DrawPoint;
 window.addEventListener("load", init);
