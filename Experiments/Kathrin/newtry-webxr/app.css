@@ -22,7 +22,16 @@ body {
 	height: 100vh;
 	-webkit-user-select: none;
 	user-select: none;
-	background-color: rgb(69, 90, 100);
+	background-color: #424242;
+}
+
+.mdl-card__title {
+	background-color: #339900 !important;
+}
+
+.mdl-button--accent {
+	background-color: #66b340 !important;
+	color: white !important;
 }
 
 canvas {
@@ -110,16 +119,26 @@ body.ar.surfaces .searching {
 	display: none;
 }
 
-body .cancle-ar-container {
+#xr-canvas {
 	display: none;
 }
 
-body.ar .cancle-ar-container {
+#xr-canvas.active {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+}
+
+body .cancel-ar-container {
+	display: none;
+}
+
+body.ar .cancel-ar-container {
 	display: block;
 	position: absolute;
 	bottom: 60px;
 	left: 0;
-	margin: 0 auto;
+	margin: 4px;
 	width: auto;
 	height: auto;
 	z-index: 50000;
@@ -128,7 +147,7 @@ body.ar .cancle-ar-container {
 .toast {
 	width: 100%;
 	color: white;
-	background-color: rgba(255, 0, 0, 0.8);
+	background-color: rgba(255, 193, 7, 0.8);
 	position: absolute;
 	left: 0;
 	top: 0;

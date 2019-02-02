@@ -1,0 +1,21 @@
+{
+	"name": "newtry-webxr",
+	"version": "1.0.0",
+	"description": "Used an older version of WebXR (Dec 18) - did not get it to work with newer versions :(",
+	"private": true,
+	"scripts": {
+		"webpack": "npx webpack --config webpack.config.js"
+	},
+	"dependencies": {
+		"@types/three": "^0.93.17",
+		"@types/webgl2": "0.0.4",
+		"mtl-obj-loader": "^1.0.4"
+	},
+	"devDependencies": {
+		"three": "^0.100.0",
+		"typescript": "^3.2.4",
+		"webpack": "^4.29.0",
+		"webpack-cli": "^3.2.1"
+	},
+	"author": "Kathrin Fuhrer <kathrin.fuhrer@gmx.de>"
+}

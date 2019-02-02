@@ -9,26 +9,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const phonegap_class_1 = require("./phonegap.class");
+const electron_1 = require("electron");
 let pg;
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
     init();
 });
 function init() {
-    const domAppName = document.getElementById('app-name');
-    // const domAppDir: HTMLInputElement = document.getElementById('app-dir') as HTMLElement;
-    const domAppDir = document.getElementById('app-dir');
-    const domSubmitBtn = document.getElementById('create-phonegap-dir');
-    domSubmitBtn.addEventListener('click', (event) => {
+    const domAppName = document.getElementById("app-name");
+    const domAppDir = document.getElementById("app-dir");
+    const domSubmitBtn = document.getElementById("create-phonegap-dir");
+    domAppDir.addEventListener("change", (event) => {
+        document.querySelector(".chose-path").innerHTML = domAppDir.files[0].name;
+        document.querySelector(".chose-path-container").classList.add("show");
+    });
+    domSubmitBtn.addEventListener("click", (event) => {
         const appName = domAppName.value;
         const appDir = domAppDir.files[0].path;
-        if (appName == null && appDir == null) {
-            alert('Bitte App-Name und App-Verzeichnis angeben.');
+        if ((appName === null || appName === "") && appDir == null) {
+            alert("Please give the project a name and select a target path.");
         }
-        else if (appName == null) {
-            alert('Bitte App-Name angeben.');
+        else if (appName === null || appName === "") {
+            alert("Please give the project a name.");
         }
         else if (appDir == null) {
-            alert('Bitte App-Verzeichnis angeben');
+            alert("Please select a path for saving your new project.");
         }
         else {
             createPhoneGapProject(appName, appDir);
@@ -37,28 +41,26 @@ function init() {
 }
 function createPhoneGapProject(name, dir) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(dir);
+        let loading = document.querySelector("#loading");
+        loading.classList.remove("hide");
         pg = new phonegap_class_1.PhoneGap(name, dir);
-        try {
-            const projectCreated = yield pg.createProject();
-            // if(projectCreated) {
-            createServeProjectBtn();
-            // }
-        }
-        catch (error) {
-            console.error(error);
-        }
+        pg.createProject()
+            .then((created) => {
+            if (created.getResult()) {
+                electron_1.ipcRenderer.send("created-pg-project", pg);
+                let win = electron_1.remote.getCurrentWindow();
+                loading.classList.add("hide");
+                win.close();
+            }
+            else {
+                loading.classList.add("hide");
+                alert(created.getMessage());
+            }
+        })
+            .catch(error => {
+            loading.classList.add("hide");
+            console.log(error);
+        });
     });
-}
-function createServeProjectBtn() {
-    let body = document.getElementsByTagName('body')[0];
-    let runBtn = document.createElement('button');
-    runBtn.setAttribute('id', 'serve-phonegap-btn');
-    runBtn.innerHTML = 'Serve project';
-    runBtn.addEventListener('click', function (event) {
-        pg.serveProject();
-    });
-    body.appendChild(document.createElement('br'));
-    body.appendChild(runBtn);
 }
 //# sourceMappingURL=phonegap-create.renderer.js.map
