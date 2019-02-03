@@ -16,6 +16,7 @@ var DrawTypes;
             super(color, name, order);
             this.fillColor = fillColor;
             this.points = points;
+            this.closed = true;
         }
         draw(context, includeCorners = false) {
             this.generatePath2D();
@@ -34,10 +35,12 @@ var DrawTypes;
             if (this.points.length < 0)
                 return;
             this.path2d.moveTo(this.points[0].x, this.points[0].y);
-            for (let i = 3; i < this.points.length; i += 3) {
+            for (let i = 3; i < this.points.length - 1; i += 3) {
                 this.path2d.bezierCurveTo(this.points[i - 2].x, this.points[i - 2].y, this.points[i - 1].x, this.points[i - 1].y, this.points[i].x, this.points[i].y);
             }
-            this.path2d.closePath();
+            if (this.closed) {
+                this.path2d.closePath();
+            }
         }
         addLineToEnd(bcp1, bcp2, end) {
             this.points.push(bcp1, bcp2, end);

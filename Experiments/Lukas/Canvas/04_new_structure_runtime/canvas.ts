@@ -63,6 +63,8 @@ function createLines(){
     let amountPointsInput: HTMLInputElement = <HTMLInputElement> document.getElementById("amountPoints"); 
     let amountPoints: number =  parseInt(amountPointsInput.value);
 
+    let startTime = Date.now();
+
     for (let i: number = 0; i < amountObjects; i++) {
         let previousEnd: Point = new Point(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
         let path: Path = new Path([previousEnd], "black", Utils.RandomColor(), "path" + i, i);
@@ -74,7 +76,9 @@ function createLines(){
         path.addLineToEnd(new Point(previousEnd.x, previousEnd.y), new Point(path.points[0].x, path.points[0].y), new Point(path.points[0].x, path.points[0].y));
         paths.push(path);
     }
-
+    console.log(`[Done] Created old Path Objects. This took ${Date.now() - startTime}ms`);
+    
+    startTime = Date.now();
     for (let i: number = 0; i < amountObjects; i++) {
         let start: Vertex = new Vertex(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500), null);
         let path: Path2 = new Path2([start], "black", Utils.RandomColor(), "path" + i, i);
@@ -85,7 +89,8 @@ function createLines(){
         path.setClosed(true);
         paths2.push(path);
     }
-
+    console.log(`[Done] Created new Path Objects. This took ${Date.now() - startTime}ms`);
+    
     redrawAll();
 }
 
@@ -110,6 +115,7 @@ function redrawAll() {
 
 
     console.log("[Start] Drawing New Path Objects");
+    startTime = Date.now();
     paths2.sort(Path2.sort);
 
     for (let path of paths2) {
