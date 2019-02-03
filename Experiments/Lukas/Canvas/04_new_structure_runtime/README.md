@@ -64,7 +64,9 @@ _NOTE:_ The numbers come from the built-in Date.now() method and are averaged ov
 | 1000  | 1000     | -           | -           | -           | -           | 2          |
 | 10000 | 10       | 1227,6      | 1367,7      | 1021        | 1106,8      |            |
 | 10000 | 100      | 21446,2     | 25111,8     | 14848       | 14699       | 1          |
+| 10000 | 1000     | -           | -           | -           | -           | 2          |
 
 ##### Annotations:  
 1: test only includes 5 testruns instead of 10  
-2: test couldn't be finished as the browser recognized the tab as crashed an halted all operations even before the new objects were generated.
+2: test couldn't be finished as the browser recognized the tab as crashed an halted all operations even before the new objects were generated. with more than 16GB RAM and stepwise generation of the objects it might have worked. Here is the resource usage from the start until the tab and firefox itself were closed.
+![resource usage](https://user-images.githubusercontent.com/7681159/52181179-81ceee00-27ef-11e9-9221-172e73ddabbb.png)
