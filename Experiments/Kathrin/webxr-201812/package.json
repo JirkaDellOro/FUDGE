@@ -1,5 +1,5 @@
 {
-	"name": "newtry-webxr",
+	"name": "webxr-201812",
 	"version": "1.0.0",
 	"description": "Used an older version of WebXR (Dec 18) - did not get it to work with newer versions :(",
 	"private": true,

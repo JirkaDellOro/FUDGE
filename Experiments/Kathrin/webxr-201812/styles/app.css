@@ -145,7 +145,7 @@ body.ar .cancel-ar-container {
 }
 
 .distance {
-	display: none !important;
+	display: block;
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -160,8 +160,8 @@ body.ar .cancel-ar-container {
 	content: "distance: ";
 }
 
-.surfaces .distance {
-	display: block !important;
+.hide {
+	display: none;
 }
 
 .toast {

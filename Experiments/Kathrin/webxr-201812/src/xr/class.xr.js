@@ -40,7 +40,15 @@ class XR {
         this._hitTesting = enabled;
     }
     /**
-     * Enable/disable Reticle
+     * Enable/disable showing the reticle
+     * Default is true
+     * @param {boolean} enabled
+     */
+    set enableReticleDistance(enabled) {
+        this._reticle.enableReticleDistance = enabled;
+    }
+    /**
+     * Enable/disable showing the reticle
      * Default is true
      * @param {boolean} enabled
      */
@@ -56,6 +64,7 @@ class XR {
     }
     /**
      * Initialize XR - Check for available XR Device
+     * @returns {Promise<ReturnMessage>} Request was successful or not
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -78,8 +87,9 @@ class XR {
         });
     }
     /**
-     * Start a XRSession
+     * Start a XRSession and add the virtual scene from the callback
      * @param {VirtualWorldCallback} callback
+     * @returns {Promise<ReturnMessage>} result
      */
     startSession(callback) {
         const ctx = this._xrCanvas.getContext("xrpresent");
@@ -100,8 +110,8 @@ class XR {
     }
     /**
      * Called when the XRSession has begun.
-     * Creating the Scene
-     * Start render loop
+     * Set the virtual scene from callback.
+     * Start the render loop.
      * @param {VirtualWorldCallback} callback
      */
     onSessionStarted(callback) {
@@ -208,7 +218,8 @@ class XR {
     }
     /**
      * Show no XRDevice found message
-     * @return {string} message
+     * @param {string} message
+     * @returns {ReturnMessage} result
      */
     onNoXRDevice(message) {
         let msg = message ? message : "Could not find any XRDevices for creating XR-Contents";
@@ -216,53 +227,52 @@ class XR {
         return new class_utils_1.ReturnMessage(false, msg);
     }
     /**
-     * Function binded to session for input Events
-     * Fires "hits"-Event when Input is hitting a surface
+     * Function binded to session for input events.
+     * Fires "hits"-Event when input is hitting a surface
      * @param {XRInputSourceEvent} event
+     *
      */
     onHit(event) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let rayOrigin = new THREE_1.Vector3();
-            let rayDirection = new THREE_1.Vector3();
-            let inputPose = event.frame.getInputPose(event.inputSource, this._frameOfRef);
-            let devicePose = event.frame.getDevicePose(this._frameOfRef);
-            if (!inputPose) {
-                return;
-            }
-            if (this._showReticle) {
-                rayOrigin.set(this._reticle.origin.x, this._reticle.origin.y, this._reticle.origin.z);
-                rayDirection.set(this._reticle.direction.x, this._reticle.direction.y, this._reticle.direction.z);
-            }
-            else if (!this._showReticle && inputPose.targetRay) {
-                rayOrigin.set(inputPose.targetRay.origin.x, inputPose.targetRay.origin.y, inputPose.targetRay.origin.z);
-                rayDirection.set(inputPose.targetRay.direction.x, inputPose.targetRay.direction.y, inputPose.targetRay.direction.z);
+        let rayOrigin = new THREE_1.Vector3();
+        let rayDirection = new THREE_1.Vector3();
+        let inputPose = event.frame.getInputPose(event.inputSource, this._frameOfRef);
+        let devicePose = event.frame.getDevicePose(this._frameOfRef);
+        if (!inputPose) {
+            return;
+        }
+        if (this._showReticle) {
+            rayOrigin.set(this._reticle.origin.x, this._reticle.origin.y, this._reticle.origin.z);
+            rayDirection.set(this._reticle.direction.x, this._reticle.direction.y, this._reticle.direction.z);
+        }
+        else if (!this._showReticle && inputPose.targetRay) {
+            rayOrigin.set(inputPose.targetRay.origin.x, inputPose.targetRay.origin.y, inputPose.targetRay.origin.z);
+            rayDirection.set(inputPose.targetRay.direction.x, inputPose.targetRay.direction.y, inputPose.targetRay.direction.z);
+        }
+        else {
+            return;
+        }
+        this._session
+            .requestHitTest(new Float32Array(rayOrigin.toArray()), new Float32Array(rayDirection.toArray()), this._frameOfRef)
+            .then((results) => {
+            this.hitEvent = new CustomEvent("hits", {
+                detail: {
+                    hits: results,
+                    devicePose: devicePose
+                }
+            });
+            if (results.length > 0) {
+                this._xrCanvas.dispatchEvent(this.hitEvent);
             }
             else {
-                return;
+                this.showToast("No plane detected here");
             }
-            this._session
-                .requestHitTest(new Float32Array(rayOrigin.toArray()), new Float32Array(rayDirection.toArray()), this._frameOfRef)
-                .then((results) => {
-                this.hitEvent = new CustomEvent("hits", {
-                    detail: {
-                        hits: results,
-                        devicePose: devicePose
-                    }
-                });
-                if (results.length > 0) {
-                    this._xrCanvas.dispatchEvent(this.hitEvent);
-                }
-                else {
-                    this.showToast("No plane detected here");
-                }
-            })
-                .catch(err => {
-                return err;
-            });
+        })
+            .catch(err => {
+            return err;
         });
     }
     /**
-     * Check if their are surfaces ready, then activate click handler
+     * Check if their are surfaces ready, then activate input handler
      * Showing hint until surfaces class on body
      * @param {XRFrame} frame
      */
@@ -319,7 +329,6 @@ class XR {
         }
         this._scene.add(newModel);
         this._models.push(newModel);
-        console.log(this._scene);
     }
     /**
      * Show error message in form of a toast for user

@@ -10,7 +10,6 @@ export class XR {
 	private _time: number;
 	private _frame: XRFrame;
 
-	private _surfaces: boolean = false;
 	private _hitTesting: boolean = false;
 
 	private _xrCanvas: HTMLCanvasElement;
@@ -54,7 +53,16 @@ export class XR {
 	}
 
 	/**
-	 * Enable/disable Reticle
+	 * Enable/disable showing the reticle
+	 * Default is true
+	 * @param {boolean} enabled
+	 */
+	set enableReticleDistance(enabled: boolean) {
+		this._reticle.enableReticleDistance = enabled;
+	}
+
+	/**
+	 * Enable/disable showing the reticle
 	 * Default is true
 	 * @param {boolean} enabled
 	 */
@@ -72,6 +80,7 @@ export class XR {
 
 	/**
 	 * Initialize XR - Check for available XR Device
+	 * @returns {Promise<ReturnMessage>} Request was successful or not
 	 */
 	async init(): Promise<ReturnMessage> {
 		if (navigator.xr && XRSession.prototype.requestHitTest) {
@@ -92,8 +101,9 @@ export class XR {
 	}
 
 	/**
-	 * Start a XRSession
+	 * Start a XRSession and add the virtual scene from the callback
 	 * @param {VirtualWorldCallback} callback
+	 * @returns {Promise<ReturnMessage>} result
 	 */
 	startSession(callback: VirtualWorldCallback): Promise<ReturnMessage> {
 		const ctx: XRPresentationContext = this._xrCanvas.getContext("xrpresent");
@@ -116,11 +126,11 @@ export class XR {
 
 	/**
 	 * Called when the XRSession has begun.
-	 * Creating the Scene
-	 * Start render loop
+	 * Set the virtual scene from callback.
+	 * Start the render loop.
 	 * @param {VirtualWorldCallback} callback
 	 */
-	async onSessionStarted(callback: VirtualWorldCallback) {
+	async onSessionStarted(callback: VirtualWorldCallback): Promise<void> {
 		document.body.classList.add("ar");
 
 		// Check that the GL content is compatible with the XRDevice
@@ -233,7 +243,8 @@ export class XR {
 
 	/**
 	 * Show no XRDevice found message
-	 * @return {string} message
+	 * @param {string} message
+	 * @returns {ReturnMessage} result
 	 */
 	onNoXRDevice(message?: string): ReturnMessage {
 		let msg = message ? message : "Could not find any XRDevices for creating XR-Contents";
@@ -242,11 +253,12 @@ export class XR {
 	}
 
 	/**
-	 * Function binded to session for input Events
-	 * Fires "hits"-Event when Input is hitting a surface
+	 * Function binded to session for input events.
+	 * Fires "hits"-Event when input is hitting a surface
 	 * @param {XRInputSourceEvent} event
+	 *
 	 */
-	async onHit(event: XRInputSourceEvent): Promise<Array<XRHitResult>> {
+	onHit(event: XRInputSourceEvent): Promise<void> {
 		let rayOrigin = new Vector3();
 		let rayDirection = new Vector3();
 
@@ -288,7 +300,7 @@ export class XR {
 	}
 
 	/**
-	 * Check if their are surfaces ready, then activate click handler
+	 * Check if their are surfaces ready, then activate input handler
 	 * Showing hint until surfaces class on body
 	 * @param {XRFrame} frame
 	 */
@@ -311,7 +323,6 @@ export class XR {
 			.then(hits => {
 				if (hits.length > 0) {
 					console.log("got surface");
-					this._surfaces = true;
 					document.body.classList.add("surfaces");
 
 					if (this._hitTesting) {
@@ -353,8 +364,6 @@ export class XR {
 
 		this._scene.add(newModel);
 		this._models.push(newModel);
-
-		console.log(this._scene);
 	}
 
 	/**

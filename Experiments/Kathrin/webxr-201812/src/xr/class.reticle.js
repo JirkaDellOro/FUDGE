@@ -12,30 +12,67 @@ const THREE_1 = require("THREE");
 class Reticle {
     constructor(distanceContainer, object) {
         this._visible = false;
+        this._showDistance = true;
         let distanceSpan = document.createElement("span");
         distanceSpan.setAttribute("id", "distance-content");
-        distanceSpan.setAttribute("class", "distance");
+        distanceSpan.setAttribute("class", "distance hide");
         this._distanceContainer = distanceContainer.appendChild(distanceSpan);
         this._model = object ? object : this.createDefaultObject();
     }
+    /**
+     * The reticles origin
+     * @returns {Vector3}
+     */
     get origin() {
         return this._origin;
     }
+    /**
+     * The reticles direction
+     * @returns {Vector3}
+     */
     get direction() {
         return this._direction;
     }
+    /**
+     * Distance between user (camera) and reticle
+     * @returns {number}
+     */
     get distance() {
         return this._distance;
     }
+    /**
+     * Enable/disable showing the reticle distance
+     */
+    set enableReticleDistance(enable) {
+        this._showDistance = enable;
+    }
+    /**
+     * The object that has to be shown as reticle.
+     * @returns {Object3D}
+     */
     get objectToShow() {
         return this._model;
     }
+    /**
+     * Set an other object as reticle.
+     * @param {Object3D} object
+     */
     set objectToShow(object) {
         this._model = object;
     }
+    /**
+     * @returns {boolean} visibility of the reticle object
+     */
     get visible() {
         return this._visible;
     }
+    /**
+     * Set the position of the reticle. Has to be called each frame.
+     *
+     * @param camera
+     * @param session
+     * @param frameOfRef
+     */
     update(camera, session, frameOfRef) {
         return __awaiter(this, void 0, void 0, function* () {
             this._raycaster = this._raycaster ? this._raycaster : new THREE_1.Raycaster();
@@ -50,7 +87,10 @@ class Reticle {
                     let hitMatrix = new THREE_1.Matrix4().fromArray(Array.from(hits[0].hitMatrix));
                     this._model.position.setFromMatrixPosition(hitMatrix);
                     this._distance = camera.position.distanceTo(this._model.position);
-                    this._distanceContainer.innerHTML = this._distance.toFixed(2).toString() + " units";
+                    if (this._showDistance) {
+                        this._distanceContainer.innerHTML = this._distance.toFixed(2).toString() + " units";
+                        this._distanceContainer.classList.remove("hide");
+                    }
                     this._visible = true;
                 }
             })
@@ -59,6 +99,12 @@ class Reticle {
             });
         });
     }
+    /**
+     * Create the default object. Is set to the three axes x, y and z
+     *
+     * @param {number} size Default object size 0.1
+     * @returns {Object3D} The default object
+     */
     createDefaultObject(size = 0.1) {
         let lines = new THREE_1.Object3D();
         let xMaterial = new THREE_1.LineBasicMaterial({
