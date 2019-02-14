@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>WebXR Device API - Working Application</title>
+		<link rel="stylesheet" type="text/css" href="./styles/app.css" />
+		<link rel="stylesheet" type="text/css" href="./third_party/mdl/material.min.css" />
+		<link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png" />
+		<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png" />
+		<link rel="manifest" href="./assets/site.webmanifest" />
+		<link rel="mask-icon" href="./assets/safari-pinned-tab.svg" color="#339900" />
+		<meta name="msapplication-TileColor" content="#ffffff" />
+		<meta name="theme-color" content="#ffffff" />
+	</head>
+	<body>
+		<div id="enter-ar-info" class="demo-card mdl-card mdl-shadow--4dp">
+			<div class="mdl-card__title"><h2 class="mdl-card__title-text">Augmented Reality with the WebXR Device API</h2></div>
+			<div class="mdl-card__supporting-text">Enter augmented reality to get virtual pets to your home.</div>
+			<div class="mdl-card__actions mdl-card--border">
+				<a id="enter-ar" class="mdl-button mdl-button--raised mdl-button--accent"> Start augmented reality </a>
+			</div>
+		</div>
+		<div id="unsupported-info" class="demo-card mdl-card mdl-shadow--4dp">
+			<div class="mdl-card__title"><h2 class="mdl-card__title-text">Unsupported Browser</h2></div>
+			<div class="mdl-card__supporting-text">Your browser does not support AR features with WebXR.</div>
+		</div>
+
+		<div class="searching">Searching for surfaces...</div>
+		<div id="toast" class="toast"></div>
+
+		<div class="cancel-ar-container">
+			<a id="cancel-ar" class="mdl-button mdl-button--raised mdl-button--accent">Cancel AR</a>
+		</div>
+
+		<canvas id="xr-canvas"></canvas>
+
+		<script src="./main.js"></script>
+	</body>
+</html>
