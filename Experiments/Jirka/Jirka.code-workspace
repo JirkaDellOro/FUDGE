@@ -50,6 +50,9 @@
 		},
 		{
 			"path": "NameSpace"
+		},
+		{
+			"path": "ObjectManager"
 		}
 	],
 	"settings": {}
