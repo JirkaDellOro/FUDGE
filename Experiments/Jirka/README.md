@@ -33,3 +33,5 @@ First very primitve experments with WebGL
 Simple example file for x3dom
 ## NameSpace
 Testing namespace/module structure and naming conventions (just a proposal to use ƒ as alias for Fudge)
+## ObjectManager
+Factory to create and reuse instances of arbitrary classes. First iteration on optimization to avoid the carbage collector blocking animations
