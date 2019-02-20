@@ -3,7 +3,7 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
 # Jan 20th 2019
-Discussion on UI
+Discussion on UI  
 [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190220_Whiteboard_UI.jpg)
 
 # Jan 15th 2019  
@@ -20,7 +20,7 @@ Issue with a Typescript error [#10](https://github.com/JirkaDellOro/FUDGE/issues
 # Dec 4th 2018
 [General thoughts about the Engine and the Animator (and Lukas' Jobs)](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Notizen_LS.md)  
 [General Information about about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Protokoll_TD)  
-[Objects in WebXR](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20181129_WebXR.png)  
+[Objects in WebXR](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181129_WebXR.png)  
 # Nov 27th 2018
 [Some Information about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181127_Protokoll_TD)
 # Nov 20th 2018
