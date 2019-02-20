@@ -2,6 +2,10 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Jan 20th 2019
+Discussion on UI
+[Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190220_Whiteboard_UI.jpg)
+
 # Jan 15th 2019  
 [Overview WebXR, ARCore etc,](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190115-WebXR-ARCore-WebGL-JS_KF.jpg)  
 [PhoneGap CLI table and some notes to WebXR](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190115_Notizen_KF.md)  
