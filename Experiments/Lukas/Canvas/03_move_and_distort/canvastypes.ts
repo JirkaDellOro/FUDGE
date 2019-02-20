@@ -1,21 +1,5 @@
 module DrawTypes {
 
-	export class Vector2 {
-		public x: number;
-		public y: number;
-
-		constructor(x: number, y: number = 0) {
-			this.x = x;
-			this.y = y;
-		}
-
-		equals(obj: Vector2): boolean {
-			if (this.x != obj.x) return false;
-			if (this.y != obj.y) return false;
-			return true;
-		}
-	}
-
 	export class DrawObject {
 		public color: string | CanvasGradient | CanvasPattern;
 		public name: String;
@@ -25,6 +9,10 @@ module DrawTypes {
 			this.color = color;
 			this.name = name;
 			this.order = order;
+		}
+		
+		static sort(a: DrawObject, b: DrawObject): number {
+			return a.order - b.order;
 		}
 	}
 
@@ -69,9 +57,6 @@ module DrawTypes {
 			this.generatePath2D();
 		}
 
-		static sort(a: DrawObject, b: DrawObject): number {
-			return a.order - b.order;
-		}
 
 		getPath2D(): Path2D {
 			return this.path2d;

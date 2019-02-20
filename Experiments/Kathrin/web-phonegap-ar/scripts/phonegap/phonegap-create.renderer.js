@@ -63,15 +63,4 @@ function createPhoneGapProject(name, dir) {
         });
     });
 }
-function createServeProjectBtn() {
-    let body = document.getElementsByTagName("body")[0];
-    let runBtn = document.createElement("button");
-    runBtn.setAttribute("id", "serve-phonegap-btn");
-    runBtn.innerHTML = "Serve project";
-    runBtn.addEventListener("click", function (event) {
-        pg.serveProject();
-    });
-    body.appendChild(document.createElement("br"));
-    body.appendChild(runBtn);
-}
 //# sourceMappingURL=phonegap-create.renderer.js.map

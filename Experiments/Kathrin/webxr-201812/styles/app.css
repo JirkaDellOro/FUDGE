@@ -1,0 +1,199 @@
+/*
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+body {
+	font-family: monospace;
+	margin: 0;
+	overflow: hidden;
+	position: fixed;
+	width: 100%;
+	height: 100vh;
+	-webkit-user-select: none;
+	user-select: none;
+	background-color: #424242;
+}
+
+.mdl-card__title {
+	background-color: #339900 !important;
+}
+
+.mdl-button--accent {
+	background-color: #66b340 !important;
+	color: white !important;
+}
+
+canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+div.demo-card {
+	width: 80vw;
+	margin: 20px auto;
+}
+
+#enter-ar-info .mdl-card__title {
+	color: #fff;
+	height: 176px;
+	background-color: rgb(96, 125, 139);
+}
+
+body.unsupported #enter-ar-info {
+	display: none;
+}
+
+body.ar #enter-ar-info {
+	display: none;
+}
+
+#unsupported-info {
+	display: none;
+}
+
+body.unsupported #unsupported-info {
+	display: block;
+}
+
+#info {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	transform: translate(-50%, 0);
+	margin: 1em 1em 2em 1em;
+	z-index: 10;
+	display: block;
+	line-height: 2em;
+	text-align: center;
+	display: none;
+	width: 100%;
+}
+
+body.ar #info {
+	display: block;
+}
+
+#info * {
+	color: #fff;
+}
+
+#info span {
+	background-color: rgba(40, 40, 40, 0.4);
+	padding: 0.4em 0.6em;
+	width: 80vw;
+	border-radius: 0.1em;
+}
+
+.searching {
+	width: 100%;
+	color: white;
+	background-color: rgba(0, 0, 0, 0.6);
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 40000;
+	padding: 15px;
+	text-align: center;
+	display: none;
+}
+
+body.ar .searching {
+	display: block;
+}
+
+body.ar.surfaces .searching {
+	display: none;
+}
+
+#xr-canvas {
+	display: none;
+}
+
+#xr-canvas.active {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+}
+
+body .cancel-ar-container {
+	display: none;
+}
+
+body.ar .cancel-ar-container {
+	display: block;
+	position: absolute;
+	top: 5px;
+	left: 0;
+	margin: 4px;
+	width: auto;
+	height: auto;
+	z-index: 50000;
+}
+
+.distance {
+	display: block;
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	bottom: 55%;
+	left: 55%;
+	background-color: rgba(0, 0, 0, 0.6);
+	color: white;
+	padding: 10px;
+}
+
+.distance::before {
+	content: "distance: ";
+}
+
+.hide {
+	display: none;
+}
+
+.toast {
+	width: 100%;
+	color: white;
+	background-color: rgba(255, 193, 7, 0.8);
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 50000;
+	padding: 15px;
+	text-align: center;
+	display: block;
+	opacity: 0;
+}
+
+.toast.show {
+	animation-name: show-hide-toast;
+	animation-duration: 8s;
+}
+
+@keyframes show-hide-toast {
+	0% {
+		opacity: 0;
+	}
+	30% {
+		opacity: 1;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}

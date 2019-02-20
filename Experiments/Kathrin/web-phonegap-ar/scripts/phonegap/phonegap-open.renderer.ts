@@ -36,62 +36,15 @@ async function openPhoneGapProject(dir: string): Promise<void> {
 		.openProject(dir)
 		.then((opened: ReturnMessage) => {
 			if (opened.getResult()) {
-				// createServeProjectBtn();
 				sendPgObjectToMain();
 			} else {
 				alert(opened.getMessage());
 			}
 		})
-		.catch(error => {
-			console.log("An unknown error occurred" + error);
+		.catch((error: Error) => {
+			alert(error.message);
 		});
 }
-
-// function createServeProjectBtn() {
-// 	if (!document.getElementById("serve-phonegap-btn")) {
-// 		let runBtn = document.createElement("button");
-// 		runBtn.setAttribute("id", "serve-phonegap-btn");
-// 		runBtn.innerHTML = "Serve project";
-
-// 		runBtn.addEventListener("click", event => {
-// 			pg.serveProject().then(serveProcess => {
-// 				console.log(serveProcess);
-// 				if (serveProcess) {
-// 					createKillServeProcessBtn();
-// 				}
-// 			});
-// 		});
-
-// 		document.body.appendChild(document.createElement("br"));
-// 		document.body.appendChild(runBtn);
-// 	}
-// }
-
-// function createKillServeProcessBtn() {
-// 	if (!document.getElementById("kill-serve-btn")) {
-// 		let killBtn = document.createElement("button");
-// 		killBtn.setAttribute("id", "kill-serve-btn");
-// 		killBtn.innerHTML = "Kill serve process";
-
-// 		killBtn.addEventListener("click", event => {
-// 			pg.killServeProcess().then((msg: ReturnMessage) => {
-// 				if (msg.getResult()) {
-// 					removeKillServeProcessBtn();
-// 				} else {
-// 					alert(msg.getMessage);
-// 				}
-// 			});
-// 		});
-
-// 		document.body.appendChild(document.createElement("br"));
-// 		document.body.appendChild(killBtn);
-// 	}
-// }
-
-// function removeKillServeProcessBtn() {
-// 	let killBtn: HTMLElement = document.getElementById("kill-serve-btn");
-// 	killBtn.remove();
-// }
 
 function sendPgObjectToMain(): void {
 	ipcRenderer.send("opened-pg-project", pg);

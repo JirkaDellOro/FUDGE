@@ -1,0 +1,21 @@
+{
+	"name": "webxr-201812",
+	"version": "1.0.0",
+	"description": "Used an older version of WebXR (Dec 18) - did not get it to work with newer versions :(",
+	"private": true,
+	"scripts": {
+		"webpack": "npx webpack --config webpack.config.js"
+	},
+	"dependencies": {
+		"@types/three": "^0.93.19",
+		"@types/webgl2": "0.0.4",
+		"mtl-obj-loader": "^1.0.4"
+	},
+	"devDependencies": {
+		"three": "^0.101.1",
+		"typescript": "^3.3.3",
+		"webpack": "^4.29.3",
+		"webpack-cli": "^3.2.3"
+	},
+	"author": "Kathrin Fuhrer <kathrin.fuhrer@gmx.de>"
+}

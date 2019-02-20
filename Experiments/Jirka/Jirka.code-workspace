@@ -50,6 +50,12 @@
 		},
 		{
 			"path": "NameSpace"
+		},
+		{
+			"path": "ObjectManager"
+		},
+		{
+			"path": "Time"
 		}
 	],
 	"settings": {}

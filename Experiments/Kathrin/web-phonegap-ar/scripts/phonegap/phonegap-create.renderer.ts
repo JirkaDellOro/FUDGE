@@ -56,17 +56,3 @@ async function createPhoneGapProject(name: string, dir: string) {
 			console.log(error);
 		});
 }
-
-function createServeProjectBtn() {
-	let body = document.getElementsByTagName("body")[0];
-	let runBtn = document.createElement("button");
-	runBtn.setAttribute("id", "serve-phonegap-btn");
-	runBtn.innerHTML = "Serve project";
-
-	runBtn.addEventListener("click", function(event) {
-		pg.serveProject();
-	});
-
-	body.appendChild(document.createElement("br"));
-	body.appendChild(runBtn);
-}

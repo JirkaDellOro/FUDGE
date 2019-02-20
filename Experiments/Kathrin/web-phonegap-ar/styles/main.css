@@ -93,7 +93,6 @@ button,
 	padding: 10px;
 	color: white;
 	outline: none;
-	border-radius: 3px;
 	font-size: 1rem;
 	font-family: "Quicksand", sans-serif;
 	font-weight: 400;
@@ -102,10 +101,23 @@ button,
 	cursor: pointer;
 	margin: 0px;
 	margin-bottom: 5px;
+
+	transition: all ease 600ms;
+}
+
+button:hover,
+button:focus,
+.custom-file-input:hover,
+.custom-file-input:focus {
+	background-color: #99cc99;
 }
 
 .action-btn {
 	background-color: orange;
+}
+.action-btn:hover,
+.action-btn:focus {
+	background-color: #ffc04d;
 }
 
 input[type="file"] {
@@ -120,16 +132,21 @@ input[type="file"] {
 	font-weight: 700;
 }
 
-.project-btn-container {
-	display: none;
-}
-
 #terminal {
 	background-color: #434343;
 	color: #f3f3f3;
 	padding: 5px;
 	line-height: 1.8;
 	font-family: "Consolas", monospace;
+	max-height: 350px;
+	height: 100%;
+	overflow-y: auto;
+}
+
+#result {
+	background-color: orange;
+	color: white;
+	padding: 5px;
 }
 
 .show {
@@ -144,4 +161,122 @@ input[type="file"] {
 
 .hide {
 	display: none !important;
+}
+
+.project-btn-container * {
+	font-size: 0.9rem;
+	margin: 0px;
+	height: 100%;
+}
+
+.project-btn-container {
+	display: grid;
+	grid-gap: 5px;
+	grid-template-columns: repeat(5, 1fr);
+}
+
+.serve-container > *:not(:first-child) {
+	margin-top: 5px;
+}
+
+#install-project {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#kill-serve-project {
+	background-color: orange;
+}
+
+#kill-serve-project:focus,
+#kill-serve-project:hover {
+	background-color: #ffc04d;
+}
+
+.little-note {
+	display: block;
+	font-size: 0.776rem;
+	color: orange;
+}
+
+/* CONSOLE STRINGS */
+.bright {
+	font-weight: 700;
+}
+.dim {
+	opacity: 0.6;
+}
+.underscore {
+	text-decoration: underline;
+}
+.blink {
+	animation: blink 600ms infinite;
+}
+.inverse {
+	direction: rtl;
+}
+.hidden {
+	display: none;
+}
+.fg-black {
+	color: black;
+}
+.fg-red {
+	color: red;
+}
+.fg-green {
+	color: green;
+}
+.fg-yellow {
+	color: yellow;
+}
+.fg-blue {
+	color: blue;
+}
+.fg-magenta {
+	color: magenta;
+}
+.fg-cyan {
+	color: cyan;
+}
+.fg-white {
+	color: white;
+}
+.bg-black {
+	background-color: black;
+}
+.bg-red {
+	background-color: red;
+}
+.bg-green {
+	background-color: green;
+}
+.bg-yellow {
+	background-color: yellow;
+}
+.bg-blue {
+	background-color: blue;
+}
+.bg-magenta {
+	background-color: magenta;
+}
+.bg-cyan {
+	background-color: cyan;
+}
+.bg-white {
+	background-color: white;
+}
+
+@keyframes blink {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
 }
