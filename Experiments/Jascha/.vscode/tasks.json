@@ -5,15 +5,6 @@
     "tasks": [
         {
             "type": "typescript",
-            "tsconfig": "WebGl2Test2D\\tsconfig.json",
-            "option": "watch",
-            "problemMatcher": [
-                "$tsc-watch"
-            ],
-            "group": "build"
-        },
-        {
-            "type": "typescript",
             "tsconfig": "WebGl2Test3D\\tsconfig.json",
             "option": "watch",
             "problemMatcher": [
