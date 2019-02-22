@@ -41,9 +41,6 @@ namespace WebEngine {
         public get Perspective(): boolean {
             return this.perspective;
         }
-        public get ProjectionMatrix(): Mat4 {
-            return this.projectionMatrix;
-        }
         public get FieldOfView(): number {
             return this.fieldOfView;
         }
@@ -58,6 +55,10 @@ namespace WebEngine {
         }
         public disableBackground() : void{
             this.backgroundEnabled = false;
+        }
+        public get ViewProjectionMatrix(): Mat4{
+            let viewMatrix : Mat4 = Mat4.inverse((<Transform>this.container.getComponentByName("Transform")).Matrix || Mat4.identity());
+            return Mat4.multiply(this.projectionMatrix, viewMatrix);
         }
 
         // Projection methods.######################################################################################

@@ -33,9 +33,6 @@ var WebEngine;
         get Perspective() {
             return this.perspective;
         }
-        get ProjectionMatrix() {
-            return this.projectionMatrix;
-        }
         get FieldOfView() {
             return this.fieldOfView;
         }
@@ -50,6 +47,10 @@ var WebEngine;
         }
         disableBackground() {
             this.backgroundEnabled = false;
+        }
+        get ViewProjectionMatrix() {
+            let viewMatrix = WebEngine.Mat4.inverse(this.container.getComponentByName("Transform").Matrix || WebEngine.Mat4.identity());
+            return WebEngine.Mat4.multiply(this.projectionMatrix, viewMatrix);
         }
         // Projection methods.######################################################################################
         /**
