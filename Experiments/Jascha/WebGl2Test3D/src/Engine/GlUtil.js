@@ -20,23 +20,23 @@ var WebEngine;
                 console.log("Creating new canvas...");
                 canvas = document.createElement("canvas");
                 canvas.id = "canvas";
-                canvas.width = 1260;
-                canvas.height = 1080;
+                canvas.width = 800;
+                canvas.height = 640;
                 document.body.appendChild(canvas);
             }
             WebEngine.gl2 = canvas.getContext("webgl2");
             if (WebEngine.gl2 === undefined) {
-                throw new Error("Unable to initialize WebGL2");
+                throw new Error("The Browser does not support WebGl2.");
             }
             return canvas;
         }
         /**
-         * Wrapper function to utilize the BufferData interface when passing data to the shader via a buffer.
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferData // Interface passing datapullspecifications to the buffer.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
-        static attributePointer(_attributeLocation, _bufferData) {
-            WebEngine.gl2.vertexAttribPointer(_attributeLocation, _bufferData.size, _bufferData.dataType, _bufferData.normalize, _bufferData.stride, _bufferData.offset);
+        static attributePointer(_attributeLocation, _bufferSpecification) {
+            WebEngine.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
         ;
         /**
