@@ -4,7 +4,7 @@ namespace WebEngine{
      * Small interface used by Material- and Mesh-classes to store datapullspecifications
      * for a WebGLBuffer.
      */
-    export interface BufferData {
+    export interface BufferSpecification {
         size: number;   // The size of the datasample.
         dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
         normalize: boolean; // Flag to normalize the data.
