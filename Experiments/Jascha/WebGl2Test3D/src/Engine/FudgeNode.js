@@ -14,6 +14,7 @@ var WebEngine;
             this.components = {};
             this.layers = [];
             this.tags = [];
+            WebEngine.AssetManager.addAsset(this);
         }
         // Get and set methods.######################################################################################
         set Name(_name) {

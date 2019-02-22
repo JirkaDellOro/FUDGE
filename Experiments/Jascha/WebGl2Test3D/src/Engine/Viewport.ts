@@ -1,6 +1,10 @@
 namespace WebEngine {
 
+    /**
+     * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     */
     export class Viewport {
+        private name : string; // The name to call this viewport by.
         private camera: Camera; // The camera from which's position and view the tree will be rendered.
         private rootNode: FudgeNode; // The first node in the tree(branch) that will be rendered.
         private vertexArrayObjects: { [key: string]: WebGLVertexArrayObject } = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
@@ -10,12 +14,21 @@ namespace WebEngine {
          * @param _rootNode 
          * @param _camera 
          */
-        public constructor(_rootNode: FudgeNode, _camera: Camera) {
+        public constructor(_name : string, _rootNode: FudgeNode, _camera: Camera) {
+            this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;
+            AssetManager.addAsset(this);
             this.initializeViewPortNodes(this.rootNode);
         }
+
+        public get Name():string{
+            return this.name;
+        }
         
+        /**
+         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         */
         public drawScene(): void {
             if (this.camera.Enabled) {
                 this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
@@ -24,12 +37,8 @@ namespace WebEngine {
                 // Enable backface- and zBuffer-culling.
                 gl2.enable(gl2.CULL_FACE);
                 gl2.enable(gl2.DEPTH_TEST);
-                let projectionMatrix: Mat4 = this.camera.ProjectionMatrix;
-                let cameraTransformMatrix: Mat4 = (<Transform>this.camera.Container.getComponentByName("Transform")).Matrix || Mat4.identity();
-                let viewMatrix: Mat4 = Mat4.inverse(cameraTransformMatrix);
-                let viewProjectionMatrix: Mat4 = Mat4.multiply(projectionMatrix, viewMatrix);
                 this.updateNodeWorldMatrix(this.rootNode);
-                this.drawObjects(this.rootNode, viewProjectionMatrix);
+                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
 
@@ -42,31 +51,27 @@ namespace WebEngine {
             if (_fudgeNode.getComponentByName("Mesh")) {
                 let mesh: Mesh = <Mesh>_fudgeNode.getComponentByName("Mesh");
                 let transform = <Transform>_fudgeNode.getComponentByName("Transform");
-                let material: Material = <Material>_fudgeNode.getComponentByName("Material");
-                let shader: Shader = material.BaseMaterial.Shader;
-                let positionAttributeLocation = material.BaseMaterial.PositionAttributeLocation;
-                let matrixLocation = material.BaseMaterial.MatrixUniformLocation;
-                shader.use();
+                let materialComponent: MaterialComponent = <MaterialComponent>_fudgeNode.getComponentByName("Material");
+                materialComponent.Material.Shader.use();
                 gl2.bindVertexArray(this.vertexArrayObjects[_fudgeNode.Name]);
-                gl2.enableVertexAttribArray(positionAttributeLocation);
+                gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                 // Compute the matrices
                 let transformMatrix: Mat4 = transform.WorldMatrix;
                 if (_fudgeNode.getComponentByName("Pivot")) {
                     let pivot = <Pivot>_fudgeNode.getComponentByName("Pivot");
                     transformMatrix = Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
-                let nodeViewProjectionMatrix: Mat4 = Mat4.multiply(_matrix, transformMatrix);
+                let objectViewProjectionMatrix: Mat4 = Mat4.multiply(_matrix, transformMatrix);
                 // Supply matrixdata to shader. 
-                gl2.uniformMatrix4fv(matrixLocation, false, nodeViewProjectionMatrix.Data);
+                gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
                 // Draw call
-                gl2.drawArrays(gl2.TRIANGLES, mesh.BufferData.offset, mesh.VertexCount);
+                gl2.drawArrays(gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
             }
             for (let name in _fudgeNode.getChildren()) {
                 let childNode: FudgeNode = _fudgeNode.getChildren()[name];
                 this.drawObjects(childNode, _matrix);
             }
         }
-
         /**
          * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
          * @param _fudgeNode The node which's transform worldmatrix to update.
@@ -106,19 +111,19 @@ namespace WebEngine {
             else {
                 mesh = <Mesh>_fudgeNode.getComponentByName("Mesh");
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
-                let material: Material;
+                let materialComponent: MaterialComponent;
                 if (_fudgeNode.getComponentByName("Material") == undefined) {
                     console.log(`No Material attached to node named '${_fudgeNode.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    _fudgeNode.addComponent(new Material(baseMaterial, new Vec3(190, 190, 190)));
+                    _fudgeNode.addComponent(new MaterialComponent(AssetManager.getMaterial("BasicMaterial")));
                 }
-                material = <Material>_fudgeNode.getComponentByName("Material");
-                let positionAttributeLocation = material.BaseMaterial.PositionAttributeLocation;
-                GLUtil.attributePointer(positionAttributeLocation, mesh.BufferData);
-                this.initializeNodeMaterial(material, mesh);
+                materialComponent = <MaterialComponent>_fudgeNode.getComponentByName("Material");
+                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                this.initializeNodeMaterial(materialComponent, mesh);
 
-                if (material.TextureEnabled) {
-                    this.initializeNodeTexture(material, mesh);
+                if (materialComponent.Material.TextureEnabled) {
+                    this.initializeNodeTexture(materialComponent, mesh);
                 }
             }
             for (let name in _fudgeNode.getChildren()) {
@@ -146,17 +151,17 @@ namespace WebEngine {
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeMaterial(_material: Material, _mesh: Mesh): void {
+        private initializeNodeMaterial(_materialComponent: MaterialComponent, _mesh: Mesh): void {
             // Setup new buffer for colorinformation and bind it to context for further use.
             let colorBuffer: WebGLBuffer = gl2.createBuffer();
             gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
             // Supply materialinformation to the buffer.
-            _material.applyColor(_mesh.VertexCount);
+            _mesh.applyColor(_materialComponent);
             // Enable pulling of data out of the buffer.
-            let colorAttributeLocation = _material.BaseMaterial.ColorAttributeLocation;
+            let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
             gl2.enableVertexAttribArray(colorAttributeLocation);
             // Use material's dataspecifications and bind attribute to colorBuffer.
-            GLUtil.attributePointer(colorAttributeLocation, _material.ColorBufferData);
+            GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
         }
 
         /**
@@ -164,14 +169,14 @@ namespace WebEngine {
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeTexture(_material: Material, _mesh: Mesh): void {
-            let textureCoordinateAttributeLocation = _material.BaseMaterial.TextureCoordinateLocation;
+        private initializeNodeTexture(_materialComponent: MaterialComponent, _mesh: Mesh): void {
+            let textureCoordinateAttributeLocation = _materialComponent.Material.TextureCoordinateLocation;
             let textureCoordinateBuffer = gl2.createBuffer();
             gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            _material.setTextureCoordinates(_mesh.VertexCount);
+            _mesh.setTextureCoordinates();
             gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            GLUtil.attributePointer(textureCoordinateAttributeLocation, _material.TextureBufferData);
-            GLUtil.createTexture(_material.TextureSource);
+            GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
+            GLUtil.createTexture(_materialComponent.Material.TextureSource);
         }
 
         /**

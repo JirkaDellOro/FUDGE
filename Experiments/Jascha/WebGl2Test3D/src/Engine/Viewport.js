@@ -1,18 +1,29 @@
 var WebEngine;
 (function (WebEngine) {
+    /**
+     * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     */
     class Viewport {
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode
          * @param _camera
          */
-        constructor(_rootNode, _camera) {
+        constructor(_name, _rootNode, _camera) {
             this.vertexArrayObjects = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
             this.buffers = {}; // Associative array that holds a buffer for each node in the tree(branch)
+            this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;
+            WebEngine.AssetManager.addAsset(this);
             this.initializeViewPortNodes(this.rootNode);
         }
+        get Name() {
+            return this.name;
+        }
+        /**
+         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         */
         drawScene() {
             if (this.camera.Enabled) {
                 this.updateCanvasDisplaySizeAndCamera(WebEngine.gl2.canvas);
@@ -21,12 +32,8 @@ var WebEngine;
                 // Enable backface- and zBuffer-culling.
                 WebEngine.gl2.enable(WebEngine.gl2.CULL_FACE);
                 WebEngine.gl2.enable(WebEngine.gl2.DEPTH_TEST);
-                let projectionMatrix = this.camera.ProjectionMatrix;
-                let cameraTransformMatrix = this.camera.Container.getComponentByName("Transform").Matrix || WebEngine.Mat4.identity();
-                let viewMatrix = WebEngine.Mat4.inverse(cameraTransformMatrix);
-                let viewProjectionMatrix = WebEngine.Mat4.multiply(projectionMatrix, viewMatrix);
                 this.updateNodeWorldMatrix(this.rootNode);
-                this.drawObjects(this.rootNode, viewProjectionMatrix);
+                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
         /**
@@ -38,24 +45,21 @@ var WebEngine;
             if (_fudgeNode.getComponentByName("Mesh")) {
                 let mesh = _fudgeNode.getComponentByName("Mesh");
                 let transform = _fudgeNode.getComponentByName("Transform");
-                let material = _fudgeNode.getComponentByName("Material");
-                let shader = material.BaseMaterial.Shader;
-                let positionAttributeLocation = material.BaseMaterial.PositionAttributeLocation;
-                let matrixLocation = material.BaseMaterial.MatrixUniformLocation;
-                shader.use();
+                let materialComponent = _fudgeNode.getComponentByName("Material");
+                materialComponent.Material.Shader.use();
                 WebEngine.gl2.bindVertexArray(this.vertexArrayObjects[_fudgeNode.Name]);
-                WebEngine.gl2.enableVertexAttribArray(positionAttributeLocation);
+                WebEngine.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                 // Compute the matrices
                 let transformMatrix = transform.WorldMatrix;
                 if (_fudgeNode.getComponentByName("Pivot")) {
                     let pivot = _fudgeNode.getComponentByName("Pivot");
                     transformMatrix = WebEngine.Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
-                let nodeViewProjectionMatrix = WebEngine.Mat4.multiply(_matrix, transformMatrix);
+                let objectViewProjectionMatrix = WebEngine.Mat4.multiply(_matrix, transformMatrix);
                 // Supply matrixdata to shader. 
-                WebEngine.gl2.uniformMatrix4fv(matrixLocation, false, nodeViewProjectionMatrix.Data);
+                WebEngine.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
                 // Draw call
-                WebEngine.gl2.drawArrays(WebEngine.gl2.TRIANGLES, mesh.BufferData.offset, mesh.VertexCount);
+                WebEngine.gl2.drawArrays(WebEngine.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
             }
             for (let name in _fudgeNode.getChildren()) {
                 let childNode = _fudgeNode.getChildren()[name];
@@ -100,18 +104,18 @@ var WebEngine;
             else {
                 mesh = _fudgeNode.getComponentByName("Mesh");
                 WebEngine.gl2.bufferData(WebEngine.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), WebEngine.gl2.STATIC_DRAW);
-                let material;
+                let materialComponent;
                 if (_fudgeNode.getComponentByName("Material") == undefined) {
                     console.log(`No Material attached to node named '${_fudgeNode.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    _fudgeNode.addComponent(new WebEngine.Material(WebEngine.baseMaterial, new WebEngine.Vec3(190, 190, 190)));
+                    _fudgeNode.addComponent(new WebEngine.MaterialComponent(WebEngine.AssetManager.getMaterial("BasicMaterial")));
                 }
-                material = _fudgeNode.getComponentByName("Material");
-                let positionAttributeLocation = material.BaseMaterial.PositionAttributeLocation;
-                WebEngine.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferData);
-                this.initializeNodeMaterial(material, mesh);
-                if (material.TextureEnabled) {
-                    this.initializeNodeTexture(material, mesh);
+                materialComponent = _fudgeNode.getComponentByName("Material");
+                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                WebEngine.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                this.initializeNodeMaterial(materialComponent, mesh);
+                if (materialComponent.Material.TextureEnabled) {
+                    this.initializeNodeTexture(materialComponent, mesh);
                 }
             }
             for (let name in _fudgeNode.getChildren()) {
@@ -136,31 +140,31 @@ var WebEngine;
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        initializeNodeMaterial(_material, _mesh) {
+        initializeNodeMaterial(_materialComponent, _mesh) {
             // Setup new buffer for colorinformation and bind it to context for further use.
             let colorBuffer = WebEngine.gl2.createBuffer();
             WebEngine.gl2.bindBuffer(WebEngine.gl2.ARRAY_BUFFER, colorBuffer);
             // Supply materialinformation to the buffer.
-            _material.applyColor(_mesh.VertexCount);
+            _mesh.applyColor(_materialComponent);
             // Enable pulling of data out of the buffer.
-            let colorAttributeLocation = _material.BaseMaterial.ColorAttributeLocation;
+            let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
             WebEngine.gl2.enableVertexAttribArray(colorAttributeLocation);
             // Use material's dataspecifications and bind attribute to colorBuffer.
-            WebEngine.GLUtil.attributePointer(colorAttributeLocation, _material.ColorBufferData);
+            WebEngine.GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
         }
         /**
          * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        initializeNodeTexture(_material, _mesh) {
-            let textureCoordinateAttributeLocation = _material.BaseMaterial.TextureCoordinateLocation;
+        initializeNodeTexture(_materialComponent, _mesh) {
+            let textureCoordinateAttributeLocation = _materialComponent.Material.TextureCoordinateLocation;
             let textureCoordinateBuffer = WebEngine.gl2.createBuffer();
             WebEngine.gl2.bindBuffer(WebEngine.gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            _material.setTextureCoordinates(_mesh.VertexCount);
+            _mesh.setTextureCoordinates();
             WebEngine.gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            WebEngine.GLUtil.attributePointer(textureCoordinateAttributeLocation, _material.TextureBufferData);
-            WebEngine.GLUtil.createTexture(_material.TextureSource);
+            WebEngine.GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
+            WebEngine.GLUtil.createTexture(_materialComponent.Material.TextureSource);
         }
         /**
          * Logs this viewports scenegraph to the console.
