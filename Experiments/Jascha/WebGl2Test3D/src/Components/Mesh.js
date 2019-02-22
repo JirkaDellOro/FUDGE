@@ -8,15 +8,15 @@ var WebEngine;
             super();
             this.name = "Mesh";
             this.positions = _positions;
-            this.bufferData = {
+            this.bufferSpecification = {
                 size: _size,
                 dataType: _dataType,
                 normalize: _normalize,
                 stride: 0,
                 offset: 0,
             };
-            this.vertexCount = this.positions.length / this.bufferData.size;
-            if ((this.vertexCount % this.bufferData.size) != 0) {
+            this.vertexCount = this.positions.length / this.bufferSpecification.size;
+            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
                 console.log(this.vertexCount);
                 throw new Error("Number of entries in positions[] and size do not match.");
             }
@@ -26,8 +26,8 @@ var WebEngine;
         get Positions() {
             return this.positions;
         }
-        get BufferData() {
-            return this.bufferData;
+        get BufferSpecification() {
+            return this.bufferSpecification;
         }
         get VertexCount() {
             return this.vertexCount;
@@ -50,6 +50,30 @@ var WebEngine;
                 normals.push(normal.X, normal.Y, normal.Z);
             }
             return normals;
+        }
+        /**
+ * Sets the color for each vertex to this.color and supplies the data to the colorbuffer.
+ * @param _vertexCount The number of vertices for which a color must be passed.
+ */
+        applyColor(_materialComponent) {
+            let colorPerPosition = [];
+            for (let i = 0; i < this.vertexCount; i++) {
+                colorPerPosition.push(_materialComponent.Material.Color.X, _materialComponent.Material.Color.Y, _materialComponent.Material.Color.Z);
+            }
+            WebEngine.gl2.bufferData(WebEngine.gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), WebEngine.gl2.STATIC_DRAW);
+        }
+        /**
+         * Generates UV coordinates for the texture based on the vertices of the mesh the texture
+         * was added to.
+         * @param _vertexCount The number of vertices for which the UV coordinates have to be generated.
+         */
+        setTextureCoordinates() {
+            let textureCoordinates = [];
+            let quadCount = this.vertexCount / 6;
+            for (let i = 0; i < quadCount; i++) {
+                textureCoordinates.push(0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0);
+            }
+            WebEngine.gl2.bufferData(WebEngine.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), WebEngine.gl2.STATIC_DRAW);
         }
     } // End class.
     WebEngine.Mesh = Mesh;
