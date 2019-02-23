@@ -71,14 +71,7 @@ var WebEngine;
          * @param _fudgeNode The node which's transform worldmatrix to update.
          */
         updateNodeWorldMatrix(_fudgeNode) {
-            let transform;
-            if (!_fudgeNode.getComponentByName("Transform")) {
-                transform = new WebEngine.Transform();
-                _fudgeNode.addComponent(transform);
-            }
-            else {
-                transform = _fudgeNode.getComponentByName("Transform");
-            }
+            let transform = _fudgeNode.getComponentByName("Transform");
             if (!_fudgeNode.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
@@ -96,19 +89,23 @@ var WebEngine;
          * @param _fudgeNode The node to initialize.
          */
         initializeViewPortNodes(_fudgeNode) {
-            this.initializeNodeBuffer(_fudgeNode);
+            if (!_fudgeNode.getComponentByName("Transform")) {
+                let transform = new WebEngine.TransformComponent();
+                _fudgeNode.addComponent(transform);
+            }
             let mesh;
             if (_fudgeNode.getComponentByName("Mesh") == undefined) {
                 console.log(`No Mesh attached to node named '${_fudgeNode.Name}'.`);
             }
             else {
+                this.initializeNodeBuffer(_fudgeNode);
                 mesh = _fudgeNode.getComponentByName("Mesh");
                 WebEngine.gl2.bufferData(WebEngine.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), WebEngine.gl2.STATIC_DRAW);
                 let materialComponent;
                 if (_fudgeNode.getComponentByName("Material") == undefined) {
                     console.log(`No Material attached to node named '${_fudgeNode.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    _fudgeNode.addComponent(new WebEngine.MaterialComponent(WebEngine.AssetManager.getMaterial("BasicMaterial")));
+                    _fudgeNode.addComponent(new WebEngine.MaterialComponent(WebEngine.AssetManager.getMaterial("standardMaterial")));
                 }
                 materialComponent = _fudgeNode.getComponentByName("Material");
                 let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
@@ -140,16 +137,12 @@ var WebEngine;
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        initializeNodeMaterial(_materialComponent, _mesh) {
-            // Setup new buffer for colorinformation and bind it to context for further use.
+        initializeNodeMaterial(_materialComponent, _meshComponent) {
             let colorBuffer = WebEngine.gl2.createBuffer();
             WebEngine.gl2.bindBuffer(WebEngine.gl2.ARRAY_BUFFER, colorBuffer);
-            // Supply materialinformation to the buffer.
-            _mesh.applyColor(_materialComponent);
-            // Enable pulling of data out of the buffer.
+            _meshComponent.applyColor(_materialComponent);
             let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
             WebEngine.gl2.enableVertexAttribArray(colorAttributeLocation);
-            // Use material's dataspecifications and bind attribute to colorBuffer.
             WebEngine.GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
         }
         /**
@@ -157,11 +150,11 @@ var WebEngine;
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        initializeNodeTexture(_materialComponent, _mesh) {
+        initializeNodeTexture(_materialComponent, _meshComponent) {
             let textureCoordinateAttributeLocation = _materialComponent.Material.TextureCoordinateLocation;
             let textureCoordinateBuffer = WebEngine.gl2.createBuffer();
             WebEngine.gl2.bindBuffer(WebEngine.gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            _mesh.setTextureCoordinates();
+            _meshComponent.setTextureCoordinates();
             WebEngine.gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
             WebEngine.GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
             WebEngine.GLUtil.createTexture(_materialComponent.Material.TextureSource);
