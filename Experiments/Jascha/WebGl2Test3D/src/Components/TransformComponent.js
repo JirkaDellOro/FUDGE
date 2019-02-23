@@ -5,7 +5,7 @@ var WebEngine;
      * While Pivot only affects the mesh of the node it is attached to, without altering the nodes origin, the
      * Transform component affects the origin of a node and its descendants.
      */
-    class Transform extends WebEngine.Pivot {
+    class TransformComponent extends WebEngine.PivotComponent {
         constructor() {
             super();
             this.name = "Transform";
@@ -22,6 +22,6 @@ var WebEngine;
             return new WebEngine.Vec3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
         }
     } // End of class
-    WebEngine.Transform = Transform;
+    WebEngine.TransformComponent = TransformComponent;
 })(WebEngine || (WebEngine = {})); // Close Namespace
-//# sourceMappingURL=Transform.js.map
+//# sourceMappingURL=TransformComponent.js.map

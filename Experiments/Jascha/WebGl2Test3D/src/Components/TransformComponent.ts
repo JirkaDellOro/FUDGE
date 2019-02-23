@@ -4,7 +4,7 @@ namespace WebEngine {
      * While Pivot only affects the mesh of the node it is attached to, without altering the nodes origin, the 
      * Transform component affects the origin of a node and its descendants.
      */
-    export class Transform extends Pivot {
+    export class TransformComponent extends PivotComponent {
         private worldMatrix: Mat4;
 
         public constructor() {

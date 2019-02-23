@@ -1,16 +1,16 @@
 namespace WebEngine {
 
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the an object.
+     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      */
-    export class Mesh extends Component {
+    export class MeshComponent extends Component {
 
-        private positions: number[]; // The Mesh's vertexpositions.
+        private positions: Float32Array; // The Mesh's vertexpositions.
         private vertexCount: number; // The amount of Vertices that need to be drawn.
         private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
-        private normals: number[]; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
+        private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
 
-        public constructor(_positions: number[], _size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false) {
+        public constructor(_positions: Float32Array, _size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false) {
             super();
             this.name = "Mesh";
             this.positions = _positions;
@@ -26,11 +26,11 @@ namespace WebEngine {
                 console.log(this.vertexCount);
                 throw new Error("Number of entries in positions[] and size do not match.")
             }
-            this.normals = this.setNormals();
+            this.normals = this.computeNormals();
         }
 
         // Get and set methods.######################################################################################
-        public get Positions(): number[] {
+        public get Positions(): Float32Array {
             return this.positions;
         }
         public get BufferSpecification(): BufferSpecification {
@@ -39,14 +39,14 @@ namespace WebEngine {
         public get VertexCount(): number {
             return this.vertexCount;
         }
-        public get Normals(): number[] {
+        public get Normals(): Float32Array {
             return this.normals;
         }
 
         /**
          * Computes the normal for each triangle of this meshand applies it to each of the triangles vertices.
          */
-        private setNormals(): number[] {
+        private computeNormals(): Float32Array {
             let normals: number[] = [];
             let normal: Vec3 = new Vec3;
             for (let i: number = 0; i < this.positions.length; i += 9) {
@@ -57,7 +57,7 @@ namespace WebEngine {
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
             }
-            return normals;
+            return new Float32Array(normals);
         }
                 /**
          * Sets the color for each vertex to this.color and supplies the data to the colorbuffer.

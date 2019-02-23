@@ -1,9 +1,9 @@
 var WebEngine;
 (function (WebEngine) {
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the an object.
+     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      */
-    class Mesh extends WebEngine.Component {
+    class MeshComponent extends WebEngine.Component {
         constructor(_positions, _size = 3, _dataType = WebEngine.gl2.FLOAT, _normalize = false) {
             super();
             this.name = "Mesh";
@@ -20,7 +20,7 @@ var WebEngine;
                 console.log(this.vertexCount);
                 throw new Error("Number of entries in positions[] and size do not match.");
             }
-            this.normals = this.setNormals();
+            this.normals = this.computeNormals();
         }
         // Get and set methods.######################################################################################
         get Positions() {
@@ -38,7 +38,7 @@ var WebEngine;
         /**
          * Computes the normal for each triangle of this meshand applies it to each of the triangles vertices.
          */
-        setNormals() {
+        computeNormals() {
             let normals = [];
             let normal = new WebEngine.Vec3;
             for (let i = 0; i < this.positions.length; i += 9) {
@@ -49,7 +49,7 @@ var WebEngine;
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
             }
-            return normals;
+            return new Float32Array(normals);
         }
         /**
  * Sets the color for each vertex to this.color and supplies the data to the colorbuffer.
@@ -76,6 +76,6 @@ var WebEngine;
             WebEngine.gl2.bufferData(WebEngine.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), WebEngine.gl2.STATIC_DRAW);
         }
     } // End class.
-    WebEngine.Mesh = Mesh;
+    WebEngine.MeshComponent = MeshComponent;
 })(WebEngine || (WebEngine = {})); // End namespace.
-//# sourceMappingURL=Mesh.js.map
+//# sourceMappingURL=MeshComponent.js.map
