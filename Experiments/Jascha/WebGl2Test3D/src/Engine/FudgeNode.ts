@@ -204,6 +204,9 @@ namespace WebEngine {
                 console.log(`There is allready a component by the name '${_component.Name}'. Deleting component '${this.components[name]}'.`)
                 delete this.components[name];
             }
+            if (_component.Container != undefined){
+                _component.Container.removeComponent(_component.Name);
+            }
             this.components[name] = _component;
             _component.Container = this;
         }
