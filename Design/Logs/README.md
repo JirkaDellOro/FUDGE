@@ -2,7 +2,7 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
-# Jan 20th 2019
+# Feb 20th 2019
 Discussion on UI  
 [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190220_Whiteboard_UI.jpg)
 
