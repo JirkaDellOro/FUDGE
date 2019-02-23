@@ -2,55 +2,53 @@ var WebEngine;
 (function (WebEngine) {
     window.addEventListener("DOMContentLoaded", init);
     window.addEventListener("keydown", moveCamera);
-    // Shader sourcestrings are located at script's bottom end due to spacemanagement.
     function init() {
         console.log("Starting init().");
         WebEngine.GLUtil.initializeContext();
-        let shader = new WebEngine.BasicShader();
-        let material = new WebEngine.Material("BasicMaterial", new WebEngine.Vec3(190, 190, 190), shader);
-        material = new WebEngine.Material("Textured Material", new WebEngine.Vec3(130, 130, 0), shader);
-        // Setup for two testnodes and a CameraNode.
-        let materialComponent = new WebEngine.MaterialComponent(material);
-        material.addTexture("https://cdn.shopify.com/s/files/1/1869/0319/products/ART-i-cant-adult-today_color-powder-blue_1024x1024.jpg?v=1523750709");
-        let mesh = new WebEngine.Mesh(new WebEngine.BoxGeometry(50, 50, 50).Positions);
-        let transform0 = new WebEngine.Transform();
-        let pivot0 = new WebEngine.Pivot();
+        let basicShader = new WebEngine.BasicShader();
+        let standardMaterial = new WebEngine.Material("standardMaterial", new WebEngine.Vec3(190, 190, 190), basicShader);
+        let greenMaterial = new WebEngine.Material("greenMaterial", new WebEngine.Vec3(130, 130, 0), basicShader);
+        let texturedMaterial = new WebEngine.Material("texturedMaterial", new WebEngine.Vec3(255, 255, 255), basicShader);
+        texturedMaterial.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
+        let meshComponent0 = new WebEngine.MeshComponent(new WebEngine.BoxGeometry(50, 50, 50).Positions);
+        let materialComponent0 = new WebEngine.MaterialComponent(texturedMaterial);
+        let transformComponent0 = new WebEngine.TransformComponent();
+        let pivotComponent0 = new WebEngine.PivotComponent();
         let fudge0 = new WebEngine.FudgeNode("Fudge0");
-        fudge0.addComponent(mesh);
-        fudge0.addComponent(materialComponent);
-        fudge0.addComponent(pivot0);
-        fudge0.addComponent(transform0);
-        transform0.translate(0, -200, -200);
-        pivot0.translateZ(0);
+        fudge0.addComponent(meshComponent0);
+        fudge0.addComponent(materialComponent0);
+        fudge0.addComponent(pivotComponent0);
+        fudge0.addComponent(transformComponent0);
+        pivotComponent0.translateY(-50);
         let fudge1 = new WebEngine.FudgeNode("Fudge1");
-        let transform1 = new WebEngine.Transform();
-        let mesh1 = new WebEngine.Mesh(new WebEngine.BoxGeometry(25, 25, 25).Positions);
-        fudge1.addComponent(mesh1);
-        fudge1.addComponent(transform1);
-        transform1.translate(150, 0, 0);
+        let transformComponent1 = new WebEngine.TransformComponent();
+        let meshComponent1 = new WebEngine.MeshComponent(new WebEngine.BoxGeometry(25, 25, 25).Positions);
+        fudge1.addComponent(meshComponent1);
+        fudge1.addComponent(transformComponent1);
+        transformComponent1.translate(150, 0, 0);
         let fudge2 = new WebEngine.FudgeNode("Fudge2");
-        let transform2 = new WebEngine.Transform();
-        let mesh2 = new WebEngine.Mesh(new WebEngine.BoxGeometry(25, 25, 25).Positions);
-        fudge2.addComponent(materialComponent);
-        fudge2.addComponent(transform2);
-        transform2.translate(0, -150, 0);
+        let transformComponent2 = new WebEngine.TransformComponent();
+        fudge2.addComponent(transformComponent2);
+        transformComponent2.translate(0, -150, 0);
         let fudge3 = new WebEngine.FudgeNode("Fudge3");
-        let transform3 = new WebEngine.Transform();
-        let mesh3 = new WebEngine.Mesh(new WebEngine.BoxGeometry(15, 15, 100).Positions);
-        fudge3.addComponent(mesh3);
-        fudge3.addComponent(materialComponent);
-        fudge3.addComponent(transform3);
-        transform3.translate(0, 0, 0);
+        let transformComponent3 = new WebEngine.TransformComponent();
+        let meshComponent3 = new WebEngine.MeshComponent(new WebEngine.BoxGeometry(15, 15, 100).Positions);
+        let materialComponent3 = new WebEngine.MaterialComponent(greenMaterial);
+        fudge3.addComponent(meshComponent3);
+        fudge3.addComponent(materialComponent3);
+        fudge3.addComponent(transformComponent3);
+        transformComponent3.rotateY(90);
         let cameraNode = new WebEngine.FudgeNode("Camera");
-        let camtrans = new WebEngine.Transform();
-        camtrans.lookAt(fudge0.getComponentByName("Transform").Position);
-        cameraNode.addComponent(camtrans);
-        let camera = new WebEngine.Camera();
-        cameraNode.addComponent(camera);
+        let cameraTransformComponent = new WebEngine.TransformComponent();
+        cameraTransformComponent.translate(100, 100, 500);
+        cameraTransformComponent.lookAt(fudge0.getComponentByName("Transform").Position);
+        cameraNode.addComponent(cameraTransformComponent);
+        let cameraComponent = new WebEngine.CameraComponent();
+        cameraNode.addComponent(cameraComponent);
         fudge0.appendChild(fudge1);
         fudge1.appendChild(fudge2);
         fudge2.appendChild(fudge3);
-        let viewPort = new WebEngine.Viewport("Scene1", fudge0, camera);
+        let viewPort = new WebEngine.Viewport("Scene1", fudge0, cameraComponent);
         viewPort.drawScene();
         viewPort.showSceneGraph();
         play();
@@ -108,7 +106,5 @@ var WebEngine;
             }
         }
     }
-    // Trial function to setup the cube's face's colors (TODO: Outsource to Material?).
-    // Shadersourcestrings below.
 })(WebEngine || (WebEngine = {}));
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=engineExample.js.map
