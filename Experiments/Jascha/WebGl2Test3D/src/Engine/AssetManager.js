@@ -4,9 +4,6 @@ var WebEngine;
      * Class handling the fudgenodes and viewports that are created for an application
      */
     class AssetManager {
-        static getFudgeNode(_name) {
-            return this.FudgeNodes[_name];
-        }
         static addAsset(_asset) {
             if (_asset instanceof WebEngine.FudgeNode) {
                 if (this.FudgeNodes[_asset.Name] === undefined) {
@@ -32,6 +29,9 @@ var WebEngine;
                     throw new Error(`There is allready a viewport named '${_asset.Name}'.`);
                 }
             }
+        }
+        static getFudgeNode(_name) {
+            return this.FudgeNodes[_name];
         }
         static deleteFudgeNode(_name) {
             if (this.FudgeNodes[_name] === undefined) {

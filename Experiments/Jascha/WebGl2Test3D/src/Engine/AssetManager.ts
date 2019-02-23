@@ -3,16 +3,12 @@ namespace WebEngine {
     /**
      * Class handling the fudgenodes and viewports that are created for an application
      */
-    export class AssetManager {
+    export abstract class AssetManager {
 
         private static FudgeNodes: { [key: string]: FudgeNode } = {}; // Associative array for created fudgenodes.
         private static Viewports: { [key: string]: Viewport } = {}; // Associative array for created viewports.
         private static Materials: { [key: string]: Material } = {};
 
-        public static getFudgeNode(_name: string): FudgeNode {
-            return this.FudgeNodes[_name];
-
-        }
 
         public static addAsset(_asset: any): void {
             if (_asset instanceof FudgeNode) {
@@ -39,6 +35,11 @@ namespace WebEngine {
                     throw new Error(`There is allready a viewport named '${_asset.Name}'.`)
                 }
             }
+        }
+        
+        public static getFudgeNode(_name: string): FudgeNode {
+            return this.FudgeNodes[_name];
+
         }
 
         public static deleteFudgeNode(_name: string): void {

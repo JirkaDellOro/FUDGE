@@ -5,7 +5,7 @@ namespace WebEngine {
     /**
      * Utility class to sore and/or wrap some functionality.
      */
-    export class GLUtil {
+    export abstract class GLUtil {
         /**
          * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
          * @param _elementID Optional: ID of a predefined canvaselement.
