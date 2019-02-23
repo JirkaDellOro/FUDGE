@@ -85,12 +85,12 @@ namespace WebEngine {
         let transform : TransformComponent =<TransformComponent>AssetManager.getFudgeNode("Camera").getComponentByName("Transform");
         let target : Vec3 = (<TransformComponent>AssetManager.getFudgeNode("Fudge0").getComponentByName("Transform")).Position
         switch(_event.key){
-            case "q":{
+            case "w":{
                 transform.translateY(10);
                 transform.lookAt(target);
                 break;
             }
-            case "e":{
+            case "s":{
                 transform.translateY(-10);
                 transform.lookAt(target);
                 break;
@@ -105,11 +105,11 @@ namespace WebEngine {
                 transform.lookAt(target);
                 break;
             }
-            case "w":{
+            case "q":{
                 transform.translateZ(-10);
                 break;
             }
-            case "s":{
+            case "e":{
                 transform.translateZ(10);
                 break;
             }

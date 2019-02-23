@@ -71,12 +71,12 @@ var WebEngine;
         let transform = WebEngine.AssetManager.getFudgeNode("Camera").getComponentByName("Transform");
         let target = WebEngine.AssetManager.getFudgeNode("Fudge0").getComponentByName("Transform").Position;
         switch (_event.key) {
-            case "q": {
+            case "w": {
                 transform.translateY(10);
                 transform.lookAt(target);
                 break;
             }
-            case "e": {
+            case "s": {
                 transform.translateY(-10);
                 transform.lookAt(target);
                 break;
@@ -91,11 +91,11 @@ var WebEngine;
                 transform.lookAt(target);
                 break;
             }
-            case "w": {
+            case "q": {
                 transform.translateZ(-10);
                 break;
             }
-            case "s": {
+            case "e": {
                 transform.translateZ(10);
                 break;
             }
