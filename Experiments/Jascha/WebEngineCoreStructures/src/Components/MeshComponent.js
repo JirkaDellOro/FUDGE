@@ -52,8 +52,8 @@ var WebEngine;
             return new Float32Array(normals);
         }
         /**
- * Sets the color for each vertex to this.color and supplies the data to the colorbuffer.
- * @param _vertexCount The number of vertices for which a color must be passed.
+ * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
+ * @param _materialComponent The materialcomponent attached to the same fudgenode.
  */
         applyColor(_materialComponent) {
             let colorPerPosition = [];
@@ -65,7 +65,6 @@ var WebEngine;
         /**
          * Generates UV coordinates for the texture based on the vertices of the mesh the texture
          * was added to.
-         * @param _vertexCount The number of vertices for which the UV coordinates have to be generated.
          */
         setTextureCoordinates() {
             let textureCoordinates = [];

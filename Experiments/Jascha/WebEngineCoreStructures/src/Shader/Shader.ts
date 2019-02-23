@@ -1,6 +1,7 @@
 namespace WebEngine {
     /**
-     * Abstract superclass for the representation of WebGl shaderprograms.
+     * Abstract superclass for the representation of WebGl shaderprograms. 
+     * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
      */
     export  abstract class Shader {
 
