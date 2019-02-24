@@ -32,7 +32,7 @@ var WebEngine;
                 // Enable backface- and zBuffer-culling.
                 WebEngine.gl2.enable(WebEngine.gl2.CULL_FACE);
                 WebEngine.gl2.enable(WebEngine.gl2.DEPTH_TEST);
-                this.updateNodeWorldMatrix(this.rootNode);
+                this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
                 this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
@@ -83,6 +83,16 @@ var WebEngine;
                 let childNode = _fudgeNode.getChildren()[name];
                 this.updateNodeWorldMatrix(childNode);
             }
+        }
+        /**
+         * Returns the scenegraph's rootnode for computation of worldmatrices.
+         */
+        viewportNodeSceneGraphRoot() {
+            let sceneGraphRoot = this.rootNode;
+            while (sceneGraphRoot.Parent) {
+                sceneGraphRoot = sceneGraphRoot.Parent;
+            }
+            return sceneGraphRoot;
         }
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
