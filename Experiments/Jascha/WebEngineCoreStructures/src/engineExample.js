@@ -57,12 +57,8 @@ var WebEngine;
     // Trial function that animates the scene.
     function play() {
         let rotation = 1;
-        //(fudge1.getComponentByName("Transform") as Transform).rotateY(rotation);
         WebEngine.AssetManager.getFudgeNode("Fudge2").getComponentByName("Transform").rotateY(rotation);
-        //(fudge0.getComponentByName("Transform") as Transform).rotateY(rotation);
-        //(fudge1.getComponentByName("Transform") as Transform).translateX(rotation);
-        // (fudge1.getComponentByName("Transform") as Transform).lookAt(fudge2);
-        //(fudge3.getComponentByName("Transform") as Transform).lookAt(fudge1);
+        WebEngine.AssetManager.getFudgeNode("Fudge0").getComponentByName("Pivot").rotateY(-rotation);
         WebEngine.AssetManager.getViewport("Scene1").drawScene();
         requestAnimationFrame(play);
     }

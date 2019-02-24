@@ -69,13 +69,10 @@ namespace WebEngine {
     function play(): void {
 
         let rotation: number = 1;
-        //(fudge1.getComponentByName("Transform") as Transform).rotateY(rotation);
-        (AssetManager.getFudgeNode("Fudge2").getComponentByName("Transform") as TransformComponent).rotateY(rotation);
-        //(fudge0.getComponentByName("Transform") as Transform).rotateY(rotation);
-        //(fudge1.getComponentByName("Transform") as Transform).translateX(rotation);
 
-       // (fudge1.getComponentByName("Transform") as Transform).lookAt(fudge2);
-        //(fudge3.getComponentByName("Transform") as Transform).lookAt(fudge1);
+        (AssetManager.getFudgeNode("Fudge2").getComponentByName("Transform") as TransformComponent).rotateY(rotation);
+        (AssetManager.getFudgeNode("Fudge0").getComponentByName("Pivot") as PivotComponent).rotateY(-rotation);
+
         AssetManager.getViewport("Scene1").drawScene();
         requestAnimationFrame(play);
     }
