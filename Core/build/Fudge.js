@@ -1,3 +1,4 @@
+"use strict";
 var Fudge;
 (function (Fudge) {
     /**
@@ -18,9 +19,9 @@ var Fudge;
         set Container(_container) {
             this.container = _container;
         }
-    } // End class.
+    }
     Fudge.Component = Component;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 /// <reference path="Component.ts"/>
 var Fudge;
 /// <reference path="Component.ts"/>
@@ -74,8 +75,15 @@ var Fudge;
             this.backgroundEnabled = false;
         }
         get ViewProjectionMatrix() {
-            let viewMatrix = Fudge.Mat4.inverse(this.container.getComponentByName("Transform").Matrix || Fudge.Mat4.identity());
-            return Fudge.Mat4.multiply(this.projectionMatrix, viewMatrix);
+            let viewMatrix = Fudge.Mat4.identity();
+            if (this.container) {
+                let transform = this.container.getComponentByName("Transform");
+                if (transform) {
+                    viewMatrix = Fudge.Mat4.inverse(transform.Matrix);
+                    return Fudge.Mat4.multiply(this.projectionMatrix, viewMatrix);
+                }
+            }
+            return this.projectionMatrix;
         }
         // Projection methods.######################################################################################
         /**
@@ -99,9 +107,9 @@ var Fudge;
             this.perspective = false;
             this.projectionMatrix = Fudge.Mat4.orthographic(_left, _right, _bottom, _top, 400, -400);
         }
-    } // End class.
+    }
     Fudge.CameraComponent = CameraComponent;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -117,9 +125,9 @@ var Fudge;
         get Material() {
             return this.material;
         }
-    } // End class.
+    }
     Fudge.MaterialComponent = MaterialComponent;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -196,9 +204,9 @@ var Fudge;
             }
             Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), Fudge.gl2.STATIC_DRAW);
         }
-    } // End class.
+    }
     Fudge.MeshComponent = MeshComponent;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -360,9 +368,9 @@ var Fudge;
          * @param _asset
          */
         static addAsset(_asset) {
-            if (_asset instanceof Fudge.FudgeNode) {
-                if (this.FudgeNodes[_asset.Name] === undefined) {
-                    this.FudgeNodes[_asset.Name] = _asset;
+            if (_asset instanceof Fudge.Node) {
+                if (this.Nodes[_asset.Name] === undefined) {
+                    this.Nodes[_asset.Name] = _asset;
                 }
                 else {
                     throw new Error(`There is allready a fudgenode named '${_asset.Name}'.`);
@@ -389,25 +397,25 @@ var Fudge;
          * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
          * @param _name The name to look for.
          */
-        static getFudgeNode(_name) {
-            return this.FudgeNodes[_name];
+        static getNode(_name) {
+            return this.Nodes[_name];
         }
         /**
          * Returns an object containing all fudgenodes that are currently in the array.
          */
-        static getFudgeNodes() {
-            return this.FudgeNodes;
+        static getNodes() {
+            return this.Nodes;
         }
         /**
          * Removes the fudgenode with the passed name in the array. Throw's error if there is none.
          * @param _name The name to look for.
          */
         static deleteFudgeNode(_name) {
-            if (this.FudgeNodes[_name] === undefined) {
+            if (this.Nodes[_name] === undefined) {
                 throw new Error(`Cannot find fudgenode named '${_name}'.`);
             }
             else {
-                delete this.FudgeNodes[_name];
+                delete this.Nodes[_name];
             }
         }
         /**
@@ -461,10 +469,173 @@ var Fudge;
             }
         }
     }
-    AssetManager.FudgeNodes = {}; // Associative array for created fudgenodes.
+    AssetManager.Nodes = {}; // Associative array for created fudgenodes.
     AssetManager.Viewports = {}; // Associative array for created viewports.
     AssetManager.Materials = {};
     Fudge.AssetManager = AssetManager;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Utility class to sore and/or wrap some functionality.
+     */
+    class GLUtil {
+        /**
+         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
+         * @param _elementID Optional: ID of a predefined canvaselement.
+         */
+        static initializeContext(_elementID) {
+            let canvas;
+            if (_elementID !== undefined) { // Check if ID was passed. 
+                canvas = document.getElementById(_elementID);
+                if (canvas === undefined) { // Check if element by passed ID exists. Otherwise throw Error.
+                    throw new Error("Cannot find a canvas Element named: " + _elementID);
+                }
+            }
+            else { // If no Canvas ID was passed, create new canvas with default width and height. 
+                console.log("Creating new canvas...");
+                canvas = document.createElement("canvas");
+                canvas.id = "canvas";
+                canvas.width = 800;
+                canvas.height = 640;
+                document.body.appendChild(canvas);
+            }
+            // TODO use create-function below
+            let gl2found = canvas.getContext("webgl2");
+            if (gl2found === null) {
+                throw new Error("The Browser does not support WebGl2.");
+            }
+            Fudge.gl2 = gl2found;
+            return canvas;
+        }
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static attributePointer(_attributeLocation, _bufferSpecification) {
+            Fudge.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
+        ;
+        static create(_result) {
+            if (_result === null)
+                throw ("SOMETHING WENT WRONG");
+            return _result;
+        }
+        /**
+         * Wrapperclass that binds and initializes a texture.
+         * @param _textureSource A string containing the path to the texture.
+         */
+        static createTexture(_textureSource) {
+            // TODO: use create throwable above
+            let textureCreated = Fudge.gl2.createTexture();
+            if (textureCreated === null)
+                return;
+            let texture = textureCreated;
+            Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
+            // Fill the texture with a 1x1 blue pixel.
+            Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, 1, 1, 0, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
+            // Asynchronously load an image
+            let image = new Image();
+            image.crossOrigin = "anonymous";
+            image.src = _textureSource;
+            image.onload = function () {
+                Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
+                Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, image);
+                Fudge.gl2.generateMipmap(Fudge.gl2.TEXTURE_2D);
+            };
+        }
+    }
+    Fudge.GLUtil = GLUtil;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
+     */
+    class Material {
+        constructor(_name, _color, _shader) {
+            this.name = _name;
+            this.shader = _shader;
+            // TODO: check null
+            this.positionAttributeLocation = this.shader.getAttributeLocation("a_position");
+            this.colorAttributeLocation = this.shader.getAttributeLocation("a_color");
+            this.textureCoordinateAtributeLocation = this.shader.getAttributeLocation("a_textureCoordinate");
+            this.matrixLocation = this.shader.getUniformLocation("u_matrix");
+            this.color = _color;
+            this.colorBufferSpecification = {
+                size: 3,
+                dataType: Fudge.gl2.UNSIGNED_BYTE,
+                normalize: true,
+                stride: 0,
+                offset: 0,
+            };
+            this.textureBufferSpecification = {
+                size: 2,
+                dataType: Fudge.gl2.FLOAT,
+                normalize: true,
+                stride: 0,
+                offset: 0,
+            };
+            this.textureEnabled = false;
+            this.textureSource = "";
+            Fudge.AssetManager.addAsset(this);
+        }
+        // Get methods. ######################################################################################
+        get Shader() {
+            return this.shader;
+        }
+        get Name() {
+            return this.name;
+        }
+        get Color() {
+            return this.color;
+        }
+        set Color(_color) {
+            this.color = _color;
+        }
+        get ColorBufferSpecification() {
+            return this.colorBufferSpecification;
+        }
+        get TextureBufferSpecification() {
+            return this.textureBufferSpecification;
+        }
+        get TextureEnabled() {
+            return this.textureEnabled;
+        }
+        get TextureSource() {
+            return this.textureSource;
+        }
+        get PositionAttributeLocation() {
+            return this.positionAttributeLocation;
+        }
+        get ColorAttributeLocation() {
+            return this.colorAttributeLocation;
+        }
+        get MatrixUniformLocation() {
+            return this.matrixLocation;
+        }
+        get TextureCoordinateLocation() {
+            return this.textureCoordinateAtributeLocation;
+        }
+        // Color and Texture methods.######################################################################################
+        /**
+         * Adds and enables a Texture passed to this material.
+         * @param _textureSource A string holding the path to the location of the texture.
+         */
+        addTexture(_textureSource) {
+            this.textureEnabled = true;
+            this.textureSource = _textureSource;
+        }
+        /**
+         * Removes and disables a texture that was added to this material.
+         */
+        removeTexture() {
+            this.textureEnabled = false;
+            this.textureSource = "";
+        }
+    }
+    Fudge.Material = Material;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -472,7 +643,7 @@ var Fudge;
     /**
      * Represents a node in the scenetree.
      */
-    class FudgeNode {
+    class Node {
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -614,7 +785,7 @@ var Fudge;
         removeChild(_name) {
             if (this.children[_name] != undefined) {
                 let child = this.children[_name];
-                child.setParent(undefined);
+                child.setParent(null);
                 delete this.children[_name];
             }
             else {
@@ -670,7 +841,7 @@ var Fudge;
          */
         removeComponent(_name) {
             if (this.components[_name]) {
-                this.components[_name].Container = undefined;
+                this.components[_name].Container = null;
                 delete this.components[_name];
                 console.log(`Component '${_name}' removed.`);
             }
@@ -678,159 +849,8 @@ var Fudge;
                 throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
             }
         }
-    } // End class.
-    Fudge.FudgeNode = FudgeNode;
-})(Fudge || (Fudge = {})); // Close namespace.
-var Fudge;
-(function (Fudge) {
-    /**
-     * Utility class to sore and/or wrap some functionality.
-     */
-    class GLUtil {
-        /**
-         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
-         * @param _elementID Optional: ID of a predefined canvaselement.
-         */
-        static initializeContext(_elementID) {
-            let canvas;
-            if (_elementID !== undefined) { // Check if ID was passed. 
-                canvas = document.getElementById(_elementID);
-                if (canvas === undefined) { // Check if element by passed ID exists. Otherwise throw Error.
-                    throw new Error("Cannot find a canvas Element named: " + _elementID);
-                }
-            }
-            else { // If no Canvas ID was passed, create new canvas with default width and height. 
-                console.log("Creating new canvas...");
-                canvas = document.createElement("canvas");
-                canvas.id = "canvas";
-                canvas.width = 800;
-                canvas.height = 640;
-                document.body.appendChild(canvas);
-            }
-            Fudge.gl2 = canvas.getContext("webgl2");
-            if (Fudge.gl2 === undefined) {
-                throw new Error("The Browser does not support WebGl2.");
-            }
-            return canvas;
-        }
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            Fudge.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-        }
-        ;
-        /**
-         * Wrapperclass that binds and initializes a texture.
-         * @param _textureSource A string containing the path to the texture.
-         */
-        static createTexture(_textureSource) {
-            let texture = Fudge.gl2.createTexture();
-            Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
-            // Fill the texture with a 1x1 blue pixel.
-            Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, 1, 1, 0, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
-            // Asynchronously load an image
-            let image = new Image();
-            image.crossOrigin = "anonymous";
-            image.src = _textureSource;
-            image.onload = function () {
-                Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
-                Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, image);
-                Fudge.gl2.generateMipmap(Fudge.gl2.TEXTURE_2D);
-            };
-        }
-    } // End class.
-    Fudge.GLUtil = GLUtil;
-})(Fudge || (Fudge = {})); // End namespace.
-var Fudge;
-(function (Fudge) {
-    /**
-     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
-     */
-    class Material {
-        constructor(_name, _color, _shader) {
-            this.name = _name;
-            this.shader = _shader;
-            this.positionAttributeLocation = this.shader.getAttributeLocation("a_position");
-            this.colorAttributeLocation = this.shader.getAttributeLocation("a_color");
-            this.textureCoordinateAtributeLocation = this.shader.getAttributeLocation("a_textureCoordinate");
-            this.matrixLocation = this.shader.getUniformLocation("u_matrix");
-            this.color = _color;
-            this.colorBufferSpecification = {
-                size: 3,
-                dataType: Fudge.gl2.UNSIGNED_BYTE,
-                normalize: true,
-                stride: 0,
-                offset: 0,
-            };
-            this.textureBufferSpecification = {
-                size: 2,
-                dataType: Fudge.gl2.FLOAT,
-                normalize: true,
-                stride: 0,
-                offset: 0,
-            };
-            this.textureEnabled = false;
-            this.textureSource = "";
-            Fudge.AssetManager.addAsset(this);
-        }
-        // Get methods. ######################################################################################
-        get Shader() {
-            return this.shader;
-        }
-        get Name() {
-            return this.name;
-        }
-        get Color() {
-            return this.color;
-        }
-        set Color(_color) {
-            this.color = _color;
-        }
-        get ColorBufferSpecification() {
-            return this.colorBufferSpecification;
-        }
-        get TextureBufferSpecification() {
-            return this.textureBufferSpecification;
-        }
-        get TextureEnabled() {
-            return this.textureEnabled;
-        }
-        get TextureSource() {
-            return this.textureSource;
-        }
-        get PositionAttributeLocation() {
-            return this.positionAttributeLocation;
-        }
-        get ColorAttributeLocation() {
-            return this.colorAttributeLocation;
-        }
-        get MatrixUniformLocation() {
-            return this.matrixLocation;
-        }
-        get TextureCoordinateLocation() {
-            return this.textureCoordinateAtributeLocation;
-        }
-        // Color and Texture methods.######################################################################################
-        /**
-         * Adds and enables a Texture passed to this material.
-         * @param _textureSource A string holding the path to the location of the texture.
-         */
-        addTexture(_textureSource) {
-            this.textureEnabled = true;
-            this.textureSource = _textureSource;
-        }
-        /**
-         * Removes and disables a texture that was added to this material.
-         */
-        removeTexture() {
-            this.textureEnabled = false;
-            this.textureSource = "";
-        }
     }
-    Fudge.Material = Material;
+    Fudge.Node = Node;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -872,21 +892,21 @@ var Fudge;
         }
         /**
          * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
-         * @param _fudgeNode The currend node to be drawn.
+         * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
-        drawObjects(_fudgeNode, _matrix) {
-            if (_fudgeNode.getComponentByName("Mesh")) {
-                let mesh = _fudgeNode.getComponentByName("Mesh");
-                let transform = _fudgeNode.getComponentByName("Transform");
-                let materialComponent = _fudgeNode.getComponentByName("Material");
+        drawObjects(_node, _matrix) {
+            if (_node.getComponentByName("Mesh")) {
+                let mesh = _node.getComponentByName("Mesh");
+                let transform = _node.getComponentByName("Transform");
+                let materialComponent = _node.getComponentByName("Material");
                 materialComponent.Material.Shader.use();
-                Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_fudgeNode.Name]);
+                Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
                 Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                 // Compute the matrices
                 let transformMatrix = transform.WorldMatrix;
-                if (_fudgeNode.getComponentByName("Pivot")) {
-                    let pivot = _fudgeNode.getComponentByName("Pivot");
+                if (_node.getComponentByName("Pivot")) {
+                    let pivot = _node.getComponentByName("Pivot");
                     transformMatrix = Fudge.Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
                 let objectViewProjectionMatrix = Fudge.Mat4.multiply(_matrix, transformMatrix);
@@ -895,8 +915,8 @@ var Fudge;
                 // Draw call
                 Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
             }
-            for (let name in _fudgeNode.getChildren()) {
-                let childNode = _fudgeNode.getChildren()[name];
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
                 this.drawObjects(childNode, _matrix);
             }
         }
@@ -930,28 +950,28 @@ var Fudge;
         }
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _fudgeNode The node to initialize.
+         * @param _node The node to initialize.
          */
-        initializeViewportNodes(_fudgeNode) {
-            if (!_fudgeNode.getComponentByName("Transform")) {
+        initializeViewportNodes(_node) {
+            if (!_node.getComponentByName("Transform")) {
                 let transform = new Fudge.TransformComponent();
-                _fudgeNode.addComponent(transform);
+                _node.addComponent(transform);
             }
             let mesh;
-            if (_fudgeNode.getComponentByName("Mesh") == undefined) {
-                console.log(`No Mesh attached to node named '${_fudgeNode.Name}'.`);
+            if (_node.getComponentByName("Mesh") == undefined) {
+                console.log(`No Mesh attached to node named '${_node.Name}'.`);
             }
             else {
-                this.initializeNodeBuffer(_fudgeNode);
-                mesh = _fudgeNode.getComponentByName("Mesh");
+                this.initializeNodeBuffer(_node);
+                mesh = _node.getComponentByName("Mesh");
                 Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
                 let materialComponent;
-                if (_fudgeNode.getComponentByName("Material") == undefined) {
-                    console.log(`No Material attached to node named '${_fudgeNode.Name}'.`);
+                if (_node.getComponentByName("Material") == undefined) {
+                    console.log(`No Material attached to node named '${_node.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    _fudgeNode.addComponent(new Fudge.MaterialComponent(Fudge.AssetManager.getMaterial("standardMaterial")));
+                    _node.addComponent(new Fudge.MaterialComponent(Fudge.AssetManager.getMaterial("standardMaterial")));
                 }
-                materialComponent = _fudgeNode.getComponentByName("Material");
+                materialComponent = _node.getComponentByName("Material");
                 let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
                 Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
                 this.initializeNodeMaterial(materialComponent, mesh);
@@ -959,20 +979,26 @@ var Fudge;
                     this.initializeNodeTexture(materialComponent, mesh);
                 }
             }
-            for (let name in _fudgeNode.getChildren()) {
-                let childNode = _fudgeNode.getChildren()[name];
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
                 this.initializeViewportNodes(childNode);
             }
         }
         /**
          * Initializes the vertexbuffer for a passed node.
-         * @param _fudgeNode The node to initialize a buffer for.
+         * @param _node The node to initialize a buffer for.
          */
-        initializeNodeBuffer(_fudgeNode) {
-            let buffer = Fudge.gl2.createBuffer();
-            this.buffers[_fudgeNode.Name] = buffer;
-            let vertexArrayObject = Fudge.gl2.createVertexArray();
-            this.vertexArrayObjects[_fudgeNode.Name] = vertexArrayObject;
+        initializeNodeBuffer(_node) {
+            let bufferCreated = Fudge.gl2.createBuffer();
+            if (bufferCreated === null)
+                return;
+            let buffer = bufferCreated;
+            this.buffers[_node.Name] = buffer;
+            let vertexArrayObjectCreated = Fudge.gl2.createVertexArray();
+            if (vertexArrayObjectCreated === null)
+                return;
+            let vertexArrayObject = vertexArrayObjectCreated;
+            this.vertexArrayObjects[_node.Name] = vertexArrayObject;
             Fudge.gl2.bindVertexArray(vertexArrayObject);
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, buffer);
         }
@@ -982,6 +1008,7 @@ var Fudge;
          * @param _mesh The node's meshcomponent.
          */
         initializeNodeMaterial(_materialComponent, _meshComponent) {
+            // TODO: check null
             let colorBuffer = Fudge.gl2.createBuffer();
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, colorBuffer);
             _meshComponent.applyColor(_materialComponent);
@@ -1022,9 +1049,9 @@ var Fudge;
                 let child = _fudgeNode.getChildren()[name];
                 output += "\n";
                 let current = child;
-                if (current.Parent.Parent)
+                if (current.Parent && current.Parent.Parent)
                     output += "|";
-                while (current.Parent.Parent) {
+                while (current.Parent && current.Parent.Parent) {
                     output += "   ";
                     current = current.Parent;
                 }
@@ -1056,9 +1083,9 @@ var Fudge;
             }
             Fudge.gl2.viewport(0, 0, width, height);
         }
-    } // End class.
+    }
     Fudge.Viewport = Viewport;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -1115,9 +1142,9 @@ var Fudge;
         get Positions() {
             return this.positions;
         }
-    } // End class.
+    }
     Fudge.BoxGeometry = BoxGeometry;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -1585,9 +1612,9 @@ var Fudge;
             ]);
             return matrix;
         }
-    } // End class.
+    }
     Fudge.Mat4 = Mat4;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class Vec3 {
@@ -1736,6 +1763,7 @@ var Fudge;
             return this.uniforms[_name];
         }
         load(_vertexShaderSource, _fragmentShaderSource) {
+            // TODO: check null
             let vertexShader = this.loadShader(_vertexShaderSource, Fudge.gl2.VERTEX_SHADER);
             let fragmentShader = this.loadShader(_fragmentShaderSource, Fudge.gl2.FRAGMENT_SHADER);
             this.createProgram(vertexShader, fragmentShader);
@@ -1749,9 +1777,11 @@ var Fudge;
          * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
          */
         loadShader(_source, _shaderType) {
+            // TODO: check null
             let shader = Fudge.gl2.createShader(_shaderType);
             Fudge.gl2.shaderSource(shader, _source);
             Fudge.gl2.compileShader(shader);
+            // TODO: check null
             let error = Fudge.gl2.getShaderInfoLog(shader);
             if (error !== "") {
                 throw new Error("Error compiling shader: " + error);
@@ -1769,6 +1799,7 @@ var Fudge;
          * @param fragmentShader The compiled fragmentshader to be used by the programm.
          */
         createProgram(vertexShader, fragmentShader) {
+            // TODO: check null
             this.program = Fudge.gl2.createProgram();
             Fudge.gl2.attachShader(this.program, vertexShader);
             Fudge.gl2.attachShader(this.program, fragmentShader);
@@ -1790,6 +1821,7 @@ var Fudge;
         detectAttributes() {
             let attributeCount = Fudge.gl2.getProgramParameter(this.program, Fudge.gl2.ACTIVE_ATTRIBUTES);
             for (let i = 0; i < attributeCount; i++) {
+                // TODO: check null
                 let attributeInfo = Fudge.gl2.getActiveAttrib(this.program, i);
                 if (!attributeInfo) {
                     break;
@@ -1803,16 +1835,18 @@ var Fudge;
         detectUniforms() {
             let uniformCount = Fudge.gl2.getProgramParameter(this.program, Fudge.gl2.ACTIVE_UNIFORMS);
             for (let i = 0; i < uniformCount; i++) {
+                // TODO: check null
                 let info = Fudge.gl2.getActiveUniform(this.program, i);
                 if (!info) {
                     break;
                 }
+                // TODO: check null
                 this.uniforms[info.name] = Fudge.gl2.getUniformLocation(this.program, info.name);
             }
         }
-    } // End class.
+    }
     Fudge.Shader = Shader;
-})(Fudge || (Fudge = {})); // End namespace.
+})(Fudge || (Fudge = {}));
 /// <reference path="Shader.ts"/>
 var Fudge;
 /// <reference path="Shader.ts"/>

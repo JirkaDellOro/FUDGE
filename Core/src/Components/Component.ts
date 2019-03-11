@@ -5,7 +5,7 @@ namespace Fudge {
     export abstract class Component {
 
         protected name: string; // The name to call the component by
-        protected container: FudgeNode; // The sceneObject the component is attached to.
+        protected container: Node | null; // The sceneObject the component is attached to.
 
         /**
          * The Superclass' constructor. Values will be overridden by subclass constructors
@@ -16,11 +16,11 @@ namespace Fudge {
         public get Name():string{
             return this.name;
         }
-        public get Container(): FudgeNode{
+        public get Container(): Node | null {
             return this.container;
         }
-        public set Container(_container:FudgeNode){
+        public set Container(_container:Node | null){
             this.container = _container;
         }
-    }// End class.
-}// End namespace.
+    }
+}

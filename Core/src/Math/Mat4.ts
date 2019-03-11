@@ -376,5 +376,5 @@ namespace Fudge{
             ]);
             return matrix;
         }
-    } // End class.
-} // End namespace.
+    } 
+}

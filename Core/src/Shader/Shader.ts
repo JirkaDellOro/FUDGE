@@ -3,9 +3,7 @@ namespace Fudge {
      * Abstract superclass for the representation of WebGl shaderprograms. 
      * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
      */
-    export  abstract class Shader {
-
-
+    export abstract class Shader {
         private program: WebGLProgram; // Declaration of graphicprocessing-programm.
         private attributes: { [name: string]: number } = {}; // Associative array of shader atrributes.
         private uniforms: { [name: string]: WebGLUniformLocation } = {}; // Associative array of shader uniforms.
@@ -21,7 +19,7 @@ namespace Fudge {
          * Get location of an attribute by its name.
          * @param _name Name of the attribute to locate.
          */
-        public getAttributeLocation(_name: string): number {
+        public getAttributeLocation(_name: string): number | null {
             if (this.attributes[_name] === undefined) {
                 return null;
             }
@@ -31,16 +29,17 @@ namespace Fudge {
           * Get location of uniform by its name.
           * @param _name Name of the attribute to locate.
           */
-        public getUniformLocation(_name: string): WebGLUniformLocation {
+        public getUniformLocation(_name: string): WebGLUniformLocation | null {
             if (this.uniforms[_name] === undefined) {
                 return null;
             }
             return this.uniforms[_name];
         }
-        
-        protected load(_vertexShaderSource: string, _fragmentShaderSource: string):void{
-            let vertexShader = this.loadShader(_vertexShaderSource, gl2.VERTEX_SHADER);
-            let fragmentShader = this.loadShader(_fragmentShaderSource, gl2.FRAGMENT_SHADER);
+
+        protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void {
+            // TODO: check null
+            let vertexShader: WebGLShader = <WebGLShader>this.loadShader(_vertexShaderSource, gl2.VERTEX_SHADER);
+            let fragmentShader: WebGLShader = <WebGLShader>this.loadShader(_fragmentShaderSource, gl2.FRAGMENT_SHADER);
             this.createProgram(vertexShader, fragmentShader);
             this.detectAttributes();
             this.detectUniforms();
@@ -52,11 +51,13 @@ namespace Fudge {
          * @param _source The sourcevariable holding a GLSL shaderstring.
          * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
          */
-        private loadShader(_source: string, _shaderType: number): WebGLShader {
-            let shader: WebGLShader = gl2.createShader(_shaderType);
+        private loadShader(_source: string, _shaderType: number): WebGLShader | null {
+            // TODO: check null
+            let shader: WebGLShader = <WebGLShader>gl2.createShader(_shaderType);
             gl2.shaderSource(shader, _source);
             gl2.compileShader(shader);
-            let error: string = gl2.getShaderInfoLog(shader);
+            // TODO: check null
+            let error: string = <string>gl2.getShaderInfoLog(shader);
             if (error !== "") {
                 throw new Error("Error compiling shader: " + error);
             }
@@ -73,7 +74,8 @@ namespace Fudge {
          * @param fragmentShader The compiled fragmentshader to be used by the programm.
          */
         private createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): void {
-            this.program = gl2.createProgram();
+            // TODO: check null
+            this.program = <WebGLProgram>gl2.createProgram();
 
             gl2.attachShader(this.program, vertexShader);
             gl2.attachShader(this.program, fragmentShader);
@@ -97,7 +99,8 @@ namespace Fudge {
         private detectAttributes(): void {
             let attributeCount: number = gl2.getProgramParameter(this.program, gl2.ACTIVE_ATTRIBUTES);
             for (let i: number = 0; i < attributeCount; i++) {
-                let attributeInfo: WebGLActiveInfo = gl2.getActiveAttrib(this.program, i);
+                // TODO: check null
+                let attributeInfo: WebGLActiveInfo = <WebGLActiveInfo>gl2.getActiveAttrib(this.program, i);
                 if (!attributeInfo) {
                     break;
                 }
@@ -110,12 +113,14 @@ namespace Fudge {
         private detectUniforms(): void {
             let uniformCount: number = gl2.getProgramParameter(this.program, gl2.ACTIVE_UNIFORMS);
             for (let i: number = 0; i < uniformCount; i++) {
-                let info: WebGLActiveInfo = gl2.getActiveUniform(this.program, i);
+                // TODO: check null
+                let info: WebGLActiveInfo = <WebGLActiveInfo>gl2.getActiveUniform(this.program, i);
                 if (!info) {
                     break;
                 }
-                this.uniforms[info.name] = gl2.getUniformLocation(this.program, info.name);
+                // TODO: check null
+                this.uniforms[info.name] = <WebGLUniformLocation>gl2.getUniformLocation(this.program, info.name);
             }
         }
-    }// End class.
-}// End namespace.
+    }
+}

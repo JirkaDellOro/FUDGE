@@ -22,5 +22,5 @@ namespace Fudge {
         }
 
 
-    }// End class.
-}// End namespace.
+    }
+}

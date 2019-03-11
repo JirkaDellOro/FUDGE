@@ -64,5 +64,5 @@ namespace Fudge {
         public get Positions() {
             return this.positions;
         }
-    } // End class.
-} // End namespace.
+    } 
+}

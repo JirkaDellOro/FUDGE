@@ -21,10 +21,11 @@ namespace Fudge{
         public constructor(_name:string, _color:Vec3,_shader: Shader) {
             this.name = _name
             this.shader = _shader;
-            this.positionAttributeLocation = this.shader.getAttributeLocation("a_position");
-            this.colorAttributeLocation = this.shader.getAttributeLocation("a_color");
-            this.textureCoordinateAtributeLocation = this.shader.getAttributeLocation("a_textureCoordinate");
-            this.matrixLocation = this.shader.getUniformLocation("u_matrix");
+            // TODO: check null
+            this.positionAttributeLocation = <number>this.shader.getAttributeLocation("a_position");
+            this.colorAttributeLocation = <number>this.shader.getAttributeLocation("a_color");
+            this.textureCoordinateAtributeLocation = <number>this.shader.getAttributeLocation("a_textureCoordinate");
+            this.matrixLocation = <WebGLUniformLocation>this.shader.getUniformLocation("u_matrix");
 
             this.color = _color;
             this.colorBufferSpecification = {

@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export abstract class AssetManager {
 
-        private static FudgeNodes: { [key: string]: FudgeNode } = {}; // Associative array for created fudgenodes.
+        private static Nodes: { [key: string]: Node } = {}; // Associative array for created fudgenodes.
         private static Viewports: { [key: string]: Viewport } = {}; // Associative array for created viewports.
         private static Materials: { [key: string]: Material } = {};
 
@@ -14,9 +14,9 @@ namespace Fudge {
          * @param _asset 
          */
         public static addAsset(_asset: any): void {
-            if (_asset instanceof FudgeNode) {
-                if (this.FudgeNodes[_asset.Name] === undefined) {
-                    this.FudgeNodes[_asset.Name] = _asset;
+            if (_asset instanceof Node) {
+                if (this.Nodes[_asset.Name] === undefined) {
+                    this.Nodes[_asset.Name] = _asset;
                 }
                 else {
                     throw new Error(`There is allready a fudgenode named '${_asset.Name}'.`)
@@ -44,14 +44,14 @@ namespace Fudge {
          * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
          * @param _name The name to look for.
          */
-        public static getFudgeNode(_name: string): FudgeNode {
-            return this.FudgeNodes[_name];
+        public static getNode(_name: string): Node {
+            return this.Nodes[_name];
         }
         /**
          * Returns an object containing all fudgenodes that are currently in the array.
          */
-        public static getFudgeNodes(): Object {
-            return this.FudgeNodes;
+        public static getNodes(): Object {
+            return this.Nodes;
         }
 
         /**
@@ -59,11 +59,11 @@ namespace Fudge {
          * @param _name The name to look for.
          */
         public static deleteFudgeNode(_name: string): void {
-            if (this.FudgeNodes[_name] === undefined) {
+            if (this.Nodes[_name] === undefined) {
                 throw new Error(`Cannot find fudgenode named '${_name}'.`);
             }
             else {
-                delete this.FudgeNodes[_name];
+                delete this.Nodes[_name];
             }
         }
 

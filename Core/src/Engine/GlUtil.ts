@@ -28,10 +28,12 @@ namespace Fudge {
                 document.body.appendChild(canvas);
             }
 
-            gl2 = canvas.getContext("webgl2");
-            if (gl2 === undefined) {
+            // TODO use create-function below
+            let gl2found: WebGL2RenderingContext | null = canvas.getContext("webgl2");
+            if (gl2found === null) {
                 throw new Error("The Browser does not support WebGl2.");
             }
+            gl2 = gl2found;
             return canvas;
         }
 
@@ -43,12 +45,22 @@ namespace Fudge {
         public static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
             gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         };
+
+        public static create<T>(_result: T | null): T {
+            if (_result === null)
+                throw ("SOMETHING WENT WRONG");
+            return _result;
+        }
         /**
          * Wrapperclass that binds and initializes a texture.
          * @param _textureSource A string containing the path to the texture.
          */
         public static createTexture(_textureSource: string): void {
-            let texture: WebGLTexture = gl2.createTexture();
+            // TODO: use create throwable above
+            let textureCreated: WebGLTexture | null = gl2.createTexture();
+            if (textureCreated === null)
+                return;
+            let texture = textureCreated;
             gl2.bindTexture(gl2.TEXTURE_2D, texture);
             // Fill the texture with a 1x1 blue pixel.
             gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, 1, 1, 0, gl2.RGBA, gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
@@ -62,5 +74,5 @@ namespace Fudge {
                 gl2.generateMipmap(gl2.TEXTURE_2D);
             }
         }
-    } // End class.
-}// End namespace.
+    } 
+}

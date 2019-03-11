@@ -5,13 +5,13 @@ declare namespace Fudge {
      */
     abstract class Component {
         protected name: string;
-        protected container: FudgeNode;
+        protected container: Node | null;
         /**
          * The Superclass' constructor. Values will be overridden by subclass constructors
          * values will be set by the subclass' constructor.
          */
         readonly Name: string;
-        Container: FudgeNode;
+        Container: Node | null;
     }
 }
 declare namespace Fudge {
@@ -194,7 +194,7 @@ declare namespace Fudge {
      * Class handling all created fudgenodes, viewports and materials.
      */
     abstract class AssetManager {
-        private static FudgeNodes;
+        private static Nodes;
         private static Viewports;
         private static Materials;
         /**
@@ -206,11 +206,11 @@ declare namespace Fudge {
          * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
          * @param _name The name to look for.
          */
-        static getFudgeNode(_name: string): FudgeNode;
+        static getNode(_name: string): Node;
         /**
          * Returns an object containing all fudgenodes that are currently in the array.
          */
-        static getFudgeNodes(): Object;
+        static getNodes(): Object;
         /**
          * Removes the fudgenode with the passed name in the array. Throw's error if there is none.
          * @param _name The name to look for.
@@ -260,105 +260,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface StringToFudgeNode {
-        [key: string]: FudgeNode;
-    }
-    /**
-     * Represents a node in the scenetree.
-     */
-    class FudgeNode {
-        private name;
-        private parent;
-        private children;
-        private components;
-        private tags;
-        private layers;
-        /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
-         */
-        constructor(_name: string);
-        Name: string;
-        readonly Parent: FudgeNode;
-        /**
-         * Sets the parent of this node to be the supplied node.
-         * Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        private setParent;
-        readonly Layers: string[];
-        readonly Tags: string[];
-        /**
-         * Adds the name of a layer to this nodes layerarray.
-         * @param _name The name of the layer to add.
-         */
-        addLayer(_name: string): void;
-        /**
-         * Removes the name of a layer from this nodes layerarray.
-         * @param _name The name of the layer to remove.
-         */
-        removeLayer(_name: string): void;
-        /**
-         * Adds the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to add.
-         */
-        addTag(_name: string): void;
-        /**
-         * Removes the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to remove.
-         */
-        removeTag(_name: string): void;
-        /**
-         * Returns the children array of this node.
-         */
-        getChildren(): StringToFudgeNode;
-        /**
-         * Looks through this Nodes children array and returns a child with the supplied name.
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
-         */
-        getChildByName(_name: string): FudgeNode;
-        /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParend method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
-         */
-        appendChild(_child: FudgeNode): void;
-        /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
-         */
-        removeChild(_name: string): void;
-        /**
-         * Returns the component array of this node.
-         */
-        getComponents(): object;
-        /**
-         * Looks through this nodes component array and returns a component with the supplied name.
-         * If there are multiple components with the same name in the array, only the first that is found will be returned.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
-         */
-        getComponentByName(_name: string): Component;
-        /**
-         * Adds the supplied component into this nodes component array.
-         * If there is allready a component by the same name, it will be overridden.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component: Component): void;
-        /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
-         */
-        removeComponent(_name: string): void;
-    }
-}
-declare namespace Fudge {
     let gl2: WebGL2RenderingContext;
     /**
      * Utility class to sore and/or wrap some functionality.
@@ -375,6 +276,7 @@ declare namespace Fudge {
          * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
         static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
+        static create<T>(_result: T | null): T;
         /**
          * Wrapperclass that binds and initializes a texture.
          * @param _textureSource A string containing the path to the texture.
@@ -422,6 +324,105 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface AssocStringNode {
+        [key: string]: Node;
+    }
+    /**
+     * Represents a node in the scenetree.
+     */
+    class Node {
+        private name;
+        private parent;
+        private children;
+        private components;
+        private tags;
+        private layers;
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name: string);
+        Name: string;
+        readonly Parent: Node | null;
+        /**
+         * Sets the parent of this node to be the supplied node.
+         * Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        private setParent;
+        readonly Layers: string[];
+        readonly Tags: string[];
+        /**
+         * Adds the name of a layer to this nodes layerarray.
+         * @param _name The name of the layer to add.
+         */
+        addLayer(_name: string): void;
+        /**
+         * Removes the name of a layer from this nodes layerarray.
+         * @param _name The name of the layer to remove.
+         */
+        removeLayer(_name: string): void;
+        /**
+         * Adds the name of a tag to this nodes tagarray.
+         * @param _name The name of the tag to add.
+         */
+        addTag(_name: string): void;
+        /**
+         * Removes the name of a tag to this nodes tagarray.
+         * @param _name The name of the tag to remove.
+         */
+        removeTag(_name: string): void;
+        /**
+         * Returns the children array of this node.
+         */
+        getChildren(): AssocStringNode;
+        /**
+         * Looks through this Nodes children array and returns a child with the supplied name.
+         * If there are multiple children with the same name in the array, only the first that is found will be returned.
+         * Throws error if no child can be found by the supplied name.
+         * @param _name The name of the child to be found.
+         */
+        getChildByName(_name: string): Node;
+        /**
+         * Adds the supplied child into this nodes children array.
+         * Calls setParend method of supplied child with this Node as parameter.
+         * @param _child The child to be pushed into the array
+         */
+        appendChild(_child: Node): void;
+        /**
+         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
+         * If there are multiple children with the same name in the array, only the first that is found will be removed.
+         * Throws error if no child can be found by the name.
+         * @param _name The name of the child to be removed.
+         */
+        removeChild(_name: string): void;
+        /**
+         * Returns the component array of this node.
+         */
+        getComponents(): object;
+        /**
+         * Looks through this nodes component array and returns a component with the supplied name.
+         * If there are multiple components with the same name in the array, only the first that is found will be returned.
+         * Throws error if no component can be found by the name.
+         * @param _name The name of the component to be found.
+         */
+        getComponentByName(_name: string): Component | null;
+        /**
+         * Adds the supplied component into this nodes component array.
+         * If there is allready a component by the same name, it will be overridden.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component: Component): void;
+        /**
+         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
+         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Throws error if no component can be found by the name.
+         * @param _name The name of the component to be found.
+         */
+        removeComponent(_name: string): void;
+    }
+}
+declare namespace Fudge {
     /**
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      */
@@ -436,7 +437,7 @@ declare namespace Fudge {
          * @param _rootNode
          * @param _camera
          */
-        constructor(_name: string, _rootNode: FudgeNode, _camera: CameraComponent);
+        constructor(_name: string, _rootNode: Node, _camera: CameraComponent);
         readonly Name: string;
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
@@ -444,7 +445,7 @@ declare namespace Fudge {
         drawScene(): void;
         /**
          * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
-         * @param _fudgeNode The currend node to be drawn.
+         * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         private drawObjects;
@@ -459,12 +460,12 @@ declare namespace Fudge {
         private viewportNodeSceneGraphRoot;
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _fudgeNode The node to initialize.
+         * @param _node The node to initialize.
          */
-        initializeViewportNodes(_fudgeNode: FudgeNode): void;
+        initializeViewportNodes(_node: Node): void;
         /**
          * Initializes the vertexbuffer for a passed node.
-         * @param _fudgeNode The node to initialize a buffer for.
+         * @param _node The node to initialize a buffer for.
          */
         private initializeNodeBuffer;
         /**
@@ -698,12 +699,12 @@ declare namespace Fudge {
          * Get location of an attribute by its name.
          * @param _name Name of the attribute to locate.
          */
-        getAttributeLocation(_name: string): number;
+        getAttributeLocation(_name: string): number | null;
         /**
           * Get location of uniform by its name.
           * @param _name Name of the attribute to locate.
           */
-        getUniformLocation(_name: string): WebGLUniformLocation;
+        getUniformLocation(_name: string): WebGLUniformLocation | null;
         protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void;
         /**
          * Compiles shader from sourcestring.

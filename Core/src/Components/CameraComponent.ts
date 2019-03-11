@@ -47,18 +47,25 @@ namespace Fudge {
         public get BackgroundColor(): Vec3 {
             return this.backgroundColor;
         }
-        public get BackgroundEnabled():boolean{
+        public get BackgroundEnabled(): boolean {
             return this.backgroundEnabled;
         }
-        public enableBackground():void{
+        public enableBackground(): void {
             this.backgroundEnabled = true;
         }
-        public disableBackground() : void{
+        public disableBackground(): void {
             this.backgroundEnabled = false;
         }
-        public get ViewProjectionMatrix(): Mat4{
-            let viewMatrix : Mat4 = Mat4.inverse((<TransformComponent>this.container.getComponentByName("Transform")).Matrix || Mat4.identity());
-            return Mat4.multiply(this.projectionMatrix, viewMatrix);
+        public get ViewProjectionMatrix(): Mat4 {
+            let viewMatrix: Mat4 = Mat4.identity();
+            if (this.container) {
+                let transform: TransformComponent = <TransformComponent>this.container.getComponentByName("Transform");
+                if (transform) {
+                    viewMatrix = Mat4.inverse(transform.Matrix);
+                    return Mat4.multiply(this.projectionMatrix, viewMatrix);
+                }
+            }
+            return this.projectionMatrix;
         }
 
         // Projection methods.######################################################################################
@@ -84,6 +91,6 @@ namespace Fudge {
             this.perspective = false;
             this.projectionMatrix = Mat4.orthographic(_left, _right, _bottom, _top, 400, -400);
         }
-    } // End class.
+    }
 
-} // End namespace.
+}

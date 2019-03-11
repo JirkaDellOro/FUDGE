@@ -91,5 +91,5 @@ namespace Fudge {
             }
             gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
         }
-    } // End class.
-} // End namespace.
+    } 
+}
