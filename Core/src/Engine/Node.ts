@@ -1,4 +1,7 @@
 namespace Fudge {
+    export interface MapClassToComponents {
+        [className: string]: Component[];
+    }
     export interface AssocStringNode {
         [key: string]: Node
     };
@@ -9,7 +12,7 @@ namespace Fudge {
         private name: string; // The name to call this node by.
         private parent: Node | null; // The parent of this node.
         private children: AssocStringNode; // Associative array nodes appended to this node.
-        private components: { [key: string]: Component }; //Associative array of components attached to this node.
+        private components: MapClassToComponents;
         private tags: string[]; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         private layers: string[]; // Names of the layers this node is on. (TODO: As of yet no functionality)
 
@@ -137,7 +140,7 @@ namespace Fudge {
 
         /**
          * Adds the supplied child into this nodes children array.
-         * Calls setParend method of supplied child with this Node as parameter.
+         * Calls setParent method of supplied child with this Node as parameter.
          * @param _child The child to be pushed into the array
          */
         public appendChild(_child: Node): void {
@@ -168,47 +171,27 @@ namespace Fudge {
             }
         }
 
-        // Component methods.######################################################################################
         /**
-         * Returns the component array of this node.
-         */
-        public getComponents(): object {
-            console.log(this.components);
-            return this.components;
-        }
-
-        /**
-         * Looks through this nodes component array and returns a component with the supplied name. 
-         * If there are multiple components with the same name in the array, only the first that is found will be returned.
-         * Throws error if no component can be found by the name.
+         * Returns all components of the given class. 
          * @param _name The name of the component to be found.
          */
-        public getComponentByName(_name: string): Component | null {
-            let component: Component;
-            if (this.components[_name] != undefined) {
-                component = this.components[_name];
-                return component;
-            }
-            else {
-                return null;
-            }
-
+        public getComponents(_class: typeof Component): Component[] {
+            return this.components[_class.name] || [];
         }
+
         /**
-         * Adds the supplied component into this nodes component array.
-         * If there is allready a component by the same name, it will be overridden.
+         * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
          */
         public addComponent(_component: Component): void {
-            let name: string = _component.Name;
-            if (this.components[name] != undefined) {
-                console.log(`There is allready a component by the name '${_component.Name}'. Deleting component '${this.components[name]}'.`)
-                delete this.components[name];
-            }
-            this.components[name] = _component;
-            if (_component.Container != undefined) {
-                _component.Container.removeComponent(_component.Name);
-            }
+            if (this.components[_component.Classname] === undefined)
+                this.components[_component.Classname] = [_component];
+            else
+                if (_component.isSingleton)
+                    throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+                else
+                    this.components[_component.Classname].push(_component);
+
             _component.Container = this;
         }
         /**
@@ -217,6 +200,7 @@ namespace Fudge {
          * Throws error if no component can be found by the name.
          * @param _name The name of the component to be found.
          */
+        /*
         public removeComponent(_name: string): void {
             if (this.components[_name]) {
                 this.components[_name].Container = null;
@@ -227,5 +211,6 @@ namespace Fudge {
                 throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
             }
         }
+        */
     }
 }

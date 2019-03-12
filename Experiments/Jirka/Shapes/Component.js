@@ -1,12 +1,12 @@
 var Shapes;
 (function (Shapes) {
     class Component {
-        constructor(_name, _singleton) {
+        constructor() {
             this.singleton = false;
-            this.type = "";
             this.parent = null;
-            this.singleton = _singleton;
-            this.type = _name;
+        }
+        getClassname() {
+            return this.constructor.name;
         }
     }
     Shapes.Component = Component;

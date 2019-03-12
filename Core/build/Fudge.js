@@ -2,16 +2,18 @@
 var Fudge;
 (function (Fudge) {
     /**
-     * Superclass for all components that hold data for a sceneobject (i.e. SceneNodes).
+     * Superclass for all Components that may be attached to Nodes.
      */
     class Component {
-        /**
-         * The Superclass' constructor. Values will be overridden by subclass constructors
-         * values will be set by the subclass' constructor.
-         */
-        // Get and set methods.######################################################################################
-        get Name() {
-            return this.name;
+        constructor() {
+            this.container = null;
+            this.singleton = false;
+        }
+        get Classname() {
+            return this.constructor.name;
+        }
+        get isSingleton() {
+            return this.singleton;
         }
         get Container() {
             return this.container;
@@ -76,14 +78,14 @@ var Fudge;
         }
         get ViewProjectionMatrix() {
             let viewMatrix = Fudge.Mat4.identity();
-            if (this.container) {
-                let transform = this.container.getComponentByName("Transform");
-                if (transform) {
-                    viewMatrix = Fudge.Mat4.inverse(transform.Matrix);
-                    return Fudge.Mat4.multiply(this.projectionMatrix, viewMatrix);
-                }
+            try {
+                let transform = this.container.getComponents(Fudge.TransformComponent)[0];
+                viewMatrix = Fudge.Mat4.inverse(transform.Matrix);
+                return Fudge.Mat4.multiply(this.projectionMatrix, viewMatrix);
             }
-            return this.projectionMatrix;
+            catch {
+                return this.projectionMatrix;
+            }
         }
         // Projection methods.######################################################################################
         /**
@@ -116,12 +118,9 @@ var Fudge;
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
      */
     class MaterialComponent extends Fudge.Component {
-        constructor(_material) {
-            super();
-            this.name = "Material";
+        initialize(_material) {
             this.material = _material;
         }
-        // Get and set methods.######################################################################################
         get Material() {
             return this.material;
         }
@@ -134,9 +133,7 @@ var Fudge;
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      */
     class MeshComponent extends Fudge.Component {
-        constructor(_positions, _size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
-            super();
-            this.name = "Mesh";
+        initialize(_positions, _size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
             this.positions = _positions;
             this.bufferSpecification = {
                 size: _size,
@@ -215,10 +212,8 @@ var Fudge;
      */
     class PivotComponent extends Fudge.Component {
         constructor() {
-            super();
-            this.name = "Pivot";
-            this.container = null;
-            this.matrix = Fudge.Mat4.identity();
+            super(...arguments);
+            this.matrix = Fudge.Mat4.identity(); // The matrix to transform the mesh by.
         }
         // Get and set methods.######################################################################################
         get Matrix() {
@@ -339,24 +334,28 @@ var Fudge;
      * Transform component affects the origin of a node and its descendants.
      */
     class TransformComponent extends Fudge.PivotComponent {
+        //* TODO: figure out why there is an extra matrix necessary. Implement initialize method if applicable
         constructor() {
             super();
-            this.name = "Transform";
             this.worldMatrix = this.matrix;
         }
+        //*/
         // Get and Set methods.######################################################################################
         get WorldMatrix() {
-            return this.worldMatrix;
+            /* */ return this.worldMatrix;
+            //* */return this.matrix;
         }
         set WorldMatrix(_matrix) {
-            this.worldMatrix = _matrix;
+            /* */ this.worldMatrix = _matrix;
+            //* */this.matrix = _matrix;
         }
         get WorldPosition() {
-            return new Fudge.Vec3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
+            /* */ return new Fudge.Vec3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
+            //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
-    } // End of class
+    }
     Fudge.TransformComponent = TransformComponent;
-})(Fudge || (Fudge = {})); // Close namespace
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -500,12 +499,7 @@ var Fudge;
                 canvas.height = 640;
                 document.body.appendChild(canvas);
             }
-            // TODO use create-function below
-            let gl2found = canvas.getContext("webgl2");
-            if (gl2found === null) {
-                throw new Error("The Browser does not support WebGl2.");
-            }
-            Fudge.gl2 = gl2found;
+            Fudge.gl2 = GLUtil.assert(canvas.getContext("webgl2"), "WebGL-context couldn't be created");
             return canvas;
         }
         /**
@@ -517,21 +511,22 @@ var Fudge;
             Fudge.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
         ;
-        static create(_result) {
-            if (_result === null)
-                throw ("SOMETHING WENT WRONG");
-            return _result;
+        /**
+         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+         * @param _value // value to check against null
+         * @param _message // optional, additional message for the exception
+         */
+        static assert(_value, _message = "") {
+            if (_value === null)
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${Fudge.gl2 ? Fudge.gl2.getError() : ""}`);
+            return _value;
         }
         /**
          * Wrapperclass that binds and initializes a texture.
          * @param _textureSource A string containing the path to the texture.
          */
         static createTexture(_textureSource) {
-            // TODO: use create throwable above
-            let textureCreated = Fudge.gl2.createTexture();
-            if (textureCreated === null)
-                return;
-            let texture = textureCreated;
+            let texture = GLUtil.assert(Fudge.gl2.createTexture());
             Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
             // Fill the texture with a 1x1 blue pixel.
             Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, 1, 1, 0, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
@@ -554,14 +549,14 @@ var Fudge;
      * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
      */
     class Material {
+        // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
         constructor(_name, _color, _shader) {
             this.name = _name;
             this.shader = _shader;
-            // TODO: check null
-            this.positionAttributeLocation = this.shader.getAttributeLocation("a_position");
-            this.colorAttributeLocation = this.shader.getAttributeLocation("a_color");
-            this.textureCoordinateAtributeLocation = this.shader.getAttributeLocation("a_textureCoordinate");
-            this.matrixLocation = this.shader.getUniformLocation("u_matrix");
+            this.positionAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_position"));
+            this.colorAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_color"));
+            this.textureCoordinateAtributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_textureCoordinate"));
+            this.matrixLocation = Fudge.GLUtil.assert(this.shader.getUniformLocation("u_matrix"));
             this.color = _color;
             this.colorBufferSpecification = {
                 size: 3,
@@ -763,7 +758,7 @@ var Fudge;
         }
         /**
          * Adds the supplied child into this nodes children array.
-         * Calls setParend method of supplied child with this Node as parameter.
+         * Calls setParent method of supplied child with this Node as parameter.
          * @param _child The child to be pushed into the array
          */
         appendChild(_child) {
@@ -792,62 +787,25 @@ var Fudge;
                 throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
             }
         }
-        // Component methods.######################################################################################
         /**
-         * Returns the component array of this node.
-         */
-        getComponents() {
-            console.log(this.components);
-            return this.components;
-        }
-        /**
-         * Looks through this nodes component array and returns a component with the supplied name.
-         * If there are multiple components with the same name in the array, only the first that is found will be returned.
-         * Throws error if no component can be found by the name.
+         * Returns all components of the given class.
          * @param _name The name of the component to be found.
          */
-        getComponentByName(_name) {
-            let component;
-            if (this.components[_name] != undefined) {
-                component = this.components[_name];
-                return component;
-            }
-            else {
-                return null;
-            }
+        getComponents(_class) {
+            return this.components[_class.name] || [];
         }
         /**
-         * Adds the supplied component into this nodes component array.
-         * If there is allready a component by the same name, it will be overridden.
+         * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component) {
-            let name = _component.Name;
-            if (this.components[name] != undefined) {
-                console.log(`There is allready a component by the name '${_component.Name}'. Deleting component '${this.components[name]}'.`);
-                delete this.components[name];
-            }
-            this.components[name] = _component;
-            if (_component.Container != undefined) {
-                _component.Container.removeComponent(_component.Name);
-            }
+            if (this.components[_component.Classname] === undefined)
+                this.components[_component.Classname] = [_component];
+            else if (_component.isSingleton)
+                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+            else
+                this.components[_component.Classname].push(_component);
             _component.Container = this;
-        }
-        /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
-         */
-        removeComponent(_name) {
-            if (this.components[_name]) {
-                this.components[_name].Container = null;
-                delete this.components[_name];
-                console.log(`Component '${_name}' removed.`);
-            }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
-            }
         }
     }
     Fudge.Node = Node;
@@ -896,18 +854,19 @@ var Fudge;
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         drawObjects(_node, _matrix) {
-            if (_node.getComponentByName("Mesh")) {
-                let mesh = _node.getComponentByName("Mesh");
-                let transform = _node.getComponentByName("Transform");
-                let materialComponent = _node.getComponentByName("Material");
+            if (_node.getComponents(Fudge.MeshComponent).length > 0) {
+                let mesh = _node.getComponents(Fudge.MeshComponent)[0];
+                let transform = _node.getComponents(Fudge.TransformComponent)[0];
+                let materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
                 materialComponent.Material.Shader.use();
                 Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
                 Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                 // Compute the matrices
                 let transformMatrix = transform.WorldMatrix;
-                if (_node.getComponentByName("Pivot")) {
-                    let pivot = _node.getComponentByName("Pivot");
-                    transformMatrix = Fudge.Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
+                if (_node.getComponents(Fudge.PivotComponent)) {
+                    let pivot = _node.getComponents(Fudge.PivotComponent)[0];
+                    if (pivot)
+                        transformMatrix = Fudge.Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
                 let objectViewProjectionMatrix = Fudge.Mat4.multiply(_matrix, transformMatrix);
                 // Supply matrixdata to shader. 
@@ -925,12 +884,12 @@ var Fudge;
          * @param _fudgeNode The node which's transform worldmatrix to update.
          */
         updateNodeWorldMatrix(_fudgeNode) {
-            let transform = _fudgeNode.getComponentByName("Transform");
+            let transform = _fudgeNode.getComponents(Fudge.TransformComponent)[0];
             if (!_fudgeNode.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform = _fudgeNode.Parent.getComponentByName("Transform");
+                let parentTransform = _fudgeNode.Parent.getComponents(Fudge.TransformComponent)[0];
                 transform.WorldMatrix = Fudge.Mat4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
             for (let name in _fudgeNode.getChildren()) {
@@ -953,25 +912,28 @@ var Fudge;
          * @param _node The node to initialize.
          */
         initializeViewportNodes(_node) {
-            if (!_node.getComponentByName("Transform")) {
+            console.log(_node.Name);
+            if (!_node.getComponents(Fudge.TransformComponent)) {
                 let transform = new Fudge.TransformComponent();
                 _node.addComponent(transform);
             }
             let mesh;
-            if (_node.getComponentByName("Mesh") == undefined) {
+            if (_node.getComponents(Fudge.MeshComponent).length == 0) {
                 console.log(`No Mesh attached to node named '${_node.Name}'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = _node.getComponentByName("Mesh");
+                mesh = _node.getComponents(Fudge.MeshComponent)[0];
                 Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
                 let materialComponent;
-                if (_node.getComponentByName("Material") == undefined) {
+                if (_node.getComponents(Fudge.MaterialComponent)[0] == undefined) {
                     console.log(`No Material attached to node named '${_node.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    _node.addComponent(new Fudge.MaterialComponent(Fudge.AssetManager.getMaterial("standardMaterial")));
+                    materialComponent = new Fudge.MaterialComponent();
+                    materialComponent.initialize(Fudge.AssetManager.getMaterial("standardMaterial"));
+                    _node.addComponent(materialComponent);
                 }
-                materialComponent = _node.getComponentByName("Material");
+                materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
                 let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
                 Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
                 this.initializeNodeMaterial(materialComponent, mesh);
@@ -1008,8 +970,7 @@ var Fudge;
          * @param _mesh The node's meshcomponent.
          */
         initializeNodeMaterial(_materialComponent, _meshComponent) {
-            // TODO: check null
-            let colorBuffer = Fudge.gl2.createBuffer();
+            let colorBuffer = Fudge.GLUtil.assert(Fudge.gl2.createBuffer());
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, colorBuffer);
             _meshComponent.applyColor(_materialComponent);
             let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
@@ -1763,9 +1724,8 @@ var Fudge;
             return this.uniforms[_name];
         }
         load(_vertexShaderSource, _fragmentShaderSource) {
-            // TODO: check null
-            let vertexShader = this.loadShader(_vertexShaderSource, Fudge.gl2.VERTEX_SHADER);
-            let fragmentShader = this.loadShader(_fragmentShaderSource, Fudge.gl2.FRAGMENT_SHADER);
+            let vertexShader = Fudge.GLUtil.assert(this.compileShader(_vertexShaderSource, Fudge.gl2.VERTEX_SHADER));
+            let fragmentShader = Fudge.GLUtil.assert(this.compileShader(_fragmentShaderSource, Fudge.gl2.FRAGMENT_SHADER));
             this.createProgram(vertexShader, fragmentShader);
             this.detectAttributes();
             this.detectUniforms();
@@ -1776,13 +1736,11 @@ var Fudge;
          * @param _source The sourcevariable holding a GLSL shaderstring.
          * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
          */
-        loadShader(_source, _shaderType) {
-            // TODO: check null
-            let shader = Fudge.gl2.createShader(_shaderType);
+        compileShader(_source, _shaderType) {
+            let shader = Fudge.GLUtil.assert(Fudge.gl2.createShader(_shaderType));
             Fudge.gl2.shaderSource(shader, _source);
             Fudge.gl2.compileShader(shader);
-            // TODO: check null
-            let error = Fudge.gl2.getShaderInfoLog(shader);
+            let error = Fudge.GLUtil.assert(Fudge.gl2.getShaderInfoLog(shader));
             if (error !== "") {
                 throw new Error("Error compiling shader: " + error);
             }
@@ -1799,8 +1757,7 @@ var Fudge;
          * @param fragmentShader The compiled fragmentshader to be used by the programm.
          */
         createProgram(vertexShader, fragmentShader) {
-            // TODO: check null
-            this.program = Fudge.gl2.createProgram();
+            this.program = Fudge.GLUtil.assert(Fudge.gl2.createProgram());
             Fudge.gl2.attachShader(this.program, vertexShader);
             Fudge.gl2.attachShader(this.program, fragmentShader);
             Fudge.gl2.linkProgram(this.program);
@@ -1821,8 +1778,7 @@ var Fudge;
         detectAttributes() {
             let attributeCount = Fudge.gl2.getProgramParameter(this.program, Fudge.gl2.ACTIVE_ATTRIBUTES);
             for (let i = 0; i < attributeCount; i++) {
-                // TODO: check null
-                let attributeInfo = Fudge.gl2.getActiveAttrib(this.program, i);
+                let attributeInfo = Fudge.GLUtil.assert(Fudge.gl2.getActiveAttrib(this.program, i));
                 if (!attributeInfo) {
                     break;
                 }
@@ -1835,13 +1791,11 @@ var Fudge;
         detectUniforms() {
             let uniformCount = Fudge.gl2.getProgramParameter(this.program, Fudge.gl2.ACTIVE_UNIFORMS);
             for (let i = 0; i < uniformCount; i++) {
-                // TODO: check null
-                let info = Fudge.gl2.getActiveUniform(this.program, i);
+                let info = Fudge.GLUtil.assert(Fudge.gl2.getActiveUniform(this.program, i));
                 if (!info) {
                     break;
                 }
-                // TODO: check null
-                this.uniforms[info.name] = Fudge.gl2.getUniformLocation(this.program, info.name);
+                this.uniforms[info.name] = Fudge.GLUtil.assert(Fudge.gl2.getUniformLocation(this.program, info.name));
             }
         }
     }

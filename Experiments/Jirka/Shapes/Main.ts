@@ -5,21 +5,21 @@
  */
 namespace Shapes {
     window.addEventListener("load", init);
-    let root: GameObject = new GameObject("Root");
+    let root: GameObject = new GameObject();
     let crc2: CanvasRenderingContext2D;
-
+    
     function init(_event: Event): void {
         let canvas: HTMLCanvasElement = document.getElementsByTagName("canvas")[0];
         crc2 = canvas.getContext("2d");
 
-        let go1: GameObject = new GameObject("Square");
+        let go1: GameObject = new GameObject();
         let s: Shape = createSquare(100);
         go1.addComponent(s);
         go1.transform.x = 200;
         go1.transform.y = 150;
         go1.transform.r = Math.PI / 4;
 
-        let go2: GameObject = new GameObject("Circle");
+        let go2: GameObject = new GameObject();
         s = createCircle(50);
         go2.addComponent(s);
         go2.transform.x = 60;
@@ -29,22 +29,25 @@ namespace Shapes {
         go1.render(crc2);
 
         go1.addComponent(new TestScript());
-        console.log(go1.components);
+        //console.log(go1.components);
 
         root.addComponent(go1);
+
+        let components: Component[] = go1.getComponentsExtending(Component);
+        console.log(components);
         animate();
     }
 
     function animate(): void {
         crc2.clearRect(0, 0, crc2.canvas.width, crc2.canvas.height);
-        let s: GameObject = root.find("Square");
+        let s: GameObject = <GameObject>root.getComponents(GameObject)[0];
         s.transform.r += 0.01;
         s.transform.x += 1;
         if (s.transform.x > crc2.canvas.width)
             s.transform.x = 0;
         s.render(crc2);
 
-        let t: TestScript = <TestScript>s.getScript(TestScript);
+        let t: TestScript = <TestScript>s.getComponents(TestScript)[0];
         t.sayHello();
         window.setTimeout(animate, 20);
     }

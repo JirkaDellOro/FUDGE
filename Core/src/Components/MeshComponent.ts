@@ -1,18 +1,14 @@
 namespace Fudge {
-
     /**
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      */
     export class MeshComponent extends Component {
-
         private positions: Float32Array; // The Mesh's vertexpositions.
         private vertexCount: number; // The amount of Vertices that need to be drawn.
         private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
         private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
 
-        public constructor(_positions: Float32Array, _size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false) {
-            super();
-            this.name = "Mesh";
+        public initialize(_positions: Float32Array, _size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false) {
             this.positions = _positions;
             this.bufferSpecification = {
                 size: _size,

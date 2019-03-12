@@ -7,7 +7,8 @@ namespace Shapes {
         r: number = 0;
 
         constructor() {
-            super("Transform", true);
+            super();
+            this.singleton = true;
         }
 
         apply(_c: CanvasRenderingContext2D): void {

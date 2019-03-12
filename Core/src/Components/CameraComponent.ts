@@ -58,14 +58,14 @@ namespace Fudge {
         }
         public get ViewProjectionMatrix(): Mat4 {
             let viewMatrix: Mat4 = Mat4.identity();
-            if (this.container) {
-                let transform: TransformComponent = <TransformComponent>this.container.getComponentByName("Transform");
-                if (transform) {
-                    viewMatrix = Mat4.inverse(transform.Matrix);
-                    return Mat4.multiply(this.projectionMatrix, viewMatrix);
-                }
+            try {
+                let transform: TransformComponent = <TransformComponent>this.container.getComponents(TransformComponent)[0];
+                viewMatrix = Mat4.inverse(transform.Matrix);
+                return Mat4.multiply(this.projectionMatrix, viewMatrix);
             }
-            return this.projectionMatrix;
+            catch {
+                return this.projectionMatrix;
+            }
         }
 
         // Projection methods.######################################################################################

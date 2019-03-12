@@ -1,16 +1,13 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
     /**
-     * Superclass for all components that hold data for a sceneobject (i.e. SceneNodes).
+     * Superclass for all Components that may be attached to Nodes.
      */
     abstract class Component {
-        protected name: string;
         protected container: Node | null;
-        /**
-         * The Superclass' constructor. Values will be overridden by subclass constructors
-         * values will be set by the subclass' constructor.
-         */
-        readonly Name: string;
+        protected singleton: boolean;
+        readonly Classname: string;
+        readonly isSingleton: boolean;
         Container: Node | null;
     }
 }
@@ -59,7 +56,7 @@ declare namespace Fudge {
      */
     class MaterialComponent extends Component {
         private material;
-        constructor(_material: Material);
+        initialize(_material: Material): void;
         readonly Material: Material;
     }
 }
@@ -72,7 +69,7 @@ declare namespace Fudge {
         private vertexCount;
         private bufferSpecification;
         private normals;
-        constructor(_positions: Float32Array, _size?: number, _dataType?: number, _normalize?: boolean);
+        initialize(_positions: Float32Array, _size?: number, _dataType?: number, _normalize?: boolean): void;
         readonly Positions: Float32Array;
         readonly BufferSpecification: BufferSpecification;
         readonly VertexCount: number;
@@ -100,7 +97,6 @@ declare namespace Fudge {
      */
     class PivotComponent extends Component {
         protected matrix: Mat4;
-        constructor();
         readonly Matrix: Mat4;
         readonly Position: Vec3;
         /**
@@ -276,7 +272,12 @@ declare namespace Fudge {
          * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
         static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
-        static create<T>(_result: T | null): T;
+        /**
+         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+         * @param _value // value to check against null
+         * @param _message // optional, additional message for the exception
+         */
+        static assert<T>(_value: T | null, _message?: string): T;
         /**
          * Wrapperclass that binds and initializes a texture.
          * @param _textureSource A string containing the path to the texture.
@@ -324,6 +325,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface MapClassToComponents {
+        [className: string]: Component[];
+    }
     interface AssocStringNode {
         [key: string]: Node;
     }
@@ -385,7 +389,7 @@ declare namespace Fudge {
         getChildByName(_name: string): Node;
         /**
          * Adds the supplied child into this nodes children array.
-         * Calls setParend method of supplied child with this Node as parameter.
+         * Calls setParent method of supplied child with this Node as parameter.
          * @param _child The child to be pushed into the array
          */
         appendChild(_child: Node): void;
@@ -397,29 +401,15 @@ declare namespace Fudge {
          */
         removeChild(_name: string): void;
         /**
-         * Returns the component array of this node.
-         */
-        getComponents(): object;
-        /**
-         * Looks through this nodes component array and returns a component with the supplied name.
-         * If there are multiple components with the same name in the array, only the first that is found will be returned.
-         * Throws error if no component can be found by the name.
+         * Returns all components of the given class.
          * @param _name The name of the component to be found.
          */
-        getComponentByName(_name: string): Component | null;
+        getComponents(_class: typeof Component): Component[];
         /**
-         * Adds the supplied component into this nodes component array.
-         * If there is allready a component by the same name, it will be overridden.
+         * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component: Component): void;
-        /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
-         */
-        removeComponent(_name: string): void;
     }
 }
 declare namespace Fudge {
@@ -711,7 +701,7 @@ declare namespace Fudge {
          * @param _source The sourcevariable holding a GLSL shaderstring.
          * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
          */
-        private loadShader;
+        private compileShader;
         /**
          * Create shaderprogramm that will be used on GPU.
          * @param vertexShader The compiled vertexshader to be used by the programm.

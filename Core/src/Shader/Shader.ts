@@ -37,9 +37,8 @@ namespace Fudge {
         }
 
         protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void {
-            // TODO: check null
-            let vertexShader: WebGLShader = <WebGLShader>this.loadShader(_vertexShaderSource, gl2.VERTEX_SHADER);
-            let fragmentShader: WebGLShader = <WebGLShader>this.loadShader(_fragmentShaderSource, gl2.FRAGMENT_SHADER);
+            let vertexShader: WebGLShader = GLUtil.assert<WebGLShader>(this.compileShader(_vertexShaderSource, gl2.VERTEX_SHADER));
+            let fragmentShader: WebGLShader = GLUtil.assert<WebGLShader>(this.compileShader(_fragmentShaderSource, gl2.FRAGMENT_SHADER));
             this.createProgram(vertexShader, fragmentShader);
             this.detectAttributes();
             this.detectUniforms();
@@ -51,13 +50,11 @@ namespace Fudge {
          * @param _source The sourcevariable holding a GLSL shaderstring.
          * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
          */
-        private loadShader(_source: string, _shaderType: number): WebGLShader | null {
-            // TODO: check null
-            let shader: WebGLShader = <WebGLShader>gl2.createShader(_shaderType);
+        private compileShader(_source: string, _shaderType: GLenum): WebGLShader | null {
+            let shader: WebGLShader = GLUtil.assert<WebGLShader>(gl2.createShader(_shaderType));
             gl2.shaderSource(shader, _source);
             gl2.compileShader(shader);
-            // TODO: check null
-            let error: string = <string>gl2.getShaderInfoLog(shader);
+            let error: string = GLUtil.assert<string>(gl2.getShaderInfoLog(shader));
             if (error !== "") {
                 throw new Error("Error compiling shader: " + error);
             }
@@ -74,8 +71,7 @@ namespace Fudge {
          * @param fragmentShader The compiled fragmentshader to be used by the programm.
          */
         private createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): void {
-            // TODO: check null
-            this.program = <WebGLProgram>gl2.createProgram();
+            this.program = GLUtil.assert<WebGLProgram>(gl2.createProgram());
 
             gl2.attachShader(this.program, vertexShader);
             gl2.attachShader(this.program, fragmentShader);
@@ -99,8 +95,7 @@ namespace Fudge {
         private detectAttributes(): void {
             let attributeCount: number = gl2.getProgramParameter(this.program, gl2.ACTIVE_ATTRIBUTES);
             for (let i: number = 0; i < attributeCount; i++) {
-                // TODO: check null
-                let attributeInfo: WebGLActiveInfo = <WebGLActiveInfo>gl2.getActiveAttrib(this.program, i);
+                let attributeInfo: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(gl2.getActiveAttrib(this.program, i));
                 if (!attributeInfo) {
                     break;
                 }
@@ -113,13 +108,11 @@ namespace Fudge {
         private detectUniforms(): void {
             let uniformCount: number = gl2.getProgramParameter(this.program, gl2.ACTIVE_UNIFORMS);
             for (let i: number = 0; i < uniformCount; i++) {
-                // TODO: check null
-                let info: WebGLActiveInfo = <WebGLActiveInfo>gl2.getActiveUniform(this.program, i);
+                let info: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(gl2.getActiveUniform(this.program, i));
                 if (!info) {
                     break;
                 }
-                // TODO: check null
-                this.uniforms[info.name] = <WebGLUniformLocation>gl2.getUniformLocation(this.program, info.name);
+                this.uniforms[info.name] = GLUtil.assert<WebGLUniformLocation>(gl2.getUniformLocation(this.program, info.name));
             }
         }
     }

@@ -8,7 +8,9 @@ namespace TimeTest {
         private start: number;
         private scale: number;
         private offset: number;
-        private lastCallToElapsed: number;
+        /** just testing comment */
+        private lastCallToElapsed: number; 
+        private xz: string;
 
         constructor() {
             this.start = performance.now();

@@ -11,8 +11,10 @@ var JaschasExample;
         let greenMaterial = new ƒ.Material("greenMaterial", new ƒ.Vec3(130, 130, 0), basicShader);
         let texturedMaterial = new ƒ.Material("texturedMaterial", new ƒ.Vec3(255, 255, 255), basicShader);
         texturedMaterial.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
-        let meshComponent0 = new ƒ.MeshComponent(new ƒ.BoxGeometry(50, 50, 50).Positions);
-        let materialComponent0 = new ƒ.MaterialComponent(texturedMaterial);
+        let meshComponent0 = new ƒ.MeshComponent();
+        meshComponent0.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        let materialComponent0 = new ƒ.MaterialComponent();
+        materialComponent0.initialize(texturedMaterial);
         let transformComponent0 = new ƒ.TransformComponent();
         let pivotComponent0 = new ƒ.PivotComponent();
         let fudge0 = new ƒ.Node("Fudge0");
@@ -23,7 +25,8 @@ var JaschasExample;
         pivotComponent0.translateY(-50);
         let fudge1 = new ƒ.Node("Fudge1");
         let transformComponent1 = new ƒ.TransformComponent();
-        let meshComponent1 = new ƒ.MeshComponent(new ƒ.BoxGeometry(25, 25, 25).Positions);
+        let meshComponent1 = new ƒ.MeshComponent();
+        meshComponent1.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
         fudge1.addComponent(meshComponent1);
         fudge1.addComponent(transformComponent1);
         transformComponent1.translate(150, 0, 0);
@@ -33,8 +36,10 @@ var JaschasExample;
         transformComponent2.translate(0, -150, 0);
         let fudge3 = new ƒ.Node("Fudge3");
         let transformComponent3 = new ƒ.TransformComponent();
-        let meshComponent3 = new ƒ.MeshComponent(new ƒ.BoxGeometry(15, 15, 100).Positions);
-        let materialComponent3 = new ƒ.MaterialComponent(greenMaterial);
+        let meshComponent3 = new ƒ.MeshComponent();
+        meshComponent3.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
+        let materialComponent3 = new ƒ.MaterialComponent();
+        materialComponent3.initialize(greenMaterial);
         fudge3.addComponent(meshComponent3);
         fudge3.addComponent(materialComponent3);
         fudge3.addComponent(transformComponent3);
@@ -42,7 +47,7 @@ var JaschasExample;
         let cameraNode = new ƒ.Node("Camera");
         let cameraTransformComponent = new ƒ.TransformComponent();
         cameraTransformComponent.translate(100, 100, 500);
-        cameraTransformComponent.lookAt(fudge0.getComponentByName("Transform").Position);
+        cameraTransformComponent.lookAt(fudge0.getComponents(ƒ.TransformComponent)[0].Position);
         cameraNode.addComponent(cameraTransformComponent);
         let cameraComponent = new ƒ.CameraComponent();
         cameraNode.addComponent(cameraComponent);
@@ -58,15 +63,15 @@ var JaschasExample;
     // Trial function that animates the scene.
     function play() {
         let rotation = 1;
-        ƒ.AssetManager.getNode("Fudge2").getComponentByName("Transform").rotateY(rotation);
-        ƒ.AssetManager.getNode("Fudge0").getComponentByName("Pivot").rotateY(-rotation);
+        ƒ.AssetManager.getNode("Fudge2").getComponents(ƒ.TransformComponent)[0].rotateY(rotation);
+        ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.PivotComponent)[0].rotateY(-rotation);
         ƒ.AssetManager.getViewport("Scene1").drawScene();
         requestAnimationFrame(play);
     }
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event) {
-        let transform = ƒ.AssetManager.getNode("Camera").getComponentByName("Transform");
-        let target = ƒ.AssetManager.getNode("Fudge0").getComponentByName("Transform").Position;
+        let transform = ƒ.AssetManager.getNode("Camera").getComponents(ƒ.TransformComponent)[0];
+        let target = ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.TransformComponent)[0].Position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);

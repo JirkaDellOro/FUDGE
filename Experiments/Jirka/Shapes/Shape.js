@@ -2,12 +2,13 @@ var Shapes;
 (function (Shapes) {
     class Shape extends Shapes.Component {
         constructor() {
-            super("Shape", true);
+            super();
             this.splinePoints = [];
             this.fillColor = "red";
             this.lineColor = "black";
             this.lineWidth = 1;
             this.closed = false;
+            this.singleton = true;
         }
         addPoint(_x, _y, _xd1, _yd1, _xd2, _yd2) {
             let sp = new Shapes.SplinePoint(_x, _y, _xd1, _yd1, _xd2, _yd2);

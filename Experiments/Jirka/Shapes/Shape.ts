@@ -7,7 +7,8 @@ namespace Shapes {
         closed: boolean = false;
 
         constructor() {
-            super("Shape", true);
+            super();
+            this.singleton = true;
         }
 
         addPoint(_x: number, _y: number, _xd1: number, _yd1: number, _xd2: number, _yd2: number): void {
