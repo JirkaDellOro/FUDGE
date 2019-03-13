@@ -1,50 +1,30 @@
 /// <reference path="Component.ts"/>
 namespace Fudge {
     /**
-     * The camera component passes the ability to render a scene from the perspective of the
-     * node it is attached to.
+     * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      */
     export class CameraComponent extends Component {
-        private enabled: boolean; // Determines whether or not the camera will render what it can see.
-        private perspective: boolean; // Determines whether the image will be rendered with perspective or orthographic projection.
-        private projectionMatrix: Mat4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
-        private fieldOfView: number; // The camera's sensorangle.
-        private backgroundColor: Vec3; // The color of the background the camera will render.
-        private backgroundEnabled: boolean; // Determines whether or not the background of this camera will be rendered.
+        private enabled: boolean = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass?
+        private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+        private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+        private fieldOfView: number = 45; // The camera's sensorangle.
+        private backgroundColor: Vector3 = new Vector3(0, 0, 0); // The color of the background the camera will render.
+        private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
 
-        public constructor(_perspective: boolean = true) {
-            super();
-            this.enabled = true;
-            this.projectionMatrix = new Mat4;
-            this.perspective = _perspective;
-            if (!this.perspective) {
-                this.setCameraToOrthographic();
-            }
-            else {
-                this.setCameraToPerspective();
-            }
-            this.fieldOfView = 45;
-            this.backgroundColor = new Vec3(0, 0, 0);
-            this.backgroundEnabled = true;
-        }
-
-        // Get and set Methods.######################################################################################
         public get Enabled(): boolean {
             return this.enabled;
         }
-        public enable(): void {
-            this.enabled = true;
+        public set Enabled(_enabled: boolean) {
+            this.enabled = _enabled;
         }
-        public disable(): void {
-            this.enabled = false;
-        }
-        public get Perspective(): boolean {
-            return this.perspective;
+
+        public get Orthographic(): boolean {
+            return this.orthographic;
         }
         public get FieldOfView(): number {
             return this.fieldOfView;
         }
-        public get BackgroundColor(): Vec3 {
+        public get BackgroundColor(): Vector3 {
             return this.backgroundColor;
         }
         public get BackgroundEnabled(): boolean {
@@ -56,28 +36,30 @@ namespace Fudge {
         public disableBackground(): void {
             this.backgroundEnabled = false;
         }
-        public get ViewProjectionMatrix(): Mat4 {
-            let viewMatrix: Mat4 = Mat4.identity();
+        /**
+         * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
+         * @returns the world-projection-matrix
+         */
+        public get ViewProjectionMatrix(): Matrix4x4 {
             try {
                 let transform: TransformComponent = <TransformComponent>this.container.getComponents(TransformComponent)[0];
-                viewMatrix = Mat4.inverse(transform.Matrix);
-                return Mat4.multiply(this.projectionMatrix, viewMatrix);
+                let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
+                return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
             catch {
                 return this.projectionMatrix;
             }
         }
 
-        // Projection methods.######################################################################################
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        public setCameraToPerspective(_aspect: number = gl2.canvas.clientWidth / gl2.canvas.clientHeight, _fieldOfView: number = 45): void {
+        public projectCentral(_aspect: number = gl2.canvas.clientWidth / gl2.canvas.clientHeight, _fieldOfView: number = 45): void {
             this.fieldOfView = _fieldOfView;
-            this.perspective = true;
-            this.projectionMatrix = Mat4.perspective(_aspect, _fieldOfView, 1, 2000);
+            this.orthographic = false;
+            this.projectionMatrix = Matrix4x4.centralProjection(_aspect, _fieldOfView, 1, 2000);
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -86,11 +68,10 @@ namespace Fudge {
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        public setCameraToOrthographic(_left: number = 0, _right: number = gl2.canvas.clientWidth, _bottom: number = gl2.canvas.clientHeight,
+        public projectOrthographic(_left: number = 0, _right: number = gl2.canvas.clientWidth, _bottom: number = gl2.canvas.clientHeight,
             _top: number = 0): void {
-            this.perspective = false;
-            this.projectionMatrix = Mat4.orthographic(_left, _right, _bottom, _top, 400, -400);
+            this.orthographic = true;
+            this.projectionMatrix = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
     }
-
 }

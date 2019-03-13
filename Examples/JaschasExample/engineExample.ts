@@ -8,9 +8,9 @@ namespace JaschasExample {
         console.log("Starting init().")
         ƒ.GLUtil.initializeContext();
         let basicShader = new ƒ.BasicShader();
-        let standardMaterial = new ƒ.Material("standardMaterial", new ƒ.Vec3(190, 190, 190), basicShader);
-        let greenMaterial = new ƒ.Material("greenMaterial", new ƒ.Vec3(130, 130, 0), basicShader)
-        let texturedMaterial = new ƒ.Material("texturedMaterial", new ƒ.Vec3(255, 255, 255), basicShader);
+        let standardMaterial = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), basicShader);
+        let greenMaterial = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), basicShader)
+        let texturedMaterial = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), basicShader);
         texturedMaterial.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
 
         let meshComponent0: ƒ.MeshComponent = new ƒ.MeshComponent();
@@ -59,15 +59,16 @@ namespace JaschasExample {
         cameraNode.addComponent(cameraTransformComponent);
         let cameraComponent: ƒ.CameraComponent = new ƒ.CameraComponent();
         cameraNode.addComponent(cameraComponent);
-
+        // TODO: orthographic doesn't work!
+        // cameraComponent.projectOrthographic();
 
         fudge0.appendChild(fudge1);
-        fudge1.appendChild(fudge2);
-        fudge2.appendChild(fudge3);
+        fudge1.appendChild(fudge2); 
+        fudge2.appendChild(fudge3); 
 
         let viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
         viewPort.drawScene();
-        viewPort.showSceneGraph();
+        viewPort.showSceneGraph(); 
         play();
     }
 
@@ -88,7 +89,7 @@ namespace JaschasExample {
     function moveCamera(_event: KeyboardEvent): void {
 
         let transform: ƒ.TransformComponent = <ƒ.TransformComponent>ƒ.AssetManager.getNode("Camera").getComponents(ƒ.TransformComponent)[0];
-        let target: ƒ.Vec3 = (<ƒ.TransformComponent>ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.TransformComponent)[0]).Position;
+        let target: ƒ.Vector3 = (<ƒ.TransformComponent>ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.TransformComponent)[0]).Position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);

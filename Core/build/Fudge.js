@@ -29,37 +29,26 @@ var Fudge;
 /// <reference path="Component.ts"/>
 (function (Fudge) {
     /**
-     * The camera component passes the ability to render a scene from the perspective of the
-     * node it is attached to.
+     * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      */
     class CameraComponent extends Fudge.Component {
-        constructor(_perspective = true) {
-            super();
-            this.enabled = true;
-            this.projectionMatrix = new Fudge.Mat4;
-            this.perspective = _perspective;
-            if (!this.perspective) {
-                this.setCameraToOrthographic();
-            }
-            else {
-                this.setCameraToPerspective();
-            }
-            this.fieldOfView = 45;
-            this.backgroundColor = new Fudge.Vec3(0, 0, 0);
-            this.backgroundEnabled = true;
+        constructor() {
+            super(...arguments);
+            this.enabled = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass?
+            this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+            this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+            this.fieldOfView = 45; // The camera's sensorangle.
+            this.backgroundColor = new Fudge.Vector3(0, 0, 0); // The color of the background the camera will render.
+            this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
-        // Get and set Methods.######################################################################################
         get Enabled() {
             return this.enabled;
         }
-        enable() {
-            this.enabled = true;
+        set Enabled(_enabled) {
+            this.enabled = _enabled;
         }
-        disable() {
-            this.enabled = false;
-        }
-        get Perspective() {
-            return this.perspective;
+        get Orthographic() {
+            return this.orthographic;
         }
         get FieldOfView() {
             return this.fieldOfView;
@@ -76,27 +65,29 @@ var Fudge;
         disableBackground() {
             this.backgroundEnabled = false;
         }
+        /**
+         * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
+         * @returns the world-projection-matrix
+         */
         get ViewProjectionMatrix() {
-            let viewMatrix = Fudge.Mat4.identity();
             try {
                 let transform = this.container.getComponents(Fudge.TransformComponent)[0];
-                viewMatrix = Fudge.Mat4.inverse(transform.Matrix);
-                return Fudge.Mat4.multiply(this.projectionMatrix, viewMatrix);
+                let viewMatrix = Fudge.Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
+                return Fudge.Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
             catch {
                 return this.projectionMatrix;
             }
         }
-        // Projection methods.######################################################################################
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        setCameraToPerspective(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
+        projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
-            this.perspective = true;
-            this.projectionMatrix = Fudge.Mat4.perspective(_aspect, _fieldOfView, 1, 2000);
+            this.orthographic = false;
+            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, _fieldOfView, 1, 2000);
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -105,9 +96,9 @@ var Fudge;
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        setCameraToOrthographic(_left = 0, _right = Fudge.gl2.canvas.clientWidth, _bottom = Fudge.gl2.canvas.clientHeight, _top = 0) {
-            this.perspective = false;
-            this.projectionMatrix = Fudge.Mat4.orthographic(_left, _right, _bottom, _top, 400, -400);
+        projectOrthographic(_left = 0, _right = Fudge.gl2.canvas.clientWidth, _bottom = Fudge.gl2.canvas.clientHeight, _top = 0) {
+            this.orthographic = true;
+            this.projectionMatrix = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
     }
     Fudge.CameraComponent = CameraComponent;
@@ -118,6 +109,7 @@ var Fudge;
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
      */
     class MaterialComponent extends Fudge.Component {
+        // TODO: clearify what a "material" actually is and its relation to the shader. Isn't it just shader parameters? Can then the material be independent of the shader?
         initialize(_material) {
             this.material = _material;
         }
@@ -149,7 +141,6 @@ var Fudge;
             }
             this.normals = this.computeNormals();
         }
-        // Get and set methods.######################################################################################
         get Positions() {
             return this.positions;
         }
@@ -163,15 +154,16 @@ var Fudge;
             return this.normals;
         }
         /**
-         * Computes the normal for each triangle of this meshand applies it to each of the triangles vertices.
+         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
         computeNormals() {
             let normals = [];
-            let normal = new Fudge.Vec3;
-            for (let i = 0; i < this.positions.length; i += 9) {
-                let vector1 = new Fudge.Vec3(this.positions[i + 3] - this.positions[i], this.positions[i + 4] - this.positions[i + 1], this.positions[i + 5] - this.positions[i + 2]);
-                let vector2 = new Fudge.Vec3(this.positions[i + 6] - this.positions[i], this.positions[i + 7] - this.positions[i + 1], this.positions[i + 8] - this.positions[i + 2]);
-                normal = Fudge.Vec3.normalize(Fudge.Vec3.cross(vector1, vector2));
+            let normal = new Fudge.Vector3;
+            let p = this.positions;
+            for (let i = 0; i < p.length; i += 9) {
+                let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
+                let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
+                normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(vector1, vector2));
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
@@ -179,9 +171,9 @@ var Fudge;
             return new Float32Array(normals);
         }
         /**
- * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
- * @param _materialComponent The materialcomponent attached to the same fudgenode.
- */
+         * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
+         * @param _materialComponent The materialcomponent attached to the same node.
+         */
         applyColor(_materialComponent) {
             let colorPerPosition = [];
             for (let i = 0; i < this.vertexCount; i++) {
@@ -190,8 +182,7 @@ var Fudge;
             Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), Fudge.gl2.STATIC_DRAW);
         }
         /**
-         * Generates UV coordinates for the texture based on the vertices of the mesh the texture
-         * was added to.
+         * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
         setTextureCoordinates() {
             let textureCoordinates = [];
@@ -207,137 +198,142 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold the transformationdata of the mesh that is attached to the same Node.
-     * The pivottransformation does not affect the transformation of the nodes children.
+     * Class to hold the transformation-data of the mesh that is attached to the same node.
+     * The pivot-transformation does not affect the transformation of the node itself or its children.
      */
     class PivotComponent extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.matrix = Fudge.Mat4.identity(); // The matrix to transform the mesh by.
+            this.matrix = Fudge.Matrix4x4.identity(); // The matrix to transform the mesh by.
         }
-        // Get and set methods.######################################################################################
         get Matrix() {
             return this.matrix;
         }
         get Position() {
-            return new Fudge.Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+            return new Fudge.Vector3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
-        // Transformation methods.######################################################################################
+        /**
+         * # Transformation methods
+         */
         /**
          * Resets this.matrix to idenity Matrix.
          */
         reset() {
-            this.matrix = Fudge.Mat4.identity();
+            this.matrix = Fudge.Matrix4x4.identity();
         }
-        // Translation methods.######################################################################################
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the x-, y- and z-axis.
+         * # Translation methods
+         */
+        /**
+         * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
          * @param _y The y-value of the translation.
          * @param _z The z-value of the translation.
          */
         translate(_x, _y, _z) {
-            this.matrix = Fudge.Mat4.translate(this.matrix, _x, _y, _z);
+            this.matrix = Fudge.Matrix4x4.translate(this.matrix, _x, _y, _z);
         }
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the x-axis.
+         * Translate the transformation along the x-axis.
          * @param _x The value of the translation.
          */
         translateX(_x) {
-            this.matrix = Fudge.Mat4.translate(this.matrix, _x, 0, 0);
+            this.matrix = Fudge.Matrix4x4.translate(this.matrix, _x, 0, 0);
         }
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the y-axis.
+         * Translate the transformation along the y-axis.
          * @param _y The value of the translation.
          */
         translateY(_y) {
-            this.matrix = Fudge.Mat4.translate(this.matrix, 0, _y, 0);
+            this.matrix = Fudge.Matrix4x4.translate(this.matrix, 0, _y, 0);
         }
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the z-axis.
+         * Translate the transformation along the z-axis.
          * @param _z The value of the translation.
          */
         translateZ(_z) {
-            this.matrix = Fudge.Mat4.translate(this.matrix, 0, 0, _z);
+            this.matrix = Fudge.Matrix4x4.translate(this.matrix, 0, 0, _z);
         }
-        // Rotation methods.######################################################################################
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its x-Axis.
+         * # Rotation methods
+         */
+        /**
+         * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateX(_angle) {
-            this.matrix = Fudge.Mat4.rotateX(this.matrix, _angle);
+            this.matrix = Fudge.Matrix4x4.rotateX(this.matrix, _angle);
         }
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its y-Axis.
+         * Rotate the transformation along the around its y-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateY(_angle) {
-            this.matrix = Fudge.Mat4.rotateY(this.matrix, _angle);
+            this.matrix = Fudge.Matrix4x4.rotateY(this.matrix, _angle);
         }
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its z-Axis.
+         * Rotate the transformation along the around its z-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateZ(_zAngle) {
-            this.matrix = Fudge.Mat4.rotateZ(this.matrix, _zAngle);
+            this.matrix = Fudge.Matrix4x4.rotateZ(this.matrix, _zAngle);
         }
         /**
-         * Wrapper function to rotate the mesh of the mesh this pivot is attached to so that its z-Axis is facing in the direction
-         * of the targets position.
-         * WARNING: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
+         * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
+         * TODO: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
          * one another, as it does not take into account the transformation that is passed from one to the other.
          * @param _target The target to look at.
          */
         lookAt(_target) {
-            this.matrix = Fudge.Mat4.lookAt(this.Position, _target);
+            this.matrix = Fudge.Matrix4x4.lookAt(this.Position, _target); // TODO: Handle rotation around z-axis
         }
-        // Scaling methods.######################################################################################
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the x-, y- and z-axis.
+         * # Scaling methods
+         */
+        /**
+         * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
          * @param _yScale The value to scale y by.
          * @param _zScale The value to scale z by.
          */
         scale(_xScale, _yScale, _zScale) {
-            this.matrix = Fudge.Mat4.scale(this.matrix, _xScale, _yScale, _zScale);
+            this.matrix = Fudge.Matrix4x4.scale(this.matrix, _xScale, _yScale, _zScale);
         }
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the x-axis.
+         * Scale the transformation along the x-axis.
          * @param _scale The value to scale by.
          */
         scaleX(_scale) {
-            this.matrix = Fudge.Mat4.scale(this.matrix, _scale, 1, 1);
+            this.matrix = Fudge.Matrix4x4.scale(this.matrix, _scale, 1, 1);
         }
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the y-axis.
+         * Scale the transformation along the y-axis.
          * @param _scale The value to scale by.
          */
         scaleY(_scale) {
-            this.matrix = Fudge.Mat4.scale(this.matrix, 1, _scale, 1);
+            this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, _scale, 1);
         }
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the z-axis.
+         * Scale the transformation along the z-axis.
          * @param _scale The value to scale by.
          */
         scaleZ(_scale) {
-            this.matrix = Fudge.Mat4.scale(this.matrix, 1, 1, _scale);
+            this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, 1, _scale);
         }
-    } // End of class
+    }
     Fudge.PivotComponent = PivotComponent;
-})(Fudge || (Fudge = {})); // Close namespace
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold the transformationdata of the node it is attached to. Extends Pivot for fewer redundancies.
-     * While Pivot only affects the mesh of the node it is attached to, without altering the nodes origin, the
-     * Transform component affects the origin of a node and its descendants.
+     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
+     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
      */
     class TransformComponent extends Fudge.PivotComponent {
         //* TODO: figure out why there is an extra matrix necessary. Implement initialize method if applicable
         constructor() {
             super();
-            this.worldMatrix = this.matrix;
+            //this.worldMatrix = this.matrix; // TODO: worldMatrix and matrix both reference the same object. Nonsense
         }
         //*/
         // Get and Set methods.######################################################################################
@@ -347,10 +343,10 @@ var Fudge;
         }
         set WorldMatrix(_matrix) {
             /* */ this.worldMatrix = _matrix;
-            //* */this.matrix = _matrix;
+            //* */this.matrix = _matrix; 
         }
         get WorldPosition() {
-            /* */ return new Fudge.Vec3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
+            /* */ return new Fudge.Vector3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
             //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
     }
@@ -844,6 +840,7 @@ var Fudge;
                 // Enable backface- and zBuffer-culling.
                 Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
                 Fudge.gl2.enable(Fudge.gl2.DEPTH_TEST);
+                // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
                 this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
@@ -866,9 +863,9 @@ var Fudge;
                 if (_node.getComponents(Fudge.PivotComponent)) {
                     let pivot = _node.getComponents(Fudge.PivotComponent)[0];
                     if (pivot)
-                        transformMatrix = Fudge.Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
+                        transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
-                let objectViewProjectionMatrix = Fudge.Mat4.multiply(_matrix, transformMatrix);
+                let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                 // Supply matrixdata to shader. 
                 Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
                 // Draw call
@@ -881,19 +878,19 @@ var Fudge;
         }
         /**
          * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
-         * @param _fudgeNode The node which's transform worldmatrix to update.
+         * @param _node The node which's transform worldmatrix to update.
          */
-        updateNodeWorldMatrix(_fudgeNode) {
-            let transform = _fudgeNode.getComponents(Fudge.TransformComponent)[0];
-            if (!_fudgeNode.Parent) {
+        updateNodeWorldMatrix(_node) {
+            let transform = _node.getComponents(Fudge.TransformComponent)[0];
+            if (!_node.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform = _fudgeNode.Parent.getComponents(Fudge.TransformComponent)[0];
-                transform.WorldMatrix = Fudge.Mat4.multiply(parentTransform.WorldMatrix, transform.Matrix);
+                let parentTransform = _node.Parent.getComponents(Fudge.TransformComponent)[0];
+                transform.WorldMatrix = Fudge.Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
-            for (let name in _fudgeNode.getChildren()) {
-                let childNode = _fudgeNode.getChildren()[name];
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
                 this.updateNodeWorldMatrix(childNode);
             }
         }
@@ -1036,12 +1033,10 @@ var Fudge;
                 canvas.width = width;
                 canvas.height = height;
             }
-            if (this.camera.Perspective) {
-                this.camera.setCameraToPerspective(width / height, this.camera.FieldOfView);
-            }
-            else {
-                this.camera.setCameraToOrthographic(0, width, height, 0);
-            }
+            if (this.camera.Orthographic)
+                this.camera.projectOrthographic(0, width, height, 0);
+            else
+                this.camera.projectCentral(width / height, this.camera.FieldOfView);
             Fudge.gl2.viewport(0, 0, width, height);
         }
     }
@@ -1214,9 +1209,9 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Simple class for 4x4 matrix operations.
+     * Simple class for 4x4 transformation matrix operations.
      */
-    class Mat4 {
+    class Matrix4x4 {
         constructor() {
             this.data = new Float32Array([
                 1, 0, 0, 0,
@@ -1231,7 +1226,7 @@ var Fudge;
         }
         // Transformation methods.######################################################################################
         static identity() {
-            return new Mat4;
+            return new Matrix4x4;
         }
         // Translation methods.######################################################################################
         /**
@@ -1241,7 +1236,7 @@ var Fudge;
          * @param _zTranslation The z-value of the translation.
          */
         static translation(_xTranslation, _yTranslation, _zTranslation) {
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -1258,7 +1253,7 @@ var Fudge;
          * @param _zTranslation The z-value of the translation.
          */
         static translate(_matrix, _xTranslation, _yTranslation, _zTranslation) {
-            return Mat4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
+            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
         }
         // Rotation methods.######################################################################################
         /**
@@ -1266,7 +1261,7 @@ var Fudge;
          * @param _angleInDegrees The value of the rotation.
          */
         static xRotation(_angleInDegrees) {
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -1284,14 +1279,14 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         static rotateX(_matrix, _angleInDegrees) {
-            return Mat4.multiply(_matrix, this.xRotation(_angleInDegrees));
+            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
         }
         /**
          * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
          */
         static yRotation(_angleInDegrees) {
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -1309,14 +1304,14 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         static rotateY(_matrix, _angleInDegrees) {
-            return Mat4.multiply(_matrix, this.yRotation(_angleInDegrees));
+            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
         }
         /**
          * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
          */
         static zRotation(_angleInDegrees) {
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -1334,7 +1329,7 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         static rotateZ(_matrix, _angleInDegrees) {
-            return Mat4.multiply(_matrix, this.zRotation(_angleInDegrees));
+            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
         }
         // Scaling methods.######################################################################################
         /**
@@ -1344,7 +1339,7 @@ var Fudge;
          * @param _z The scaling multiplier for the z-axis.
          */
         static scaling(_x, _y, _z) {
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 _x, 0, 0, 0,
                 0, _y, 0, 0,
@@ -1361,7 +1356,7 @@ var Fudge;
          * @param _z The scaling multiplier for the z-Axis.
          */
         static scale(_matrix, _x, _y, _z) {
-            return Mat4.multiply(_matrix, this.scaling(_x, _y, _z));
+            return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
         /**
          * Computes and returns the product of two passed matrices.
@@ -1369,7 +1364,7 @@ var Fudge;
          * @param _b The matrix to multiply by.
          */
         static multiply(_a, _b) {
-            let matrix = new Mat4();
+            let matrix = new Matrix4x4();
             let a00 = _a.Data[0 * 4 + 0];
             let a01 = _a.Data[0 * 4 + 1];
             let a02 = _a.Data[0 * 4 + 2];
@@ -1476,7 +1471,7 @@ var Fudge;
             let t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
                 (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 d * t0,
                 d * t1,
@@ -1503,21 +1498,21 @@ var Fudge;
          * @param _targetPosition The position to look at.
          */
         static lookAt(_transformPosition, _targetPosition) {
-            let matrix = new Mat4;
-            let transformPosition = new Fudge.Vec3(_transformPosition.X, _transformPosition.Y, _transformPosition.Z);
-            let targetPosition = new Fudge.Vec3(_targetPosition.X, _targetPosition.Y, _targetPosition.Z);
-            let zAxis = Fudge.Vec3.subtract(transformPosition, targetPosition);
-            zAxis = Fudge.Vec3.normalize(zAxis);
+            let matrix = new Matrix4x4;
+            let transformPosition = new Fudge.Vector3(_transformPosition.X, _transformPosition.Y, _transformPosition.Z);
+            let targetPosition = new Fudge.Vector3(_targetPosition.X, _targetPosition.Y, _targetPosition.Z);
+            let zAxis = Fudge.Vector3.subtract(transformPosition, targetPosition);
+            zAxis = Fudge.Vector3.normalize(zAxis);
             let xAxis;
             let yAxis;
-            if (zAxis.Data != Fudge.Vec3.Up.Data) {
-                xAxis = Fudge.Vec3.normalize(Fudge.Vec3.cross(Fudge.Vec3.Up, zAxis));
-                yAxis = Fudge.Vec3.normalize(Fudge.Vec3.cross(zAxis, xAxis));
+            if (zAxis.Data != Fudge.Vector3.Up.Data) {
+                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Up, zAxis));
+                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(zAxis, xAxis));
             }
             else {
-                xAxis = Fudge.Vec3.normalize(Fudge.Vec3.subtract(transformPosition, targetPosition));
-                yAxis = Fudge.Vec3.normalize(Fudge.Vec3.cross(Fudge.Vec3.Forward, xAxis));
-                zAxis = Fudge.Vec3.normalize(Fudge.Vec3.cross(xAxis, yAxis));
+                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.subtract(transformPosition, targetPosition));
+                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Forward, xAxis));
+                zAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(xAxis, yAxis));
             }
             matrix.data = new Float32Array([
                 xAxis.X, xAxis.Y, xAxis.Z, 0,
@@ -1538,11 +1533,11 @@ var Fudge;
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static perspective(_aspect, _fieldOfViewInDegrees, _near, _far) {
+        static centralProjection(_aspect, _fieldOfViewInDegrees, _near, _far) {
             let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
             let f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
             let rangeInv = 1.0 / (_near - _far);
-            let matrix = new Mat4;
+            let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 f / _aspect, 0, 0, 0,
                 0, f, 0, 0,
@@ -1560,8 +1555,8 @@ var Fudge;
          * @param _near The positionvalue of the projectionspace's near border.
          * @param _far The positionvalue of the projectionspace's far border
          */
-        static orthographic(_left, _right, _bottom, _top, _near = -400, _far = 400) {
-            let matrix = new Mat4;
+        static orthographicProjection(_left, _right, _bottom, _top, _near = -400, _far = 400) {
+            let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
@@ -1574,11 +1569,11 @@ var Fudge;
             return matrix;
         }
     }
-    Fudge.Mat4 = Mat4;
+    Fudge.Matrix4x4 = Matrix4x4;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class Vec3 {
+    class Vector3 {
         constructor(_x = 0, _y = 0, _z = 0) {
             this.data = [_x, _y, _z];
         }
@@ -1596,32 +1591,32 @@ var Fudge;
             return this.data[2];
         }
         static get Up() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [0, 1, 0];
             return vector;
         }
         static get Down() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [0, -1, 0];
             return vector;
         }
         static get Forward() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [0, 0, 1];
             return vector;
         }
         static get Backward() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [0, 0, -1];
             return vector;
         }
         static get Right() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [1, 0, 0];
             return vector;
         }
         static get Left() {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [-1, 0, 0];
             return vector;
         }
@@ -1632,7 +1627,7 @@ var Fudge;
          * @param _b The vector to add
          */
         static add(_a, _b) {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [_a.X + _b.X, _a.Y + _b.Y, _a.Z + _b.Z];
             return vector;
         }
@@ -1642,7 +1637,7 @@ var Fudge;
          * @param _b The vector to subtract.
          */
         static subtract(_a, _b) {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [_a.X - _b.X, _a.Y - _b.Y, _a.Z - _b.Z];
             return vector;
         }
@@ -1652,7 +1647,7 @@ var Fudge;
          * @param _b The vector to multiply by.
          */
         static cross(_a, _b) {
-            let vector = new Vec3;
+            let vector = new Vector3;
             vector.data = [
                 _a.Y * _b.Z - _a.Z * _b.Y,
                 _a.Z * _b.X - _a.X * _b.Z,
@@ -1675,7 +1670,7 @@ var Fudge;
          */
         static normalize(_vector) {
             let length = Math.sqrt(_vector.X * _vector.X + _vector.Y * _vector.Y + _vector.Z * _vector.Z);
-            let vector = new Vec3;
+            let vector = new Vector3;
             // make sure we don't divide by 0.
             if (length > 0.00001) {
                 vector.data = [_vector.X / length, _vector.Y / length, _vector.Z / length];
@@ -1686,7 +1681,7 @@ var Fudge;
             return vector;
         }
     }
-    Fudge.Vec3 = Vec3;
+    Fudge.Vector3 = Vector3;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

@@ -25,7 +25,6 @@ namespace Fudge {
             this.normals = this.computeNormals();
         }
 
-        // Get and set methods.######################################################################################
         public get Positions(): Float32Array {
             return this.positions;
         }
@@ -40,26 +39,28 @@ namespace Fudge {
         }
 
         /**
-         * Computes the normal for each triangle of this meshand applies it to each of the triangles vertices.
+         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
         private computeNormals(): Float32Array {
             let normals: number[] = [];
-            let normal: Vec3 = new Vec3;
-            for (let i: number = 0; i < this.positions.length; i += 9) {
-                let vector1: Vec3 = new Vec3(this.positions[i + 3] - this.positions[i], this.positions[i + 4] - this.positions[i + 1], this.positions[i + 5] - this.positions[i + 2])
-                let vector2: Vec3 = new Vec3(this.positions[i + 6] - this.positions[i], this.positions[i + 7] - this.positions[i + 1], this.positions[i + 8] - this.positions[i + 2])
-                normal = Vec3.normalize(Vec3.cross(vector1, vector2));
+            let normal: Vector3 = new Vector3;
+            let p: Float32Array = this.positions;
+            for (let i: number = 0; i < p.length; i += 9) {
+                let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2])
+                let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2])
+                normal = Vector3.normalize(Vector3.cross(vector1, vector2));
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
                 normals.push(normal.X, normal.Y, normal.Z);
             }
             return new Float32Array(normals);
         }
-                /**
+
+        /**
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
-         * @param _materialComponent The materialcomponent attached to the same fudgenode.
+         * @param _materialComponent The materialcomponent attached to the same node.
          */
-        public applyColor(_materialComponent : MaterialComponent): void {
+        public applyColor(_materialComponent: MaterialComponent): void {
 
             let colorPerPosition: number[] = [];
             for (let i: number = 0; i < this.vertexCount; i++) {
@@ -69,8 +70,7 @@ namespace Fudge {
         }
 
         /**
-         * Generates UV coordinates for the texture based on the vertices of the mesh the texture
-         * was added to.
+         * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
         public setTextureCoordinates(): void {
             let textureCoordinates: number[] = [];
@@ -87,5 +87,5 @@ namespace Fudge {
             }
             gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
         }
-    } 
+    }
 }

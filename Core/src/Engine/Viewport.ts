@@ -36,6 +36,7 @@ namespace Fudge {
                 // Enable backface- and zBuffer-culling.
                 gl2.enable(gl2.CULL_FACE);
                 gl2.enable(gl2.DEPTH_TEST);
+                // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
                 this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
@@ -46,7 +47,7 @@ namespace Fudge {
          * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
-        private drawObjects(_node: Node, _matrix: Mat4): void {
+        private drawObjects(_node: Node, _matrix: Matrix4x4): void {
             if (_node.getComponents(MeshComponent).length > 0) {
                 let mesh: MeshComponent = <MeshComponent>_node.getComponents(MeshComponent)[0];
                 let transform = <TransformComponent>_node.getComponents(TransformComponent)[0];
@@ -55,13 +56,13 @@ namespace Fudge {
                 gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
                 gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                 // Compute the matrices
-                let transformMatrix: Mat4 = transform.WorldMatrix;
+                let transformMatrix: Matrix4x4 = transform.WorldMatrix;
                 if (_node.getComponents(PivotComponent)) {
                     let pivot: PivotComponent = <PivotComponent>_node.getComponents(PivotComponent)[0];
                     if (pivot)
-                        transformMatrix = Mat4.multiply(pivot.Matrix, transform.WorldMatrix);
+                        transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
                 }
-                let objectViewProjectionMatrix: Mat4 = Mat4.multiply(_matrix, transformMatrix);
+                let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                 // Supply matrixdata to shader. 
                 gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
                 // Draw call
@@ -74,21 +75,20 @@ namespace Fudge {
         }
         /**
          * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
-         * @param _fudgeNode The node which's transform worldmatrix to update.
+         * @param _node The node which's transform worldmatrix to update.
          */
-        private updateNodeWorldMatrix(_fudgeNode: Node): void {
-            let transform: TransformComponent = <TransformComponent>_fudgeNode.getComponents(TransformComponent)[0];
-            if (!_fudgeNode.Parent) {
+        private updateNodeWorldMatrix(_node: Node): void {
+            let transform: TransformComponent = <TransformComponent>_node.getComponents(TransformComponent)[0];
+            if (!_node.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform: TransformComponent = (<TransformComponent>_fudgeNode.Parent.getComponents(TransformComponent)[0]);
-                transform.WorldMatrix = Mat4.multiply(parentTransform.WorldMatrix, transform.Matrix);
+                let parentTransform: TransformComponent = (<TransformComponent>_node.Parent.getComponents(TransformComponent)[0]);
+                transform.WorldMatrix = Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
-            for (let name in _fudgeNode.getChildren()) {
-                let childNode: Node = _fudgeNode.getChildren()[name];
+            for (let name in _node.getChildren()) {
+                let childNode: Node = _node.getChildren()[name];
                 this.updateNodeWorldMatrix(childNode);
-
             }
         }
         /**
@@ -237,12 +237,10 @@ namespace Fudge {
                 canvas.width = width;
                 canvas.height = height;
             }
-            if (this.camera.Perspective) {
-                this.camera.setCameraToPerspective(width / height, this.camera.FieldOfView);
-            }
-            else {
-                this.camera.setCameraToOrthographic(0, width, height, 0);
-            }
+            if (this.camera.Orthographic)
+                this.camera.projectOrthographic(0, width, height, 0);
+            else
+                this.camera.projectCentral(width / height, this.camera.FieldOfView);
             gl2.viewport(0, 0, width, height);
         }
     }

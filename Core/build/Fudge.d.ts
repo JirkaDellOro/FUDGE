@@ -13,33 +13,33 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * The camera component passes the ability to render a scene from the perspective of the
-     * node it is attached to.
+     * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      */
     class CameraComponent extends Component {
         private enabled;
-        private perspective;
+        private orthographic;
         private projectionMatrix;
         private fieldOfView;
         private backgroundColor;
         private backgroundEnabled;
-        constructor(_perspective?: boolean);
-        readonly Enabled: boolean;
-        enable(): void;
-        disable(): void;
-        readonly Perspective: boolean;
+        Enabled: boolean;
+        readonly Orthographic: boolean;
         readonly FieldOfView: number;
-        readonly BackgroundColor: Vec3;
+        readonly BackgroundColor: Vector3;
         readonly BackgroundEnabled: boolean;
         enableBackground(): void;
         disableBackground(): void;
-        readonly ViewProjectionMatrix: Mat4;
+        /**
+         * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
+         * @returns the world-projection-matrix
+         */
+        readonly ViewProjectionMatrix: Matrix4x4;
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        setCameraToPerspective(_aspect?: number, _fieldOfView?: number): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -47,7 +47,7 @@ declare namespace Fudge {
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        setCameraToOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
     }
 }
 declare namespace Fudge {
@@ -75,98 +75,108 @@ declare namespace Fudge {
         readonly VertexCount: number;
         readonly Normals: Float32Array;
         /**
-         * Computes the normal for each triangle of this meshand applies it to each of the triangles vertices.
+         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
         private computeNormals;
         /**
- * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
- * @param _materialComponent The materialcomponent attached to the same fudgenode.
- */
+         * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
+         * @param _materialComponent The materialcomponent attached to the same node.
+         */
         applyColor(_materialComponent: MaterialComponent): void;
         /**
-         * Generates UV coordinates for the texture based on the vertices of the mesh the texture
-         * was added to.
+         * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
         setTextureCoordinates(): void;
     }
 }
 declare namespace Fudge {
     /**
-     * Class to hold the transformationdata of the mesh that is attached to the same Node.
-     * The pivottransformation does not affect the transformation of the nodes children.
+     * Class to hold the transformation-data of the mesh that is attached to the same node.
+     * The pivot-transformation does not affect the transformation of the node itself or its children.
      */
     class PivotComponent extends Component {
-        protected matrix: Mat4;
-        readonly Matrix: Mat4;
-        readonly Position: Vec3;
+        protected matrix: Matrix4x4;
+        readonly Matrix: Matrix4x4;
+        readonly Position: Vector3;
+        /**
+         * # Transformation methods
+         */
         /**
          * Resets this.matrix to idenity Matrix.
          */
         reset(): void;
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the x-, y- and z-axis.
+         * # Translation methods
+         */
+        /**
+         * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
          * @param _y The y-value of the translation.
          * @param _z The z-value of the translation.
          */
         translate(_x: number, _y: number, _z: number): void;
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the x-axis.
+         * Translate the transformation along the x-axis.
          * @param _x The value of the translation.
          */
         translateX(_x: number): void;
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the y-axis.
+         * Translate the transformation along the y-axis.
          * @param _y The value of the translation.
          */
         translateY(_y: number): void;
         /**
-         * Wrapper function to translate the position of the mesh this pivot is attached to on the z-axis.
+         * Translate the transformation along the z-axis.
          * @param _z The value of the translation.
          */
         translateZ(_z: number): void;
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its x-Axis.
+         * # Rotation methods
+         */
+        /**
+         * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateX(_angle: number): void;
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its y-Axis.
+         * Rotate the transformation along the around its y-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateY(_angle: number): void;
         /**
-         * Wrapper function to rotate the mesh this pivot is attached to around its z-Axis.
+         * Rotate the transformation along the around its z-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateZ(_zAngle: number): void;
         /**
-         * Wrapper function to rotate the mesh of the mesh this pivot is attached to so that its z-Axis is facing in the direction
-         * of the targets position.
-         * WARNING: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
+         * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
+         * TODO: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
          * one another, as it does not take into account the transformation that is passed from one to the other.
          * @param _target The target to look at.
          */
-        lookAt(_target: Vec3): void;
+        lookAt(_target: Vector3): void;
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the x-, y- and z-axis.
+         * # Scaling methods
+         */
+        /**
+         * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
          * @param _yScale The value to scale y by.
          * @param _zScale The value to scale z by.
          */
         scale(_xScale: number, _yScale: number, _zScale: number): void;
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the x-axis.
+         * Scale the transformation along the x-axis.
          * @param _scale The value to scale by.
          */
         scaleX(_scale: number): void;
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the y-axis.
+         * Scale the transformation along the y-axis.
          * @param _scale The value to scale by.
          */
         scaleY(_scale: number): void;
         /**
-         * Wrapper function to scale the mesh of the node this pivot is attached to on the z-axis.
+         * Scale the transformation along the z-axis.
          * @param _scale The value to scale by.
          */
         scaleZ(_scale: number): void;
@@ -174,15 +184,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Class to hold the transformationdata of the node it is attached to. Extends Pivot for fewer redundancies.
-     * While Pivot only affects the mesh of the node it is attached to, without altering the nodes origin, the
-     * Transform component affects the origin of a node and its descendants.
+     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
+     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
      */
     class TransformComponent extends PivotComponent {
         private worldMatrix;
         constructor();
-        WorldMatrix: Mat4;
-        readonly WorldPosition: Vec3;
+        WorldMatrix: Matrix4x4;
+        readonly WorldPosition: Vector3;
     }
 }
 declare namespace Fudge {
@@ -244,8 +253,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Small interface used by Material- and Mesh-classes to store datapullspecifications
-     * for a WebGLBuffer.
+     * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
      */
     interface BufferSpecification {
         size: number;
@@ -301,10 +309,10 @@ declare namespace Fudge {
         private textureSource;
         private colorBufferSpecification;
         private textureBufferSpecification;
-        constructor(_name: string, _color: Vec3, _shader: Shader);
+        constructor(_name: string, _color: Vector3, _shader: Shader);
         readonly Shader: Shader;
         readonly Name: string;
-        Color: Vec3;
+        Color: Vector3;
         readonly ColorBufferSpecification: BufferSpecification;
         readonly TextureBufferSpecification: BufferSpecification;
         readonly TextureEnabled: boolean;
@@ -441,7 +449,7 @@ declare namespace Fudge {
         private drawObjects;
         /**
          * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
-         * @param _fudgeNode The node which's transform worldmatrix to update.
+         * @param _node The node which's transform worldmatrix to update.
          */
         private updateNodeWorldMatrix;
         /**
@@ -520,13 +528,13 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Simple class for 4x4 matrix operations.
+     * Simple class for 4x4 transformation matrix operations.
      */
-    class Mat4 {
+    class Matrix4x4 {
         private data;
         constructor();
         readonly Data: Float32Array;
-        static identity(): Mat4;
+        static identity(): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
          * @param _xTranslation The x-value of the translation.
@@ -541,7 +549,7 @@ declare namespace Fudge {
          * @param _yTranslation The y-value of the translation.
          * @param _zTranslation The z-value of the translation.
          */
-        static translate(_matrix: Mat4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Mat4;
+        static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
@@ -552,7 +560,7 @@ declare namespace Fudge {
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateX(_matrix: Mat4, _angleInDegrees: number): Mat4;
+        static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
@@ -563,7 +571,7 @@ declare namespace Fudge {
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateY(_matrix: Mat4, _angleInDegrees: number): Mat4;
+        static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
@@ -574,7 +582,7 @@ declare namespace Fudge {
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateZ(_matrix: Mat4, _angleInDegrees: number): Mat4;
+        static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
          * @param _x The scaling multiplier for the x-axis.
@@ -589,24 +597,24 @@ declare namespace Fudge {
          * @param _y The scaling multiplier for the y-Axis.
          * @param _z The scaling multiplier for the z-Axis.
          */
-        static scale(_matrix: Mat4, _x: number, _y: number, _z: number): Mat4;
+        static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
          * @param _b The matrix to multiply by.
          */
-        static multiply(_a: Mat4, _b: Mat4): Mat4;
+        static multiply(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix Tha matrix to compute the inverse of.
          */
-        static inverse(_matrix: Mat4): Mat4;
+        static inverse(_matrix: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static lookAt(_transformPosition: Vec3, _targetPosition: Vec3): Mat4;
+        static lookAt(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4;
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -614,7 +622,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static perspective(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number): Mat4;
+        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
@@ -624,52 +632,52 @@ declare namespace Fudge {
          * @param _near The positionvalue of the projectionspace's near border.
          * @param _far The positionvalue of the projectionspace's far border
          */
-        static orthographic(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Mat4;
+        static orthographicProjection(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
     }
 }
 declare namespace Fudge {
-    class Vec3 {
+    class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
         readonly Data: number[];
         readonly X: number;
         readonly Y: number;
         readonly Z: number;
-        static readonly Up: Vec3;
-        static readonly Down: Vec3;
-        static readonly Forward: Vec3;
-        static readonly Backward: Vec3;
-        static readonly Right: Vec3;
-        static readonly Left: Vec3;
+        static readonly Up: Vector3;
+        static readonly Down: Vector3;
+        static readonly Forward: Vector3;
+        static readonly Backward: Vector3;
+        static readonly Right: Vector3;
+        static readonly Left: Vector3;
         /**
          * Adds two vectors.
          * @param _a The vector to add to.
          * @param _b The vector to add
          */
-        static add(_a: Vec3, _b: Vec3): Vec3;
+        static add(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Subtracts two vectors.
          * @param _a The vector to subtract from.
          * @param _b The vector to subtract.
          */
-        static subtract(_a: Vec3, _b: Vec3): Vec3;
+        static subtract(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          */
-        static cross(_a: Vec3, _b: Vec3): Vec3;
+        static cross(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the dotproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          */
-        static dot(_a: Vec3, _b: Vec3): number;
+        static dot(_a: Vector3, _b: Vector3): number;
         /**
          * Normalizes a vector.
          * @param _vector The vector to normalize.
          */
-        static normalize(_vector: Vec3): Vec3;
+        static normalize(_vector: Vector3): Vector3;
     }
 }
 declare namespace Fudge {

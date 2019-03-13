@@ -10,7 +10,7 @@ namespace Fudge{
         private textureCoordinateAtributeLocation: number; // The attribute on the shader that takes the meshs texturecoordinates.
         private matrixLocation: WebGLUniformLocation; // The uniform on the shader to multiply the vertexpositions by to place them in viewspace.
 
-        private color: Vec3;
+        private color: Vector3;
         private textureEnabled: boolean;
         private textureSource: string;
         private colorBufferSpecification: BufferSpecification;
@@ -18,7 +18,7 @@ namespace Fudge{
         
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
 
-        public constructor(_name:string, _color:Vec3,_shader: Shader) {
+        public constructor(_name:string, _color:Vector3,_shader: Shader) {
             this.name = _name
             this.shader = _shader;
             this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
@@ -53,10 +53,10 @@ namespace Fudge{
         public get Name(){
             return this.name;
         }
-        public get Color():Vec3{
+        public get Color():Vector3{
             return this.color;
         }
-        public set Color(_color : Vec3){
+        public set Color(_color : Vector3){
             this.color = _color;
         }
         public get ColorBufferSpecification(): BufferSpecification {
