@@ -3,8 +3,8 @@ namespace Fudge {
         [className: string]: Component[];
     }
     export interface AssocStringNode {
-        [key: string]: Node
-    };
+        [key: string]: Node;
+    }
     /**
      * Represents a node in the scenetree.
      */
@@ -39,14 +39,7 @@ namespace Fudge {
         public get Parent(): Node | null {
             return this.parent;
         }
-        /**
-         * Sets the parent of this node to be the supplied node.
-         * Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        private setParent(_parent: Node | null) {
-            this.parent = _parent;
-        }
+
         public get Layers(): string[] {
             return this.layers;
         }
@@ -59,9 +52,9 @@ namespace Fudge {
          * Adds the name of a layer to this nodes layerarray.
          * @param _name The name of the layer to add.
          */
-        public addLayer(_name: string) {
-            for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] = _name) {
+        public addLayer(_name: string): void {
+            for (let i: number = 0; i < this.layers.length; i++) {
+                if (this.layers[i] == _name) {
                     console.log(`Node "${this.name}" is already on the layer "${_name}".`);
                     return;
                 }
@@ -73,9 +66,9 @@ namespace Fudge {
          * Removes the name of a layer from this nodes layerarray.
          * @param _name The name of the layer to remove.
          */
-        public removeLayer(_name: string) {
-            for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] = _name) {
+        public removeLayer(_name: string): void {
+            for (let i: number = 0; i < this.layers.length; i++) {
+                if (this.layers[i] == _name) {
                     this.layers.splice(i, 1);
                     console.log(`Layer "${_name}" removed from node "${this.name}".`);
                     return;
@@ -89,9 +82,9 @@ namespace Fudge {
          * Adds the name of a tag to this nodes tagarray.
          * @param _name The name of the tag to add.
          */
-        public addTag(_name: string) {
-            for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] = _name) {
+        public addTag(_name: string): void {
+            for (let i: number = 0; i < this.tags.length; i++) {
+                if (this.tags[i] == _name) {
                     console.log(`Node "${this.name}" already has the tag "${_name}".`);
                     return;
                 }
@@ -103,9 +96,9 @@ namespace Fudge {
          * Removes the name of a tag to this nodes tagarray.
          * @param _name The name of the tag to remove.
          */
-        public removeTag(_name: string) {
-            for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] = _name) {
+        public removeTag(_name: string): void {
+            for (let i: number = 0; i < this.tags.length; i++) {
+                if (this.tags[i] == _name) {
                     this.tags.splice(i, 1);
                     console.log(`Tag "${_name}" removed from node "${this.name}".`);
                     return;
@@ -212,5 +205,12 @@ namespace Fudge {
             }
         }
         */
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        private setParent(_parent: Node | null): void {
+            this.parent = _parent;
+        }
     }
 }

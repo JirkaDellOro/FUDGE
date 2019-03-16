@@ -22,13 +22,11 @@ declare namespace Fudge {
         private fieldOfView;
         private backgroundColor;
         private backgroundEnabled;
-        Enabled: boolean;
-        readonly Orthographic: boolean;
-        readonly FieldOfView: number;
-        readonly BackgroundColor: Vector3;
-        readonly BackgroundEnabled: boolean;
-        enableBackground(): void;
-        disableBackground(): void;
+        activate(_on: boolean): void;
+        readonly isActive: boolean;
+        readonly isOrthographic: boolean;
+        getBackgoundColor(): Vector3;
+        getBackgroundEnabled(): boolean;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -264,6 +262,10 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class Color {
+    }
+}
+declare namespace Fudge {
     let gl2: WebGL2RenderingContext;
     /**
      * Utility class to sore and/or wrap some functionality.
@@ -356,12 +358,6 @@ declare namespace Fudge {
         constructor(_name: string);
         Name: string;
         readonly Parent: Node | null;
-        /**
-         * Sets the parent of this node to be the supplied node.
-         * Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        private setParent;
         readonly Layers: string[];
         readonly Tags: string[];
         /**
@@ -418,6 +414,17 @@ declare namespace Fudge {
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component: Component): void;
+        /**
+         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
+         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Throws error if no component can be found by the name.
+         * @param _name The name of the component to be found.
+         */
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        private setParent;
     }
 }
 declare namespace Fudge {
@@ -442,6 +449,15 @@ declare namespace Fudge {
          */
         drawScene(): void;
         /**
+         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
+         * @param _node The node to initialize.
+         */
+        initializeViewportNodes(_node: Node): void;
+        /**
+         * Logs this viewports scenegraph to the console.
+         */
+        showSceneGraph(): void;
+        /**
          * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
          * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
@@ -456,11 +472,6 @@ declare namespace Fudge {
          * Returns the scenegraph's rootnode for computation of worldmatrices.
          */
         private viewportNodeSceneGraphRoot;
-        /**
-         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _node The node to initialize.
-         */
-        initializeViewportNodes(_node: Node): void;
         /**
          * Initializes the vertexbuffer for a passed node.
          * @param _node The node to initialize a buffer for.
@@ -478,10 +489,6 @@ declare namespace Fudge {
          * @param _mesh The node's meshcomponent.
          */
         private initializeNodeTexture;
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        showSceneGraph(): void;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.

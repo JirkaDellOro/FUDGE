@@ -8,7 +8,7 @@ namespace TimeTest {
         private start: number;
         private scale: number;
         private offset: number;
-        /** just testing comment */
+        /** just **testing** Comment */
         private lastCallToElapsed: number; 
         private xz: string;
 
@@ -18,8 +18,10 @@ namespace TimeTest {
             this.offset = 0.0;
             this.lastCallToElapsed = 0.0;
         }
+
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds
+         * # Watch out for headlines
          */
         get(): number {
             return this.offset + this.scale * (performance.now() - this.start);
@@ -42,6 +44,11 @@ namespace TimeTest {
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
         }
+
+        /**
+         * # I wonder what this comment does... appearently nothing
+         */
+
         /**
          * Retrieves the current scaling of this time
          */

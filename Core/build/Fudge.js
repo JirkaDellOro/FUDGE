@@ -41,29 +41,21 @@ var Fudge;
             this.backgroundColor = new Fudge.Vector3(0, 0, 0); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
-        get Enabled() {
+        // TODO: examine, if background should be an attribute of Camera or Viewport
+        activate(_on) {
+            this.enabled = _on;
+        }
+        get isActive() {
             return this.enabled;
         }
-        set Enabled(_enabled) {
-            this.enabled = _enabled;
-        }
-        get Orthographic() {
+        get isOrthographic() {
             return this.orthographic;
         }
-        get FieldOfView() {
-            return this.fieldOfView;
-        }
-        get BackgroundColor() {
+        getBackgoundColor() {
             return this.backgroundColor;
         }
-        get BackgroundEnabled() {
+        getBackgroundEnabled() {
             return this.backgroundEnabled;
-        }
-        enableBackground() {
-            this.backgroundEnabled = true;
-        }
-        disableBackground() {
-            this.backgroundEnabled = false;
         }
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
@@ -471,6 +463,12 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class Color {
+    }
+    Fudge.Color = Color;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     /**
      * Utility class to sore and/or wrap some functionality.
      */
@@ -630,7 +628,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    ;
     /**
      * Represents a node in the scenetree.
      */
@@ -657,14 +654,6 @@ var Fudge;
         get Parent() {
             return this.parent;
         }
-        /**
-         * Sets the parent of this node to be the supplied node.
-         * Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        setParent(_parent) {
-            this.parent = _parent;
-        }
         get Layers() {
             return this.layers;
         }
@@ -678,7 +667,7 @@ var Fudge;
          */
         addLayer(_name) {
             for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] = _name) {
+                if (this.layers[i] == _name) {
                     console.log(`Node "${this.name}" is already on the layer "${_name}".`);
                     return;
                 }
@@ -692,7 +681,7 @@ var Fudge;
          */
         removeLayer(_name) {
             for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] = _name) {
+                if (this.layers[i] == _name) {
                     this.layers.splice(i, 1);
                     console.log(`Layer "${_name}" removed from node "${this.name}".`);
                     return;
@@ -707,7 +696,7 @@ var Fudge;
          */
         addTag(_name) {
             for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] = _name) {
+                if (this.tags[i] == _name) {
                     console.log(`Node "${this.name}" already has the tag "${_name}".`);
                     return;
                 }
@@ -721,7 +710,7 @@ var Fudge;
          */
         removeTag(_name) {
             for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] = _name) {
+                if (this.tags[i] == _name) {
                     this.tags.splice(i, 1);
                     console.log(`Tag "${_name}" removed from node "${this.name}".`);
                     return;
@@ -803,6 +792,31 @@ var Fudge;
                 this.components[_component.Classname].push(_component);
             _component.Container = this;
         }
+        /**
+         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
+         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Throws error if no component can be found by the name.
+         * @param _name The name of the component to be found.
+         */
+        /*
+        public removeComponent(_name: string): void {
+            if (this.components[_name]) {
+                this.components[_name].Container = null;
+                delete this.components[_name];
+                console.log(`Component '${_name}' removed.`)
+            }
+            else {
+                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
+            }
+        }
+        */
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        setParent(_parent) {
+            this.parent = _parent;
+        }
     }
     Fudge.Node = Node;
 })(Fudge || (Fudge = {}));
@@ -833,9 +847,10 @@ var Fudge;
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         drawScene() {
-            if (this.camera.Enabled) {
+            if (this.camera.isActive) {
                 this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
-                Fudge.gl2.clearColor(this.camera.BackgroundColor.X, this.camera.BackgroundColor.Y, this.camera.BackgroundColor.Z, this.camera.BackgroundEnabled ? 1 : 0);
+                let backgroundColor = this.camera.getBackgoundColor();
+                Fudge.gl2.clearColor(backgroundColor.X, backgroundColor.Y, backgroundColor.Z, this.camera.getBackgroundEnabled() ? 1 : 0);
                 Fudge.gl2.clear(Fudge.gl2.COLOR_BUFFER_BIT | Fudge.gl2.DEPTH_BUFFER_BIT);
                 // Enable backface- and zBuffer-culling.
                 Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
@@ -844,6 +859,54 @@ var Fudge;
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
                 this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
+        }
+        /**
+         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
+         * @param _node The node to initialize.
+         */
+        initializeViewportNodes(_node) {
+            console.log(_node.Name);
+            if (!_node.getComponents(Fudge.TransformComponent)) {
+                let transform = new Fudge.TransformComponent();
+                _node.addComponent(transform);
+            }
+            let mesh;
+            if (_node.getComponents(Fudge.MeshComponent).length == 0) {
+                console.log(`No Mesh attached to node named '${_node.Name}'.`);
+            }
+            else {
+                this.initializeNodeBuffer(_node);
+                mesh = _node.getComponents(Fudge.MeshComponent)[0];
+                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
+                let materialComponent;
+                if (_node.getComponents(Fudge.MaterialComponent)[0] == undefined) {
+                    console.log(`No Material attached to node named '${_node.Name}'.`);
+                    console.log("Adding standardmaterial...");
+                    materialComponent = new Fudge.MaterialComponent();
+                    materialComponent.initialize(Fudge.AssetManager.getMaterial("standardMaterial"));
+                    _node.addComponent(materialComponent);
+                }
+                materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
+                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                this.initializeNodeMaterial(materialComponent, mesh);
+                if (materialComponent.Material.TextureEnabled) {
+                    this.initializeNodeTexture(materialComponent, mesh);
+                }
+            }
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
+                this.initializeViewportNodes(childNode);
+            }
+        }
+        /**
+         * Logs this viewports scenegraph to the console.
+         */
+        showSceneGraph() {
+            let output = "SceneGraph for this viewport:";
+            output += "\n \n";
+            output += this.rootNode.Name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
         }
         /**
          * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
@@ -905,45 +968,6 @@ var Fudge;
             return sceneGraphRoot;
         }
         /**
-         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _node The node to initialize.
-         */
-        initializeViewportNodes(_node) {
-            console.log(_node.Name);
-            if (!_node.getComponents(Fudge.TransformComponent)) {
-                let transform = new Fudge.TransformComponent();
-                _node.addComponent(transform);
-            }
-            let mesh;
-            if (_node.getComponents(Fudge.MeshComponent).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.Name}'.`);
-            }
-            else {
-                this.initializeNodeBuffer(_node);
-                mesh = _node.getComponents(Fudge.MeshComponent)[0];
-                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
-                let materialComponent;
-                if (_node.getComponents(Fudge.MaterialComponent)[0] == undefined) {
-                    console.log(`No Material attached to node named '${_node.Name}'.`);
-                    console.log("Adding standardmaterial...");
-                    materialComponent = new Fudge.MaterialComponent();
-                    materialComponent.initialize(Fudge.AssetManager.getMaterial("standardMaterial"));
-                    _node.addComponent(materialComponent);
-                }
-                materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
-                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
-                Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
-                this.initializeNodeMaterial(materialComponent, mesh);
-                if (materialComponent.Material.TextureEnabled) {
-                    this.initializeNodeTexture(materialComponent, mesh);
-                }
-            }
-            for (let name in _node.getChildren()) {
-                let childNode = _node.getChildren()[name];
-                this.initializeViewportNodes(childNode);
-            }
-        }
-        /**
          * Initializes the vertexbuffer for a passed node.
          * @param _node The node to initialize a buffer for.
          */
@@ -989,15 +1013,6 @@ var Fudge;
             Fudge.GLUtil.createTexture(_materialComponent.Material.TextureSource);
         }
         /**
-         * Logs this viewports scenegraph to the console.
-         */
-        showSceneGraph() {
-            let output = "SceneGraph for this viewport:";
-            output += "\n \n";
-            output += this.rootNode.Name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
-        }
-        /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
@@ -1033,10 +1048,11 @@ var Fudge;
                 canvas.width = width;
                 canvas.height = height;
             }
-            if (this.camera.Orthographic)
+            // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
+            if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
-                this.camera.projectCentral(width / height, this.camera.FieldOfView);
+                this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
             Fudge.gl2.viewport(0, 0, width, height);
         }
     }

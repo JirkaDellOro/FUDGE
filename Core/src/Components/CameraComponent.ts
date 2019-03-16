@@ -10,32 +10,26 @@ namespace Fudge {
         private fieldOfView: number = 45; // The camera's sensorangle.
         private backgroundColor: Vector3 = new Vector3(0, 0, 0); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
+        // TODO: examine, if background should be an attribute of Camera or Viewport
 
-        public get Enabled(): boolean {
+        public activate(_on: boolean): void {
+            this.enabled = _on;
+        }
+        public get isActive(): boolean {
             return this.enabled;
         }
-        public set Enabled(_enabled: boolean) {
-            this.enabled = _enabled;
-        }
 
-        public get Orthographic(): boolean {
+        public get isOrthographic(): boolean {
             return this.orthographic;
         }
-        public get FieldOfView(): number {
-            return this.fieldOfView;
-        }
-        public get BackgroundColor(): Vector3 {
+
+        public getBackgoundColor(): Vector3 {
             return this.backgroundColor;
         }
-        public get BackgroundEnabled(): boolean {
+        public getBackgroundEnabled(): boolean {
             return this.backgroundEnabled;
         }
-        public enableBackground(): void {
-            this.backgroundEnabled = true;
-        }
-        public disableBackground(): void {
-            this.backgroundEnabled = false;
-        }
+
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -45,8 +39,7 @@ namespace Fudge {
                 let transform: TransformComponent = <TransformComponent>this.container.getComponents(TransformComponent)[0];
                 let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
                 return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
-            }
-            catch {
+            } catch {
                 return this.projectionMatrix;
             }
         }
@@ -68,8 +61,7 @@ namespace Fudge {
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        public projectOrthographic(_left: number = 0, _right: number = gl2.canvas.clientWidth, _bottom: number = gl2.canvas.clientHeight,
-            _top: number = 0): void {
+        public projectOrthographic(_left: number = 0, _right: number = gl2.canvas.clientWidth, _bottom: number = gl2.canvas.clientHeight, _top: number = 0): void {
             this.orthographic = true;
             this.projectionMatrix = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }

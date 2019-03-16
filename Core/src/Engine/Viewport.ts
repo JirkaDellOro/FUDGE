@@ -29,9 +29,10 @@ namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         public drawScene(): void {
-            if (this.camera.Enabled) {
+            if (this.camera.isActive) {
                 this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
-                gl2.clearColor(this.camera.BackgroundColor.X, this.camera.BackgroundColor.Y, this.camera.BackgroundColor.Z, this.camera.BackgroundEnabled ? 1 : 0);
+                let backgroundColor: Vector3 = this.camera.getBackgoundColor();
+                gl2.clearColor(backgroundColor.X, backgroundColor.Y, backgroundColor.Z, this.camera.getBackgroundEnabled() ? 1 : 0);
                 gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
                 // Enable backface- and zBuffer-culling.
                 gl2.enable(gl2.CULL_FACE);
@@ -43,6 +44,56 @@ namespace Fudge {
         }
 
         /**
+         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
+         * @param _node The node to initialize.
+         */
+        public initializeViewportNodes(_node: Node): void {
+            console.log(_node.Name);
+            if (!_node.getComponents(TransformComponent)) {
+                let transform: TransformComponent = new TransformComponent();
+                _node.addComponent(transform);
+            }
+            let mesh: MeshComponent;
+            if (_node.getComponents(MeshComponent).length == 0) {
+                console.log(`No Mesh attached to node named '${_node.Name}'.`);
+            }
+            else {
+                this.initializeNodeBuffer(_node);
+                mesh = <MeshComponent>_node.getComponents(MeshComponent)[0];
+                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
+                let materialComponent: MaterialComponent;
+                if (_node.getComponents(MaterialComponent)[0] == undefined) {
+                    console.log(`No Material attached to node named '${_node.Name}'.`);
+                    console.log("Adding standardmaterial...");
+                    materialComponent = new MaterialComponent();
+                    materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
+                    _node.addComponent(materialComponent);
+                }
+                materialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
+                let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
+                GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                this.initializeNodeMaterial(materialComponent, mesh);
+                if (materialComponent.Material.TextureEnabled) {
+                    this.initializeNodeTexture(materialComponent, mesh);
+                }
+            }
+            for (let name in _node.getChildren()) {
+                let childNode: Node = _node.getChildren()[name];
+                this.initializeViewportNodes(childNode);
+            }
+        }
+
+        /**
+         * Logs this viewports scenegraph to the console.
+         */
+        public showSceneGraph(): void {
+            let output: string = "SceneGraph for this viewport:";
+            output += "\n \n";
+            output += this.rootNode.Name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
+        }
+
+        /**
          * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
          * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
@@ -50,7 +101,7 @@ namespace Fudge {
         private drawObjects(_node: Node, _matrix: Matrix4x4): void {
             if (_node.getComponents(MeshComponent).length > 0) {
                 let mesh: MeshComponent = <MeshComponent>_node.getComponents(MeshComponent)[0];
-                let transform = <TransformComponent>_node.getComponents(TransformComponent)[0];
+                let transform: TransformComponent = <TransformComponent>_node.getComponents(TransformComponent)[0];
                 let materialComponent: MaterialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
                 materialComponent.Material.Shader.use();
                 gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
@@ -102,47 +153,6 @@ namespace Fudge {
             return sceneGraphRoot;
         }
         /**
-         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _node The node to initialize.
-         */
-        public initializeViewportNodes(_node: Node): void {
-            console.log(_node.Name);
-            if (!_node.getComponents(TransformComponent)) {
-                let transform = new TransformComponent();
-                _node.addComponent(transform);
-            }
-            let mesh: MeshComponent;
-            if (_node.getComponents(MeshComponent).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.Name}'.`);
-            }
-            else {
-                this.initializeNodeBuffer(_node);
-                mesh = <MeshComponent>_node.getComponents(MeshComponent)[0];
-                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
-                let materialComponent: MaterialComponent;
-                if (_node.getComponents(MaterialComponent)[0] == undefined) {
-                    console.log(`No Material attached to node named '${_node.Name}'.`);
-                    console.log("Adding standardmaterial...");
-                    materialComponent = new MaterialComponent();
-                    materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
-                    _node.addComponent(materialComponent);
-                }
-                materialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
-                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
-                GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
-                this.initializeNodeMaterial(materialComponent, mesh);
-                if (materialComponent.Material.TextureEnabled) {
-                    this.initializeNodeTexture(materialComponent, mesh);
-                }
-            }
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.initializeViewportNodes(childNode);
-            }
-        }
-
-
-        /**
          * Initializes the vertexbuffer for a passed node.
          * @param _node The node to initialize a buffer for.
          */
@@ -154,7 +164,7 @@ namespace Fudge {
             this.buffers[_node.Name] = buffer;
             let vertexArrayObjectCreated: WebGLVertexArrayObject | null = gl2.createVertexArray();
             if (vertexArrayObjectCreated === null) return;
-            let vertexArrayObject = vertexArrayObjectCreated;
+            let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
             this.vertexArrayObjects[_node.Name] = vertexArrayObject;
             gl2.bindVertexArray(vertexArrayObject);
             gl2.bindBuffer(gl2.ARRAY_BUFFER, buffer);
@@ -169,7 +179,7 @@ namespace Fudge {
             let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
             gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
             _meshComponent.applyColor(_materialComponent);
-            let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
+            let colorAttributeLocation: number = _materialComponent.Material.ColorAttributeLocation;
             gl2.enableVertexAttribArray(colorAttributeLocation);
             GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
         }
@@ -180,23 +190,13 @@ namespace Fudge {
          * @param _mesh The node's meshcomponent.
          */
         private initializeNodeTexture(_materialComponent: MaterialComponent, _meshComponent: MeshComponent): void {
-            let textureCoordinateAttributeLocation = _materialComponent.Material.TextureCoordinateLocation;
-            let textureCoordinateBuffer = gl2.createBuffer();
+            let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+            let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
             gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
             _meshComponent.setTextureCoordinates();
             gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
             GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
             GLUtil.createTexture(_materialComponent.Material.TextureSource);
-        }
-
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        public showSceneGraph(): void {
-            let output: string = "SceneGraph for this viewport:";
-            output += "\n \n"
-            output += this.rootNode.Name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
         }
 
         /**
@@ -206,9 +206,9 @@ namespace Fudge {
         private createSceneGraph(_fudgeNode: Node): string {
             let output: string = "";
             for (let name in _fudgeNode.getChildren()) {
-                let child = _fudgeNode.getChildren()[name];
+                let child: Node = _fudgeNode.getChildren()[name];
                 output += "\n";
-                let current = child;
+                let current: Node = child;
                 if (current.Parent && current.Parent.Parent)
                     output += "|";
                 while (current.Parent && current.Parent.Parent) {
@@ -231,16 +231,17 @@ namespace Fudge {
          */
         private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
             multiplier = multiplier || 1;
-            let width = canvas.clientWidth * multiplier | 0;
-            let height = canvas.clientHeight * multiplier | 0;
+            let width: number = canvas.clientWidth * multiplier | 0;
+            let height: number = canvas.clientHeight * multiplier | 0;
             if (canvas.width !== width || canvas.height !== height) {
                 canvas.width = width;
                 canvas.height = height;
             }
-            if (this.camera.Orthographic)
+            // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
+            if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
-                this.camera.projectCentral(width / height, this.camera.FieldOfView);
+                this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
             gl2.viewport(0, 0, width, height);
         }
     }
