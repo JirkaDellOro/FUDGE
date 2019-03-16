@@ -16,7 +16,7 @@ namespace JaschasExample {
         let meshComponent0: ƒ.MeshComponent = new ƒ.MeshComponent();
         meshComponent0.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
         let materialComponent0: ƒ.MaterialComponent = new ƒ.MaterialComponent();
-        materialComponent0.initialize(texturedMaterial);
+        materialComponent0.initialize(texturedMaterial);  
         let transformComponent0: ƒ.TransformComponent = new ƒ.TransformComponent();
         let pivotComponent0: ƒ.PivotComponent = new ƒ.PivotComponent();
         let fudge0 = new ƒ.Node("Fudge0");

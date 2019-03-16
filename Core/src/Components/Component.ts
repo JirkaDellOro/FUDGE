@@ -6,7 +6,7 @@ namespace Fudge {
         protected container: Node | null = null;
         protected singleton: boolean = false;
 
-        public get Classname(): string {
+        public get className(): string {
             return this.constructor.name;
         }
         public get isSingleton(): boolean {

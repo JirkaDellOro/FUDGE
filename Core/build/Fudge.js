@@ -9,7 +9,7 @@ var Fudge;
             this.container = null;
             this.singleton = false;
         }
-        get Classname() {
+        get className() {
             return this.constructor.name;
         }
         get isSingleton() {
@@ -78,6 +78,7 @@ var Fudge;
          */
         projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
+            console.log(this.fieldOfView); // TODO: remove, this is just here to remove "never used"
             this.orthographic = false;
             this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, _fieldOfView, 1, 2000);
         }
@@ -124,7 +125,7 @@ var Fudge;
                 dataType: _dataType,
                 normalize: _normalize,
                 stride: 0,
-                offset: 0,
+                offset: 0
             };
             this.vertexCount = this.positions.length / this.bufferSpecification.size;
             if ((this.vertexCount % this.bufferSpecification.size) != 0) {
@@ -144,23 +145,6 @@ var Fudge;
         }
         get Normals() {
             return this.normals;
-        }
-        /**
-         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
-         */
-        computeNormals() {
-            let normals = [];
-            let normal = new Fudge.Vector3;
-            let p = this.positions;
-            for (let i = 0; i < p.length; i += 9) {
-                let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
-                let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
-                normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(vector1, vector2));
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
-            }
-            return new Float32Array(normals);
         }
         /**
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
@@ -183,6 +167,23 @@ var Fudge;
                 textureCoordinates.push(0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0);
             }
             Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), Fudge.gl2.STATIC_DRAW);
+        }
+        /**
+         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
+         */
+        computeNormals() {
+            let normals = [];
+            let normal = new Fudge.Vector3;
+            let p = this.positions;
+            for (let i = 0; i < p.length; i += 9) {
+                let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
+                let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
+                normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(vector1, vector2));
+                normals.push(normal.X, normal.Y, normal.Z);
+                normals.push(normal.X, normal.Y, normal.Z);
+                normals.push(normal.X, normal.Y, normal.Z);
+            }
+            return new Float32Array(normals);
         }
     }
     Fudge.MeshComponent = MeshComponent;
@@ -356,24 +357,24 @@ var Fudge;
          */
         static addAsset(_asset) {
             if (_asset instanceof Fudge.Node) {
-                if (this.Nodes[_asset.Name] === undefined) {
-                    this.Nodes[_asset.Name] = _asset;
+                if (this.nodes[_asset.Name] === undefined) {
+                    this.nodes[_asset.Name] = _asset;
                 }
                 else {
                     throw new Error(`There is allready a fudgenode named '${_asset.Name}'.`);
                 }
             }
             else if (_asset instanceof Fudge.Material) {
-                if (this.Materials[_asset.Name] === undefined) {
-                    this.Materials[_asset.Name] = _asset;
+                if (this.materials[_asset.Name] === undefined) {
+                    this.materials[_asset.Name] = _asset;
                 }
                 else {
                     throw new Error(`There is allready a material named '${_asset.Name}'.`);
                 }
             }
             else if (_asset instanceof Fudge.Viewport) {
-                if (this.Viewports[_asset.Name] === undefined) {
-                    this.Viewports[_asset.Name] = _asset;
+                if (this.viewports[_asset.Name] === undefined) {
+                    this.viewports[_asset.Name] = _asset;
                 }
                 else {
                     throw new Error(`There is allready a viewport named '${_asset.Name}'.`);
@@ -385,24 +386,24 @@ var Fudge;
          * @param _name The name to look for.
          */
         static getNode(_name) {
-            return this.Nodes[_name];
+            return this.nodes[_name];
         }
         /**
          * Returns an object containing all fudgenodes that are currently in the array.
          */
         static getNodes() {
-            return this.Nodes;
+            return this.nodes;
         }
         /**
          * Removes the fudgenode with the passed name in the array. Throw's error if there is none.
          * @param _name The name to look for.
          */
         static deleteFudgeNode(_name) {
-            if (this.Nodes[_name] === undefined) {
+            if (this.nodes[_name] === undefined) {
                 throw new Error(`Cannot find fudgenode named '${_name}'.`);
             }
             else {
-                delete this.Nodes[_name];
+                delete this.nodes[_name];
             }
         }
         /**
@@ -410,24 +411,24 @@ var Fudge;
          * @param _name The name to look for.
          */
         static getViewport(_name) {
-            return this.Viewports[_name];
+            return this.viewports[_name];
         }
         /**
          * Returns an object containing all viewports that are currently in the array.
          */
         static getViewports() {
-            return this.Viewports;
+            return this.viewports;
         }
         /**
          * Removes the viewport with the passed name in the array. Throw's error if there is none.
          * @param _name The name to look for.
          */
         static deleteViewport(_name) {
-            if (this.Viewports[_name] === undefined) {
+            if (this.viewports[_name] === undefined) {
                 throw new Error(`Cannot find viewport named '${_name}'.`);
             }
             else {
-                delete this.Viewports[_name];
+                delete this.viewports[_name];
             }
         }
         /**
@@ -435,30 +436,30 @@ var Fudge;
          * @param _name The name to look for.
          */
         static getMaterial(_name) {
-            return this.Materials[_name];
+            return this.materials[_name];
         }
         /**
          * Returns an object containing all materials that are currently in the array.
          */
         static getMaterials() {
-            return this.Materials;
+            return this.materials;
         }
         /**
          * Removes the material with the passed name in the array. Throw's error if there is none.
          * @param _name The name to look for.
          */
         static deleteMaterial(_name) {
-            if (this.Materials[_name] === undefined) {
+            if (this.materials[_name] === undefined) {
                 throw new Error(`Cannot find Material named '${_name}'.`);
             }
             else {
-                delete this.Materials[_name];
+                delete this.materials[_name];
             }
         }
     }
-    AssetManager.Nodes = {}; // Associative array for created fudgenodes.
-    AssetManager.Viewports = {}; // Associative array for created viewports.
-    AssetManager.Materials = {};
+    AssetManager.nodes = {}; // Associative array for created fudgenodes.
+    AssetManager.viewports = {}; // Associative array for created viewports.
+    AssetManager.materials = {};
     Fudge.AssetManager = AssetManager;
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -504,7 +505,6 @@ var Fudge;
         static attributePointer(_attributeLocation, _bufferSpecification) {
             Fudge.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
-        ;
         /**
          * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
          * @param _value // value to check against null
@@ -557,14 +557,14 @@ var Fudge;
                 dataType: Fudge.gl2.UNSIGNED_BYTE,
                 normalize: true,
                 stride: 0,
-                offset: 0,
+                offset: 0
             };
             this.textureBufferSpecification = {
                 size: 2,
                 dataType: Fudge.gl2.FLOAT,
                 normalize: true,
                 stride: 0,
-                offset: 0,
+                offset: 0
             };
             this.textureEnabled = false;
             this.textureSource = "";
@@ -784,12 +784,12 @@ var Fudge;
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component) {
-            if (this.components[_component.Classname] === undefined)
-                this.components[_component.Classname] = [_component];
+            if (this.components[_component.className] === undefined)
+                this.components[_component.className] = [_component];
             else if (_component.isSingleton)
                 throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
             else
-                this.components[_component.Classname].push(_component);
+                this.components[_component.className].push(_component);
             _component.Container = this;
         }
         /**
@@ -1107,7 +1107,7 @@ var Fudge;
                 -_width / 2, -_height / 2, _depth / 2,
                 -_width / 2, -_height / 2, _depth / 2,
                 _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, _depth / 2,
+                _width / 2, -_height / 2, _depth / 2
             ]);
         }
         // Get method.######################################################################################
@@ -1128,8 +1128,17 @@ var Fudge;
             this.data = [
                 1, 0, 0,
                 0, 1, 0,
-                0, 0, 1,
+                0, 0, 1
             ];
+        }
+        static projection(_width, _height) {
+            let matrix = new Mat3;
+            matrix.data = [
+                2 / _width, 0, 0,
+                0, -2 / _height, 0,
+                -1, 1, 1
+            ];
+            return matrix;
         }
         get Data() {
             return this.data;
@@ -1137,42 +1146,11 @@ var Fudge;
         identity() {
             return new Mat3;
         }
-        translation(_xTranslation, _yTranslation) {
-            let matrix = new Mat3;
-            matrix.data = [
-                1, 0, 0,
-                0, 1, 0,
-                _xTranslation, _yTranslation, 1
-            ];
-            return matrix;
-        }
         translate(_matrix, _xTranslation, _yTranslation) {
             return this.multiply(_matrix, this.translation(_xTranslation, _yTranslation));
         }
-        rotation(_angleInDegrees) {
-            let angleInDegrees = 360 - _angleInDegrees;
-            let angleInRadians = angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            let matrix = new Mat3;
-            matrix.data = [
-                cos, -sin, 0,
-                sin, cos, 0,
-                0, 0, 1
-            ];
-            return matrix;
-        }
         rotate(_matrix, _angleInDegrees) {
             return this.multiply(_matrix, this.rotation(_angleInDegrees));
-        }
-        scaling(_xScale, _yScale) {
-            let matrix = new Mat3;
-            matrix.data = [
-                _xScale, 0, 0,
-                0, _yScale, 0,
-                0, 0, 1
-            ];
-            return matrix;
         }
         scale(_matrix, _xScale, _yscale) {
             return this.multiply(_matrix, this.scaling(_xScale, _yscale));
@@ -1206,16 +1184,38 @@ var Fudge;
                 b10 * a02 + b11 * a12 + b12 * a22,
                 b20 * a00 + b21 * a10 + b22 * a20,
                 b20 * a01 + b21 * a11 + b22 * a21,
-                b20 * a02 + b21 * a12 + b22 * a22,
+                b20 * a02 + b21 * a12 + b22 * a22
             ];
             return matrix;
         }
-        static projection(_width, _height) {
+        translation(_xTranslation, _yTranslation) {
             let matrix = new Mat3;
             matrix.data = [
-                2 / _width, 0, 0,
-                0, -2 / _height, 0,
-                -1, 1, 1
+                1, 0, 0,
+                0, 1, 0,
+                _xTranslation, _yTranslation, 1
+            ];
+            return matrix;
+        }
+        scaling(_xScale, _yScale) {
+            let matrix = new Mat3;
+            matrix.data = [
+                _xScale, 0, 0,
+                0, _yScale, 0,
+                0, 0, 1
+            ];
+            return matrix;
+        }
+        rotation(_angleInDegrees) {
+            let angleInDegrees = 360 - _angleInDegrees;
+            let angleInRadians = angleInDegrees * Math.PI / 180;
+            let sin = Math.sin(angleInRadians);
+            let cos = Math.cos(angleInRadians);
+            let matrix = new Mat3;
+            matrix.data = [
+                cos, -sin, 0,
+                sin, cos, 0,
+                0, 0, 1
             ];
             return matrix;
         }
@@ -1244,133 +1244,6 @@ var Fudge;
         static identity() {
             return new Matrix4x4;
         }
-        // Translation methods.######################################################################################
-        /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        static translation(_xTranslation, _yTranslation, _zTranslation) {
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                _xTranslation, _yTranslation, _zTranslation, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-         * @param _matrix The matrix to multiply.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        static translate(_matrix, _xTranslation, _yTranslation, _zTranslation) {
-            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
-        }
-        // Rotation methods.######################################################################################
-        /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        static xRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateX(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
-        }
-        /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        static yRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateY(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
-        }
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        static zRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, sin, 0, 0,
-                -sin, cos, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateZ(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
-        }
-        // Scaling methods.######################################################################################
-        /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
-         */
-        static scaling(_x, _y, _z) {
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                _x, 0, 0, 0,
-                0, _y, 0, 0,
-                0, 0, _z, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
         static scale(_matrix, _x, _y, _z) {
             return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
@@ -1429,7 +1302,7 @@ var Fudge;
                 b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30,
                 b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31,
                 b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32,
-                b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
+                b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33
             ]);
             return matrix;
         }
@@ -1454,38 +1327,38 @@ var Fudge;
             let m31 = _matrix.Data[3 * 4 + 1];
             let m32 = _matrix.Data[3 * 4 + 2];
             let m33 = _matrix.Data[3 * 4 + 3];
-            let tmp_0 = m22 * m33;
-            let tmp_1 = m32 * m23;
-            let tmp_2 = m12 * m33;
-            let tmp_3 = m32 * m13;
-            let tmp_4 = m12 * m23;
-            let tmp_5 = m22 * m13;
-            let tmp_6 = m02 * m33;
-            let tmp_7 = m32 * m03;
-            let tmp_8 = m02 * m23;
-            let tmp_9 = m22 * m03;
-            let tmp_10 = m02 * m13;
-            let tmp_11 = m12 * m03;
-            let tmp_12 = m20 * m31;
-            let tmp_13 = m30 * m21;
-            let tmp_14 = m10 * m31;
-            let tmp_15 = m30 * m11;
-            let tmp_16 = m10 * m21;
-            let tmp_17 = m20 * m11;
-            let tmp_18 = m00 * m31;
-            let tmp_19 = m30 * m01;
-            let tmp_20 = m00 * m21;
-            let tmp_21 = m20 * m01;
-            let tmp_22 = m00 * m11;
-            let tmp_23 = m10 * m01;
-            let t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
-                (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-            let t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
-                (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-            let t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
-                (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-            let t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
-                (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+            let tmp0 = m22 * m33;
+            let tmp1 = m32 * m23;
+            let tmp2 = m12 * m33;
+            let tmp3 = m32 * m13;
+            let tmp4 = m12 * m23;
+            let tmp5 = m22 * m13;
+            let tmp6 = m02 * m33;
+            let tmp7 = m32 * m03;
+            let tmp8 = m02 * m23;
+            let tmp9 = m22 * m03;
+            let tmp10 = m02 * m13;
+            let tmp11 = m12 * m03;
+            let tmp12 = m20 * m31;
+            let tmp13 = m30 * m21;
+            let tmp14 = m10 * m31;
+            let tmp15 = m30 * m11;
+            let tmp16 = m10 * m21;
+            let tmp17 = m20 * m11;
+            let tmp18 = m00 * m31;
+            let tmp19 = m30 * m01;
+            let tmp20 = m00 * m21;
+            let tmp21 = m20 * m01;
+            let tmp22 = m00 * m11;
+            let tmp23 = m10 * m01;
+            let t0 = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
+                (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
+            let t1 = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
+                (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
+            let t2 = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
+                (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
+            let t3 = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
+                (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
             let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
@@ -1493,18 +1366,18 @@ var Fudge;
                 d * t1,
                 d * t2,
                 d * t3,
-                d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) - (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
-                d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) - (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
-                d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) - (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
-                d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) - (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
-                d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) - (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
-                d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) - (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
-                d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) - (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
-                d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) - (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
-                d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) - (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
-                d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) - (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
-                d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) - (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
-                d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) - (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),
+                d * ((tmp1 * m10 + tmp2 * m20 + tmp5 * m30) - (tmp0 * m10 + tmp3 * m20 + tmp4 * m30)),
+                d * ((tmp0 * m00 + tmp7 * m20 + tmp8 * m30) - (tmp1 * m00 + tmp6 * m20 + tmp9 * m30)),
+                d * ((tmp3 * m00 + tmp6 * m10 + tmp11 * m30) - (tmp2 * m00 + tmp7 * m10 + tmp10 * m30)),
+                d * ((tmp4 * m00 + tmp9 * m10 + tmp10 * m20) - (tmp5 * m00 + tmp8 * m10 + tmp11 * m20)),
+                d * ((tmp12 * m13 + tmp15 * m23 + tmp16 * m33) - (tmp13 * m13 + tmp14 * m23 + tmp17 * m33)),
+                d * ((tmp13 * m03 + tmp18 * m23 + tmp21 * m33) - (tmp12 * m03 + tmp19 * m23 + tmp20 * m33)),
+                d * ((tmp14 * m03 + tmp19 * m13 + tmp22 * m33) - (tmp15 * m03 + tmp18 * m13 + tmp23 * m33)),
+                d * ((tmp17 * m03 + tmp20 * m13 + tmp23 * m23) - (tmp16 * m03 + tmp21 * m13 + tmp22 * m23)),
+                d * ((tmp14 * m22 + tmp17 * m32 + tmp13 * m12) - (tmp16 * m32 + tmp12 * m12 + tmp15 * m22)),
+                d * ((tmp20 * m32 + tmp12 * m02 + tmp19 * m22) - (tmp18 * m22 + tmp21 * m32 + tmp13 * m02)),
+                d * ((tmp18 * m12 + tmp23 * m32 + tmp15 * m02) - (tmp22 * m32 + tmp14 * m02 + tmp19 * m12)),
+                d * ((tmp22 * m22 + tmp16 * m02 + tmp21 * m12) - (tmp20 * m12 + tmp23 * m22 + tmp17 * m02)) // [15]
             ]);
             return matrix;
         }
@@ -1537,7 +1410,7 @@ var Fudge;
                 transformPosition.X,
                 transformPosition.Y,
                 transformPosition.Z,
-                1,
+                1
             ]);
             return matrix;
         }
@@ -1558,7 +1431,7 @@ var Fudge;
                 f / _aspect, 0, 0, 0,
                 0, f, 0, 0,
                 0, 0, (_near + _far) * rangeInv, -1,
-                0, 0, _near * _far * rangeInv * 2, 0,
+                0, 0, _near * _far * rangeInv * 2, 0
             ]);
             return matrix;
         }
@@ -1580,7 +1453,127 @@ var Fudge;
                 (_left + _right) / (_left - _right),
                 (_bottom + _top) / (_bottom - _top),
                 (_near + _far) / (_near - _far),
-                1,
+                1
+            ]);
+            return matrix;
+        }
+        /**
+        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
+        * @param _matrix The matrix to multiply.
+        * @param _xTranslation The x-value of the translation.
+        * @param _yTranslation The y-value of the translation.
+        * @param _zTranslation The z-value of the translation.
+        */
+        static translate(_matrix, _xTranslation, _yTranslation, _zTranslation) {
+            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
+        }
+        /**
+        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
+        * @param _matrix The matrix to multiply.
+        * @param _angleInDegrees The angle to rotate by.
+        */
+        static rotateX(_matrix, _angleInDegrees) {
+            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        static rotateY(_matrix, _angleInDegrees) {
+            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        static rotateZ(_matrix, _angleInDegrees) {
+            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
+        }
+        // Translation methods.######################################################################################
+        /**
+         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _xTranslation The x-value of the translation.
+         * @param _yTranslation The y-value of the translation.
+         * @param _zTranslation The z-value of the translation.
+         */
+        static translation(_xTranslation, _yTranslation, _zTranslation) {
+            let matrix = new Matrix4x4;
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                _xTranslation, _yTranslation, _zTranslation, 1
+            ]);
+            return matrix;
+        }
+        // Rotation methods.######################################################################################
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static xRotation(_angleInDegrees) {
+            let matrix = new Matrix4x4;
+            let angleInRadians = _angleInDegrees * Math.PI / 180;
+            let sin = Math.sin(angleInRadians);
+            let cos = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, cos, sin, 0,
+                0, -sin, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static yRotation(_angleInDegrees) {
+            let matrix = new Matrix4x4;
+            let angleInRadians = _angleInDegrees * Math.PI / 180;
+            let sin = Math.sin(angleInRadians);
+            let cos = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, 0, -sin, 0,
+                0, 1, 0, 0,
+                sin, 0, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static zRotation(_angleInDegrees) {
+            let matrix = new Matrix4x4;
+            let angleInRadians = _angleInDegrees * Math.PI / 180;
+            let sin = Math.sin(angleInRadians);
+            let cos = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, sin, 0, 0,
+                -sin, cos, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        // Scaling methods.######################################################################################
+        /**
+         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _x The scaling multiplier for the x-axis.
+         * @param _y The scaling multiplier for the y-axis.
+         * @param _z The scaling multiplier for the z-axis.
+         */
+        static scaling(_x, _y, _z) {
+            let matrix = new Matrix4x4;
+            matrix.data = new Float32Array([
+                _x, 0, 0, 0,
+                0, _y, 0, 0,
+                0, 0, _z, 0,
+                0, 0, 0, 1
             ]);
             return matrix;
         }
@@ -1592,49 +1585,6 @@ var Fudge;
     class Vector3 {
         constructor(_x = 0, _y = 0, _z = 0) {
             this.data = [_x, _y, _z];
-        }
-        // Get methods.######################################################################################
-        get Data() {
-            return this.data;
-        }
-        get X() {
-            return this.data[0];
-        }
-        get Y() {
-            return this.data[1];
-        }
-        get Z() {
-            return this.data[2];
-        }
-        static get Up() {
-            let vector = new Vector3;
-            vector.data = [0, 1, 0];
-            return vector;
-        }
-        static get Down() {
-            let vector = new Vector3;
-            vector.data = [0, -1, 0];
-            return vector;
-        }
-        static get Forward() {
-            let vector = new Vector3;
-            vector.data = [0, 0, 1];
-            return vector;
-        }
-        static get Backward() {
-            let vector = new Vector3;
-            vector.data = [0, 0, -1];
-            return vector;
-        }
-        static get Right() {
-            let vector = new Vector3;
-            vector.data = [1, 0, 0];
-            return vector;
-        }
-        static get Left() {
-            let vector = new Vector3;
-            vector.data = [-1, 0, 0];
-            return vector;
         }
         // Vectormath methods.######################################################################################
         /**
@@ -1696,6 +1646,49 @@ var Fudge;
             }
             return vector;
         }
+        // Get methods.######################################################################################
+        get Data() {
+            return this.data;
+        }
+        get X() {
+            return this.data[0];
+        }
+        get Y() {
+            return this.data[1];
+        }
+        get Z() {
+            return this.data[2];
+        }
+        static get Up() {
+            let vector = new Vector3;
+            vector.data = [0, 1, 0];
+            return vector;
+        }
+        static get Down() {
+            let vector = new Vector3;
+            vector.data = [0, -1, 0];
+            return vector;
+        }
+        static get Forward() {
+            let vector = new Vector3;
+            vector.data = [0, 0, 1];
+            return vector;
+        }
+        static get Backward() {
+            let vector = new Vector3;
+            vector.data = [0, 0, -1];
+            return vector;
+        }
+        static get Right() {
+            let vector = new Vector3;
+            vector.data = [1, 0, 0];
+            return vector;
+        }
+        static get Left() {
+            let vector = new Vector3;
+            vector.data = [-1, 0, 0];
+            return vector;
+        }
     }
     Fudge.Vector3 = Vector3;
 })(Fudge || (Fudge = {}));
@@ -1706,9 +1699,6 @@ var Fudge;
      * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
      */
     class Shader {
-        /**
-         * Creates a new shader.
-         */
         constructor() {
             this.attributes = {}; // Associative array of shader atrributes.
             this.uniforms = {}; // Associative array of shader uniforms.
@@ -1733,6 +1723,12 @@ var Fudge;
                 return null;
             }
             return this.uniforms[_name];
+        }
+        /**
+         * Use this shader in Rendercontext on callup.
+         */
+        use() {
+            Fudge.gl2.useProgram(this.program);
         }
         load(_vertexShaderSource, _fragmentShaderSource) {
             let vertexShader = Fudge.GLUtil.assert(this.compileShader(_vertexShaderSource, Fudge.gl2.VERTEX_SHADER));
@@ -1776,12 +1772,6 @@ var Fudge;
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
-        }
-        /**
-         * Use this shader in Rendercontext on callup.
-         */
-        use() {
-            Fudge.gl2.useProgram(this.program);
         }
         /**
          * Iterates through all active attributes on an instance of shader and saves them in an associative array with the attribute's name as key and the location as value

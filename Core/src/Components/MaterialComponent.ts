@@ -6,7 +6,7 @@ namespace Fudge {
         private material: Material;
         
         // TODO: clearify what a "material" actually is and its relation to the shader. Isn't it just shader parameters? Can then the material be independent of the shader?
-        public initialize(_material: Material) {
+        public initialize(_material: Material): void {
             this.material = _material;
         }
 

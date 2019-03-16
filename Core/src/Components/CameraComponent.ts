@@ -51,6 +51,7 @@ namespace Fudge {
          */
         public projectCentral(_aspect: number = gl2.canvas.clientWidth / gl2.canvas.clientHeight, _fieldOfView: number = 45): void {
             this.fieldOfView = _fieldOfView;
+            console.log(this.fieldOfView); // TODO: remove, this is just here to remove "never used"
             this.orthographic = false;
             this.projectionMatrix = Matrix4x4.centralProjection(_aspect, _fieldOfView, 1, 2000);
         }

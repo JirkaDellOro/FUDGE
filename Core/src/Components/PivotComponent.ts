@@ -11,7 +11,7 @@ namespace Fudge {
         }
 
         public get Position(): Vector3 {
-            return new Vector3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14])
+            return new Vector3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
 
         /**

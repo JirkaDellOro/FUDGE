@@ -6,7 +6,7 @@ declare namespace Fudge {
     abstract class Component {
         protected container: Node | null;
         protected singleton: boolean;
-        readonly Classname: string;
+        readonly className: string;
         readonly isSingleton: boolean;
         Container: Node | null;
     }
@@ -73,10 +73,6 @@ declare namespace Fudge {
         readonly VertexCount: number;
         readonly Normals: Float32Array;
         /**
-         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
-         */
-        private computeNormals;
-        /**
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
          * @param _materialComponent The materialcomponent attached to the same node.
          */
@@ -85,6 +81,10 @@ declare namespace Fudge {
          * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
         setTextureCoordinates(): void;
+        /**
+         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
+         */
+        private computeNormals;
     }
 }
 declare namespace Fudge {
@@ -197,14 +197,14 @@ declare namespace Fudge {
      * Class handling all created fudgenodes, viewports and materials.
      */
     abstract class AssetManager {
-        private static Nodes;
-        private static Viewports;
-        private static Materials;
+        private static nodes;
+        private static viewports;
+        private static materials;
         /**
          * Identifies the passed asset's class and loads it into the fitting array
          * @param _asset
          */
-        static addAsset(_asset: any): void;
+        static addAsset(_asset: Object): void;
         /**
          * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
          * @param _name The name to look for.
@@ -521,16 +521,16 @@ declare namespace Fudge {
     class Mat3 {
         data: number[];
         constructor();
+        static projection(_width: number, _height: number): Mat3;
         readonly Data: number[];
         identity(): Mat3;
-        private translation;
         translate(_matrix: Mat3, _xTranslation: number, _yTranslation: number): Mat3;
-        private rotation;
         rotate(_matrix: Mat3, _angleInDegrees: number): Mat3;
-        private scaling;
         scale(_matrix: Mat3, _xScale: number, _yscale: number): Mat3;
         multiply(_a: Mat3, _b: Mat3): Mat3;
-        static projection(_width: number, _height: number): Mat3;
+        private translation;
+        private scaling;
+        private rotation;
     }
 }
 declare namespace Fudge {
@@ -542,68 +542,6 @@ declare namespace Fudge {
         constructor();
         readonly Data: Float32Array;
         static identity(): Matrix4x4;
-        /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        private static translation;
-        /**
-         * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-         * @param _matrix The matrix to multiply.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4;
-        /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static xRotation;
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
-        /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static yRotation;
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static zRotation;
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
-        /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
-         */
-        private static scaling;
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
         static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -640,22 +578,67 @@ declare namespace Fudge {
          * @param _far The positionvalue of the projectionspace's far border
          */
         static orthographicProjection(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
+        /**
+        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
+        * @param _matrix The matrix to multiply.
+        * @param _xTranslation The x-value of the translation.
+        * @param _yTranslation The y-value of the translation.
+        * @param _zTranslation The z-value of the translation.
+        */
+        static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4;
+        /**
+        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
+        * @param _matrix The matrix to multiply.
+        * @param _angleInDegrees The angle to rotate by.
+        */
+        static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _xTranslation The x-value of the translation.
+         * @param _yTranslation The y-value of the translation.
+         * @param _zTranslation The z-value of the translation.
+         */
+        private static translation;
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static xRotation;
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static yRotation;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static zRotation;
+        /**
+         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _x The scaling multiplier for the x-axis.
+         * @param _y The scaling multiplier for the y-axis.
+         * @param _z The scaling multiplier for the z-axis.
+         */
+        private static scaling;
     }
 }
 declare namespace Fudge {
     class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        readonly Data: number[];
-        readonly X: number;
-        readonly Y: number;
-        readonly Z: number;
-        static readonly Up: Vector3;
-        static readonly Down: Vector3;
-        static readonly Forward: Vector3;
-        static readonly Backward: Vector3;
-        static readonly Right: Vector3;
-        static readonly Left: Vector3;
         /**
          * Adds two vectors.
          * @param _a The vector to add to.
@@ -685,6 +668,16 @@ declare namespace Fudge {
          * @param _vector The vector to normalize.
          */
         static normalize(_vector: Vector3): Vector3;
+        readonly Data: number[];
+        readonly X: number;
+        readonly Y: number;
+        readonly Z: number;
+        static readonly Up: Vector3;
+        static readonly Down: Vector3;
+        static readonly Forward: Vector3;
+        static readonly Backward: Vector3;
+        static readonly Right: Vector3;
+        static readonly Left: Vector3;
     }
 }
 declare namespace Fudge {
@@ -697,10 +690,6 @@ declare namespace Fudge {
         private attributes;
         private uniforms;
         /**
-         * Creates a new shader.
-         */
-        constructor();
-        /**
          * Get location of an attribute by its name.
          * @param _name Name of the attribute to locate.
          */
@@ -710,6 +699,10 @@ declare namespace Fudge {
           * @param _name Name of the attribute to locate.
           */
         getUniformLocation(_name: string): WebGLUniformLocation | null;
+        /**
+         * Use this shader in Rendercontext on callup.
+         */
+        use(): void;
         protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void;
         /**
          * Compiles shader from sourcestring.
@@ -723,10 +716,6 @@ declare namespace Fudge {
          * @param fragmentShader The compiled fragmentshader to be used by the programm.
          */
         private createProgram;
-        /**
-         * Use this shader in Rendercontext on callup.
-         */
-        use(): void;
         /**
          * Iterates through all active attributes on an instance of shader and saves them in an associative array with the attribute's name as key and the location as value
          */

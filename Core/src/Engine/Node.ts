@@ -177,22 +177,22 @@ namespace Fudge {
          * @param _component The component to be pushed into the array.
          */
         public addComponent(_component: Component): void {
-            if (this.components[_component.Classname] === undefined)
-                this.components[_component.Classname] = [_component];
+            if (this.components[_component.className] === undefined)
+                this.components[_component.className] = [_component];
             else
                 if (_component.isSingleton)
                     throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
                 else
-                    this.components[_component.Classname].push(_component);
+                    this.components[_component.className].push(_component);
 
-            _component.Container = this;
+            _component.Container = this; 
         }
         /**
          * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null. 
          * If there are multiple components with the same name in the array, only the first that is found will be removed.
          * Throws error if no component can be found by the name.
          * @param _name The name of the component to be found.
-         */
+         */ 
         /*
         public removeComponent(_name: string): void {
             if (this.components[_name]) {

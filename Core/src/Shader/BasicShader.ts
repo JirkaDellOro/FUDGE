@@ -7,10 +7,10 @@ namespace Fudge {
 
         public constructor() {
             super();
-            this.load(this.loadVertexShaderSource(),this.loadFragmentShaderSource())
+            this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
         }
 
-        private loadVertexShaderSource() :string{
+        private loadVertexShaderSource(): string {
             return `#version 300 es
  
         // an attribute is an input (in) to a vertex shader.
@@ -41,9 +41,10 @@ namespace Fudge {
             v_color = a_color;
             v_textureCoordinate = a_textureCoordinate;
         }
-        `;}
-        private loadFragmentShaderSource(): string{
-        return `#version 300 es
+        `;
+        }
+        private loadFragmentShaderSource(): string {
+            return `#version 300 es
      
             // fragment shaders don't have a default precision so we need
             // to pick one. mediump is a good default. It means "medium precision"
@@ -63,6 +64,6 @@ namespace Fudge {
             outColor = v_color;
             outColor = texture(u_texture, v_textureCoordinate) * v_color;
             }`;
+        }
     }
-}
 }

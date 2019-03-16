@@ -4,12 +4,12 @@ namespace Fudge {
      * Simple class to compute the vertexpositions for a box.
      */
     export class BoxGeometry {
-        private positions : Float32Array
+        private positions: Float32Array;
 
         public constructor(_width: number, _height: number, _depth: number) {
 
             this.positions = new Float32Array([
-                
+
                 //front
                 -_width / 2, -_height / 2, _depth / 2,
                 _width / 2, -_height / 2, _depth / 2,
@@ -57,12 +57,12 @@ namespace Fudge {
                 -_width / 2, -_height / 2, _depth / 2,
                 -_width / 2, -_height / 2, _depth / 2,
                 _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, _depth / 2,]);
+                _width / 2, -_height / 2, _depth / 2]);
         }
 
         // Get method.######################################################################################
-        public get Positions() {
+        public get Positions(): Float32Array {
             return this.positions;
         }
-    } 
+    }
 }

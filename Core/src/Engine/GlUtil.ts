@@ -19,7 +19,7 @@ namespace Fudge {
                 }
             }
             else { // If no Canvas ID was passed, create new canvas with default width and height. 
-                console.log("Creating new canvas...")
+                console.log("Creating new canvas...");
                 canvas = <HTMLCanvasElement>document.createElement("canvas");
                 canvas.id = "canvas";
                 canvas.width = 800;
@@ -38,8 +38,8 @@ namespace Fudge {
          */
         public static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
             gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-        };
-        
+        }
+
         /**
          * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
          * @param _value // value to check against null
@@ -47,7 +47,7 @@ namespace Fudge {
          */
         public static assert<T>(_value: T | null, _message: string = ""): T {
             if (_value === null)
-                throw new Error(`Assertion failed. ${ _message}, WebGL-Error: ${gl2 ? gl2.getError(): ""}`);
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${gl2 ? gl2.getError() : ""}`);
             return _value;
         }
         /**
@@ -60,14 +60,14 @@ namespace Fudge {
             // Fill the texture with a 1x1 blue pixel.
             gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, 1, 1, 0, gl2.RGBA, gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
             // Asynchronously load an image
-            let image = new Image();
+            let image: HTMLImageElement = new Image();
             image.crossOrigin = "anonymous";
             image.src = _textureSource;
-            image.onload = function () {
+            image.onload = function (): void {
                 gl2.bindTexture(gl2.TEXTURE_2D, texture);
                 gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, gl2.RGBA, gl2.UNSIGNED_BYTE, image);
                 gl2.generateMipmap(gl2.TEXTURE_2D);
-            }
+            };
         }
-    } 
+    }
 }

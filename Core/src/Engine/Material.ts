@@ -1,9 +1,9 @@
-namespace Fudge{
+namespace Fudge {
     /**
      * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
      */
     export class Material {
-        private name : string; // The name to call the Material by.
+        private name: string; // The name to call the Material by.
         private shader: Shader; // The shader program used by this BaseMaterial
         private positionAttributeLocation: number; // The attribute on the shader that takes the meshs vertexpositions.
         private colorAttributeLocation: number; // The attribute on the shader that takes a materials colorvalues.
@@ -15,11 +15,11 @@ namespace Fudge{
         private textureSource: string;
         private colorBufferSpecification: BufferSpecification;
         private textureBufferSpecification: BufferSpecification;
-        
+
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
 
-        public constructor(_name:string, _color:Vector3,_shader: Shader) {
-            this.name = _name
+        public constructor(_name: string, _color: Vector3, _shader: Shader) {
+            this.name = _name;
             this.shader = _shader;
             this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
             this.colorAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_color"));
@@ -32,14 +32,14 @@ namespace Fudge{
                 dataType: gl2.UNSIGNED_BYTE,
                 normalize: true,
                 stride: 0,
-                offset: 0,
+                offset: 0
             };
             this.textureBufferSpecification = {
                 size: 2,
                 dataType: gl2.FLOAT,
                 normalize: true,
                 stride: 0,
-                offset: 0,
+                offset: 0
             };
             this.textureEnabled = false;
             this.textureSource = "";
@@ -47,16 +47,16 @@ namespace Fudge{
         }
 
         // Get methods. ######################################################################################
-        public get Shader() {
+        public get Shader(): Shader {
             return this.shader;
         }
-        public get Name(){
+        public get Name(): string {
             return this.name;
         }
-        public get Color():Vector3{
+        public get Color(): Vector3 {
             return this.color;
         }
-        public set Color(_color : Vector3){
+        public set Color(_color: Vector3) {
             this.color = _color;
         }
         public get ColorBufferSpecification(): BufferSpecification {
@@ -69,9 +69,9 @@ namespace Fudge{
             return this.textureEnabled;
         }
         public get TextureSource(): string {
-            return this.textureSource
+            return this.textureSource;
         }
-        
+
         public get PositionAttributeLocation(): number {
             return this.positionAttributeLocation;
         }
@@ -82,7 +82,7 @@ namespace Fudge{
             return this.matrixLocation;
         }
         public get TextureCoordinateLocation(): number {
-            return this.textureCoordinateAtributeLocation
+            return this.textureCoordinateAtributeLocation;
         }
 
         // Color and Texture methods.######################################################################################
@@ -97,7 +97,7 @@ namespace Fudge{
         /**
          * Removes and disables a texture that was added to this material.
          */
-        public removeTexture():void{
+        public removeTexture(): void {
             this.textureEnabled = false;
             this.textureSource = "";
         }

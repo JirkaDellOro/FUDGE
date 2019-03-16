@@ -1,55 +1,10 @@
 namespace Fudge {
 
     export class Vector3 {
-
         private data: number[];
 
         public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
             this.data = [_x, _y, _z];
-        }
-
-        // Get methods.######################################################################################
-        get Data(): number[] {
-            return this.data;
-        }
-        get X(): number {
-            return this.data[0];
-        }
-        get Y(): number {
-            return this.data[1];
-        }
-        get Z(): number {
-            return this.data[2];
-        }
-        public static get Up(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [0, 1, 0];
-            return vector;
-        }
-        public static get Down(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [0, -1, 0];
-            return vector;
-        }
-        public static get Forward(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [0, 0, 1];
-            return vector;
-        }
-        public static get Backward(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [0, 0, -1];
-            return vector;
-        }
-        public static get Right(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [1, 0, 0];
-            return vector;
-        }
-        public static get Left(): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [-1, 0, 0];
-            return vector;
         }
 
         // Vectormath methods.######################################################################################
@@ -108,6 +63,51 @@ namespace Fudge {
             } else {
                 vector.data = [0, 0, 0];
             }
+            return vector;
+        }
+
+
+        // Get methods.######################################################################################
+        get Data(): number[] {
+            return this.data;
+        }
+        get X(): number {
+            return this.data[0];
+        }
+        get Y(): number {
+            return this.data[1];
+        }
+        get Z(): number {
+            return this.data[2];
+        }
+        public static get Up(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [0, 1, 0];
+            return vector;
+        }
+        public static get Down(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [0, -1, 0];
+            return vector;
+        }
+        public static get Forward(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [0, 0, 1];
+            return vector;
+        }
+        public static get Backward(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [0, 0, -1];
+            return vector;
+        }
+        public static get Right(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [1, 0, 0];
+            return vector;
+        }
+        public static get Left(): Vector3 {
+            let vector: Vector3 = new Vector3;
+            vector.data = [-1, 0, 0];
             return vector;
         }
 

@@ -24,136 +24,6 @@ namespace Fudge {
         public static identity(): Matrix4x4 {
             return new Matrix4x4;
         }
-
-        // Translation methods.######################################################################################
-        /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        private static translation(_xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4 {
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                _xTranslation, _yTranslation, _zTranslation, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-         * @param _matrix The matrix to multiply.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
-         */
-        public static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4 {
-            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
-        }
-
-        // Rotation methods.######################################################################################
-        /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static xRotation(_angleInDegrees: number): Matrix4x4 {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        public static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
-            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
-        }
-        /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static yRotation(_angleInDegrees: number): Matrix4x4 {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        public static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
-            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
-        }
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static zRotation(_angleInDegrees: number): Matrix4x4 {
-            let matrix = new Matrix4x4;
-            let angleInRadians = _angleInDegrees * Math.PI / 180;
-            let sin = Math.sin(angleInRadians);
-            let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, sin, 0, 0,
-                -sin, cos, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        public static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
-            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
-        }
-
-        // Scaling methods.######################################################################################
-        /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
-         */
-        private static scaling(_x: number, _y: number, _z: number): Matrix4x4 {
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                _x, 0, 0, 0,
-                0, _y, 0, 0,
-                0, 0, _z, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
         public static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
@@ -213,7 +83,7 @@ namespace Fudge {
                     b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30,
                     b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31,
                     b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32,
-                    b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
+                    b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33
                 ]);
             return matrix;
         }
@@ -239,40 +109,40 @@ namespace Fudge {
             let m31: number = _matrix.Data[3 * 4 + 1];
             let m32: number = _matrix.Data[3 * 4 + 2];
             let m33: number = _matrix.Data[3 * 4 + 3];
-            let tmp_0: number = m22 * m33;
-            let tmp_1: number = m32 * m23;
-            let tmp_2: number = m12 * m33;
-            let tmp_3: number = m32 * m13;
-            let tmp_4: number = m12 * m23;
-            let tmp_5: number = m22 * m13;
-            let tmp_6: number = m02 * m33;
-            let tmp_7: number = m32 * m03;
-            let tmp_8: number = m02 * m23;
-            let tmp_9: number = m22 * m03;
-            let tmp_10: number = m02 * m13;
-            let tmp_11: number = m12 * m03;
-            let tmp_12: number = m20 * m31;
-            let tmp_13: number = m30 * m21;
-            let tmp_14: number = m10 * m31;
-            let tmp_15: number = m30 * m11;
-            let tmp_16: number = m10 * m21;
-            let tmp_17: number = m20 * m11;
-            let tmp_18: number = m00 * m31;
-            let tmp_19: number = m30 * m01;
-            let tmp_20: number = m00 * m21;
-            let tmp_21: number = m20 * m01;
-            let tmp_22: number = m00 * m11;
-            let tmp_23: number = m10 * m01;
+            let tmp0: number = m22 * m33;
+            let tmp1: number = m32 * m23;
+            let tmp2: number = m12 * m33;
+            let tmp3: number = m32 * m13;
+            let tmp4: number = m12 * m23;
+            let tmp5: number = m22 * m13;
+            let tmp6: number = m02 * m33;
+            let tmp7: number = m32 * m03;
+            let tmp8: number = m02 * m23;
+            let tmp9: number = m22 * m03;
+            let tmp10: number = m02 * m13;
+            let tmp11: number = m12 * m03;
+            let tmp12: number = m20 * m31;
+            let tmp13: number = m30 * m21;
+            let tmp14: number = m10 * m31;
+            let tmp15: number = m30 * m11;
+            let tmp16: number = m10 * m21;
+            let tmp17: number = m20 * m11;
+            let tmp18: number = m00 * m31;
+            let tmp19: number = m30 * m01;
+            let tmp20: number = m00 * m21;
+            let tmp21: number = m20 * m01;
+            let tmp22: number = m00 * m11;
+            let tmp23: number = m10 * m01;
 
-            let t0: number = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
-                (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
+            let t0: number = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
+                (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
 
-            let t1: number = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
-                (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-            let t2: number = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
-                (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-            let t3: number = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
-                (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+            let t1: number = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
+                (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
+            let t2: number = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
+                (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
+            let t3: number = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
+                (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
 
             let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
@@ -282,18 +152,18 @@ namespace Fudge {
                 d * t1, // [1]
                 d * t2, // [2]
                 d * t3, // [3]
-                d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) - (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),        // [4]
-                d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) - (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),        // [5]
-                d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) - (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),      // [6]
-                d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) - (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),      // [7]
-                d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) - (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),  // [8]
-                d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) - (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),  // [9]
-                d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) - (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),  // [10]
-                d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) - (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),  // [11]
-                d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) - (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),  // [12]
-                d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) - (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),  // [13]
-                d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) - (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),  // [14]
-                d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) - (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),  // [15]
+                d * ((tmp1 * m10 + tmp2 * m20 + tmp5 * m30) - (tmp0 * m10 + tmp3 * m20 + tmp4 * m30)),        // [4]
+                d * ((tmp0 * m00 + tmp7 * m20 + tmp8 * m30) - (tmp1 * m00 + tmp6 * m20 + tmp9 * m30)),        // [5]
+                d * ((tmp3 * m00 + tmp6 * m10 + tmp11 * m30) - (tmp2 * m00 + tmp7 * m10 + tmp10 * m30)),      // [6]
+                d * ((tmp4 * m00 + tmp9 * m10 + tmp10 * m20) - (tmp5 * m00 + tmp8 * m10 + tmp11 * m20)),      // [7]
+                d * ((tmp12 * m13 + tmp15 * m23 + tmp16 * m33) - (tmp13 * m13 + tmp14 * m23 + tmp17 * m33)),  // [8]
+                d * ((tmp13 * m03 + tmp18 * m23 + tmp21 * m33) - (tmp12 * m03 + tmp19 * m23 + tmp20 * m33)),  // [9]
+                d * ((tmp14 * m03 + tmp19 * m13 + tmp22 * m33) - (tmp15 * m03 + tmp18 * m13 + tmp23 * m33)),  // [10]
+                d * ((tmp17 * m03 + tmp20 * m13 + tmp23 * m23) - (tmp16 * m03 + tmp21 * m13 + tmp22 * m23)),  // [11]
+                d * ((tmp14 * m22 + tmp17 * m32 + tmp13 * m12) - (tmp16 * m32 + tmp12 * m12 + tmp15 * m22)),  // [12]
+                d * ((tmp20 * m32 + tmp12 * m02 + tmp19 * m22) - (tmp18 * m22 + tmp21 * m32 + tmp13 * m02)),  // [13]
+                d * ((tmp18 * m12 + tmp23 * m32 + tmp15 * m02) - (tmp22 * m32 + tmp14 * m02 + tmp19 * m12)),  // [14]
+                d * ((tmp22 * m22 + tmp16 * m02 + tmp21 * m12) - (tmp20 * m12 + tmp23 * m22 + tmp17 * m02))  // [15]
             ]);
             return matrix;
         }
@@ -327,7 +197,7 @@ namespace Fudge {
                     transformPosition.X,
                     transformPosition.Y,
                     transformPosition.Z,
-                    1,
+                    1
                 ]);
             return matrix;
         }
@@ -349,7 +219,7 @@ namespace Fudge {
                 f / _aspect, 0, 0, 0,
                 0, f, 0, 0,
                 0, 0, (_near + _far) * rangeInv, -1,
-                0, 0, _near * _far * rangeInv * 2, 0,
+                0, 0, _near * _far * rangeInv * 2, 0
             ]);
             return matrix;
         }
@@ -371,9 +241,139 @@ namespace Fudge {
                 (_left + _right) / (_left - _right),
                 (_bottom + _top) / (_bottom - _top),
                 (_near + _far) / (_near - _far),
-                1,
+                1
             ]);
             return matrix;
         }
+        /**
+        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
+        * @param _matrix The matrix to multiply.
+        * @param _xTranslation The x-value of the translation.
+        * @param _yTranslation The y-value of the translation.
+        * @param _zTranslation The z-value of the translation.
+        */
+        public static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4 {
+            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
+        }
+        /**
+        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
+        * @param _matrix The matrix to multiply.
+        * @param _angleInDegrees The angle to rotate by.
+        */
+        public static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
+            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        public static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
+            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        public static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
+            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
+        }
+        // Translation methods.######################################################################################
+        /**
+         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _xTranslation The x-value of the translation.
+         * @param _yTranslation The y-value of the translation.
+         * @param _zTranslation The z-value of the translation.
+         */
+        private static translation(_xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                _xTranslation, _yTranslation, _zTranslation, 1
+            ]);
+            return matrix;
+        }
+
+        // Rotation methods.######################################################################################
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static xRotation(_angleInDegrees: number): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, cos, sin, 0,
+                0, -sin, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static yRotation(_angleInDegrees: number): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, 0, -sin, 0,
+                0, 1, 0, 0,
+                sin, 0, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static zRotation(_angleInDegrees: number): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, sin, 0, 0,
+                -sin, cos, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+
+        // Scaling methods.######################################################################################
+        /**
+         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
+         * @param _x The scaling multiplier for the x-axis.
+         * @param _y The scaling multiplier for the y-axis.
+         * @param _z The scaling multiplier for the z-axis.
+         */
+        private static scaling(_x: number, _y: number, _z: number): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            matrix.data = new Float32Array([
+                _x, 0, 0, 0,
+                0, _y, 0, 0,
+                0, 0, _z, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
+         * @param _matrix The matrix to multiply.
+         * @param _x The scaling multiplier for the x-Axis.
+         * @param _y The scaling multiplier for the y-Axis.
+         * @param _z The scaling multiplier for the z-Axis.
+         */
+
     }
 }

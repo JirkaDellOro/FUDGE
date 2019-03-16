@@ -8,12 +8,6 @@ namespace Fudge {
         private attributes: { [name: string]: number } = {}; // Associative array of shader atrributes.
         private uniforms: { [name: string]: WebGLUniformLocation } = {}; // Associative array of shader uniforms.
 
-        /**
-         * Creates a new shader.
-         */
-        public constructor() {
-        }
-
         // Get and set methods.######################################################################################
         /**
          * Get location of an attribute by its name.
@@ -34,6 +28,13 @@ namespace Fudge {
                 return null;
             }
             return this.uniforms[_name];
+        }
+
+        /**
+         * Use this shader in Rendercontext on callup.
+         */
+        public use(): void {
+            gl2.useProgram(this.program);
         }
 
         protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void {
@@ -78,16 +79,10 @@ namespace Fudge {
 
             gl2.linkProgram(this.program);
 
-            let error = gl2.getProgramInfoLog(this.program);
+            let error: string = gl2.getProgramInfoLog(this.program);
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
-        }
-        /**
-         * Use this shader in Rendercontext on callup.
-         */
-        public use(): void {
-            gl2.useProgram(this.program);
         }
         /**
          * Iterates through all active attributes on an instance of shader and saves them in an associative array with the attribute's name as key and the location as value
