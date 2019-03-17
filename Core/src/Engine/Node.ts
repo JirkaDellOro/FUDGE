@@ -177,34 +177,32 @@ namespace Fudge {
          * @param _component The component to be pushed into the array.
          */
         public addComponent(_component: Component): void {
-            if (this.components[_component.className] === undefined)
-                this.components[_component.className] = [_component];
+            if (this.components[_component.type] === undefined)
+                this.components[_component.type] = [_component];
             else
                 if (_component.isSingleton)
                     throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
                 else
-                    this.components[_component.className].push(_component);
+                    this.components[_component.type].push(_component);
 
-            _component.Container = this; 
+            _component.setContainer(this);
         }
         /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null. 
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null. 
          * Throws error if no component can be found by the name.
          * @param _name The name of the component to be found.
-         */ 
-        /*
-        public removeComponent(_name: string): void {
-            if (this.components[_name]) {
-                this.components[_name].Container = null;
-                delete this.components[_name];
-                console.log(`Component '${_name}' removed.`)
-            }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
+         * @throws Exception when component is not found
+         */
+        public removeComponent(_component: Component): void {
+            try {
+                let componentsOfType: Component[] = this.components[_component.type];
+                let foundAt: number = componentsOfType.indexOf(_component);
+                componentsOfType.splice(foundAt, 1);
+                _component.setContainer(null);
+            } catch {
+                throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
         }
-        */
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.

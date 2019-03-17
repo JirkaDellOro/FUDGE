@@ -68,7 +68,7 @@ namespace JaschasExample {
 
         let viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
         viewPort.drawScene();
-        viewPort.showSceneGraph(); 
+        viewPort.showSceneGraph();
         play();
     }
 

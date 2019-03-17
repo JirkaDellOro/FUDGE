@@ -36,7 +36,7 @@ namespace Fudge {
          */
         public get ViewProjectionMatrix(): Matrix4x4 {
             try {
-                let transform: TransformComponent = <TransformComponent>this.container.getComponents(TransformComponent)[0];
+                let transform: TransformComponent = <TransformComponent>this.getContainer().getComponents(TransformComponent)[0];
                 let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
                 return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             } catch {

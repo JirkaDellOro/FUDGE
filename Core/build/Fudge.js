@@ -2,24 +2,52 @@
 var Fudge;
 (function (Fudge) {
     /**
-     * Superclass for all Components that may be attached to Nodes.
+     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Component {
         constructor() {
             this.container = null;
             this.singleton = false;
         }
-        get className() {
+        /**
+         * Retrieves the type of this components subclass as the name of the runtime class
+         * @returns The type of the component
+         */
+        get type() {
             return this.constructor.name;
         }
+        /**
+         * Is true, when only one instance of the component class can be attached to a node
+         */
         get isSingleton() {
             return this.singleton;
         }
-        get Container() {
+        /**
+         * Retrieves the node, this component is currently attached to
+         * @returns The container node or null, if the component is not attached to
+         */
+        getContainer() {
             return this.container;
         }
-        set Container(_container) {
-            this.container = _container;
+        /**
+         * Tries to add the component to the given node, removing it from the previous container if applicable
+         * @param _container The node to attach this component to
+         * TODO: write tests to prove consistency and correct exception handling
+         */
+        setContainer(_container) {
+            if (this.container == _container)
+                return;
+            let previousContainer = this.container;
+            try {
+                if (previousContainer)
+                    previousContainer.removeComponent(this);
+                this.container = _container;
+                this.container.addComponent(this);
+            }
+            catch {
+                this.container = previousContainer;
+            }
         }
     }
     Fudge.Component = Component;
@@ -63,7 +91,7 @@ var Fudge;
          */
         get ViewProjectionMatrix() {
             try {
-                let transform = this.container.getComponents(Fudge.TransformComponent)[0];
+                let transform = this.getContainer().getComponents(Fudge.TransformComponent)[0];
                 let viewMatrix = Fudge.Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
                 return Fudge.Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
@@ -784,32 +812,31 @@ var Fudge;
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component) {
-            if (this.components[_component.className] === undefined)
-                this.components[_component.className] = [_component];
+            if (this.components[_component.type] === undefined)
+                this.components[_component.type] = [_component];
             else if (_component.isSingleton)
                 throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
             else
-                this.components[_component.className].push(_component);
-            _component.Container = this;
+                this.components[_component.type].push(_component);
+            _component.setContainer(this);
         }
         /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null.
          * Throws error if no component can be found by the name.
          * @param _name The name of the component to be found.
+         * @throws Exception when component is not found
          */
-        /*
-        public removeComponent(_name: string): void {
-            if (this.components[_name]) {
-                this.components[_name].Container = null;
-                delete this.components[_name];
-                console.log(`Component '${_name}' removed.`)
+        removeComponent(_component) {
+            try {
+                let componentsOfType = this.components[_component.type];
+                let foundAt = componentsOfType.indexOf(_component);
+                componentsOfType.splice(foundAt, 1);
+                _component.setContainer(null);
             }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
+            catch {
+                throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
         }
-        */
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.

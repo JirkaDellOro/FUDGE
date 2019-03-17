@@ -2,7 +2,7 @@ namespace TimeTest {
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed
      * since the start of the program but allows for resetting and scaling
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Time {
         private start: number;

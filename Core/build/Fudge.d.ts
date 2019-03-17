@@ -1,14 +1,32 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
     /**
-     * Superclass for all Components that may be attached to Nodes.
+     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Component {
-        protected container: Node | null;
-        protected singleton: boolean;
-        readonly className: string;
+        private container;
+        private singleton;
+        /**
+         * Retrieves the type of this components subclass as the name of the runtime class
+         * @returns The type of the component
+         */
+        readonly type: string;
+        /**
+         * Is true, when only one instance of the component class can be attached to a node
+         */
         readonly isSingleton: boolean;
-        Container: Node | null;
+        /**
+         * Retrieves the node, this component is currently attached to
+         * @returns The container node or null, if the component is not attached to
+         */
+        getContainer(): Node | null;
+        /**
+         * Tries to add the component to the given node, removing it from the previous container if applicable
+         * @param _container The node to attach this component to
+         * TODO: write tests to prove consistency and correct exception handling
+         */
+        setContainer(_container: Node | null): void;
     }
 }
 declare namespace Fudge {
@@ -415,11 +433,12 @@ declare namespace Fudge {
          */
         addComponent(_component: Component): void;
         /**
-         * Looks through this nodes ccomponent array, removes a component with the supplied name and sets the components parent to null.
-         * If there are multiple components with the same name in the array, only the first that is found will be removed.
+         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null.
          * Throws error if no component can be found by the name.
          * @param _name The name of the component to be found.
+         * @throws Exception when component is not found
          */
+        removeComponent(_component: Component): void;
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
