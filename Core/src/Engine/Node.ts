@@ -2,7 +2,7 @@ namespace Fudge {
     export interface MapClassToComponents {
         [className: string]: Component[];
     }
-    export interface AssocStringNode {
+    export interface MapStringToNode {
         [key: string]: Node;
     }
     /**
@@ -12,7 +12,7 @@ namespace Fudge {
     export class Node {
         private name: string; // The name to call this node by.
         private parent: Node | null; // The parent of this node.
-        private children: AssocStringNode; // Associative array nodes appended to this node.
+        private children: MapStringToNode; // Associative array nodes appended to this node.
         private components: MapClassToComponents;
         private tags: string[]; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         private layers: string[]; // Names of the layers this node is on. (TODO: As of yet no functionality)
@@ -111,7 +111,7 @@ namespace Fudge {
         /**
          * Returns the children array of this node.
          */
-        public getChildren(): AssocStringNode {
+        public getChildren(): MapStringToNode {
             return this.children;
         }
         /**

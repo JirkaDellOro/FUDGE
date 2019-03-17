@@ -307,7 +307,7 @@ declare namespace Fudge {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
-    interface AssocStringNode {
+    interface MapStringToNode {
         [key: string]: Node;
     }
     /**
@@ -353,7 +353,7 @@ declare namespace Fudge {
         /**
          * Returns the children array of this node.
          */
-        getChildren(): AssocStringNode;
+        getChildren(): MapStringToNode;
         /**
          * Looks through this Nodes children array and returns a child with the supplied name.
          * If there are multiple children with the same name in the array, only the first that is found will be returned.
