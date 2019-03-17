@@ -48,7 +48,7 @@ namespace Fudge {
 
             let colorPerPosition: number[] = [];
             for (let i: number = 0; i < this.vertexCount; i++) {
-                colorPerPosition.push(_materialComponent.Material.Color.X, _materialComponent.Material.Color.Y, _materialComponent.Material.Color.Z);
+                colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
             }
             gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
         }
@@ -83,9 +83,9 @@ namespace Fudge {
                 let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
                 let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
                 normal = Vector3.normalize(Vector3.cross(vector1, vector2));
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
+                normals.push(normal.x, normal.y, normal.z);
+                normals.push(normal.x, normal.y, normal.z);
+                normals.push(normal.x, normal.y, normal.z);
             }
             return new Float32Array(normals);
         }

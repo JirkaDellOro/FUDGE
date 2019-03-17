@@ -175,29 +175,29 @@ namespace Fudge {
          */
         public static lookAt(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4 {
             let matrix: Matrix4x4 = new Matrix4x4;
-            let transformPosition: Vector3 = new Vector3(_transformPosition.X, _transformPosition.Y, _transformPosition.Z);
-            let targetPosition: Vector3 = new Vector3(_targetPosition.X, _targetPosition.Y, _targetPosition.Z);
+            let transformPosition: Vector3 = new Vector3(_transformPosition.x, _transformPosition.y, _transformPosition.z);
+            let targetPosition: Vector3 = new Vector3(_targetPosition.x, _targetPosition.y, _targetPosition.z);
             let zAxis: Vector3 = Vector3.subtract(transformPosition, targetPosition);
             zAxis = Vector3.normalize(zAxis);
             let xAxis: Vector3;
             let yAxis: Vector3;
-            if (zAxis.Data != Vector3.Up.Data) {
-                xAxis = Vector3.normalize(Vector3.cross(Vector3.Up, zAxis));
+            if (zAxis.Data != Vector3.up.Data) { // TODO: verify intention - this is the comparison of references...
+                xAxis = Vector3.normalize(Vector3.cross(Vector3.up, zAxis));
                 yAxis = Vector3.normalize(Vector3.cross(zAxis, xAxis));
             }
             else {
                 xAxis = Vector3.normalize(Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Vector3.normalize(Vector3.cross(Vector3.Forward, xAxis));
+                yAxis = Vector3.normalize(Vector3.cross(Vector3.forward, xAxis));
                 zAxis = Vector3.normalize(Vector3.cross(xAxis, yAxis));
             }
             matrix.data = new Float32Array(
                 [
-                    xAxis.X, xAxis.Y, xAxis.Z, 0,
-                    yAxis.X, yAxis.Y, yAxis.Z, 0,
-                    zAxis.X, zAxis.Y, zAxis.Z, 0,
-                    transformPosition.X,
-                    transformPosition.Y,
-                    transformPosition.Z,
+                    xAxis.x, xAxis.y, xAxis.z, 0,
+                    yAxis.x, yAxis.y, yAxis.z, 0,
+                    zAxis.x, zAxis.y, zAxis.z, 0,
+                    transformPosition.x,
+                    transformPosition.y,
+                    transformPosition.z,
                     1
                 ]);
             return matrix;

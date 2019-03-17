@@ -618,6 +618,16 @@ declare namespace Fudge {
     class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
+        readonly Data: number[];
+        readonly x: number;
+        readonly y: number;
+        readonly z: number;
+        static readonly up: Vector3;
+        static readonly down: Vector3;
+        static readonly forward: Vector3;
+        static readonly backward: Vector3;
+        static readonly right: Vector3;
+        static readonly left: Vector3;
         /**
          * Adds two vectors.
          * @param _a The vector to add to.
@@ -647,16 +657,6 @@ declare namespace Fudge {
          * @param _vector The vector to normalize.
          */
         static normalize(_vector: Vector3): Vector3;
-        readonly Data: number[];
-        readonly X: number;
-        readonly Y: number;
-        readonly Z: number;
-        static readonly Up: Vector3;
-        static readonly Down: Vector3;
-        static readonly Forward: Vector3;
-        static readonly Backward: Vector3;
-        static readonly Right: Vector3;
-        static readonly Left: Vector3;
     }
 }
 declare namespace Fudge {

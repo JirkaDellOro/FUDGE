@@ -184,7 +184,7 @@ var Fudge;
         applyColor(_materialComponent) {
             let colorPerPosition = [];
             for (let i = 0; i < this.vertexCount; i++) {
-                colorPerPosition.push(_materialComponent.Material.Color.X, _materialComponent.Material.Color.Y, _materialComponent.Material.Color.Z);
+                colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
             }
             Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), Fudge.gl2.STATIC_DRAW);
         }
@@ -210,9 +210,9 @@ var Fudge;
                 let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
                 let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
                 normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(vector1, vector2));
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
-                normals.push(normal.X, normal.Y, normal.Z);
+                normals.push(normal.x, normal.y, normal.z);
+                normals.push(normal.x, normal.y, normal.z);
+                normals.push(normal.x, normal.y, normal.z);
             }
             return new Float32Array(normals);
         }
@@ -766,7 +766,7 @@ var Fudge;
             if (this.camera.isActive) {
                 this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
                 let backgroundColor = this.camera.getBackgoundColor();
-                Fudge.gl2.clearColor(backgroundColor.X, backgroundColor.Y, backgroundColor.Z, this.camera.getBackgroundEnabled() ? 1 : 0);
+                Fudge.gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
                 Fudge.gl2.clear(Fudge.gl2.COLOR_BUFFER_BIT | Fudge.gl2.DEPTH_BUFFER_BIT);
                 // Enable backface- and zBuffer-culling.
                 Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
@@ -1310,28 +1310,28 @@ var Fudge;
          */
         static lookAt(_transformPosition, _targetPosition) {
             let matrix = new Matrix4x4;
-            let transformPosition = new Fudge.Vector3(_transformPosition.X, _transformPosition.Y, _transformPosition.Z);
-            let targetPosition = new Fudge.Vector3(_targetPosition.X, _targetPosition.Y, _targetPosition.Z);
+            let transformPosition = new Fudge.Vector3(_transformPosition.x, _transformPosition.y, _transformPosition.z);
+            let targetPosition = new Fudge.Vector3(_targetPosition.x, _targetPosition.y, _targetPosition.z);
             let zAxis = Fudge.Vector3.subtract(transformPosition, targetPosition);
             zAxis = Fudge.Vector3.normalize(zAxis);
             let xAxis;
             let yAxis;
-            if (zAxis.Data != Fudge.Vector3.Up.Data) {
-                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Up, zAxis));
+            if (zAxis.Data != Fudge.Vector3.up.Data) { // TODO: verify intention - this is the comparison of references...
+                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.up, zAxis));
                 yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(zAxis, xAxis));
             }
             else {
                 xAxis = Fudge.Vector3.normalize(Fudge.Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Forward, xAxis));
+                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.forward, xAxis));
                 zAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(xAxis, yAxis));
             }
             matrix.data = new Float32Array([
-                xAxis.X, xAxis.Y, xAxis.Z, 0,
-                yAxis.X, yAxis.Y, yAxis.Z, 0,
-                zAxis.X, zAxis.Y, zAxis.Z, 0,
-                transformPosition.X,
-                transformPosition.Y,
-                transformPosition.Z,
+                xAxis.x, xAxis.y, xAxis.z, 0,
+                yAxis.x, yAxis.y, yAxis.z, 0,
+                zAxis.x, zAxis.y, zAxis.z, 0,
+                transformPosition.x,
+                transformPosition.y,
+                transformPosition.z,
                 1
             ]);
             return matrix;
@@ -1512,6 +1512,43 @@ var Fudge;
         constructor(_x = 0, _y = 0, _z = 0) {
             this.data = [_x, _y, _z];
         }
+        // Get methods.######################################################################################
+        get Data() {
+            return this.data;
+        }
+        get x() {
+            return this.data[0];
+        }
+        get y() {
+            return this.data[1];
+        }
+        get z() {
+            return this.data[2];
+        }
+        static get up() {
+            let vector = new Vector3(0, 1, 0);
+            return vector;
+        }
+        static get down() {
+            let vector = new Vector3(0, -1, 0);
+            return vector;
+        }
+        static get forward() {
+            let vector = new Vector3(0, 0, 1);
+            return vector;
+        }
+        static get backward() {
+            let vector = new Vector3(0, 0, -1);
+            return vector;
+        }
+        static get right() {
+            let vector = new Vector3(1, 0, 0);
+            return vector;
+        }
+        static get left() {
+            let vector = new Vector3(-1, 0, 0);
+            return vector;
+        }
         // Vectormath methods.######################################################################################
         /**
          * Adds two vectors.
@@ -1520,7 +1557,7 @@ var Fudge;
          */
         static add(_a, _b) {
             let vector = new Vector3;
-            vector.data = [_a.X + _b.X, _a.Y + _b.Y, _a.Z + _b.Z];
+            vector.data = [_a.x + _b.x, _a.y + _b.y, _a.z + _b.z];
             return vector;
         }
         /**
@@ -1530,7 +1567,7 @@ var Fudge;
          */
         static subtract(_a, _b) {
             let vector = new Vector3;
-            vector.data = [_a.X - _b.X, _a.Y - _b.Y, _a.Z - _b.Z];
+            vector.data = [_a.x - _b.x, _a.y - _b.y, _a.z - _b.z];
             return vector;
         }
         /**
@@ -1541,9 +1578,9 @@ var Fudge;
         static cross(_a, _b) {
             let vector = new Vector3;
             vector.data = [
-                _a.Y * _b.Z - _a.Z * _b.Y,
-                _a.Z * _b.X - _a.X * _b.Z,
-                _a.X * _b.Y - _a.Y * _b.X
+                _a.y * _b.z - _a.z * _b.y,
+                _a.z * _b.x - _a.x * _b.z,
+                _a.x * _b.y - _a.y * _b.x
             ];
             return vector;
         }
@@ -1553,7 +1590,7 @@ var Fudge;
          * @param _b The vector to multiply by.
          */
         static dot(_a, _b) {
-            let scalarProduct = _a.X * _b.X + _a.Y * _b.Y + _a.Z * _b.Z;
+            let scalarProduct = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
             return scalarProduct;
         }
         /**
@@ -1561,58 +1598,15 @@ var Fudge;
          * @param _vector The vector to normalize.
          */
         static normalize(_vector) {
-            let length = Math.sqrt(_vector.X * _vector.X + _vector.Y * _vector.Y + _vector.Z * _vector.Z);
+            let length = Math.sqrt(_vector.x * _vector.x + _vector.y * _vector.y + _vector.z * _vector.z);
             let vector = new Vector3;
             // make sure we don't divide by 0.
             if (length > 0.00001) {
-                vector.data = [_vector.X / length, _vector.Y / length, _vector.Z / length];
+                vector.data = [_vector.x / length, _vector.y / length, _vector.z / length];
             }
             else {
                 vector.data = [0, 0, 0];
             }
-            return vector;
-        }
-        // Get methods.######################################################################################
-        get Data() {
-            return this.data;
-        }
-        get X() {
-            return this.data[0];
-        }
-        get Y() {
-            return this.data[1];
-        }
-        get Z() {
-            return this.data[2];
-        }
-        static get Up() {
-            let vector = new Vector3;
-            vector.data = [0, 1, 0];
-            return vector;
-        }
-        static get Down() {
-            let vector = new Vector3;
-            vector.data = [0, -1, 0];
-            return vector;
-        }
-        static get Forward() {
-            let vector = new Vector3;
-            vector.data = [0, 0, 1];
-            return vector;
-        }
-        static get Backward() {
-            let vector = new Vector3;
-            vector.data = [0, 0, -1];
-            return vector;
-        }
-        static get Right() {
-            let vector = new Vector3;
-            vector.data = [1, 0, 0];
-            return vector;
-        }
-        static get Left() {
-            let vector = new Vector3;
-            vector.data = [-1, 0, 0];
             return vector;
         }
     }
