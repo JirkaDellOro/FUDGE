@@ -217,64 +217,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Class handling all created fudgenodes, viewports and materials.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class AssetManager {
-        private static nodes;
-        private static viewports;
-        private static materials;
-        /**
-         * Identifies the passed asset's class and loads it into the fitting array
-         * @param _asset
-         */
-        static addAsset(_asset: Object): void;
-        /**
-         * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getNode(_name: string): Node;
-        /**
-         * Returns an object containing all fudgenodes that are currently in the array.
-         */
-        static getNodes(): Object;
-        /**
-         * Removes the fudgenode with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteFudgeNode(_name: string): void;
-        /**
-         * Looks up the viewport with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getViewport(_name: string): Viewport;
-        /**
-         * Returns an object containing all viewports that are currently in the array.
-         */
-        static getViewports(): Object;
-        /**
-         * Removes the viewport with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteViewport(_name: string): void;
-        /**
-         * Looks up the material with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getMaterial(_name: string): Material;
-        /**
-         * Returns an object containing all materials that are currently in the array.
-         */
-        static getMaterials(): Object;
-        /**
-         * Removes the material with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteMaterial(_name: string): void;
-    }
-}
-declare namespace Fudge {
-    /**
      * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */

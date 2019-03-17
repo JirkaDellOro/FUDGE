@@ -27,7 +27,6 @@ namespace Fudge {
             this.components = {};
             this.layers = [];
             this.tags = [];
-            AssetManager.addAsset(this);
         }
 
         // Get and set methods.######################################################################################

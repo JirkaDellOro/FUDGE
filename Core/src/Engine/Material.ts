@@ -44,7 +44,6 @@ namespace Fudge {
             };
             this.textureEnabled = false;
             this.textureSource = "";
-            AssetManager.addAsset(this);
         }
 
         // Get methods. ######################################################################################

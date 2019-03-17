@@ -3,6 +3,10 @@ var JaschasExample;
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     window.addEventListener("keydown", moveCamera);
+    let fudge0;
+    let fudge2;
+    let cameraNode;
+    let viewPort;
     function init() {
         console.log("Starting init().");
         ƒ.GLUtil.initializeContext();
@@ -17,7 +21,7 @@ var JaschasExample;
         materialComponent0.initialize(texturedMaterial);
         let transformComponent0 = new ƒ.TransformComponent();
         let pivotComponent0 = new ƒ.PivotComponent();
-        let fudge0 = new ƒ.Node("Fudge0");
+        fudge0 = new ƒ.Node("Fudge0");
         fudge0.addComponent(meshComponent0);
         fudge0.addComponent(materialComponent0);
         fudge0.addComponent(pivotComponent0);
@@ -27,10 +31,13 @@ var JaschasExample;
         let transformComponent1 = new ƒ.TransformComponent();
         let meshComponent1 = new ƒ.MeshComponent();
         meshComponent1.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
+        let materialComponent1 = new ƒ.MaterialComponent();
+        materialComponent1.initialize(standardMaterial);
         fudge1.addComponent(meshComponent1);
+        fudge1.addComponent(materialComponent1);
         fudge1.addComponent(transformComponent1);
         transformComponent1.translate(150, 0, 0);
-        let fudge2 = new ƒ.Node("Fudge2");
+        fudge2 = new ƒ.Node("Fudge2");
         let transformComponent2 = new ƒ.TransformComponent();
         fudge2.addComponent(transformComponent2);
         transformComponent2.translate(0, -150, 0);
@@ -44,7 +51,7 @@ var JaschasExample;
         fudge3.addComponent(materialComponent3);
         fudge3.addComponent(transformComponent3);
         transformComponent3.rotateY(90);
-        let cameraNode = new ƒ.Node("Camera");
+        cameraNode = new ƒ.Node("Camera");
         let cameraTransformComponent = new ƒ.TransformComponent();
         cameraTransformComponent.translate(100, 100, 500);
         cameraTransformComponent.lookAt(fudge0.getComponents(ƒ.TransformComponent)[0].Position);
@@ -56,7 +63,7 @@ var JaschasExample;
         fudge0.appendChild(fudge1);
         fudge1.appendChild(fudge2);
         fudge2.appendChild(fudge3);
-        let viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
+        viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
         viewPort.drawScene();
         viewPort.showSceneGraph();
         play();
@@ -65,15 +72,15 @@ var JaschasExample;
     // Trial function that animates the scene.
     function play() {
         let rotation = 1;
-        ƒ.AssetManager.getNode("Fudge2").getComponents(ƒ.TransformComponent)[0].rotateY(rotation);
-        ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.PivotComponent)[0].rotateY(-rotation);
-        ƒ.AssetManager.getViewport("Scene1").drawScene();
+        fudge2.getComponents(ƒ.TransformComponent)[0].rotateY(rotation);
+        fudge0.getComponents(ƒ.PivotComponent)[0].rotateY(-rotation);
+        viewPort.drawScene();
         requestAnimationFrame(play);
     }
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event) {
-        let transform = ƒ.AssetManager.getNode("Camera").getComponents(ƒ.TransformComponent)[0];
-        let target = ƒ.AssetManager.getNode("Fudge0").getComponents(ƒ.TransformComponent)[0].Position;
+        let transform = cameraNode.getComponents(ƒ.TransformComponent)[0];
+        let target = fudge0.getComponents(ƒ.TransformComponent)[0].Position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);

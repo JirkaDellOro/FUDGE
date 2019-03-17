@@ -18,7 +18,6 @@ namespace Fudge {
             this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;
-            AssetManager.addAsset(this);
             this.initializeViewportNodes(this.rootNode);
         }
 
@@ -62,20 +61,22 @@ namespace Fudge {
                 this.initializeNodeBuffer(_node);
                 mesh = <MeshComponent>_node.getComponents(MeshComponent)[0];
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
-                let materialComponent: MaterialComponent;
-                if (_node.getComponents(MaterialComponent)[0] == undefined) {
+                let materialComponent: MaterialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
+
+                if (materialComponent) {
+                    /*
                     console.log(`No Material attached to node named '${_node.Name}'.`);
                     console.log("Adding standardmaterial...");
                     materialComponent = new MaterialComponent();
                     materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
                     _node.addComponent(materialComponent);
-                }
-                materialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
-                let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
-                GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
-                this.initializeNodeMaterial(materialComponent, mesh);
-                if (materialComponent.Material.TextureEnabled) {
-                    this.initializeNodeTexture(materialComponent, mesh);
+                    */
+                    let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
+                    GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                    this.initializeNodeMaterial(materialComponent, mesh);
+                    if (materialComponent.Material.TextureEnabled) {
+                        this.initializeNodeTexture(materialComponent, mesh);
+                    }
                 }
             }
             for (let name in _node.getChildren()) {
@@ -104,21 +105,23 @@ namespace Fudge {
                 let mesh: MeshComponent = <MeshComponent>_node.getComponents(MeshComponent)[0];
                 let transform: TransformComponent = <TransformComponent>_node.getComponents(TransformComponent)[0];
                 let materialComponent: MaterialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
-                materialComponent.Material.Shader.use();
-                gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
-                gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
-                // Compute the matrices
-                let transformMatrix: Matrix4x4 = transform.WorldMatrix;
-                if (_node.getComponents(PivotComponent)) {
-                    let pivot: PivotComponent = <PivotComponent>_node.getComponents(PivotComponent)[0];
-                    if (pivot)
-                        transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                if (materialComponent) {
+                    materialComponent.Material.Shader.use();
+                    gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
+                    gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
+                    // Compute the matrices
+                    let transformMatrix: Matrix4x4 = transform.WorldMatrix;
+                    if (_node.getComponents(PivotComponent)) {
+                        let pivot: PivotComponent = <PivotComponent>_node.getComponents(PivotComponent)[0];
+                        if (pivot)
+                            transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                    }
+                    let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
+                    // Supply matrixdata to shader. 
+                    gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
+                    // Draw call
+                    gl2.drawArrays(gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
                 }
-                let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
-                // Supply matrixdata to shader. 
-                gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
-                // Draw call
-                gl2.drawArrays(gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
             }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];

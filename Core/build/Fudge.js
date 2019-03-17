@@ -380,124 +380,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    /**
-     * Class handling all created fudgenodes, viewports and materials.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class AssetManager {
-        /**
-         * Identifies the passed asset's class and loads it into the fitting array
-         * @param _asset
-         */
-        static addAsset(_asset) {
-            if (_asset instanceof Fudge.Node) {
-                if (this.nodes[_asset.Name] === undefined) {
-                    this.nodes[_asset.Name] = _asset;
-                }
-                else {
-                    throw new Error(`There is allready a fudgenode named '${_asset.Name}'.`);
-                }
-            }
-            else if (_asset instanceof Fudge.Material) {
-                if (this.materials[_asset.Name] === undefined) {
-                    this.materials[_asset.Name] = _asset;
-                }
-                else {
-                    throw new Error(`There is allready a material named '${_asset.Name}'.`);
-                }
-            }
-            else if (_asset instanceof Fudge.Viewport) {
-                if (this.viewports[_asset.Name] === undefined) {
-                    this.viewports[_asset.Name] = _asset;
-                }
-                else {
-                    throw new Error(`There is allready a viewport named '${_asset.Name}'.`);
-                }
-            }
-        }
-        /**
-         * Looks up the fudgenode with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getNode(_name) {
-            return this.nodes[_name];
-        }
-        /**
-         * Returns an object containing all fudgenodes that are currently in the array.
-         */
-        static getNodes() {
-            return this.nodes;
-        }
-        /**
-         * Removes the fudgenode with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteFudgeNode(_name) {
-            if (this.nodes[_name] === undefined) {
-                throw new Error(`Cannot find fudgenode named '${_name}'.`);
-            }
-            else {
-                delete this.nodes[_name];
-            }
-        }
-        /**
-         * Looks up the viewport with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getViewport(_name) {
-            return this.viewports[_name];
-        }
-        /**
-         * Returns an object containing all viewports that are currently in the array.
-         */
-        static getViewports() {
-            return this.viewports;
-        }
-        /**
-         * Removes the viewport with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteViewport(_name) {
-            if (this.viewports[_name] === undefined) {
-                throw new Error(`Cannot find viewport named '${_name}'.`);
-            }
-            else {
-                delete this.viewports[_name];
-            }
-        }
-        /**
-         * Looks up the material with the passed name in the array. Returns undefined if there is none
-         * @param _name The name to look for.
-         */
-        static getMaterial(_name) {
-            return this.materials[_name];
-        }
-        /**
-         * Returns an object containing all materials that are currently in the array.
-         */
-        static getMaterials() {
-            return this.materials;
-        }
-        /**
-         * Removes the material with the passed name in the array. Throw's error if there is none.
-         * @param _name The name to look for.
-         */
-        static deleteMaterial(_name) {
-            if (this.materials[_name] === undefined) {
-                throw new Error(`Cannot find Material named '${_name}'.`);
-            }
-            else {
-                delete this.materials[_name];
-            }
-        }
-    }
-    AssetManager.nodes = {}; // Associative array for created fudgenodes.
-    AssetManager.viewports = {}; // Associative array for created viewports.
-    AssetManager.materials = {};
-    Fudge.AssetManager = AssetManager;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     class Color {
     }
     Fudge.Color = Color;
@@ -604,7 +486,6 @@ var Fudge;
             };
             this.textureEnabled = false;
             this.textureSource = "";
-            Fudge.AssetManager.addAsset(this);
         }
         // Get methods. ######################################################################################
         get Shader() {
@@ -679,7 +560,6 @@ var Fudge;
             this.components = {};
             this.layers = [];
             this.tags = [];
-            Fudge.AssetManager.addAsset(this);
         }
         // Get and set methods.######################################################################################
         set Name(_name) {
@@ -874,7 +754,6 @@ var Fudge;
             this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;
-            Fudge.AssetManager.addAsset(this);
             this.initializeViewportNodes(this.rootNode);
         }
         get Name() {
@@ -915,20 +794,21 @@ var Fudge;
                 this.initializeNodeBuffer(_node);
                 mesh = _node.getComponents(Fudge.MeshComponent)[0];
                 Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
-                let materialComponent;
-                if (_node.getComponents(Fudge.MaterialComponent)[0] == undefined) {
+                let materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
+                if (materialComponent) {
+                    /*
                     console.log(`No Material attached to node named '${_node.Name}'.`);
                     console.log("Adding standardmaterial...");
-                    materialComponent = new Fudge.MaterialComponent();
-                    materialComponent.initialize(Fudge.AssetManager.getMaterial("standardMaterial"));
+                    materialComponent = new MaterialComponent();
+                    materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
                     _node.addComponent(materialComponent);
-                }
-                materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
-                let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
-                Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
-                this.initializeNodeMaterial(materialComponent, mesh);
-                if (materialComponent.Material.TextureEnabled) {
-                    this.initializeNodeTexture(materialComponent, mesh);
+                    */
+                    let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                    Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                    this.initializeNodeMaterial(materialComponent, mesh);
+                    if (materialComponent.Material.TextureEnabled) {
+                        this.initializeNodeTexture(materialComponent, mesh);
+                    }
                 }
             }
             for (let name in _node.getChildren()) {
@@ -955,21 +835,23 @@ var Fudge;
                 let mesh = _node.getComponents(Fudge.MeshComponent)[0];
                 let transform = _node.getComponents(Fudge.TransformComponent)[0];
                 let materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
-                materialComponent.Material.Shader.use();
-                Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
-                Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
-                // Compute the matrices
-                let transformMatrix = transform.WorldMatrix;
-                if (_node.getComponents(Fudge.PivotComponent)) {
-                    let pivot = _node.getComponents(Fudge.PivotComponent)[0];
-                    if (pivot)
-                        transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                if (materialComponent) {
+                    materialComponent.Material.Shader.use();
+                    Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
+                    Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
+                    // Compute the matrices
+                    let transformMatrix = transform.WorldMatrix;
+                    if (_node.getComponents(Fudge.PivotComponent)) {
+                        let pivot = _node.getComponents(Fudge.PivotComponent)[0];
+                        if (pivot)
+                            transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                    }
+                    let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
+                    // Supply matrixdata to shader. 
+                    Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
+                    // Draw call
+                    Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
                 }
-                let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
-                // Supply matrixdata to shader. 
-                Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
-                // Draw call
-                Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
             }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
