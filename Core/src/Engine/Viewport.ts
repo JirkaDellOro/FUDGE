@@ -1,6 +1,7 @@
 namespace Fudge {
     /**
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Viewport {
         private name: string; // The name to call this viewport by.

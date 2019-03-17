@@ -2,6 +2,7 @@
 namespace Fudge {
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class CameraComponent extends Component {
         private enabled: boolean = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass?

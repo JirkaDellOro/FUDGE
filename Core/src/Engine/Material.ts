@@ -1,6 +1,7 @@
 namespace Fudge {
     /**
      * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Material {
         private name: string; // The name to call the Material by.

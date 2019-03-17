@@ -58,6 +58,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class CameraComponent extends Fudge.Component {
         constructor() {
@@ -128,6 +129,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MaterialComponent extends Fudge.Component {
         // TODO: clearify what a "material" actually is and its relation to the shader. Isn't it just shader parameters? Can then the material be independent of the shader?
@@ -144,6 +146,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshComponent extends Fudge.Component {
         initialize(_positions, _size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
@@ -221,6 +224,7 @@ var Fudge;
     /**
      * Class to hold the transformation-data of the mesh that is attached to the same node.
      * The pivot-transformation does not affect the transformation of the node itself or its children.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class PivotComponent extends Fudge.Component {
         constructor() {
@@ -349,6 +353,7 @@ var Fudge;
     /**
      * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class TransformComponent extends Fudge.PivotComponent {
         //* TODO: figure out why there is an extra matrix necessary. Implement initialize method if applicable
@@ -377,6 +382,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Class handling all created fudgenodes, viewports and materials.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class AssetManager {
         /**
@@ -500,6 +506,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Utility class to sore and/or wrap some functionality.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class GLUtil {
         /**
@@ -569,6 +576,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
@@ -658,6 +666,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Node {
         /**
@@ -851,6 +860,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport {
         /**
@@ -1089,6 +1099,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class BoxGeometry {
         constructor(_width, _height, _depth) {
@@ -1149,6 +1160,7 @@ var Fudge;
     /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Mat3 {
         constructor() {
@@ -1253,6 +1265,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Simple class for 4x4 transformation matrix operations.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 {
         constructor() {
@@ -1609,6 +1622,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Class storing and manipulating a threedimensional vector
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Vector3 {
         constructor(_x = 0, _y = 0, _z = 0) {
             this.data = [_x, _y, _z];
@@ -1724,6 +1741,8 @@ var Fudge;
     /**
      * Abstract superclass for the representation of WebGl shaderprograms.
      * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * TODO: revisit licensing
      */
     class Shader {
         constructor() {
@@ -1835,6 +1854,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Represents a WebGL shaderprogram
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class BasicShader extends Fudge.Shader {
         constructor() {

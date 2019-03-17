@@ -2,6 +2,7 @@ namespace Fudge {
 
     /**
      * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class BoxGeometry {
         private positions: Float32Array;

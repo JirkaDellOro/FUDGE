@@ -1,5 +1,8 @@
 namespace Fudge {
-
+    /**
+     * Class storing and manipulating a threedimensional vector
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     export class Vector3 {
         private data: number[];
 

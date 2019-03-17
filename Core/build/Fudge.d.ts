@@ -32,6 +32,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class CameraComponent extends Component {
         private enabled;
@@ -69,6 +70,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MaterialComponent extends Component {
         private material;
@@ -79,6 +81,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshComponent extends Component {
         private positions;
@@ -109,6 +112,7 @@ declare namespace Fudge {
     /**
      * Class to hold the transformation-data of the mesh that is attached to the same node.
      * The pivot-transformation does not affect the transformation of the node itself or its children.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class PivotComponent extends Component {
         protected matrix: Matrix4x4;
@@ -202,6 +206,7 @@ declare namespace Fudge {
     /**
      * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class TransformComponent extends PivotComponent {
         private worldMatrix;
@@ -213,6 +218,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Class handling all created fudgenodes, viewports and materials.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class AssetManager {
         private static nodes;
@@ -270,6 +276,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     interface BufferSpecification {
         size: number;
@@ -287,6 +294,7 @@ declare namespace Fudge {
     let gl2: WebGL2RenderingContext;
     /**
      * Utility class to sore and/or wrap some functionality.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class GLUtil {
         /**
@@ -316,6 +324,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
         private name;
@@ -361,6 +370,7 @@ declare namespace Fudge {
     }
     /**
      * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Node {
         private name;
@@ -449,6 +459,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport {
         private name;
@@ -525,6 +536,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class BoxGeometry {
         private positions;
@@ -536,6 +548,7 @@ declare namespace Fudge {
     /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Mat3 {
         data: number[];
@@ -555,6 +568,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Simple class for 4x4 transformation matrix operations.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 {
         private data;
@@ -655,6 +669,10 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Class storing and manipulating a threedimensional vector
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
@@ -703,6 +721,8 @@ declare namespace Fudge {
     /**
      * Abstract superclass for the representation of WebGl shaderprograms.
      * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * TODO: revisit licensing
      */
     abstract class Shader {
         private program;
@@ -748,6 +768,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Represents a WebGL shaderprogram
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class BasicShader extends Shader {
         constructor();

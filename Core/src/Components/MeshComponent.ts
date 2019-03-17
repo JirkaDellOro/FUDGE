@@ -1,6 +1,7 @@
 namespace Fudge {
     /**
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class MeshComponent extends Component {
         private positions: Float32Array; // The Mesh's vertexpositions.

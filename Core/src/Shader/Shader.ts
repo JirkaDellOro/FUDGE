@@ -2,6 +2,8 @@ namespace Fudge {
     /**
      * Abstract superclass for the representation of WebGl shaderprograms. 
      * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * TODO: revisit licensing
      */
     export abstract class Shader {
         private program: WebGLProgram; // Declaration of graphicprocessing-programm.

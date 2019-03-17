@@ -2,6 +2,7 @@ namespace Fudge {
     /**
      * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class TransformComponent extends PivotComponent {
         /* */private worldMatrix: Matrix4x4 ;

@@ -2,6 +2,7 @@
 namespace Fudge {
     /**
      * Represents a WebGL shaderprogram
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class BasicShader extends Shader {
 

@@ -3,6 +3,7 @@ namespace Fudge {
     export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
     /**
      * Utility class to sore and/or wrap some functionality.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export abstract class GLUtil {
         /**

@@ -2,6 +2,7 @@ namespace Fudge {
 
     /**
      * Simple class for 4x4 transformation matrix operations.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 {
         private data: Float32Array; // The data of the matrix.

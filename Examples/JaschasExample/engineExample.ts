@@ -63,7 +63,7 @@ namespace JaschasExample {
         // cameraComponent.projectOrthographic();
 
         fudge0.appendChild(fudge1);
-        fudge1.appendChild(fudge2); 
+        fudge1.appendChild(fudge2);
         fudge2.appendChild(fudge3); 
 
         let viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);

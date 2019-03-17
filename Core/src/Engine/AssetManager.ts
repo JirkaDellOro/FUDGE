@@ -2,6 +2,7 @@ namespace Fudge {
 
     /**
      * Class handling all created fudgenodes, viewports and materials.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export abstract class AssetManager {
 
