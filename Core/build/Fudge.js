@@ -701,6 +701,8 @@ var Fudge;
          * @param _component The component to be pushed into the array.
          */
         addComponent(_component) {
+            if (_component.getContainer() == this)
+                return;
             if (this.components[_component.type] === undefined)
                 this.components[_component.type] = [_component];
             else if (_component.isSingleton)
@@ -1525,26 +1527,44 @@ var Fudge;
         get z() {
             return this.data[2];
         }
+        /**
+         * The up-Vector (0, 1, 0)
+         */
         static get up() {
             let vector = new Vector3(0, 1, 0);
             return vector;
         }
+        /**
+         * The down-Vector (0, -1, 0)
+         */
         static get down() {
             let vector = new Vector3(0, -1, 0);
             return vector;
         }
+        /**
+         * The forward-Vector (0, 0, 1)
+         */
         static get forward() {
             let vector = new Vector3(0, 0, 1);
             return vector;
         }
+        /**
+         * The backward-Vector (0, 0, -1)
+         */
         static get backward() {
             let vector = new Vector3(0, 0, -1);
             return vector;
         }
+        /**
+         * The right-Vector (1, 0, 0)
+         */
         static get right() {
             let vector = new Vector3(1, 0, 0);
             return vector;
         }
+        /**
+         * The left-Vector (-1, 0, 0)
+         */
         static get left() {
             let vector = new Vector3(-1, 0, 0);
             return vector;
@@ -1552,8 +1572,9 @@ var Fudge;
         // Vectormath methods.######################################################################################
         /**
          * Adds two vectors.
-         * @param _a The vector to add to.
-         * @param _b The vector to add
+         * @param _a The first vector to add
+         * @param _b The second vector to add
+         * @returns A new vector representing the sum of the given vectors
          */
         static add(_a, _b) {
             let vector = new Vector3;
@@ -1561,9 +1582,22 @@ var Fudge;
             return vector;
         }
         /**
+        * Sums up multiple vectors.
+        * @param _a The first vector to add
+        * @param _b The second vector to add
+        * @returns A new vector representing the sum of the given vectors
+        */
+        static sum(..._vectors) {
+            let result = new Vector3();
+            for (let vector of _vectors)
+                result.data = [result.x + vector.x, result.y + vector.y, result.z + vector.z];
+            return result;
+        }
+        /**
          * Subtracts two vectors.
          * @param _a The vector to subtract from.
          * @param _b The vector to subtract.
+         * @returns A new vector representing the difference of the given vectors
          */
         static subtract(_a, _b) {
             let vector = new Vector3;
@@ -1574,6 +1608,7 @@ var Fudge;
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
+         * @returns A new vector representing the crossproduct of the given vectors
          */
         static cross(_a, _b) {
             let vector = new Vector3;
@@ -1588,6 +1623,7 @@ var Fudge;
          * Computes the dotproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
+         * @returns A new vector representing the dotproduct of the given vectors
          */
         static dot(_a, _b) {
             let scalarProduct = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
@@ -1596,11 +1632,12 @@ var Fudge;
         /**
          * Normalizes a vector.
          * @param _vector The vector to normalize.
+         * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector) {
             let length = Math.sqrt(_vector.x * _vector.x + _vector.y * _vector.y + _vector.z * _vector.z);
             let vector = new Vector3;
-            // make sure we don't divide by 0.
+            // make sure we don't divide by 0. TODO: see if it's appropriate to use try/catch here
             if (length > 0.00001) {
                 vector.data = [_vector.x / length, _vector.y / length, _vector.z / length];
             }

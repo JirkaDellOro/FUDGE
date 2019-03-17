@@ -622,39 +622,69 @@ declare namespace Fudge {
         readonly x: number;
         readonly y: number;
         readonly z: number;
+        /**
+         * The up-Vector (0, 1, 0)
+         */
         static readonly up: Vector3;
+        /**
+         * The down-Vector (0, -1, 0)
+         */
         static readonly down: Vector3;
+        /**
+         * The forward-Vector (0, 0, 1)
+         */
         static readonly forward: Vector3;
+        /**
+         * The backward-Vector (0, 0, -1)
+         */
         static readonly backward: Vector3;
+        /**
+         * The right-Vector (1, 0, 0)
+         */
         static readonly right: Vector3;
+        /**
+         * The left-Vector (-1, 0, 0)
+         */
         static readonly left: Vector3;
         /**
          * Adds two vectors.
-         * @param _a The vector to add to.
-         * @param _b The vector to add
+         * @param _a The first vector to add
+         * @param _b The second vector to add
+         * @returns A new vector representing the sum of the given vectors
          */
         static add(_a: Vector3, _b: Vector3): Vector3;
+        /**
+        * Sums up multiple vectors.
+        * @param _a The first vector to add
+        * @param _b The second vector to add
+        * @returns A new vector representing the sum of the given vectors
+        */
+        static sum(..._vectors: Vector3[]): Vector3;
         /**
          * Subtracts two vectors.
          * @param _a The vector to subtract from.
          * @param _b The vector to subtract.
+         * @returns A new vector representing the difference of the given vectors
          */
         static subtract(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
+         * @returns A new vector representing the crossproduct of the given vectors
          */
         static cross(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the dotproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
+         * @returns A new vector representing the dotproduct of the given vectors
          */
         static dot(_a: Vector3, _b: Vector3): number;
         /**
          * Normalizes a vector.
          * @param _vector The vector to normalize.
+         * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector: Vector3): Vector3;
     }

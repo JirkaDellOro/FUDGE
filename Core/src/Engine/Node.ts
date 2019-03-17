@@ -177,6 +177,8 @@ namespace Fudge {
          * @param _component The component to be pushed into the array.
          */
         public addComponent(_component: Component): void {
+            if (_component.getContainer() == this)
+                return;
             if (this.components[_component.type] === undefined)
                 this.components[_component.type] = [_component];
             else
