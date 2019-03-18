@@ -6,7 +6,7 @@ namespace JaschasExample {
 
     let fudge0: ƒ.Node;
     let fudge2: ƒ.Node;
-    let cameraNode: ƒ.Node;
+    let camera: ƒ.Node;
     let viewPort: ƒ.Viewport;
 
     export function init(): void {
@@ -14,15 +14,15 @@ namespace JaschasExample {
         ƒ.GLUtil.initializeContext();
         let shdBasic: ƒ.ShaderBasic = new ƒ.ShaderBasic();
         let shdTexture: ƒ.ShaderTexture = new ƒ.ShaderTexture();
-        let matStandard: ƒ.Material = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), shdBasic);
-        let matGreen: ƒ.Material = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), shdBasic);
-        let matTexture: ƒ.Material = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), shdTexture);
-        matTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
+        let mtrStandard: ƒ.Material = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), shdBasic);
+        let mtrGreen: ƒ.Material = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), shdBasic);
+        let mtrTexture: ƒ.Material = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), shdTexture);
+        mtrTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
         cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(matTexture);
+        cmpMaterial.initialize(mtrTexture);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         let cmpPivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
         fudge0 = new ƒ.Node("Fudge0");
@@ -37,10 +37,10 @@ namespace JaschasExample {
         cmpTransform = new ƒ.ComponentTransform();
         cmpMesh = new ƒ.ComponentMesh();
         cmpMesh.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
-        let materialComponent1: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        materialComponent1.initialize(matStandard);
+        cmpMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(mtrStandard);
         fudge1.addComponent(cmpMesh);
-        fudge1.addComponent(materialComponent1);
+        fudge1.addComponent(cmpMaterial);
         fudge1.addComponent(cmpTransform);
         cmpTransform.translate(150, 0, 0);
 
@@ -51,23 +51,23 @@ namespace JaschasExample {
 
         let fudge3: ƒ.Node = new ƒ.Node("Fudge3");
         cmpTransform = new ƒ.ComponentTransform();
-        let meshComponent3: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        meshComponent3.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
-        let materialComponent3: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        materialComponent3.initialize(matGreen);
-        fudge3.addComponent(meshComponent3);
-        fudge3.addComponent(materialComponent3);
+        cmpMesh = new ƒ.ComponentMesh();
+        cmpMesh.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
+        cmpMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(mtrGreen);
+        fudge3.addComponent(cmpMesh);
+        fudge3.addComponent(cmpMaterial);
         fudge3.addComponent(cmpTransform);
         cmpTransform.rotateY(90);
 
 
-        cameraNode = new ƒ.Node("Camera");
-        let cameraComponentTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-        cameraComponentTransform.translate(100, 100, 500);
-        cameraComponentTransform.lookAt((fudge0.getComponents(ƒ.ComponentTransform)[0] as ƒ.ComponentTransform).Position);
-        cameraNode.addComponent(cameraComponentTransform);
-        let cameraComponent: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-        cameraNode.addComponent(cameraComponent);
+        camera = new ƒ.Node("Camera");
+        cmpTransform = new ƒ.ComponentTransform();
+        cmpTransform.translate(100, 100, 500);
+        cmpTransform.lookAt(fudge0.transform.Position);
+        camera.addComponent(cmpTransform);
+        let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+        camera.addComponent(cmpCamera);
         // TODO: orthographic doesn't work!
         // cameraComponent.projectOrthographic();
 
@@ -75,7 +75,7 @@ namespace JaschasExample {
         fudge1.appendChild(fudge2);
         fudge2.appendChild(fudge3);
 
-        viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
+        viewPort = new ƒ.Viewport("Scene1", fudge0, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
         play();
@@ -87,8 +87,9 @@ namespace JaschasExample {
 
         let rotation: number = 1;
 
-        (fudge2.getComponents(ƒ.ComponentTransform)[0] as ƒ.ComponentTransform).rotateY(rotation);
-        (fudge0.getComponents(ƒ.ComponentPivot)[0] as ƒ.ComponentPivot).rotateY(-rotation);
+        fudge2.transform.rotateY(rotation);
+        let pivot: ƒ.ComponentPivot = <ƒ.ComponentPivot>fudge0.getComponents(ƒ.ComponentPivot)[0];
+        pivot.rotateY(-rotation);
 
         viewPort.drawScene();
         requestAnimationFrame(play);
@@ -97,27 +98,23 @@ namespace JaschasExample {
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event: KeyboardEvent): void {
 
-        let transform: ƒ.ComponentTransform = <ƒ.ComponentTransform>cameraNode.getComponents(ƒ.ComponentTransform)[0];
-        let target: ƒ.Vector3 = (<ƒ.ComponentTransform>fudge0.getComponents(ƒ.ComponentTransform)[0]).Position;
+        let transform: ƒ.ComponentTransform = camera.transform;
+        let target: ƒ.Vector3 = fudge0.transform.Position;
         switch (_event.key) {
-            case "w": {
+            case "w": { 
                 transform.translateY(10);
-                transform.lookAt(target);
                 break;
             }
             case "s": {
                 transform.translateY(-10);
-                transform.lookAt(target);
                 break;
             }
             case "a": {
                 transform.translateX(-10);
-                transform.lookAt(target);
                 break;
             }
             case "d": {
                 transform.translateX(10);
-                transform.lookAt(target);
                 break;
             }
             case "q": {
@@ -128,11 +125,7 @@ namespace JaschasExample {
                 transform.translateZ(10);
                 break;
             }
-            case "r": {
-                transform.reset();
-                transform.lookAt(target);
-                break;
-            }
         }
+        transform.lookAt(target);
     }
 }

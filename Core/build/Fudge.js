@@ -559,13 +559,6 @@ var Fudge;
             this.layers = [];
             this.tags = [];
         }
-        // Get and set methods.######################################################################################
-        set Name(_name) {
-            this.name = _name;
-        }
-        get Name() {
-            return this.name;
-        }
         get Parent() {
             return this.parent;
         }
@@ -574,6 +567,9 @@ var Fudge;
         }
         get Tags() {
             return this.tags;
+        }
+        get transform() {
+            return this.getComponents(Fudge.ComponentTransform)[0];
         }
         // Layer methods.######################################################################################
         /**
@@ -653,7 +649,7 @@ var Fudge;
                 return child;
             }
             else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.Name}'`);
+                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
             }
         }
         /**
@@ -662,9 +658,9 @@ var Fudge;
          * @param _child The child to be pushed into the array
          */
         appendChild(_child) {
-            let name = _child.Name;
+            let name = _child.name;
             if (this.children[name] != undefined) {
-                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.Name}'`);
+                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.name}'`);
             }
             else {
                 this.children[name] = _child;
@@ -781,14 +777,14 @@ var Fudge;
          * @param _node The node to initialize.
          */
         initializeViewportNodes(_node) {
-            console.log(_node.Name);
+            console.log(_node.name);
             if (!_node.getComponents(Fudge.ComponentTransform)) {
                 let transform = new Fudge.ComponentTransform();
                 _node.addComponent(transform);
             }
             let mesh;
             if (_node.getComponents(Fudge.ComponentMesh).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.Name}'.`);
+                console.log(`No Mesh attached to node named '${_node.name}'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
@@ -822,7 +818,7 @@ var Fudge;
         showSceneGraph() {
             let output = "SceneGraph for this viewport:";
             output += "\n \n";
-            output += this.rootNode.Name;
+            output += this.rootNode.name;
             console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
         }
         /**
@@ -837,7 +833,7 @@ var Fudge;
                 let materialComponent = _node.getComponents(Fudge.ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
-                    Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
+                    Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
                     let transformMatrix = transform.WorldMatrix;
@@ -895,12 +891,12 @@ var Fudge;
             if (bufferCreated === null)
                 return;
             let buffer = bufferCreated;
-            this.buffers[_node.Name] = buffer;
+            this.buffers[_node.name] = buffer;
             let vertexArrayObjectCreated = Fudge.gl2.createVertexArray();
             if (vertexArrayObjectCreated === null)
                 return;
             let vertexArrayObject = vertexArrayObjectCreated;
-            this.vertexArrayObjects[_node.Name] = vertexArrayObject;
+            this.vertexArrayObjects[_node.name] = vertexArrayObject;
             Fudge.gl2.bindVertexArray(vertexArrayObject);
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, buffer);
         }
@@ -948,7 +944,7 @@ var Fudge;
                     current = current.Parent;
                 }
                 output += "'--";
-                output += child.Name;
+                output += child.name;
                 output += this.createSceneGraph(child);
             }
             return output;

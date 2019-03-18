@@ -5,21 +5,21 @@ var JaschasExample;
     window.addEventListener("keydown", moveCamera);
     let fudge0;
     let fudge2;
-    let cameraNode;
+    let camera;
     let viewPort;
     function init() {
         console.log("Starting init().");
         ƒ.GLUtil.initializeContext();
         let shdBasic = new ƒ.ShaderBasic();
         let shdTexture = new ƒ.ShaderTexture();
-        let matStandard = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), shdBasic);
-        let matGreen = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), shdBasic);
-        let matTexture = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), shdTexture);
-        matTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
+        let mtrStandard = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), shdBasic);
+        let mtrGreen = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), shdBasic);
+        let mtrTexture = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), shdTexture);
+        mtrTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
         let cmpMesh = new ƒ.ComponentMesh();
         cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
         let cmpMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(matTexture);
+        cmpMaterial.initialize(mtrTexture);
         let cmpTransform = new ƒ.ComponentTransform();
         let cmpPivot = new ƒ.ComponentPivot();
         fudge0 = new ƒ.Node("Fudge0");
@@ -32,10 +32,10 @@ var JaschasExample;
         cmpTransform = new ƒ.ComponentTransform();
         cmpMesh = new ƒ.ComponentMesh();
         cmpMesh.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
-        let materialComponent1 = new ƒ.ComponentMaterial();
-        materialComponent1.initialize(matStandard);
+        cmpMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(mtrStandard);
         fudge1.addComponent(cmpMesh);
-        fudge1.addComponent(materialComponent1);
+        fudge1.addComponent(cmpMaterial);
         fudge1.addComponent(cmpTransform);
         cmpTransform.translate(150, 0, 0);
         fudge2 = new ƒ.Node("Fudge2");
@@ -44,27 +44,27 @@ var JaschasExample;
         cmpTransform.translate(0, -150, 0);
         let fudge3 = new ƒ.Node("Fudge3");
         cmpTransform = new ƒ.ComponentTransform();
-        let meshComponent3 = new ƒ.ComponentMesh();
-        meshComponent3.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
-        let materialComponent3 = new ƒ.ComponentMaterial();
-        materialComponent3.initialize(matGreen);
-        fudge3.addComponent(meshComponent3);
-        fudge3.addComponent(materialComponent3);
+        cmpMesh = new ƒ.ComponentMesh();
+        cmpMesh.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
+        cmpMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(mtrGreen);
+        fudge3.addComponent(cmpMesh);
+        fudge3.addComponent(cmpMaterial);
         fudge3.addComponent(cmpTransform);
         cmpTransform.rotateY(90);
-        cameraNode = new ƒ.Node("Camera");
-        let cameraComponentTransform = new ƒ.ComponentTransform();
-        cameraComponentTransform.translate(100, 100, 500);
-        cameraComponentTransform.lookAt(fudge0.getComponents(ƒ.ComponentTransform)[0].Position);
-        cameraNode.addComponent(cameraComponentTransform);
-        let cameraComponent = new ƒ.ComponentCamera();
-        cameraNode.addComponent(cameraComponent);
+        camera = new ƒ.Node("Camera");
+        cmpTransform = new ƒ.ComponentTransform();
+        cmpTransform.translate(100, 100, 500);
+        cmpTransform.lookAt(fudge0.transform.Position);
+        camera.addComponent(cmpTransform);
+        let cmpCamera = new ƒ.ComponentCamera();
+        camera.addComponent(cmpCamera);
         // TODO: orthographic doesn't work!
         // cameraComponent.projectOrthographic();
         fudge0.appendChild(fudge1);
         fudge1.appendChild(fudge2);
         fudge2.appendChild(fudge3);
-        viewPort = new ƒ.Viewport("Scene1", fudge0, cameraComponent);
+        viewPort = new ƒ.Viewport("Scene1", fudge0, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
         play();
@@ -73,34 +73,31 @@ var JaschasExample;
     // Trial function that animates the scene.
     function play() {
         let rotation = 1;
-        fudge2.getComponents(ƒ.ComponentTransform)[0].rotateY(rotation);
-        fudge0.getComponents(ƒ.ComponentPivot)[0].rotateY(-rotation);
+        fudge2.transform.rotateY(rotation);
+        let pivot = fudge0.getComponents(ƒ.ComponentPivot)[0];
+        pivot.rotateY(-rotation);
         viewPort.drawScene();
         requestAnimationFrame(play);
     }
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event) {
-        let transform = cameraNode.getComponents(ƒ.ComponentTransform)[0];
-        let target = fudge0.getComponents(ƒ.ComponentTransform)[0].Position;
+        let transform = camera.transform;
+        let target = fudge0.transform.Position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);
-                transform.lookAt(target);
                 break;
             }
             case "s": {
                 transform.translateY(-10);
-                transform.lookAt(target);
                 break;
             }
             case "a": {
                 transform.translateX(-10);
-                transform.lookAt(target);
                 break;
             }
             case "d": {
                 transform.translateX(10);
-                transform.lookAt(target);
                 break;
             }
             case "q": {
@@ -111,12 +108,8 @@ var JaschasExample;
                 transform.translateZ(10);
                 break;
             }
-            case "r": {
-                transform.reset();
-                transform.lookAt(target);
-                break;
-            }
         }
+        transform.lookAt(target);
     }
 })(JaschasExample || (JaschasExample = {}));
 //# sourceMappingURL=engineExample.js.map

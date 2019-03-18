@@ -314,7 +314,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Node {
-        private name;
+        name: string;
         private parent;
         private children;
         private components;
@@ -325,10 +325,10 @@ declare namespace Fudge {
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
-        Name: string;
         readonly Parent: Node | null;
         readonly Layers: string[];
         readonly Tags: string[];
+        readonly transform: ComponentTransform;
         /**
          * Adds the name of a layer to this nodes layerarray.
          * @param _name The name of the layer to add.

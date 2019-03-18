@@ -48,14 +48,14 @@ namespace Fudge {
          * @param _node The node to initialize.
          */
         public initializeViewportNodes(_node: Node): void {
-            console.log(_node.Name);
+            console.log(_node.name);
             if (!_node.getComponents(ComponentTransform)) {
                 let transform: ComponentTransform = new ComponentTransform();
                 _node.addComponent(transform);
             }
             let mesh: ComponentMesh;
             if (_node.getComponents(ComponentMesh).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.Name}'.`);
+                console.log(`No Mesh attached to node named '${_node.name}'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
@@ -91,7 +91,7 @@ namespace Fudge {
         public showSceneGraph(): void {
             let output: string = "SceneGraph for this viewport:";
             output += "\n \n";
-            output += this.rootNode.Name;
+            output += this.rootNode.name;
             console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
         }
 
@@ -107,7 +107,7 @@ namespace Fudge {
                 let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
-                    gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
+                    gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
                     let transformMatrix: Matrix4x4 = transform.WorldMatrix;
@@ -165,11 +165,11 @@ namespace Fudge {
             if (bufferCreated === null)
                 return;
             let buffer: WebGLBuffer = bufferCreated;
-            this.buffers[_node.Name] = buffer;
+            this.buffers[_node.name] = buffer;
             let vertexArrayObjectCreated: WebGLVertexArrayObject | null = gl2.createVertexArray();
             if (vertexArrayObjectCreated === null) return;
             let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
-            this.vertexArrayObjects[_node.Name] = vertexArrayObject;
+            this.vertexArrayObjects[_node.name] = vertexArrayObject;
             gl2.bindVertexArray(vertexArrayObject);
             gl2.bindBuffer(gl2.ARRAY_BUFFER, buffer);
         }
@@ -221,7 +221,7 @@ namespace Fudge {
                 }
                 output += "'--";
 
-                output += child.Name;
+                output += child.name;
                 output += this.createSceneGraph(child);
             }
             return output;

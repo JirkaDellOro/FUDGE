@@ -10,7 +10,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Node {
-        private name: string; // The name to call this node by.
+        public name: string; // The name to call this node by.
         private parent: Node | null; // The parent of this node.
         private children: MapStringToNode; // Associative array nodes appended to this node.
         private components: MapClassToComponents;
@@ -29,13 +29,6 @@ namespace Fudge {
             this.tags = [];
         }
 
-        // Get and set methods.######################################################################################
-        public set Name(_name: string) {
-            this.name = _name;
-        }
-        public get Name(): string {
-            return this.name;
-        }
         public get Parent(): Node | null {
             return this.parent;
         }
@@ -45,6 +38,10 @@ namespace Fudge {
         }
         public get Tags(): string[] {
             return this.tags;
+        }
+
+        public get transform(): ComponentTransform {
+            return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
 
         // Layer methods.######################################################################################
@@ -127,7 +124,7 @@ namespace Fudge {
                 return child;
             }
             else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.Name}'`);
+                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
             }
         }
 
@@ -137,9 +134,9 @@ namespace Fudge {
          * @param _child The child to be pushed into the array
          */
         public appendChild(_child: Node): void {
-            let name: string = _child.Name;
+            let name: string = _child.name;
             if (this.children[name] != undefined) {
-                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.Name}'`);
+                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.name}'`);
             }
             else {
                 this.children[name] = _child;
