@@ -2,11 +2,32 @@
 var Fudge;
 (function (Fudge) {
     /**
+     * Base class for [[Node]], [[Component]] and more. Abstracts methods needed by all such as serialization
+     */
+    class Base {
+        /**
+         * Returns a JSON-String representing the data needed to recreate an object of the applicable subclass
+         */
+        serialize() {
+            return "";
+        }
+        deserialize() {
+            return null;
+        }
+    }
+    Fudge.Base = Base;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Engine/Base.ts"/>
+var Fudge;
+/// <reference path="../Engine/Base.ts"/>
+(function (Fudge) {
+    /**
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Component {
+    class Component extends Fudge.Base {
         constructor() {
+            super(...arguments);
             this.container = null;
             this.singleton = true;
         }
@@ -547,12 +568,13 @@ var Fudge;
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node {
+    class Node extends Fudge.Base {
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name) {
+            super();
             this.name = _name;
             this.children = {};
             this.components = {};

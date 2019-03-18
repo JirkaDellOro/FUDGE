@@ -9,7 +9,7 @@ namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Node {
+    export class Node extends Base {
         public name: string; // The name to call this node by.
         private parent: Node | null; // The parent of this node.
         private children: MapStringToNode; // Associative array nodes appended to this node.
@@ -22,6 +22,7 @@ namespace Fudge {
          * @param _name The name by which the node can be called.
          */
         public constructor(_name: string) {
+            super();
             this.name = _name;
             this.children = {};
             this.components = {};

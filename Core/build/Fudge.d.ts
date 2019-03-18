@@ -1,10 +1,22 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
     /**
+     * Base class for [[Node]], [[Component]] and more. Abstracts methods needed by all such as serialization
+     */
+    abstract class Base {
+        /**
+         * Returns a JSON-String representing the data needed to recreate an object of the applicable subclass
+         */
+        serialize(): string;
+        deserialize(): Base;
+    }
+}
+declare namespace Fudge {
+    /**
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Component {
+    abstract class Component extends Base {
         private container;
         private singleton;
         /**
@@ -313,7 +325,7 @@ declare namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node {
+    class Node extends Base {
         name: string;
         private parent;
         private children;

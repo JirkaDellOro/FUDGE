@@ -1,9 +1,10 @@
+/// <reference path="../Engine/Base.ts"/>
 namespace Fudge {
     /** 
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export abstract class Component {
+    export abstract class Component extends Base {
         private container: Node | null = null;
         private singleton: boolean = true;
 
