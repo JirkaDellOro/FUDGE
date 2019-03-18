@@ -1,10 +1,10 @@
-/// <reference path="../Engine/Base.ts"/>
+/// <reference path="../Engine/Serializer.ts"/>
 namespace Fudge {
     /** 
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export abstract class Component extends Base {
+    export abstract class Component implements Serializable {
         private container: Node | null = null;
         private singleton: boolean = true;
 
@@ -45,6 +45,13 @@ namespace Fudge {
             } catch {
                 this.container = previousContainer;
             }
+        }
+
+        public serialize(): Serialization {
+            return null;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            return null;
         }
     }
 }

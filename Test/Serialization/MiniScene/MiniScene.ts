@@ -20,14 +20,13 @@ namespace MiniScene {
         node = new ƒ.Node("Node");
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);
-        console.log(node.transform);
         node.addComponent(cmpTransform);
-
-
+        cmpTransform.scaleX(2);
+        
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(node.transform.Position);
+        cmpTransform.lookAt(node.transform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -35,5 +34,30 @@ namespace MiniScene {
         viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
+
+        console.group("Original");
+        console.log(cmpTransform);
+        console.groupEnd();
+    
+        console.group("Serialized");
+        let serializer: ƒ.Serializer = new ƒ.Serializer();
+        let serialization: ƒ.Serialization = serializer.serialize(cmpTransform);
+        console.log(serialization);
+        console.groupEnd();
+
+        console.group("Stringified");
+        let json: string = JSON.stringify(serialization);
+        console.log(json);
+        console.groupEnd();
+
+        console.group("Parsed");
+        serialization = JSON.parse(json);
+        console.log(serialization);
+        console.groupEnd();
+
+        console.group("Reconstructed");
+        let reconstruction: ƒ.Serializable = serializer.deserialize(serialization);
+        console.log(reconstruction);
+        console.groupEnd();
     }
 }

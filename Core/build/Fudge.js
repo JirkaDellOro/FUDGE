@@ -1,33 +1,33 @@
 "use strict";
 var Fudge;
 (function (Fudge) {
-    /**
-     * Base class for [[Node]], [[Component]] and more. Abstracts methods needed by all such as serialization
-     */
-    class Base {
-        /**
-         * Returns a JSON-String representing the data needed to recreate an object of the applicable subclass
-         */
-        serialize() {
-            return "";
+    class Serializer {
+        serialize(_object) {
+            let serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
         }
-        deserialize() {
-            return null;
+        deserialize(_serialization) {
+            let reconstruct;
+            for (let typeName in _serialization) {
+                reconstruct = new Fudge[typeName];
+                reconstruct.deserialize(_serialization[typeName]);
+            }
+            return reconstruct;
         }
     }
-    Fudge.Base = Base;
+    Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
-/// <reference path="../Engine/Base.ts"/>
+/// <reference path="../Engine/Serializer.ts"/>
 var Fudge;
-/// <reference path="../Engine/Base.ts"/>
+/// <reference path="../Engine/Serializer.ts"/>
 (function (Fudge) {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Component extends Fudge.Base {
+    class Component {
         constructor() {
-            super(...arguments);
             this.container = null;
             this.singleton = true;
         }
@@ -69,6 +69,12 @@ var Fudge;
             catch {
                 this.container = previousContainer;
             }
+        }
+        serialize() {
+            return null;
+        }
+        deserialize(_serialization) {
+            return null;
         }
     }
     Fudge.Component = Component;
@@ -128,9 +134,8 @@ var Fudge;
          */
         projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
-            console.log(this.fieldOfView); // TODO: remove, this is just here to remove "never used"
             this.orthographic = false;
-            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, _fieldOfView, 1, 2000);
+            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000);
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -255,8 +260,8 @@ var Fudge;
         get Matrix() {
             return this.matrix;
         }
-        get Position() {
-            return new Fudge.Vector3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+        get position() {
+            return new Fudge.Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
         /**
          * # Transformation methods
@@ -330,7 +335,7 @@ var Fudge;
          * @param _target The target to look at.
          */
         lookAt(_target) {
-            this.matrix = Fudge.Matrix4x4.lookAt(this.Position, _target); // TODO: Handle rotation around z-axis
+            this.matrix = Fudge.Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
         }
         /**
          * # Scaling methods
@@ -365,6 +370,17 @@ var Fudge;
         scaleZ(_scale) {
             this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, 1, _scale);
         }
+        serialize() {
+            // TODO: save translation, rotation and scale as vectors for readability and manipulation
+            let serialization = {
+                matrix: this.matrix
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.matrix = _serialization.matrix;
+            return this;
+        }
     }
     Fudge.ComponentPivot = ComponentPivot;
 })(Fudge || (Fudge = {}));
@@ -391,8 +407,21 @@ var Fudge;
             //* */this.matrix = _matrix; 
         }
         get WorldPosition() {
-            /* */ return new Fudge.Vector3(this.worldMatrix.Data[12], this.worldMatrix.Data[13], this.worldMatrix.Data[14]);
+            /* */ return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
             //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+        }
+        serialize() {
+            // TODO: save translation, rotation and scale as vectors for readability and manipulation
+            let serialization = {
+                worldMatrix: this.worldMatrix
+            };
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.WorldMatrix = _serialization.worldMatrix;
+            super.deserialize(_serialization.ComponentPivot);
+            return this;
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
@@ -568,13 +597,12 @@ var Fudge;
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node extends Fudge.Base {
+    class Node {
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name) {
-            super();
             this.name = _name;
             this.children = {};
             this.components = {};
@@ -744,6 +772,12 @@ var Fudge;
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
         }
+        serialize() {
+            return null;
+        }
+        deserialize() {
+            return null;
+        }
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
@@ -799,7 +833,6 @@ var Fudge;
          * @param _node The node to initialize.
          */
         initializeViewportNodes(_node) {
-            console.log(_node.name);
             if (!_node.getComponents(Fudge.ComponentTransform)) {
                 let transform = new Fudge.ComponentTransform();
                 _node.addComponent(transform);
@@ -866,7 +899,7 @@ var Fudge;
                     }
                     let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
-                    Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
+                    Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
                     // Draw call
                     Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
                 }
@@ -1176,10 +1209,6 @@ var Fudge;
                 0, 0, 0, 1
             ]);
         }
-        // Get method.######################################################################################
-        get Data() {
-            return this.data;
-        }
         // Transformation methods.######################################################################################
         static identity() {
             return new Matrix4x4;
@@ -1194,38 +1223,38 @@ var Fudge;
          */
         static multiply(_a, _b) {
             let matrix = new Matrix4x4();
-            let a00 = _a.Data[0 * 4 + 0];
-            let a01 = _a.Data[0 * 4 + 1];
-            let a02 = _a.Data[0 * 4 + 2];
-            let a03 = _a.Data[0 * 4 + 3];
-            let a10 = _a.Data[1 * 4 + 0];
-            let a11 = _a.Data[1 * 4 + 1];
-            let a12 = _a.Data[1 * 4 + 2];
-            let a13 = _a.Data[1 * 4 + 3];
-            let a20 = _a.Data[2 * 4 + 0];
-            let a21 = _a.Data[2 * 4 + 1];
-            let a22 = _a.Data[2 * 4 + 2];
-            let a23 = _a.Data[2 * 4 + 3];
-            let a30 = _a.Data[3 * 4 + 0];
-            let a31 = _a.Data[3 * 4 + 1];
-            let a32 = _a.Data[3 * 4 + 2];
-            let a33 = _a.Data[3 * 4 + 3];
-            let b00 = _b.Data[0 * 4 + 0];
-            let b01 = _b.Data[0 * 4 + 1];
-            let b02 = _b.Data[0 * 4 + 2];
-            let b03 = _b.Data[0 * 4 + 3];
-            let b10 = _b.Data[1 * 4 + 0];
-            let b11 = _b.Data[1 * 4 + 1];
-            let b12 = _b.Data[1 * 4 + 2];
-            let b13 = _b.Data[1 * 4 + 3];
-            let b20 = _b.Data[2 * 4 + 0];
-            let b21 = _b.Data[2 * 4 + 1];
-            let b22 = _b.Data[2 * 4 + 2];
-            let b23 = _b.Data[2 * 4 + 3];
-            let b30 = _b.Data[3 * 4 + 0];
-            let b31 = _b.Data[3 * 4 + 1];
-            let b32 = _b.Data[3 * 4 + 2];
-            let b33 = _b.Data[3 * 4 + 3];
+            let a00 = _a.data[0 * 4 + 0];
+            let a01 = _a.data[0 * 4 + 1];
+            let a02 = _a.data[0 * 4 + 2];
+            let a03 = _a.data[0 * 4 + 3];
+            let a10 = _a.data[1 * 4 + 0];
+            let a11 = _a.data[1 * 4 + 1];
+            let a12 = _a.data[1 * 4 + 2];
+            let a13 = _a.data[1 * 4 + 3];
+            let a20 = _a.data[2 * 4 + 0];
+            let a21 = _a.data[2 * 4 + 1];
+            let a22 = _a.data[2 * 4 + 2];
+            let a23 = _a.data[2 * 4 + 3];
+            let a30 = _a.data[3 * 4 + 0];
+            let a31 = _a.data[3 * 4 + 1];
+            let a32 = _a.data[3 * 4 + 2];
+            let a33 = _a.data[3 * 4 + 3];
+            let b00 = _b.data[0 * 4 + 0];
+            let b01 = _b.data[0 * 4 + 1];
+            let b02 = _b.data[0 * 4 + 2];
+            let b03 = _b.data[0 * 4 + 3];
+            let b10 = _b.data[1 * 4 + 0];
+            let b11 = _b.data[1 * 4 + 1];
+            let b12 = _b.data[1 * 4 + 2];
+            let b13 = _b.data[1 * 4 + 3];
+            let b20 = _b.data[2 * 4 + 0];
+            let b21 = _b.data[2 * 4 + 1];
+            let b22 = _b.data[2 * 4 + 2];
+            let b23 = _b.data[2 * 4 + 3];
+            let b30 = _b.data[3 * 4 + 0];
+            let b31 = _b.data[3 * 4 + 1];
+            let b32 = _b.data[3 * 4 + 2];
+            let b33 = _b.data[3 * 4 + 3];
             matrix.data = new Float32Array([
                 b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
                 b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
@@ -1251,22 +1280,22 @@ var Fudge;
          * @param _matrix Tha matrix to compute the inverse of.
          */
         static inverse(_matrix) {
-            let m00 = _matrix.Data[0 * 4 + 0];
-            let m01 = _matrix.Data[0 * 4 + 1];
-            let m02 = _matrix.Data[0 * 4 + 2];
-            let m03 = _matrix.Data[0 * 4 + 3];
-            let m10 = _matrix.Data[1 * 4 + 0];
-            let m11 = _matrix.Data[1 * 4 + 1];
-            let m12 = _matrix.Data[1 * 4 + 2];
-            let m13 = _matrix.Data[1 * 4 + 3];
-            let m20 = _matrix.Data[2 * 4 + 0];
-            let m21 = _matrix.Data[2 * 4 + 1];
-            let m22 = _matrix.Data[2 * 4 + 2];
-            let m23 = _matrix.Data[2 * 4 + 3];
-            let m30 = _matrix.Data[3 * 4 + 0];
-            let m31 = _matrix.Data[3 * 4 + 1];
-            let m32 = _matrix.Data[3 * 4 + 2];
-            let m33 = _matrix.Data[3 * 4 + 3];
+            let m00 = _matrix.data[0 * 4 + 0];
+            let m01 = _matrix.data[0 * 4 + 1];
+            let m02 = _matrix.data[0 * 4 + 2];
+            let m03 = _matrix.data[0 * 4 + 3];
+            let m10 = _matrix.data[1 * 4 + 0];
+            let m11 = _matrix.data[1 * 4 + 1];
+            let m12 = _matrix.data[1 * 4 + 2];
+            let m13 = _matrix.data[1 * 4 + 3];
+            let m20 = _matrix.data[2 * 4 + 0];
+            let m21 = _matrix.data[2 * 4 + 1];
+            let m22 = _matrix.data[2 * 4 + 2];
+            let m23 = _matrix.data[2 * 4 + 3];
+            let m30 = _matrix.data[3 * 4 + 0];
+            let m31 = _matrix.data[3 * 4 + 1];
+            let m32 = _matrix.data[3 * 4 + 2];
+            let m33 = _matrix.data[3 * 4 + 3];
             let tmp0 = m22 * m33;
             let tmp1 = m32 * m23;
             let tmp2 = m12 * m33;

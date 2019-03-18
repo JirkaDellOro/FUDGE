@@ -4,8 +4,8 @@ namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Matrix4x4 {
-        private data: Float32Array; // The data of the matrix.
+    export class Matrix4x4 {  // TODO: examine if it could/should be an extension of Float32Array
+        public data: Float32Array; // The data of the matrix.
 
         public constructor() {
             this.data = new Float32Array([
@@ -14,11 +14,6 @@ namespace Fudge {
                 0, 0, 1, 0,
                 0, 0, 0, 1
             ]);
-        }
-
-        // Get method.######################################################################################
-        public get Data(): Float32Array {
-            return this.data;
         }
 
         // Transformation methods.######################################################################################
@@ -35,38 +30,38 @@ namespace Fudge {
          */
         public static multiply(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4 {
             let matrix: Matrix4x4 = new Matrix4x4();
-            let a00: number = _a.Data[0 * 4 + 0];
-            let a01: number = _a.Data[0 * 4 + 1];
-            let a02: number = _a.Data[0 * 4 + 2];
-            let a03: number = _a.Data[0 * 4 + 3];
-            let a10: number = _a.Data[1 * 4 + 0];
-            let a11: number = _a.Data[1 * 4 + 1];
-            let a12: number = _a.Data[1 * 4 + 2];
-            let a13: number = _a.Data[1 * 4 + 3];
-            let a20: number = _a.Data[2 * 4 + 0];
-            let a21: number = _a.Data[2 * 4 + 1];
-            let a22: number = _a.Data[2 * 4 + 2];
-            let a23: number = _a.Data[2 * 4 + 3];
-            let a30: number = _a.Data[3 * 4 + 0];
-            let a31: number = _a.Data[3 * 4 + 1];
-            let a32: number = _a.Data[3 * 4 + 2];
-            let a33: number = _a.Data[3 * 4 + 3];
-            let b00: number = _b.Data[0 * 4 + 0];
-            let b01: number = _b.Data[0 * 4 + 1];
-            let b02: number = _b.Data[0 * 4 + 2];
-            let b03: number = _b.Data[0 * 4 + 3];
-            let b10: number = _b.Data[1 * 4 + 0];
-            let b11: number = _b.Data[1 * 4 + 1];
-            let b12: number = _b.Data[1 * 4 + 2];
-            let b13: number = _b.Data[1 * 4 + 3];
-            let b20: number = _b.Data[2 * 4 + 0];
-            let b21: number = _b.Data[2 * 4 + 1];
-            let b22: number = _b.Data[2 * 4 + 2];
-            let b23: number = _b.Data[2 * 4 + 3];
-            let b30: number = _b.Data[3 * 4 + 0];
-            let b31: number = _b.Data[3 * 4 + 1];
-            let b32: number = _b.Data[3 * 4 + 2];
-            let b33: number = _b.Data[3 * 4 + 3];
+            let a00: number = _a.data[0 * 4 + 0];
+            let a01: number = _a.data[0 * 4 + 1];
+            let a02: number = _a.data[0 * 4 + 2];
+            let a03: number = _a.data[0 * 4 + 3];
+            let a10: number = _a.data[1 * 4 + 0];
+            let a11: number = _a.data[1 * 4 + 1];
+            let a12: number = _a.data[1 * 4 + 2];
+            let a13: number = _a.data[1 * 4 + 3];
+            let a20: number = _a.data[2 * 4 + 0];
+            let a21: number = _a.data[2 * 4 + 1];
+            let a22: number = _a.data[2 * 4 + 2];
+            let a23: number = _a.data[2 * 4 + 3];
+            let a30: number = _a.data[3 * 4 + 0];
+            let a31: number = _a.data[3 * 4 + 1];
+            let a32: number = _a.data[3 * 4 + 2];
+            let a33: number = _a.data[3 * 4 + 3];
+            let b00: number = _b.data[0 * 4 + 0];
+            let b01: number = _b.data[0 * 4 + 1];
+            let b02: number = _b.data[0 * 4 + 2];
+            let b03: number = _b.data[0 * 4 + 3];
+            let b10: number = _b.data[1 * 4 + 0];
+            let b11: number = _b.data[1 * 4 + 1];
+            let b12: number = _b.data[1 * 4 + 2];
+            let b13: number = _b.data[1 * 4 + 3];
+            let b20: number = _b.data[2 * 4 + 0];
+            let b21: number = _b.data[2 * 4 + 1];
+            let b22: number = _b.data[2 * 4 + 2];
+            let b23: number = _b.data[2 * 4 + 3];
+            let b30: number = _b.data[3 * 4 + 0];
+            let b31: number = _b.data[3 * 4 + 1];
+            let b32: number = _b.data[3 * 4 + 2];
+            let b33: number = _b.data[3 * 4 + 3];
             matrix.data = new Float32Array(
                 [
                     b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
@@ -94,22 +89,22 @@ namespace Fudge {
          */
         public static inverse(_matrix: Matrix4x4): Matrix4x4 {
 
-            let m00: number = _matrix.Data[0 * 4 + 0];
-            let m01: number = _matrix.Data[0 * 4 + 1];
-            let m02: number = _matrix.Data[0 * 4 + 2];
-            let m03: number = _matrix.Data[0 * 4 + 3];
-            let m10: number = _matrix.Data[1 * 4 + 0];
-            let m11: number = _matrix.Data[1 * 4 + 1];
-            let m12: number = _matrix.Data[1 * 4 + 2];
-            let m13: number = _matrix.Data[1 * 4 + 3];
-            let m20: number = _matrix.Data[2 * 4 + 0];
-            let m21: number = _matrix.Data[2 * 4 + 1];
-            let m22: number = _matrix.Data[2 * 4 + 2];
-            let m23: number = _matrix.Data[2 * 4 + 3];
-            let m30: number = _matrix.Data[3 * 4 + 0];
-            let m31: number = _matrix.Data[3 * 4 + 1];
-            let m32: number = _matrix.Data[3 * 4 + 2];
-            let m33: number = _matrix.Data[3 * 4 + 3];
+            let m00: number = _matrix.data[0 * 4 + 0];
+            let m01: number = _matrix.data[0 * 4 + 1];
+            let m02: number = _matrix.data[0 * 4 + 2];
+            let m03: number = _matrix.data[0 * 4 + 3];
+            let m10: number = _matrix.data[1 * 4 + 0];
+            let m11: number = _matrix.data[1 * 4 + 1];
+            let m12: number = _matrix.data[1 * 4 + 2];
+            let m13: number = _matrix.data[1 * 4 + 3];
+            let m20: number = _matrix.data[2 * 4 + 0];
+            let m21: number = _matrix.data[2 * 4 + 1];
+            let m22: number = _matrix.data[2 * 4 + 2];
+            let m23: number = _matrix.data[2 * 4 + 3];
+            let m30: number = _matrix.data[3 * 4 + 0];
+            let m31: number = _matrix.data[3 * 4 + 1];
+            let m32: number = _matrix.data[3 * 4 + 2];
+            let m33: number = _matrix.data[3 * 4 + 3];
             let tmp0: number = m22 * m33;
             let tmp1: number = m32 * m23;
             let tmp2: number = m12 * m33;

@@ -1,14 +1,16 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
-    /**
-     * Base class for [[Node]], [[Component]] and more. Abstracts methods needed by all such as serialization
-     */
-    abstract class Base {
-        /**
-         * Returns a JSON-String representing the data needed to recreate an object of the applicable subclass
-         */
-        serialize(): string;
-        deserialize(): Base;
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    class Serializer {
+        serialize(_object: Serializable): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -16,7 +18,7 @@ declare namespace Fudge {
      * Superclass for all [[Component]]s that can be attached to [[Nodes]].
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Component extends Base {
+    abstract class Component implements Serializable {
         private container;
         private singleton;
         /**
@@ -39,6 +41,8 @@ declare namespace Fudge {
          * TODO: write tests to prove consistency and correct exception handling
          */
         setContainer(_container: Node | null): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -129,7 +133,7 @@ declare namespace Fudge {
     class ComponentPivot extends Component {
         protected matrix: Matrix4x4;
         readonly Matrix: Matrix4x4;
-        readonly Position: Vector3;
+        readonly position: Vector3;
         /**
          * # Transformation methods
          */
@@ -211,6 +215,8 @@ declare namespace Fudge {
          * @param _scale The value to scale by.
          */
         scaleZ(_scale: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -224,6 +230,8 @@ declare namespace Fudge {
         constructor();
         WorldMatrix: Matrix4x4;
         readonly WorldPosition: Vector3;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -325,7 +333,7 @@ declare namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node extends Base {
+    class Node implements Serializable {
         name: string;
         private parent;
         private children;
@@ -402,6 +410,8 @@ declare namespace Fudge {
          * @throws Exception when component is not found
          */
         removeComponent(_component: Component): void;
+        serialize(): Serialization;
+        deserialize(): Serializable;
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
@@ -524,9 +534,8 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 {
-        private data;
+        data: Float32Array;
         constructor();
-        readonly Data: Float32Array;
         static identity(): Matrix4x4;
         static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
         /**

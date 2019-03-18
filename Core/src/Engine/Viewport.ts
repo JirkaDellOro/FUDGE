@@ -48,7 +48,6 @@ namespace Fudge {
          * @param _node The node to initialize.
          */
         public initializeViewportNodes(_node: Node): void {
-            console.log(_node.name);
             if (!_node.getComponents(ComponentTransform)) {
                 let transform: ComponentTransform = new ComponentTransform();
                 _node.addComponent(transform);
@@ -118,7 +117,7 @@ namespace Fudge {
                     }
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
-                    gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.Data);
+                    gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
                     // Draw call
                     gl2.drawArrays(gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
                 }

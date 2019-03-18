@@ -55,7 +55,7 @@ var JaschasExample;
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(fudge0.transform.Position);
+        cmpTransform.lookAt(fudge0.transform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -82,7 +82,7 @@ var JaschasExample;
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event) {
         let transform = camera.transform;
-        let target = fudge0.transform.Position;
+        let target = fudge0.transform.position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);

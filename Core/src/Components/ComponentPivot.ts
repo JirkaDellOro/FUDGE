@@ -11,8 +11,8 @@ namespace Fudge {
             return this.matrix;
         }
 
-        public get Position(): Vector3 {
-            return new Vector3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+        public get position(): Vector3 {
+            return new Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
 
         /**
@@ -88,7 +88,7 @@ namespace Fudge {
          * @param _target The target to look at.
          */
         public lookAt(_target: Vector3): void {
-            this.matrix = Matrix4x4.lookAt(this.Position, _target); // TODO: Handle rotation around z-axis
+            this.matrix = Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
         }
         /**
          * # Scaling methods
@@ -122,6 +122,18 @@ namespace Fudge {
          */
         public scaleZ(_scale: number): void {
             this.matrix = Matrix4x4.scale(this.matrix, 1, 1, _scale);
+        }
+
+        public serialize(): Serialization {
+            // TODO: save translation, rotation and scale as vectors for readability and manipulation
+            let serialization: Serialization = {
+                matrix: this.matrix
+            };
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            this.matrix = _serialization.matrix;
+            return this;
         }
     }
 }

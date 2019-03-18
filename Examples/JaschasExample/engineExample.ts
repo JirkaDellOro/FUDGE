@@ -64,7 +64,7 @@ namespace JaschasExample {
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(fudge0.transform.Position);
+        cmpTransform.lookAt(fudge0.transform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -99,7 +99,7 @@ namespace JaschasExample {
     function moveCamera(_event: KeyboardEvent): void {
 
         let transform: ƒ.ComponentTransform = camera.transform;
-        let target: ƒ.Vector3 = fudge0.transform.Position;
+        let target: ƒ.Vector3 = fudge0.transform.position;
         switch (_event.key) {
             case "w": { 
                 transform.translateY(10);
