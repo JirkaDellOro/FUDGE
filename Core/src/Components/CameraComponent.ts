@@ -5,7 +5,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class CameraComponent extends Component {
-        private enabled: boolean = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass?
+        private enabled: boolean = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass? -> Superclass
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
@@ -38,7 +38,7 @@ namespace Fudge {
         public get ViewProjectionMatrix(): Matrix4x4 {
             try {
                 let transform: TransformComponent = <TransformComponent>this.getContainer().getComponents(TransformComponent)[0];
-                let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
+                let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
                 return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             } catch {
                 return this.projectionMatrix;

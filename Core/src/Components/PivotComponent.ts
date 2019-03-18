@@ -84,8 +84,7 @@ namespace Fudge {
         }
         /**
          * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
-         * one another, as it does not take into account the transformation that is passed from one to the other.
+         * TODO: Use world transformations! Does it make sense in Pivot?
          * @param _target The target to look at.
          */
         public lookAt(_target: Vector3): void {

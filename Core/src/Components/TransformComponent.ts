@@ -5,11 +5,11 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class TransformComponent extends PivotComponent {
-        /* */private worldMatrix: Matrix4x4 ;
-        //* TODO: figure out why there is an extra matrix necessary. Implement initialize method if applicable
+        /*TODO: delete comments */private worldMatrix: Matrix4x4 ;
+        
         public constructor() {
             super();
-            //this.worldMatrix = this.matrix; // TODO: worldMatrix and matrix both reference the same object. Nonsense
+            this.worldMatrix = Matrix4x4.identity();
         }
         //*/
         // Get and Set methods.######################################################################################

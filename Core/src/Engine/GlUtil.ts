@@ -1,5 +1,5 @@
 namespace Fudge {
-    // TODO: prepare for multiple contexts/canvases
+    // : prepare for multiple contexts/canvases
     export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
     /**
      * Utility class to sore and/or wrap some functionality.

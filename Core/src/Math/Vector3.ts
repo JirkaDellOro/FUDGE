@@ -10,6 +10,8 @@ namespace Fudge {
             this.data = [_x, _y, _z];
         }
 
+        // TODO: implement equals-functions
+
         // Get methods.######################################################################################
         get Data(): number[] {
             return this.data;
