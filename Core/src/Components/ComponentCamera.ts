@@ -4,7 +4,7 @@ namespace Fudge {
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class CameraComponent extends Component {
+    export class ComponentCamera extends Component {
         private enabled: boolean = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass? -> Superclass
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
@@ -37,7 +37,7 @@ namespace Fudge {
          */
         public get ViewProjectionMatrix(): Matrix4x4 {
             try {
-                let transform: TransformComponent = <TransformComponent>this.getContainer().getComponents(TransformComponent)[0];
+                let transform: ComponentTransform = <ComponentTransform>this.getContainer().getComponents(ComponentTransform)[0];
                 let viewMatrix: Matrix4x4 = Matrix4x4.inverse(transform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
                 return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             } catch {

@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export class Viewport {
         private name: string; // The name to call this viewport by.
-        private camera: CameraComponent; // The camera from which's position and view the tree will be rendered.
+        private camera: ComponentCamera; // The camera from which's position and view the tree will be rendered.
         private rootNode: Node; // The first node in the tree(branch) that will be rendered.
         private vertexArrayObjects: { [key: string]: WebGLVertexArrayObject } = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
         private buffers: { [key: string]: WebGLBuffer } = {}; // Associative array that holds a buffer for each node in the tree(branch)
@@ -14,7 +14,7 @@ namespace Fudge {
          * @param _rootNode 
          * @param _camera 
          */
-        public constructor(_name: string, _rootNode: Node, _camera: CameraComponent) {
+        public constructor(_name: string, _rootNode: Node, _camera: ComponentCamera) {
             this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;
@@ -49,19 +49,19 @@ namespace Fudge {
          */
         public initializeViewportNodes(_node: Node): void {
             console.log(_node.Name);
-            if (!_node.getComponents(TransformComponent)) {
-                let transform: TransformComponent = new TransformComponent();
+            if (!_node.getComponents(ComponentTransform)) {
+                let transform: ComponentTransform = new ComponentTransform();
                 _node.addComponent(transform);
             }
-            let mesh: MeshComponent;
-            if (_node.getComponents(MeshComponent).length == 0) {
+            let mesh: ComponentMesh;
+            if (_node.getComponents(ComponentMesh).length == 0) {
                 console.log(`No Mesh attached to node named '${_node.Name}'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = <MeshComponent>_node.getComponents(MeshComponent)[0];
+                mesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
-                let materialComponent: MaterialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
 
                 if (materialComponent) {
                     /*
@@ -101,18 +101,18 @@ namespace Fudge {
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         private drawObjects(_node: Node, _matrix: Matrix4x4): void {
-            if (_node.getComponents(MeshComponent).length > 0) {
-                let mesh: MeshComponent = <MeshComponent>_node.getComponents(MeshComponent)[0];
-                let transform: TransformComponent = <TransformComponent>_node.getComponents(TransformComponent)[0];
-                let materialComponent: MaterialComponent = <MaterialComponent>_node.getComponents(MaterialComponent)[0];
+            if (_node.getComponents(ComponentMesh).length > 0) {
+                let mesh: ComponentMesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
+                let transform: ComponentTransform = <ComponentTransform>_node.getComponents(ComponentTransform)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
                     gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
                     let transformMatrix: Matrix4x4 = transform.WorldMatrix;
-                    if (_node.getComponents(PivotComponent)) {
-                        let pivot: PivotComponent = <PivotComponent>_node.getComponents(PivotComponent)[0];
+                    if (_node.getComponents(ComponentPivot)) {
+                        let pivot: ComponentPivot = <ComponentPivot>_node.getComponents(ComponentPivot)[0];
                         if (pivot)
                             transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
                     }
@@ -133,12 +133,12 @@ namespace Fudge {
          * @param _node The node which's transform worldmatrix to update.
          */
         private updateNodeWorldMatrix(_node: Node): void {
-            let transform: TransformComponent = <TransformComponent>_node.getComponents(TransformComponent)[0];
+            let transform: ComponentTransform = <ComponentTransform>_node.getComponents(ComponentTransform)[0];
             if (!_node.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform: TransformComponent = (<TransformComponent>_node.Parent.getComponents(TransformComponent)[0]);
+                let parentTransform: ComponentTransform = (<ComponentTransform>_node.Parent.getComponents(ComponentTransform)[0]);
                 transform.WorldMatrix = Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
             for (let name in _node.getChildren()) {
@@ -179,7 +179,7 @@ namespace Fudge {
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeMaterial(_materialComponent: MaterialComponent, _meshComponent: MeshComponent): void {
+        private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
             let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
             gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
             _meshComponent.applyColor(_materialComponent);
@@ -193,7 +193,7 @@ namespace Fudge {
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeTexture(_materialComponent: MaterialComponent, _meshComponent: MeshComponent): void {
+        private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
             let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
             let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
             gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);

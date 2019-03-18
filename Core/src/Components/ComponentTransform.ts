@@ -4,7 +4,7 @@ namespace Fudge {
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class TransformComponent extends PivotComponent {
+    export class ComponentTransform extends ComponentPivot {
         /*TODO: delete comments */private worldMatrix: Matrix4x4 ;
         
         public constructor() {

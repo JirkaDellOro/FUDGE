@@ -34,7 +34,7 @@ declare namespace Fudge {
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class CameraComponent extends Component {
+    class ComponentCamera extends Component {
         private enabled;
         private orthographic;
         private projectionMatrix;
@@ -72,7 +72,7 @@ declare namespace Fudge {
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MaterialComponent extends Component {
+    class ComponentMaterial extends Component {
         private material;
         initialize(_material: Material): void;
         readonly Material: Material;
@@ -83,7 +83,7 @@ declare namespace Fudge {
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshComponent extends Component {
+    class ComponentMesh extends Component {
         private positions;
         private vertexCount;
         private bufferSpecification;
@@ -97,7 +97,7 @@ declare namespace Fudge {
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
          * @param _materialComponent The materialcomponent attached to the same node.
          */
-        applyColor(_materialComponent: MaterialComponent): void;
+        applyColor(_materialComponent: ComponentMaterial): void;
         /**
          * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
@@ -114,7 +114,7 @@ declare namespace Fudge {
      * The pivot-transformation does not affect the transformation of the node itself or its children.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class PivotComponent extends Component {
+    class ComponentPivot extends Component {
         protected matrix: Matrix4x4;
         readonly Matrix: Matrix4x4;
         readonly Position: Vector3;
@@ -170,8 +170,7 @@ declare namespace Fudge {
         rotateZ(_zAngle: number): void;
         /**
          * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
-         * one another, as it does not take into account the transformation that is passed from one to the other.
+         * TODO: Use world transformations! Does it make sense in Pivot?
          * @param _target The target to look at.
          */
         lookAt(_target: Vector3): void;
@@ -208,7 +207,7 @@ declare namespace Fudge {
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class TransformComponent extends PivotComponent {
+    class ComponentTransform extends ComponentPivot {
         private worldMatrix;
         constructor();
         WorldMatrix: Matrix4x4;
@@ -414,7 +413,7 @@ declare namespace Fudge {
          * @param _rootNode
          * @param _camera
          */
-        constructor(_name: string, _rootNode: Node, _camera: CameraComponent);
+        constructor(_name: string, _rootNode: Node, _camera: ComponentCamera);
         readonly Name: string;
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
@@ -742,7 +741,18 @@ declare namespace Fudge {
      * Represents a WebGL shaderprogram
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class BasicShader extends Shader {
+    class ShaderBasic extends Shader {
+        constructor();
+        private loadVertexShaderSource;
+        private loadFragmentShaderSource;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Represents a WebGL shaderprogram
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderTexture extends Shader {
         constructor();
         private loadVertexShaderSource;
         private loadFragmentShaderSource;

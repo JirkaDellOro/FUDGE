@@ -24,7 +24,6 @@ namespace Fudge {
             this.shader = _shader;
             this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
             this.colorAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_color"));
-            this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
             this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
 
             this.color = _color;
@@ -93,6 +92,7 @@ namespace Fudge {
         public addTexture(_textureSource: string): void {
             this.textureEnabled = true;
             this.textureSource = _textureSource;
+            this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
         }
         /**
          * Removes and disables a texture that was added to this material.

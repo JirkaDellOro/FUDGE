@@ -4,7 +4,7 @@ namespace Fudge {
      * The pivot-transformation does not affect the transformation of the node itself or its children.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class PivotComponent extends Component {
+    export class ComponentPivot extends Component {
         protected matrix: Matrix4x4 = Matrix4x4.identity(); // The matrix to transform the mesh by.
 
         public get Matrix(): Matrix4x4 {

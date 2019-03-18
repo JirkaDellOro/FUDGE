@@ -8,7 +8,7 @@ var Fudge;
     class Component {
         constructor() {
             this.container = null;
-            this.singleton = false;
+            this.singleton = true;
         }
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
@@ -60,10 +60,10 @@ var Fudge;
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class CameraComponent extends Fudge.Component {
+    class ComponentCamera extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.enabled = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass?
+            this.enabled = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass? -> Superclass
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
@@ -92,8 +92,8 @@ var Fudge;
          */
         get ViewProjectionMatrix() {
             try {
-                let transform = this.getContainer().getComponents(Fudge.TransformComponent)[0];
-                let viewMatrix = Fudge.Matrix4x4.inverse(transform.Matrix); // TODO: examine, why Matrix is used and not WorldMatrix!
+                let transform = this.getContainer().getComponents(Fudge.ComponentTransform)[0];
+                let viewMatrix = Fudge.Matrix4x4.inverse(transform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
                 return Fudge.Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
             catch {
@@ -123,7 +123,7 @@ var Fudge;
             this.projectionMatrix = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
     }
-    Fudge.CameraComponent = CameraComponent;
+    Fudge.ComponentCamera = ComponentCamera;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -131,8 +131,8 @@ var Fudge;
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MaterialComponent extends Fudge.Component {
-        // TODO: clearify what a "material" actually is and its relation to the shader. Isn't it just shader parameters? Can then the material be independent of the shader?
+    class ComponentMaterial extends Fudge.Component {
+        // TODO: Shader defines material-parameter. Can then the material be independent of the shader? Different structure needed
         initialize(_material) {
             this.material = _material;
         }
@@ -140,7 +140,7 @@ var Fudge;
             return this.material;
         }
     }
-    Fudge.MaterialComponent = MaterialComponent;
+    Fudge.ComponentMaterial = ComponentMaterial;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -148,7 +148,7 @@ var Fudge;
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshComponent extends Fudge.Component {
+    class ComponentMesh extends Fudge.Component {
         initialize(_positions, _size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
             this.positions = _positions;
             this.bufferSpecification = {
@@ -217,7 +217,7 @@ var Fudge;
             return new Float32Array(normals);
         }
     }
-    Fudge.MeshComponent = MeshComponent;
+    Fudge.ComponentMesh = ComponentMesh;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -226,7 +226,7 @@ var Fudge;
      * The pivot-transformation does not affect the transformation of the node itself or its children.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class PivotComponent extends Fudge.Component {
+    class ComponentPivot extends Fudge.Component {
         constructor() {
             super(...arguments);
             this.matrix = Fudge.Matrix4x4.identity(); // The matrix to transform the mesh by.
@@ -305,8 +305,7 @@ var Fudge;
         }
         /**
          * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: This method does not work properly if the mesh that calls it and the target are ancestor/descendant of
-         * one another, as it does not take into account the transformation that is passed from one to the other.
+         * TODO: Use world transformations! Does it make sense in Pivot?
          * @param _target The target to look at.
          */
         lookAt(_target) {
@@ -346,7 +345,7 @@ var Fudge;
             this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, 1, _scale);
         }
     }
-    Fudge.PivotComponent = PivotComponent;
+    Fudge.ComponentPivot = ComponentPivot;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -355,11 +354,10 @@ var Fudge;
      * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class TransformComponent extends Fudge.PivotComponent {
-        //* TODO: figure out why there is an extra matrix necessary. Implement initialize method if applicable
+    class ComponentTransform extends Fudge.ComponentPivot {
         constructor() {
             super();
-            //this.worldMatrix = this.matrix; // TODO: worldMatrix and matrix both reference the same object. Nonsense
+            this.worldMatrix = Fudge.Matrix4x4.identity();
         }
         //*/
         // Get and Set methods.######################################################################################
@@ -376,7 +374,7 @@ var Fudge;
             //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
     }
-    Fudge.TransformComponent = TransformComponent;
+    Fudge.ComponentTransform = ComponentTransform;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -467,7 +465,6 @@ var Fudge;
             this.shader = _shader;
             this.positionAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_position"));
             this.colorAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_color"));
-            this.textureCoordinateAtributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_textureCoordinate"));
             this.matrixLocation = Fudge.GLUtil.assert(this.shader.getUniformLocation("u_matrix"));
             this.color = _color;
             this.colorBufferSpecification = {
@@ -532,6 +529,7 @@ var Fudge;
         addTexture(_textureSource) {
             this.textureEnabled = true;
             this.textureSource = _textureSource;
+            this.textureCoordinateAtributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_textureCoordinate"));
         }
         /**
          * Removes and disables a texture that was added to this material.
@@ -784,19 +782,19 @@ var Fudge;
          */
         initializeViewportNodes(_node) {
             console.log(_node.Name);
-            if (!_node.getComponents(Fudge.TransformComponent)) {
-                let transform = new Fudge.TransformComponent();
+            if (!_node.getComponents(Fudge.ComponentTransform)) {
+                let transform = new Fudge.ComponentTransform();
                 _node.addComponent(transform);
             }
             let mesh;
-            if (_node.getComponents(Fudge.MeshComponent).length == 0) {
+            if (_node.getComponents(Fudge.ComponentMesh).length == 0) {
                 console.log(`No Mesh attached to node named '${_node.Name}'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = _node.getComponents(Fudge.MeshComponent)[0];
+                mesh = _node.getComponents(Fudge.ComponentMesh)[0];
                 Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
-                let materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
+                let materialComponent = _node.getComponents(Fudge.ComponentMaterial)[0];
                 if (materialComponent) {
                     /*
                     console.log(`No Material attached to node named '${_node.Name}'.`);
@@ -833,18 +831,18 @@ var Fudge;
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         drawObjects(_node, _matrix) {
-            if (_node.getComponents(Fudge.MeshComponent).length > 0) {
-                let mesh = _node.getComponents(Fudge.MeshComponent)[0];
-                let transform = _node.getComponents(Fudge.TransformComponent)[0];
-                let materialComponent = _node.getComponents(Fudge.MaterialComponent)[0];
+            if (_node.getComponents(Fudge.ComponentMesh).length > 0) {
+                let mesh = _node.getComponents(Fudge.ComponentMesh)[0];
+                let transform = _node.getComponents(Fudge.ComponentTransform)[0];
+                let materialComponent = _node.getComponents(Fudge.ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
                     Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.Name]);
                     Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
                     let transformMatrix = transform.WorldMatrix;
-                    if (_node.getComponents(Fudge.PivotComponent)) {
-                        let pivot = _node.getComponents(Fudge.PivotComponent)[0];
+                    if (_node.getComponents(Fudge.ComponentPivot)) {
+                        let pivot = _node.getComponents(Fudge.ComponentPivot)[0];
                         if (pivot)
                             transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
                     }
@@ -865,12 +863,12 @@ var Fudge;
          * @param _node The node which's transform worldmatrix to update.
          */
         updateNodeWorldMatrix(_node) {
-            let transform = _node.getComponents(Fudge.TransformComponent)[0];
+            let transform = _node.getComponents(Fudge.ComponentTransform)[0];
             if (!_node.Parent) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform = _node.Parent.getComponents(Fudge.TransformComponent)[0];
+                let parentTransform = _node.Parent.getComponents(Fudge.ComponentTransform)[0];
                 transform.WorldMatrix = Fudge.Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
             for (let name in _node.getChildren()) {
@@ -1514,6 +1512,7 @@ var Fudge;
         constructor(_x = 0, _y = 0, _z = 0) {
             this.data = [_x, _y, _z];
         }
+        // TODO: implement equals-functions
         // Get methods.######################################################################################
         get Data() {
             return this.data;
@@ -1769,7 +1768,62 @@ var Fudge;
      * Represents a WebGL shaderprogram
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class BasicShader extends Fudge.Shader {
+    class ShaderBasic extends Fudge.Shader {
+        constructor() {
+            super();
+            this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
+        }
+        loadVertexShaderSource() {
+            return `#version 300 es
+                    // an attribute is an input (in) to a vertex shader.
+                    // It will receive data from a buffer
+                    in vec4 a_position;
+                    in vec4 a_color;
+                
+                    // The Matrix to transform the positions by.
+                    uniform mat4 u_matrix;
+                
+                    // Varying color in the fragmentshader.
+                    out vec4 v_color;
+                
+                    // all shaders have a main function.
+                    void main() {  
+                        // Multiply all positions by the matrix.   
+                        vec4 position = u_matrix * a_position;
+                        
+                        gl_Position = u_matrix * a_position;
+                
+                        // Pass color to fragmentshader.
+                        v_color = a_color;
+                    }`;
+        }
+        loadFragmentShaderSource() {
+            return `#version 300 es
+                    // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
+                    precision mediump float;
+                    
+                    // Color passed from vertexshader.
+                    in vec4 v_color;
+                
+                    // we need to declare an output for the fragment shader
+                    out vec4 outColor;
+                    
+                    void main() {
+                       outColor = v_color;
+                    }`;
+        }
+    }
+    Fudge.ShaderBasic = ShaderBasic;
+})(Fudge || (Fudge = {}));
+/// <reference path="Shader.ts"/>
+var Fudge;
+/// <reference path="Shader.ts"/>
+(function (Fudge) {
+    /**
+     * Represents a WebGL shaderprogram
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderTexture extends Fudge.Shader {
         constructor() {
             super();
             this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
@@ -1777,59 +1831,58 @@ var Fudge;
         loadVertexShaderSource() {
             return `#version 300 es
  
-        // an attribute is an input (in) to a vertex shader.
-        // It will receive data from a buffer
-        in vec4 a_position;
-        in vec4 a_color;
-        in vec2 a_textureCoordinate;
-    
-        // The Matrix to transform the positions by.
-        uniform mat4 u_matrix;
-    
-    
-        // Varying color in the fragmentshader.
-        out vec4 v_color;
-        // Varying texture in the fragmentshader.
-        out vec2 v_textureCoordinate;
-    
-    
-        // all shaders have a main function.
-        void main() {  
-            // Multiply all positions by the matrix.   
-            vec4 position = u_matrix * a_position;
-    
-    
-            gl_Position = u_matrix * a_position;
-    
-            // Pass color to fragmentshader.
-            v_color = a_color;
-            v_textureCoordinate = a_textureCoordinate;
-        }
-        `;
+                    // an attribute is an input (in) to a vertex shader.
+                    // It will receive data from a buffer
+                    in vec4 a_position;
+                    in vec4 a_color;
+                    in vec2 a_textureCoordinate;
+                
+                    // The Matrix to transform the positions by.
+                    uniform mat4 u_matrix;
+                
+                
+                    // Varying color in the fragmentshader.
+                    out vec4 v_color;
+                    // Varying texture in the fragmentshader.
+                    out vec2 v_textureCoordinate;
+                
+                
+                    // all shaders have a main function.
+                    void main() {  
+                        // Multiply all positions by the matrix.   
+                        vec4 position = u_matrix * a_position;
+                
+                
+                        gl_Position = u_matrix * a_position;
+                
+                        // Pass color to fragmentshader.
+                        v_color = a_color;
+                        v_textureCoordinate = a_textureCoordinate;
+                    }`;
         }
         loadFragmentShaderSource() {
             return `#version 300 es
-     
-            // fragment shaders don't have a default precision so we need
-            // to pick one. mediump is a good default. It means "medium precision"
-            precision mediump float;
             
-            // Color passed from vertexshader.
-            in vec4 v_color;
-            // Texture passed from vertexshader.
-            in vec2 v_textureCoordinate;
-        
-        
-            uniform sampler2D u_texture;
-            // we need to declare an output for the fragment shader
-            out vec4 outColor;
-            
-            void main() {
-            outColor = v_color;
-            outColor = texture(u_texture, v_textureCoordinate) * v_color;
+                    // fragment shaders don't have a default precision so we need
+                    // to pick one. mediump is a good default. It means "medium precision"
+                    precision mediump float;
+                    
+                    // Color passed from vertexshader.
+                    in vec4 v_color;
+                    // Texture passed from vertexshader.
+                    in vec2 v_textureCoordinate;
+                
+                
+                    uniform sampler2D u_texture;
+                    // we need to declare an output for the fragment shader
+                    out vec4 outColor;
+                    
+                    void main() {
+                    outColor = v_color;
+                    outColor = texture(u_texture, v_textureCoordinate) * v_color;
             }`;
         }
     }
-    Fudge.BasicShader = BasicShader;
+    Fudge.ShaderTexture = ShaderTexture;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

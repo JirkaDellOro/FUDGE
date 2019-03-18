@@ -12,60 +12,61 @@ namespace JaschasExample {
     export function init(): void {
         console.log("Starting init().");
         ƒ.GLUtil.initializeContext();
-        let basicShader: ƒ.BasicShader = new ƒ.BasicShader();
-        let standardMaterial: ƒ.Material = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), basicShader);
-        let greenMaterial: ƒ.Material = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), basicShader);
-        let texturedMaterial: ƒ.Material = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), basicShader);
-        texturedMaterial.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
+        let shdBasic: ƒ.ShaderBasic = new ƒ.ShaderBasic();
+        let shdTexture: ƒ.ShaderTexture = new ƒ.ShaderTexture();
+        let matStandard: ƒ.Material = new ƒ.Material("standardMaterial", new ƒ.Vector3(190, 190, 190), shdBasic);
+        let matGreen: ƒ.Material = new ƒ.Material("greenMaterial", new ƒ.Vector3(130, 130, 0), shdBasic);
+        let matTexture: ƒ.Material = new ƒ.Material("texturedMaterial", new ƒ.Vector3(255, 255, 255), shdTexture);
+        matTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
 
-        let meshComponent0: ƒ.MeshComponent = new ƒ.MeshComponent();
-        meshComponent0.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
-        let materialComponent0: ƒ.MaterialComponent = new ƒ.MaterialComponent();
-        materialComponent0.initialize(texturedMaterial);
-        let transformComponent0: ƒ.TransformComponent = new ƒ.TransformComponent();
-        let pivotComponent0: ƒ.PivotComponent = new ƒ.PivotComponent();
+        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
+        cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(matTexture);
+        let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
+        let cmpPivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
         fudge0 = new ƒ.Node("Fudge0");
-        fudge0.addComponent(meshComponent0);
-        fudge0.addComponent(materialComponent0);
-        fudge0.addComponent(pivotComponent0);
-        fudge0.addComponent(transformComponent0);
-        pivotComponent0.translateY(-50);
+        fudge0.addComponent(cmpMesh);
+        fudge0.addComponent(cmpMaterial);
+        fudge0.addComponent(cmpPivot);
+        fudge0.addComponent(cmpTransform);
+        cmpPivot.translateY(-50);
 
 
         let fudge1: ƒ.Node = new ƒ.Node("Fudge1");
-        let transformComponent1: ƒ.TransformComponent = new ƒ.TransformComponent();
-        let meshComponent1: ƒ.MeshComponent = new ƒ.MeshComponent();
-        meshComponent1.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
-        let materialComponent1: ƒ.MaterialComponent = new ƒ.MaterialComponent();
-        materialComponent1.initialize(standardMaterial);
-        fudge1.addComponent(meshComponent1);
+        cmpTransform = new ƒ.ComponentTransform();
+        cmpMesh = new ƒ.ComponentMesh();
+        cmpMesh.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
+        let materialComponent1: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
+        materialComponent1.initialize(matStandard);
+        fudge1.addComponent(cmpMesh);
         fudge1.addComponent(materialComponent1);
-        fudge1.addComponent(transformComponent1);
-        transformComponent1.translate(150, 0, 0);
+        fudge1.addComponent(cmpTransform);
+        cmpTransform.translate(150, 0, 0);
 
         fudge2 = new ƒ.Node("Fudge2");
-        let transformComponent2: ƒ.TransformComponent = new ƒ.TransformComponent();
-        fudge2.addComponent(transformComponent2);
-        transformComponent2.translate(0, -150, 0);
+        cmpTransform = new ƒ.ComponentTransform();
+        fudge2.addComponent(cmpTransform);
+        cmpTransform.translate(0, -150, 0);
 
         let fudge3: ƒ.Node = new ƒ.Node("Fudge3");
-        let transformComponent3: ƒ.TransformComponent = new ƒ.TransformComponent();
-        let meshComponent3: ƒ.MeshComponent = new ƒ.MeshComponent();
+        cmpTransform = new ƒ.ComponentTransform();
+        let meshComponent3: ƒ.ComponentMesh = new ƒ.ComponentMesh();
         meshComponent3.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
-        let materialComponent3: ƒ.MaterialComponent = new ƒ.MaterialComponent();
-        materialComponent3.initialize(greenMaterial);
+        let materialComponent3: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
+        materialComponent3.initialize(matGreen);
         fudge3.addComponent(meshComponent3);
         fudge3.addComponent(materialComponent3);
-        fudge3.addComponent(transformComponent3);
-        transformComponent3.rotateY(90);
+        fudge3.addComponent(cmpTransform);
+        cmpTransform.rotateY(90);
 
 
         cameraNode = new ƒ.Node("Camera");
-        let cameraTransformComponent: ƒ.TransformComponent = new ƒ.TransformComponent();
-        cameraTransformComponent.translate(100, 100, 500);
-        cameraTransformComponent.lookAt((fudge0.getComponents(ƒ.TransformComponent)[0] as ƒ.TransformComponent).Position);
-        cameraNode.addComponent(cameraTransformComponent);
-        let cameraComponent: ƒ.CameraComponent = new ƒ.CameraComponent();
+        let cameraComponentTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
+        cameraComponentTransform.translate(100, 100, 500);
+        cameraComponentTransform.lookAt((fudge0.getComponents(ƒ.ComponentTransform)[0] as ƒ.ComponentTransform).Position);
+        cameraNode.addComponent(cameraComponentTransform);
+        let cameraComponent: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         cameraNode.addComponent(cameraComponent);
         // TODO: orthographic doesn't work!
         // cameraComponent.projectOrthographic();
@@ -86,8 +87,8 @@ namespace JaschasExample {
 
         let rotation: number = 1;
 
-        (fudge2.getComponents(ƒ.TransformComponent)[0] as ƒ.TransformComponent).rotateY(rotation);
-        (fudge0.getComponents(ƒ.PivotComponent)[0] as ƒ.PivotComponent).rotateY(-rotation);
+        (fudge2.getComponents(ƒ.ComponentTransform)[0] as ƒ.ComponentTransform).rotateY(rotation);
+        (fudge0.getComponents(ƒ.ComponentPivot)[0] as ƒ.ComponentPivot).rotateY(-rotation);
 
         viewPort.drawScene();
         requestAnimationFrame(play);
@@ -96,8 +97,8 @@ namespace JaschasExample {
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event: KeyboardEvent): void {
 
-        let transform: ƒ.TransformComponent = <ƒ.TransformComponent>cameraNode.getComponents(ƒ.TransformComponent)[0];
-        let target: ƒ.Vector3 = (<ƒ.TransformComponent>fudge0.getComponents(ƒ.TransformComponent)[0]).Position;
+        let transform: ƒ.ComponentTransform = <ƒ.ComponentTransform>cameraNode.getComponents(ƒ.ComponentTransform)[0];
+        let target: ƒ.Vector3 = (<ƒ.ComponentTransform>fudge0.getComponents(ƒ.ComponentTransform)[0]).Position;
         switch (_event.key) {
             case "w": {
                 transform.translateY(10);

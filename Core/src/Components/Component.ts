@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export abstract class Component {
         private container: Node | null = null;
-        private singleton: boolean = false;
+        private singleton: boolean = true;
 
         /**
          * Retrieves the type of this components subclass as the name of the runtime class

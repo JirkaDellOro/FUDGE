@@ -3,7 +3,7 @@ namespace Fudge {
      * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class MeshComponent extends Component {
+    export class ComponentMesh extends Component {
         private positions: Float32Array; // The Mesh's vertexpositions.
         private vertexCount: number; // The amount of Vertices that need to be drawn.
         private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
@@ -44,7 +44,7 @@ namespace Fudge {
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
          * @param _materialComponent The materialcomponent attached to the same node.
          */
-        public applyColor(_materialComponent: MaterialComponent): void {
+        public applyColor(_materialComponent: ComponentMaterial): void {
 
             let colorPerPosition: number[] = [];
             for (let i: number = 0; i < this.vertexCount; i++) {

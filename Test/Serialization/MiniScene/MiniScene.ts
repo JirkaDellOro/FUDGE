@@ -9,29 +9,29 @@ namespace MiniScene {
 
     export function init(): void {
         ƒ.GLUtil.initializeContext();
-        let basicShader: ƒ.BasicShader = new ƒ.BasicShader();
-        let standardMaterial: ƒ.Material = new ƒ.Material("standardMaterial", new ƒ.Vector3(100, 100, 100), basicShader);
+        let basicShader: ƒ.ShaderBasic = new ƒ.ShaderBasic();
+        let material: ƒ.Material = new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), basicShader);
 
-        let mesh: ƒ.MeshComponent = new ƒ.MeshComponent();
-        mesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
-        let material: ƒ.MaterialComponent = new ƒ.MaterialComponent();
-        material.initialize(standardMaterial);
-        let transform: ƒ.TransformComponent = new ƒ.TransformComponent();
+        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
+        cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
+        cmpMaterial.initialize(material);
+        let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         node = new ƒ.Node("Node");
-        node.addComponent(mesh);
-        node.addComponent(material);
-        node.addComponent(transform);
+        node.addComponent(cmpMesh);
+        node.addComponent(cmpMaterial);
+        node.addComponent(cmpTransform);
 
 
         camera = new ƒ.Node("Camera");
-        let cameraTransformComponent: ƒ.TransformComponent = new ƒ.TransformComponent();
-        cameraTransformComponent.translate(100, 100, 500);
-        cameraTransformComponent.lookAt((node.getComponents(ƒ.TransformComponent)[0] as ƒ.TransformComponent).Position);
-        camera.addComponent(cameraTransformComponent);
-        let cameraComponent: ƒ.CameraComponent = new ƒ.CameraComponent();
-        camera.addComponent(cameraComponent);
+        cmpTransform = new ƒ.ComponentTransform();
+        cmpTransform.translate(100, 100, 500);
+        cmpTransform.lookAt((node.getComponents(ƒ.ComponentTransform)[0] as ƒ.ComponentTransform).Position);
+        camera.addComponent(cmpTransform);
+        let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+        camera.addComponent(cmpCamera);
 
-        viewPort = new ƒ.Viewport("MiniScene", node, cameraComponent);
+        viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
     }
