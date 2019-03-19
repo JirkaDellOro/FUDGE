@@ -498,17 +498,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class BoxGeometry {
-        private positions;
-        constructor(_width: number, _height: number, _depth: number);
-        readonly Positions: Float32Array;
-    }
-}
-declare namespace Fudge {
-    /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -707,6 +696,17 @@ declare namespace Fudge {
          * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector: Vector3): Vector3;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshCube {
+        private positions;
+        constructor(_width: number, _height: number, _depth: number);
+        readonly Positions: Float32Array;
     }
 }
 declare namespace Fudge {

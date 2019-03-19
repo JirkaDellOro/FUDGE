@@ -2,6 +2,7 @@
 var Fudge;
 (function (Fudge) {
     class Serializer {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'4
         serialize(_object) {
             let serialization = {};
             serialization[_object.constructor.name] = _object.serialize();
@@ -1031,66 +1032,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class BoxGeometry {
-        constructor(_width, _height, _depth) {
-            this.positions = new Float32Array([
-                //front
-                -_width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                _width / 2, -_height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                //back
-                _width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                //left
-                -_width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                //right
-                _width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                //top
-                -_width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                //bottom
-                -_width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, _depth / 2
-            ]);
-        }
-        // Get method.######################################################################################
-        get Positions() {
-            return this.positions;
-        }
-    }
-    Fudge.BoxGeometry = BoxGeometry;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1694,6 +1635,66 @@ var Fudge;
         }
     }
     Fudge.Vector3 = Vector3;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshCube {
+        constructor(_width, _height, _depth) {
+            this.positions = new Float32Array([
+                //front
+                -_width / 2, -_height / 2, _depth / 2,
+                _width / 2, -_height / 2, _depth / 2,
+                -_width / 2, _height / 2, _depth / 2,
+                -_width / 2, _height / 2, _depth / 2,
+                _width / 2, -_height / 2, _depth / 2,
+                _width / 2, _height / 2, _depth / 2,
+                //back
+                _width / 2, -_height / 2, -_depth / 2,
+                -_width / 2, -_height / 2, -_depth / 2,
+                _width / 2, _height / 2, -_depth / 2,
+                _width / 2, _height / 2, -_depth / 2,
+                -_width / 2, -_height / 2, -_depth / 2,
+                -_width / 2, _height / 2, -_depth / 2,
+                //left
+                -_width / 2, -_height / 2, -_depth / 2,
+                -_width / 2, -_height / 2, _depth / 2,
+                -_width / 2, _height / 2, -_depth / 2,
+                -_width / 2, _height / 2, -_depth / 2,
+                -_width / 2, -_height / 2, _depth / 2,
+                -_width / 2, _height / 2, _depth / 2,
+                //right
+                _width / 2, -_height / 2, _depth / 2,
+                _width / 2, -_height / 2, -_depth / 2,
+                _width / 2, _height / 2, _depth / 2,
+                _width / 2, _height / 2, _depth / 2,
+                _width / 2, -_height / 2, -_depth / 2,
+                _width / 2, _height / 2, -_depth / 2,
+                //top
+                -_width / 2, _height / 2, _depth / 2,
+                _width / 2, _height / 2, _depth / 2,
+                -_width / 2, _height / 2, -_depth / 2,
+                -_width / 2, _height / 2, -_depth / 2,
+                _width / 2, _height / 2, _depth / 2,
+                _width / 2, _height / 2, -_depth / 2,
+                //bottom
+                -_width / 2, -_height / 2, -_depth / 2,
+                _width / 2, -_height / 2, -_depth / 2,
+                -_width / 2, -_height / 2, _depth / 2,
+                -_width / 2, -_height / 2, _depth / 2,
+                _width / 2, -_height / 2, -_depth / 2,
+                _width / 2, -_height / 2, _depth / 2
+            ]);
+        }
+        // Get method.######################################################################################
+        get Positions() {
+            return this.positions;
+        }
+    }
+    Fudge.MeshCube = MeshCube;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

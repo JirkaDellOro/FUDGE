@@ -10,7 +10,7 @@ var MiniScene;
         let shdBasic = new ƒ.ShaderBasic();
         let mtrRed = new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), shdBasic);
         let cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        cmpMesh.initialize(new ƒ.MeshCube(50, 50, 50).Positions);
         let cmpMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrRed);
         let cmpTransform = new ƒ.ComponentTransform();

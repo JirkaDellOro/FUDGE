@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Shader | Fudge Core</title>
+	<title>Serializer | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,43 +59,21 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.shader.html">Shader</a>
+					<a href="fudge.serializer.html">Serializer</a>
 				</li>
 			</ul>
-			<h1>Class Shader</h1>
+			<h1>Class Serializer</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Abstract superclass for the representation of WebGl shaderprograms.
-						Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine</p>
-					</div>
-					<dl class="tsd-comment-tags">
-						<dt>authors</dt>
-						<dd><p>Jascha Karagöl, HFU, 2019 | Jirka Dell&#39;Oro-Friedl, HFU, 2019
-							TODO: revisit licensing</p>
-						</dd>
-					</dl>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Shader</span>
-						<ul class="tsd-hierarchy">
-							<li>
-								<a href="fudge.shaderbasic.html" class="tsd-signature-type">ShaderBasic</a>
-							</li>
-							<li>
-								<a href="fudge.shadertexture.html" class="tsd-signature-type">ShaderTexture</a>
-							</li>
-						</ul>
+						<span class="target">Serializer</span>
 					</li>
 				</ul>
 			</section>
@@ -106,9 +84,8 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.shader.html#getattributelocation" class="tsd-kind-icon">get<wbr>Attribute<wbr>Location</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.shader.html#getuniformlocation" class="tsd-kind-icon">get<wbr>Uniform<wbr>Location</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.shader.html#use" class="tsd-kind-icon">use</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.serializer.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.serializer.html#serialize" class="tsd-kind-icon">serialize</a></li>
 							</ul>
 						</section>
 					</div>
@@ -117,92 +94,48 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getattributelocation" class="tsd-anchor"></a>
-					<h3>get<wbr>Attribute<wbr>Location</h3>
+					<a name="deserialize" class="tsd-anchor"></a>
+					<h3>deserialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Attribute<wbr>Location<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Shader/Shader.ts#L18">Shader/Shader.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Engine/Serializer.ts#L21">Engine/Serializer.ts:21</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Get location of an attribute by its name.</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_name: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Name of the attribute to locate.</p>
-									</div>
+									<h5>_serialization: <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span>
-								<span class="tsd-signature-symbol"> | </span>
-								<span class="tsd-signature-type">null</span>
-							</h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getuniformlocation" class="tsd-anchor"></a>
-					<h3>get<wbr>Uniform<wbr>Location</h3>
+					<a name="serialize" class="tsd-anchor"></a>
+					<h3>serialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Uniform<wbr>Location<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WebGLUniformLocation</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span>_object<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Shader/Shader.ts#L28">Shader/Shader.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Engine/Serializer.ts#L15">Engine/Serializer.ts:15</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Get location of uniform by its name.</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_name: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>Name of the attribute to locate.</p>
-									</div>
+									<h5>_object: <a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">WebGLUniformLocation</span>
-								<span class="tsd-signature-symbol"> | </span>
-								<span class="tsd-signature-type">null</span>
-							</h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="use" class="tsd-anchor"></a>
-					<h3>use</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">use<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Shader/Shader.ts#L38">Shader/Shader.ts:38</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Use this shader in Rendercontext on callup.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -260,27 +193,24 @@
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.node.html" class="tsd-kind-icon">Node</a>
 					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shader.html" class="tsd-kind-icon">Shader</a>
+						<a href="fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudge.shader.html#getattributelocation" class="tsd-kind-icon">get<wbr>Attribute<wbr>Location</a>
+								<a href="fudge.serializer.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudge.shader.html#getuniformlocation" class="tsd-kind-icon">get<wbr>Uniform<wbr>Location</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudge.shader.html#use" class="tsd-kind-icon">use</a>
+								<a href="fudge.serializer.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudge.shader.html" class="tsd-kind-icon">Shader</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.shaderbasic.html" class="tsd-kind-icon">Shader<wbr>Basic</a>
 					</li>

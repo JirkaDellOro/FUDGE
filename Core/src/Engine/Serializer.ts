@@ -10,7 +10,8 @@ namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
     export class Serializer {
-
+    // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'4
+    
         public serialize(_object: Serializable): Serialization {
             let serialization: Serialization = {};
             serialization[_object.constructor.name] = _object.serialize();

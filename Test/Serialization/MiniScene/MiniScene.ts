@@ -13,7 +13,7 @@ namespace MiniScene {
         let mtrRed: ƒ.Material = new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), shdBasic);
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        cmpMesh.initialize(new ƒ.MeshCube(50, 50, 50).Positions);
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrRed);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
