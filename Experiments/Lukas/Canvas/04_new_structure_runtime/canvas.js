@@ -74,9 +74,17 @@ function createLines() {
 }
 function redrawAll() {
     crc.clearRect(0, 0, 500, 500);
+    console.log("[Start] Drawing New Path Objects");
+    let startTime = Date.now();
+    paths2.sort(Path2.sort);
+    for (let path of paths2) {
+        // crc.globalAlpha = 1;
+        path.draw(crc);
+    }
+    console.log(`[Done] Drawing New Path Objects, ${paths2.length} Paths with ${paths2[0].points.length} Vertices each. This took ${Date.now() - startTime}ms`);
     console.log("[Start] Drawing Old Path Objects");
     paths.sort(Path.sort);
-    let startTime = Date.now();
+    startTime = Date.now();
     for (let path of paths) {
         // crc.globalAlpha = (path == currentlySelectedPath) || (currentlySelectedPath == null) ? 1 : 0.5;
         path.draw(crc);
@@ -88,14 +96,6 @@ function redrawAll() {
     //         p.draw(crc);
     //     }
     // }
-    console.log("[Start] Drawing New Path Objects");
-    startTime = Date.now();
-    paths2.sort(Path2.sort);
-    for (let path of paths2) {
-        // crc.globalAlpha = 1;
-        path.draw(crc);
-    }
-    console.log(`[Done] Drawing New Path Objects, ${paths2.length} Paths with ${paths2[0].points.length} Vertices each. This took ${Date.now() - startTime}ms`);
 }
 function mousedown(_event) {
     // let foundPoint: Point;
