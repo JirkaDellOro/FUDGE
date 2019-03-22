@@ -2,6 +2,10 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Mar 18th 2019
+Presentation of the Core as it stands, general thoughts about it.  
+[Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Protokoll_LS)
+
 # Feb 20th 2019
 Discussion on UI  
 [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190220_Whiteboard_UI.jpg)
