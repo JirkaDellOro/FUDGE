@@ -161,6 +161,12 @@ var DrawTypes;
             this.generatePath2D();
             return this.path;
         }
+        moveTo(x, y) {
+            this.x = x;
+            this.y = y;
+            this.generatePath2D();
+            return this.path;
+        }
     }
     DrawTypes.DrawPoint = DrawPoint;
     class Vertex extends DrawPoint {
@@ -187,18 +193,40 @@ var DrawTypes;
             }
         }
         move(dx, dy) {
-            if (VectorEditor.pressedKeys.indexOf(Utils.KEYCODE.CONTROL) < 0) {
-                let prevVertex = this.parent.getPreviousVertex(this);
-                let nextVertex = this.parent.getNextVertex(this);
-                let prevVector = new Vector2(prevVertex.x - this.x, prevVertex.y - this.y);
-                let tangentVector = new Vector2(this.tangentIn.x - this.x, this.tangentIn.y - this.y);
-                this.tangentIn.move(dx, dy);
-                this.tangentOut.move(dx, dy);
+            if (VectorEditor.pressedKeys.indexOf(Utils.KEYCODE.CONTROL) > -1) {
+                let newTInPos = determineNewTangentPoint(this, this.parent.getPreviousVertex(this), this.tangentIn, dx, dy);
+                this.tangentIn.moveTo(newTInPos.x, newTInPos.y);
+                let newTOutPos = determineNewTangentPoint(this, this.parent.getNextVertex(this), this.tangentOut, dx, dy);
+                this.tangentOut.moveTo(newTOutPos.x, newTOutPos.y);
+                let newOtInPos = determineNewTangentPoint(this, this.parent.getPreviousVertex(this), this.parent.getPreviousVertex(this).tangentOut, dx, dy);
+                this.parent.getPreviousVertex(this).tangentOut.moveTo(newOtInPos.x, newOtInPos.y);
+                let newOtOutPos = determineNewTangentPoint(this, this.parent.getNextVertex(this), this.parent.getNextVertex(this).tangentIn, dx, dy);
+                this.parent.getNextVertex(this).tangentIn.moveTo(newOtOutPos.x, newOtOutPos.y);
             }
             return super.move(dx, dy);
         }
     }
     DrawTypes.Vertex = Vertex;
+    function determineNewTangentPoint(movingVertex, stationaryVertex, tangent, dx, dy) {
+        let ac = new Vector2(stationaryVertex.x - movingVertex.x, stationaryVertex.y - movingVertex.y);
+        let ab = new Vector2(tangent.x - movingVertex.x, tangent.y - movingVertex.y);
+        //calculate important stuff
+        let magnitude = ac.sqrMagnitude();
+        let acabProduct = Vector2.dot(ab, ac);
+        let distance = acabProduct / magnitude;
+        let p = new Vector2(movingVertex.x + ac.x * distance, movingVertex.y + ac.y * distance);
+        let pb = new Vector2(tangent.x - p.x, tangent.y - p.y);
+        let acPerpendicular = ac.perpendicularVector();
+        let xScale = pb.x / acPerpendicular.x;
+        let yScale = pb.y / acPerpendicular.y;
+        let PBScale = xScale ? xScale : yScale;
+        let newac = new Vector2(stationaryVertex.x - (movingVertex.x + dx), stationaryVertex.y - (movingVertex.y + dy));
+        let newP = new Vector2(movingVertex.x + dx + newac.x * distance, movingVertex.y + dy + newac.y * distance);
+        let newacPerpendicular = newac.perpendicularVector();
+        let newX = newP.x + newacPerpendicular.x * PBScale;
+        let newY = newP.y + newacPerpendicular.y * PBScale;
+        return new Vector2(newX, newY);
+    }
     class TangentPoint extends DrawPoint {
         constructor(x, y, parent) {
             super(x, y);

@@ -1,20 +1,20 @@
 module Utils {
 
-    export function RandomRange(min: number, max: number): number {
-        return Math.floor((Math.random() * (max + min)) - min);
-    }
+	export function RandomRange(min: number, max: number): number {
+		return Math.floor((Math.random() * (max + min)) - min);
+	}
 
-    export function RandomColor(includeAlpha: boolean = false): string {
-        let c: string = "rgba(";
-        c += RandomRange(0, 255) + ",";
-        c += RandomRange(0, 255) + ",";
-        c += RandomRange(0, 255) + ",";
-        c += includeAlpha ? RandomRange(0,255) + ")" : "1)" ;
+	export function RandomColor(includeAlpha: boolean = false): string {
+		let c: string = "rgba(";
+		c += RandomRange(0, 255) + ",";
+		c += RandomRange(0, 255) + ",";
+		c += RandomRange(0, 255) + ",";
+		c += includeAlpha ? RandomRange(0, 255) + ")" : "1)";
 
-        return c;
-    }
+		return c;
+	}
 
-    export class Vector2 {
+	export class Vector2 {
 		public x: number;
 		public y: number;
 
@@ -29,12 +29,29 @@ module Utils {
 			return true;
 		}
 
-		magnitude(): number{
+		magnitude(): number {
 			return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
+		}
+
+		sqrMagnitude(): number {
+			return Math.pow(this.x, 2) + Math.pow(this.y, 2);
+		}
+
+		static dot(a: Vector2, b: Vector2) {
+			return a.x * b.x + a.y * b.y;
+		}
+
+		normalize(): Vector2 {
+			return new Vector2(this.x / this.magnitude(), this.y / this.magnitude());
+		}
+
+		perpendicularVector(): Vector2 {
+			let v: Vector2 = this.normalize();
+			return new Vector2(v.y, -v.x);
 		}
 	}
 
-	export enum KEYCODE{
+	export enum KEYCODE {
 		CANCEL = 3,
 		HELP = 6,
 		BACK_SPACE = 8,

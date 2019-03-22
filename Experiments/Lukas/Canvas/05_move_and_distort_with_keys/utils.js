@@ -28,6 +28,19 @@ var Utils;
         magnitude() {
             return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
         }
+        sqrMagnitude() {
+            return Math.pow(this.x, 2) + Math.pow(this.y, 2);
+        }
+        static dot(a, b) {
+            return a.x * b.x + a.y * b.y;
+        }
+        normalize() {
+            return new Vector2(this.x / this.magnitude(), this.y / this.magnitude());
+        }
+        perpendicularVector() {
+            let v = this.normalize();
+            return new Vector2(v.y, -v.x);
+        }
     }
     Utils.Vector2 = Vector2;
     let KEYCODE;
