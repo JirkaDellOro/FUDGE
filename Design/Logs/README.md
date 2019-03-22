@@ -4,7 +4,7 @@ This readme-file describes in a few words the contents of each log and the major
 
 # Mar 18th 2019
 Presentation of the Core as it stands, general thoughts about it.  
-[Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Protokoll_LS)
+[Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Notizen_LS.md)
 
 # Feb 20th 2019
 Discussion on UI  
