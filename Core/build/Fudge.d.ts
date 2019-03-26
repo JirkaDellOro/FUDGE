@@ -343,37 +343,13 @@ declare namespace Fudge {
         private parent;
         private children;
         private components;
-        private tags;
-        private layers;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
-        readonly Parent: Node | null;
-        readonly Layers: string[];
-        readonly Tags: string[];
+        getParent(): Node | null;
         readonly cmpTransform: ComponentTransform;
-        /**
-         * Adds the name of a layer to this nodes layerarray.
-         * @param _name The name of the layer to add.
-         */
-        addLayer(_name: string): void;
-        /**
-         * Removes the name of a layer from this nodes layerarray.
-         * @param _name The name of the layer to remove.
-         */
-        removeLayer(_name: string): void;
-        /**
-         * Adds the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to add.
-         */
-        addTag(_name: string): void;
-        /**
-         * Removes the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to remove.
-         */
-        removeTag(_name: string): void;
         /**
          * Returns the children array of this node.
          */
@@ -399,8 +375,8 @@ declare namespace Fudge {
          */
         removeChild(_name: string): void;
         /**
-         * Returns all components of the given class.
-         * @param _name The name of the component to be found.
+         * Returns a clone of the list of components of the given class attached this node.
+         * @param _class The class of the components to be found.
          */
         getComponents(_class: typeof Component): Component[];
         /**
@@ -409,9 +385,8 @@ declare namespace Fudge {
          */
         addComponent(_component: Component): void;
         /**
-         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
          * @throws Exception when component is not found
          */
         removeComponent(_component: Component): void;

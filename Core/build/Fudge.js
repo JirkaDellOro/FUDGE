@@ -621,93 +621,30 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Node {
+        // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+        // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name) {
-            this.name = _name;
-            this.children = {};
+            this.parent = null; // The parent of this node.
+            this.children = {}; // Associative array nodes appended to this node.
             this.components = {};
-            this.layers = [];
-            this.tags = [];
+            this.name = _name;
         }
-        get Parent() {
+        getParent() {
             return this.parent;
-        }
-        get Layers() {
-            return this.layers;
-        }
-        get Tags() {
-            return this.tags;
         }
         get cmpTransform() {
             return this.getComponents(Fudge.ComponentTransform)[0];
         }
-        // Layer methods.######################################################################################
-        /**
-         * Adds the name of a layer to this nodes layerarray.
-         * @param _name The name of the layer to add.
-         */
-        addLayer(_name) {
-            for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] == _name) {
-                    console.log(`Node "${this.name}" is already on the layer "${_name}".`);
-                    return;
-                }
-            }
-            this.layers.push(_name);
-            console.log(`Layer "${_name}" added to node "${this.name}".`);
-        }
-        /**
-         * Removes the name of a layer from this nodes layerarray.
-         * @param _name The name of the layer to remove.
-         */
-        removeLayer(_name) {
-            for (let i = 0; i < this.layers.length; i++) {
-                if (this.layers[i] == _name) {
-                    this.layers.splice(i, 1);
-                    console.log(`Layer "${_name}" removed from node "${this.name}".`);
-                    return;
-                }
-            }
-            console.log(`Node "${this.name}" is not on the layer "${_name}".`);
-        }
-        // Tag methods.######################################################################################
-        /**
-         * Adds the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to add.
-         */
-        addTag(_name) {
-            for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] == _name) {
-                    console.log(`Node "${this.name}" already has the tag "${_name}".`);
-                    return;
-                }
-            }
-            this.tags.push(_name);
-            console.log(`Tag "${_name}" added to node "${this.name}".`);
-        }
-        /**
-         * Removes the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to remove.
-         */
-        removeTag(_name) {
-            for (let i = 0; i < this.tags.length; i++) {
-                if (this.tags[i] == _name) {
-                    this.tags.splice(i, 1);
-                    console.log(`Tag "${_name}" removed from node "${this.name}".`);
-                    return;
-                }
-            }
-            console.log(`Tag "${_name}" is not attached to node "${this.name}".`);
-        }
-        // Children methods.######################################################################################
+        // #region Hierarchy
         /**
          * Returns the children array of this node.
          */
         getChildren() {
-            return this.children;
+            return this.children; //.slice(0); Return a clone of the list of children
         }
         /**
          * Looks through this Nodes children array and returns a child with the supplied name.
@@ -756,12 +693,14 @@ var Fudge;
                 throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
             }
         }
+        // #endregion
+        // #region Components
         /**
-         * Returns all components of the given class.
-         * @param _name The name of the component to be found.
+         * Returns a clone of the list of components of the given class attached this node.
+         * @param _class The class of the components to be found.
          */
         getComponents(_class) {
-            return this.components[_class.name] || [];
+            return (this.components[_class.name] || []).slice(0);
         }
         /**
          * Adds the supplied component into the nodes component map.
@@ -779,9 +718,8 @@ var Fudge;
             _component.setContainer(this);
         }
         /**
-         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null.
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
          * @throws Exception when component is not found
          */
         removeComponent(_component) {
@@ -795,12 +733,15 @@ var Fudge;
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
         }
+        // #endregion
+        // #region Serialization
         serialize() {
             return null;
         }
         deserialize() {
             return null;
         }
+        // #endregion
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
@@ -856,7 +797,7 @@ var Fudge;
          * @param _node The node to initialize.
          */
         initializeViewportNodes(_node) {
-            if (!_node.getComponents(Fudge.ComponentTransform)) {
+            if (!_node.cmpTransform) {
                 let transform = new Fudge.ComponentTransform();
                 _node.addComponent(transform);
             }
@@ -907,7 +848,7 @@ var Fudge;
         drawObjects(_node, _matrix) {
             if (_node.getComponents(Fudge.ComponentMesh).length > 0) {
                 let mesh = _node.getComponents(Fudge.ComponentMesh)[0];
-                let transform = _node.getComponents(Fudge.ComponentTransform)[0];
+                let transform = _node.cmpTransform;
                 let materialComponent = _node.getComponents(Fudge.ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
@@ -937,12 +878,12 @@ var Fudge;
          * @param _node The node which's transform worldmatrix to update.
          */
         updateNodeWorldMatrix(_node) {
-            let transform = _node.getComponents(Fudge.ComponentTransform)[0];
-            if (!_node.Parent) {
+            let transform = _node.cmpTransform;
+            if (!_node.getParent()) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform = _node.Parent.getComponents(Fudge.ComponentTransform)[0];
+                let parentTransform = _node.getParent().cmpTransform;
                 transform.WorldMatrix = Fudge.Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
             for (let name in _node.getChildren()) {
@@ -955,8 +896,8 @@ var Fudge;
          */
         viewportNodeSceneGraphRoot() {
             let sceneGraphRoot = this.rootNode;
-            while (sceneGraphRoot.Parent) {
-                sceneGraphRoot = sceneGraphRoot.Parent;
+            while (sceneGraphRoot.getParent()) {
+                sceneGraphRoot = sceneGraphRoot.getParent();
             }
             return sceneGraphRoot;
         }
@@ -1015,11 +956,11 @@ var Fudge;
                 let child = _fudgeNode.getChildren()[name];
                 output += "\n";
                 let current = child;
-                if (current.Parent && current.Parent.Parent)
+                if (current.getParent() && current.getParent().getParent())
                     output += "|";
-                while (current.Parent && current.Parent.Parent) {
+                while (current.getParent() && current.getParent().getParent()) {
                     output += "   ";
-                    current = current.Parent;
+                    current = current.getParent();
                 }
                 output += "'--";
                 output += child.name;

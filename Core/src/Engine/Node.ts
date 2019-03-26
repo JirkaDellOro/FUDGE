@@ -11,11 +11,11 @@ namespace Fudge {
      */
     export class Node implements Serializable {
         public name: string; // The name to call this node by.
-        private parent: Node | null; // The parent of this node.
-        private children: MapStringToNode; // Associative array nodes appended to this node.
-        private components: MapClassToComponents;
-        private tags: string[]; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
-        private layers: string[]; // Names of the layers this node is on. (TODO: As of yet no functionality)
+        private parent: Node | null = null; // The parent of this node.
+        private children: MapStringToNode = {}; // Associative array nodes appended to this node.
+        private components: MapClassToComponents = {};
+        // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+        // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
 
         /**
          * Creates a new node with a name and initializes all attributes
@@ -23,93 +23,22 @@ namespace Fudge {
          */
         public constructor(_name: string) {
             this.name = _name;
-            this.children = {};
-            this.components = {};
-            this.layers = [];
-            this.tags = [];
         }
 
-        public get Parent(): Node | null {
+        public getParent(): Node | null {
             return this.parent;
-        }
-
-        public get Layers(): string[] {
-            return this.layers;
-        }
-        public get Tags(): string[] {
-            return this.tags;
         }
 
         public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
 
-        // Layer methods.######################################################################################
-        /**
-         * Adds the name of a layer to this nodes layerarray.
-         * @param _name The name of the layer to add.
-         */
-        public addLayer(_name: string): void { 
-            for (let i: number = 0; i < this.layers.length; i++) {
-                if (this.layers[i] == _name) {
-                    console.log(`Node "${this.name}" is already on the layer "${_name}".`);
-                    return;
-                }
-            }
-            this.layers.push(_name);
-            console.log(`Layer "${_name}" added to node "${this.name}".`);
-        }
-        /**
-         * Removes the name of a layer from this nodes layerarray.
-         * @param _name The name of the layer to remove.
-         */
-        public removeLayer(_name: string): void {
-            for (let i: number = 0; i < this.layers.length; i++) {
-                if (this.layers[i] == _name) {
-                    this.layers.splice(i, 1);
-                    console.log(`Layer "${_name}" removed from node "${this.name}".`);
-                    return;
-                }
-            }
-            console.log(`Node "${this.name}" is not on the layer "${_name}".`);
-        }
-
-        // Tag methods.######################################################################################
-        /**
-         * Adds the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to add.
-         */
-        public addTag(_name: string): void {
-            for (let i: number = 0; i < this.tags.length; i++) {
-                if (this.tags[i] == _name) {
-                    console.log(`Node "${this.name}" already has the tag "${_name}".`);
-                    return;
-                }
-            }
-            this.tags.push(_name);
-            console.log(`Tag "${_name}" added to node "${this.name}".`);
-        }
-        /**
-         * Removes the name of a tag to this nodes tagarray.
-         * @param _name The name of the tag to remove.
-         */
-        public removeTag(_name: string): void {
-            for (let i: number = 0; i < this.tags.length; i++) {
-                if (this.tags[i] == _name) {
-                    this.tags.splice(i, 1);
-                    console.log(`Tag "${_name}" removed from node "${this.name}".`);
-                    return;
-                }
-            }
-            console.log(`Tag "${_name}" is not attached to node "${this.name}".`);
-        }
-
-        // Children methods.######################################################################################
+        // #region Hierarchy
         /**
          * Returns the children array of this node.
          */
         public getChildren(): MapStringToNode {
-            return this.children;
+            return this.children; //.slice(0); Return a clone of the list of children
         }
         /**
          * Looks through this Nodes children array and returns a child with the supplied name. 
@@ -160,13 +89,15 @@ namespace Fudge {
                 throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
             }
         }
+        // #endregion
 
+        // #region Components
         /**
-         * Returns all components of the given class. 
-         * @param _name The name of the component to be found.
+         * Returns a clone of the list of components of the given class attached this node. 
+         * @param _class The class of the components to be found.
          */
         public getComponents(_class: typeof Component): Component[] {
-            return this.components[_class.name] || [];
+            return (this.components[_class.name] || []).slice(0) ;
         }
 
         /**
@@ -175,7 +106,7 @@ namespace Fudge {
          */
         public addComponent(_component: Component): void {
             if (_component.getContainer() == this)
-                return;
+                return;  
             if (this.components[_component.type] === undefined)
                 this.components[_component.type] = [_component];
             else
@@ -186,10 +117,9 @@ namespace Fudge {
 
             _component.setContainer(this);
         }
-        /**
-         * Looks through this nodes component array, removes a component with the supplied name and sets the components parent to null. 
-         * Throws error if no component can be found by the name.
-         * @param _name The name of the component to be found.
+        /** 
+         * Removes the given component from the node, if it was attached, and sets its parent to null. 
+         * @param _component The component to be removed
          * @throws Exception when component is not found
          */
         public removeComponent(_component: Component): void {
@@ -202,15 +132,18 @@ namespace Fudge {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
         }
+        // #endregion
 
-        
+        // #region Serialization
         public serialize(): Serialization {
             return null;
         }
         public deserialize(): Serializable {
             return null;
         }
-        
+        // #endregion
+
+
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.

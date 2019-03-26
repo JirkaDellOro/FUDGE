@@ -48,7 +48,7 @@ namespace Fudge {
          * @param _node The node to initialize.
          */
         public initializeViewportNodes(_node: Node): void {
-            if (!_node.getComponents(ComponentTransform)) {
+            if (!_node.cmpTransform) {
                 let transform: ComponentTransform = new ComponentTransform();
                 _node.addComponent(transform);
             }
@@ -102,7 +102,7 @@ namespace Fudge {
         private drawObjects(_node: Node, _matrix: Matrix4x4): void {
             if (_node.getComponents(ComponentMesh).length > 0) {
                 let mesh: ComponentMesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
-                let transform: ComponentTransform = <ComponentTransform>_node.getComponents(ComponentTransform)[0];
+                let transform: ComponentTransform = _node.cmpTransform;
                 let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
@@ -132,12 +132,12 @@ namespace Fudge {
          * @param _node The node which's transform worldmatrix to update.
          */
         private updateNodeWorldMatrix(_node: Node): void {
-            let transform: ComponentTransform = <ComponentTransform>_node.getComponents(ComponentTransform)[0];
-            if (!_node.Parent) {
+            let transform: ComponentTransform = _node.cmpTransform;
+            if (!_node.getParent()) {
                 transform.WorldMatrix = transform.Matrix;
             }
             else {
-                let parentTransform: ComponentTransform = (<ComponentTransform>_node.Parent.getComponents(ComponentTransform)[0]);
+                let parentTransform: ComponentTransform = _node.getParent().cmpTransform;
                 transform.WorldMatrix = Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
             }
             for (let name in _node.getChildren()) {
@@ -150,8 +150,8 @@ namespace Fudge {
          */
         private viewportNodeSceneGraphRoot(): Node {
             let sceneGraphRoot: Node = this.rootNode;
-            while (sceneGraphRoot.Parent) {
-                sceneGraphRoot = sceneGraphRoot.Parent;
+            while (sceneGraphRoot.getParent()) {
+                sceneGraphRoot = sceneGraphRoot.getParent();
             }
             return sceneGraphRoot;
         }
@@ -212,11 +212,11 @@ namespace Fudge {
                 let child: Node = _fudgeNode.getChildren()[name];
                 output += "\n";
                 let current: Node = child;
-                if (current.Parent && current.Parent.Parent)
+                if (current.getParent() && current.getParent().getParent())
                     output += "|";
-                while (current.Parent && current.Parent.Parent) {
+                while (current.getParent() && current.getParent().getParent()) {
                     output += "   ";
-                    current = current.Parent;
+                    current = current.getParent();
                 }
                 output += "'--";
 
