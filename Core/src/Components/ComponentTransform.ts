@@ -27,17 +27,14 @@ namespace Fudge {
         }
 
         public serialize(): Serialization {
-            // TODO: save translation, rotation and scale as vectors for readability and manipulation
-
             let serialization: Serialization = {
-                worldMatrix: this.worldMatrix
+                worldMatrix: this.worldMatrix.serialize()
             };
             serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.WorldMatrix = _serialization.worldMatrix;
-            super.deserialize(_serialization.ComponentPivot);
+            this.WorldMatrix.deserialize(_serialization.worldMatrix);
             return this;
         }
     }

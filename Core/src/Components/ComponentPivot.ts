@@ -127,12 +127,12 @@ namespace Fudge {
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization: Serialization = {
-                matrix: this.matrix
+                matrix: this.matrix.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.matrix = _serialization.matrix;
+            this.matrix.deserialize(_serialization.matrix);
             return this;
         }
     }

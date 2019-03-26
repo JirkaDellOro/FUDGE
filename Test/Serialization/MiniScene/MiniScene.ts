@@ -7,13 +7,18 @@ namespace MiniScene {
     let camera: ƒ.Node;
     let viewPort: ƒ.Viewport;
 
-    export function init(): void {
+    function init(): void {
+        createScene();
+        testSerialization(node.getComponents(ƒ.ComponentMesh)[0]);
+    }
+
+    function createScene(): void {
         ƒ.GLUtil.initializeContext();
         let shdBasic: ƒ.ShaderBasic = new ƒ.ShaderBasic();
         let mtrRed: ƒ.Material = new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), shdBasic);
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.MeshCube(50, 50, 50).Positions);
+        cmpMesh.setMesh(new ƒ.MeshCube(50, 50, 50));
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrRed);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
@@ -22,11 +27,11 @@ namespace MiniScene {
         node.addComponent(cmpMaterial);
         node.addComponent(cmpTransform);
         cmpTransform.scaleX(2);
-        
+
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(node.transform.position);
+        cmpTransform.lookAt(node.cmpTransform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -34,14 +39,15 @@ namespace MiniScene {
         viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
+    }
 
+    function testSerialization(_object: ƒ.Serializable): void {
         console.group("Original");
-        console.log(cmpTransform);
+        console.log(_object);
         console.groupEnd();
-    
+
         console.group("Serialized");
-        let serializer: ƒ.Serializer = new ƒ.Serializer();
-        let serialization: ƒ.Serialization = serializer.serialize(cmpTransform);
+        let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_object);
         console.log(serialization);
         console.groupEnd();
 
@@ -56,7 +62,7 @@ namespace MiniScene {
         console.groupEnd();
 
         console.group("Reconstructed");
-        let reconstruction: ƒ.Serializable = serializer.deserialize(serialization);
+        let reconstruction: ƒ.Serializable = ƒ.Serializer.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
     }

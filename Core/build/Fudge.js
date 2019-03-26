@@ -2,15 +2,17 @@
 var Fudge;
 (function (Fudge) {
     class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'4
-        serialize(_object) {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        static serialize(_object) {
             let serialization = {};
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
-        deserialize(_serialization) {
+        static deserialize(_serialization) {
             let reconstruct;
             for (let typeName in _serialization) {
+                // TODO: it doesn't make sense to overwrite reconstruct in the loop. Either accumulate or no loop...
                 reconstruct = new Fudge[typeName];
                 reconstruct.deserialize(_serialization[typeName]);
             }
@@ -120,8 +122,8 @@ var Fudge;
          */
         get ViewProjectionMatrix() {
             try {
-                let transform = this.getContainer().getComponents(Fudge.ComponentTransform)[0];
-                let viewMatrix = Fudge.Matrix4x4.inverse(transform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
+                let cmpTransform = this.getContainer().cmpTransform;
+                let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
                 return Fudge.Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
             catch {
@@ -176,32 +178,27 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Fudge.Component {
-        initialize(_positions, _size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
-            this.positions = _positions;
-            this.bufferSpecification = {
-                size: _size,
-                dataType: _dataType,
-                normalize: _normalize,
-                stride: 0,
-                offset: 0
-            };
-            this.vertexCount = this.positions.length / this.bufferSpecification.size;
-            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
-                console.log(this.vertexCount);
-                throw new Error("Number of entries in positions[] and size do not match.");
-            }
-            this.normals = this.computeNormals();
+        constructor() {
+            super(...arguments);
+            this.mesh = null;
         }
-        get Positions() {
-            return this.positions;
+        setMesh(_mesh) {
+            this.mesh = _mesh;
+            this.initialize();
         }
-        get BufferSpecification() {
+        getMesh() {
+            return this.mesh;
+        }
+        getVertices() {
+            return this.vertices;
+        }
+        getBufferSpecification() {
             return this.bufferSpecification;
         }
-        get VertexCount() {
+        getVertexCount() {
             return this.vertexCount;
         }
-        get Normals() {
+        getNormals() {
             return this.normals;
         }
         /**
@@ -226,13 +223,24 @@ var Fudge;
             }
             Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), Fudge.gl2.STATIC_DRAW);
         }
+        serialize() {
+            let serialization = {
+                mesh: this.mesh.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
+            this.setMesh(mesh);
+            return this;
+        }
         /**
          * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
         computeNormals() {
             let normals = [];
             let normal = new Fudge.Vector3;
-            let p = this.positions;
+            let p = this.vertices;
             for (let i = 0; i < p.length; i += 9) {
                 let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
                 let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
@@ -242,6 +250,22 @@ var Fudge;
                 normals.push(normal.x, normal.y, normal.z);
             }
             return new Float32Array(normals);
+        }
+        initialize(_size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
+            this.vertices = this.mesh.getVertices();
+            this.bufferSpecification = {
+                size: _size,
+                dataType: _dataType,
+                normalize: _normalize,
+                stride: 0,
+                offset: 0
+            };
+            this.vertexCount = this.vertices.length / this.bufferSpecification.size;
+            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
+                console.log(this.vertexCount);
+                throw new Error("Number of entries in positions[] and size do not match.");
+            }
+            this.normals = this.computeNormals();
         }
     }
     Fudge.ComponentMesh = ComponentMesh;
@@ -374,12 +398,12 @@ var Fudge;
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                matrix: this.matrix
+                matrix: this.matrix.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            this.matrix = _serialization.matrix;
+            this.matrix.deserialize(_serialization.matrix);
             return this;
         }
     }
@@ -412,16 +436,14 @@ var Fudge;
             //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
         }
         serialize() {
-            // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                worldMatrix: this.worldMatrix
+                worldMatrix: this.worldMatrix.serialize()
             };
             serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         deserialize(_serialization) {
-            this.WorldMatrix = _serialization.worldMatrix;
-            super.deserialize(_serialization.ComponentPivot);
+            this.WorldMatrix.deserialize(_serialization.worldMatrix);
             return this;
         }
     }
@@ -619,7 +641,7 @@ var Fudge;
         get Tags() {
             return this.tags;
         }
-        get transform() {
+        get cmpTransform() {
             return this.getComponents(Fudge.ComponentTransform)[0];
         }
         // Layer methods.######################################################################################
@@ -845,7 +867,7 @@ var Fudge;
             else {
                 this.initializeNodeBuffer(_node);
                 mesh = _node.getComponents(Fudge.ComponentMesh)[0];
-                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), Fudge.gl2.STATIC_DRAW);
+                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), Fudge.gl2.STATIC_DRAW);
                 let materialComponent = _node.getComponents(Fudge.ComponentMaterial)[0];
                 if (materialComponent) {
                     /*
@@ -856,7 +878,7 @@ var Fudge;
                     _node.addComponent(materialComponent);
                     */
                     let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
-                    Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                    Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
                     this.initializeNodeMaterial(materialComponent, mesh);
                     if (materialComponent.Material.TextureEnabled) {
                         this.initializeNodeTexture(materialComponent, mesh);
@@ -902,7 +924,7 @@ var Fudge;
                     // Supply matrixdata to shader. 
                     Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
                     // Draw call
-                    Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
+                    Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }
             }
             for (let name in _node.getChildren()) {
@@ -1154,6 +1176,13 @@ var Fudge;
         static identity() {
             return new Matrix4x4;
         }
+        /**
+         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
+         * @param _matrix The matrix to multiply.
+         * @param _x The scaling multiplier for the x-Axis.
+         * @param _y The scaling multiplier for the y-Axis.
+         * @param _z The scaling multiplier for the z-Axis.
+         */
         static scale(_matrix, _x, _y, _z) {
             return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
@@ -1487,6 +1516,17 @@ var Fudge;
             ]);
             return matrix;
         }
+        serialize() {
+            // TODO: save translation, rotation and scale as vectors for readability and manipulation
+            let serialization = {
+                data: Array.from(this.data)
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.data = new Float32Array(_serialization.data);
+            return this;
+        }
     }
     Fudge.Matrix4x4 = Matrix4x4;
 })(Fudge || (Fudge = {}));
@@ -1644,54 +1684,72 @@ var Fudge;
      */
     class MeshCube {
         constructor(_width, _height, _depth) {
-            this.positions = new Float32Array([
-                //front
-                -_width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                _width / 2, -_height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                //back
-                _width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                //left
-                -_width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, _height / 2, _depth / 2,
-                //right
-                _width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                //top
-                -_width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                -_width / 2, _height / 2, -_depth / 2,
-                _width / 2, _height / 2, _depth / 2,
-                _width / 2, _height / 2, -_depth / 2,
-                //bottom
-                -_width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                -_width / 2, -_height / 2, _depth / 2,
-                _width / 2, -_height / 2, -_depth / 2,
-                _width / 2, -_height / 2, _depth / 2
-            ]);
+            this.width = _width;
+            this.height = _height;
+            this.depth = _depth;
         }
-        // Get method.######################################################################################
-        get Positions() {
-            return this.positions;
+        getVertices() {
+            let vertices = new Float32Array([
+                //front
+                -1, -1, 1,
+                1, -1, 1,
+                -1, 1, 1,
+                -1, 1, 1,
+                1, -1, 1,
+                1, 1, 1,
+                //back
+                1, -1, -1,
+                -1, -1, -1,
+                1, 1, -1,
+                1, 1, -1,
+                -1, -1, -1,
+                -1, 1, -1,
+                //left
+                -1, -1, -1,
+                -1, -1, 1,
+                -1, 1, -1,
+                -1, 1, -1,
+                -1, -1, 1,
+                -1, 1, 1,
+                //right
+                1, -1, 1,
+                1, -1, -1,
+                1, 1, 1,
+                1, 1, 1,
+                1, -1, -1,
+                1, 1, -1,
+                //top
+                -1, 1, 1,
+                1, 1, 1,
+                -1, 1, -1,
+                -1, 1, -1,
+                1, 1, 1,
+                1, 1, -1,
+                //bottom
+                -1, -1, -1,
+                1, -1, -1,
+                -1, -1, 1,
+                -1, -1, 1,
+                1, -1, -1,
+                1, -1, 1
+            ]);
+            for (let iVertex = 0; iVertex < vertices.length; iVertex += 3) {
+                vertices[iVertex] *= this.width / 2;
+                vertices[iVertex + 1] *= this.height / 2;
+                vertices[iVertex + 2] *= this.depth / 2;
+            }
+            return vertices;
+        }
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.width = _serialization.width;
+            this.height = _serialization.height;
+            this.depth = _serialization.depth;
+            return this;
         }
     }
     Fudge.MeshCube = MeshCube;

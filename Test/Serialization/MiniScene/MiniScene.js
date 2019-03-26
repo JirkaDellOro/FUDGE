@@ -6,11 +6,15 @@ var MiniScene;
     let camera;
     let viewPort;
     function init() {
+        createScene();
+        testSerialization(node.getComponents(ƒ.ComponentMesh)[0]);
+    }
+    function createScene() {
         ƒ.GLUtil.initializeContext();
         let shdBasic = new ƒ.ShaderBasic();
         let mtrRed = new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), shdBasic);
         let cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.MeshCube(50, 50, 50).Positions);
+        cmpMesh.setMesh(new ƒ.MeshCube(50, 50, 50));
         let cmpMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrRed);
         let cmpTransform = new ƒ.ComponentTransform();
@@ -22,19 +26,20 @@ var MiniScene;
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(node.transform.position);
+        cmpTransform.lookAt(node.cmpTransform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
         viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
+    }
+    function testSerialization(_object) {
         console.group("Original");
-        console.log(cmpTransform);
+        console.log(_object);
         console.groupEnd();
         console.group("Serialized");
-        let serializer = new ƒ.Serializer();
-        let serialization = serializer.serialize(cmpTransform);
+        let serialization = ƒ.Serializer.serialize(_object);
         console.log(serialization);
         console.groupEnd();
         console.group("Stringified");
@@ -46,10 +51,9 @@ var MiniScene;
         console.log(serialization);
         console.groupEnd();
         console.group("Reconstructed");
-        let reconstruction = serializer.deserialize(serialization);
+        let reconstruction = ƒ.Serializer.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
     }
-    MiniScene.init = init;
 })(MiniScene || (MiniScene = {}));
 //# sourceMappingURL=MiniScene.js.map

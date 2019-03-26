@@ -40,7 +40,7 @@ namespace Fudge {
             return this.tags;
         }
 
-        public get transform(): ComponentTransform {
+        public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
 
@@ -49,7 +49,7 @@ namespace Fudge {
          * Adds the name of a layer to this nodes layerarray.
          * @param _name The name of the layer to add.
          */
-        public addLayer(_name: string): void {
+        public addLayer(_name: string): void { 
             for (let i: number = 0; i < this.layers.length; i++) {
                 if (this.layers[i] == _name) {
                     console.log(`Node "${this.name}" is already on the layer "${_name}".`);

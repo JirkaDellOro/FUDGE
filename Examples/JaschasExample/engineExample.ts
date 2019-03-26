@@ -20,7 +20,7 @@ namespace JaschasExample {
         mtrTexture.addTexture("https://stemkoski.github.io/A-Frame-Examples/images/hexagons.png");
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.BoxGeometry(50, 50, 50).Positions);
+        cmpMesh.setMesh(new ƒ.MeshCube(50, 50, 50));
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrTexture);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
@@ -36,7 +36,7 @@ namespace JaschasExample {
         let fudge1: ƒ.Node = new ƒ.Node("Fudge1");
         cmpTransform = new ƒ.ComponentTransform();
         cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.BoxGeometry(25, 25, 25).Positions);
+        cmpMesh.setMesh(new ƒ.MeshCube(25, 25, 25));
         cmpMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrStandard);
         fudge1.addComponent(cmpMesh);
@@ -52,7 +52,7 @@ namespace JaschasExample {
         let fudge3: ƒ.Node = new ƒ.Node("Fudge3");
         cmpTransform = new ƒ.ComponentTransform();
         cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.initialize(new ƒ.BoxGeometry(15, 15, 100).Positions);
+        cmpMesh.setMesh(new ƒ.MeshCube(15, 15, 100));
         cmpMaterial = new ƒ.ComponentMaterial();
         cmpMaterial.initialize(mtrGreen);
         fudge3.addComponent(cmpMesh);
@@ -64,7 +64,7 @@ namespace JaschasExample {
         camera = new ƒ.Node("Camera");
         cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(100, 100, 500);
-        cmpTransform.lookAt(fudge0.transform.position);
+        cmpTransform.lookAt(fudge0.cmpTransform.position);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -87,7 +87,7 @@ namespace JaschasExample {
 
         let rotation: number = 1;
 
-        fudge2.transform.rotateY(rotation);
+        fudge2.cmpTransform.rotateY(rotation);
         let pivot: ƒ.ComponentPivot = <ƒ.ComponentPivot>fudge0.getComponents(ƒ.ComponentPivot)[0];
         pivot.rotateY(-rotation);
 
@@ -98,8 +98,8 @@ namespace JaschasExample {
     // Trial function to move the camera around the viewports rootnode.
     function moveCamera(_event: KeyboardEvent): void {
 
-        let transform: ƒ.ComponentTransform = camera.transform;
-        let target: ƒ.Vector3 = fudge0.transform.position;
+        let transform: ƒ.ComponentTransform = camera.cmpTransform;
+        let target: ƒ.Vector3 = fudge0.cmpTransform.position;
         switch (_event.key) {
             case "w": { 
                 transform.translateY(10);

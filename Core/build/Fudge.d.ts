@@ -9,8 +9,8 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
     class Serializer {
-        serialize(_object: Serializable): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        static serialize(_object: Serializable): Serialization;
+        static deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -100,15 +100,17 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
-        private positions;
+        private mesh;
+        private vertices;
         private vertexCount;
         private bufferSpecification;
         private normals;
-        initialize(_positions: Float32Array, _size?: number, _dataType?: number, _normalize?: boolean): void;
-        readonly Positions: Float32Array;
-        readonly BufferSpecification: BufferSpecification;
-        readonly VertexCount: number;
-        readonly Normals: Float32Array;
+        setMesh(_mesh: Mesh): void;
+        getMesh(): Mesh;
+        getVertices(): Float32Array;
+        getBufferSpecification(): BufferSpecification;
+        getVertexCount(): number;
+        getNormals(): Float32Array;
         /**
          * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
          * @param _materialComponent The materialcomponent attached to the same node.
@@ -118,10 +120,13 @@ declare namespace Fudge {
          * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
          */
         setTextureCoordinates(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         /**
          * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
         private computeNormals;
+        private initialize;
     }
 }
 declare namespace Fudge {
@@ -348,7 +353,7 @@ declare namespace Fudge {
         readonly Parent: Node | null;
         readonly Layers: string[];
         readonly Tags: string[];
-        readonly transform: ComponentTransform;
+        readonly cmpTransform: ComponentTransform;
         /**
          * Adds the name of a layer to this nodes layerarray.
          * @param _name The name of the layer to add.
@@ -522,10 +527,17 @@ declare namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 {
+    class Matrix4x4 implements Serializable {
         data: Float32Array;
         constructor();
         static identity(): Matrix4x4;
+        /**
+         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
+         * @param _matrix The matrix to multiply.
+         * @param _x The scaling multiplier for the x-Axis.
+         * @param _y The scaling multiplier for the y-Axis.
+         * @param _z The scaling multiplier for the z-Axis.
+         */
         static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -617,6 +629,8 @@ declare namespace Fudge {
          * @param _z The scaling multiplier for the z-axis.
          */
         private static scaling;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -699,14 +713,23 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface Mesh extends Serializable {
+        getVertices(): Float32Array;
+    }
+}
+declare namespace Fudge {
     /**
      * Simple class to compute the vertexpositions for a box.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshCube {
-        private positions;
+    class MeshCube implements Mesh {
+        width: number;
+        height: number;
+        depth: number;
         constructor(_width: number, _height: number, _depth: number);
-        readonly Positions: Float32Array;
+        getVertices(): Float32Array;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {

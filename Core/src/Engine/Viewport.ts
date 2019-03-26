@@ -59,7 +59,7 @@ namespace Fudge {
             else {
                 this.initializeNodeBuffer(_node);
                 mesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
-                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.Positions), gl2.STATIC_DRAW);
+                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
                 let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
 
                 if (materialComponent) {
@@ -71,7 +71,7 @@ namespace Fudge {
                     _node.addComponent(materialComponent);
                     */
                     let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
-                    GLUtil.attributePointer(positionAttributeLocation, mesh.BufferSpecification);
+                    GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
                     this.initializeNodeMaterial(materialComponent, mesh);
                     if (materialComponent.Material.TextureEnabled) {
                         this.initializeNodeTexture(materialComponent, mesh);
@@ -119,7 +119,7 @@ namespace Fudge {
                     // Supply matrixdata to shader. 
                     gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
                     // Draw call
-                    gl2.drawArrays(gl2.TRIANGLES, mesh.BufferSpecification.offset, mesh.VertexCount);
+                    gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }
             }
             for (let name in _node.getChildren()) {

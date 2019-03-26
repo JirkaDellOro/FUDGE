@@ -4,38 +4,30 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentMesh extends Component {
-        private positions: Float32Array; // The Mesh's vertexpositions.
+        private mesh: Mesh = null;
+        private vertices: Float32Array; // The Mesh's vertexpositions.
         private vertexCount: number; // The amount of Vertices that need to be drawn.
         private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
         private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
 
-        public initialize(_positions: Float32Array, _size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false): void {
-            this.positions = _positions;
-            this.bufferSpecification = {
-                size: _size,
-                dataType: _dataType,
-                normalize: _normalize,
-                stride: 0,
-                offset: 0
-            };
-            this.vertexCount = this.positions.length / this.bufferSpecification.size;
-            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
-                console.log(this.vertexCount);
-                throw new Error("Number of entries in positions[] and size do not match.");
-            }
-            this.normals = this.computeNormals();
+        public setMesh(_mesh: Mesh): void {
+            this.mesh = _mesh;
+            this.initialize();
+        }
+        public getMesh(): Mesh {
+            return this.mesh;
         }
 
-        public get Positions(): Float32Array {
-            return this.positions;
+        public getVertices(): Float32Array {
+            return this.vertices;
         }
-        public get BufferSpecification(): BufferSpecification {
+        public getBufferSpecification(): BufferSpecification {
             return this.bufferSpecification;
         }
-        public get VertexCount(): number {
+        public getVertexCount(): number {
             return this.vertexCount;
         }
-        public get Normals(): Float32Array {
+        public getNormals(): Float32Array {
             return this.normals;
         }
 
@@ -72,13 +64,25 @@ namespace Fudge {
             gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
         }
 
+        public serialize(): Serialization {
+            let serialization: Serialization = {
+                mesh: this.mesh.serialize()
+            };
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            let mesh: Mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
+            this.setMesh(mesh);
+            return this;
+        }
+
         /**
          * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
          */
-        private computeNormals(): Float32Array { 
+        private computeNormals(): Float32Array {
             let normals: number[] = [];
             let normal: Vector3 = new Vector3;
-            let p: Float32Array = this.positions;
+            let p: Float32Array = this.vertices;
             for (let i: number = 0; i < p.length; i += 9) {
                 let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
                 let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
@@ -90,5 +94,21 @@ namespace Fudge {
             return new Float32Array(normals);
         }
 
+        private initialize(_size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false): void {
+            this.vertices = this.mesh.getVertices();
+            this.bufferSpecification = {
+                size: _size,
+                dataType: _dataType,
+                normalize: _normalize,
+                stride: 0,
+                offset: 0
+            };
+            this.vertexCount = this.vertices.length / this.bufferSpecification.size;
+            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
+                console.log(this.vertexCount);
+                throw new Error("Number of entries in positions[] and size do not match.");
+            }
+            this.normals = this.computeNormals();
+        }
     }
 }

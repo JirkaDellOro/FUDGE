@@ -4,7 +4,7 @@ namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Matrix4x4 {  // TODO: examine if it could/should be an extension of Float32Array
+    export class Matrix4x4 implements Serializable {  // TODO: examine if it could/should be an extension of Float32Array
         public data: Float32Array; // The data of the matrix.
 
         public constructor() {
@@ -20,6 +20,14 @@ namespace Fudge {
         public static identity(): Matrix4x4 {
             return new Matrix4x4;
         }
+        /**
+         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
+         * @param _matrix The matrix to multiply.
+         * @param _x The scaling multiplier for the x-Axis.
+         * @param _y The scaling multiplier for the y-Axis.
+         * @param _z The scaling multiplier for the z-Axis.
+         */
+
         public static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
@@ -363,13 +371,18 @@ namespace Fudge {
             ]);
             return matrix;
         }
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
+
+        public serialize(): Serialization {
+            // TODO: save translation, rotation and scale as vectors for readability and manipulation
+            let serialization: Serialization = {
+                data: Array.from(this.data)
+            };
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            this.data = new Float32Array(_serialization.data);
+            return this;
+        }
 
     }
 }
