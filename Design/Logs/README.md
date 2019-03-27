@@ -2,6 +2,10 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Mar 27th 2019
+Interfaces for Animation and UI (and more?) compatibility/accessability. init/change (name is subject to change) function that handles changes on an object by using a generic JS Object.  
+[Relevant for VectorEditor and Animator](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Notizen_LS.md)
+
 # Mar 18th 2019
 Presentation of the Core as it stands, general thoughts about it.  
 [Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Notizen_LS.md)
