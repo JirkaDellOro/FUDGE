@@ -150,6 +150,8 @@ var VectorEditor;
         else if (currentlySelectedPath && _event.buttons == 1) {
             currentlySelectedPath.move((_event.clientX - originalPos.x) / VectorEditor.scale, (_event.clientY - originalPos.y) / VectorEditor.scale);
         }
+        else if (_event.buttons == 1) {
+        }
         else if (_event.buttons == 2) {
             pivotPoint = new Vector2(pivotPoint.x + _event.clientX - originalPos.x, pivotPoint.y + _event.clientY - originalPos.y);
         }
@@ -182,11 +184,16 @@ var VectorEditor;
         _event.preventDefault();
         if (_event.deltaY > 0) {
             let newScale = +Math.max(0.1, Math.min(VectorEditor.scale * scaleMutiplier, 10)).toFixed(2);
-            pivotPoint = new Vector2(_event.clientX - (_event.clientX - pivotPoint.x) * scaleMutiplier, _event.clientY - (_event.clientY - pivotPoint.y) * scaleMutiplier);
+            let clientPos = new Vector2(_event.clientX, _event.clientY);
+            // Vector2.add(clientPos, Vector2.add(clientPos, pivotPoint.scaled(-1)).scaled(-1 * newScale / scale));
+            // pivotPoint = clientPos - ( (clientPos - pivotPoint) * (newScale / scale) )
+            pivotPoint = new Vector2(_event.clientX - (_event.clientX - pivotPoint.x) * newScale / VectorEditor.scale, _event.clientY - (_event.clientY - pivotPoint.y) * newScale / VectorEditor.scale);
             VectorEditor.scale = newScale;
         }
         else if (_event.deltaY < 0) {
-            VectorEditor.scale = +Math.max(0.1, Math.min(VectorEditor.scale / scaleMutiplier, 10)).toFixed(2);
+            let newScale = +Math.max(0.1, Math.min(VectorEditor.scale / scaleMutiplier, 10)).toFixed(2);
+            pivotPoint = new Vector2(_event.clientX - (_event.clientX - pivotPoint.x) * newScale / VectorEditor.scale, _event.clientY - (_event.clientY - pivotPoint.y) * newScale / VectorEditor.scale);
+            VectorEditor.scale = newScale;
         }
         redrawAll();
     }
