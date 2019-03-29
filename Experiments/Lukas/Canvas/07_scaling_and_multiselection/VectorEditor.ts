@@ -83,9 +83,11 @@ module VectorEditor {
 		if (currentlySelectedPath) {
 			let drawTangents: boolean = pressedKeys.indexOf(Utils.KEYCODE.CONTROL) > -1;
 			for (let p of currentlySelectedPath.points) {
-				p.draw(crc, drawTangents);
+				p.draw(crc, false, drawTangents);
 			}
+			if (currentlySelectedPoint instanceof Vertex || (currentlySelectedPoint instanceof Tangent && drawTangents)) currentlySelectedPoint.draw(crc, true);
 		}
+
 
 		crc.resetTransform();
 		crc.lineWidth = 1;
@@ -176,8 +178,12 @@ module VectorEditor {
 
 	function mouseup(_event: MouseEvent) {
 		_event.preventDefault();
-		// currentlySelectedPath = null;
+		if(currentlySelectedPoint instanceof Tangent && pressedKeys.indexOf(Utils.KEYCODE.CONTROL) < 0){
+			currentlySelectedPoint = null;
+		}
+		// currentlySelectedPoint = null;
 		// console.log("mouseup");
+		redrawAll();
 	}
 
 	function mousemove(_event: MouseEvent) {
@@ -202,13 +208,36 @@ module VectorEditor {
 			pressedKeys.push(_event.keyCode);
 		}
 
-		if (_event.keyCode == Utils.KEYCODE.SPACE) {
-			pivotPoint = new Vector2(crc.canvas.height / 2, crc.canvas.width / 2);
-			redrawAll();
+		switch (_event.keyCode) {
+			case Utils.KEYCODE.UP:
+				moveSomething(0, -1);
+				break;
+			case Utils.KEYCODE.DOWN:
+				moveSomething(0, 1);
+				break;
+			case Utils.KEYCODE.LEFT:
+				moveSomething(-1, 0);
+				break;
+			case Utils.KEYCODE.RIGHT:
+				moveSomething(1, 0);
+				break;
+			case Utils.KEYCODE.CONTROL:
+				redrawAll();
+				break;
+			case Utils.KEYCODE.SPACE:
+				pivotPoint = new Vector2(crc.canvas.height / 2, crc.canvas.width / 2);
+				redrawAll();
+				break;
 		}
-		if (_event.keyCode == Utils.KEYCODE.CONTROL) {
-			redrawAll();
+	}
+
+	function moveSomething(dx: number, dy: number) {
+		if (currentlySelectedPoint) {
+			currentlySelectedPoint.move(dx, dy);
+		} else if (currentlySelectedPath) {
+			currentlySelectedPath.move(dx, dy);
 		}
+		redrawAll();
 	}
 
 	function keyup(_event: KeyboardEvent) {
@@ -216,9 +245,16 @@ module VectorEditor {
 		if (index > -1) {
 			pressedKeys.splice(index, 1);
 		}
-		if (_event.keyCode == Utils.KEYCODE.CONTROL) {
-			redrawAll();
+		switch (_event.keyCode) {
+
+			case Utils.KEYCODE.CONTROL:
+			if(currentlySelectedPoint instanceof Tangent && pressedKeys.indexOf(Utils.KEYCODE.CONTROL) < 0){
+				currentlySelectedPoint = null;
+			}
+				redrawAll();
+				break;
 		}
+
 	}
 
 	function scroll(_event: WheelEvent) {
