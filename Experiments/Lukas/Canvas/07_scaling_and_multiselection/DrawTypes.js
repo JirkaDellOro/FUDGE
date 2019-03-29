@@ -20,14 +20,14 @@ var DrawTypes;
             this.points = points;
             this.closed = false;
         }
-        draw(context, includeCorners = false) {
+        draw(context, selected = false) {
             this.generatePath2D();
             context.fillStyle = this.fillColor;
             context.fill(this.path2d);
             context.strokeStyle = this.color;
             context.lineWidth = this.lineWidth > 0 ? this.lineWidth : 1 / VectorEditor.scale;
             context.stroke(this.path2d);
-            if (includeCorners) {
+            if (selected) {
                 for (let point of this.points) {
                     point.draw(context);
                 }
@@ -154,18 +154,24 @@ var DrawTypes;
             this.path.closePath();
             return this.path;
         }
-        draw(context) {
+        draw(context, selected = false) {
             context.strokeStyle = "#000";
             context.lineWidth = 1 / VectorEditor.scale;
+            if (selected) {
+                context.fillStyle = "#000";
+                context.fill(this.generatePath2D());
+            }
             context.stroke(this.generatePath2D());
         }
         move(dx, dy) {
+            // if(!dx || !dy) return this.path;
             this.x += dx;
             this.y += dy;
             this.generatePath2D();
             return this.path;
         }
         moveTo(x, y) {
+            // if(!x || !y) return this.path;
             this.x = x;
             this.y = y;
             this.generatePath2D();
@@ -184,8 +190,8 @@ var DrawTypes;
             this.tangentIn = tIn;
             this.tangentOut = tOut;
         }
-        draw(context, showTangents = false) {
-            super.draw(context);
+        draw(context, selected = false, showTangents = false) {
+            super.draw(context, selected);
             if (showTangents) {
                 this.tangentIn.draw(context);
                 this.tangentOut.draw(context);

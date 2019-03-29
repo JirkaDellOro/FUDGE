@@ -49,6 +49,18 @@ module Utils {
 			let v: Vector2 = this.normalize();
 			return new Vector2(v.y, -v.x);
 		}
+
+		static add(...params: Vector2[]): Vector2 {
+			let result: Vector2 = new Vector2();
+			for (let v of params){
+				result = new Vector2(result.x + v.x, result.y + v.y);
+			}
+			return result;
+		}
+
+		scaled(s: number){
+			return new Vector2(this.x * s, this.y * s);
+		}
 	}
 
 	export enum MOUSEBUTTON {

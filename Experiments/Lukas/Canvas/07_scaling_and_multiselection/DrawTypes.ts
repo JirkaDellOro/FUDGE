@@ -7,7 +7,7 @@ module DrawTypes {
 		public order: number;
 		public lineWidth: number;
 
-		constructor(color: string | CanvasGradient | CanvasPattern = "black", name:string = "", order = 0, lineWidth: number = 1) {
+		constructor(color: string | CanvasGradient | CanvasPattern = "black", name: string = "", order = 0, lineWidth: number = 1) {
 			this.color = color;
 			this.name = name;
 			this.order = order;
@@ -32,7 +32,7 @@ module DrawTypes {
 			this.closed = false;
 		}
 
-		draw(context: CanvasRenderingContext2D, includeCorners: boolean = false) {
+		draw(context: CanvasRenderingContext2D, selected: boolean = false) {
 			this.generatePath2D();
 			context.fillStyle = this.fillColor;
 			context.fill(this.path2d);
@@ -40,7 +40,7 @@ module DrawTypes {
 			context.lineWidth = this.lineWidth > 0 ? this.lineWidth : 1 / VectorEditor.scale;
 			context.stroke(this.path2d);
 
-			if (includeCorners) {
+			if (selected) {
 				for (let point of this.points) {
 					point.draw(context);
 				}
@@ -195,13 +195,18 @@ module DrawTypes {
 			return this.path;
 		}
 
-		draw(context: CanvasRenderingContext2D) {
+		draw(context: CanvasRenderingContext2D, selected: boolean = false) {
 			context.strokeStyle = "#000";
 			context.lineWidth = 1 / VectorEditor.scale;
+			if(selected) {
+				context.fillStyle = "#000";
+				context.fill(this.generatePath2D());
+			}
 			context.stroke(this.generatePath2D());
 		}
 
 		move(dx: number, dy: number): Path2D {
+			// if(!dx || !dy) return this.path;
 			this.x += dx;
 			this.y += dy;
 			this.generatePath2D();
@@ -209,6 +214,7 @@ module DrawTypes {
 		}
 
 		moveTo(x: number, y: number): Path2D {
+			// if(!x || !y) return this.path;
 			this.x = x;
 			this.y = y;
 			this.generatePath2D();
@@ -232,8 +238,8 @@ module DrawTypes {
 			this.tangentOut = tOut;
 		}
 
-		draw(context: CanvasRenderingContext2D, showTangents: boolean = false) {
-			super.draw(context);
+		draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false) {
+			super.draw(context, selected);
 			if (showTangents) {
 				this.tangentIn.draw(context);
 				this.tangentOut.draw(context);

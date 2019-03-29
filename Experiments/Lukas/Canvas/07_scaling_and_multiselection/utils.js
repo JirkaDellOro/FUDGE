@@ -41,6 +41,16 @@ var Utils;
             let v = this.normalize();
             return new Vector2(v.y, -v.x);
         }
+        static add(...params) {
+            let result = new Vector2();
+            for (let v of params) {
+                result = new Vector2(result.x + v.x, result.y + v.y);
+            }
+            return result;
+        }
+        scaled(s) {
+            return new Vector2(this.x * s, this.y * s);
+        }
     }
     Utils.Vector2 = Vector2;
     let MOUSEBUTTON;
