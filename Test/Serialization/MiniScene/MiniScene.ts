@@ -9,7 +9,7 @@ namespace MiniScene {
 
     function init(): void {
         createScene();
-        testSerialization(node.getComponents(ƒ.ComponentMesh)[0]);
+        testSerialization(node);
     }
 
     function createScene(): void {
@@ -39,6 +39,9 @@ namespace MiniScene {
         viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
+
+        let child: ƒ.Node = new ƒ.Node("Child");
+        node.appendChild(child);
     }
 
     function testSerialization(_object: ƒ.Serializable): void {

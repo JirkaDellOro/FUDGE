@@ -9,7 +9,17 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
     class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
         static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
         static deserialize(_serialization: Serialization): Serializable;
     }
 }

@@ -4,11 +4,21 @@ var Fudge;
     class Serializer {
         // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
         static serialize(_object) {
             let serialization = {};
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
         static deserialize(_serialization) {
             let reconstruct;
             for (let typeName in _serialization) {
@@ -720,7 +730,25 @@ var Fudge;
         // #endregion
         // #region Serialization
         serialize() {
-            return null;
+            let serialization = {
+                name: this.name,
+                // TODO: serialize references, does parent need to be serialized at all?
+                parent: "not defined yet..."
+            };
+            let components = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            serialization["components"] = components;
+            let children = [];
+            for (let child of this.children) {
+                children.push(child.serialize());
+            }
+            serialization["children"] = children;
+            return serialization;
         }
         deserialize() {
             return null;

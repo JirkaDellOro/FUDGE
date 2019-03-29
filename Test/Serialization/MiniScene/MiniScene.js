@@ -7,7 +7,7 @@ var MiniScene;
     let viewPort;
     function init() {
         createScene();
-        testSerialization(node.getComponents(ƒ.ComponentMesh)[0]);
+        testSerialization(node);
     }
     function createScene() {
         ƒ.GLUtil.initializeContext();
@@ -33,6 +33,8 @@ var MiniScene;
         viewPort = new ƒ.Viewport("MiniScene", node, cmpCamera);
         viewPort.drawScene();
         viewPort.showSceneGraph();
+        let child = new ƒ.Node("Child");
+        node.appendChild(child);
     }
     function testSerialization(_object) {
         console.group("Original");

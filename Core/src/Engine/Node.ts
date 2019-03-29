@@ -121,7 +121,27 @@ namespace Fudge {
 
         // #region Serialization
         public serialize(): Serialization {
-            return null;
+            let serialization: Serialization = {
+                name: this.name,
+                // TODO: serialize references, does parent need to be serialized at all?
+                parent: "not defined yet..."
+            };
+            let components: Serialization = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            serialization["components"] = components;
+            
+            let children: Serialization[] = [];
+            for (let child of this.children) {
+                children.push(child.serialize());
+            }
+            serialization["children"] = children;
+
+            return serialization;
         }
         public deserialize(): Serializable {
             return null;
