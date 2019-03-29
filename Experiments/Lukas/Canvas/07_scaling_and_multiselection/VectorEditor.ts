@@ -36,9 +36,14 @@ module VectorEditor {
 		window.addEventListener("keydown", keydown);
 		window.addEventListener("keyup", keyup);
 		window.addEventListener("wheel", scroll);
+		window.oncontextmenu = () => { return false; };
 
 		crc = canvas.getContext("2d");
+
+		pivotPoint = new Vector2(canvas.height / 2, canvas.width / 2);
+
 		createTestObjects();
+
 	}
 
 	function createTestObjects() {
@@ -47,11 +52,11 @@ module VectorEditor {
 		let amountPoints: number = 3;
 
 		for (let i: number = 0; i < amountObjects; i++) {
-			let start: Vertex = new Vertex(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500));
+			let start: Vertex = new Vertex(Utils.RandomRange(-250, 250), Utils.RandomRange(-250, 250));
 			let path: Path = new Path([], "black", Utils.RandomColor(), "path" + i, i);
 			path.addVertexToEnd(start);
 			for (let k: number = 0; k < amountPoints - 1; k++) {
-				let newPoint: Vertex = new Vertex(Utils.RandomRange(0, 500), Utils.RandomRange(0, 500));
+				let newPoint: Vertex = new Vertex(Utils.RandomRange(-250, 250), Utils.RandomRange(-250, 250));
 				path.addVertexToEnd(newPoint);
 			}
 			path.setClosed(true);
@@ -65,9 +70,9 @@ module VectorEditor {
 	function redrawAll() {
 		crc.resetTransform();
 		crc.clearRect(0, 0, crc.canvas.width, crc.canvas.height);
-		crc.translate(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
-		// console.log(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
+		crc.translate(pivotPoint.x, pivotPoint.y);
 		crc.scale(scale, scale);
+
 
 		paths.sort(Path.sort);
 
@@ -81,11 +86,14 @@ module VectorEditor {
 				p.draw(crc, drawTangents);
 			}
 		}
+
+		crc.resetTransform();
+		crc.lineWidth = 1;
 		let pivotPath: Path2D = new Path2D();
-		pivotPath.moveTo(-5, 0);
-		pivotPath.lineTo(5, 0);
-		pivotPath.moveTo(0, -5);
-		pivotPath.lineTo(0, 5);
+		pivotPath.moveTo(pivotPoint.x - 5, pivotPoint.y);
+		pivotPath.lineTo(pivotPoint.x + 5, pivotPoint.y);
+		pivotPath.moveTo(pivotPoint.x, pivotPoint.y - 5);
+		pivotPath.lineTo(pivotPoint.x, pivotPoint.y + 5);
 		crc.stroke(pivotPath);
 
 		// crc.setTransform(0, 0, 0, 0, pivotPoint.x, pivotPoint.y);
@@ -101,26 +109,34 @@ module VectorEditor {
 
 	}
 
-	function mousedown(_event: MouseEvent) {
-		let foundPoint: Point;
+	function getTransformedPoint(_point: Vector2): Vector2 {
+		return new Vector2((_point.x - pivotPoint.x) / scale, (_point.y - pivotPoint.y) / scale);
+	}
 
+	function mousedown(_event: MouseEvent) {
+		_event.preventDefault();
+		originalPos = new Vector2(_event.clientX, _event.clientY);
+		if (_event.button != Utils.MOUSEBUTTON.LEFT) return;
+
+		let transformedPoint: Vector2 = getTransformedPoint(new Vector2(_event.clientX, _event.clientY));
+		let foundPoint: Point;
 		let foundPath: Path;
 		for (let path of paths) {
-			if (crc.isPointInPath(path.getPath2D(), _event.clientX, _event.clientY)) {
+			if (crc.isPointInPath(path.getPath2D(), transformedPoint.x, transformedPoint.y)) {
 				foundPath = path;
 			}
 
 			for (let point of path.points) {
 				if (pressedKeys.indexOf(Utils.KEYCODE.CONTROL) > -1) {
-					if (crc.isPointInPath(point.tangentIn.getPath2D(), _event.clientX, _event.clientY)) {
+					if (crc.isPointInPath(point.tangentIn.getPath2D(), transformedPoint.x, transformedPoint.y)) {
 						foundPoint = point.tangentIn;
 					}
-					if (crc.isPointInPath(point.tangentOut.getPath2D(), _event.clientX, _event.clientY)) {
+					if (crc.isPointInPath(point.tangentOut.getPath2D(), transformedPoint.x, transformedPoint.y)) {
 						foundPoint = point.tangentOut;
 					}
 
 				}
-				if (crc.isPointInPath(point.getPath2D(), _event.clientX, _event.clientY)) {
+				if (crc.isPointInPath(point.getPath2D(), transformedPoint.x, transformedPoint.y)) {
 					foundPoint = point;
 				}
 			}
@@ -140,7 +156,6 @@ module VectorEditor {
 			selectPath(null, _event);
 			selectPoint(null, _event);
 		}
-		originalPos = new Vector2(_event.clientX, _event.clientY);
 		redrawAll();
 	}
 
@@ -155,31 +170,26 @@ module VectorEditor {
 	function selectPoint(pointToSelect: Point, _event: MouseEvent): void {
 		currentlySelectedPoint = pointToSelect;
 		if (!pointToSelect) return;
-		if (currentlySelectedPoint instanceof DrawTypes.Vertex) {
-			(<DrawTypes.Vertex>currentlySelectedPoint).prepareMovementValues();
-		}
 		// originalPos = new Vector2(_event.clientX, _event.clientY);
 		// redrawAll();
 	}
 
-	function mouseup() {
+	function mouseup(_event: MouseEvent) {
+		_event.preventDefault();
 		// currentlySelectedPath = null;
-		// currentlySelectedPoint = null;
-
 		// console.log("mouseup");
 	}
 
 	function mousemove(_event: MouseEvent) {
 		if (_event.buttons == 0) return;
-		let deltaX: number = (_event.clientX - originalPos.x) / scale;
-		let deltaY: number = (_event.clientY - originalPos.y) / scale;
-		if (currentlySelectedPoint) {
-			currentlySelectedPoint.move(deltaX, deltaY);
+		_event.preventDefault();
+		if (currentlySelectedPoint && _event.buttons == 1) {
+			currentlySelectedPoint.move((_event.clientX - originalPos.x) / scale, (_event.clientY - originalPos.y) / scale);
 		}
-		else if (currentlySelectedPath) {
-			currentlySelectedPath.move(deltaX, deltaY);
-		} else {
-			pivotPoint = new Vector2(pivotPoint.x + deltaX * scale, pivotPoint.y + deltaY * scale)
+		else if (currentlySelectedPath && _event.buttons == 1) {
+			currentlySelectedPath.move((_event.clientX - originalPos.x) / scale, (_event.clientY - originalPos.y) / scale);
+		} else if (_event.buttons == 2) {
+			pivotPoint = new Vector2(pivotPoint.x + _event.clientX - originalPos.x, pivotPoint.y + _event.clientY - originalPos.y)
 		}
 		redrawAll();
 		originalPos = new Vector2(_event.clientX, _event.clientY);
@@ -191,7 +201,7 @@ module VectorEditor {
 		}
 
 		if (_event.keyCode == Utils.KEYCODE.SPACE) {
-			pivotPoint = new Vector2();
+			pivotPoint = new Vector2(crc.canvas.height / 2, crc.canvas.width / 2);
 			redrawAll();
 		}
 		if (_event.keyCode == Utils.KEYCODE.CONTROL) {
@@ -213,12 +223,12 @@ module VectorEditor {
 		let scaleMutiplier: number = 0.9;
 		_event.preventDefault();
 		if (_event.deltaY > 0) {
-			scale = +Math.max(0.1, Math.min(scale * scaleMutiplier, 10)).toFixed(2);
-			// pivotPoint = new Vector2(pivotPoint.x + (pivotPoint.x - _event.clientX) * scale, (pivotPoint.y - _event.clientY) + _event.clientY * scale);
+			let newScale = +Math.max(0.1, Math.min(scale * scaleMutiplier, 10)).toFixed(2);
+			pivotPoint = new Vector2(_event.clientX - (_event.clientX - pivotPoint.x) * scaleMutiplier, _event.clientY - (_event.clientY - pivotPoint.y) * scaleMutiplier);
+			scale = newScale;
 		} else if (_event.deltaY < 0) {
 			scale = +Math.max(0.1, Math.min(scale / scaleMutiplier, 10)).toFixed(2);
 		}
-		console.log(scale);
 		redrawAll();
 	}
 

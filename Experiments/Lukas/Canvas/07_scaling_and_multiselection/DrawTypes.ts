@@ -5,11 +5,13 @@ module DrawTypes {
 		public color: string | CanvasGradient | CanvasPattern;
 		public name: String;
 		public order: number;
+		public lineWidth: number;
 
-		constructor(color: string | CanvasGradient | CanvasPattern = "black", name = "", order = 0) {
+		constructor(color: string | CanvasGradient | CanvasPattern = "black", name:string = "", order = 0, lineWidth: number = 1) {
 			this.color = color;
 			this.name = name;
 			this.order = order;
+			this.lineWidth = lineWidth;
 		}
 
 		static sort(a: DrawObject, b: DrawObject): number {
@@ -23,8 +25,8 @@ module DrawTypes {
 		public points: Vertex[];
 		public fillColor: string | CanvasGradient | CanvasPattern;
 
-		constructor(points: Vertex[], color: string | CanvasGradient | CanvasPattern = "rgba(0,0,0,0)", fillColor: string | CanvasGradient | CanvasPattern, name = "", order = 0) {
-			super(color, name, order);
+		constructor(points: Vertex[], color: string | CanvasGradient | CanvasPattern = "rgba(0,0,0,0)", fillColor: string | CanvasGradient | CanvasPattern, name = "", order = 0, lineWidth = 0) {
+			super(color, name, order, lineWidth);
 			this.fillColor = fillColor;
 			this.points = points;
 			this.closed = false;
@@ -35,6 +37,7 @@ module DrawTypes {
 			context.fillStyle = this.fillColor;
 			context.fill(this.path2d);
 			context.strokeStyle = this.color;
+			context.lineWidth = this.lineWidth > 0 ? this.lineWidth : 1 / VectorEditor.scale;
 			context.stroke(this.path2d);
 
 			if (includeCorners) {
@@ -193,6 +196,8 @@ module DrawTypes {
 		}
 
 		draw(context: CanvasRenderingContext2D) {
+			context.strokeStyle = "#000";
+			context.lineWidth = 1 / VectorEditor.scale;
 			context.stroke(this.generatePath2D());
 		}
 
@@ -211,15 +216,12 @@ module DrawTypes {
 		}
 	}
 
+
+
 	export class Vertex extends DrawPoint {
 		tangentIn: TangentPoint;
 		tangentOut: TangentPoint;
 		public parent: DrawPath;
-
-		private deltaBIn: Vector2;
-		private deltaBOut: Vector2;
-		private scaleIn: number;
-		private scaleOut: number;
 
 		constructor(x: number, y: number, parent: DrawPath = null, tIn: TangentPoint = null, tOut: TangentPoint = null) {
 			super(x, y);
@@ -231,7 +233,7 @@ module DrawTypes {
 		}
 
 		draw(context: CanvasRenderingContext2D, showTangents: boolean = false) {
-			context.stroke(this.generatePath2D());
+			super.draw(context);
 			if (showTangents) {
 				this.tangentIn.draw(context);
 				this.tangentOut.draw(context);
@@ -245,13 +247,12 @@ module DrawTypes {
 		}
 
 		move(dx: number, dy: number): Path2D {
-			if (VectorEditor.pressedKeys.indexOf(Utils.KEYCODE.CONTROL) > -1) {
-				// let newTInPos: Vector2 = determineNewTangentPoint(this, this.parent.getPreviousVertex(this), this.tangentIn, dx, dy);
-				// this.tangentIn.moveTo(newTInPos.x, newTInPos.y);
-				// let newTOutPos: Vector2 = determineNewTangentPoint(this, this.parent.getNextVertex(this), this.tangentOut, dx, dy);
-				// this.tangentOut.moveTo(newTOutPos.x, newTOutPos.y);
-				this.newTInPoint(dx, dy);
-				this.newTOutPoint(dx, dy);
+			if (VectorEditor.pressedKeys.indexOf(Utils.KEYCODE.CONTROL) < 0) {
+				//TODO: On SHIFT make Tangents opposite of each other
+				let newTInPos: Vector2 = determineNewTangentPoint(this, this.parent.getPreviousVertex(this), this.tangentIn, dx, dy);
+				this.tangentIn.moveTo(newTInPos.x, newTInPos.y);
+				let newTOutPos: Vector2 = determineNewTangentPoint(this, this.parent.getNextVertex(this), this.tangentOut, dx, dy);
+				this.tangentOut.moveTo(newTOutPos.x, newTOutPos.y);
 				let newOtInPos: Vector2 = determineNewTangentPoint(this, this.parent.getPreviousVertex(this), this.parent.getPreviousVertex(this).tangentOut, dx, dy);
 				this.parent.getPreviousVertex(this).tangentOut.moveTo(newOtInPos.x, newOtInPos.y);
 				let newOtOutPos: Vector2 = determineNewTangentPoint(this, this.parent.getNextVertex(this), this.parent.getNextVertex(this).tangentIn, dx, dy);
@@ -259,86 +260,32 @@ module DrawTypes {
 			}
 			return super.move(dx, dy);
 		}
-
-		prepareMovementValues() {
-			let vertIn: Vertex = this.parent.getPreviousVertex(this);
-			let p: Vector2 = getClosestPoint(this, this.tangentIn, vertIn);
-			let pb: Vector2 = new Vector2(this.tangentIn.x - p.x, this.tangentIn.y - p.y);
-
-			let xScale: number = (p.x - this.x) / (vertIn.x - this.x);
-			let yScale: number = (p.y - this.y) / (vertIn.y - this.y);
-			this.scaleIn = xScale ? xScale : yScale;
-			let ac: Vector2 = new Vector2(vertIn.x - this.x, vertIn.y - this.y);
-			this.deltaBIn = new Vector2(pb.x / ac.magnitude(), pb.y / ac.magnitude());
-
-
-			let vertOut: Vertex = this.parent.getNextVertex(this);
-			p = getClosestPoint(this, this.tangentOut, vertOut);
-			pb = new Vector2(this.tangentOut.x - p.x, this.tangentOut.y - p.y);
-
-			xScale = (p.x - this.x) / (vertOut.x - this.x);
-			yScale = (p.y - this.y) / (vertOut.y - this.y);
-			this.scaleOut = xScale ? xScale : yScale;
-			ac = new Vector2(vertOut.x - this.x, vertOut.y - this.y);
-			this.deltaBOut = new Vector2(pb.x / ac.magnitude(), pb.y / ac.magnitude());
-		}
-
-		newTInPoint(dx: number, dy: number): void {
-			let newA: Vector2 = new Vector2(this.x + dx, this.y + dy);
-			let newac: Vector2 = new Vector2(this.parent.getPreviousVertex(this).x - newA.x, this.parent.getPreviousVertex(this).y - newA.y);
-			let newP: Vector2 = new Vector2(newA.x + newac.x * this.scaleIn, newA.y + newac.y * this.scaleIn);
-
-			let newX: number = newP.x + this.deltaBIn.x * newac.magnitude();
-			let newY: number = newP.y + this.deltaBIn.y * newac.magnitude();
-
-			this.tangentIn.moveTo(newX, newY);
-		}
-
-		newTOutPoint(dx: number, dy: number): void {
-			let newA: Vector2 = new Vector2(this.x + dx, this.y + dy);
-			let newac: Vector2 = new Vector2(this.parent.getNextVertex(this).x - newA.x, this.parent.getNextVertex(this).y - newA.y);
-			let newP: Vector2 = new Vector2(newA.x + newac.x * this.scaleOut, newA.y + newac.y * this.scaleOut);
-
-			let newX: number = newP.x + this.deltaBOut.x * newac.magnitude();
-			let newY: number = newP.y + this.deltaBOut.y * newac.magnitude();
-
-			this.tangentOut.moveTo(newX, newY);
-		}
-
 	}
 
 	function determineNewTangentPoint(movingVertex: Vertex, stationaryVertex: Vertex, tangent: TangentPoint, dx: number, dy: number): Vector2 {
-		let p: Vector2 = getClosestPoint(movingVertex, tangent, stationaryVertex);
-
-		let pb: Vector2 = new Vector2(tangent.x - p.x, tangent.y - p.y);
-
-		let xScale: number = (p.x - movingVertex.x) / (stationaryVertex.x - movingVertex.x);
-		let yScale: number = (p.y - movingVertex.y) / (stationaryVertex.y - movingVertex.y);
-		let scale: number = xScale ? xScale : yScale;
 		let ac: Vector2 = new Vector2(stationaryVertex.x - movingVertex.x, stationaryVertex.y - movingVertex.y);
-		let deltaB: Vector2 = new Vector2(pb.x / ac.magnitude(), pb.y / ac.magnitude());
-
-		let newA: Vector2 = new Vector2(movingVertex.x + dx, movingVertex.y + dy);
-		let newac: Vector2 = new Vector2(stationaryVertex.x - newA.x, stationaryVertex.y - newA.y);
-		let newP: Vector2 = new Vector2(newA.x + newac.x * scale, newA.y + newac.y * scale);
-
-		let newX: number = newP.x + deltaB.x * newac.magnitude();
-		let newY: number = newP.y + deltaB.y * newac.magnitude();
-
-		return new Vector2(newX, newY);
-	}
-
-	function getClosestPoint(a: Vertex, b: TangentPoint, c: Vertex): Vector2 {
-		let ac: Vector2 = new Vector2(c.x - a.x, c.y - a.y);
-		let ab: Vector2 = new Vector2(b.x - a.x, b.y - a.y);
+		let ab: Vector2 = new Vector2(tangent.x - movingVertex.x, tangent.y - movingVertex.y);
 
 		//calculate important stuff
 		let magnitude: number = ac.sqrMagnitude();
 		let acabProduct: number = Vector2.dot(ab, ac);
 		let distance: number = acabProduct / magnitude;
-		let p: Vector2 = new Vector2(a.x + ac.x * distance, a.y + ac.y * distance);
-		return p;
+		let p: Vector2 = new Vector2(movingVertex.x + ac.x * distance, movingVertex.y + ac.y * distance);
+		let pb: Vector2 = new Vector2(tangent.x - p.x, tangent.y - p.y);
+		let acPerpendicular: Vector2 = ac.perpendicularVector();
+		let xScale: number = pb.x / acPerpendicular.x;
+		let yScale: number = pb.y / acPerpendicular.y;
+		let PBScale: number = xScale ? xScale : yScale;
+
+		let newac: Vector2 = new Vector2(stationaryVertex.x - (movingVertex.x + dx), stationaryVertex.y - (movingVertex.y + dy));
+		let newP: Vector2 = new Vector2(movingVertex.x + dx + newac.x * distance, movingVertex.y + dy + newac.y * distance);
+		let newacPerpendicular: Vector2 = newac.perpendicularVector();
+		let newX: number = newP.x + newacPerpendicular.x * PBScale;
+		let newY: number = newP.y + newacPerpendicular.y * PBScale;
+
+		return new Vector2(newX, newY);
 	}
+
 
 	export class TangentPoint extends DrawPoint {
 		public parent: Vertex;
@@ -350,7 +297,7 @@ module DrawTypes {
 
 		generatePath2D(): Path2D {
 			this.path = new Path2D();
-			this.path.rect(this.x - 5, this.y - 5, 10, 10);
+			this.path.rect(this.x - 5 / VectorEditor.scale, this.y - 5 / VectorEditor.scale, 10 / VectorEditor.scale, 10 / VectorEditor.scale);
 			return this.path;
 		}
 	}
