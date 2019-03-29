@@ -351,29 +351,25 @@ declare namespace Fudge {
         getParent(): Node | null;
         readonly cmpTransform: ComponentTransform;
         /**
-         * Returns the children array of this node.
+         * Returns a clone of the list of children
          */
-        getChildren(): MapStringToNode;
+        getChildren(): Node[];
         /**
-         * Looks through this Nodes children array and returns a child with the supplied name.
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
          */
-        getChildByName(_name: string): Node;
+        getChildrenByName(_name: string): Node[];
         /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParent method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
          */
-        appendChild(_child: Node): void;
+        appendChild(_node: Node): void;
         /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
          */
-        removeChild(_name: string): void;
+        removeChild(_node: Node): void;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.

@@ -12,7 +12,7 @@ namespace Fudge {
     export class Node implements Serializable {
         public name: string; // The name to call this node by.
         private parent: Node | null = null; // The parent of this node.
-        private children: MapStringToNode = {}; // Associative array nodes appended to this node.
+        private children: Node[] = []; // Associative array nodes appended to this node.
         private components: MapClassToComponents = {};
         // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
@@ -35,59 +35,44 @@ namespace Fudge {
 
         // #region Hierarchy
         /**
-         * Returns the children array of this node.
+         * Returns a clone of the list of children
          */
-        public getChildren(): MapStringToNode {
-            return this.children; //.slice(0); Return a clone of the list of children
+        public getChildren(): Node[] {
+            return this.children.slice(0);
         }
         /**
-         * Looks through this Nodes children array and returns a child with the supplied name. 
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
+         * Returns an array of references to childnodes with the supplied name. 
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
          */
-        public getChildByName(_name: string): Node {
-            let child: Node;
-            if (this.children[_name] != undefined) {
-                child = this.children[_name];
-                return child;
-            }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
-            }
+        public getChildrenByName(_name: string): Node[] {
+            let found: Node[] = [];
+            found = this.children.filter((_node: Node) => _node.name == _name);
+            return found;
         }
 
         /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParent method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
          */
-        public appendChild(_child: Node): void {
-            let name: string = _child.name;
-            if (this.children[name] != undefined) {
-                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.name}'`);
-            }
-            else {
-                this.children[name] = _child;
-                _child.setParent(this);
-            }
+        public appendChild(_node: Node): void {
+            if (this.children.indexOf(_node) >= 0)
+                return;
+            this.children.push(_node);
+            _node.setParent(this);
         }
 
         /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined. 
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
          */
-        public removeChild(_name: string): void {
-            if (this.children[_name] != undefined) {
-                let child: Node = this.children[_name];
-                child.setParent(null);
-                delete this.children[_name];
-            }
-            else {
-                throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
-            }
+        public removeChild(_node: Node): void {
+            let iFound: number = this.children.indexOf(_node);
+            if (iFound < 0)
+                return;
+
+            this.children.splice(iFound, 1);
+            _node.setParent(null);
         }
         // #endregion
 
@@ -97,7 +82,7 @@ namespace Fudge {
          * @param _class The class of the components to be found.
          */
         public getComponents(_class: typeof Component): Component[] {
-            return (this.components[_class.name] || []).slice(0) ;
+            return (this.components[_class.name] || []).slice(0);
         }
 
         /**
@@ -106,7 +91,7 @@ namespace Fudge {
          */
         public addComponent(_component: Component): void {
             if (_component.getContainer() == this)
-                return;  
+                return;
             if (this.components[_component.type] === undefined)
                 this.components[_component.type] = [_component];
             else
