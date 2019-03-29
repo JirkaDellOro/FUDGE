@@ -629,7 +629,7 @@ var Fudge;
          */
         constructor(_name) {
             this.parent = null; // The parent of this node.
-            this.children = {}; // Associative array nodes appended to this node.
+            this.children = []; // Associative array nodes appended to this node.
             this.components = {};
             this.name = _name;
         }
@@ -641,57 +641,41 @@ var Fudge;
         }
         // #region Hierarchy
         /**
-         * Returns the children array of this node.
+         * Returns a clone of the list of children
          */
         getChildren() {
-            return this.children; //.slice(0); Return a clone of the list of children
+            return this.children.slice(0);
         }
         /**
-         * Looks through this Nodes children array and returns a child with the supplied name.
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
          */
-        getChildByName(_name) {
-            let child;
-            if (this.children[_name] != undefined) {
-                child = this.children[_name];
-                return child;
-            }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
-            }
+        getChildrenByName(_name) {
+            let found = [];
+            found = this.children.filter((_node) => _node.name == _name);
+            return found;
         }
         /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParent method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
          */
-        appendChild(_child) {
-            let name = _child.name;
-            if (this.children[name] != undefined) {
-                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.name}'`);
-            }
-            else {
-                this.children[name] = _child;
-                _child.setParent(this);
-            }
+        appendChild(_node) {
+            if (this.children.indexOf(_node) >= 0)
+                return;
+            this.children.push(_node);
+            _node.setParent(this);
         }
         /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
          */
-        removeChild(_name) {
-            if (this.children[_name] != undefined) {
-                let child = this.children[_name];
-                child.setParent(null);
-                delete this.children[_name];
-            }
-            else {
-                throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
-            }
+        removeChild(_node) {
+            let iFound = this.children.indexOf(_node);
+            if (iFound < 0)
+                return;
+            this.children.splice(iFound, 1);
+            _node.setParent(null);
         }
         // #endregion
         // #region Components
