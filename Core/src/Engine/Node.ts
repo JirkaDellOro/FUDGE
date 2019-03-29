@@ -54,10 +54,21 @@ namespace Fudge {
         /**
          * Adds the given reference to a node to the list of children, if not already in
          * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this 
          */
         public appendChild(_node: Node): void {
             if (this.children.indexOf(_node) >= 0)
+                // _node is already a child of this
                 return;
+
+            let ancestor: Node = this.parent;
+            while (ancestor) {
+                if (ancestor == _node)
+                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
+                else
+                    ancestor = ancestor.parent;
+            }
+
             this.children.push(_node);
             _node.setParent(this);
         }
@@ -124,8 +135,9 @@ namespace Fudge {
             let serialization: Serialization = {
                 name: this.name,
                 // TODO: serialize references, does parent need to be serialized at all?
-                parent: "not defined yet..."
+                //parent: this.parent
             };
+            
             let components: Serialization = {};
             for (let type in this.components) {
                 components[type] = [];
@@ -134,7 +146,7 @@ namespace Fudge {
                 }
             }
             serialization["components"] = components;
-            
+
             let children: Serialization[] = [];
             for (let child of this.children) {
                 children.push(child.serialize());
@@ -143,7 +155,12 @@ namespace Fudge {
 
             return serialization;
         }
-        public deserialize(): Serializable {
+
+        public deserialize(_serialization: Serialization): Serializable {
+            this.name = _serialization.name;
+            // this.parent = is set when the nodes are added
+
+            // TODO: finish deserialization
             return null;
         }
         // #endregion

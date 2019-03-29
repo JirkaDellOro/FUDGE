@@ -373,6 +373,7 @@ declare namespace Fudge {
         /**
          * Adds the given reference to a node to the list of children, if not already in
          * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
          */
         appendChild(_node: Node): void;
         /**
@@ -397,7 +398,7 @@ declare namespace Fudge {
          */
         removeComponent(_component: Component): void;
         serialize(): Serialization;
-        deserialize(): Serializable;
+        deserialize(_serialization: Serialization): Serializable;
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
