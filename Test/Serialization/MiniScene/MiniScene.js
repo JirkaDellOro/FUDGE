@@ -7,7 +7,7 @@ var MiniScene;
     let viewPort;
     function init() {
         createScene();
-        testSerialization(node.cmpTransform);
+        testSerialization(node);
     }
     function createScene() {
         ƒ.GLUtil.initializeContext();

@@ -21,12 +21,18 @@ var Fudge;
          */
         static deserialize(_serialization) {
             let reconstruct;
-            for (let typeName in _serialization) {
-                // TODO: it doesn't make sense to overwrite reconstruct in the loop. Either accumulate or no loop...
-                reconstruct = new Fudge[typeName];
-                reconstruct.deserialize(_serialization[typeName]);
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
             }
-            return reconstruct;
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
         }
     }
     Fudge.Serializer = Serializer;
@@ -763,16 +769,15 @@ var Fudge;
         deserialize(_serialization) {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
-            /*
             for (let type in _serialization.components) {
-                components[type] = [];
-                for (let component of this.components[type]) {
-                    components[type].push(component.serialize());
+                let serializedComponent = {};
+                for (let data of _serialization.components[type]) {
+                    serializedComponent[type] = data;
+                    let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
+                    this.addComponent(deserializedComponent);
                 }
             }
-            */
-            // TODO: finish deserialization
-            return null;
+            return this;
         }
         // #endregion
         /**

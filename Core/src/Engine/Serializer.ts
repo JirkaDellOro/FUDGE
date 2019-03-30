@@ -31,12 +31,17 @@ namespace Fudge {
          */
         public static deserialize(_serialization: Serialization): Serializable {
             let reconstruct: Serializable;
-            for (let typeName in _serialization) {
-                // TODO: it doesn't make sense to overwrite reconstruct in the loop. Either accumulate or no loop...
-                reconstruct = new (<General>Fudge)[typeName];
-                reconstruct.deserialize(_serialization[typeName]);
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new (<General>Fudge)[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            } catch (message) {
+                throw new Error("Deserialization failed: " + message);
             }
-            return reconstruct;
+            return null;
         }
     }
 }
