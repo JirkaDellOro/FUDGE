@@ -9,7 +9,7 @@ namespace MiniScene {
 
     function init(): void {
         createScene();
-        testSerialization(node);
+        testSerialization(node.cmpTransform);
     }
 
     function createScene(): void {

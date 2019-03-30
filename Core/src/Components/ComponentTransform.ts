@@ -35,6 +35,7 @@ namespace Fudge {
         }
         public deserialize(_serialization: Serialization): Serializable {
             this.WorldMatrix.deserialize(_serialization.worldMatrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
     }

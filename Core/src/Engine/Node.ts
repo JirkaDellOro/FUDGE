@@ -133,7 +133,7 @@ namespace Fudge {
         // #region Serialization
         public serialize(): Serialization {
             let serialization: Serialization = {
-                name: this.name,
+                name: this.name
                 // TODO: serialize references, does parent need to be serialized at all?
                 //parent: this.parent
             };
@@ -159,7 +159,14 @@ namespace Fudge {
         public deserialize(_serialization: Serialization): Serializable {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
-
+            /*
+            for (let type in _serialization.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            */
             // TODO: finish deserialization
             return null;
         }

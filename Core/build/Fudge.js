@@ -454,6 +454,7 @@ var Fudge;
         }
         deserialize(_serialization) {
             this.WorldMatrix.deserialize(_serialization.worldMatrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
     }
@@ -740,7 +741,9 @@ var Fudge;
         // #region Serialization
         serialize() {
             let serialization = {
-                name: this.name,
+                name: this.name
+                // TODO: serialize references, does parent need to be serialized at all?
+                //parent: this.parent
             };
             let components = {};
             for (let type in this.components) {
@@ -760,6 +763,14 @@ var Fudge;
         deserialize(_serialization) {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
+            /*
+            for (let type in _serialization.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            */
             // TODO: finish deserialization
             return null;
         }
