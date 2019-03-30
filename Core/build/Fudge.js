@@ -770,12 +770,16 @@ var Fudge;
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
             for (let type in _serialization.components) {
-                let serializedComponent = {};
                 for (let data of _serialization.components[type]) {
-                    serializedComponent[type] = data;
+                    let serializedComponent = { [type]: data };
                     let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
+            }
+            for (let child of _serialization.children) {
+                let serializedChild = { "Node": child };
+                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
             }
             return this;
         }
