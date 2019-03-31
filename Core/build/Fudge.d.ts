@@ -237,13 +237,12 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends ComponentPivot {
-        private worldMatrix;
+        worldMatrix: Matrix4x4;
         constructor();
-        WorldMatrix: Matrix4x4;
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;

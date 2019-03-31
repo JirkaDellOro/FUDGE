@@ -154,7 +154,7 @@ var Fudge;
         projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
-            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000);
+            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -429,7 +429,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Fudge.ComponentPivot {
@@ -437,19 +437,8 @@ var Fudge;
             super();
             this.worldMatrix = Fudge.Matrix4x4.identity();
         }
-        //*/
-        // Get and Set methods.######################################################################################
-        get WorldMatrix() {
-            /* */ return this.worldMatrix;
-            //* */return this.matrix;
-        }
-        set WorldMatrix(_matrix) {
-            /* */ this.worldMatrix = _matrix;
-            //* */this.matrix = _matrix; 
-        }
         get WorldPosition() {
-            /* */ return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
-            //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+            return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
         }
         serialize() {
             let serialization = {
@@ -459,7 +448,7 @@ var Fudge;
             return serialization;
         }
         deserialize(_serialization) {
-            this.WorldMatrix.deserialize(_serialization.worldMatrix);
+            this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
@@ -897,11 +886,11 @@ var Fudge;
                     Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix = transform.WorldMatrix;
+                    let transformMatrix = transform.worldMatrix;
                     if (_node.getComponents(Fudge.ComponentPivot)) {
                         let pivot = _node.getComponents(Fudge.ComponentPivot)[0];
                         if (pivot)
-                            transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                            transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
                     }
                     let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
@@ -922,11 +911,11 @@ var Fudge;
         updateNodeWorldMatrix(_node) {
             let transform = _node.cmpTransform;
             if (!_node.getParent()) {
-                transform.WorldMatrix = transform.Matrix;
+                transform.worldMatrix = transform.Matrix;
             }
             else {
                 let parentTransform = _node.getParent().cmpTransform;
-                transform.WorldMatrix = Fudge.Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
+                transform.worldMatrix = Fudge.Matrix4x4.multiply(parentTransform.worldMatrix, transform.Matrix);
             }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];

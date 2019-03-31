@@ -53,7 +53,7 @@ namespace Fudge {
         public projectCentral(_aspect: number = gl2.canvas.clientWidth / gl2.canvas.clientHeight, _fieldOfView: number = 45): void {
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
-            this.projectionMatrix = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000);
+            this.projectionMatrix = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
