@@ -66,13 +66,15 @@ namespace Fudge {
 
         public serialize(): Serialization {
             let serialization: Serialization = {
-                mesh: this.mesh.serialize()
+                mesh: this.mesh.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
             let mesh: Mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
             this.setMesh(mesh);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
 

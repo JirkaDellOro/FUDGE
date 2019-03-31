@@ -31,6 +31,9 @@ declare namespace Fudge {
     abstract class Component implements Serializable {
         private container;
         private singleton;
+        private active;
+        activate(_on: boolean): void;
+        readonly isActive: boolean;
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
          * @returns The type of the component
@@ -61,14 +64,11 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
-        private enabled;
         private orthographic;
         private projectionMatrix;
         private fieldOfView;
         private backgroundColor;
         private backgroundEnabled;
-        activate(_on: boolean): void;
-        readonly isActive: boolean;
         readonly isOrthographic: boolean;
         getBackgoundColor(): Vector3;
         getBackgroundEnabled(): boolean;
@@ -91,6 +91,8 @@ declare namespace Fudge {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {

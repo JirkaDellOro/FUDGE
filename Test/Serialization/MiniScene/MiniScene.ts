@@ -9,9 +9,9 @@ namespace MiniScene {
 
     function init(): void {
         createScene();
-        let result: ƒ.Serializable = testSerialization(camera);
+        let result: ƒ.Serializable = testSerialization(node);
         // (<ƒ.Node>result).name = "nlksanfdv";
-        compare(camera, result);
+        compare(node, result);
     }
 
     function compare(_object1: ƒ.Serializable, _object2: ƒ.Serializable, _level: number = 0, _checked: ƒ.Serializable[] = []): boolean {
@@ -110,7 +110,7 @@ namespace MiniScene {
         console.groupEnd();
 
         console.group("Stringified");
-        let json: string = JSON.stringify(serialization);
+        let json: string = JSON.stringify(serialization, null, 2);
         console.log(json);
         console.groupEnd();
 

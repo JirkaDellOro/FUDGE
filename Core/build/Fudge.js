@@ -49,6 +49,13 @@ var Fudge;
         constructor() {
             this.container = null;
             this.singleton = true;
+            this.active = true;
+        }
+        activate(_on) {
+            this.active = _on;
+        }
+        get isActive() {
+            return this.active;
         }
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
@@ -90,10 +97,14 @@ var Fudge;
             }
         }
         serialize() {
-            return null;
+            let serialization = {
+                active: this.active
+            };
+            return serialization;
         }
         deserialize(_serialization) {
-            return null;
+            this.active = _serialization.active;
+            return this;
         }
     }
     Fudge.Component = Component;
@@ -109,7 +120,6 @@ var Fudge;
     class ComponentCamera extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.enabled = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass? -> Superclass
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
@@ -117,12 +127,6 @@ var Fudge;
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
-        activate(_on) {
-            this.enabled = _on;
-        }
-        get isActive() {
-            return this.enabled;
-        }
         get isOrthographic() {
             return this.orthographic;
         }
@@ -166,6 +170,28 @@ var Fudge;
         projectOrthographic(_left = 0, _right = Fudge.gl2.canvas.clientWidth, _bottom = Fudge.gl2.canvas.clientHeight, _top = 0) {
             this.orthographic = true;
             this.projectionMatrix = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+        }
+        serialize() {
+            let serialization = {
+                backgroundColor: this.backgroundColor,
+                backgroundEnabled: this.backgroundEnabled,
+                orthographic: this.orthographic,
+                fieldOfView: this.fieldOfView,
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.backgroundColor = _serialization.backgroundColor;
+            this.backgroundEnabled = _serialization.backgroundEnabled;
+            this.orthographic = _serialization.orthographic;
+            this.fieldOfView = _serialization.fieldOfView;
+            super.deserialize(_serialization[super.constructor.name]);
+            if (this.isOrthographic)
+                this.projectOrthographic(); // TODO: serialize and deserialize parameters
+            else
+                this.projectCentral();
+            return this;
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -241,13 +267,15 @@ var Fudge;
         }
         serialize() {
             let serialization = {
-                mesh: this.mesh.serialize()
+                mesh: this.mesh.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.setMesh(mesh);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
         /**
@@ -414,12 +442,14 @@ var Fudge;
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                matrix: this.matrix.serialize()
+                matrix: this.matrix.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             this.matrix.deserialize(_serialization.matrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
     }
@@ -442,13 +472,13 @@ var Fudge;
         }
         serialize() {
             let serialization = {
-                worldMatrix: this.worldMatrix.serialize()
+                // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
+                [super.constructor.name]: super.serialize()
             };
-            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         deserialize(_serialization) {
-            this.worldMatrix.deserialize(_serialization.worldMatrix);
+            // this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }

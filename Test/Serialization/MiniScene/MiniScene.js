@@ -7,9 +7,9 @@ var MiniScene;
     let viewPort;
     function init() {
         createScene();
-        let result = testSerialization(camera);
+        let result = testSerialization(node);
         // (<ƒ.Node>result).name = "nlksanfdv";
-        compare(camera, result);
+        compare(node, result);
     }
     function compare(_object1, _object2, _level = 0, _checked = []) {
         if (_checked.indexOf(_object1) >= 0 || _checked.indexOf(_object2) >= 0)
@@ -93,7 +93,7 @@ var MiniScene;
         console.log(serialization);
         console.groupEnd();
         console.group("Stringified");
-        let json = JSON.stringify(serialization);
+        let json = JSON.stringify(serialization, null, 2);
         console.log(json);
         console.groupEnd();
         console.group("Parsed");
