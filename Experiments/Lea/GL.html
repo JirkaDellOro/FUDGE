@@ -1,0 +1,39 @@
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js">
+</script>
+<script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
+<script language="javascript">
+    var config = {
+        content: [{
+            type: 'row',
+            content: [{
+                type: 'component',
+                componentName: 'testComponent',
+                componentState: { label: 'A' }
+            },
+
+            {
+                type: 'column',
+                content: [{
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'B' }
+                },
+
+                {
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'C' }
+                }]
+            }]
+        }]
+    };
+
+    var myLayout = new GoldenLayout(config);
+
+    myLayout.registerComponent( 'testComponent', function( container, componentState ){
+    container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+});
+    myLayout.init();
+</script>
