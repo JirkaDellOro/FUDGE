@@ -1,0 +1,25 @@
+@startuml
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing true
+skinparam handwritten true
+
+namespace NamespaceTest {
+  class A {
+      +sayHello(): void
+  }
+  package "Components" <<Folder>> {
+    class B extends NamespaceTest.A {
+        -a: A 
+        #b:nsdlvkn 
+        +sayHello(): void
+    }
+    class C extends NamespaceTest.A {
+        -a: A 
+        #b:nsdlvkn 
+        +sayHello(): void
+    }
+  }
+}
+@enduml

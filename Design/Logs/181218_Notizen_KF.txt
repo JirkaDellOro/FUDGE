@@ -1,0 +1,7 @@
+Gemeinsam das child_process phonegap serve Problem angeschaut und über debugging versucht zu beheben
+.exec und . Spawn vorgeführt
+Im debug ist der Fehler nicht aufgetreten
+Daher mit setTimeout versucht, fehler trotzdem  aufgetreten
+Fehlerursprung ist im childprocess onexit handler
+
+Fehlerursache noch nicht gefunden

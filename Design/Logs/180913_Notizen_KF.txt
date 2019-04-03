@@ -1,0 +1,27 @@
+GameEngine wird angelehnt an folgende Beispiele:
+	- PlayCanvas
+	- ThreeJS
+	- Babylon
+
+Struktur an Unity anlehnen
+
+Editor-Funktionen sind ihm sehr wichtig (Thesis Lukas)
+--> ein Coding Editor soll nicht integriert werden, sondern in einen externen Editor verlinken
+
+Wichtig ist die Verwendung von TypeScript!
+Unbedingt WebGL 2 verwenden - bei Recherchen darauf achten, dass Lösung für WebGL 2 verwendet wird
+
+Github Projekt: JirkaDellOro/FUDGE
+
+Alle wichtigen Infos stehen in der MindMap
+
+Flache Hierarchien:
+	- Composition over Inheritance
+	- Meshs sollen einfach ausgetauscht werden können
+		? Unabhängig von weiteren Komponenten
+
+Datenformat zum Speichern einer Szene soll JSON sein
+
+Wichtig: Definition-Files in TS!
+
+=> Es sollen Tests geschrieben werden können. Nicht zwingend jetzt direkt aber es soll möglich sein!

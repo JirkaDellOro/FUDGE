@@ -1,0 +1,18 @@
+Allgemein
+
+Begriffsbibliothek angelegt
+Schnittstelle untersuchen von ThreeJS
+
+
+
+Zeit
+
+Generelle Informationen zusammengetragen
+Game Time muss skalierbar sein
+Frame Rate soll immer mit voller Geschwindigkeit ablaufen
+
+
+
+Sonstiges
+
+WebAssembly anschauen -> Web Compiler für Geometrie von C für Web
