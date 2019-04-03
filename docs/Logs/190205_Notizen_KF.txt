@@ -1,0 +1,9 @@
+Zusammenfassung KF 05. Feb 2019
+
+- Phonegap-Befehle auch mit iOS vorbereiten 
+- Kleine Checkliste in die Anwendung, was für build bzw. run benötigt wird (USB-Debugging aktiviert? Dateiübertragung erlaubt? Etc.)
+- WebXR in neuster Version in Thesis schreiben evtl. Anwendung dann aus den bestehenden Gründen in Älterer Version anhängen
+
+Anpassung des Thesistitels:
+
+Entwicklung einer Anwendung zur Einbindung und Programmierung von AR-Applikationen mit ARCore für die Integration in einen webbasierten Game-Editor (FUDGE)

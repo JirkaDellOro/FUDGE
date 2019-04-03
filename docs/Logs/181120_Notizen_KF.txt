@@ -1,0 +1,11 @@
+	1. Zusammenfassung letzte Sitzung
+	2. Vorstellung Thomas' aktueller Stand
+		a. PDF wird nochmal korrigiert und hochgeladen
+	3. Vorstellung Jascha's aktueller Stand
+		a. Vereinfachte Klassendiagramme von babylon.js erstellen? Wie?
+		b. Aktuelle Klassen in babylon.js (wie vermutet) sehr stark verschachtelt
+		c. Babylon.js wird vermutlich eine Sackgasse sein
+	4. Vorstellung Kathrin 
+		a. Klassendiagramm WebXR oder ARCore
+		b. Cordova in electron "builden"
+

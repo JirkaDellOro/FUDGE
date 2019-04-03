@@ -1,0 +1,8 @@
+Die Möglichkeit, Szenen zu speichern und zu laden muss gegeben werden
+Szenen werden in JSON gespeichert und können dort auch ohne den Editor bearbeitet werden (Z.b. Erstellung eines neuen Objektes)
+
+Gibt es Bedarf, FUDGE auf Node laufen zu lassen?
+
+DOM Eventsteuerung
+
+Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)
