@@ -7,7 +7,7 @@ skinparam handwritten true
 
 namespace NamespaceTest {
   class A {
-      +sayHelloYYYY(): void
+      +sayHelloYABC(): void
   }
   package "Components" <<Folder>> {
     class B extends NamespaceTest.A {
