@@ -6,7 +6,11 @@
 </head>
 
 <body>
-    <img src="http://www.plantuml.com/plantuml/proxy?src=https://jirkadelloro.github.io/FUDGE/Design/Core.txt?13">
+    <script>
+        let src = "http://www.plantuml.com/plantuml/proxy" + location.search + "?" + Math.random();
+        console.log(src);
+        document.write('<img src="' + src + '"/>');
+    </script>
 </body>
 
 </html>
