@@ -9,7 +9,9 @@ var MiniScene;
         createScene();
         let result = testSerialization(node);
         // (<ƒ.Node>result).name = "nlksanfdv";
+        console.groupCollapsed("Comparison");
         compare(node, result);
+        console.groupEnd();
     }
     function compare(_object1, _object2, _level = 0, _checked = []) {
         if (_checked.indexOf(_object1) >= 0 || _checked.indexOf(_object2) >= 0)
@@ -92,7 +94,7 @@ var MiniScene;
         let serialization = ƒ.Serializer.serialize(_object);
         console.log(serialization);
         console.groupEnd();
-        console.group("Stringified");
+        console.groupCollapsed("Stringified");
         let json = JSON.stringify(serialization, null, 2);
         console.log(json);
         console.groupEnd();
