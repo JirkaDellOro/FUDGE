@@ -3,7 +3,7 @@ skinparam monochrome true
 skinparam componentStyle uml2
 skinparam classAttributeIconSize 0
 skinparam shadowing false
-skinparam handwritten false
+//skinparam handwritten true
 
 namespace NamespaceTest {
   class A {
