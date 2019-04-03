@@ -1,3 +1,0 @@
-Probleme mit Typescript, Projekt muss neu aufgesetzt werden, um den Fehler besser beheben zu können. (#10)
-
-Probleme mit dem HTML-Element <input type="file"/> --> Dateipfad wird vermutlich durch electron unkenntlich gemacht.
