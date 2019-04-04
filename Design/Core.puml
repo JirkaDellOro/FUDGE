@@ -9,6 +9,7 @@ top to bottom direction
 
 package Fudge <<Rectangle>>{
   ' gl2: WebGL2RenderingContext
+  
   package "Math" <<Folder>> {
     class Vector3 {
       - data: number[]
@@ -22,15 +23,26 @@ package Fudge <<Rectangle>>{
     }
     Matrix4x4 --() Serializable
   }
+  
+  package "Shader" << Folder>> {
+    abstract class Shader {
+      - program: WebGLProgram
+      - attributes: MapStringToNumber
+      - uniforms: MapStringToWebGLUniformLocation
+    }
+    class ShaderBasic extends Shader {
+    }
+    class ShaderTexture extends Shader {
+    }
+  }
+  
   package "Engine" <<Folder>> {
-    package "Node" <<Frame>> {
+    file "Node" {
       class Node {
         - parent: Node | null
         - children: Node[]
         - components: MapClassToComponents
       }
-      Node "0..1 parent"<-left->"0..n children" Node
-      Serializable ()- Node
       interface MapClassToComponents{
         [className: string]: Component[]
       }
@@ -38,6 +50,7 @@ package Fudge <<Rectangle>>{
         [key: string]: Node
       }
     }
+    Serializable ()-- Node
     interface BufferSpecification {
       size: number
       dataType: number
@@ -45,6 +58,7 @@ package Fudge <<Rectangle>>{
       stride: number
       offset: number
     }
+    
     class Color {
       // to be implemented
     }
@@ -60,20 +74,22 @@ package Fudge <<Rectangle>>{
       - vertexArrayObjects: MapStringToWebGLVertexArrayObject
       - buffers: MapStringToWebGLBuffer
     }
+
+    file "Serializer" {
+      interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+      }
+      interface Serialization {
+        [type: string]: General;
+      }
+      class Serializer {
+        {static} + serialize(_object: Serializable): Serialization
+        {static} + deserialize(_serialization: Serialization): Serializable
+      }
+    }
   }
-  package "Serializer" <<Frame>> {
-    interface Serializable {
-      serialize(): Serialization;
-      deserialize(_serialization: Serialization): Serializable;
-    }
-    interface Serialization {
-      [type: string]: General;
-    }
-    class Serializer {
-      {static} + serialize(_object: Serializable): Serialization
-      {static} + deserialize(_serialization: Serialization): Serializable
-    }
-  }
+  
   package "Components" <<Folder>> {
     abstract class Component {
       - container: Node | null
@@ -115,16 +131,13 @@ package Fudge <<Rectangle>>{
       public depth: number;
     }
   }
-  package "Shader" << Folder>> {
-    abstract class Shader {
-      - program: WebGLProgram
-      - attributes: MapStringToNumber
-      - uniforms: MapStringToWebGLUniformLocation
-    }
-    class ShaderBasic extends Shader {
-    }
-    class ShaderTexture extends Shader {
-    }
-  }
+
+  Node "0..1 parent"<-left->"0..n children" Node
+  ComponentMesh -->"1" Mesh
+  Node "1 container"<-->"0..n" Component
+  ComponentPivot -->"1" Matrix4x4
+  ComponentTransform -->"1" Matrix4x4
+  Viewport -->"1 root" Node
+  Viewport -->"1 camera" ComponentCamera
 }
 @enduml
