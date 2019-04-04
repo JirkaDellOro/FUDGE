@@ -5,7 +5,7 @@ namespace Fudge {
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Mat3 {
+    export class Matrix3x3 {
 
         public data: number[];
 
@@ -17,8 +17,8 @@ namespace Fudge {
             ];
         }
 
-        public static projection(_width: number, _height: number): Mat3 {
-            let matrix: Mat3 = new Mat3;
+        public static projection(_width: number, _height: number): Matrix3x3 {
+            let matrix: Matrix3x3 = new Matrix3x3;
             matrix.data = [
                 2 / _width, 0, 0,
                 0, -2 / _height, 0,
@@ -31,22 +31,22 @@ namespace Fudge {
             return this.data;
         }
 
-        public identity(): Mat3 {
-            return new Mat3;
+        public identity(): Matrix3x3 {
+            return new Matrix3x3;
         }
-        public translate(_matrix: Mat3, _xTranslation: number, _yTranslation: number): Mat3 {
+        public translate(_matrix: Matrix3x3, _xTranslation: number, _yTranslation: number): Matrix3x3 {
             return this.multiply(_matrix, this.translation(_xTranslation, _yTranslation));
         }
 
-        public rotate(_matrix: Mat3, _angleInDegrees: number): Mat3 {
+        public rotate(_matrix: Matrix3x3, _angleInDegrees: number): Matrix3x3 {
             return this.multiply(_matrix, this.rotation(_angleInDegrees));
         }
 
-        public scale(_matrix: Mat3, _xScale: number, _yscale: number): Mat3 {
+        public scale(_matrix: Matrix3x3, _xScale: number, _yscale: number): Matrix3x3 {
             return this.multiply(_matrix, this.scaling(_xScale, _yscale));
         }
 
-        public multiply(_a: Mat3, _b: Mat3): Mat3 {
+        public multiply(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3 {
             let a00: number = _a.data[0 * 3 + 0];
             let a01: number = _a.data[0 * 3 + 1];
             let a02: number = _a.data[0 * 3 + 2];
@@ -65,7 +65,7 @@ namespace Fudge {
             let b20: number = _b.data[2 * 3 + 0];
             let b21: number = _b.data[2 * 3 + 1];
             let b22: number = _b.data[2 * 3 + 2];
-            let matrix: Mat3 = new Mat3;
+            let matrix: Matrix3x3 = new Matrix3x3;
             matrix.data = [
                 b00 * a00 + b01 * a10 + b02 * a20,
                 b00 * a01 + b01 * a11 + b02 * a21,
@@ -80,8 +80,8 @@ namespace Fudge {
             return matrix;
         }
 
-        private translation(_xTranslation: number, _yTranslation: number): Mat3 {
-            let matrix: Mat3 = new Mat3;
+        private translation(_xTranslation: number, _yTranslation: number): Matrix3x3 {
+            let matrix: Matrix3x3 = new Matrix3x3;
             matrix.data = [
                 1, 0, 0,
                 0, 1, 0,
@@ -90,8 +90,8 @@ namespace Fudge {
             return matrix;
         }
 
-        private scaling(_xScale: number, _yScale: number): Mat3 {
-            let matrix: Mat3 = new Mat3;
+        private scaling(_xScale: number, _yScale: number): Matrix3x3 {
+            let matrix: Matrix3x3 = new Matrix3x3;
             matrix.data = [
                 _xScale, 0, 0,
                 0, _yScale, 0,
@@ -100,12 +100,12 @@ namespace Fudge {
             return matrix;
         }
 
-        private rotation(_angleInDegrees: number): Mat3 {
+        private rotation(_angleInDegrees: number): Matrix3x3 {
             let angleInDegrees: number = 360 - _angleInDegrees;
             let angleInRadians: number = angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
-            let matrix: Mat3 = new Mat3;
+            let matrix: Matrix3x3 = new Matrix3x3;
             matrix.data = [
                 cos, -sin, 0,
                 sin, cos, 0,
