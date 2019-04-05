@@ -4,6 +4,7 @@
  * to create the florin-sign (ƒ) type Alt+159 on numpad or use key binding for Alt+F:
  * {"key": "alt+f", "command": "editor.action.insertSnippet", "when": "editorFocus", "args": {"snippet": "ƒ"}}
  */
+/*
 namespace NameSpaceTest {
     import ƒ = Fudge;
 
@@ -13,3 +14,4 @@ namespace NameSpaceTest {
     test.x = "Hello";
     console.log(test.x);
 }
+*/

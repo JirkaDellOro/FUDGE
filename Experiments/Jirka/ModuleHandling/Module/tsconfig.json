@@ -1,7 +1,12 @@
 {
     "compilerOptions": {
         "target": "es6",
-        "sourceMap": true
+        "sourceMap": true,
+        "strictFunctionTypes": true,
+        "alwaysStrict": true,
+        "diagnostics": true,
+        "strict": true,
+        "outFile": "Test.js"
     },
     "exclude": [
         "node_modules"

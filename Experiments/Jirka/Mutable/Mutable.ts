@@ -1,21 +1,29 @@
 
 namespace Mutable {
-    export interface Mutator {
+    //#region class Mutator 
+    export interface MutatorTypes {
         [attribute: string]: string;
     }
-    export interface Mutation {
-        [attribute: string]: object;
+    export interface Mutator {
+        [attribute: string]: Object;
     }
-    export interface MutatorForAnimation extends Mutator { }
-    export interface MutatorForUserInterface extends Mutator { }
+    export interface MutatorForAnimation extends Mutator { forAnimation: null; }
+    export interface MutatorForUserInterface extends Mutator { forUserInterface: null; }
 
     class Mutable {
-        public getMutator(): Mutator {
-            let mutation: Mutator = {};
-            for (let attribute in this) {
-                mutation[attribute] = this[attribute].constructor.name;
+        public getMutatorTypes(_mutator: Mutator): MutatorTypes {
+            let types: MutatorTypes = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
             }
-            return mutation;
+            return types;
+        }
+        public getMutator(): Mutator {
+            let mutator: Mutator = {};
+            for (let attribute in this) {
+                mutator[attribute] = this[attribute];
+            }
+            return mutator;
         }
         public getMutatorForAnimation(): MutatorForAnimation {
             return <MutatorForAnimation>this.getMutator();
@@ -23,9 +31,9 @@ namespace Mutable {
         public getMutatorForUserInterface(): MutatorForUserInterface {
             return <MutatorForUserInterface>this.getMutator();
         }
-        public getMutation(_mutation: Mutation): void {
-            for (let attribute in _mutation)
-                _mutation[attribute] = this[attribute];
+        public updateMutator(_mutator: Mutator): void {
+            for (let attribute in _mutator)
+                _mutator[attribute] = this[attribute];
         }
         protected mutate(_mutator: Mutator): void {
             for (let attribute in _mutator)
@@ -54,38 +62,39 @@ namespace Mutable {
         public animate(_mutation: MutatorForAnimation): void {
             this.mutate(_mutation);
         }
+
+        public mutate(_mutator: Mutator): void {
+            super.mutate(_mutator);
+        }
     }
+    //#endregion
 
     let test: Test = new Test();
     test.test = new Test();
-    printMutators();
-    printMutation();
+    printMutatorTypes();
+    console.group("Mutator for animation");
+    console.log(test.getMutatorForAnimation());
+    console.groupEnd();
     animate();
-    printMutation();
+
 
     function animate(): void {
         console.group("Animate");
-        let mutation: Mutation = <Mutation><Object>test.getMutatorForAnimation();
-        mutation["s"] = "I'v been animated!";
-        test.animate(mutation);
-    }
-
-    function printMutation(): void {
-        console.group("Mutation");
-        let mutation: Mutation = test.getMutatorForAnimation();
-        test.getMutation(mutation);
-        console.log(mutation);
+        let m: MutatorForAnimation = test.getMutatorForAnimation();
+        m["s"] = "I've been animated!";
+        test.animate(m);
+        test.updateMutator(m);
+        console.log(m);
         console.groupEnd();
     }
 
-    function printMutators(): void {
+    function printMutatorTypes(): void {
         console.group("Mutators");
         let m: Mutator = test.getMutator();
         console.log(m);
-        let mfa: Mutator = test.getMutatorForAnimation();
-        console.log(mfa);
-        let mfui: Mutator = test.getMutatorForUserInterface();
-        console.log(mfui);
+        console.log(test.getMutatorForAnimation());
+        console.log(test.getMutatorForUserInterface());
+        console.log(test.getMutatorTypes(m));
         console.groupEnd();
     }
 }

@@ -1,12 +1,19 @@
 var Mutable;
 (function (Mutable_1) {
     class Mutable {
-        getMutator() {
-            let mutation = {};
-            for (let attribute in this) {
-                mutation[attribute] = this[attribute].constructor.name;
+        getMutatorTypes(_mutator) {
+            let types = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
             }
-            return mutation;
+            return types;
+        }
+        getMutator() {
+            let mutator = {};
+            for (let attribute in this) {
+                mutator[attribute] = this[attribute];
+            }
+            return mutator;
         }
         getMutatorForAnimation() {
             return this.getMutator();
@@ -14,9 +21,9 @@ var Mutable;
         getMutatorForUserInterface() {
             return this.getMutator();
         }
-        getMutation(_mutation) {
-            for (let attribute in _mutation)
-                _mutation[attribute] = this[attribute];
+        updateMutator(_mutator) {
+            for (let attribute in _mutator)
+                _mutator[attribute] = this[attribute];
         }
         mutate(_mutator) {
             for (let attribute in _mutator)
@@ -46,35 +53,35 @@ var Mutable;
         animate(_mutation) {
             this.mutate(_mutation);
         }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
     }
     Mutable_1.Test = Test;
+    //#endregion
     let test = new Test();
     test.test = new Test();
-    printMutators();
-    printMutation();
+    printMutatorTypes();
+    console.group("Mutator for animation");
+    console.log(test.getMutatorForAnimation());
+    console.groupEnd();
     animate();
-    printMutation();
     function animate() {
         console.group("Animate");
-        let mutation = test.getMutatorForAnimation();
-        mutation["s"] = "I'v been animated!";
-        test.animate(mutation);
-    }
-    function printMutation() {
-        console.group("Mutation");
-        let mutation = test.getMutatorForAnimation();
-        test.getMutation(mutation);
-        console.log(mutation);
+        let m = test.getMutatorForAnimation();
+        m["s"] = "I've been animated!";
+        test.animate(m);
+        test.updateMutator(m);
+        console.log(m);
         console.groupEnd();
     }
-    function printMutators() {
+    function printMutatorTypes() {
         console.group("Mutators");
         let m = test.getMutator();
         console.log(m);
-        let mfa = test.getMutatorForAnimation();
-        console.log(mfa);
-        let mfui = test.getMutatorForUserInterface();
-        console.log(mfui);
+        console.log(test.getMutatorForAnimation());
+        console.log(test.getMutatorForUserInterface());
+        console.log(test.getMutatorTypes(m));
         console.groupEnd();
     }
 })(Mutable || (Mutable = {}));
