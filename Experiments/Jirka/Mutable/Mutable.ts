@@ -1,23 +1,30 @@
 
 namespace Mutable {
     //#region class Mutator 
-    export interface MutatorTypes {
+    /**
+     * Interface describing the datatypes of the attributes a mutator as strings 
+     */
+    export interface MutatorAttributeTypes {
         [attribute: string]: string;
     }
+    /**
+     * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
+     */
     export interface Mutator {
         [attribute: string]: Object;
     }
-    export interface MutatorForAnimation extends Mutator { forAnimation: null; }
-    export interface MutatorForUserInterface extends Mutator { forUserInterface: null; }
 
-    class Mutable {
-        public getMutatorTypes(_mutator: Mutator): MutatorTypes {
-            let types: MutatorTypes = {};
-            for (let attribute in _mutator) {
-                types[attribute] = _mutator[attribute].constructor.name;
-            }
-            return types;
-        }
+    export interface MutatorForAnimation extends Mutator { readonly forAnimation: null; }
+    export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null; }
+
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    export class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
         public getMutator(): Mutator {
             let mutator: Mutator = {};
             for (let attribute in this) {
@@ -25,23 +32,54 @@ namespace Mutable {
             }
             return mutator;
         }
+        /**
+         * Collect the attributes of the instance and their values applicable for animation
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
         public getMutatorForAnimation(): MutatorForAnimation {
             return <MutatorForAnimation>this.getMutator();
         }
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
         public getMutatorForUserInterface(): MutatorForUserInterface {
             return <MutatorForUserInterface>this.getMutator();
         }
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator 
+         */
+        public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+            let types: MutatorAttributeTypes = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
+            }
+            return types;
+        }
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator 
+         */
         public updateMutator(_mutator: Mutator): void {
             for (let attribute in _mutator)
                 _mutator[attribute] = this[attribute];
         }
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
         protected mutate(_mutator: Mutator): void {
             for (let attribute in _mutator)
                 this[attribute] = _mutator[attribute];
         }
     }
 
-    export class Test extends Mutable {
+    export class TestSuper extends Mutable {
+        ssuper: string = "Hello from the superclass";
+    }
+
+    export class Test extends TestSuper {
         public test: Test = null;
         public b: boolean = true;
         protected s: string = "Hallo";
@@ -94,7 +132,7 @@ namespace Mutable {
         console.log(m);
         console.log(test.getMutatorForAnimation());
         console.log(test.getMutatorForUserInterface());
-        console.log(test.getMutatorTypes(m));
+        console.log(test.getMutatorAttributeTypes(m));
         console.groupEnd();
     }
 }

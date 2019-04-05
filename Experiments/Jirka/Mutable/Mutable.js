@@ -1,13 +1,13 @@
 var Mutable;
 (function (Mutable_1) {
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
     class Mutable {
-        getMutatorTypes(_mutator) {
-            let types = {};
-            for (let attribute in _mutator) {
-                types[attribute] = _mutator[attribute].constructor.name;
-            }
-            return types;
-        }
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
         getMutator() {
             let mutator = {};
             for (let attribute in this) {
@@ -15,22 +15,57 @@ var Mutable;
             }
             return mutator;
         }
+        /**
+         * Collect the attributes of the instance and their values applicable for animation
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
         getMutatorForAnimation() {
             return this.getMutator();
         }
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
         getMutatorForUserInterface() {
             return this.getMutator();
         }
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator) {
+            let types = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
+            }
+            return types;
+        }
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
         updateMutator(_mutator) {
             for (let attribute in _mutator)
                 _mutator[attribute] = this[attribute];
         }
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
         mutate(_mutator) {
             for (let attribute in _mutator)
                 this[attribute] = _mutator[attribute];
         }
     }
-    class Test extends Mutable {
+    Mutable_1.Mutable = Mutable;
+    class TestSuper extends Mutable {
+        constructor() {
+            super(...arguments);
+            this.ssuper = "Hello from the superclass";
+        }
+    }
+    Mutable_1.TestSuper = TestSuper;
+    class Test extends TestSuper {
         constructor() {
             super(...arguments);
             this.test = null;
@@ -81,7 +116,7 @@ var Mutable;
         console.log(m);
         console.log(test.getMutatorForAnimation());
         console.log(test.getMutatorForUserInterface());
-        console.log(test.getMutatorTypes(m));
+        console.log(test.getMutatorAttributeTypes(m));
         console.groupEnd();
     }
 })(Mutable || (Mutable = {}));
