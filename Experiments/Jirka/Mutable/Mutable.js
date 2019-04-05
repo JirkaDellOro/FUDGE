@@ -105,6 +105,7 @@ var Mutable;
         console.group("Animate");
         let m = test.getMutatorForAnimation();
         m["s"] = "I've been animated!";
+        m["xyz"] = "I shouldn't be here...";
         test.animate(m);
         test.updateMutator(m);
         console.log(m);

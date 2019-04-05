@@ -14,6 +14,9 @@ namespace Mutable {
         [attribute: string]: Object;
     }
 
+    /*
+     * Interfaces dedicated for each purpose. Extra attribute necessary for compiletime type checking, not existent at runtime
+     */
     export interface MutatorForAnimation extends Mutator { readonly forAnimation: null; }
     export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null; }
 
@@ -120,6 +123,7 @@ namespace Mutable {
         console.group("Animate");
         let m: MutatorForAnimation = test.getMutatorForAnimation();
         m["s"] = "I've been animated!";
+        m["xyz"] = "I shouldn't be here...";
         test.animate(m);
         test.updateMutator(m);
         console.log(m);

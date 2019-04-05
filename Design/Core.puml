@@ -1,9 +1,9 @@
-@startuml
+@startuml FUDGE-Core
 skinparam monochrome true
 skinparam componentStyle uml2
 skinparam classAttributeIconSize 0
 skinparam shadowing false
-skinparam handwritten true
+skinparam handwritten false
 
 top to bottom direction
 
