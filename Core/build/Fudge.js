@@ -899,6 +899,7 @@ var Fudge;
         }
         // #endregion
         // #region Events
+        //TODO: research on AddEventListenerOptions and probably implementation
         addEventListener(_type, _handler, _capture = false) {
             if (_capture) {
                 if (!this.captures[_type])

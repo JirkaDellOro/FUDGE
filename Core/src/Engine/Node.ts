@@ -179,6 +179,7 @@ namespace Fudge {
         // #endregion
 
         // #region Events
+        //TODO: research on AddEventListenerOptions and probably implementation
         addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean = false): void {
             if (_capture) {
                 if (!this.captures[_type])

@@ -7,7 +7,9 @@ namespace EventSystem {
     //     [type: string]: Function[];
     // }
 
-    type Listeners = Map<string, Function[]>;
+    export interface Listeners {
+        [eventType: string]: Function[];
+    }
 
     enum NODE_EVENT {
         ANIMATION_FRAME = "animationFrame",
@@ -31,8 +33,8 @@ namespace EventSystem {
             this.name = _name;
             this.count = 0;
             this.children = [];
-            this.listeners = new Map();
-            this.captures = new Map();
+            this.listeners = {};
+            this.captures = {};
             parent = null;
         }
 
