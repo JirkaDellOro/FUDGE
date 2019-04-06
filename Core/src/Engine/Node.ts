@@ -2,7 +2,7 @@ namespace Fudge {
     export interface MapClassToComponents {
         [className: string]: Component[];
     }
-    
+
     /**
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -14,8 +14,8 @@ namespace Fudge {
         private components: MapClassToComponents = {};
         // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
-        private listeners: Listeners;
-        private captures: Listeners;
+        private listeners: Listeners = {};
+        private captures: Listeners = {};
 
         /**
          * Creates a new node with a name and initializes all attributes
@@ -179,7 +179,7 @@ namespace Fudge {
         // #endregion
 
         // #region Events
-        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean): void {
+        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean = false): void {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];
@@ -192,10 +192,12 @@ namespace Fudge {
             }
         }
 
-        dispatchEvent(_event: FudgeEvent): void {
+        // TODO: set current target in Event
+        dispatchEvent(_event: Event): void {
             let ancestors: Node[] = [];
             let upcoming: Node = this;
-            _event.node = this;
+            // _event.setTarget(this);
+            Object.defineProperty(_event, "target", { writable: false, value: this });
 
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
@@ -220,12 +222,14 @@ namespace Fudge {
             }
         }
 
-        broadcastEvent(_event: FudgeEvent): void {
-            _event.node = this;
+        broadcastEvent(_event: Event): void {
+            // _event.setTarget(this);
+            Object.defineProperty(_event, "target", { writable: false, value: this });
             this.broadcastEventRecursive(_event);
         }
 
-        private broadcastEventRecursive(_event: FudgeEvent): void {
+        // TODO: set current target in Event
+        private broadcastEventRecursive(_event: Event): void {
             // capture phase only
             let captures: Function[] = this.captures[_event.type] || [];
             for (let handler of captures)

@@ -9,7 +9,13 @@ namespace Fudge {
         POINTER_UP = "pointerUp"
     }
 
-    export class FudgeEvent extends Event {
+    /*
+    export class Eventƒ extends Event {
         node: Node;
+        public setTarget(_node: Node): void {    
+            this.node = _node;   
+        }
     }
+    */
+    // function setEventTarget(_node: Node): void {}
 }

@@ -574,9 +574,15 @@ var Fudge;
         NODE_EVENT["POINTER_DOWN"] = "pointerDown";
         NODE_EVENT["POINTER_UP"] = "pointerUp";
     })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
-    class FudgeEvent extends Event {
+    /*
+    export class Eventƒ extends Event {
+        node: Node;
+        public setTarget(_node: Node): void {
+            this.node = _node;
+        }
     }
-    Fudge.FudgeEvent = FudgeEvent;
+    */
+    // function setEventTarget(_node: Node): void {}
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -752,6 +758,10 @@ var Fudge;
             this.parent = null; // The parent of this node.
             this.children = []; // Associative array nodes appended to this node.
             this.components = {};
+            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+            this.listeners = {};
+            this.captures = {};
             this.name = _name;
         }
         getParent() {
@@ -889,7 +899,7 @@ var Fudge;
         }
         // #endregion
         // #region Events
-        addEventListener(_type, _handler, _capture) {
+        addEventListener(_type, _handler, _capture = false) {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];
@@ -901,10 +911,12 @@ var Fudge;
                 this.listeners[_type].push(_handler);
             }
         }
+        // TODO: set current target in Event
         dispatchEvent(_event) {
             let ancestors = [];
             let upcoming = this;
-            _event.node = this;
+            // _event.setTarget(this);
+            Object.defineProperty(_event, "target", { writable: false, value: this });
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
             // capture phase
@@ -925,9 +937,11 @@ var Fudge;
             }
         }
         broadcastEvent(_event) {
-            _event.node = this;
+            // _event.setTarget(this);
+            Object.defineProperty(_event, "target", { writable: false, value: this });
             this.broadcastEventRecursive(_event);
         }
+        // TODO: set current target in Event
         broadcastEventRecursive(_event) {
             // capture phase only
             let captures = this.captures[_event.type] || [];
