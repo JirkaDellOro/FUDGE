@@ -325,6 +325,19 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface Listeners {
+        [eventType: string]: Function[];
+    }
+    enum NODE_EVENT {
+        ANIMATION_FRAME = "animationFrame",
+        POINTER_DOWN = "pointerDown",
+        POINTER_UP = "pointerUp"
+    }
+    class FudgeEvent extends Event {
+        node: Node;
+    }
+}
+declare namespace Fudge {
     let gl2: WebGL2RenderingContext;
     /**
      * Utility class to sore and/or wrap some functionality.
@@ -399,9 +412,6 @@ declare namespace Fudge {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
-    interface MapStringToNode {
-        [key: string]: Node;
-    }
     /**
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -411,6 +421,8 @@ declare namespace Fudge {
         private parent;
         private children;
         private components;
+        private listeners;
+        private captures;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -457,6 +469,10 @@ declare namespace Fudge {
         removeComponent(_component: Component): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean): void;
+        dispatchEvent(_event: FudgeEvent): void;
+        broadcastEvent(_event: FudgeEvent): void;
+        private broadcastEventRecursive;
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.

@@ -2,9 +2,7 @@ namespace Fudge {
     export interface MapClassToComponents {
         [className: string]: Component[];
     }
-    export interface MapStringToNode {
-        [key: string]: Node;
-    }
+    
     /**
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -16,6 +14,8 @@ namespace Fudge {
         private components: MapClassToComponents = {};
         // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+        private listeners: Listeners;
+        private captures: Listeners;
 
         /**
          * Creates a new node with a name and initializes all attributes
@@ -57,7 +57,7 @@ namespace Fudge {
          * @throws Error when trying to add an ancestor of this 
          */
         public appendChild(_node: Node): void {
-            if (this.children.indexOf(_node) >= 0)
+            if (this.children.includes(_node))
                 // _node is already a child of this
                 return;
 
@@ -178,6 +178,69 @@ namespace Fudge {
         }
         // #endregion
 
+        // #region Events
+        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean): void {
+            if (_capture) {
+                if (!this.captures[_type])
+                    this.captures[_type] = [];
+                this.captures[_type].push(_handler);
+            }
+            else {
+                if (!this.listeners[_type])
+                    this.listeners[_type] = [];
+                this.listeners[_type].push(_handler);
+            }
+        }
+
+        dispatchEvent(_event: FudgeEvent): void {
+            let ancestors: Node[] = [];
+            let upcoming: Node = this;
+            _event.node = this;
+
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+
+            // capture phase
+            for (let i: number = ancestors.length - 1; i >= 0; i--) {
+                let captures: Function[] = ancestors[i].captures[_event.type] || [];
+                for (let handler of captures)
+                    handler(_event);
+            }
+
+            // target phase
+            let listeners: Function[] = this.listeners[_event.type] || [];
+            for (let handler of listeners)
+                handler(_event);
+
+            // bubble phase
+            for (let i: number = 0; i < ancestors.length; i++) {
+                let listeners: Function[] = ancestors[i].listeners[_event.type] || [];
+                for (let handler of listeners)
+                    handler(_event);
+            }
+        }
+
+        broadcastEvent(_event: FudgeEvent): void {
+            _event.node = this;
+            this.broadcastEventRecursive(_event);
+        }
+
+        private broadcastEventRecursive(_event: FudgeEvent): void {
+            // capture phase only
+            let captures: Function[] = this.captures[_event.type] || [];
+            for (let handler of captures)
+                handler(_event);
+            // slower...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
+
+            // same for children
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
+        }
+        // #endregion
 
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().

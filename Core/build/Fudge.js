@@ -568,6 +568,18 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    let NODE_EVENT;
+    (function (NODE_EVENT) {
+        NODE_EVENT["ANIMATION_FRAME"] = "animationFrame";
+        NODE_EVENT["POINTER_DOWN"] = "pointerDown";
+        NODE_EVENT["POINTER_UP"] = "pointerUp";
+    })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
+    class FudgeEvent extends Event {
+    }
+    Fudge.FudgeEvent = FudgeEvent;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     /**
      * Utility class to sore and/or wrap some functionality.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -732,8 +744,6 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Node {
-        // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
-        // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -773,7 +783,7 @@ var Fudge;
          * @throws Error when trying to add an ancestor of this
          */
         appendChild(_node) {
-            if (this.children.indexOf(_node) >= 0)
+            if (this.children.includes(_node))
                 // _node is already a child of this
                 return;
             let ancestor = this.parent;
@@ -876,6 +886,61 @@ var Fudge;
                 this.appendChild(deserializedChild);
             }
             return this;
+        }
+        // #endregion
+        // #region Events
+        addEventListener(_type, _handler, _capture) {
+            if (_capture) {
+                if (!this.captures[_type])
+                    this.captures[_type] = [];
+                this.captures[_type].push(_handler);
+            }
+            else {
+                if (!this.listeners[_type])
+                    this.listeners[_type] = [];
+                this.listeners[_type].push(_handler);
+            }
+        }
+        dispatchEvent(_event) {
+            let ancestors = [];
+            let upcoming = this;
+            _event.node = this;
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+            // capture phase
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let captures = ancestors[i].captures[_event.type] || [];
+                for (let handler of captures)
+                    handler(_event);
+            }
+            // target phase
+            let listeners = this.listeners[_event.type] || [];
+            for (let handler of listeners)
+                handler(_event);
+            // bubble phase
+            for (let i = 0; i < ancestors.length; i++) {
+                let listeners = ancestors[i].listeners[_event.type] || [];
+                for (let handler of listeners)
+                    handler(_event);
+            }
+        }
+        broadcastEvent(_event) {
+            _event.node = this;
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
+            // capture phase only
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
+                handler(_event);
+            // slower...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
+            // same for children
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
         }
         // #endregion
         /**
