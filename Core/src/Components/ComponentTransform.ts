@@ -1,6 +1,6 @@
 namespace Fudge {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -9,7 +9,7 @@ namespace Fudge {
 
         public constructor() {
             super();
-            this.worldMatrix = Matrix4x4.identity();
+            this.worldMatrix = Matrix4x4.identity;
         }
 
         public get WorldPosition(): Vector3 {
@@ -27,6 +27,11 @@ namespace Fudge {
             // this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        public getMutator(): Mutator {
+            let mutator: Mutator = super.getMutator();
+            delete mutator.worldMatrix;
+            return mutator;
         }
     }
 }

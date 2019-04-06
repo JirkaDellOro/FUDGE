@@ -11,32 +11,6 @@ left to right direction
 package Fudge <<Rectangle>>{
   ' gl2: WebGL2RenderingContext
 
-  package "Math" <<Folder>> {
-    class Vector3 {
-      - data: number[]
-      // to be refactored, components as x,y,z numbers
-    }
-    class Matrix3x3 {
-      public data: number[]
-    }
-    class Matrix4x4 {
-      public data: Float32Array
-    }
-    Matrix4x4 --() Serializable
-  }
-
-  package "Shader" << Folder>> {
-    abstract class Shader {
-      - program: WebGLProgram
-      - attributes: MapStringToNumber
-      - uniforms: MapStringToWebGLUniformLocation
-    }
-    class ShaderBasic extends Shader {
-    }
-    class ShaderTexture extends Shader {
-    }
-  }
-
   package "Engine" <<Folder>> {
     file "Node" {
       class Node {
@@ -75,7 +49,8 @@ package Fudge <<Rectangle>>{
       - vertexArrayObjects: MapStringToWebGLVertexArrayObject
       - buffers: MapStringToWebGLBuffer
     }
-
+  }
+  package "Transfer" <<Folder>> {
     file "Serializer" {
       interface Serializable {
         serialize(): Serialization;
@@ -145,6 +120,31 @@ package Fudge <<Rectangle>>{
       public width: number;
       public height: number;
       public depth: number;
+    }
+  }
+  package "Math" <<Folder>> {
+    class Vector3 {
+      - data: number[]
+      // to be refactored, components as x,y,z numbers
+    }
+    class Matrix3x3 {
+      public data: number[]
+    }
+    class Matrix4x4 {
+      public data: Float32Array
+    }
+    Matrix4x4 --() Serializable
+  }
+
+  package "Shader" << Folder>> {
+    abstract class Shader {
+      - program: WebGLProgram
+      - attributes: MapStringToNumber
+      - uniforms: MapStringToWebGLUniformLocation
+    }
+    class ShaderBasic extends Shader {
+    }
+    class ShaderTexture extends Shader {
     }
   }
 

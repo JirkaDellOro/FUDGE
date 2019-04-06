@@ -37,16 +37,80 @@ var Fudge;
     }
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
+        getMutator() {
+            let mutator = {};
+            for (let attribute in this) {
+                mutator[attribute] = this[attribute];
+            }
+            return mutator;
+        }
+        /**
+         * Collect the attributes of the instance and their values applicable for animation.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForAnimation() {
+            return this.getMutator();
+        }
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForUserInterface() {
+            return this.getMutator();
+        }
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator) {
+            let types = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
+            }
+            return types;
+        }
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
+        updateMutator(_mutator) {
+            for (let attribute in _mutator)
+                _mutator[attribute] = this[attribute];
+        }
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
+        mutate(_mutator) {
+            for (let attribute in _mutator)
+                this[attribute] = _mutator[attribute];
+        }
+    }
+    Fudge.Mutable = Mutable;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
 var Fudge;
 /// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
 (function (Fudge) {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Component {
+    class Component extends Fudge.Mutable {
         constructor() {
+            super(...arguments);
             this.container = null;
             this.singleton = true;
             this.active = true;
@@ -324,7 +388,7 @@ var Fudge;
     class ComponentPivot extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.matrix = Fudge.Matrix4x4.identity(); // The matrix to transform the mesh by.
+            this.matrix = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
         }
         get Matrix() {
             return this.matrix;
@@ -339,7 +403,7 @@ var Fudge;
          * Resets this.matrix to idenity Matrix.
          */
         reset() {
-            this.matrix = Fudge.Matrix4x4.identity();
+            this.matrix = Fudge.Matrix4x4.identity;
         }
         /**
          * # Translation methods
@@ -452,20 +516,26 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
+        getMutator() {
+            let mutator = super.getMutator();
+            delete mutator.container;
+            delete mutator.singleton;
+            return mutator;
+        }
     }
     Fudge.ComponentPivot = ComponentPivot;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Fudge.ComponentPivot {
         constructor() {
             super();
-            this.worldMatrix = Fudge.Matrix4x4.identity();
+            this.worldMatrix = Fudge.Matrix4x4.identity;
         }
         get WorldPosition() {
             return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
@@ -481,6 +551,11 @@ var Fudge;
             // this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            delete mutator.worldMatrix;
+            return mutator;
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
@@ -935,21 +1010,19 @@ var Fudge;
             }
         }
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
-        updateNodeWorldMatrix(_node) {
+        updateNodeWorldMatrix(_node, _matrix = Fudge.Matrix4x4.identity) {
+            let worldMatrix = _matrix;
             let transform = _node.cmpTransform;
-            if (!_node.getParent()) {
-                transform.worldMatrix = transform.Matrix;
-            }
-            else {
-                let parentTransform = _node.getParent().cmpTransform;
-                transform.worldMatrix = Fudge.Matrix4x4.multiply(parentTransform.worldMatrix, transform.Matrix);
+            if (transform) {
+                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.Matrix);
+                transform.worldMatrix = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
-                this.updateNodeWorldMatrix(childNode);
+                this.updateNodeWorldMatrix(childNode, worldMatrix);
             }
         }
         /**
@@ -1175,7 +1248,7 @@ var Fudge;
             ]);
         }
         // Transformation methods.######################################################################################
-        static identity() {
+        static get identity() {
             return new Matrix4x4;
         }
         /**
@@ -1693,47 +1766,17 @@ var Fudge;
         getVertices() {
             let vertices = new Float32Array([
                 //front
-                -1, -1, 1,
-                1, -1, 1,
-                -1, 1, 1,
-                -1, 1, 1,
-                1, -1, 1,
-                1, 1, 1,
+                -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
                 //back
-                1, -1, -1,
-                -1, -1, -1,
-                1, 1, -1,
-                1, 1, -1,
-                -1, -1, -1,
-                -1, 1, -1,
+                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
                 //left
-                -1, -1, -1,
-                -1, -1, 1,
-                -1, 1, -1,
-                -1, 1, -1,
-                -1, -1, 1,
-                -1, 1, 1,
+                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
                 //right
-                1, -1, 1,
-                1, -1, -1,
-                1, 1, 1,
-                1, 1, 1,
-                1, -1, -1,
-                1, 1, -1,
+                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
                 //top
-                -1, 1, 1,
-                1, 1, 1,
-                -1, 1, -1,
-                -1, 1, -1,
-                1, 1, 1,
-                1, 1, -1,
+                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
                 //bottom
-                -1, -1, -1,
-                1, -1, -1,
-                -1, -1, 1,
-                -1, -1, 1,
-                1, -1, -1,
-                1, -1, 1
+                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
             ]);
             for (let iVertex = 0; iVertex < vertices.length; iVertex += 3) {
                 vertices[iVertex] *= this.width / 2;
@@ -1992,66 +2035,5 @@ var Fudge;
         }
     }
     Fudge.ShaderTexture = ShaderTexture;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
-     */
-    class Mutable {
-        /**
-         * Collect all attributes of the instance and their values in a Mutator-object
-         */
-        getMutator() {
-            let mutator = {};
-            for (let attribute in this) {
-                mutator[attribute] = this[attribute];
-            }
-            return mutator;
-        }
-        /**
-         * Collect the attributes of the instance and their values applicable for animation.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
-         */
-        getMutatorForAnimation() {
-            return this.getMutator();
-        }
-        /**
-         * Collect the attributes of the instance and their values applicable for the user interface.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
-         */
-        getMutatorForUserInterface() {
-            return this.getMutator();
-        }
-        /**
-         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
-         * @param _mutator
-         */
-        getMutatorAttributeTypes(_mutator) {
-            let types = {};
-            for (let attribute in _mutator) {
-                types[attribute] = _mutator[attribute].constructor.name;
-            }
-            return types;
-        }
-        /**
-         * Updates the values of the given mutator according to the current state of the instance
-         * @param _mutator
-         */
-        updateMutator(_mutator) {
-            for (let attribute in _mutator)
-                _mutator[attribute] = this[attribute];
-        }
-        /**
-         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-         * @param _mutator
-         */
-        mutate(_mutator) {
-            for (let attribute in _mutator)
-                this[attribute] = _mutator[attribute];
-        }
-    }
-    Fudge.Mutable = Mutable;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

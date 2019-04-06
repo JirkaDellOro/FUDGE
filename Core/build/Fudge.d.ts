@@ -25,10 +25,65 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Interface describing the datatypes of the attributes a mutator as strings
+     */
+    interface MutatorAttributeTypes {
+        [attribute: string]: string;
+    }
+    /**
+     * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
+     */
+    interface Mutator {
+        [attribute: string]: Object;
+    }
+    interface MutatorForAnimation extends Mutator {
+        readonly forAnimation: null;
+    }
+    interface MutatorForUserInterface extends Mutator {
+        readonly forUserInterface: null;
+    }
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
+        getMutator(): Mutator;
+        /**
+         * Collect the attributes of the instance and their values applicable for animation.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForAnimation(): MutatorForAnimation;
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
+        updateMutator(_mutator: Mutator): void;
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
+        protected mutate(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Component implements Serializable {
+    abstract class Component extends Mutable implements Serializable {
         private container;
         private singleton;
         private active;
@@ -234,11 +289,12 @@ declare namespace Fudge {
         scaleZ(_scale: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -248,6 +304,7 @@ declare namespace Fudge {
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -445,7 +502,7 @@ declare namespace Fudge {
          */
         private drawObjects;
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
         private updateNodeWorldMatrix;
@@ -513,7 +570,7 @@ declare namespace Fudge {
     class Matrix4x4 implements Serializable {
         data: Float32Array;
         constructor();
-        static identity(): Matrix4x4;
+        static readonly identity: Matrix4x4;
         /**
          * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
          * @param _matrix The matrix to multiply.
@@ -783,60 +840,5 @@ declare namespace Fudge {
         constructor();
         private loadVertexShaderSource;
         private loadFragmentShaderSource;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Interface describing the datatypes of the attributes a mutator as strings
-     */
-    interface MutatorAttributeTypes {
-        [attribute: string]: string;
-    }
-    /**
-     * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
-     */
-    interface Mutator {
-        [attribute: string]: Object;
-    }
-    interface MutatorForAnimation extends Mutator {
-        readonly forAnimation: null;
-    }
-    interface MutatorForUserInterface extends Mutator {
-        readonly forUserInterface: null;
-    }
-    /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
-     */
-    class Mutable {
-        /**
-         * Collect all attributes of the instance and their values in a Mutator-object
-         */
-        getMutator(): Mutator;
-        /**
-         * Collect the attributes of the instance and their values applicable for animation.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
-         */
-        getMutatorForAnimation(): MutatorForAnimation;
-        /**
-         * Collect the attributes of the instance and their values applicable for the user interface.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
-         */
-        getMutatorForUserInterface(): MutatorForUserInterface;
-        /**
-         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
-         * @param _mutator
-         */
-        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
-        /**
-         * Updates the values of the given mutator according to the current state of the instance
-         * @param _mutator
-         */
-        updateMutator(_mutator: Mutator): void;
-        /**
-         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-         * @param _mutator
-         */
-        protected mutate(_mutator: Mutator): void;
     }
 }
