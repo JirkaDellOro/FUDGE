@@ -128,21 +128,19 @@ namespace Fudge {
             }
         }
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
-        private updateNodeWorldMatrix(_node: Node): void {
+        private updateNodeWorldMatrix(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
+            let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
-            if (!_node.getParent()) {
-                transform.worldMatrix = transform.Matrix;
-            }
-            else {
-                let parentTransform: ComponentTransform = _node.getParent().cmpTransform;
-                transform.worldMatrix = Matrix4x4.multiply(parentTransform.worldMatrix, transform.Matrix);
+            if (transform) {
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
+                transform.worldMatrix = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.updateNodeWorldMatrix(childNode);
+                this.updateNodeWorldMatrix(childNode, worldMatrix);
             }
         }
         /**
