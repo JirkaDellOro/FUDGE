@@ -1,6 +1,6 @@
 namespace Fudge {
     // tslint:disable-next-line: no-any
-    type General = any;
+    export type General = any;
 
     export interface Serialization {
         [type: string]: General;

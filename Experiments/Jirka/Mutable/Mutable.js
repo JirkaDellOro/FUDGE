@@ -1,3 +1,4 @@
+"use strict";
 var Mutable;
 (function (Mutable_1) {
     /**

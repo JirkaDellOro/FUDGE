@@ -1,8 +1,4 @@
-
-namespace Mutable {
-    // tslint:disable-next-line: no-any
-    type General = any;
-    //#region class Mutator 
+namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings 
      */
@@ -38,14 +34,14 @@ namespace Mutable {
             return mutator;
         }
         /**
-         * Collect the attributes of the instance and their values applicable for animation
+         * Collect the attributes of the instance and their values applicable for animation.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         public getMutatorForAnimation(): MutatorForAnimation {
             return <MutatorForAnimation>this.getMutator();
         }
         /**
-         * Collect the attributes of the instance and their values applicable for the user interface
+         * Collect the attributes of the instance and their values applicable for the user interface.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         public getMutatorForUserInterface(): MutatorForUserInterface {
@@ -78,67 +74,5 @@ namespace Mutable {
             for (let attribute in _mutator)
                 (<General>this)[attribute] = _mutator[attribute];
         }
-    }
-
-    export class TestSuper extends Mutable {
-        ssuper: string = "Hello from the superclass";
-    }
-
-    export class Test extends TestSuper {
-        public test: Test = null;
-        public b: boolean = true;
-        protected s: string = "Hallo";
-        private n: number = 42;
-
-        public getMutatorForAnimation(): MutatorForAnimation {
-            let mutator: MutatorForAnimation = super.getMutatorForAnimation();
-            delete mutator["test"];
-            Object.seal(mutator);
-            return mutator;
-        }
-        public getMutatorForUserInterface(): MutatorForUserInterface {
-            let mutator: MutatorForUserInterface = super.getMutatorForUserInterface();
-            delete mutator["s"];
-            Object.seal(mutator);
-            return mutator;
-        }
-        public animate(_mutation: MutatorForAnimation): void {
-            this.mutate(_mutation);
-        }
-
-        public mutate(_mutator: Mutator): void {
-            super.mutate(_mutator);
-        }
-    }
-    //#endregion
-
-    let test: Test = new Test();
-    test.test = new Test();
-    printMutatorTypes();
-    console.group("Mutator for animation");
-    console.log(test.getMutatorForAnimation());
-    console.groupEnd();
-    animate();
-
-
-    function animate(): void {
-        console.group("Animate");
-        let m: MutatorForAnimation = test.getMutatorForAnimation();
-        m["s"] = "I've been animated!";
-        m["xyz"] = "I shouldn't be here...";
-        test.animate(m);
-        test.updateMutator(m);
-        console.log(m);
-        console.groupEnd();
-    }
-
-    function printMutatorTypes(): void {
-        console.group("Mutators");
-        let m: Mutator = test.getMutator();
-        console.log(m);
-        console.log(test.getMutatorForAnimation());
-        console.log(test.getMutatorForUserInterface());
-        console.log(test.getMutatorAttributeTypes(m));
-        console.groupEnd();
     }
 }

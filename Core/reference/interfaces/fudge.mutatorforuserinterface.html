@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>BoxGeometry | Fudge Core</title>
+	<title>MutatorForUserInterface | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,105 +59,57 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.boxgeometry.html">BoxGeometry</a>
+					<a href="fudge.mutatorforuserinterface.html">MutatorForUserInterface</a>
 				</li>
 			</ul>
-			<h1>Class BoxGeometry</h1>
+			<h1>Interface MutatorForUserInterface</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Simple class to compute the vertexpositions for a box.</p>
-					</div>
-					<dl class="tsd-comment-tags">
-						<dt>authors</dt>
-						<dd><p>Jascha Karagöl, HFU, 2019 | Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
-						</dd>
-					</dl>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">BoxGeometry</span>
+						<a href="fudge.mutator.html" class="tsd-signature-type">Mutator</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">MutatorForUserInterface</span>
+							</li>
+						</ul>
 					</li>
 				</ul>
+			</section>
+			<section class="tsd-panel tsd-kind-interface tsd-parent-kind-module">
+				<h3 class="tsd-before-signature">Indexable</h3>
+				<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>attribute: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">Object</span></div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Constructors</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudge.boxgeometry.html#constructor" class="tsd-kind-icon">constructor</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Accessors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudge.boxgeometry.html#positions" class="tsd-kind-icon">Positions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.mutatorforuserinterface.html#foruserinterface" class="tsd-kind-icon">for<wbr>User<wbr>Interface</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-					<a name="constructor" class="tsd-anchor"></a>
-					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Box<wbr>Geometry<span class="tsd-signature-symbol">(</span>_width<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _depth<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.boxgeometry.html" class="tsd-signature-type">BoxGeometry</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Geometry/BoxGeometry.ts#L8">Geometry/BoxGeometry.ts:8</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_width: <span class="tsd-signature-type">number</span></h5>
-								</li>
-								<li>
-									<h5>_height: <span class="tsd-signature-type">number</span></h5>
-								</li>
-								<li>
-									<h5>_depth: <span class="tsd-signature-type">number</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudge.boxgeometry.html" class="tsd-signature-type">BoxGeometry</a></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Accessors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
-					<a name="positions" class="tsd-anchor"></a>
-					<h3>Positions</h3>
-					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> Positions<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Float32Array</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Geometry/BoxGeometry.ts#L65">Geometry/BoxGeometry.ts:65</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
-						</li>
-					</ul>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="foruserinterface" class="tsd-anchor"></a>
+					<h3>for<wbr>User<wbr>Interface</h3>
+					<div class="tsd-signature tsd-kind-icon">for<wbr>User<wbr>Interface<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in Transfer/Mutable.ts:19</li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -174,91 +126,106 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.color.html" class="tsd-kind-icon">Color</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.component.html" class="tsd-kind-icon">Component</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componentcamera.html" class="tsd-kind-icon">Component<wbr>Camera</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componentmaterial.html" class="tsd-kind-icon">Component<wbr>Material</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componentmesh.html" class="tsd-kind-icon">Component<wbr>Mesh</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componentpivot.html" class="tsd-kind-icon">Component<wbr>Pivot</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componenttransform.html" class="tsd-kind-icon">Component<wbr>Transform</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.material.html" class="tsd-kind-icon">Material</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.matrix3x3.html" class="tsd-kind-icon">Matrix3x3</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.matrix4x4.html" class="tsd-kind-icon">Matrix4x4</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.meshcube.html" class="tsd-kind-icon">Mesh<wbr>Cube</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.mutable.html" class="tsd-kind-icon">Mutable</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.node.html" class="tsd-kind-icon">Node</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.shader.html" class="tsd-kind-icon">Shader</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.shaderbasic.html" class="tsd-kind-icon">Shader<wbr>Basic</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.shadertexture.html" class="tsd-kind-icon">Shader<wbr>Texture</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.vector3.html" class="tsd-kind-icon">Vector3</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.viewport.html" class="tsd-kind-icon">Viewport</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.bufferspecification.html" class="tsd-kind-icon">Buffer<wbr>Specification</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mapclasstocomponents.html" class="tsd-kind-icon">Map<wbr>Class<wbr>ToComponents</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mapstringtonode.html" class="tsd-kind-icon">Map<wbr>String<wbr>ToNode</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mesh.html" class="tsd-kind-icon">Mesh</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mutator.html" class="tsd-kind-icon">Mutator</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mutatorattributetypes.html" class="tsd-kind-icon">Mutator<wbr>Attribute<wbr>Types</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mutatorforanimation.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>Animation</a>
+					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.boxgeometry.html" class="tsd-kind-icon">Box<wbr>Geometry</a>
+					<li class="current tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.mutatorforuserinterface.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>User<wbr>Interface</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudge.boxgeometry.html#constructor" class="tsd-kind-icon">constructor</a>
-							</li>
-							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
-								<a href="fudge.boxgeometry.html#positions" class="tsd-kind-icon">Positions</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="fudge.mutatorforuserinterface.html#foruserinterface" class="tsd-kind-icon">for<wbr>User<wbr>Interface</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.color.html" class="tsd-kind-icon">Color</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.component.html" class="tsd-kind-icon">Component</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentcamera.html" class="tsd-kind-icon">Component<wbr>Camera</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentmaterial.html" class="tsd-kind-icon">Component<wbr>Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentmesh.html" class="tsd-kind-icon">Component<wbr>Mesh</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentpivot.html" class="tsd-kind-icon">Component<wbr>Pivot</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componenttransform.html" class="tsd-kind-icon">Component<wbr>Transform</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.mat3.html" class="tsd-kind-icon">Mat3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.material.html" class="tsd-kind-icon">Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.matrix4x4.html" class="tsd-kind-icon">Matrix4x4</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.node.html" class="tsd-kind-icon">Node</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shader.html" class="tsd-kind-icon">Shader</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shaderbasic.html" class="tsd-kind-icon">Shader<wbr>Basic</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shadertexture.html" class="tsd-kind-icon">Shader<wbr>Texture</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.vector3.html" class="tsd-kind-icon">Vector3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.viewport.html" class="tsd-kind-icon">Viewport</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.serializable.html" class="tsd-kind-icon">Serializable</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.bufferspecification.html" class="tsd-kind-icon">Buffer<wbr>Specification</a>
+						<a href="fudge.serialization.html" class="tsd-kind-icon">Serialization</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mapclasstocomponents.html" class="tsd-kind-icon">Map<wbr>Class<wbr>ToComponents</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mapstringtonode.html" class="tsd-kind-icon">Map<wbr>String<wbr>ToNode</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.serializable.html" class="tsd-kind-icon">Serializable</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.serialization.html" class="tsd-kind-icon">Serialization</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
 						<a href="../modules/fudge.html#general" class="tsd-kind-icon">General</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-module">

@@ -1,4 +1,4 @@
-/// <reference path="../Engine/Serializer.ts"/>
+/// <reference path="../Transfer/Serializer.ts"/>
 namespace Fudge {
     /** 
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.

@@ -25,7 +25,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Component implements Serializable {
@@ -490,16 +490,16 @@ declare namespace Fudge {
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Mat3 {
+    class Matrix3x3 {
         data: number[];
         constructor();
-        static projection(_width: number, _height: number): Mat3;
+        static projection(_width: number, _height: number): Matrix3x3;
         readonly Data: number[];
-        identity(): Mat3;
-        translate(_matrix: Mat3, _xTranslation: number, _yTranslation: number): Mat3;
-        rotate(_matrix: Mat3, _angleInDegrees: number): Mat3;
-        scale(_matrix: Mat3, _xScale: number, _yscale: number): Mat3;
-        multiply(_a: Mat3, _b: Mat3): Mat3;
+        identity(): Matrix3x3;
+        translate(_matrix: Matrix3x3, _xTranslation: number, _yTranslation: number): Matrix3x3;
+        rotate(_matrix: Matrix3x3, _angleInDegrees: number): Matrix3x3;
+        scale(_matrix: Matrix3x3, _xScale: number, _yscale: number): Matrix3x3;
+        multiply(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
         private translation;
         private scaling;
         private rotation;
@@ -783,5 +783,60 @@ declare namespace Fudge {
         constructor();
         private loadVertexShaderSource;
         private loadFragmentShaderSource;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Interface describing the datatypes of the attributes a mutator as strings
+     */
+    interface MutatorAttributeTypes {
+        [attribute: string]: string;
+    }
+    /**
+     * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
+     */
+    interface Mutator {
+        [attribute: string]: Object;
+    }
+    interface MutatorForAnimation extends Mutator {
+        readonly forAnimation: null;
+    }
+    interface MutatorForUserInterface extends Mutator {
+        readonly forUserInterface: null;
+    }
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
+        getMutator(): Mutator;
+        /**
+         * Collect the attributes of the instance and their values applicable for animation.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForAnimation(): MutatorForAnimation;
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
+        updateMutator(_mutator: Mutator): void;
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
+        protected mutate(_mutator: Mutator): void;
     }
 }
