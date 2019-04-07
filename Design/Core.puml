@@ -78,7 +78,7 @@ package Fudge <<Rectangle>>{
         + updateMutator(_mutator: Mutator): void
         # mutate(_mutator: Mutator): void
       }
-      Mutable -( Mutator
+      Mutable --(( Mutator
     }
   }
   package "Components" <<Folder>> {
