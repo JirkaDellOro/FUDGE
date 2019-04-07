@@ -47,7 +47,7 @@ var VectorEditor;
         crc.resetTransform();
         crc.clearRect(0, 0, crc.canvas.width, crc.canvas.height);
         crc.translate(pivotPoint.x - pivotPoint.x / VectorEditor.scale, pivotPoint.y - pivotPoint.y / VectorEditor.scale);
-        console.log(pivotPoint.x - pivotPoint.x / VectorEditor.scale, pivotPoint.y - pivotPoint.y / VectorEditor.scale);
+        // console.log(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
         crc.scale(VectorEditor.scale, VectorEditor.scale);
         paths.sort(Path.sort);
         for (let path of paths) {
@@ -122,11 +122,15 @@ var VectorEditor;
         currentlySelectedPoint = pointToSelect;
         if (!pointToSelect)
             return;
+        if (currentlySelectedPoint instanceof DrawTypes.Vertex) {
+            currentlySelectedPoint.prepareMovementValues();
+        }
         // originalPos = new Vector2(_event.clientX, _event.clientY);
         // redrawAll();
     }
     function mouseup() {
         // currentlySelectedPath = null;
+        // currentlySelectedPoint = null;
         // console.log("mouseup");
     }
     function mousemove(_event) {
@@ -168,13 +172,14 @@ var VectorEditor;
         }
     }
     function scroll(_event) {
+        let scaleMutiplier = 0.9;
         _event.preventDefault();
         if (_event.deltaY > 0) {
-            VectorEditor.scale = +Math.max(0.1, Math.min(VectorEditor.scale * 0.9, 10)).toFixed(2);
+            VectorEditor.scale = +Math.max(0.1, Math.min(VectorEditor.scale * scaleMutiplier, 10)).toFixed(2);
             // pivotPoint = new Vector2(pivotPoint.x + (pivotPoint.x - _event.clientX) * scale, (pivotPoint.y - _event.clientY) + _event.clientY * scale);
         }
         else if (_event.deltaY < 0) {
-            VectorEditor.scale = +Math.max(0.1, Math.min(VectorEditor.scale * 1.11, 10)).toFixed(2);
+            VectorEditor.scale = +Math.max(0.1, Math.min(VectorEditor.scale / scaleMutiplier, 10)).toFixed(2);
         }
         console.log(VectorEditor.scale);
         redrawAll();

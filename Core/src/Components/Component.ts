@@ -1,12 +1,21 @@
-/// <reference path="../Engine/Serializer.ts"/>
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
 namespace Fudge {
     /** 
-     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export abstract class Component implements Serializable {
+    export abstract class Component extends Mutable implements Serializable {
         private container: Node | null = null;
         private singleton: boolean = true;
+        private active: boolean = true;
+
+        public activate(_on: boolean): void {
+            this.active = _on;
+        }
+        public get isActive(): boolean {
+            return this.active;
+        }
 
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
@@ -14,7 +23,7 @@ namespace Fudge {
          */
         public get type(): string {
             return this.constructor.name;
-        } 
+        }
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
@@ -48,10 +57,14 @@ namespace Fudge {
         }
 
         public serialize(): Serialization {
-            return null;
+            let serialization: Serialization = {
+                active: this.active
+            };
+            return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            return null;
+            this.active = _serialization.active;
+            return this;
         }
     }
 }

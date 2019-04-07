@@ -4,35 +4,122 @@ var Fudge;
     class Serializer {
         // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
         static serialize(_object) {
             let serialization = {};
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
         static deserialize(_serialization) {
             let reconstruct;
-            for (let typeName in _serialization) {
-                // TODO: it doesn't make sense to overwrite reconstruct in the loop. Either accumulate or no loop...
-                reconstruct = new Fudge[typeName];
-                reconstruct.deserialize(_serialization[typeName]);
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
             }
-            return reconstruct;
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
         }
     }
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
-/// <reference path="../Engine/Serializer.ts"/>
 var Fudge;
-/// <reference path="../Engine/Serializer.ts"/>
 (function (Fudge) {
     /**
-     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
+        getMutator() {
+            let mutator = {};
+            for (let attribute in this) {
+                mutator[attribute] = this[attribute];
+            }
+            return mutator;
+        }
+        /**
+         * Collect the attributes of the instance and their values applicable for animation.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForAnimation() {
+            return this.getMutator();
+        }
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForUserInterface() {
+            return this.getMutator();
+        }
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator) {
+            let types = {};
+            for (let attribute in _mutator) {
+                types[attribute] = _mutator[attribute].constructor.name;
+            }
+            return types;
+        }
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
+        updateMutator(_mutator) {
+            for (let attribute in _mutator)
+                _mutator[attribute] = this[attribute];
+        }
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
+        mutate(_mutator) {
+            for (let attribute in _mutator)
+                this[attribute] = _mutator[attribute];
+        }
+    }
+    Fudge.Mutable = Mutable;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Component {
+    class Component extends Fudge.Mutable {
         constructor() {
+            super(...arguments);
             this.container = null;
             this.singleton = true;
+            this.active = true;
+        }
+        activate(_on) {
+            this.active = _on;
+        }
+        get isActive() {
+            return this.active;
         }
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
@@ -74,10 +161,14 @@ var Fudge;
             }
         }
         serialize() {
-            return null;
+            let serialization = {
+                active: this.active
+            };
+            return serialization;
         }
         deserialize(_serialization) {
-            return null;
+            this.active = _serialization.active;
+            return this;
         }
     }
     Fudge.Component = Component;
@@ -93,7 +184,6 @@ var Fudge;
     class ComponentCamera extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.enabled = true; // TODO: examine, why this is meaningful. Or shouldn't this be a property of the superclass? -> Superclass
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
@@ -101,12 +191,6 @@ var Fudge;
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
-        activate(_on) {
-            this.enabled = _on;
-        }
-        get isActive() {
-            return this.enabled;
-        }
         get isOrthographic() {
             return this.orthographic;
         }
@@ -138,7 +222,7 @@ var Fudge;
         projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
-            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000);
+            this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -150,6 +234,28 @@ var Fudge;
         projectOrthographic(_left = 0, _right = Fudge.gl2.canvas.clientWidth, _bottom = Fudge.gl2.canvas.clientHeight, _top = 0) {
             this.orthographic = true;
             this.projectionMatrix = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+        }
+        serialize() {
+            let serialization = {
+                backgroundColor: this.backgroundColor,
+                backgroundEnabled: this.backgroundEnabled,
+                orthographic: this.orthographic,
+                fieldOfView: this.fieldOfView,
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.backgroundColor = _serialization.backgroundColor;
+            this.backgroundEnabled = _serialization.backgroundEnabled;
+            this.orthographic = _serialization.orthographic;
+            this.fieldOfView = _serialization.fieldOfView;
+            super.deserialize(_serialization[super.constructor.name]);
+            if (this.isOrthographic)
+                this.projectOrthographic(); // TODO: serialize and deserialize parameters
+            else
+                this.projectCentral();
+            return this;
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -225,13 +331,15 @@ var Fudge;
         }
         serialize() {
             let serialization = {
-                mesh: this.mesh.serialize()
+                mesh: this.mesh.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.setMesh(mesh);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
         /**
@@ -280,7 +388,7 @@ var Fudge;
     class ComponentPivot extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.matrix = Fudge.Matrix4x4.identity(); // The matrix to transform the mesh by.
+            this.matrix = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
         }
         get Matrix() {
             return this.matrix;
@@ -295,7 +403,7 @@ var Fudge;
          * Resets this.matrix to idenity Matrix.
          */
         reset() {
-            this.matrix = Fudge.Matrix4x4.identity();
+            this.matrix = Fudge.Matrix4x4.identity;
         }
         /**
          * # Translation methods
@@ -398,13 +506,21 @@ var Fudge;
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                matrix: this.matrix.serialize()
+                matrix: this.matrix.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             this.matrix.deserialize(_serialization.matrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            delete mutator.container;
+            delete mutator.singleton;
+            return mutator;
         }
     }
     Fudge.ComponentPivot = ComponentPivot;
@@ -412,39 +528,34 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
+     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Fudge.ComponentPivot {
         constructor() {
             super();
-            this.worldMatrix = Fudge.Matrix4x4.identity();
-        }
-        //*/
-        // Get and Set methods.######################################################################################
-        get WorldMatrix() {
-            /* */ return this.worldMatrix;
-            //* */return this.matrix;
-        }
-        set WorldMatrix(_matrix) {
-            /* */ this.worldMatrix = _matrix;
-            //* */this.matrix = _matrix; 
+            this.worldMatrix = Fudge.Matrix4x4.identity;
         }
         get WorldPosition() {
-            /* */ return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
-            //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+            return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
         }
         serialize() {
             let serialization = {
-                worldMatrix: this.worldMatrix.serialize()
+                // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
+                [super.constructor.name]: super.serialize()
             };
-            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         deserialize(_serialization) {
-            this.WorldMatrix.deserialize(_serialization.worldMatrix);
+            // this.worldMatrix.deserialize(_serialization.worldMatrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            delete mutator.worldMatrix;
+            return mutator;
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
@@ -454,6 +565,15 @@ var Fudge;
     class Color {
     }
     Fudge.Color = Color;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let NODE_EVENT;
+    (function (NODE_EVENT) {
+        NODE_EVENT["ANIMATION_FRAME"] = "animationFrame";
+        NODE_EVENT["POINTER_DOWN"] = "pointerDown";
+        NODE_EVENT["POINTER_UP"] = "pointerUp";
+    })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -620,17 +740,20 @@ var Fudge;
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node {
-        // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
-        // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+    class Node extends EventTarget {
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name) {
+            super();
             this.parent = null; // The parent of this node.
-            this.children = {}; // Associative array nodes appended to this node.
+            this.children = []; // Associative array nodes appended to this node.
             this.components = {};
+            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+            this.listeners = {};
+            this.captures = {};
             this.name = _name;
         }
         getParent() {
@@ -641,57 +764,50 @@ var Fudge;
         }
         // #region Hierarchy
         /**
-         * Returns the children array of this node.
+         * Returns a clone of the list of children
          */
         getChildren() {
-            return this.children; //.slice(0); Return a clone of the list of children
+            return this.children.slice(0);
         }
         /**
-         * Looks through this Nodes children array and returns a child with the supplied name.
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
          */
-        getChildByName(_name) {
-            let child;
-            if (this.children[_name] != undefined) {
-                child = this.children[_name];
-                return child;
-            }
-            else {
-                throw new Error(`Unable to find component named  '${_name}'in node named '${this.name}'`);
-            }
+        getChildrenByName(_name) {
+            let found = [];
+            found = this.children.filter((_node) => _node.name == _name);
+            return found;
         }
         /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParent method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
          */
-        appendChild(_child) {
-            let name = _child.name;
-            if (this.children[name] != undefined) {
-                throw new Error(`There is already a Child by the name '${_child.name}' in node named '${this.name}'`);
+        appendChild(_node) {
+            if (this.children.includes(_node))
+                // _node is already a child of this
+                return;
+            let ancestor = this.parent;
+            while (ancestor) {
+                if (ancestor == _node)
+                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
+                else
+                    ancestor = ancestor.parent;
             }
-            else {
-                this.children[name] = _child;
-                _child.setParent(this);
-            }
+            this.children.push(_node);
+            _node.setParent(this);
         }
         /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
          */
-        removeChild(_name) {
-            if (this.children[_name] != undefined) {
-                let child = this.children[_name];
-                child.setParent(null);
-                delete this.children[_name];
-            }
-            else {
-                throw new Error(`Unable to find child named  '${_name}'in node named '${this.name}'`);
-            }
+        removeChild(_node) {
+            let iFound = this.children.indexOf(_node);
+            if (iFound < 0)
+                return;
+            this.children.splice(iFound, 1);
+            _node.setParent(null);
         }
         // #endregion
         // #region Components
@@ -736,10 +852,130 @@ var Fudge;
         // #endregion
         // #region Serialization
         serialize() {
-            return null;
+            let serialization = {
+                name: this.name
+                // TODO: serialize references, does parent need to be serialized at all?
+                //parent: this.parent
+            };
+            let components = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            serialization["components"] = components;
+            let children = [];
+            for (let child of this.children) {
+                children.push(child.serialize());
+            }
+            serialization["children"] = children;
+            return serialization;
         }
-        deserialize() {
-            return null;
+        deserialize(_serialization) {
+            this.name = _serialization.name;
+            // this.parent = is set when the nodes are added
+            for (let type in _serialization.components) {
+                for (let data of _serialization.components[type]) {
+                    let serializedComponent = { [type]: data };
+                    let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
+                    this.addComponent(deserializedComponent);
+                }
+            }
+            for (let child of _serialization.children) {
+                let serializedChild = { "Node": child };
+                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
+            return this;
+        }
+        // #endregion
+        // #region Events
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type, _handler, _capture = false) {
+            if (_capture) {
+                if (!this.captures[_type])
+                    this.captures[_type] = [];
+                this.captures[_type].push(_handler);
+            }
+            else {
+                if (!this.listeners[_type])
+                    this.listeners[_type] = [];
+                this.listeners[_type].push(_handler);
+            }
+        }
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event) {
+            let ancestors = [];
+            let upcoming = this;
+            // overwrite event target
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+            // capture phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let captures = ancestor.captures[_event.type] || [];
+                for (let handler of captures)
+                    handler(_event);
+            }
+            if (!_event.bubbles)
+                return true;
+            // target phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let listeners = this.listeners[_event.type] || [];
+            for (let handler of listeners)
+                handler(_event);
+            // bubble phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
+            for (let i = 0; i < ancestors.length; i++) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let listeners = ancestor.listeners[_event.type] || [];
+                for (let handler of listeners)
+                    handler(_event);
+            }
+            return true; //TODO: return a meaningful value, see documentation of dispatch event
+        }
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event) {
+            // overwrite event target and phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
+            // capture phase only
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
+                handler(_event);
+            // appears to be slower, astonishingly...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
+            // same for children
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
         }
         // #endregion
         /**
@@ -855,11 +1091,11 @@ var Fudge;
                     Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix = transform.WorldMatrix;
+                    let transformMatrix = transform.worldMatrix;
                     if (_node.getComponents(Fudge.ComponentPivot)) {
                         let pivot = _node.getComponents(Fudge.ComponentPivot)[0];
                         if (pivot)
-                            transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                            transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
                     }
                     let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
@@ -874,21 +1110,19 @@ var Fudge;
             }
         }
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
-        updateNodeWorldMatrix(_node) {
+        updateNodeWorldMatrix(_node, _matrix = Fudge.Matrix4x4.identity) {
+            let worldMatrix = _matrix;
             let transform = _node.cmpTransform;
-            if (!_node.getParent()) {
-                transform.WorldMatrix = transform.Matrix;
-            }
-            else {
-                let parentTransform = _node.getParent().cmpTransform;
-                transform.WorldMatrix = Fudge.Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
+            if (transform) {
+                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.Matrix);
+                transform.worldMatrix = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
-                this.updateNodeWorldMatrix(childNode);
+                this.updateNodeWorldMatrix(childNode, worldMatrix);
             }
         }
         /**
@@ -999,7 +1233,7 @@ var Fudge;
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Mat3 {
+    class Matrix3x3 {
         constructor() {
             this.data = [
                 1, 0, 0,
@@ -1008,7 +1242,7 @@ var Fudge;
             ];
         }
         static projection(_width, _height) {
-            let matrix = new Mat3;
+            let matrix = new Matrix3x3;
             matrix.data = [
                 2 / _width, 0, 0,
                 0, -2 / _height, 0,
@@ -1020,7 +1254,7 @@ var Fudge;
             return this.data;
         }
         identity() {
-            return new Mat3;
+            return new Matrix3x3;
         }
         translate(_matrix, _xTranslation, _yTranslation) {
             return this.multiply(_matrix, this.translation(_xTranslation, _yTranslation));
@@ -1050,7 +1284,7 @@ var Fudge;
             let b20 = _b.data[2 * 3 + 0];
             let b21 = _b.data[2 * 3 + 1];
             let b22 = _b.data[2 * 3 + 2];
-            let matrix = new Mat3;
+            let matrix = new Matrix3x3;
             matrix.data = [
                 b00 * a00 + b01 * a10 + b02 * a20,
                 b00 * a01 + b01 * a11 + b02 * a21,
@@ -1065,7 +1299,7 @@ var Fudge;
             return matrix;
         }
         translation(_xTranslation, _yTranslation) {
-            let matrix = new Mat3;
+            let matrix = new Matrix3x3;
             matrix.data = [
                 1, 0, 0,
                 0, 1, 0,
@@ -1074,7 +1308,7 @@ var Fudge;
             return matrix;
         }
         scaling(_xScale, _yScale) {
-            let matrix = new Mat3;
+            let matrix = new Matrix3x3;
             matrix.data = [
                 _xScale, 0, 0,
                 0, _yScale, 0,
@@ -1087,7 +1321,7 @@ var Fudge;
             let angleInRadians = angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
-            let matrix = new Mat3;
+            let matrix = new Matrix3x3;
             matrix.data = [
                 cos, -sin, 0,
                 sin, cos, 0,
@@ -1096,7 +1330,7 @@ var Fudge;
             return matrix;
         }
     }
-    Fudge.Mat3 = Mat3;
+    Fudge.Matrix3x3 = Matrix3x3;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1114,7 +1348,7 @@ var Fudge;
             ]);
         }
         // Transformation methods.######################################################################################
-        static identity() {
+        static get identity() {
             return new Matrix4x4;
         }
         /**
@@ -1632,47 +1866,17 @@ var Fudge;
         getVertices() {
             let vertices = new Float32Array([
                 //front
-                -1, -1, 1,
-                1, -1, 1,
-                -1, 1, 1,
-                -1, 1, 1,
-                1, -1, 1,
-                1, 1, 1,
+                -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
                 //back
-                1, -1, -1,
-                -1, -1, -1,
-                1, 1, -1,
-                1, 1, -1,
-                -1, -1, -1,
-                -1, 1, -1,
+                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
                 //left
-                -1, -1, -1,
-                -1, -1, 1,
-                -1, 1, -1,
-                -1, 1, -1,
-                -1, -1, 1,
-                -1, 1, 1,
+                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
                 //right
-                1, -1, 1,
-                1, -1, -1,
-                1, 1, 1,
-                1, 1, 1,
-                1, -1, -1,
-                1, 1, -1,
+                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
                 //top
-                -1, 1, 1,
-                1, 1, 1,
-                -1, 1, -1,
-                -1, 1, -1,
-                1, 1, 1,
-                1, 1, -1,
+                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
                 //bottom
-                -1, -1, -1,
-                1, -1, -1,
-                -1, -1, 1,
-                -1, -1, 1,
-                1, -1, -1,
-                1, -1, 1
+                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
             ]);
             for (let iVertex = 0; iVertex < vertices.length; iVertex += 3) {
                 vertices[iVertex] *= this.width / 2;

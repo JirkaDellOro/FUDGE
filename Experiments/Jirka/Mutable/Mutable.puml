@@ -1,0 +1,22 @@
+@startuml Mutable
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+interface MutatorAttributeTypes
+interface Mutator
+
+interface MutatorForAnimation extends Mutator
+interface MutatorForUserInterface extends Mutator
+class Mutable {
+    + getMutator(): Mutator
+    + getMutatorForAnimation(): MutatorForAnimation
+    + getMutatorForUserInterface(): MutatorForUserInterface
+    + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
+    + updateMutator(_mutator: Mutator): void
+    # mutate(_mutator: Mutator): void
+}
+Mutable -( Mutator
+@enduml

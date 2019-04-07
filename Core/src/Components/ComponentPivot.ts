@@ -5,7 +5,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentPivot extends Component {
-        protected matrix: Matrix4x4 = Matrix4x4.identity(); // The matrix to transform the mesh by.
+        protected matrix: Matrix4x4 = Matrix4x4.identity; // The matrix to transform the mesh by.
 
         public get Matrix(): Matrix4x4 {
             return this.matrix;
@@ -22,7 +22,7 @@ namespace Fudge {
          * Resets this.matrix to idenity Matrix.
          */
         public reset(): void {
-            this.matrix = Matrix4x4.identity();
+            this.matrix = Matrix4x4.identity;
         }
         /**
          * # Translation methods
@@ -127,13 +127,21 @@ namespace Fudge {
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization: Serialization = {
-                matrix: this.matrix.serialize()
+                matrix: this.matrix.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
             this.matrix.deserialize(_serialization.matrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        public getMutator(): Mutator {
+            let mutator: Mutator = super.getMutator();
+            delete mutator.container;
+            delete mutator.singleton;
+            return mutator;
         }
     }
 }

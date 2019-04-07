@@ -4,6 +4,7 @@ This readme-file describes in a few words the contents of each log and the major
 
 # Mar 27th 2019
 Interfaces for Animation and UI (and more?) compatibility/accessability. init/change (name is subject to change) function that handles changes on an object by using a generic JS Object.  
+[Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Whiteboard.jpg)  
 [Relevant for VectorEditor and Animator](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Notizen_LS.md)
 
 # Mar 18th 2019

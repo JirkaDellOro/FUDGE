@@ -72,7 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Superclass for all <a href="fudge.component.html">Component</a>s that can be attached to [[Nodes]].</p>
+						<p>Superclass for all <a href="fudge.component.html">Component</a>s that can be attached to <a href="fudge.node.html">Node</a>s.</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
@@ -116,6 +116,7 @@
 						<section class="tsd-index-section ">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudge.component.html#isactive" class="tsd-kind-icon">is<wbr>Active</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudge.component.html#issingleton" class="tsd-kind-icon">is<wbr>Singleton</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudge.component.html#type" class="tsd-kind-icon">type</a></li>
 							</ul>
@@ -123,6 +124,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.component.html#activate" class="tsd-kind-icon">activate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.component.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.component.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.component.html#serialize" class="tsd-kind-icon">serialize</a></li>
@@ -135,6 +137,23 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Accessors</h2>
 				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isactive" class="tsd-anchor"></a>
+					<h3>is<wbr>Active</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isActive<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L15">Components/Component.ts:15</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
 					<a name="issingleton" class="tsd-anchor"></a>
 					<h3>is<wbr>Singleton</h3>
 					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
@@ -144,7 +163,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L21">Components/Component.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L29">Components/Component.ts:29</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -166,7 +185,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L15">Components/Component.ts:15</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L23">Components/Component.ts:23</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -183,6 +202,29 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="activate" class="tsd-anchor"></a>
+					<h3>activate</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">activate<span class="tsd-signature-symbol">(</span>_on<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L12">Components/Component.ts:12</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="deserialize" class="tsd-anchor"></a>
 					<h3>deserialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -193,7 +235,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L53">Components/Component.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L64">Components/Component.ts:64</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -216,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L28">Components/Component.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L36">Components/Component.ts:36</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -243,7 +285,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L50">Components/Component.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L58">Components/Component.ts:58</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
@@ -260,7 +302,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/aa73916/Core/src/Components/Component.ts#L36">Components/Component.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a3fe887/Core/src/Components/Component.ts#L44">Components/Component.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -298,9 +340,6 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.boxgeometry.html" class="tsd-kind-icon">Box<wbr>Geometry</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.color.html" class="tsd-kind-icon">Color</a>
 					</li>
 				</ul>
@@ -309,10 +348,16 @@
 						<a href="fudge.component.html" class="tsd-kind-icon">Component</a>
 						<ul>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="fudge.component.html#isactive" class="tsd-kind-icon">is<wbr>Active</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="fudge.component.html#issingleton" class="tsd-kind-icon">is<wbr>Singleton</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="fudge.component.html#type" class="tsd-kind-icon">type</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.component.html#activate" class="tsd-kind-icon">activate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.component.html#deserialize" class="tsd-kind-icon">deserialize</a>
@@ -349,13 +394,19 @@
 						<a href="fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.mat3.html" class="tsd-kind-icon">Mat3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.material.html" class="tsd-kind-icon">Material</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudge.matrix3x3.html" class="tsd-kind-icon">Matrix3x3</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.matrix4x4.html" class="tsd-kind-icon">Matrix4x4</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudge.meshcube.html" class="tsd-kind-icon">Mesh<wbr>Cube</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudge.mutable.html" class="tsd-kind-icon">Mutable</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.node.html" class="tsd-kind-icon">Node</a>
@@ -388,12 +439,27 @@
 						<a href="../interfaces/fudge.mapstringtonode.html" class="tsd-kind-icon">Map<wbr>String<wbr>ToNode</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudge.mesh.html" class="tsd-kind-icon">Mesh</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudge.mutator.html" class="tsd-kind-icon">Mutator</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudge.mutatorattributetypes.html" class="tsd-kind-icon">Mutator<wbr>Attribute<wbr>Types</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudge.mutatorforanimation.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>Animation</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudge.mutatorforuserinterface.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>User<wbr>Interface</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/fudge.serializable.html" class="tsd-kind-icon">Serializable</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module">
 						<a href="../interfaces/fudge.serialization.html" class="tsd-kind-icon">Serialization</a>
 					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
 						<a href="../modules/fudge.html#general" class="tsd-kind-icon">General</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-module">

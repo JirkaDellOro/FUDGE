@@ -9,18 +9,86 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
     class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
         static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
         static deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
     /**
-     * Superclass for all [[Component]]s that can be attached to [[Nodes]].
+     * Interface describing the datatypes of the attributes a mutator as strings
+     */
+    interface MutatorAttributeTypes {
+        [attribute: string]: string;
+    }
+    /**
+     * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
+     */
+    interface Mutator {
+        [attribute: string]: Object;
+    }
+    interface MutatorForAnimation extends Mutator {
+        readonly forAnimation: null;
+    }
+    interface MutatorForUserInterface extends Mutator {
+        readonly forUserInterface: null;
+    }
+    /**
+     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
+     * thus providing and using interfaces created at runtime
+     */
+    class Mutable {
+        /**
+         * Collect all attributes of the instance and their values in a Mutator-object
+         */
+        getMutator(): Mutator;
+        /**
+         * Collect the attributes of the instance and their values applicable for animation.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForAnimation(): MutatorForAnimation;
+        /**
+         * Collect the attributes of the instance and their values applicable for the user interface.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForUserInterface(): MutatorForUserInterface;
+        /**
+         * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * @param _mutator
+         */
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         * @param _mutator
+         */
+        updateMutator(_mutator: Mutator): void;
+        /**
+         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
+         * @param _mutator
+         */
+        protected mutate(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Component implements Serializable {
+    abstract class Component extends Mutable implements Serializable {
         private container;
         private singleton;
+        private active;
+        activate(_on: boolean): void;
+        readonly isActive: boolean;
         /**
          * Retrieves the type of this components subclass as the name of the runtime class
          * @returns The type of the component
@@ -51,14 +119,11 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
-        private enabled;
         private orthographic;
         private projectionMatrix;
         private fieldOfView;
         private backgroundColor;
         private backgroundEnabled;
-        activate(_on: boolean): void;
-        readonly isActive: boolean;
         readonly isOrthographic: boolean;
         getBackgoundColor(): Vector3;
         getBackgroundEnabled(): boolean;
@@ -81,6 +146,8 @@ declare namespace Fudge {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -222,21 +289,22 @@ declare namespace Fudge {
         scaleZ(_scale: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
+     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends ComponentPivot {
-        private worldMatrix;
+        worldMatrix: Matrix4x4;
         constructor();
-        WorldMatrix: Matrix4x4;
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -254,6 +322,16 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class Color {
+    }
+}
+declare namespace Fudge {
+    interface Listeners {
+        [eventType: string]: EventListener[];
+    }
+    enum NODE_EVENT {
+        ANIMATION_FRAME = "animationFrame",
+        POINTER_DOWN = "pointerDown",
+        POINTER_UP = "pointerUp"
     }
 }
 declare namespace Fudge {
@@ -331,18 +409,17 @@ declare namespace Fudge {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
-    interface MapStringToNode {
-        [key: string]: Node;
-    }
     /**
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node implements Serializable {
+    class Node extends EventTarget implements Serializable {
         name: string;
         private parent;
         private children;
         private components;
+        private listeners;
+        private captures;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -351,29 +428,26 @@ declare namespace Fudge {
         getParent(): Node | null;
         readonly cmpTransform: ComponentTransform;
         /**
-         * Returns the children array of this node.
+         * Returns a clone of the list of children
          */
-        getChildren(): MapStringToNode;
+        getChildren(): Node[];
         /**
-         * Looks through this Nodes children array and returns a child with the supplied name.
-         * If there are multiple children with the same name in the array, only the first that is found will be returned.
-         * Throws error if no child can be found by the supplied name.
-         * @param _name The name of the child to be found.
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
          */
-        getChildByName(_name: string): Node;
+        getChildrenByName(_name: string): Node[];
         /**
-         * Adds the supplied child into this nodes children array.
-         * Calls setParent method of supplied child with this Node as parameter.
-         * @param _child The child to be pushed into the array
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
          */
-        appendChild(_child: Node): void;
+        appendChild(_node: Node): void;
         /**
-         * Looks through this nodes children array, removes a child with the supplied name and sets the child's parent to undefined.
-         * If there are multiple children with the same name in the array, only the first that is found will be removed.
-         * Throws error if no child can be found by the name.
-         * @param _name The name of the child to be removed.
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
          */
-        removeChild(_name: string): void;
+        removeChild(_node: Node): void;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
@@ -391,7 +465,29 @@ declare namespace Fudge {
          */
         removeComponent(_component: Component): void;
         serialize(): Serialization;
-        deserialize(): Serializable;
+        deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event: Event): void;
+        private broadcastEventRecursive;
         /**
          * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
          * @param _parent The parent to be set for this node.
@@ -437,7 +533,7 @@ declare namespace Fudge {
          */
         private drawObjects;
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
         private updateNodeWorldMatrix;
@@ -482,16 +578,16 @@ declare namespace Fudge {
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Mat3 {
+    class Matrix3x3 {
         data: number[];
         constructor();
-        static projection(_width: number, _height: number): Mat3;
+        static projection(_width: number, _height: number): Matrix3x3;
         readonly Data: number[];
-        identity(): Mat3;
-        translate(_matrix: Mat3, _xTranslation: number, _yTranslation: number): Mat3;
-        rotate(_matrix: Mat3, _angleInDegrees: number): Mat3;
-        scale(_matrix: Mat3, _xScale: number, _yscale: number): Mat3;
-        multiply(_a: Mat3, _b: Mat3): Mat3;
+        identity(): Matrix3x3;
+        translate(_matrix: Matrix3x3, _xTranslation: number, _yTranslation: number): Matrix3x3;
+        rotate(_matrix: Matrix3x3, _angleInDegrees: number): Matrix3x3;
+        scale(_matrix: Matrix3x3, _xScale: number, _yscale: number): Matrix3x3;
+        multiply(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
         private translation;
         private scaling;
         private rotation;
@@ -505,7 +601,7 @@ declare namespace Fudge {
     class Matrix4x4 implements Serializable {
         data: Float32Array;
         constructor();
-        static identity(): Matrix4x4;
+        static readonly identity: Matrix4x4;
         /**
          * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
          * @param _matrix The matrix to multiply.

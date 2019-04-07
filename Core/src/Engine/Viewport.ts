@@ -109,11 +109,11 @@ namespace Fudge {
                     gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix: Matrix4x4 = transform.WorldMatrix;
+                    let transformMatrix: Matrix4x4 = transform.worldMatrix;
                     if (_node.getComponents(ComponentPivot)) {
                         let pivot: ComponentPivot = <ComponentPivot>_node.getComponents(ComponentPivot)[0];
                         if (pivot)
-                            transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.WorldMatrix);
+                            transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
                     }
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
@@ -128,21 +128,19 @@ namespace Fudge {
             }
         }
         /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursive for all its children.
+         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
-        private updateNodeWorldMatrix(_node: Node): void {
+        private updateNodeWorldMatrix(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
+            let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
-            if (!_node.getParent()) {
-                transform.WorldMatrix = transform.Matrix;
-            }
-            else {
-                let parentTransform: ComponentTransform = _node.getParent().cmpTransform;
-                transform.WorldMatrix = Matrix4x4.multiply(parentTransform.WorldMatrix, transform.Matrix);
+            if (transform) {
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
+                transform.worldMatrix = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.updateNodeWorldMatrix(childNode);
+                this.updateNodeWorldMatrix(childNode, worldMatrix);
             }
         }
         /**

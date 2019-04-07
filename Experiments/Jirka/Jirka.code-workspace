@@ -55,10 +55,13 @@
 			"path": "Time"
 		},
 		{
-			"path": "NameSpace"
+			"path": "ModuleHandling"
 		},
 		{
-			"path": "ModuleHandling"
+			"path": "Mutable"
+		},
+		{
+			"path": "NameSpace"
 		}
 	],
 	"settings": {}

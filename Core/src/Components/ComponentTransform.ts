@@ -1,41 +1,37 @@
 namespace Fudge {
     /**
-     * Class to hold the transformation-data of the node it is attached to. Extends PivotComponent for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[PivotComponent]] to transform only the mesh attached
+     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
+     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentTransform extends ComponentPivot {
-        /*TODO: delete comments */private worldMatrix: Matrix4x4;
+        public worldMatrix: Matrix4x4;
 
         public constructor() {
             super();
-            this.worldMatrix = Matrix4x4.identity();
+            this.worldMatrix = Matrix4x4.identity;
         }
-        //*/
-        // Get and Set methods.######################################################################################
-        public get WorldMatrix(): Matrix4x4 {
-            /* */return this.worldMatrix;
-            //* */return this.matrix;
-        }
-        public set WorldMatrix(_matrix: Matrix4x4) {
-            /* */this.worldMatrix = _matrix;
-            //* */this.matrix = _matrix; 
-        }
+
         public get WorldPosition(): Vector3 {
-            /* */return new Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
-            //* */return new Vec3(this.matrix.Data[12], this.matrix.Data[13], this.matrix.Data[14]);
+            return new Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
         }
 
         public serialize(): Serialization {
             let serialization: Serialization = {
-                worldMatrix: this.worldMatrix.serialize()
+                // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
+                [super.constructor.name]: super.serialize()
             };
-            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.WorldMatrix.deserialize(_serialization.worldMatrix);
+            // this.worldMatrix.deserialize(_serialization.worldMatrix);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
+        }
+        public getMutator(): Mutator {
+            let mutator: Mutator = super.getMutator();
+            delete mutator.worldMatrix;
+            return mutator;
         }
     }
 }

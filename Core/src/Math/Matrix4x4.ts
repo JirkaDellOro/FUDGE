@@ -17,7 +17,7 @@ namespace Fudge {
         }
 
         // Transformation methods.######################################################################################
-        public static identity(): Matrix4x4 {
+        public static get identity(): Matrix4x4 {
             return new Matrix4x4;
         }
         /**

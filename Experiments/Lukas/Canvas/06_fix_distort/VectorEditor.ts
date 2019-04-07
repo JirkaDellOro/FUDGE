@@ -66,7 +66,7 @@ module VectorEditor {
 		crc.resetTransform();
 		crc.clearRect(0, 0, crc.canvas.width, crc.canvas.height);
 		crc.translate(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
-		console.log(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
+		// console.log(pivotPoint.x - pivotPoint.x / scale, pivotPoint.y - pivotPoint.y / scale);
 		crc.scale(scale, scale);
 
 		paths.sort(Path.sort);
@@ -155,12 +155,17 @@ module VectorEditor {
 	function selectPoint(pointToSelect: Point, _event: MouseEvent): void {
 		currentlySelectedPoint = pointToSelect;
 		if (!pointToSelect) return;
+		if (currentlySelectedPoint instanceof DrawTypes.Vertex) {
+			(<DrawTypes.Vertex>currentlySelectedPoint).prepareMovementValues();
+		}
 		// originalPos = new Vector2(_event.clientX, _event.clientY);
 		// redrawAll();
 	}
 
 	function mouseup() {
 		// currentlySelectedPath = null;
+		// currentlySelectedPoint = null;
+
 		// console.log("mouseup");
 	}
 
@@ -205,12 +210,13 @@ module VectorEditor {
 	}
 
 	function scroll(_event: WheelEvent) {
+		let scaleMutiplier: number = 0.9;
 		_event.preventDefault();
 		if (_event.deltaY > 0) {
-			scale = +Math.max(0.1, Math.min(scale * 0.9, 10)).toFixed(2);
+			scale = +Math.max(0.1, Math.min(scale * scaleMutiplier, 10)).toFixed(2);
 			// pivotPoint = new Vector2(pivotPoint.x + (pivotPoint.x - _event.clientX) * scale, (pivotPoint.y - _event.clientY) + _event.clientY * scale);
 		} else if (_event.deltaY < 0) {
-			scale = +Math.max(0.1, Math.min(scale * 1.11, 10)).toFixed(2);
+			scale = +Math.max(0.1, Math.min(scale / scaleMutiplier, 10)).toFixed(2);
 		}
 		console.log(scale);
 		redrawAll();
