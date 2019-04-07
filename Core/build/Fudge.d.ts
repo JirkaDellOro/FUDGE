@@ -326,7 +326,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     interface Listeners {
-        [eventType: string]: Function[];
+        [eventType: string]: EventListener[];
     }
     enum NODE_EVENT {
         ANIMATION_FRAME = "animationFrame",
@@ -413,7 +413,7 @@ declare namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node implements Serializable {
+    class Node extends EventTarget implements Serializable {
         name: string;
         private parent;
         private children;
@@ -466,8 +466,8 @@ declare namespace Fudge {
         removeComponent(_component: Component): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture?: boolean): void;
-        dispatchEvent(_event: Event): void;
+        addEventListener(_type: string, _handler: EventListener, _capture?: boolean | AddEventListenerOptions): void;
+        dispatchEvent(_event: Event): boolean;
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;
         /**

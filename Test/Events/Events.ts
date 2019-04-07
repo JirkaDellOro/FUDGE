@@ -16,7 +16,7 @@ namespace Events {
         child.dispatchEvent(new Event("testCapture"));
         child.addEventListener("testBroadcast", Test, true);
         node.broadcastEvent(new Event("testBroadcast"));
-    }
+    } 
 
     function Test(_event: Event): void {
         console.group(_event.type);

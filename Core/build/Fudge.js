@@ -574,15 +574,6 @@ var Fudge;
         NODE_EVENT["POINTER_DOWN"] = "pointerDown";
         NODE_EVENT["POINTER_UP"] = "pointerUp";
     })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
-    /*
-    export class Eventƒ extends Event {
-        node: Node;
-        public setTarget(_node: Node): void {
-            this.node = _node;
-        }
-    }
-    */
-    // function setEventTarget(_node: Node): void {}
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -749,12 +740,13 @@ var Fudge;
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node {
+    class Node extends EventTarget {
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name) {
+            super();
             this.parent = null; // The parent of this node.
             this.children = []; // Associative array nodes appended to this node.
             this.components = {};
@@ -899,7 +891,6 @@ var Fudge;
         }
         // #endregion
         // #region Events
-        //TODO: research on AddEventListenerOptions and probably implementation
         addEventListener(_type, _handler, _capture = false) {
             if (_capture) {
                 if (!this.captures[_type])
@@ -916,7 +907,7 @@ var Fudge;
         dispatchEvent(_event) {
             let ancestors = [];
             let upcoming = this;
-            // _event.setTarget(this);
+            // overwrite event target
             Object.defineProperty(_event, "target", { writable: false, value: this });
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
@@ -936,9 +927,10 @@ var Fudge;
                 for (let handler of listeners)
                     handler(_event);
             }
+            return true; //TODO: return a meaningful value, see documentation of dispatch event
         }
         broadcastEvent(_event) {
-            // _event.setTarget(this);
+            // overwrite event target
             Object.defineProperty(_event, "target", { writable: false, value: this });
             this.broadcastEventRecursive(_event);
         }

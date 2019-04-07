@@ -7,7 +7,7 @@ namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Node implements Serializable {
+    export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // Associative array nodes appended to this node.
@@ -22,6 +22,7 @@ namespace Fudge {
          * @param _name The name by which the node can be called.
          */
         public constructor(_name: string) {
+            super();
             this.name = _name;
         }
 
@@ -179,8 +180,7 @@ namespace Fudge {
         // #endregion
 
         // #region Events
-        //TODO: research on AddEventListenerOptions and probably implementation
-        addEventListener(_type: NODE_EVENT | string, _handler: Function, _capture: boolean = false): void {
+        addEventListener(_type: string, _handler: EventListener, _capture: boolean | AddEventListenerOptions = false): void {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];
@@ -194,10 +194,10 @@ namespace Fudge {
         }
 
         // TODO: set current target in Event
-        dispatchEvent(_event: Event): void {
+        dispatchEvent(_event: Event): boolean {
             let ancestors: Node[] = [];
             let upcoming: Node = this;
-            // _event.setTarget(this);
+            // overwrite event target
             Object.defineProperty(_event, "target", { writable: false, value: this });
 
             while (upcoming.parent)
@@ -205,13 +205,13 @@ namespace Fudge {
 
             // capture phase
             for (let i: number = ancestors.length - 1; i >= 0; i--) {
-                let captures: Function[] = ancestors[i].captures[_event.type] || [];
+                let captures: EventListener[] = ancestors[i].captures[_event.type] || [];
                 for (let handler of captures)
                     handler(_event);
             }
 
             // target phase
-            let listeners: Function[] = this.listeners[_event.type] || [];
+            let listeners: EventListener[] = this.listeners[_event.type] || [];
             for (let handler of listeners)
                 handler(_event);
 
@@ -221,10 +221,11 @@ namespace Fudge {
                 for (let handler of listeners)
                     handler(_event);
             }
+            return true; //TODO: return a meaningful value, see documentation of dispatch event
         }
 
         broadcastEvent(_event: Event): void {
-            // _event.setTarget(this);
+            // overwrite event target
             Object.defineProperty(_event, "target", { writable: false, value: this });
             this.broadcastEventRecursive(_event);
         }
