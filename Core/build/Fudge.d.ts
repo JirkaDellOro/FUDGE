@@ -466,8 +466,26 @@ declare namespace Fudge {
         removeComponent(_component: Component): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        addEventListener(_type: string, _handler: EventListener, _capture?: boolean | AddEventListenerOptions): void;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
         dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;
         /**

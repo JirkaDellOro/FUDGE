@@ -180,7 +180,14 @@ namespace Fudge {
         // #endregion
 
         // #region Events
-        addEventListener(_type: string, _handler: EventListener, _capture: boolean | AddEventListenerOptions = false): void {
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];
@@ -192,51 +199,71 @@ namespace Fudge {
                 this.listeners[_type].push(_handler);
             }
         }
-
-        // TODO: set current target in Event
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase, 
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
         dispatchEvent(_event: Event): boolean {
             let ancestors: Node[] = [];
             let upcoming: Node = this;
             // overwrite event target
-            Object.defineProperty(_event, "target", { writable: false, value: this });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
 
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
 
             // capture phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
             for (let i: number = ancestors.length - 1; i >= 0; i--) {
-                let captures: EventListener[] = ancestors[i].captures[_event.type] || [];
+                let ancestor: Node = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let captures: EventListener[] = ancestor.captures[_event.type] || [];
                 for (let handler of captures)
                     handler(_event);
             }
 
+            if (!_event.bubbles)
+                return true;
+
             // target phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
             let listeners: EventListener[] = this.listeners[_event.type] || [];
             for (let handler of listeners)
                 handler(_event);
 
             // bubble phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
             for (let i: number = 0; i < ancestors.length; i++) {
-                let listeners: Function[] = ancestors[i].listeners[_event.type] || [];
+                let ancestor: Node = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let listeners: Function[] = ancestor.listeners[_event.type] || [];
                 for (let handler of listeners)
                     handler(_event);
             }
             return true; //TODO: return a meaningful value, see documentation of dispatch event
         }
-
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
         broadcastEvent(_event: Event): void {
-            // overwrite event target
-            Object.defineProperty(_event, "target", { writable: false, value: this });
+            // overwrite event target and phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
             this.broadcastEventRecursive(_event);
         }
 
-        // TODO: set current target in Event
         private broadcastEventRecursive(_event: Event): void {
             // capture phase only
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
             let captures: Function[] = this.captures[_event.type] || [];
             for (let handler of captures)
                 handler(_event);
-            // slower...
+            // appears to be slower, astonishingly...
             // captures.forEach(function (handler: Function): void {
             //     handler(_event);
             // });
