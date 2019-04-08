@@ -578,14 +578,14 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    let NODE_EVENT;
-    (function (NODE_EVENT) {
-        NODE_EVENT["ANIMATION_FRAME"] = "animationFrame";
-        NODE_EVENT["COMPONENT_ADDED"] = "componentAdded";
-        NODE_EVENT["COMPONENT_REMOVED"] = "componentRemoved";
-        NODE_EVENT["CHILD_ADDED"] = "childAdded";
-        NODE_EVENT["CHILD_REMOVED"] = "childRemoved";
-    })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
+    let EVENT;
+    (function (EVENT) {
+        EVENT["ANIMATION_FRAME"] = "animationFrame";
+        EVENT["COMPONENT_ADDED"] = "componentAdded";
+        EVENT["COMPONENT_REMOVED"] = "componentRemoved";
+        EVENT["CHILD_ADDED"] = "childAdded";
+        EVENT["CHILD_REMOVED"] = "childRemoved";
+    })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -809,7 +809,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(Fudge.NODE_EVENT.CHILD_ADDED, { bubbles: true }));
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_ADDED, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -820,7 +820,7 @@ var Fudge;
             if (iFound < 0)
                 return;
             this.children.splice(iFound, 1);
-            _node.dispatchEvent(new Event(Fudge.NODE_EVENT.CHILD_REMOVED, { bubbles: true }));
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVED, { bubbles: true }));
             _node.setParent(null);
         }
         // #endregion
@@ -846,7 +846,7 @@ var Fudge;
             else
                 this.components[_component.type].push(_component);
             _component.setContainer(this);
-            _component.dispatchEvent(new Event(Fudge.NODE_EVENT.COMPONENT_ADDED));
+            _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_ADDED));
         }
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
@@ -859,7 +859,7 @@ var Fudge;
                 let foundAt = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
-                _component.dispatchEvent(new Event(Fudge.NODE_EVENT.COMPONENT_REMOVED));
+                _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_REMOVED));
             }
             catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);

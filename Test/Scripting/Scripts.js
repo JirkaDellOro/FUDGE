@@ -6,14 +6,14 @@ var Scripts;
         constructor() {
             super();
             this.text = "Hallo";
-            this.addEventListener(ƒ.NODE_EVENT.COMPONENT_ADDED, this.hndComponentEvent);
+            this.addEventListener(ƒ.EVENT.COMPONENT_ADDED, this.hndComponentEvent);
         }
         hndComponentEvent(_event) {
             console.log("Component event", _event);
             console.log("Container", this.getContainer());
             console.log("Target is this?", _event.target == this, this.text);
-            this.getContainer().addEventListener(ƒ.NODE_EVENT.CHILD_ADDED, this.hndNodeEvent);
-            this.getContainer().addEventListener(ƒ.NODE_EVENT.CHILD_REMOVED, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.CHILD_ADDED, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVED, this.hndNodeEvent);
         }
         hndNodeEvent(_event) {
             console.log("Node event", _event);

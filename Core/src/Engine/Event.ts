@@ -6,7 +6,7 @@ namespace Fudge {
         [eventType: string]: EventListener[];
     }
 
-    export enum NODE_EVENT {
+    export enum EVENT {
         ANIMATION_FRAME = "animationFrame",
         COMPONENT_ADDED = "componentAdded",
         COMPONENT_REMOVED = "componentRemoved",

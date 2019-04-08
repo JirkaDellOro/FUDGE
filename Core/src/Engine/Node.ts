@@ -72,7 +72,7 @@ namespace Fudge {
 
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(NODE_EVENT.CHILD_ADDED, {bubbles: true}));
+            _node.dispatchEvent(new Event(EVENT.CHILD_ADDED, {bubbles: true}));
         }
 
         /**
@@ -85,7 +85,7 @@ namespace Fudge {
                 return;
 
             this.children.splice(iFound, 1);
-            _node.dispatchEvent(new Event(NODE_EVENT.CHILD_REMOVED, {bubbles: true}));
+            _node.dispatchEvent(new Event(EVENT.CHILD_REMOVED, {bubbles: true}));
             _node.setParent(null);   
         }
         // #endregion
@@ -115,7 +115,7 @@ namespace Fudge {
                     this.components[_component.type].push(_component);
 
             _component.setContainer(this);
-            _component.dispatchEvent(new Event(NODE_EVENT.COMPONENT_ADDED));
+            _component.dispatchEvent(new Event(EVENT.COMPONENT_ADDED));
         }
         /** 
          * Removes the given component from the node, if it was attached, and sets its parent to null. 
@@ -128,7 +128,7 @@ namespace Fudge {
                 let foundAt: number = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
-                _component.dispatchEvent(new Event(NODE_EVENT.COMPONENT_REMOVED));
+                _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVED));
             } catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
             }
@@ -191,7 +191,7 @@ namespace Fudge {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];

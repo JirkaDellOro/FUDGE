@@ -336,7 +336,7 @@ declare namespace Fudge {
     interface Listeners {
         [eventType: string]: EventListener[];
     }
-    enum NODE_EVENT {
+    enum EVENT {
         ANIMATION_FRAME = "animationFrame",
         COMPONENT_ADDED = "componentAdded",
         COMPONENT_REMOVED = "componentRemoved",
@@ -483,7 +483,7 @@ declare namespace Fudge {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
