@@ -10,10 +10,16 @@ left to right direction
 
 package Fudge <<Rectangle>>{
   ' gl2: WebGL2RenderingContext
+  package "Javascript" <<Cloud>> {
+    class EventTarget
+    class WebGL2RenderingContext
+    class HTMLCanvasElement
+  }
+
 
   package "Engine" <<Folder>> {
     file "Node" {
-      class Node {
+      class Node extends EventTarget {
         - parent: Node | null
         - children: Node[]
         - components: MapClassToComponents
@@ -42,7 +48,7 @@ package Fudge <<Rectangle>>{
     class Material {
       // to be refactored!
     }
-    class Viewport {
+    class Viewport extends EventTarget {
       - name: string
       - camera: ComponentCamera
       - rootNode: Node
@@ -70,7 +76,7 @@ package Fudge <<Rectangle>>{
 
       interface MutatorForAnimation extends Mutator
       interface MutatorForUserInterface extends Mutator
-      class Mutable {
+      class Mutable extends EventTarget {
         + getMutator(): Mutator
         + getMutatorForAnimation(): MutatorForAnimation
         + getMutatorForUserInterface(): MutatorForUserInterface
@@ -78,11 +84,11 @@ package Fudge <<Rectangle>>{
         + updateMutator(_mutator: Mutator): void
         # mutate(_mutator: Mutator): void
       }
-      Mutable --(( Mutator
+      Mutable --( Mutator
     }
   }
   package "Components" <<Folder>> {
-    abstract class Component {
+    abstract class Component extends EventTarget {
       - container: Node | null
       - singleton: boolean
       - active: boolean
@@ -110,6 +116,9 @@ package Fudge <<Rectangle>>{
     }
     class ComponentTransform extends ComponentPivot {
       + worldMatrix: Matrix4x4
+    }
+    class ComponentScript extends Component {
+
     }
   }
   package "Meshes" <<Folder>> {
@@ -148,16 +157,16 @@ package Fudge <<Rectangle>>{
     }
   }
 
-  Node "0..1 parent"<-left->"0..n children" Node
-  Node "1 container"<-->"0..n" Component
+  Node "0..1 parent"<-left->"n children" Node
+  Node "1 container"<-->"n" Component
   Component --|> Mutable
-  ComponentMesh -->"1" Mesh
+  ComponentMesh "n"-->"1" Mesh
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
-  Viewport -->"1 root" Node
-  Viewport -->"1 camera" ComponentCamera
-  'Shader --> Material
-  'ComponentMaterial --> Shader
+  Viewport -->"1 root" Node : displays >
+  Viewport -->"1 camera" ComponentCamera : look through >
+  '    Shader "n"-->"1" Material : uses >
+  '    ComponentMaterial "n" --> "1" Shader : refers >
 
   'improve layout
   'Serializer --[hidden]-- Mutable
