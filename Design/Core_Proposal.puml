@@ -169,7 +169,7 @@ package Fudge <<Rectangle>>{
         webGL: WebGL
         eventManager: EventManager
         animate(): void
-    }
+    } 
 
     ' Associations
     Node "0..1 parent"<-left->"n children" Node
