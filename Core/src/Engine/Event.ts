@@ -8,7 +8,9 @@ namespace Fudge {
 
     export enum NODE_EVENT {
         ANIMATION_FRAME = "animationFrame",
-        POINTER_DOWN = "pointerDown",
-        POINTER_UP = "pointerUp"
+        COMPONENT_ADDED = "componentAdded",
+        COMPONENT_REMOVED = "componentRemoved",
+        CHILD_ADDED = "childAdded",
+        CHILD_REMOVED = "childRemoved"
     }
 }

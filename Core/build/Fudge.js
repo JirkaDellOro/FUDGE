@@ -43,7 +43,7 @@ var Fudge;
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    class Mutable {
+    class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
@@ -528,6 +528,16 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentScript extends Fudge.Component {
+    }
+    Fudge.ComponentScript = ComponentScript;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
      * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -571,8 +581,10 @@ var Fudge;
     let NODE_EVENT;
     (function (NODE_EVENT) {
         NODE_EVENT["ANIMATION_FRAME"] = "animationFrame";
-        NODE_EVENT["POINTER_DOWN"] = "pointerDown";
-        NODE_EVENT["POINTER_UP"] = "pointerUp";
+        NODE_EVENT["COMPONENT_ADDED"] = "componentAdded";
+        NODE_EVENT["COMPONENT_REMOVED"] = "componentRemoved";
+        NODE_EVENT["CHILD_ADDED"] = "childAdded";
+        NODE_EVENT["CHILD_REMOVED"] = "childRemoved";
     })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -797,6 +809,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
+            _node.dispatchEvent(new Event(Fudge.NODE_EVENT.CHILD_ADDED, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -807,6 +820,7 @@ var Fudge;
             if (iFound < 0)
                 return;
             this.children.splice(iFound, 1);
+            _node.dispatchEvent(new Event(Fudge.NODE_EVENT.CHILD_REMOVED, { bubbles: true }));
             _node.setParent(null);
         }
         // #endregion
@@ -832,6 +846,7 @@ var Fudge;
             else
                 this.components[_component.type].push(_component);
             _component.setContainer(this);
+            _component.dispatchEvent(new Event(Fudge.NODE_EVENT.COMPONENT_ADDED));
         }
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
@@ -844,6 +859,7 @@ var Fudge;
                 let foundAt = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
+                _component.dispatchEvent(new Event(Fudge.NODE_EVENT.COMPONENT_REMOVED));
             }
             catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
@@ -994,13 +1010,14 @@ var Fudge;
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Viewport {
+    class Viewport extends EventTarget {
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode
          * @param _camera
          */
         constructor(_name, _rootNode, _camera) {
+            super();
             this.vertexArrayObjects = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
             this.buffers = {}; // Associative array that holds a buffer for each node in the tree(branch)
             this.name = _name;

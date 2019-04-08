@@ -46,7 +46,7 @@ declare namespace Fudge {
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    class Mutable {
+    class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
@@ -294,6 +294,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentScript extends Component {
+    }
+}
+declare namespace Fudge {
+    /**
      * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -330,8 +338,10 @@ declare namespace Fudge {
     }
     enum NODE_EVENT {
         ANIMATION_FRAME = "animationFrame",
-        POINTER_DOWN = "pointerDown",
-        POINTER_UP = "pointerUp"
+        COMPONENT_ADDED = "componentAdded",
+        COMPONENT_REMOVED = "componentRemoved",
+        CHILD_ADDED = "childAdded",
+        CHILD_REMOVED = "childRemoved"
     }
 }
 declare namespace Fudge {
@@ -500,7 +510,7 @@ declare namespace Fudge {
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Viewport {
+    class Viewport extends EventTarget {
         private name;
         private camera;
         private rootNode;

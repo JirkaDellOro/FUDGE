@@ -22,7 +22,7 @@ namespace Fudge {
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    export class Mutable {
+    export class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
