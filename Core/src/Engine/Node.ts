@@ -14,8 +14,8 @@ namespace Fudge {
         private components: MapClassToComponents = {};
         // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
-        private listeners: Listeners = {};
-        private captures: Listeners = {};
+        private listeners: MapEventTypeToListener = {};
+        private captures: MapEventTypeToListener = {};
 
         /**
          * Creates a new node with a name and initializes all attributes

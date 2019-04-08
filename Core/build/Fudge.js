@@ -578,6 +578,9 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     */
     let EVENT;
     (function (EVENT) {
         EVENT["ANIMATION_FRAME"] = "animationFrame";
@@ -586,6 +589,26 @@ var Fudge;
         EVENT["CHILD_ADDED"] = "childAdded";
         EVENT["CHILD_REMOVED"] = "childRemoved";
     })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        constructor() {
+            super();
+        }
+        static addEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
+        }
+        static removeEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
+        }
+        static dispatchEvent(_event) {
+            EventTargetStatic.targetStatic.dispatchEvent(_event);
+            return true;
+        }
+    }
+    EventTargetStatic.targetStatic = new EventTargetStatic();
+    Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -656,6 +679,29 @@ var Fudge;
         }
     }
     Fudge.GLUtil = GLUtil;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends Fudge.EventTargetStatic {
+        /**
+         * Start the core loop
+         */
+        static start() {
+            if (!Loop.running)
+                Loop.loop();
+            console.log("Loop running");
+        }
+        static loop() {
+            window.requestAnimationFrame(Loop.loop);
+            Loop.targetStatic.dispatchEvent(new Event(Fudge.EVENT.ANIMATION_FRAME));
+        }
+    }
+    Loop.running = false;
+    Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

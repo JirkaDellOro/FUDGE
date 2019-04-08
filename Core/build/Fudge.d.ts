@@ -333,15 +333,28 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface Listeners {
+    interface MapEventTypeToListener {
         [eventType: string]: EventListener[];
     }
+    /**
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     */
     enum EVENT {
         ANIMATION_FRAME = "animationFrame",
         COMPONENT_ADDED = "componentAdded",
         COMPONENT_REMOVED = "componentRemoved",
         CHILD_ADDED = "childAdded",
         CHILD_REMOVED = "childRemoved"
+    }
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        protected static targetStatic: EventTargetStatic;
+        protected constructor();
+        static addEventListener(_type: string, _handler: EventListener): void;
+        static removeEventListener(_type: string, _handler: EventListener): void;
+        static dispatchEvent(_event: Event): boolean;
     }
 }
 declare namespace Fudge {
@@ -373,6 +386,20 @@ declare namespace Fudge {
          * @param _textureSource A string containing the path to the texture.
          */
         static createTexture(_textureSource: string): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends EventTargetStatic {
+        private static running;
+        /**
+         * Start the core loop
+         */
+        static start(): void;
+        private static loop;
     }
 }
 declare namespace Fudge {
