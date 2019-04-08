@@ -10,12 +10,11 @@ left to right direction
 
 package Fudge <<Rectangle>>{
   ' gl2: WebGL2RenderingContext
-  package "Javascript" <<Cloud>> {
+  package "Browser" <<Cloud>> {
     class EventTarget
     class WebGL2RenderingContext
     class HTMLCanvasElement
   }
-
 
   package "Engine" <<Folder>> {
     file "Node" {
@@ -31,7 +30,7 @@ package Fudge <<Rectangle>>{
         [key: string]: Node
       }
     }
-    Serializable ()-- Node
+
     interface BufferSpecification {
       size: number
       dataType: number
@@ -55,7 +54,23 @@ package Fudge <<Rectangle>>{
       - vertexArrayObjects: MapStringToWebGLVertexArrayObject
       - buffers: MapStringToWebGLBuffer
     }
+
+    interface MapEventTypeToListener {
+      [eventType: string]: EventListener[];
+    }
+
+    enum EVENT
+
+    class EventTargetStatic extends EventTarget {
+      #{static} targetStatic: EventTargetStatic
+    }
+
+    class Loop extends EventTargetStatic {
+      - {static} running: boolean = false
+      + {static} start(): void
+    }
   }
+
   package "Transfer" <<Folder>> {
     file "Serializer" {
       interface Serializable {
@@ -87,13 +102,14 @@ package Fudge <<Rectangle>>{
       Mutable --( Mutator
     }
   }
+
   package "Components" <<Folder>> {
-    abstract class Component extends EventTarget {
+    abstract class Component extends Mutable {
       - container: Node | null
       - singleton: boolean
       - active: boolean
     }
-    Component -() Serializable
+
     class ComponentCamera extends Component {
       - orthographic: boolean
       - projectionMatrix: Matrix4x4
@@ -118,9 +134,9 @@ package Fudge <<Rectangle>>{
       + worldMatrix: Matrix4x4
     }
     class ComponentScript extends Component {
-
     }
   }
+
   package "Meshes" <<Folder>> {
     interface Mesh extends Serializable {
       getVertices(): Float32Array
@@ -131,6 +147,7 @@ package Fudge <<Rectangle>>{
       public depth: number;
     }
   }
+
   package "Math" <<Folder>> {
     class Vector3 {
       - data: number[]
@@ -157,9 +174,11 @@ package Fudge <<Rectangle>>{
     }
   }
 
+  ' Associations
+  Node  ..|> Serializable
   Node "0..1 parent"<-left->"n children" Node
   Node "1 container"<-->"n" Component
-  Component --|> Mutable
+  Component ..|> Serializable
   ComponentMesh "n"-->"1" Mesh
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
@@ -169,6 +188,8 @@ package Fudge <<Rectangle>>{
   '    ComponentMaterial "n" --> "1" Shader : refers >
 
   'improve layout
+  Node -[hidden]- Serializable
+  Component -[hidden]- Serializable
   'Serializer --[hidden]-- Mutable
   'Mutable --[hidden]-- Component
   'Viewport -[hidden]- ComponentCamera
