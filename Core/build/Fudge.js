@@ -49,9 +49,10 @@ var Fudge;
          */
         getMutator() {
             let mutator = {};
-            for (let attribute in this) {
-                mutator[attribute] = this[attribute];
-            }
+            // for (let attribute in this) {
+            //     mutator[attribute] = Object.assign({}, this[attribute]);
+            // }
+            Object.assign(mutator, this);
             return mutator;
         }
         /**
@@ -92,8 +93,10 @@ var Fudge;
          * @param _mutator
          */
         mutate(_mutator) {
-            for (let attribute in _mutator)
-                this[attribute] = _mutator[attribute];
+            // for (let attribute in _mutator)
+            //     (<General>this)[attribute] = _mutator[attribute];
+            Object.assign(this, _mutator);
+            this.dispatchEvent(new Event(Fudge.EVENT.MUTATE));
         }
     }
     Fudge.Mutable = Mutable;
@@ -169,6 +172,15 @@ var Fudge;
         deserialize(_serialization) {
             this.active = _serialization.active;
             return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            delete mutator.container;
+            delete mutator.singleton;
+            delete mutator.addEventListener;
+            delete mutator.removeEventListener;
+            delete mutator.dispatchEvent;
+            return mutator;
         }
     }
     Fudge.Component = Component;
@@ -516,10 +528,12 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
+        // TODO: this is just an example. There shouldn't be a direct mutation of a matrix
         getMutator() {
             let mutator = super.getMutator();
-            delete mutator.container;
-            delete mutator.singleton;
+            let matrixCopy = new Fudge.Matrix4x4();
+            Object.assign(matrixCopy.data, this.matrix.data);
+            mutator.matrix = matrixCopy;
             return mutator;
         }
     }
@@ -567,6 +581,9 @@ var Fudge;
             delete mutator.worldMatrix;
             return mutator;
         }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
     }
     Fudge.ComponentTransform = ComponentTransform;
 })(Fudge || (Fudge = {}));
@@ -584,10 +601,11 @@ var Fudge;
     let EVENT;
     (function (EVENT) {
         EVENT["ANIMATION_FRAME"] = "animationFrame";
-        EVENT["COMPONENT_ADDED"] = "componentAdded";
-        EVENT["COMPONENT_REMOVED"] = "componentRemoved";
-        EVENT["CHILD_ADDED"] = "childAdded";
-        EVENT["CHILD_REMOVED"] = "childRemoved";
+        EVENT["COMPONENT_ADD"] = "componentAdd";
+        EVENT["COMPONENT_REMOVE"] = "componentRemove";
+        EVENT["CHILD_ADD"] = "childAdd";
+        EVENT["CHILD_REMOVE"] = "childRemove";
+        EVENT["MUTATE"] = "mutate";
     })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
@@ -855,7 +873,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_ADDED, { bubbles: true }));
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_ADD, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -866,7 +884,7 @@ var Fudge;
             if (iFound < 0)
                 return;
             this.children.splice(iFound, 1);
-            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVED, { bubbles: true }));
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
             _node.setParent(null);
         }
         // #endregion
@@ -892,7 +910,7 @@ var Fudge;
             else
                 this.components[_component.type].push(_component);
             _component.setContainer(this);
-            _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_ADDED));
+            _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_ADD));
         }
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
@@ -905,7 +923,7 @@ var Fudge;
                 let foundAt = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
-                _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_REMOVED));
+                _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_REMOVE));
             }
             catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);

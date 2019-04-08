@@ -111,6 +111,7 @@ declare namespace Fudge {
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -313,6 +314,7 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
+        mutate(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -341,10 +343,11 @@ declare namespace Fudge {
      */
     enum EVENT {
         ANIMATION_FRAME = "animationFrame",
-        COMPONENT_ADDED = "componentAdded",
-        COMPONENT_REMOVED = "componentRemoved",
-        CHILD_ADDED = "childAdded",
-        CHILD_REMOVED = "childRemoved"
+        COMPONENT_ADD = "componentAdd",
+        COMPONENT_REMOVE = "componentRemove",
+        CHILD_ADD = "childAdd",
+        CHILD_REMOVE = "childRemove",
+        MUTATE = "mutate"
     }
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop

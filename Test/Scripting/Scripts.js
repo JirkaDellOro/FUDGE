@@ -5,23 +5,39 @@ var Scripts;
     class Test extends ƒ.ComponentScript {
         constructor() {
             super();
-            this.addEventListener(ƒ.EVENT.COMPONENT_ADDED, this.hndComponentEvent);
-            ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame.bind(this)); // when using concentional function
-            // Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame;  // when using arrow-function
+            this.count = 0;
+            this.hndMutation = (_event) => {
+                console.log("Mutation", this);
+            };
+            this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
+            this.hndAnimationFrame = this.hndAnimationFrame.bind(this); // when using concentional function
+            //ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
+            this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
-        hndComponentEvent(_event) {
+        getMutator() {
+            let mutator = super.getMutator();
+            //delete mutator.hndAnimationFrame;
+            delete mutator.hndMutation;
+            return mutator;
+        }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        hndComponentAdd(_event) {
             console.log("Component event", _event);
             console.log("Container", this.getContainer());
             console.log("Target is this?", _event.target == this, this.name);
-            this.getContainer().addEventListener(ƒ.EVENT.CHILD_ADDED, this.hndNodeEvent);
-            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVED, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.CHILD_ADD, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
         }
         hndNodeEvent(_event) {
             console.log("Node event", _event);
         }
-        //hndAnimationFrame = (_event: Event) => {
         hndAnimationFrame(_event) {
-            console.count(this.name);
+            //hndAnimationFrame(_event: Event): void {
+            console.log(this.name, this.count++);
+            if (this.count > 20)
+                ƒ.Loop.removeEventListener(_event.type, this.hndAnimationFrame);
         }
     }
     function init() {
@@ -32,8 +48,6 @@ var Scripts;
         test.name = "Test_1";
         let test2 = new Test();
         test2.name = "Test_2";
-        console.count(test.name);
-        console.count(test2.name);
         node.addComponent(test);
         console.log("Test-scripts attached after add", node.getComponents(Test));
         node.removeComponent(test);
@@ -43,6 +57,22 @@ var Scripts;
         node.appendChild(child);
         console.log("Children attached after append", node.getChildren());
         ƒ.Loop.start();
+        let mutator = test.getMutator();
+        console.log("Mutator", mutator);
+        let mutatorTypes = test.getMutatorAttributeTypes(mutator);
+        console.log("MutatorTypes", mutatorTypes);
+        setTimeout(mutate, 160);
+        function mutate() {
+            mutator.name = "Test_1 has mutated!!";
+            test.mutate(mutator);
+        }
+        console.groupCollapsed("Properties");
+        for (let name in test) {
+            let value = test[name];
+            console.log("Name %s, Funktion %s, Object %s", name, value instanceof Function, value instanceof Object);
+        }
+        console.groupEnd();
+        console.log("Serialization", test.serialize());
     }
 })(Scripts || (Scripts = {}));
 //# sourceMappingURL=Scripts.js.map

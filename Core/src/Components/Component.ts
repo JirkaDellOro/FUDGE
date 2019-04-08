@@ -66,5 +66,15 @@ namespace Fudge {
             this.active = _serialization.active;
             return this;
         }
+        
+        public getMutator(): Mutator {
+            let mutator: Mutator = super.getMutator();
+            delete mutator.container;
+            delete mutator.singleton;
+            delete mutator.addEventListener;
+            delete mutator.removeEventListener;
+            delete mutator.dispatchEvent;
+            return mutator;
+        }
     }
 }

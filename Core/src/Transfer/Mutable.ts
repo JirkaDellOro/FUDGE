@@ -28,9 +28,10 @@ namespace Fudge {
          */
         public getMutator(): Mutator {
             let mutator: Mutator = {};
-            for (let attribute in this) {
-                mutator[attribute] = this[attribute];
-            }
+            // for (let attribute in this) {
+            //     mutator[attribute] = Object.assign({}, this[attribute]);
+            // }
+            Object.assign(mutator, this);
             return mutator;
         }
         /**
@@ -71,8 +72,10 @@ namespace Fudge {
          * @param _mutator
          */
         protected mutate(_mutator: Mutator): void {
-            for (let attribute in _mutator)
-                (<General>this)[attribute] = _mutator[attribute];
+            // for (let attribute in _mutator)
+            //     (<General>this)[attribute] = _mutator[attribute];
+            Object.assign(this, _mutator);
+            this.dispatchEvent(new Event(EVENT.MUTATE));
         }
     }
 }

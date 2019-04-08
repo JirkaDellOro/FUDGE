@@ -7,11 +7,12 @@ namespace Fudge {
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
      */
     export enum EVENT {
-        ANIMATION_FRAME = "animationFrame",
-        COMPONENT_ADDED = "componentAdded",
-        COMPONENT_REMOVED = "componentRemoved",
-        CHILD_ADDED = "childAdded",
-        CHILD_REMOVED = "childRemoved"
+        ANIMATION_FRAME = "animationFrame", /** fired, when requested animation frame starts */
+        COMPONENT_ADD = "componentAdd",
+        COMPONENT_REMOVE = "componentRemove",
+        CHILD_ADD = "childAdd",
+        CHILD_REMOVE = "childRemove",
+        MUTATE = "mutate"
     }
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop 

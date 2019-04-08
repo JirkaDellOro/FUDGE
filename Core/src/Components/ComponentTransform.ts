@@ -33,5 +33,9 @@ namespace Fudge {
             delete mutator.worldMatrix;
             return mutator;
         }
+
+        public mutate(_mutator: Mutator): void {
+            super.mutate(_mutator);
+        }
     }
 }
