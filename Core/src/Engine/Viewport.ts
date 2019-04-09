@@ -3,7 +3,7 @@ namespace Fudge {
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Viewport {
+    export class Viewport extends EventTarget {
         private name: string; // The name to call this viewport by.
         private camera: ComponentCamera; // The camera from which's position and view the tree will be rendered.
         private rootNode: Node; // The first node in the tree(branch) that will be rendered.
@@ -15,6 +15,7 @@ namespace Fudge {
          * @param _camera 
          */
         public constructor(_name: string, _rootNode: Node, _camera: ComponentCamera) {
+            super();
             this.name = _name;
             this.rootNode = _rootNode;
             this.camera = _camera;

@@ -43,14 +43,30 @@ var Fudge;
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    class Mutable {
+    class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
         getMutator() {
             let mutator = {};
             for (let attribute in this) {
+                let value = this[attribute];
+                if (value instanceof Function)
+                    continue;
                 mutator[attribute] = this[attribute];
+            }
+            // Object.assign is the ES6 "shortcut"... but doesn't really help
+            // Object.assign(mutator, this);
+            // mutator can be reduced but not extended!
+            Object.preventExtensions(mutator);
+            this.reduceMutator(mutator);
+            for (let attribute in mutator) {
+                let value = mutator[attribute];
+                if (value instanceof Object)
+                    if (value instanceof Mutable) {
+                        mutator[attribute] = value.getMutator();
+                        console.log("Object in mutator", attribute);
+                    }
             }
             return mutator;
         }
@@ -92,8 +108,10 @@ var Fudge;
          * @param _mutator
          */
         mutate(_mutator) {
-            for (let attribute in _mutator)
-                this[attribute] = _mutator[attribute];
+            // for (let attribute in _mutator)
+            //     (<General>this)[attribute] = _mutator[attribute];
+            Object.assign(this, _mutator);
+            this.dispatchEvent(new Event(Fudge.EVENT.MUTATE));
         }
     }
     Fudge.Mutable = Mutable;
@@ -169,6 +187,11 @@ var Fudge;
         deserialize(_serialization) {
             this.active = _serialization.active;
             return this;
+        }
+        reduceMutator(_mutator) {
+            //let mutator: Mutator = super.getMutator();
+            delete _mutator.container;
+            delete _mutator.singleton;
         }
     }
     Fudge.Component = Component;
@@ -516,14 +539,18 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        getMutator() {
-            let mutator = super.getMutator();
-            delete mutator.container;
-            delete mutator.singleton;
-            return mutator;
-        }
     }
     Fudge.ComponentPivot = ComponentPivot;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentScript extends Fudge.Component {
+    }
+    Fudge.ComponentScript = ComponentScript;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -552,10 +579,12 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        getMutator() {
-            let mutator = super.getMutator();
-            delete mutator.worldMatrix;
-            return mutator;
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.worldMatrix;
+            super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
@@ -568,12 +597,38 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    let NODE_EVENT;
-    (function (NODE_EVENT) {
-        NODE_EVENT["ANIMATION_FRAME"] = "animationFrame";
-        NODE_EVENT["POINTER_DOWN"] = "pointerDown";
-        NODE_EVENT["POINTER_UP"] = "pointerUp";
-    })(NODE_EVENT = Fudge.NODE_EVENT || (Fudge.NODE_EVENT = {}));
+    /**
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     */
+    let EVENT;
+    (function (EVENT) {
+        EVENT["ANIMATION_FRAME"] = "animationFrame";
+        EVENT["COMPONENT_ADD"] = "componentAdd";
+        EVENT["COMPONENT_REMOVE"] = "componentRemove";
+        EVENT["CHILD_ADD"] = "childAdd";
+        EVENT["CHILD_REMOVE"] = "childRemove";
+        EVENT["MUTATE"] = "mutate";
+    })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        constructor() {
+            super();
+        }
+        static addEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
+        }
+        static removeEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
+        }
+        static dispatchEvent(_event) {
+            EventTargetStatic.targetStatic.dispatchEvent(_event);
+            return true;
+        }
+    }
+    EventTargetStatic.targetStatic = new EventTargetStatic();
+    Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -644,6 +699,29 @@ var Fudge;
         }
     }
     Fudge.GLUtil = GLUtil;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends Fudge.EventTargetStatic {
+        /**
+         * Start the core loop
+         */
+        static start() {
+            if (!Loop.running)
+                Loop.loop();
+            console.log("Loop running");
+        }
+        static loop() {
+            window.requestAnimationFrame(Loop.loop);
+            Loop.targetStatic.dispatchEvent(new Event(Fudge.EVENT.ANIMATION_FRAME));
+        }
+    }
+    Loop.running = false;
+    Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -797,6 +875,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_ADD, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -807,6 +886,7 @@ var Fudge;
             if (iFound < 0)
                 return;
             this.children.splice(iFound, 1);
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
             _node.setParent(null);
         }
         // #endregion
@@ -832,6 +912,7 @@ var Fudge;
             else
                 this.components[_component.type].push(_component);
             _component.setContainer(this);
+            _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_ADD));
         }
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
@@ -844,6 +925,7 @@ var Fudge;
                 let foundAt = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
+                _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_REMOVE));
             }
             catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
@@ -994,13 +1076,14 @@ var Fudge;
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Viewport {
+    class Viewport extends EventTarget {
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode
          * @param _camera
          */
         constructor(_name, _rootNode, _camera) {
+            super();
             this.vertexArrayObjects = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
             this.buffers = {}; // Associative array that holds a buffer for each node in the tree(branch)
             this.name = _name;
@@ -1338,8 +1421,9 @@ var Fudge;
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 {
+    class Matrix4x4 extends Fudge.Mutable {
         constructor() {
+            super();
             this.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -1702,6 +1786,13 @@ var Fudge;
             this.data = new Float32Array(_serialization.data);
             return this;
         }
+        getMutator() {
+            let mutator = {
+                data: Object.assign({}, this.data)
+            };
+            return mutator;
+        }
+        reduceMutator(_mutator) { }
     }
     Fudge.Matrix4x4 = Matrix4x4;
 })(Fudge || (Fudge = {}));

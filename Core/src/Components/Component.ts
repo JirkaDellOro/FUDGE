@@ -66,5 +66,11 @@ namespace Fudge {
             this.active = _serialization.active;
             return this;
         }
+        
+        protected reduceMutator(_mutator: Mutator): void {
+            //let mutator: Mutator = super.getMutator();
+            delete _mutator.container;
+            delete _mutator.singleton;
+        }
     }
 }

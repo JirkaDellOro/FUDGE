@@ -46,7 +46,7 @@ declare namespace Fudge {
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    class Mutable {
+    abstract class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
@@ -76,6 +76,11 @@ declare namespace Fudge {
          * @param _mutator
          */
         protected mutate(_mutator: Mutator): void;
+        /**
+         * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
+         * @param _mutator
+         */
+        protected abstract reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -111,6 +116,7 @@ declare namespace Fudge {
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -289,7 +295,14 @@ declare namespace Fudge {
         scaleZ(_scale: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutator(): Mutator;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentScript extends Component {
     }
 }
 declare namespace Fudge {
@@ -304,7 +317,8 @@ declare namespace Fudge {
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutator(): Mutator;
+        mutate(_mutator: Mutator): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -325,13 +339,29 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface Listeners {
+    interface MapEventTypeToListener {
         [eventType: string]: EventListener[];
     }
-    enum NODE_EVENT {
+    /**
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     */
+    enum EVENT {
         ANIMATION_FRAME = "animationFrame",
-        POINTER_DOWN = "pointerDown",
-        POINTER_UP = "pointerUp"
+        COMPONENT_ADD = "componentAdd",
+        COMPONENT_REMOVE = "componentRemove",
+        CHILD_ADD = "childAdd",
+        CHILD_REMOVE = "childRemove",
+        MUTATE = "mutate"
+    }
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        protected static targetStatic: EventTargetStatic;
+        protected constructor();
+        static addEventListener(_type: string, _handler: EventListener): void;
+        static removeEventListener(_type: string, _handler: EventListener): void;
+        static dispatchEvent(_event: Event): boolean;
     }
 }
 declare namespace Fudge {
@@ -363,6 +393,20 @@ declare namespace Fudge {
          * @param _textureSource A string containing the path to the texture.
          */
         static createTexture(_textureSource: string): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends EventTargetStatic {
+        private static running;
+        /**
+         * Start the core loop
+         */
+        static start(): void;
+        private static loop;
     }
 }
 declare namespace Fudge {
@@ -473,7 +517,7 @@ declare namespace Fudge {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: NODE_EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
@@ -500,7 +544,7 @@ declare namespace Fudge {
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Viewport {
+    class Viewport extends EventTarget {
         private name;
         private camera;
         private rootNode;
@@ -598,7 +642,7 @@ declare namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 implements Serializable {
+    class Matrix4x4 extends Mutable implements Serializable {
         data: Float32Array;
         constructor();
         static readonly identity: Matrix4x4;
@@ -702,6 +746,8 @@ declare namespace Fudge {
         private static scaling;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {

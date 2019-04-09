@@ -4,10 +4,11 @@ namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Matrix4x4 implements Serializable {  // TODO: examine if it could/should be an extension of Float32Array
+    export class Matrix4x4 extends Mutable implements Serializable {  // TODO: examine if it could/should be an extension of Float32Array
         public data: Float32Array; // The data of the matrix.
 
         public constructor() {
+            super();
             this.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -384,5 +385,12 @@ namespace Fudge {
             return this;
         }
 
+        public getMutator(): Mutator {
+            let mutator: Mutator = {
+                data: Object.assign({}, this.data)
+            };
+            return mutator;
+        }
+        protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
 }

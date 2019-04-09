@@ -62,6 +62,9 @@
 		},
 		{
 			"path": "NameSpace"
+		},
+		{
+			"path": "Canvas3D"
 		}
 	],
 	"settings": {}

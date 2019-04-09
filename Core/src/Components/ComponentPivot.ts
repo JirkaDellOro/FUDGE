@@ -137,11 +137,5 @@ namespace Fudge {
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        public getMutator(): Mutator {
-            let mutator: Mutator = super.getMutator();
-            delete mutator.container;
-            delete mutator.singleton;
-            return mutator;
-        }
     }
 }

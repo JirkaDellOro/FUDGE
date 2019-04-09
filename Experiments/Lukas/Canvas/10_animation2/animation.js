@@ -7,9 +7,9 @@ let endPoint = new Utils.Vector2(100, 100);
 let startTangent = new Utils.Vector2();
 let endTangent = new Utils.Vector2();
 let a, b, c, d;
+let m0 = 0.5;
+let m1 = 5;
 function calculateFunction() {
-    let m0 = -3;
-    let m1 = -3;
     d = startPoint.y;
     c = m0;
     a = (-endPoint.x * (m0 + m1) - 2 * startPoint.y + 2 * endPoint.y) / -Math.pow(endPoint.x, 3);
@@ -17,9 +17,9 @@ function calculateFunction() {
     // a = (2 / Math.pow(endPoint.x, 2)) * ((m0 - m1) / 2 + (startPoint.y - endPoint.y) / endPoint.x);
     // b = (m0 - m1) / (endPoint.x * -2) - (3 * a * endPoint.x) / 2
     startTangent = new Utils.Vector2(1, m0);
-    startTangent = Utils.Vector2.add(startTangent.normalize().scaled(30), startPoint);
+    startTangent = Utils.Vector2.add(startTangent.normalize().scaled(50), startPoint);
     endTangent = new Utils.Vector2(-1, -m1);
-    endTangent = Utils.Vector2.add(endTangent.normalize().scaled(30), endPoint);
+    endTangent = Utils.Vector2.add(endTangent.normalize().scaled(50), endPoint);
 }
 calculateFunction();
 draw();
@@ -36,6 +36,15 @@ function draw() {
     animPath.lineTo(endTangent.x, endTangent.y);
     animPath.rect(endTangent.x - 5, endTangent.y - 5, 10, 10);
     crc.stroke(animPath);
+    crc.strokeStyle = "#f00";
+    crc.moveTo(startPoint.x, startPoint.y);
+    let startTangentBezier = new Utils.Vector2(1, m0);
+    startTangentBezier = Utils.Vector2.add(startTangentBezier.normalize().scaled(34 * Math.max(1, Math.abs(m0))), startPoint);
+    let endTangentBezier = new Utils.Vector2(-1, -m1);
+    endTangentBezier = Utils.Vector2.add(endTangentBezier.normalize().scaled(34 * Math.max(1, Math.abs(m1))), endPoint);
+    crc.bezierCurveTo(startTangentBezier.x, startTangentBezier.y, endTangentBezier.x, endTangentBezier.y, endPoint.x, endPoint.y);
+    crc.stroke();
+    crc.strokeStyle = "#000";
     let duration = 2000;
     let timeModulo = (Date.now() - time) % duration;
     let currentXPosition = (endPoint.x - startPoint.x) * timeModulo / duration;

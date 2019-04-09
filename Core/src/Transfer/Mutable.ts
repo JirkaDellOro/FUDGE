@@ -22,17 +22,37 @@ namespace Fudge {
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    export class Mutable {
+    export abstract class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
         public getMutator(): Mutator {
             let mutator: Mutator = {};
             for (let attribute in this) {
+                let value: Object = this[attribute];
+                if (value instanceof Function)
+                    continue;
                 mutator[attribute] = this[attribute];
             }
+            // Object.assign is the ES6 "shortcut"... but doesn't really help
+            // Object.assign(mutator, this);
+
+            // mutator can be reduced but not extended!
+            Object.preventExtensions(mutator);
+            this.reduceMutator(mutator);
+
+            for (let attribute in mutator) {
+                let value: Object = mutator[attribute];
+                if (value instanceof Object)
+                    if (value instanceof Mutable) {
+                        mutator[attribute] = value.getMutator();
+                        console.log("Object in mutator", attribute);
+                    }
+            }
+
             return mutator;
         }
+
         /**
          * Collect the attributes of the instance and their values applicable for animation.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
@@ -71,8 +91,15 @@ namespace Fudge {
          * @param _mutator
          */
         protected mutate(_mutator: Mutator): void {
-            for (let attribute in _mutator)
-                (<General>this)[attribute] = _mutator[attribute];
+            // for (let attribute in _mutator)
+            //     (<General>this)[attribute] = _mutator[attribute];
+            Object.assign(this, _mutator);
+            this.dispatchEvent(new Event(EVENT.MUTATE));
         }
+        /**
+         * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
+         * @param _mutator 
+         */
+        protected abstract reduceMutator(_mutator: Mutator): void;
     }
 }
