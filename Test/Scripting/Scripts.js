@@ -14,12 +14,6 @@ var Scripts;
             //ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
-        getMutator() {
-            let mutator = super.getMutator();
-            //delete mutator.hndAnimationFrame;
-            delete mutator.hndMutation;
-            return mutator;
-        }
         mutate(_mutator) {
             super.mutate(_mutator);
         }

@@ -46,7 +46,7 @@ declare namespace Fudge {
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
-    class Mutable extends EventTarget {
+    abstract class Mutable extends EventTarget {
         /**
          * Collect all attributes of the instance and their values in a Mutator-object
          */
@@ -76,6 +76,11 @@ declare namespace Fudge {
          * @param _mutator
          */
         protected mutate(_mutator: Mutator): void;
+        /**
+         * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
+         * @param _mutator
+         */
+        protected abstract reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -111,7 +116,7 @@ declare namespace Fudge {
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -290,7 +295,6 @@ declare namespace Fudge {
         scaleZ(_scale: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -313,8 +317,8 @@ declare namespace Fudge {
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -638,7 +642,7 @@ declare namespace Fudge {
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 implements Serializable {
+    class Matrix4x4 extends Mutable implements Serializable {
         data: Float32Array;
         constructor();
         static readonly identity: Matrix4x4;
@@ -742,6 +746,8 @@ declare namespace Fudge {
         private static scaling;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {

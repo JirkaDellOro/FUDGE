@@ -28,14 +28,13 @@ namespace Fudge {
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        public getMutator(): Mutator {
-            let mutator: Mutator = super.getMutator();
-            delete mutator.worldMatrix;
-            return mutator;
-        }
 
         public mutate(_mutator: Mutator): void {
             super.mutate(_mutator);
+        }
+        protected reduceMutator(_mutator: Mutator): void {
+            delete _mutator.worldMatrix;
+            super.reduceMutator(_mutator);
         }
     }
 }

@@ -137,14 +137,5 @@ namespace Fudge {
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-
-        // TODO: this is just an example. There shouldn't be a direct mutation of a matrix
-        public getMutator(): Mutator {
-            let mutator: Mutator = super.getMutator();
-            let matrixCopy: Matrix4x4 = new Matrix4x4();
-            Object.assign(matrixCopy.data, this.matrix.data);
-            mutator.matrix = matrixCopy;
-            return mutator;
-        }
     }
 }

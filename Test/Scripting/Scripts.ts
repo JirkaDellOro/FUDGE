@@ -14,12 +14,6 @@ namespace Scripts {
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
 
-        public getMutator(): ƒ.Mutator {
-            let mutator: ƒ.Mutator = super.getMutator();
-            //delete mutator.hndAnimationFrame;
-            delete mutator.hndMutation;
-            return mutator;
-        }
 
         public mutate(_mutator: ƒ.Mutator): void {
             super.mutate(_mutator);
@@ -89,7 +83,7 @@ namespace Scripts {
             console.log("Name %s, Funktion %s, Object %s", name, value instanceof Function, value instanceof Object);
         }
         console.groupEnd();
-        
+
         console.log("Serialization", test.serialize());
     }
 }

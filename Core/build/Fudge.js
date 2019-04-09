@@ -49,10 +49,25 @@ var Fudge;
          */
         getMutator() {
             let mutator = {};
-            // for (let attribute in this) {
-            //     mutator[attribute] = Object.assign({}, this[attribute]);
-            // }
-            Object.assign(mutator, this);
+            for (let attribute in this) {
+                let value = this[attribute];
+                if (value instanceof Function)
+                    continue;
+                mutator[attribute] = this[attribute];
+            }
+            // Object.assign is the ES6 "shortcut"... but doesn't really help
+            // Object.assign(mutator, this);
+            // mutator can be reduced but not extended!
+            Object.preventExtensions(mutator);
+            this.reduceMutator(mutator);
+            for (let attribute in mutator) {
+                let value = mutator[attribute];
+                if (value instanceof Object)
+                    if (value instanceof Mutable) {
+                        mutator[attribute] = value.getMutator();
+                        console.log("Object in mutator", attribute);
+                    }
+            }
             return mutator;
         }
         /**
@@ -173,14 +188,10 @@ var Fudge;
             this.active = _serialization.active;
             return this;
         }
-        getMutator() {
-            let mutator = super.getMutator();
-            delete mutator.container;
-            delete mutator.singleton;
-            delete mutator.addEventListener;
-            delete mutator.removeEventListener;
-            delete mutator.dispatchEvent;
-            return mutator;
+        reduceMutator(_mutator) {
+            //let mutator: Mutator = super.getMutator();
+            delete _mutator.container;
+            delete _mutator.singleton;
         }
     }
     Fudge.Component = Component;
@@ -528,14 +539,6 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        // TODO: this is just an example. There shouldn't be a direct mutation of a matrix
-        getMutator() {
-            let mutator = super.getMutator();
-            let matrixCopy = new Fudge.Matrix4x4();
-            Object.assign(matrixCopy.data, this.matrix.data);
-            mutator.matrix = matrixCopy;
-            return mutator;
-        }
     }
     Fudge.ComponentPivot = ComponentPivot;
 })(Fudge || (Fudge = {}));
@@ -576,13 +579,12 @@ var Fudge;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
-        getMutator() {
-            let mutator = super.getMutator();
-            delete mutator.worldMatrix;
-            return mutator;
-        }
         mutate(_mutator) {
             super.mutate(_mutator);
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.worldMatrix;
+            super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
@@ -1419,8 +1421,9 @@ var Fudge;
      * Simple class for 4x4 transformation matrix operations.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 {
+    class Matrix4x4 extends Fudge.Mutable {
         constructor() {
+            super();
             this.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -1783,6 +1786,13 @@ var Fudge;
             this.data = new Float32Array(_serialization.data);
             return this;
         }
+        getMutator() {
+            let mutator = {
+                data: Object.assign({}, this.data)
+            };
+            return mutator;
+        }
+        reduceMutator(_mutator) { }
     }
     Fudge.Matrix4x4 = Matrix4x4;
 })(Fudge || (Fudge = {}));

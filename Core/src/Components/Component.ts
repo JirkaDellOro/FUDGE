@@ -67,14 +67,10 @@ namespace Fudge {
             return this;
         }
         
-        public getMutator(): Mutator {
-            let mutator: Mutator = super.getMutator();
-            delete mutator.container;
-            delete mutator.singleton;
-            delete mutator.addEventListener;
-            delete mutator.removeEventListener;
-            delete mutator.dispatchEvent;
-            return mutator;
+        protected reduceMutator(_mutator: Mutator): void {
+            //let mutator: Mutator = super.getMutator();
+            delete _mutator.container;
+            delete _mutator.singleton;
         }
     }
 }
