@@ -48,7 +48,7 @@ declare namespace Fudge {
      */
     abstract class Mutable extends EventTarget {
         /**
-         * Collect all attributes of the instance and their values in a Mutator-object
+         * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
         getMutator(): Mutator;
         /**
