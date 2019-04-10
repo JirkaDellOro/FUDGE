@@ -21,7 +21,7 @@ var Scripts;
             console.log("Component event", _event);
             console.log("Container", this.getContainer());
             console.log("Target is this?", _event.target == this, this.name);
-            this.getContainer().addEventListener(ƒ.EVENT.CHILD_ADD, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndNodeEvent);
             this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
         }
         hndNodeEvent(_event) {

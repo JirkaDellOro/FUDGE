@@ -610,11 +610,17 @@ var Fudge;
      */
     let EVENT;
     (function (EVENT) {
+        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
         EVENT["ANIMATION_FRAME"] = "animationFrame";
+        /** dispatched to a [[Component]] when its being added to a [[Node]] */
         EVENT["COMPONENT_ADD"] = "componentAdd";
+        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
         EVENT["COMPONENT_REMOVE"] = "componentRemove";
-        EVENT["CHILD_ADD"] = "childAdd";
+        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
+        EVENT["CHILD_APPEND"] = "childAdd";
+        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         EVENT["CHILD_REMOVE"] = "childRemove";
+        /** dispatched to a [[Mutable]] when its being mutated */
         EVENT["MUTATE"] = "mutate";
     })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
     /**
@@ -883,7 +889,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_ADD, { bubbles: true }));
+            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_APPEND, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -893,8 +899,8 @@ var Fudge;
             let iFound = this.children.indexOf(_node);
             if (iFound < 0)
                 return;
-            this.children.splice(iFound, 1);
             _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
+            this.children.splice(iFound, 1);
             _node.setParent(null);
         }
         // #endregion

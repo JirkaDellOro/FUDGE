@@ -347,11 +347,17 @@ declare namespace Fudge {
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
      */
     enum EVENT {
+        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
         ANIMATION_FRAME = "animationFrame",
+        /** dispatched to a [[Component]] when its being added to a [[Node]] */
         COMPONENT_ADD = "componentAdd",
+        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
         COMPONENT_REMOVE = "componentRemove",
-        CHILD_ADD = "childAdd",
+        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
+        CHILD_APPEND = "childAdd",
+        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
+        /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate"
     }
     /**
