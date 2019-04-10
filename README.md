@@ -1,5 +1,5 @@
 # FUDGE 
-![Logo](https://jirkadelloro.github.io/FUDGE/Logo/Fudge.png)  
+![Logo](https://jirkadelloro.github.io/FUDGE/Logo/Fudge_48.png)  
 Furtwangen University Didactic Game Editor  
 ## Design
 - [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
