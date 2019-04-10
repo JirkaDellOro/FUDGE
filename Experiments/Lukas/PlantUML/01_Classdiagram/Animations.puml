@@ -1,0 +1,78 @@
+@startuml Animations
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+'page 2x2
+left to right direction
+
+namespace Fudge{
+	namespace Components {
+		abstract class Component
+	}
+	namespace Animation{
+		class Animator extends Fudge.Components.Component{
+			+ animations: Animation[]
+			+ speed: number;
+		}
+
+
+		class Animation{
+			+ clips: {[property: string]: Clip}
+			+ startTime: number
+			+ totaltime: number
+			+ events: Event[]
+			+ labels: Label[]
+			+ wrapMode: WrapMode
+			+ update()
+		}
+
+		class Clip {
+			+ keys: Key[]
+			+ evaluate(_time: number): number
+			+ addKey(_key:Key)
+			+ removeKey(_key:Key)
+		}
+
+		class Key {
+			+ time: number
+			+ value: number
+			- slopeIn: number
+			- slopeOut: number
+			+ functionIn: Function
+			- broken: boolean
+			+ setSlopeIn(_slope:number)
+			+ setSlopeOut(_slope:number)
+		}
+
+		class Function {
+			- a: number
+			- b: number
+			- c: number
+			- d: number
+			- keyOut: Key
+			- keyIn: Key
+			+ evaluate(_time: number): number
+			- calculate()
+			- setKeyIn(_key)
+			- setKeyOut(_key)
+		}
+
+		enum WRAPMODE{
+			INHERIT
+			STOPATEND
+			STOPAFTEREND
+			LOOP
+			PINGPONG
+		}
+' Associations
+Animator "1" -- "n" Animation
+Animation "1" -- "n" Clip
+Clip "1" -- "n" Key
+Key "2" -- "1" Function
+	}
+}
+
+@enduml
