@@ -66,7 +66,7 @@ var Fudge;
             for (let attribute in mutator) {
                 let value = mutator[attribute];
                 if (value instanceof Mutable)
-                    value = value.getMutator();
+                    mutator[attribute] = value.getMutator();
             }
             return mutator;
         }
@@ -115,6 +115,7 @@ var Fudge;
         mutate(_mutator) {
             // for (let attribute in _mutator)
             //     (<General>this)[attribute] = _mutator[attribute];
+            // TODO: don't assign unknown properties
             Object.assign(this, _mutator);
             this.dispatchEvent(new Event(Fudge.EVENT.MUTATE));
         }
@@ -1793,6 +1794,7 @@ var Fudge;
             let mutator = {
                 data: Object.assign({}, this.data)
             };
+            mutator.data[0] = 0.5;
             return mutator;
         }
         reduceMutator(_mutator) { }
