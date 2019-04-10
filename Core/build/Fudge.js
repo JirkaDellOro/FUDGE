@@ -1798,7 +1798,6 @@ var Fudge;
             let mutator = {
                 data: Object.assign({}, this.data)
             };
-            mutator.data[0] = 0.5;
             return mutator;
         }
         reduceMutator(_mutator) { }

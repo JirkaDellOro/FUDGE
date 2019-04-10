@@ -389,7 +389,6 @@ namespace Fudge {
             let mutator: Mutator = {
                 data: Object.assign({}, this.data)
             };
-            (<Float32Array>mutator.data)[0] = 0.5;
             return mutator;
         }
         protected reduceMutator(_mutator: Mutator): void {/** */ }
