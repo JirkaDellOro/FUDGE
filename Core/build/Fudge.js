@@ -45,28 +45,28 @@ var Fudge;
      */
     class Mutable extends EventTarget {
         /**
-         * Collect all attributes of the instance and their values in a Mutator-object
+         * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
         getMutator() {
             let mutator = {};
+            // collect primitive and mutable attributes
             for (let attribute in this) {
                 let value = this[attribute];
                 if (value instanceof Function)
                     continue;
+                if (value instanceof Object && !(value instanceof Mutable))
+                    continue;
                 mutator[attribute] = this[attribute];
             }
-            // Object.assign is the ES6 "shortcut"... but doesn't really help
-            // Object.assign(mutator, this);
             // mutator can be reduced but not extended!
             Object.preventExtensions(mutator);
+            // delete unwanted attributes
             this.reduceMutator(mutator);
+            // replace references to mutable objects with references to copies
             for (let attribute in mutator) {
                 let value = mutator[attribute];
-                if (value instanceof Object)
-                    if (value instanceof Mutable) {
-                        mutator[attribute] = value.getMutator();
-                        console.log("Object in mutator", attribute);
-                    }
+                if (value instanceof Mutable)
+                    value = value.getMutator();
             }
             return mutator;
         }
@@ -100,8 +100,13 @@ var Fudge;
          * @param _mutator
          */
         updateMutator(_mutator) {
-            for (let attribute in _mutator)
-                _mutator[attribute] = this[attribute];
+            for (let attribute in _mutator) {
+                let value = _mutator[attribute];
+                if (value instanceof Mutable)
+                    value = value.getMutator();
+                else
+                    _mutator[attribute] = this[attribute];
+            }
         }
         /**
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
@@ -189,8 +194,6 @@ var Fudge;
             return this;
         }
         reduceMutator(_mutator) {
-            //let mutator: Mutator = super.getMutator();
-            delete _mutator.container;
             delete _mutator.singleton;
         }
     }
