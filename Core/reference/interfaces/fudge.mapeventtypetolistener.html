@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>MapStringToNode | Fudge Core</title>
+	<title>MapEventTypeToListener | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -38,8 +38,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-externals" checked />
-							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
 							<input type="checkbox" id="tsd-filter-only-exported" />
 							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
@@ -59,10 +57,10 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.mapstringtonode.html">MapStringToNode</a>
+					<a href="fudge.mapeventtypetolistener.html">MapEventTypeToListener</a>
 				</li>
 			</ul>
-			<h1>Interface MapStringToNode</h1>
+			<h1>Interface MapEventTypeToListener</h1>
 		</div>
 	</div>
 </header>
@@ -73,13 +71,13 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">MapStringToNode</span>
+						<span class="target">MapEventTypeToListener</span>
 					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel tsd-kind-interface tsd-parent-kind-module">
 				<h3 class="tsd-before-signature">Indexable</h3>
-				<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../classes/fudge.node.html" class="tsd-signature-type">Node</a></div>
+				<div class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">[</span>eventType: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">EventListener</span><span class="tsd-signature-symbol">[]</span></div>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -95,6 +93,9 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-enum tsd-parent-kind-module">
+						<a href="../enums/fudge.event.html" class="tsd-kind-icon">EVENT</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="../classes/fudge.color.html" class="tsd-kind-icon">Color</a>
 					</li>
@@ -114,10 +115,19 @@
 						<a href="../classes/fudge.componentpivot.html" class="tsd-kind-icon">Component<wbr>Pivot</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.componentscript.html" class="tsd-kind-icon">Component<wbr>Script</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="../classes/fudge.componenttransform.html" class="tsd-kind-icon">Component<wbr>Transform</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.eventtargetstatic.html" class="tsd-kind-icon">Event<wbr>Target<wbr>Static</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="../classes/fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="../classes/fudge.loop.html" class="tsd-kind-icon">Loop</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="../classes/fudge.material.html" class="tsd-kind-icon">Material</a>
@@ -164,7 +174,7 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mapstringtonode.html" class="tsd-kind-icon">Map<wbr>String<wbr>ToNode</a>
+						<a href="fudge.mapeventtypetolistener.html" class="tsd-kind-icon">Map<wbr>Event<wbr>Type<wbr>ToListener</a>
 					</li>
 				</ul>
 				<ul class="after-current">
