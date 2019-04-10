@@ -3,6 +3,7 @@ import * as jQuery from 'jquery';
 import * as GoldenLayout from 'golden-layout';
 import { MainViewComponent } from './views/main-view/main-view.component';
 import { SecondViewComponent } from './views/second-view/second-view.component';
+import { Content } from '@angular/compiler/src/render3/r3_ast';
 
 type NgComponent<T> = { new(...params: any[]): T };
 
@@ -19,16 +20,34 @@ export class AppComponent {
       showPopoutIcon: false //Angular SPA. it will not be working in multi window app
     },
     content: [{
-      type: 'row',
+      type: 'column',
       content: [{
-        type: 'component',
-        componentName: 'main'
-      }, {
-        type: 'component',
-        componentName: 'second'
+        type: 'row',
+        content:[{
+          type: 'component',
+          componentName: 'main',
+          title: 'Scene Explorer',
+          height: 651,
+          width: 400
+      },
+      {
+          type: 'component',
+          componentName: 'second',
+          height: 651,
+          width: 1515
+      }]},
+      {
+          type: 'row',
+          content: [{
+              type: 'component',
+              componentName: 'third',
+              title: 'File Explorer',
+              height: 270,
+              width: 1920
+          }]
       }]
     }]
-  }
+};
   constructor(
     private componentFactoryResolver: ComponentFactoryResolver,
     private appRef: ApplicationRef,
@@ -38,9 +57,15 @@ export class AppComponent {
 
     this.layout = new GoldenLayout(this.config);
 
-    //reg components. this components must registred in angular as entryComponents (see app.module.ts)
+    //reg components. this components must be registered in angular as entryComponents (see app.module.ts)
     this.registerComponent("main", MainViewComponent);
-    this.registerComponent("second", SecondViewComponent);
+    this.registerComponent("second", MainViewComponent);
+    this.registerComponent("third", MainViewComponent);
+    this.registerComponent("fourth", MainViewComponent);
+    this.registerComponent("fifth", SecondViewComponent);
+    this.registerComponent("sixth", SecondViewComponent);
+    this.registerComponent("test", MainViewComponent);
+    this.registerComponent("test2", SecondViewComponent);
 
     this.layout.init();
   }
