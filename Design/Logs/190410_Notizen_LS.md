@@ -44,4 +44,4 @@ Once these are well established, a Input-Scheme can be found. Current Proposals:
 Serialisation will require you to explicitly add what needs to be saved. On the contrary the mutator will add everything and will ask you to remove what you don't want mutated.  
 The Mutator ignores accessability of variables and thus private or protected variables need to be removed specifically if they shouldn't be mutateable. Functions and non-mutateable attributes are ignored by default.  
 - There is a global EVENT Enumeration now. It should be used instead of defining events via error-prone strings. Currently Global for all of FUDGE, is considered to be split if the amount of Events gets too big.  
-- FUDGE now has a ♥-beat. Currently called "Animationframeevent"
+- FUDGE now has a ♥-beat. It sits in Fudge.Loop and fires EVENT.ANIMATION_FRAME on every answer of window.requestAnimationFram
