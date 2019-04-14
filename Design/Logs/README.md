@@ -17,6 +17,16 @@ Interfaces for Animation and UI (and more?) compatibility/accessability. init/ch
 [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Whiteboard.jpg)  
 [Relevant for VectorEditor and Animator](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Notizen_LS.md)
 
+# Mar 20th 2019
+Die Möglichkeit, Szenen zu speichern und zu laden muss gegeben werden
+Szenen werden in JSON gespeichert und können dort auch ohne den Editor bearbeitet werden (Z.b. Erstellung eines neuen Objektes)
+
+Gibt es Bedarf, FUDGE auf Node laufen zu lassen?
+
+DOM Eventsteuerung
+
+Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)
+
 # Mar 18th 2019
 Presentation of the Core as it stands, general thoughts about it.  
 [Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Notizen_LS.md)
