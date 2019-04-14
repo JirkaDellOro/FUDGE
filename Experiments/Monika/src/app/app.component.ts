@@ -23,27 +23,33 @@ export class AppComponent {
       type: 'column',
       content: [{
         type: 'row',
+        height: 70,
         content:[{
           type: 'component',
           componentName: 'main',
           title: 'Scene Explorer',
-          height: 651,
-          width: 400
+          width: 20
       },
       {
           type: 'component',
           componentName: 'second',
-          height: 651,
-          width: 1515
-      }]},
+          title: 'Viewport',
+          width: 60
+      },
+      {
+        type: 'component',
+        componentName: 'second',
+        title: 'Inspector',
+        width: 20
+    }]},
       {
           type: 'row',
           content: [{
               type: 'component',
               componentName: 'third',
               title: 'File Explorer',
-              height: 270,
-              width: 1920
+              height: 30,
+              width: 100
           }]
       }]
     }]
