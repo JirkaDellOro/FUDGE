@@ -1,4 +1,4 @@
-@startuml WebGL Internal Management
+@startuml WebG.addNode
 |UserProgram|
 '|Viewport|
 |WebGL|
@@ -57,7 +57,7 @@ package addNode {
     stop
 }
 @enduml
-@startuml WebGL Internal Management 2
+@startuml WebGL.removeNode
 |UserProgram|
 '|Viewport|
 |WebGL|
@@ -108,6 +108,14 @@ package removeNode {
     |UserProgram|
     stop
 }
+@enduml
+@startuml WebGL.updateNode
+|UserProgram|
+'|Viewport|
+|WebGL|
+'|Node|
+|ComponentMaterial|
+|ComponentMesh|
 package updateNode {
     |UserProgram|
     start
