@@ -176,10 +176,10 @@ package Fudge <<Rectangle>>{
 
   ' Associations
   Node  ..|> Serializable
-  Node "0..1 parent"<-left->"n children" Node
-  Node "1 container"<-->"n" Component
+  Node "0..1 parent" o-left- "n children" Node
+  Node "1 container" o-- "n components" Component
   Component ..|> Serializable
-  ComponentMesh "n"-->"1" Mesh
+  ComponentMesh "n" --> "1" Mesh
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
   Viewport -->"1 root" Node : displays >

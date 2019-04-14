@@ -6,8 +6,8 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export abstract class Component extends Mutable implements Serializable {
+        protected singleton: boolean = true;
         private container: Node | null = null;
-        private singleton: boolean = true;
         private active: boolean = true;
 
         public activate(_on: boolean): void {

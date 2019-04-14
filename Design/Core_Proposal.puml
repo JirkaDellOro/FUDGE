@@ -10,23 +10,14 @@ left to right direction
 
 package Fudge <<Rectangle>>{
     ' gl2: WebGL2RenderingContext
-    package "Javascript" <<Cloud>> {
+    package "Browser" <<Cloud>> {
         class EventTarget
         class WebGL2RenderingContext
         class HTMLCanvasElement
+        class CanvasRenderingContext2D
     }
 
     package "Engine" <<Folder>> {
-        class WebGL {
-            - canvas: HTMLCanvasElement (offscreen)
-            - crc3: WebGL2RenderingContext
-            - vertexArrayObjects: MapStringToWebGLVertexArrayObject
-            - buffers: MapStringToWebGLBuffer
-        }
-        class Canvas {
-            - domCanvas: HTMLCanvasElement
-            - events: string[]
-        }
         file "Node" {
             class Node extends EventTarget {
                 - parent: Node | null
@@ -40,7 +31,7 @@ package Fudge <<Rectangle>>{
                 [key: string]: Node
             }
         }
-        Serializable ()-- Node
+
         interface BufferSpecification {
             size: number
             dataType: number
@@ -61,9 +52,34 @@ package Fudge <<Rectangle>>{
             - name: string
             - camera: ComponentCamera
             - rootNode: Node
-            - canvas. Canvas
+            - canvas: HTMLCanvasElement
+            - rectTarget: Rectangle
         }
+
+        interface MapEventTypeToListener {
+            [eventType: string]: EventListener[];
+        }
+
+        enum EVENT
+
+        class EventTargetStatic extends EventTarget {
+            #{static} targetStatic: EventTargetStatic
+        }
+
+        class Loop extends EventTargetStatic {
+            - {static} running: boolean = false
+            + {static} start(): void
+        }
+
+        class WebGL {
+            - canvas: HTMLCanvasElement (offscreen)
+            - crc3: WebGL2RenderingContext
+            - vertexArrayObjects: MapStringToWebGLVertexArrayObject
+            - buffers: MapStringToWebGLBuffer
+        }
+
     }
+
     package "Transfer" <<Folder>> {
         file "Serializer" {
             interface Serializable {
@@ -95,13 +111,14 @@ package Fudge <<Rectangle>>{
             Mutable --( Mutator
         }
     }
+
     package "Components" <<Folder>> {
-        abstract class Component extends EventTarget {
+        abstract class Component extends Mutable {
             - container: Node | null
             - singleton: boolean
             - active: boolean
         }
-        Component -() Serializable
+
         class ComponentCamera extends Component {
             - orthographic: boolean
             - projectionMatrix: Matrix4x4
@@ -126,9 +143,9 @@ package Fudge <<Rectangle>>{
             + worldMatrix: Matrix4x4
         }
         class ComponentScript extends Component {
-
         }
     }
+
     package "Meshes" <<Folder>> {
         interface Mesh extends Serializable {
             getVertices(): Float32Array
@@ -139,6 +156,7 @@ package Fudge <<Rectangle>>{
             public depth: number;
         }
     }
+
     package "Math" <<Folder>> {
         class Vector3 {
             - data: number[]
@@ -147,7 +165,7 @@ package Fudge <<Rectangle>>{
         class Matrix3x3 {
             public data: number[]
         }
-        class Matrix4x4 {
+        class Matrix4x4 extends Mutable {
             public data: Float32Array
         }
         Matrix4x4 --() Serializable
@@ -165,29 +183,26 @@ package Fudge <<Rectangle>>{
         }
     }
 
-    class Fudge{
-        webGL: WebGL
-        eventManager: EventManager
-        animate(): void
-    } 
-
     ' Associations
-    Node "0..1 parent"<-left->"n children" Node
-    Node "1 container"<-->"n" Component
-    Component --|> Mutable
-    ComponentMesh "n"-->"1" Mesh
+    Node  ..|> Serializable
+    Node "0..1 parent" o-left- "n children" Node
+    Node "1 container" o-- "n components" Component
+    Component ..|> Serializable
+    ComponentMesh "n" --> "1" Mesh
     ComponentPivot -->"1" Matrix4x4
     ComponentTransform -->"1" Matrix4x4
     Viewport -->"1 root" Node : displays >
     Viewport -->"1 camera" ComponentCamera : look through >
     Shader "n"-->"1" Material : uses >
     ComponentMaterial "n" --> "1" Shader : refers >
-    Canvas "n" --> "1" HTMLCanvasElement : uses >
-    Canvas "1" <--> Viewport
-    Viewport "n" -->"1" WebGL : feeds data
-    WebGL "1"-->"1" WebGL2RenderingContext
-
+    Viewport "n" --> "1" CanvasRenderingContext2D : renders >
+    Viewport "n" --> "1" WebGL : feeds data >
+    WebGL "1" --> "1" WebGL2RenderingContext : render offscreen >
+    'HTMLCanvasElement -- CanvasRenderingContext2D
+    
     'improve layout
+    Node -[hidden]- Serializable
+    Component -[hidden]- Serializable
     'Serializer --[hidden]-- Mutable
     'Mutable --[hidden]-- Component
     'Viewport -[hidden]- ComponentCamera

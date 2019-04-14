@@ -1,0 +1,172 @@
+@startuml WebG.addNode
+header 
+WebGL.addNode
+endheader
+|UserProgram|
+|WebGL|
+|Node|
+|UserProgram|
+start
+:WebGL.addNode(_node);
+|WebGL|
+if () then (already stored)
+    end
+else (new)
+    :store reference-object
+    [key: node reference];
+endif
+|Node|
+:getShaderReference;
+|WebGL|
+if () then (new)
+    :compileShader;
+    :storeProgram
+    [key : shader reference];
+else (already stored)
+    :increase
+    shader reference
+    counter;
+endif
+|Node|
+:getMaterialReference;
+|WebGL|
+if () then (new)
+    :store static database
+    (e.g. texture)
+    [key= material reference];
+else (already stored)
+    :increase
+    material reference
+    counter;
+endif
+|Node|
+:getMeshReference;
+|WebGL|
+if () then (new)
+    :store vertices
+    [key= mesh reference];
+else (already stored)
+    :increase
+    mesh reference
+    counter;
+endif
+:store references
+in node-reference;
+|UserProgram|
+stop
+@enduml
+
+' ------------------------------------------
+
+@startuml WebGL.removeNode
+header 
+WebGL.removeNode
+endheader
+|UserProgram|
+|WebGL|
+|Node|
+|UserProgram|
+start
+:WebGL.removeNode(_node);
+|WebGL|
+if () then (_node unknown)
+    end
+endif
+:get counter of
+shader reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete program;
+    endif
+else ()
+    :ERROR;
+endif
+:get counter of
+material reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete material data;
+    endif
+else ()
+    :ERROR;
+endif
+:get counter of
+mesh reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete mesh vertices;
+    endif
+else ()
+    :ERROR;
+endif
+|UserProgram|
+stop
+@enduml
+
+' ------------------------------------------
+
+@startuml WebGL.updateNode
+header 
+WebGL.updateNode
+endheader
+|UserProgram|
+|WebGL|
+|Node|
+|UserProgram|
+start
+:WebGL.removeNode(_node);
+|WebGL|
+if () then (_node unknown)
+    end
+endif
+|Node|
+:getShaderReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
+    endif
+    :update node reference;
+endif
+|Node|
+:getMaterialReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
+    endif
+    :update node reference;
+endif
+|Node|
+:getMeshReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
+    endif
+    :update node reference;
+endif
+|UserProgram|
+stop
+@enduml

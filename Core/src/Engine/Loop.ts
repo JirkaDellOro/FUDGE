@@ -10,12 +10,14 @@ namespace Fudge {
          */
         public static start(): void {
             if (!Loop.running)
-                Loop.loop();
+                Loop.loop(performance.now());
             console.log("Loop running");
         }
-        private static loop(): void {
+        private static loop(_timestamp: number): void {
+            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
+            let event: Event = new Event(EVENT.ANIMATION_FRAME);
+            Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
-            Loop.targetStatic.dispatchEvent(new Event(EVENT.ANIMATION_FRAME));
         }
     }
 
