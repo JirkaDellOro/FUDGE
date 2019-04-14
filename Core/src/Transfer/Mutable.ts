@@ -48,7 +48,7 @@ namespace Fudge {
             for (let attribute in mutator) {
                 let value: Object = mutator[attribute];
                 if (value instanceof Mutable)
-                    value = value.getMutator();
+                    mutator[attribute] = value.getMutator();
             }
 
             return mutator;
@@ -99,6 +99,7 @@ namespace Fudge {
         protected mutate(_mutator: Mutator): void {
             // for (let attribute in _mutator)
             //     (<General>this)[attribute] = _mutator[attribute];
+            // TODO: don't assign unknown properties
             Object.assign(this, _mutator);
             this.dispatchEvent(new Event(EVENT.MUTATE));
         }

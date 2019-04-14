@@ -66,7 +66,7 @@ var Fudge;
             for (let attribute in mutator) {
                 let value = mutator[attribute];
                 if (value instanceof Mutable)
-                    value = value.getMutator();
+                    mutator[attribute] = value.getMutator();
             }
             return mutator;
         }
@@ -115,6 +115,7 @@ var Fudge;
         mutate(_mutator) {
             // for (let attribute in _mutator)
             //     (<General>this)[attribute] = _mutator[attribute];
+            // TODO: don't assign unknown properties
             Object.assign(this, _mutator);
             this.dispatchEvent(new Event(Fudge.EVENT.MUTATE));
         }
@@ -134,8 +135,8 @@ var Fudge;
     class Component extends Fudge.Mutable {
         constructor() {
             super(...arguments);
-            this.container = null;
             this.singleton = true;
+            this.container = null;
             this.active = true;
         }
         activate(_on) {
@@ -552,6 +553,10 @@ var Fudge;
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentScript extends Fudge.Component {
+        constructor() {
+            super();
+            this.singleton = false;
+        }
     }
     Fudge.ComponentScript = ComponentScript;
 })(Fudge || (Fudge = {}));

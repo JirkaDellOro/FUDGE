@@ -89,8 +89,8 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Component extends Mutable implements Serializable {
+        protected singleton: boolean;
         private container;
-        private singleton;
         private active;
         activate(_on: boolean): void;
         readonly isActive: boolean;
@@ -303,6 +303,7 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentScript extends Component {
+        constructor();
     }
 }
 declare namespace Fudge {
