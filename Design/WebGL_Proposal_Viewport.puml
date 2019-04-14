@@ -1,0 +1,14 @@
+@startuml Viewport.render
+header 
+Viewport.render
+endheader
+|UserProgram|
+|Viewport|
+|WebGL|
+|Node|
+|UserProgram|
+start
+:Viewport.render();
+|UserProgram|
+stop
+@enduml

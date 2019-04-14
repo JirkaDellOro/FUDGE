@@ -1,6 +1,6 @@
 @startuml WebG.addNode
-header 
-WebGL.addNode
+header
+    WebGL.addNode
 endheader
 |UserProgram|
 |WebGL|
@@ -59,8 +59,8 @@ stop
 ' ------------------------------------------
 
 @startuml WebGL.removeNode
-header 
-WebGL.removeNode
+header
+    WebGL.removeNode
 endheader
 |UserProgram|
 |WebGL|
@@ -112,8 +112,8 @@ stop
 ' ------------------------------------------
 
 @startuml WebGL.updateNode
-header 
-WebGL.updateNode
+header
+    WebGL.updateNode
 endheader
 |UserProgram|
 |WebGL|
@@ -169,4 +169,50 @@ else ()
 endif
 |UserProgram|
 stop
+
+' ------------------------------------------
+
+@startuml WebGL.recalculateNodes
+header
+    WebGL.recalculateNodes
+endheader
+|UserProgram|
+|WebGL|
+|UserProgram|
+:ANIMATION_FRAME<
+|WebGL|
+:ListOfNodesToRender]
+:mark all nodes as undone;
+while () is (more nodes)
+    :node = next node]
+    if () then (node done)
+        note left
+            optimization possible
+            when unchanged nodes
+            are marked as done
+        end note
+    else
+        :recalculateNode(node);
+    endif
+endwhile
+stop
+|WebGL|
+package recalculateNode {
+    :_node]
+    while () is (parent exists&\nnot done)
+        :_node = _node.parent;
+    endwhile
+    :calculate transform;
+    :calculate pivot;
+    :mark _node as done;
+    :node.children]
+    while () is (more children)
+        :child = next child]
+        if () then (child done)
+        else
+            :recalculateNode(child);
+        endif
+    endwhile
+    stop
+}
 @enduml

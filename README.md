@@ -10,6 +10,7 @@ Furtwangen University Didactic Game Editor
 - [WebGL.addNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=0)  
 - [WebGL.removeNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=1)  
 - [WebGL.updateNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=2)    
+- [WebGL.recalculateNodes](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=3)    
 
 ## Documentation
 - [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/Core.puml)
