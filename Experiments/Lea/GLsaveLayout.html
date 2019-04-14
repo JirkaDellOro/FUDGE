@@ -1,0 +1,82 @@
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js">
+</script>
+<script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
+<script language="javascript">
+    var config = {
+        content: [{
+            type: 'row',
+            content: [{
+                type: 'component',
+                componentName: 'testComponent',
+                componentState: { label: 'A' }
+            },
+            {
+                type: 'component',
+                componentName: 'testComponent',
+                componentState: { label: 'D' }
+            },
+
+            {
+                type: 'column',
+                content: [{
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'B' }
+                },
+
+                {
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'C' }
+                }]
+            }]
+        }]
+    };
+
+    var myLayout = new GoldenLayout(config);
+    myLayout.registerComponent( 'testComponent', function( container, componentState ){
+    container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+});
+   
+//Layout Changes - listener
+    myLayout.on( 'stateChanged', function(){
+    //now save the state
+    var state = JSON.stringify( myLayout.toConfig() );
+    localStorage.setItem( 'savedState', state );
+});
+
+var myLayout,
+//if used before, Layout is stored in local, otherwise default is loaded
+    savedState = localStorage.getItem( 'savedState' );
+
+if( savedState !== null ) {
+    myLayout = new GoldenLayout( JSON.parse( savedState ) );
+} else {
+    myLayout = new GoldenLayout( config );
+}
+
+//save component
+myLayout.registerComponent( 'testComponent', function( container, state ){
+
+// Create the input
+var input = $( '<input type="text" />' );
+
+// Set the initial / saved state
+if( state.label ) {
+    input.val( state.label );
+}
+
+// Store state updates
+input.on( 'change', function(){
+    container.extendState({
+        label: input.val()
+    });
+});
+
+// Append it to the DOM
+container.getElement().append( input );
+});
+myLayout.init();
+</script>
