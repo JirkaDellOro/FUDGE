@@ -12,6 +12,11 @@
                 componentName: 'testComponent',
                 componentState: { label: 'A' }
             },
+            {
+                type: 'component',
+                componentName: 'testComponent',
+                componentState: { label: 'D' }
+            },
 
             {
                 type: 'column',
@@ -31,7 +36,6 @@
     };
 
     var myLayout = new GoldenLayout(config);
-
     myLayout.registerComponent( 'testComponent', function( container, componentState ){
     container.getElement().html( '<h2>' + componentState.label + '</h2>' );
 });

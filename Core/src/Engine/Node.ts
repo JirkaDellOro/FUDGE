@@ -72,7 +72,7 @@ namespace Fudge {
 
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(EVENT.CHILD_ADD, {bubbles: true}));
+            _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
         }
 
         /**
@@ -84,9 +84,9 @@ namespace Fudge {
             if (iFound < 0)
                 return;
 
+            _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
             this.children.splice(iFound, 1);
-            _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, {bubbles: true}));
-            _node.setParent(null);   
+            _node.setParent(null);
         }
         // #endregion
 

@@ -72,6 +72,7 @@ namespace Fudge {
                     _node.addComponent(materialComponent);
                     */
                     let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
+                    // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
                     GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
                     this.initializeNodeMaterial(materialComponent, mesh);
                     if (materialComponent.Material.TextureEnabled) {
@@ -155,7 +156,7 @@ namespace Fudge {
             return sceneGraphRoot;
         }
         /**
-         * Initializes the vertexbuffer for a passed node.
+         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
         private initializeNodeBuffer(_node: Node): void {
@@ -168,7 +169,9 @@ namespace Fudge {
             if (vertexArrayObjectCreated === null) return;
             let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
             this.vertexArrayObjects[_node.name] = vertexArrayObject;
+            // bind attribute-array, subsequent calls will use it
             gl2.bindVertexArray(vertexArrayObject);
+            // bind buffer to ARRAY_BUFFER, subsequent calls work on it
             gl2.bindBuffer(gl2.ARRAY_BUFFER, buffer);
         }
 

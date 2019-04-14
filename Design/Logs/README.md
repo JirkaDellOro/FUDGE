@@ -2,6 +2,16 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed
 
+# Apr 11th 2019
+Discussion on Keyboard shortcuts for the 2D/3D Editor
+[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/2019-04-11%2016.23.21.jpg)
+
+# Apr 10th 2019
+Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).
+All Members showed off what they were working on: [WebAudioAPI Overview](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard4.jpg), [Animator Thoughts and Proposals](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard3.jpg).
+
+[Animation Editor Work](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Notizen_LS.md)
+
 # Mar 27th 2019
 Interfaces for Animation and UI (and more?) compatibility/accessability. init/change (name is subject to change) function that handles changes on an object by using a generic JS Object.  
 [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Whiteboard.jpg)  
