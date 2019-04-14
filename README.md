@@ -6,8 +6,10 @@ Furtwangen University Didactic Game Editor
 - [Core Proposal Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/Core_Proposal.puml)  
 - [View Mindmap](https://jirkadelloro.github.io/FreeMindViewer/?map=FUDGE.mm&path=https://jirkadelloro.github.io/FUDGE)  
 
-
-- [WebGL Proposal Node Processing](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml)  
+### Proposal for refactoring WebGL-Canvas-Viewport
+- [WebGL.addNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=0)  
+- [WebGL.removeNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=1)  
+- [WebGL.updateNode](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Node-Processing.puml&idx=2)    
 
 ## Documentation
 - [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/Core.puml)
