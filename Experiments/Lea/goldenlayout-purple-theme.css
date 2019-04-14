@@ -1,9 +1,9 @@
 .lm_goldenlayout {
-    background-image: url("imgBGtest.svg");
+    background-image: url("brushedMetal.png");
 }
 
 .lm_content {
-    background-image: url("imgBGtest1.svg");
+    background-image: url("brushedMetalDark.png");
 }
 
 .lm_dragProxy .lm_content {
@@ -45,7 +45,7 @@
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #999999;
-    background: #111111;
+    background-image: url("brushedMetal.png");
     box-shadow: 2px -2px 2px rgba(0, 0, 0, 0.3);
     margin-right: 2px;
     padding-bottom: 2px;
@@ -55,7 +55,7 @@
 .lm_header .lm_tab .lm_close_tab {
     width: 11px;
     height: 11px;
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAATElEQVR4nG3OwQ0DMQwDwZGRBtR/j1YJzMc5+IDoR+yCVO29g+pu981MFgqZmRdAfU7+CYWcbF11LwALjpBL0N0qybNx/RPU+gOeiS/+XCRwDlTgkQAAAABJRU5ErkJggg==);
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAATElEQVR4nG3OwQ0DMQwDwZGRBtR/j1YJzMc5+IDoR+yCVO29g+pu981MFgqZmRdAfU7+CYWcbF11LwALjpBL0N0qybNx/RPU+gOeiS/+XCRwDlTgkQAAAABJRU5ErkJggg==);
     background-position: center center;
     background-repeat: no-repeat;
     top: 4px;
