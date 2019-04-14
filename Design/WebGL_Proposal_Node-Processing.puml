@@ -3,11 +3,8 @@ header
 WebGL.addNode
 endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
+|Node|
 |UserProgram|
 start
 :WebGL.addNode(_node);
@@ -18,7 +15,7 @@ else (new)
     :store reference-object
     [key: node reference];
 endif
-|ComponentMaterial|
+|Node|
 :getShaderReference;
 |WebGL|
 if () then (new)
@@ -30,7 +27,7 @@ else (already stored)
     shader reference
     counter;
 endif
-|ComponentMaterial|
+|Node|
 :getMaterialReference;
 |WebGL|
 if () then (new)
@@ -42,7 +39,7 @@ else (already stored)
     material reference
     counter;
 endif
-|ComponentMesh|
+|Node|
 :getMeshReference;
 |WebGL|
 if () then (new)
@@ -59,17 +56,15 @@ in node-reference;
 stop
 @enduml
 
+' ------------------------------------------
 
 @startuml WebGL.removeNode
 header 
 WebGL.removeNode
 endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
+|Node|
 |UserProgram|
 start
 :WebGL.removeNode(_node);
@@ -113,16 +108,16 @@ endif
 |UserProgram|
 stop
 @enduml
+
+' ------------------------------------------
+
 @startuml WebGL.updateNode
 header 
 WebGL.updateNode
 endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
+|Node|
 |UserProgram|
 start
 :WebGL.removeNode(_node);
@@ -130,7 +125,7 @@ start
 if () then (_node unknown)
     end
 endif
-|ComponentMaterial|
+|Node|
 :getShaderReference;
 |WebGL|
 :compareReferenceToStored;
@@ -144,7 +139,7 @@ else ()
     endif
     :update node reference;
 endif
-|ComponentMaterial|
+|Node|
 :getMaterialReference;
 |WebGL|
 :compareReferenceToStored;
@@ -158,7 +153,7 @@ else ()
     endif
     :update node reference;
 endif
-|ComponentMesh|
+|Node|
 :getMeshReference;
 |WebGL|
 :compareReferenceToStored;
