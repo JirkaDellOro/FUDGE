@@ -1,0 +1,145 @@
+@startuml WebG.addNode
+|UserProgram|
+'|Viewport|
+|WebGL|
+'|Node|
+|ComponentMaterial|
+|ComponentMesh|
+package addNode {
+    |UserProgram|
+    start
+    :WebGL.addNode(_node);
+    |WebGL|
+    if () then (already stored)
+        end
+    else (new)
+        :store reference-object
+        [key: node reference];
+    endif
+    |ComponentMaterial|
+    :getShaderReference;
+    |WebGL|
+    if () then (new)
+        :compileShader;
+        :storeProgram
+        [key : shader reference];
+    else (already stored)
+        :increase
+        shader reference
+        counter;
+    endif
+    |ComponentMaterial|
+    :getMaterialReference;
+    |WebGL|
+    if () then (new)
+        :store static database
+        (e.g. texture)
+        [key= material reference];
+    else (already stored)
+        :increase
+        material reference
+        counter;
+    endif
+    |ComponentMesh|
+    :getMeshReference;
+    |WebGL|
+    if () then (new)
+        :store vertices
+        [key= mesh reference];
+    else (already stored)
+        :increase
+        mesh reference
+        counter;
+    endif
+    :store references
+    in node-reference;
+    |UserProgram|
+    stop
+}
+@enduml
+@startuml WebGL.removeNode
+|UserProgram|
+'|Viewport|
+|WebGL|
+'|Node|
+|ComponentMaterial|
+|ComponentMesh|
+package removeNode {
+    |UserProgram|
+    start
+    :WebGL.removeNode(_node);
+    |WebGL|
+    if () then (_node unknown)
+        end
+    endif
+    :get counter of
+    shader reference;
+    if () then (counter > 0)
+        :decrease
+        counter;
+        if () then (counter==0)
+            :delete program;
+        endif
+    else ()
+        :ERROR;
+    endif
+    :get counter of
+    material reference;
+    if () then (counter > 0)
+        :decrease
+        counter;
+        if () then (counter==0)
+            :delete material data;
+        endif
+    else ()
+        :ERROR;
+    endif
+    :get counter of
+    mesh reference;
+    if () then (counter > 0)
+        :decrease
+        counter;
+        if () then (counter==0)
+            :delete mesh vertices;
+        endif
+    else ()
+        :ERROR;
+    endif
+    |UserProgram|
+    stop
+}
+@enduml
+@startuml WebGL.updateNode
+|UserProgram|
+'|Viewport|
+|WebGL|
+'|Node|
+|ComponentMaterial|
+|ComponentMesh|
+package updateNode {
+    |UserProgram|
+    start
+    :WebGL.removeNode(_node);
+    |WebGL|
+    if () then (_node unknown)
+        end
+    endif
+    |ComponentMaterial|
+    :getShaderReference;
+    |WebGL|
+    :compareReferenceToStored;
+    if () then (same)
+    else ()
+        :decrease existing counter;
+        if () then (new existing)
+            :increase new counter;
+        else
+            :compile and store;
+        endif
+        :update node reference;
+    endif
+    :analogous for material and mesh;
+    |UserProgram|
+    stop
+}
+@enduml
