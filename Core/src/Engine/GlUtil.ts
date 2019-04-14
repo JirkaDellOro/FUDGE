@@ -1,4 +1,3 @@
-// Just testing new branch pulled in VSCode. This comment shouldn't show in master-branch...
 namespace Fudge {
     // TODO: prepare for multiple contexts/canvases
     export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
