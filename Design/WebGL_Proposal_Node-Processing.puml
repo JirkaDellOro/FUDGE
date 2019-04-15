@@ -169,6 +169,7 @@ else ()
 endif
 |UserProgram|
 stop
+@enduml
 
 ' ------------------------------------------
 
