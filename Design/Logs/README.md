@@ -1,6 +1,6 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
-This readme-file describes in a few words the contents of each log and the major issues discussed
+This readme-file describes in a few words the contents of each log and the major issues discussed  
 
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
