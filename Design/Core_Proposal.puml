@@ -7,15 +7,10 @@ skinparam handwritten false
 
 'page 2x2
 left to right direction
+'top to bottom direction
 
 package Fudge <<Rectangle>>{
     ' gl2: WebGL2RenderingContext
-    package "Browser" <<Cloud>> {
-        class EventTarget
-        class WebGL2RenderingContext
-        class HTMLCanvasElement
-        class CanvasRenderingContext2D
-    }
 
     package "Engine" <<Folder>> {
         file "Node" {
@@ -32,18 +27,38 @@ package Fudge <<Rectangle>>{
             }
         }
 
-        interface BufferSpecification {
-            size: number
-            dataType: number
-            normalize: boolean
-            stride: number
-            offset: number
+        file "WebGL"{
+            interface MapNodeToRenderData {
+                [key: Node]: RenderData
+            }
+            interface RenderData {
+                shader: Shader
+                material: Material
+                mesh: Mesh
+                doneTranformToWorld: boolean
+            }
+            interface BufferSpecification {
+                size: number
+                dataType: number
+                normalize: boolean
+                stride: number
+                offset: number
+            }
+            class Reference<T> {
+                - reference: T
+                - count: number
+            }
+            class WebGL {
+                - canvas: HTMLCanvasElement //offscreen
+                - crc3: WebGL2RenderingContext
+                - programs: Map<Shader, Reference<WebGLProgram>>
+                - arrays: Map<Material, Reference<WebGLVertexArrayObject>>
+                - buffers: Map<Mesh, Reference<WebGLBuffer>>
+            }
         }
 
         class Color {
             // to be implemented
-        }
-        abstract class GLUtil {
         }
         class Material {
             // to be refactored!
@@ -56,30 +71,30 @@ package Fudge <<Rectangle>>{
             - rectTarget: Rectangle
         }
 
-        interface MapEventTypeToListener {
-            [eventType: string]: EventListener[];
-        }
+        file "Event"{
+            interface MapEventTypeToListener {
+                [eventType: string]: EventListener[];
+            }
 
-        enum EVENT
+            enum EVENT
 
-        class EventTargetStatic extends EventTarget {
-            #{static} targetStatic: EventTargetStatic
+            class EventTargetStatic extends EventTarget {
+                #{static} targetStatic: EventTargetStatic
+            }
         }
 
         class Loop extends EventTargetStatic {
             - {static} running: boolean = false
             + {static} start(): void
         }
-
-        class WebGL {
-            - canvas: HTMLCanvasElement (offscreen)
-            - crc3: WebGL2RenderingContext
-            - vertexArrayObjects: MapStringToWebGLVertexArrayObject
-            - buffers: MapStringToWebGLBuffer
-        }
-
     }
 
+    package "Browser" <<Cloud>> {
+        class EventTarget
+        class WebGL2RenderingContext
+        class HTMLCanvasElement
+        class CanvasRenderingContext2D
+    }
     package "Transfer" <<Folder>> {
         file "Serializer" {
             interface Serializable {
@@ -197,16 +212,18 @@ package Fudge <<Rectangle>>{
     ComponentMaterial "n" --> "1" Shader : refers >
     Viewport "n" --> "1" CanvasRenderingContext2D : renders >
     Viewport "n" --> "1" WebGL : feeds data >
-    WebGL "1" --> "1" WebGL2RenderingContext : render offscreen >
+    WebGL "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
     'HTMLCanvasElement -- CanvasRenderingContext2D
-    
+
     'improve layout
-    Node -[hidden]- Serializable
-    Component -[hidden]- Serializable
+    'Node -[hidden]- Serializable
+    'Component -[hidden]- Serializable
     'Serializer --[hidden]-- Mutable
     'Mutable --[hidden]-- Component
     'Viewport -[hidden]- ComponentCamera
-    'Engine -[hidden]- Components
+    'Engine -[hidden]- Meshes
+    Engine -[hidden]- Browser
+    Loop -[hidden]- Material
     'Meshes --[hidden]up-- Shader
 }
 @enduml
