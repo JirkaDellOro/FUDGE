@@ -1,10 +1,14 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
-This readme-file describes in a few words the contents of each log and the major issues discussed
+This readme-file describes in a few words the contents of each log and the major issues discussed  
 
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
+
 [Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/2019-04-11%2016.23.21.jpg)
+
+Pre-Disussion about UI structure between Monika and Lea
+[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190411_UI%20Dicussion%20Monika%20Lea.jpg)
 
 # Apr 10th 2019
 Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).

@@ -9,12 +9,14 @@
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'testComponent',
+                componentName: 'Hierarchy',
+                title: "Hierarchy", 
                 componentState: { label: 'A' }
             },
             {
                 type: 'component',
-                componentName: 'testComponent',
+                componentName: 'Viewport',
+                title: "Viewport", 
                 componentState: { label: 'D' }
             },
 
@@ -22,13 +24,15 @@
                 type: 'column',
                 content: [{
                     type: 'component',
-                    componentName: 'testComponent',
+                    componentName: 'Inspector',
+                    title: "Inspector", 
                     componentState: { label: 'B' }
                 },
 
                 {
                     type: 'component',
-                    componentName: 'testComponent',
+                    componentName: 'Menubar',
+                    title: "Menubar", 
                     componentState: { label: 'C' }
                 }]
             }]
@@ -36,47 +40,53 @@
     };
 
     var myLayout = new GoldenLayout(config);
-    myLayout.registerComponent( 'testComponent', function( container, componentState ){
-    container.getElement().html( '<h2>' + componentState.label + '</h2>' );
-});
-   
+    var savedState = localStorage.getItem( 'savedState' );
+    
+if( savedState !== null ) 
+{
+    myLayout = new GoldenLayout( JSON.parse( savedState ) );
+} 
+else 
+{
+    myLayout = new GoldenLayout( config );
+}
+
 //Layout Changes - listener
-    myLayout.on( 'stateChanged', function(){
+    myLayout.on('stateChanged', function(){
     //now save the state
     var state = JSON.stringify( myLayout.toConfig() );
     localStorage.setItem( 'savedState', state );
 });
 
-var myLayout,
-//if used before, Layout is stored in local, otherwise default is loaded
-    savedState = localStorage.getItem( 'savedState' );
 
-if( savedState !== null ) {
-    myLayout = new GoldenLayout( JSON.parse( savedState ) );
-} else {
-    myLayout = new GoldenLayout( config );
-}
+//Create PersistentComponent
+var persistentComponent = function( container, state ){
+    //Check for localStorage
+    if( !typeof window.localStorage ) {
+    container.getElement().append(  '<h2 class="err">Your browser doesn\'t support localStorage.</h2>');
+    return;
+    }
+  // Create the input
+  var input = $( '<input type="text" />' );
 
-//save component
-myLayout.registerComponent( 'testComponent', function( container, state ){
-
-// Create the input
-var input = $( '<input type="text" />' );
-
-// Set the initial / saved state
-if( state.label ) {
+  // Set the initial / saved state
+  if( state.label ) {
     input.val( state.label );
-}
+  }
 
-// Store state updates
-input.on( 'change', function(){
-    container.extendState({
-        label: input.val()
+  // Store state updates
+  input.on( 'change', function(){
+    container.setState({
+      label: input.val()
     });
-});
+  }); 
 
-// Append it to the DOM
-container.getElement().append( input );
-});
+  // Append it to the DOM
+  container.getElement().append(  '<h2>I\'ll be saved to localStorage</h2>', input );
+};
+myLayout.registerComponent( 'Hierarchy', persistentComponent );
+myLayout.registerComponent( 'Viewport', persistentComponent );
+myLayout.registerComponent( 'Inspector', persistentComponent );
+myLayout.registerComponent( 'Menubar', persistentComponent );
 myLayout.init();
 </script>
