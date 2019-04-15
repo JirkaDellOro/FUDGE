@@ -120,7 +120,7 @@ endheader
 |Node|
 |UserProgram|
 start
-:WebGL.removeNode(_node);
+:WebGL.updateNode(_node);
 |WebGL|
 if () then (_node unknown)
     end
