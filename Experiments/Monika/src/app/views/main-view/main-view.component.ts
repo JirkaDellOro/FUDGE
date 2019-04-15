@@ -32,8 +32,7 @@ export class MainViewComponent implements OnInit {
   }
 
   ngOnInit() {
-    //here we can change container state
-    this.container.setTitle("MainView Title");
+
 
     this.container.on("resize", _ => {
       //we need to tell angular that something was changed

@@ -1,0 +1,35 @@
+@startuml Viewport.draw
+header
+    Viewport.draw
+endheader
+|UserProgram|
+|Viewport|
+|WebGL|
+|UserProgram|
+:ANIMATION_FRAME<
+|Viewport|
+package draw {
+    :draw();
+    :root, camera]
+}
+|WebGL|
+package draw {
+    :_node, _camera]
+    :get reference-object at key _node
+    -> program, material and vertices]
+    :multiply transform, pivot
+    and camera matrix;
+    :supply information to renderContext;
+    :renderContext.draw;
+    :node.children]
+    while () is (more children)
+        :child = next child]
+        :draw(child, _camera);
+    endwhile
+}
+|Viewport|
+:copy WebGL.canvas section
+to Viewport.canvas;
+|UserProgram|
+stop
+@enduml
