@@ -1,9 +1,9 @@
 .lm_goldenlayout {
-    background-image: url("brushedMetal.png");
+    background-image: url("brushedMetalHorizon.png");
 }
 
 .lm_content {
-    background-image: url("brushedMetalDark.png");
+    background-image: url("brushedMetalDarkHorizon.png");
 }
 
 .lm_dragProxy .lm_content {
@@ -45,7 +45,7 @@
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #999999;
-    background-image: url("brushedMetal.png");
+    background-image: url("brushedMetalHorizon.png");
     box-shadow: 2px -2px 2px rgba(0, 0, 0, 0.3);
     margin-right: 2px;
     padding-bottom: 2px;
@@ -158,3 +158,39 @@
 }
 
 /*# sourceMappingURL=goldenlayout-dark-theme.css.map */
+
+ul.tree li {
+    list-style-type: none;
+    position: relative;
+}
+
+ul.tree li ul {
+    display: none;
+}
+
+ul.tree li.open > ul {
+    display: block;
+}
+
+ul.tree li a {
+    color: black;
+    text-decoration: none;
+}
+
+ul.tree li a:before {
+    height: 1em;
+    padding:0 .1em;
+    font-size: .8em;
+    display: block;
+    position: absolute;
+    left: -1.3em;
+    top: .2em;
+}
+
+ul.tree li > a:not(:last-child):before {
+    content: '+';
+}
+
+ul.tree li.open > a:not(:last-child):before {
+    content: '-';
+}
