@@ -1,4 +1,6 @@
 @startuml WebG.addNode
+skinparam monochrome true
+skinparam shadowing false
 header
     WebGL.addNode
 endheader
@@ -59,6 +61,8 @@ stop
 ' ------------------------------------------
 
 @startuml WebGL.removeNode
+skinparam monochrome true
+skinparam shadowing false
 header
     WebGL.removeNode
 endheader
@@ -112,6 +116,8 @@ stop
 ' ------------------------------------------
 
 @startuml WebGL.updateNode
+skinparam monochrome true
+skinparam shadowing false
 header
     WebGL.updateNode
 endheader
@@ -174,6 +180,8 @@ stop
 ' ------------------------------------------
 
 @startuml WebGL.recalculateNodes
+skinparam monochrome true
+skinparam shadowing false
 header
     WebGL.recalculateNodes
 endheader
