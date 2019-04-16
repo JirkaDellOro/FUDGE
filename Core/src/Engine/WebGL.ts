@@ -25,6 +25,10 @@ namespace Fudge {
             this.reference = _reference;
         }
 
+        public getReference(): T {
+            return this.reference;
+        }
+
         public increaseCounter(): number {
             this.count++;
             return this.count;
@@ -48,6 +52,8 @@ namespace Fudge {
                 return;
 
             let shader: Shader = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material.Shader;
+            this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
+            /* replaced using generic function, see above
             let rfrProgram: Reference<WebGLProgram>;
             rfrProgram = this.programs.get(shader);
             if (rfrProgram)
@@ -58,21 +64,27 @@ namespace Fudge {
                 rfrProgram.increaseCounter();
                 this.programs.set(shader, rfrProgram);
             }
+            */
 
             let material: Material = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material;
-            let rfrParameter: Reference<WebGLVertexArrayObject>;
-            rfrProgram = this.parameters.get(material);
-            if (rfrParameter)
-                rfrParameter.increaseCounter();
-            else {
-                let parameter: WebGLVertexArrayObject = this.createParameter(material);
-                rfrParameter = new Reference<WebGLVertexArrayObject>(parameter);
-                rfrParameter.increaseCounter();
-                this.parameters.set(material, rfrParameter);
-            }
+            this.createReference<Material, WebGLVertexArrayObject>(this.parameters, material, this.createParameter);
+
+            let mesh: Mesh = (<ComponentMesh>(_node.getComponents(ComponentMesh)[0])).getMesh();
+            this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
         }
 
-        //function createReference(_in: Map, )
+        private createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
+            let reference: Reference<ReferenceType>;
+            reference = _in.get(_key);
+            if (reference)
+                reference.increaseCounter();
+            else {
+                let content: ReferenceType = _creator(_key);
+                reference = new Reference<ReferenceType>(content);
+                reference.increaseCounter();
+                _in.set(_key, reference);
+            }
+        }
 
         private createProgram(_shader: Shader): WebGLProgram {
             return new WebGLProgram();
