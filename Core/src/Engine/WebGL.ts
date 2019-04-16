@@ -21,6 +21,10 @@ namespace Fudge {
         private reference: T;
         private count: number = 0;
 
+        constructor(_reference: T) {
+            this.reference = _reference;
+        }
+
         public increaseCounter(): number {
             this.count++;
             return this.count;
@@ -35,7 +39,7 @@ namespace Fudge {
         private canvas: HTMLCanvasElement; //offscreen render buffer
         private crc3: WebGL2RenderingContext;
         private programs: Map<Shader, Reference<WebGLProgram>> = new Map();
-        private arrays: Map<Material, Reference<WebGLVertexArrayObject>> = new Map();
+        private parameters: Map<Material, Reference<WebGLVertexArrayObject>> = new Map();
         private buffers: Map<Mesh, Reference<WebGLBuffer>> = new Map();
         private nodes: Map<Node, RenderData> = new Map();
 
@@ -47,22 +51,37 @@ namespace Fudge {
             let rfrProgram: Reference<WebGLProgram>;
             rfrProgram = this.programs.get(shader);
             if (rfrProgram)
-                rfrProgram.
+                rfrProgram.increaseCounter();
+            else {
+                let program: WebGLProgram = this.createProgram(shader);
+                rfrProgram = new Reference<WebGLProgram>(program);
+                rfrProgram.increaseCounter();
+                this.programs.set(shader, rfrProgram);
+            }
 
-            let program: WebGLProgram = createProgram(shader);
-            let array: WebGLVertexArrayObject = new WebGLVertexArrayObject();
-            let buffer: WebGLBuffer = new WebGLBuffer();
-            // let renderData: RenderData = {}
-
+            let material: Material = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material;
+            let rfrParameter: Reference<WebGLVertexArrayObject>;
+            rfrProgram = this.parameters.get(material);
+            if (rfrParameter)
+                rfrParameter.increaseCounter();
+            else {
+                let parameter: WebGLVertexArrayObject = this.createParameter(material);
+                rfrParameter = new Reference<WebGLVertexArrayObject>(parameter);
+                rfrParameter.increaseCounter();
+                this.parameters.set(material, rfrParameter);
+            }
         }
+
+        //function createReference(_in: Map, )
+
         private createProgram(_shader: Shader): WebGLProgram {
             return new WebGLProgram();
         }
-        private createArray(_material: Material): WebGLProgram {
-            return new WebGLProgram();
+        private createParameter(_material: Material): WebGLVertexArrayObject {
+            return new WebGLVertexArrayObject();
         }
-        private createBuffer(_mesh: Mesh): WebGLProgram {
-            return new WebGLProgram();
+        private createBuffer(_mesh: Mesh): WebGLBuffer {
+            return new WebGLBuffer();
         }
     }
 }
