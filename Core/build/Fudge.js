@@ -644,7 +644,9 @@ var Fudge;
     EventTargetStatic.targetStatic = new EventTargetStatic();
     Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
+// Just testing new branch pulled in VSCode. This comment shouldn't show in master-branch...
 var Fudge;
+// Just testing new branch pulled in VSCode. This comment shouldn't show in master-branch...
 (function (Fudge) {
     /**
      * Utility class to sore and/or wrap some functionality.
@@ -726,12 +728,14 @@ var Fudge;
          */
         static start() {
             if (!Loop.running)
-                Loop.loop();
+                Loop.loop(performance.now());
             console.log("Loop running");
         }
-        static loop() {
+        static loop(_timestamp) {
+            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
+            let event = new Event(Fudge.EVENT.ANIMATION_FRAME);
+            Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
-            Loop.targetStatic.dispatchEvent(new Event(Fudge.EVENT.ANIMATION_FRAME));
         }
     }
     Loop.running = false;
@@ -1152,6 +1156,7 @@ var Fudge;
                     _node.addComponent(materialComponent);
                     */
                     let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                    // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
                     Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
                     this.initializeNodeMaterial(materialComponent, mesh);
                     if (materialComponent.Material.TextureEnabled) {
@@ -1233,7 +1238,7 @@ var Fudge;
             return sceneGraphRoot;
         }
         /**
-         * Initializes the vertexbuffer for a passed node.
+         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
         initializeNodeBuffer(_node) {
@@ -1247,7 +1252,9 @@ var Fudge;
                 return;
             let vertexArrayObject = vertexArrayObjectCreated;
             this.vertexArrayObjects[_node.name] = vertexArrayObject;
+            // bind attribute-array, subsequent calls will use it
             Fudge.gl2.bindVertexArray(vertexArrayObject);
+            // bind buffer to ARRAY_BUFFER, subsequent calls work on it
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, buffer);
         }
         /**
@@ -1322,6 +1329,202 @@ var Fudge;
         }
     }
     Fudge.Viewport = Viewport;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class WebGL_Jascha {
+        createProgram(_shader) {
+            let crc3 = this.crc3;
+            let shaderProgram = new WebGLProgram();
+            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.linkProgram(shaderProgram);
+            let error = Fudge.GLUtil.assert(crc3.getProgramInfoLog(shaderProgram));
+            if (error !== "") {
+                throw new Error("Error linking Shader: " + error);
+            }
+            let program = {
+                webGLProgram: shaderProgram,
+                attributes: detectAttributes(),
+                uniforms: detectUniforms()
+            };
+            return program;
+            function compileShader(_shaderCode, _shaderType) {
+                let webGLShader = crc3.createShader(_shaderType);
+                crc3.shaderSource(webGLShader, _shaderCode);
+                crc3.compileShader(webGLShader);
+                let error = Fudge.GLUtil.assert(crc3.getShaderInfoLog(webGLShader));
+                if (error !== "") {
+                    throw new Error("Error compiling shader: " + error);
+                }
+                // Check for any compilation errors.
+                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                    alert(crc3.getShaderInfoLog(webGLShader));
+                    return null;
+                }
+                return webGLShader;
+            }
+            function detectAttributes() {
+                let detectedAttributes = {};
+                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                for (let i = 0; i < attributeCount; i++) {
+                    let attributeInfo = Fudge.GLUtil.assert(crc3.getActiveAttrib(shaderProgram, i));
+                    if (!attributeInfo) {
+                        break;
+                    }
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                }
+                return detectedAttributes;
+            }
+            function detectUniforms() {
+                let detectedUniforms = {};
+                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                for (let i = 0; i < uniformCount; i++) {
+                    let info = Fudge.GLUtil.assert(crc3.getActiveUniform(shaderProgram, i));
+                    if (!info) {
+                        break;
+                    }
+                    detectedUniforms[info.name] = Fudge.GLUtil.assert(crc3.getUniformLocation(shaderProgram, info.name));
+                }
+                return detectedUniforms;
+            }
+        }
+        deleteProgram(_program) {
+            if (_program) {
+                this.crc3.deleteProgram(_program.webGLProgram);
+                delete _program.attributes;
+                delete _program.uniforms;
+            }
+        }
+        createParameter(_material) {
+            return new WebGLVertexArrayObject();
+        }
+        createBuffer(_mesh) {
+            let crc3 = this.crc3;
+            let bufferCreated = crc3.createBuffer();
+            if (bufferCreated === null)
+                return null;
+            let buffer = bufferCreated;
+            let vertexArrayObjectCreated = crc3.createVertexArray();
+            if (vertexArrayObjectCreated === null)
+                return null;
+            let vertexArrayObject = vertexArrayObjectCreated;
+            crc3.bindVertexArray(vertexArrayObject);
+            crc3.bindBuffer(crc3.ARRAY_BUFFER, buffer);
+            crc3.bufferData(crc3.ARRAY_BUFFER, _mesh.getVertices(), crc3.STATIC_DRAW);
+            return buffer;
+        }
+        deleteBuffer(_buffer) {
+            if (_buffer)
+                this.crc3.deleteBuffer(_buffer);
+        }
+    }
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class Reference {
+        constructor(_reference) {
+            this.count = 0;
+            this.reference = _reference;
+        }
+        getReference() {
+            return this.reference;
+        }
+        increaseCounter() {
+            this.count++;
+            return this.count;
+        }
+        decreaseCounter() {
+            if (this.count == 0)
+                throw (new Error("Negative reference counter"));
+            this.count--;
+            return this.count;
+        }
+    }
+    class WebGL {
+        constructor() {
+            // private canvas: HTMLCanvasElement; //offscreen render buffer
+            // private crc3: WebGL2RenderingContext;
+            this.programs = new Map();
+            this.parameters = new Map();
+            this.buffers = new Map();
+            this.nodes = new Map();
+        }
+        addNode(_node) {
+            if (this.nodes.get(_node))
+                return;
+            /* replaced using generic function, see below. This is here only to look it up and should be deleted soon
+            let rfrProgram: Reference<WebGLProgram>;
+            rfrProgram = this.programs.get(shader);
+            if (rfrProgram)
+                rfrProgram.increaseCounter();
+            else {
+                let program: WebGLProgram = this.createProgram(shader);
+                rfrProgram = new Reference<WebGLProgram>(program);
+                rfrProgram.increaseCounter();
+                this.programs.set(shader, rfrProgram);
+            }
+            */
+            let shader = (_node.getComponents(Fudge.ComponentMaterial)[0]).Material.Shader;
+            this.createReference(this.programs, shader, this.createProgram);
+            let material = (_node.getComponents(Fudge.ComponentMaterial)[0]).Material;
+            this.createReference(this.parameters, material, this.createParameter);
+            let mesh = (_node.getComponents(Fudge.ComponentMesh)[0]).getMesh();
+            this.createReference(this.buffers, mesh, this.createBuffer);
+            let nodeReferences = { shader: shader, material: material, mesh: mesh, doneTranformToWorld: false };
+            this.nodes.set(_node, nodeReferences);
+        }
+        removeNode(_node) {
+            let nodeReferences = this.nodes.get(_node);
+            if (!nodeReferences)
+                return;
+            this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
+            this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
+            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.nodes.delete(_node);
+        }
+        removeReference(_in, _key, _deletor) {
+            let reference;
+            reference = _in.get(_key);
+            if (reference.decreaseCounter() == 0) {
+                // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
+                // If data should be used later again, it must then be reconstructed...
+                _deletor(reference);
+                _in.delete(_key);
+            }
+        }
+        createReference(_in, _key, _creator) {
+            let reference;
+            reference = _in.get(_key);
+            if (reference)
+                reference.increaseCounter();
+            else {
+                let content = _creator(_key);
+                reference = new Reference(content);
+                reference.increaseCounter();
+                _in.set(_key, reference);
+            }
+        }
+        createProgram(_shader) {
+            return new WebGLProgram();
+        }
+        createParameter(_material) {
+            return new WebGLVertexArrayObject();
+        }
+        createBuffer(_mesh) {
+            return new WebGLBuffer();
+        }
+        deleteProgram(_program) {
+            // to be implemented;
+        }
+        deleteParameter(_parameter) {
+            // to be implemented;
+        }
+        deleteBuffer(_buffer) {
+            // to be implemented;
+        }
+    }
+    Fudge.WebGL = WebGL;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

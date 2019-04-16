@@ -105,6 +105,8 @@ package removeNode {
     else ()
         :ERROR;
     endif
+    :add _node to 
+    list of nodes to render;
     |UserProgram|
     stop
 }

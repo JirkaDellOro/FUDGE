@@ -11,7 +11,7 @@ namespace Fudge {
         [key: Node]: RenderData
     }
     */
-    interface RenderData {
+    interface NodeReferences {
         shader: Shader;
         material: Material;
         mesh: Mesh;
@@ -40,20 +40,18 @@ namespace Fudge {
         }
     }
     export class WebGL {
-        private canvas: HTMLCanvasElement; //offscreen render buffer
-        private crc3: WebGL2RenderingContext;
+        // private canvas: HTMLCanvasElement; //offscreen render buffer
+        // private crc3: WebGL2RenderingContext;
         private programs: Map<Shader, Reference<WebGLProgram>> = new Map();
         private parameters: Map<Material, Reference<WebGLVertexArrayObject>> = new Map();
         private buffers: Map<Mesh, Reference<WebGLBuffer>> = new Map();
-        private nodes: Map<Node, RenderData> = new Map();
+        private nodes: Map<Node, NodeReferences> = new Map();
 
         public addNode(_node: Node): void {
             if (this.nodes.get(_node))
                 return;
 
-            let shader: Shader = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material.Shader;
-            this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
-            /* replaced using generic function, see above
+            /* replaced using generic function, see below. This is here only to look it up and should be deleted soon
             let rfrProgram: Reference<WebGLProgram>;
             rfrProgram = this.programs.get(shader);
             if (rfrProgram)
@@ -66,11 +64,40 @@ namespace Fudge {
             }
             */
 
+            let shader: Shader = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material.Shader;
+            this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
+
             let material: Material = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material;
             this.createReference<Material, WebGLVertexArrayObject>(this.parameters, material, this.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponents(ComponentMesh)[0])).getMesh();
             this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
+
+            let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTranformToWorld: false };
+            this.nodes.set(_node, nodeReferences);
+        }
+
+        public removeNode(_node: Node): void {
+            let nodeReferences: NodeReferences = this.nodes.get(_node);
+            if (!nodeReferences)
+                return;
+
+            this.removeReference<Shader, WebGLProgram>(this.programs, nodeReferences.shader, this.deleteProgram);
+            this.removeReference<Material, WebGLVertexArrayObject>(this.parameters, nodeReferences.material, this.deleteParameter);
+            this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+
+            this.nodes.delete(_node);
+        }
+
+        private removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
+            let reference: Reference<ReferenceType>;
+            reference = _in.get(_key);
+            if (reference.decreaseCounter() == 0) {
+                // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
+                // If data should be used later again, it must then be reconstructed...
+                _deletor(reference);
+                _in.delete(_key);
+            }
         }
 
         private createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
@@ -94,6 +121,15 @@ namespace Fudge {
         }
         private createBuffer(_mesh: Mesh): WebGLBuffer {
             return new WebGLBuffer();
+        }
+        private deleteProgram(_program: WebGLProgram): void {
+            // to be implemented;
+        }
+        private deleteParameter(_parameter: WebGLVertexArrayObject): void {
+            // to be implemented;
+        }
+        private deleteBuffer(_buffer: WebGLBuffer): void {
+            // to be implemented;
         }
     }
 }

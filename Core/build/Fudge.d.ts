@@ -327,13 +327,6 @@ declare namespace Fudge {
      * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
 }
 declare namespace Fudge {
     class Color {
@@ -593,7 +586,7 @@ declare namespace Fudge {
          */
         private viewportNodeSceneGraphRoot;
         /**
-         * Initializes the vertexbuffer for a passed node.
+         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
         private initializeNodeBuffer;
@@ -621,6 +614,33 @@ declare namespace Fudge {
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
          */
         private updateCanvasDisplaySizeAndCamera;
+    }
+}
+declare namespace Fudge {
+}
+declare namespace Fudge {
+    interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
+    }
+    class WebGL {
+        private programs;
+        private parameters;
+        private buffers;
+        private nodes;
+        addNode(_node: Node): void;
+        removeNode(_node: Node): void;
+        private removeReference;
+        private createReference;
+        private createProgram;
+        private createParameter;
+        private createBuffer;
+        private deleteProgram;
+        private deleteParameter;
+        private deleteBuffer;
     }
 }
 declare namespace Fudge {
