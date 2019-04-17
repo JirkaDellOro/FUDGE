@@ -17,6 +17,9 @@ var genStruct;
         for (let key in _obj) {
             let value = _obj[key];
             console.log(key, value);
+            console.log(value instanceof Object);
+            if (value instanceof Object)
+                getObjectStructure(value);
         }
     }
 })(genStruct || (genStruct = {}));

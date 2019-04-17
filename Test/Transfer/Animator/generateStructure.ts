@@ -21,6 +21,9 @@ namespace genStruct {
     for (let key in _obj) {
       let value: Object = _obj[key];
       console.log(key, value);
+      console.log(value instanceof Object);
+      if (value instanceof Object)
+        getObjectStructure(<ƒ.Mutator>value);
     }
   }
 }
