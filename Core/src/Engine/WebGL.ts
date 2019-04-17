@@ -89,6 +89,33 @@ namespace Fudge {
             this.nodes.delete(_node);
         }
 
+        public updateNode(_node: Node): void {
+            let nodeReferences: NodeReferences = this.nodes.get(_node);
+            if (!nodeReferences)
+                return;
+
+            let shader: Shader = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material.Shader;
+            if (shader !== nodeReferences.shader) {
+                this.removeReference<Shader, WebGLProgram>(this.programs, nodeReferences.shader, this.deleteProgram);
+                this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
+                nodeReferences.shader = shader;
+            }
+
+            let material: Material = (<ComponentMaterial>(_node.getComponents(ComponentMaterial)[0])).Material;
+            if (material !== nodeReferences.material) {
+                this.removeReference<Material, WebGLVertexArrayObject>(this.parameters, nodeReferences.material, this.deleteParameter);
+                this.createReference<Material, WebGLVertexArrayObject>(this.parameters, material, this.createParameter);
+                nodeReferences.material = material;
+            }
+
+            let mesh: Mesh = (<ComponentMesh>(_node.getComponents(ComponentMesh)[0])).getMesh();
+            if (mesh !== nodeReferences.mesh) {
+                this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+                this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
+                nodeReferences.mesh = mesh;
+            }
+        }
+
         private removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
             let reference: Reference<ReferenceType>;
             reference = _in.get(_key);
