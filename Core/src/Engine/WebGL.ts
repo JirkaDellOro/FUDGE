@@ -15,8 +15,10 @@ namespace Fudge {
         shader: Shader;
         material: Material;
         mesh: Mesh;
-        doneTranformToWorld: boolean;
+        doneTransformToWorld: boolean;
     }
+    type MapNodeToNodeReferences = Map<Node, NodeReferences>;
+
     class Reference<T> {
         private reference: T;
         private count: number = 0;
@@ -45,7 +47,7 @@ namespace Fudge {
         private programs: Map<Shader, Reference<WebGLProgram>> = new Map();
         private parameters: Map<Material, Reference<WebGLVertexArrayObject>> = new Map();
         private buffers: Map<Mesh, Reference<WebGLBuffer>> = new Map();
-        private nodes: Map<Node, NodeReferences> = new Map();
+        private nodes: MapNodeToNodeReferences = new Map();
 
         public addNode(_node: Node): void {
             if (this.nodes.get(_node))
@@ -73,7 +75,7 @@ namespace Fudge {
             let mesh: Mesh = (<ComponentMesh>(_node.getComponents(ComponentMesh)[0])).getMesh();
             this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
 
-            let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTranformToWorld: false };
+            let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
 
@@ -113,6 +115,51 @@ namespace Fudge {
                 this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
                 this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
                 nodeReferences.mesh = mesh;
+            }
+        }
+
+        public recalculateAllNodeTransforms(): void {
+            function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+                _nodeReferences.doneTransformToWorld = false;
+            }
+
+            let recalculateSceneTransforms: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
+                if (_nodeReferences.doneTransformToWorld)
+                    return;
+                _nodeReferences.doneTransformToWorld = true;
+
+                // find uppermost untransformed ancestor
+                let ancestor: Node = _node;
+                let parent: Node;
+                while (true) {
+                    parent = ancestor.getParent()
+                    if (!parent)
+                        break;
+                    if (_map.get(parent).doneTransformToWorld)
+                        break;
+                    ancestor = parent;
+                }
+
+                let matrix: Matrix4x4 = Matrix4x4.identity;
+                if (parent && parent.cmpTransform)
+                    matrix = parent.cmpTransform.worldMatrix;
+
+                this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
+            };
+
+            this.nodes.forEach(markNodeToBeTransformed);
+            this.nodes.forEach(recalculateSceneTransforms);
+        }
+
+        private recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
+            let worldMatrix: Matrix4x4 = _matrix;
+            let transform: ComponentTransform = _node.cmpTransform;
+            if (transform) {
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
+                transform.worldMatrix = worldMatrix;
+            }
+            for (let child of _node.getChildren()) {
+                this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
             }
         }
 

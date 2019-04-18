@@ -30,6 +30,13 @@ namespace Fudge {
             return this.parent;
         }
 
+        public getAncestor(): Node | null {
+            let ancestor: Node = this;
+            while (ancestor.getParent())
+                ancestor.getParent();
+            return ancestor;
+        }
+        
         public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
