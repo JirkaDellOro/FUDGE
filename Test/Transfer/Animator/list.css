@@ -6,13 +6,23 @@ li{
 	list-style: none;
 	background: lightblue;
 	padding: 2px;
+	position: relative;
+}
+
+input{
+	position: absolute;
+	right: 0;
 }
 
 .parent::before{
-	content: "-";
+	content: "➖";
 }
-.parent.expanded::before{
-	content: "+";
+.parent.folded::before{
+	content: "➕";
+}
+
+.parent.folded{
+	background: darkcyan;
 }
 
 
@@ -29,7 +39,7 @@ li{
 	height: 500px;
 }
 
-canvas {
+canvas#animatorCanvas {
 	position: absolute;
 	top: 0;
 	left: 300px;
