@@ -54,14 +54,14 @@ namespace Fudge {
                 _node.addComponent(transform);
             }
             let mesh: ComponentMesh;
-            if (_node.getComponents(ComponentMesh).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.name}'.`);
+            if (!_node.getComponent(ComponentMesh)) {
+                console.log(`No Mesh attached to node named '${_node.name})'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
+                mesh = <ComponentMesh>_node.getComponent(ComponentMesh;
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial)s;
 
                 if (materialComponent) {
                     /*
@@ -102,21 +102,19 @@ namespace Fudge {
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         private drawObjects(_node: Node, _matrix: Matrix4x4): void {
-            if (_node.getComponents(ComponentMesh).length > 0) {
-                let mesh: ComponentMesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
+            let mesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
+            if (mesh) {
                 let transform: ComponentTransform = _node.cmpTransform;
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
                     gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
                     let transformMatrix: Matrix4x4 = transform.worldMatrix;
-                    if (_node.getComponents(ComponentPivot)) {
-                        let pivot: ComponentPivot = <ComponentPivot>_node.getComponents(ComponentPivot)[0];
-                        if (pivot)
-                            transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
-                    }
+                    let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
+                    if (pivot)
+                        transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);

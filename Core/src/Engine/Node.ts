@@ -36,7 +36,7 @@ namespace Fudge {
                 ancestor.getParent();
             return ancestor;
         }
-        
+
         public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
@@ -104,6 +104,16 @@ namespace Fudge {
          */
         public getComponents(_class: typeof Component): Component[] {
             return (this.components[_class.name] || []).slice(0);
+        }
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        public getComponent(_class: typeof Component): Component {
+            let list: Component[] = this.components[_class.name];
+            if (list)
+                return list[0];
+            return null;
         }
 
         /**
