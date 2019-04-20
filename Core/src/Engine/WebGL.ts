@@ -6,11 +6,10 @@ namespace Fudge {
         stride: number; // Number of indices that will be skipped each iteration.
         offset: number; // Index of the element to begin with.
     }
-    /*
-    interface MapNodeToRenderData {
-        [key: Node]: RenderData
-    }
-    */
+    /**
+     * To each node registered with WebGL, a reference to the shader, the material and the mesh used is stored separately
+     * With these references, the already buffered data is retrieved.
+     */
     interface NodeReferences {
         shader: Shader;
         material: Material;
@@ -19,7 +18,11 @@ namespace Fudge {
     }
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
-    class Reference<T> {
+    /**
+     * This class manages the references to the programs, buffers and vertex array objects created and stored with WebGL.
+     * Multiple nodes may refer to the same data via their references to shader, material and mesh 
+     */
+    class WebGLReference<T> {
         private reference: T;
         private count: number = 0;
 
@@ -41,14 +44,27 @@ namespace Fudge {
             return this.count;
         }
     }
+
+    /**
+     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
+     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
+     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     */
     export class WebGL {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
-        private programs: Map<Shader, Reference<WebGLProgram>> = new Map();
-        private parameters: Map<Material, Reference<WebGLVertexArrayObject>> = new Map();
-        private buffers: Map<Mesh, Reference<WebGLBuffer>> = new Map();
+        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+        private programs: Map<Shader, WebGLReference<WebGLProgram>> = new Map();
+        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        private parameters: Map<Material, WebGLReference<WebGLVertexArrayObject>> = new Map();
+        /** Stores references to the vertex buffers and makes them available via the references to meshes */
+        private buffers: Map<Mesh, WebGLReference<WebGLBuffer>> = new Map();
         private nodes: MapNodeToNodeReferences = new Map();
 
+        /**
+         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * @param _node 
+         */
         public addNode(_node: Node): void {
             if (this.nodes.get(_node))
                 return;
@@ -78,7 +94,10 @@ namespace Fudge {
             let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
-
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * @param _node 
+         */
         public removeNode(_node: Node): void {
             let nodeReferences: NodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
@@ -91,6 +110,10 @@ namespace Fudge {
             this.nodes.delete(_node);
         }
 
+        /**
+         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * @param _node
+         */
         public updateNode(_node: Node): void {
             let nodeReferences: NodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
@@ -118,17 +141,22 @@ namespace Fudge {
             }
         }
 
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
         public recalculateAllNodeTransforms(): void {
+            // inner function to be called in a for each node at the bottom of this function
             function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
                 _nodeReferences.doneTransformToWorld = false;
             }
 
+            // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
                 if (_nodeReferences.doneTransformToWorld)
                     return;
                 _nodeReferences.doneTransformToWorld = true;
 
-                // find uppermost untransformed ancestor
+                // find uppermost ancestor not recalculated yet
                 let ancestor: Node = _node;
                 let parent: Node;
                 while (true) {
@@ -140,19 +168,29 @@ namespace Fudge {
                     ancestor = parent;
                 }
 
+                // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix: Matrix4x4 = Matrix4x4.identity;
                 if (parent && parent.cmpTransform)
                     matrix = parent.cmpTransform.worldMatrix;
 
+                // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
 
+            // call the functions above for each registered node
             this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
         }
 
-
-        public drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix: Matrix4x4): void {
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node 
+         * @param _cameraMatrix 
+         * @param _matrix 
+         */
+        public drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void {
             let references: NodeReferences = this.nodes.get(_node);
             this.useProgram(this.programs.get(references.shader));
             this.useParameter(this.parameters.get(references.material));
@@ -181,7 +219,12 @@ namespace Fudge {
             }
         }
 
-
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.  
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node 
+         * @param _matrix 
+         */
         private recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
             let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
@@ -194,8 +237,14 @@ namespace Fudge {
             }
         }
 
-        private removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
-            let reference: Reference<ReferenceType>;
+        /**
+         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in 
+         * @param _key 
+         * @param _deletor 
+         */
+        private removeReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
+            let reference: WebGLReference<ReferenceType>;
             reference = _in.get(_key);
             if (reference.decreaseCounter() == 0) {
                 // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
@@ -205,19 +254,26 @@ namespace Fudge {
             }
         }
 
-        private createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
-            let reference: Reference<ReferenceType>;
+        /**
+         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in 
+         * @param _key 
+         * @param _creator 
+         */
+        private createReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _creator: Function): void {
+            let reference: WebGLReference<ReferenceType>;
             reference = _in.get(_key);
             if (reference)
                 reference.increaseCounter();
             else {
                 let content: ReferenceType = _creator(_key);
-                reference = new Reference<ReferenceType>(content);
+                reference = new WebGLReference<ReferenceType>(content);
                 reference.increaseCounter();
                 _in.set(_key, reference);
             }
         }
 
+        // #region Dummy-Methods
         private createProgram(_shader: Shader): WebGLProgram {
             return new WebGLProgram();
         }
@@ -245,5 +301,6 @@ namespace Fudge {
         private useBuffer(_buffer: WebGLBuffer): void {
             // to be implemented;
         }
+        // #endregion
     }
 }
