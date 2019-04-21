@@ -470,6 +470,7 @@ declare namespace Fudge {
          */
         constructor(_name: string);
         getParent(): Node | null;
+        getAncestor(): Node | null;
         readonly cmpTransform: ComponentTransform;
         /**
          * Returns a clone of the list of children
@@ -497,6 +498,11 @@ declare namespace Fudge {
          * @param _class The class of the components to be found.
          */
         getComponents(_class: typeof Component): Component[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent(_class: typeof Component): Component;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
@@ -626,21 +632,77 @@ declare namespace Fudge {
         stride: number;
         offset: number;
     }
+    /**
+     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
+     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
+     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     */
     class WebGL {
-        private programs;
-        private parameters;
-        private buffers;
-        private nodes;
-        addNode(_node: Node): void;
-        removeNode(_node: Node): void;
-        private removeReference;
-        private createReference;
-        private createProgram;
-        private createParameter;
-        private createBuffer;
-        private deleteProgram;
-        private deleteParameter;
-        private deleteBuffer;
+        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+        private static programs;
+        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        private static parameters;
+        /** Stores references to the vertex buffers and makes them available via the references to meshes */
+        private static buffers;
+        private static nodes;
+        /**
+         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * @param _node
+         */
+        static addNode(_node: Node): void;
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * @param _node
+         */
+        static removeNode(_node: Node): void;
+        /**
+         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * @param _node
+         */
+        static updateNode(_node: Node): void;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        static recalculateAllNodeTransforms(): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node
+         * @param _cameraMatrix
+         * @param _matrix
+         */
+        static drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void;
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node
+         * @param _matrix
+         */
+        private static recalculateTransformsOfNodeAndChildren;
+        /**
+         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in
+         * @param _key
+         * @param _deletor
+         */
+        private static removeReference;
+        /**
+         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in
+         * @param _key
+         * @param _creator
+         */
+        private static createReference;
+        private static createProgram;
+        private static createParameter;
+        private static createBuffer;
+        private static deleteProgram;
+        private static deleteParameter;
+        private static deleteBuffer;
+        private static useProgram;
+        private static useParameter;
+        private static useBuffer;
     }
 }
 declare namespace Fudge {

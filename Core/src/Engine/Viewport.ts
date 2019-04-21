@@ -59,9 +59,9 @@ namespace Fudge {
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = <ComponentMesh>_node.getComponent(ComponentMesh;
+                mesh = <ComponentMesh>_node.getComponent(ComponentMesh);
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial)s;
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
 
                 if (materialComponent) {
                     /*

@@ -1,10 +1,10 @@
 namespace Fudge {
+/*
     interface ShaderProgram {
         webGLProgram: WebGLProgram;
         attributes: { [name: string]: number };
         uniforms: { [name: string]: WebGLUniformLocation };
     }
-
     class WebGL_Jascha {
         crc3: WebGL2RenderingContext;
 
@@ -100,4 +100,5 @@ namespace Fudge {
                 this.crc3.deleteBuffer(_buffer);
         }
     }
+    */
 }

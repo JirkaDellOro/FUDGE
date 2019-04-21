@@ -54,18 +54,18 @@ namespace Fudge {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private programs: Map<Shader, WebGLReference<WebGLProgram>> = new Map();
+        private static programs: Map<Shader, WebGLReference<WebGLProgram>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private parameters: Map<Material, WebGLReference<WebGLVertexArrayObject>> = new Map();
+        private static parameters: Map<Material, WebGLReference<WebGLVertexArrayObject>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private buffers: Map<Mesh, WebGLReference<WebGLBuffer>> = new Map();
-        private nodes: MapNodeToNodeReferences = new Map();
+        private static buffers: Map<Mesh, WebGLReference<WebGLBuffer>> = new Map();
+        private static nodes: MapNodeToNodeReferences = new Map();
 
         /**
          * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
          * @param _node 
          */
-        public addNode(_node: Node): void {
+        public static addNode(_node: Node): void {
             if (this.nodes.get(_node))
                 return;
 
@@ -98,7 +98,7 @@ namespace Fudge {
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
          * @param _node 
          */
-        public removeNode(_node: Node): void {
+        public static removeNode(_node: Node): void {
             let nodeReferences: NodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
@@ -114,7 +114,7 @@ namespace Fudge {
          * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
          * @param _node
          */
-        public updateNode(_node: Node): void {
+        public static updateNode(_node: Node): void {
             let nodeReferences: NodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
@@ -144,7 +144,7 @@ namespace Fudge {
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
-        public recalculateAllNodeTransforms(): void {
+        public static recalculateAllNodeTransforms(): void {
             // inner function to be called in a for each node at the bottom of this function
             function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
                 _nodeReferences.doneTransformToWorld = false;
@@ -160,7 +160,7 @@ namespace Fudge {
                 let ancestor: Node = _node;
                 let parent: Node;
                 while (true) {
-                    parent = ancestor.getParent()
+                    parent = ancestor.getParent();
                     if (!parent)
                         break;
                     if (_map.get(parent).doneTransformToWorld)
@@ -190,7 +190,7 @@ namespace Fudge {
          * @param _cameraMatrix 
          * @param _matrix 
          */
-        public drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void {
+        public static drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void {
             let references: NodeReferences = this.nodes.get(_node);
             this.useProgram(this.programs.get(references.shader));
             this.useParameter(this.parameters.get(references.material));
@@ -207,7 +207,8 @@ namespace Fudge {
             if (pivot)
                 transformMatrix = Matrix4x4.multiply(pivot.Matrix, transformMatrix);
 
-            let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cameraMatrix, transformMatrix);
+            // multiply camera matrix
+            // let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cameraMatrix, transformMatrix);
             // Supply matrixdata to shader. 
             //gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
             // Draw call
@@ -225,7 +226,7 @@ namespace Fudge {
          * @param _node 
          * @param _matrix 
          */
-        private recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
+        private static recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
             let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
             if (transform) {
@@ -243,7 +244,7 @@ namespace Fudge {
          * @param _key 
          * @param _deletor 
          */
-        private removeReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
+        private static removeReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
             let reference: WebGLReference<ReferenceType>;
             reference = _in.get(_key);
             if (reference.decreaseCounter() == 0) {
@@ -260,7 +261,7 @@ namespace Fudge {
          * @param _key 
          * @param _creator 
          */
-        private createReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _creator: Function): void {
+        private static createReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _creator: Function): void {
             let reference: WebGLReference<ReferenceType>;
             reference = _in.get(_key);
             if (reference)
@@ -274,31 +275,34 @@ namespace Fudge {
         }
 
         // #region Dummy-Methods
-        private createProgram(_shader: Shader): WebGLProgram {
-            return new WebGLProgram();
+        private static createProgram(_shader: Shader): WebGLProgram {
+            // return new WebGLProgram();
+            return <WebGLProgram>"Program";
         }
-        private createParameter(_material: Material): WebGLVertexArrayObject {
-            return new WebGLVertexArrayObject();
+        private static createParameter(_material: Material): WebGLVertexArrayObject {
+            // return new WebGLVertexArrayObject();
+            return <WebGLVertexArrayObject>"VAO";
         }
-        private createBuffer(_mesh: Mesh): WebGLBuffer {
-            return new WebGLBuffer();
+        private static createBuffer(_mesh: Mesh): WebGLBuffer {
+            // return new WebGLBuffer();
+            return <WebGLBuffer>"Buffer";
         }
-        private deleteProgram(_program: WebGLProgram): void {
+        private static deleteProgram(_program: WebGLProgram): void {
             // to be implemented;
         }
-        private deleteParameter(_parameter: WebGLVertexArrayObject): void {
+        private static deleteParameter(_parameter: WebGLVertexArrayObject): void {
             // to be implemented;
         }
-        private deleteBuffer(_buffer: WebGLBuffer): void {
+        private static deleteBuffer(_buffer: WebGLBuffer): void {
             // to be implemented;
         }
-        private useProgram(_program: WebGLProgram): void {
+        private static useProgram(_program: WebGLProgram): void {
             // to be implemented;
         }
-        private useParameter(_parameter: WebGLVertexArrayObject): void {
+        private static useParameter(_parameter: WebGLVertexArrayObject): void {
             // to be implemented;
         }
-        private useBuffer(_buffer: WebGLBuffer): void {
+        private static useBuffer(_buffer: WebGLBuffer): void {
             // to be implemented;
         }
         // #endregion
