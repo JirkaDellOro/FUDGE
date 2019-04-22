@@ -7,7 +7,7 @@ var Scenes;
         let grandchild;
         grandchild = createCompleteMeshNode("Grandchild", ƒ.ShaderBasic, new ƒ.Vector3(0, 255, 0), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
-        Scenes.node.appendChild(grandchild);
+        child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {

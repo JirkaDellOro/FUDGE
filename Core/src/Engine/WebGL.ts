@@ -163,7 +163,8 @@ namespace Fudge {
                     parent = ancestor.getParent();
                     if (!parent)
                         break;
-                    if (_map.get(parent).doneTransformToWorld)
+                    let parentReferences: NodeReferences = _map.get(parent);
+                    if (parentReferences && parentReferences.doneTransformToWorld)
                         break;
                     ancestor = parent;
                 }

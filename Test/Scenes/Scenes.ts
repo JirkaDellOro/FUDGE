@@ -13,7 +13,7 @@ namespace Scenes {
         let grandchild: ƒ.Node;
         grandchild = createCompleteMeshNode("Grandchild", ƒ.ShaderBasic, new ƒ.Vector3(0, 255, 0), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
-        node.appendChild(grandchild);
+        child.appendChild(grandchild);
     }
 
     export function createMiniScene(): void {
