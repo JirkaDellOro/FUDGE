@@ -61,6 +61,7 @@ namespace Fudge {
         private static buffers: Map<Mesh, WebGLReference<WebGLBuffer>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
 
+        // #region Adding
         /**
          * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
          * @param _node 
@@ -103,6 +104,9 @@ namespace Fudge {
             for (let node of _node.branch)
                 this.addNode(node);
         }
+        // #endregion
+        
+        // #region Removing
         /**
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
          * @param _node 
@@ -127,7 +131,9 @@ namespace Fudge {
             for (let node of _node.branch)
                 this.removeNode(node);
         }
+        // #endregion
 
+        // #region Updating
         /**
          * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
          * @param _node
@@ -167,7 +173,9 @@ namespace Fudge {
             for (let node of _node.branch)
                 this.updateNode(node);
         }
+        // #endregion
 
+        // #region Transformation & Rendering
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -265,7 +273,9 @@ namespace Fudge {
                 this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
             }
         }
+        // #endregion
 
+        // #region Manage references to WebGL-Data
         /**
          * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
          * @param _in 
@@ -301,6 +311,7 @@ namespace Fudge {
                 _in.set(_key, reference);
             }
         }
+        // #endregion
 
         // #region Dummy-Methods
         private static createProgram(_shader: Shader): WebGLProgram {

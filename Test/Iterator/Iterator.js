@@ -14,7 +14,7 @@ var Iterator;
         child2.cmpTransform.rotateX(45);
         child.appendChild(child2);
         Scenes.createViewport();
-        for (let iter of node.branchX)
+        for (let iter of node.branch)
             console.log(iter.name);
     }
 })(Iterator || (Iterator = {}));
