@@ -726,12 +726,14 @@ var Fudge;
          */
         static start() {
             if (!Loop.running)
-                Loop.loop();
+                Loop.loop(performance.now());
             console.log("Loop running");
         }
-        static loop() {
+        static loop(_timestamp) {
+            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
+            let event = new Event(Fudge.EVENT.ANIMATION_FRAME);
+            Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
-            Loop.targetStatic.dispatchEvent(new Event(Fudge.EVENT.ANIMATION_FRAME));
         }
     }
     Loop.running = false;
@@ -1152,6 +1154,7 @@ var Fudge;
                     _node.addComponent(materialComponent);
                     */
                     let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
+                    // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
                     Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
                     this.initializeNodeMaterial(materialComponent, mesh);
                     if (materialComponent.Material.TextureEnabled) {
@@ -1233,7 +1236,7 @@ var Fudge;
             return sceneGraphRoot;
         }
         /**
-         * Initializes the vertexbuffer for a passed node.
+         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
         initializeNodeBuffer(_node) {
@@ -1247,7 +1250,9 @@ var Fudge;
                 return;
             let vertexArrayObject = vertexArrayObjectCreated;
             this.vertexArrayObjects[_node.name] = vertexArrayObject;
+            // bind attribute-array, subsequent calls will use it
             Fudge.gl2.bindVertexArray(vertexArrayObject);
+            // bind buffer to ARRAY_BUFFER, subsequent calls work on it
             Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, buffer);
         }
         /**
