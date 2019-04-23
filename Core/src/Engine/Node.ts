@@ -7,7 +7,7 @@ namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Node extends EventTarget implements Serializable, IterableIterator<Node> {
+    export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // Associative array nodes appended to this node.
@@ -96,16 +96,13 @@ namespace Fudge {
             _node.setParent(null);
         }
 
-        public next(): IteratorResult<Node> {
-            return { done: true, value: this };
-        }
-        public *generator(): IterableIterator<Node> {
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        public *branch(): IterableIterator<Node> {
             yield this;
             for (let child of this.children)
-                yield* child.generator();
-        }
-        public [Symbol.iterator](): IterableIterator<Node> {
-            return this;
+                yield* child.branch();
         }
         // #endregion
 

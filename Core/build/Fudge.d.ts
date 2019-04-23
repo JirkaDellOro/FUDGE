@@ -445,7 +445,7 @@ declare namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node extends EventTarget implements Serializable, IterableIterator<Node> {
+    class Node extends EventTarget implements Serializable {
         name: string;
         private parent;
         private children;
@@ -481,9 +481,10 @@ declare namespace Fudge {
          * @param _node The node to be removed.
          */
         removeChild(_node: Node): void;
-        next(): IteratorResult<Node>;
-        generator(): IterableIterator<Node>;
-        [Symbol.iterator](): IterableIterator<Node>;
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        branch(): IterableIterator<Node>;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.

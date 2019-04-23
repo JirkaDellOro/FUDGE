@@ -911,16 +911,13 @@ var Fudge;
             this.children.splice(iFound, 1);
             _node.setParent(null);
         }
-        next() {
-            return { done: true, value: this };
-        }
-        *generator() {
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        *branch() {
             yield this;
             for (let child of this.children)
-                yield* child.generator();
-        }
-        [Symbol.iterator]() {
-            return this;
+                yield* child.branch();
         }
         // #endregion
         // #region Components

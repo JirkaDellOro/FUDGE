@@ -18,7 +18,7 @@ namespace Iterator {
         child.appendChild(child2);
         Scenes.createViewport();
 
-        for (let iter of node.generator())
+        for (let iter of node.branch())
             console.log(iter.name);
     }
 } 
