@@ -213,15 +213,9 @@ declare namespace Fudge {
         readonly Matrix: Matrix4x4;
         readonly position: Vector3;
         /**
-         * # Transformation methods
-         */
-        /**
          * Resets this.matrix to idenity Matrix.
          */
         reset(): void;
-        /**
-         * # Translation methods
-         */
         /**
          * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
@@ -245,9 +239,6 @@ declare namespace Fudge {
          */
         translateZ(_z: number): void;
         /**
-         * # Rotation methods
-         */
-        /**
          * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
          */
@@ -268,9 +259,6 @@ declare namespace Fudge {
          * @param _target The target to look at.
          */
         lookAt(_target: Vector3): void;
-        /**
-         * # Scaling methods
-         */
         /**
          * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
@@ -457,7 +445,7 @@ declare namespace Fudge {
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Node extends EventTarget implements Serializable {
+    class Node extends EventTarget implements Serializable, IterableIterator<Node> {
         name: string;
         private parent;
         private children;
@@ -493,6 +481,9 @@ declare namespace Fudge {
          * @param _node The node to be removed.
          */
         removeChild(_node: Node): void;
+        next(): IteratorResult<Node>;
+        generator(): IterableIterator<Node>;
+        [Symbol.iterator](): IterableIterator<Node>;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.

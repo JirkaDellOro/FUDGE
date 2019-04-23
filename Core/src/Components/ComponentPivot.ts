@@ -15,18 +15,16 @@ namespace Fudge {
             return new Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
 
-        /**
-         * # Transformation methods
-         */
+        // #region Transformation
         /**
          * Resets this.matrix to idenity Matrix.
          */
         public reset(): void {
             this.matrix = Matrix4x4.identity;
         }
-        /**
-         * # Translation methods
-         */
+        // #endregion
+
+        // #region Translation
         /**
          * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
@@ -57,10 +55,9 @@ namespace Fudge {
         public translateZ(_z: number): void {
             this.matrix = Matrix4x4.translate(this.matrix, 0, 0, _z);
         }
+        // #endregion
 
-        /**
-         * # Rotation methods
-         */
+        // #region Rotation
         /**
          * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
@@ -90,9 +87,9 @@ namespace Fudge {
         public lookAt(_target: Vector3): void {
             this.matrix = Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
         }
-        /**
-         * # Scaling methods
-         */
+        // #endregion
+
+        // #region Scaling
         /**
          * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
@@ -123,7 +120,9 @@ namespace Fudge {
         public scaleZ(_scale: number): void {
             this.matrix = Matrix4x4.scale(this.matrix, 1, 1, _scale);
         }
+        // #endregion
 
+        // #region Seriallization
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization: Serialization = {
@@ -137,5 +136,6 @@ namespace Fudge {
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
+        // #endregion
     }
 }

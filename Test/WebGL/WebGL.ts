@@ -17,7 +17,7 @@ namespace WebGL {
         grandchild = child.getChildren()[0];
     }
 
-    function hndClick(_event:Event): void {
+    function hndClick(_event: Event): void {
         delegate(_event);
     }
 

@@ -416,6 +416,7 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.matrix = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
+            // #endregion
         }
         get Matrix() {
             return this.matrix;
@@ -423,18 +424,15 @@ var Fudge;
         get position() {
             return new Fudge.Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
-        /**
-         * # Transformation methods
-         */
+        // #region Transformation
         /**
          * Resets this.matrix to idenity Matrix.
          */
         reset() {
             this.matrix = Fudge.Matrix4x4.identity;
         }
-        /**
-         * # Translation methods
-         */
+        // #endregion
+        // #region Translation
         /**
          * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
@@ -465,9 +463,8 @@ var Fudge;
         translateZ(_z) {
             this.matrix = Fudge.Matrix4x4.translate(this.matrix, 0, 0, _z);
         }
-        /**
-         * # Rotation methods
-         */
+        // #endregion
+        // #region Rotation
         /**
          * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
@@ -497,9 +494,8 @@ var Fudge;
         lookAt(_target) {
             this.matrix = Fudge.Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
         }
-        /**
-         * # Scaling methods
-         */
+        // #endregion
+        // #region Scaling
         /**
          * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
@@ -530,6 +526,8 @@ var Fudge;
         scaleZ(_scale) {
             this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, 1, _scale);
         }
+        // #endregion
+        // #region Seriallization
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
@@ -864,7 +862,7 @@ var Fudge;
         get cmpTransform() {
             return this.getComponents(Fudge.ComponentTransform)[0];
         }
-        // #region Hierarchy
+        // #region Scenetree
         /**
          * Returns a clone of the list of children
          */
@@ -912,6 +910,17 @@ var Fudge;
             _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
             this.children.splice(iFound, 1);
             _node.setParent(null);
+        }
+        next() {
+            return { done: true, value: this };
+        }
+        *generator() {
+            yield this;
+            for (let child of this.children)
+                yield* child.generator();
+        }
+        [Symbol.iterator]() {
+            return this;
         }
         // #endregion
         // #region Components
