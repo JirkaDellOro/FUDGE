@@ -2,6 +2,12 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 
+# Apr 16th 2019
+Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_VE_Doodle.jpg)) as well as Animation Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle1.jpg), [2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle2.jpg)).
+
+# Apr 15th 2019
+Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190415_Whiteboard_VE_UI_Discussion.jpg)
+
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
 

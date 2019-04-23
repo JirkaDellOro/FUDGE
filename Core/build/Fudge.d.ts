@@ -593,7 +593,7 @@ declare namespace Fudge {
          */
         private viewportNodeSceneGraphRoot;
         /**
-         * Initializes the vertexbuffer for a passed node.
+         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
         private initializeNodeBuffer;

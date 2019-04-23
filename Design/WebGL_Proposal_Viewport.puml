@@ -1,4 +1,6 @@
 @startuml Viewport.draw
+skinparam monochrome true
+skinparam shadowing false
 header
     Viewport.draw
 endheader
