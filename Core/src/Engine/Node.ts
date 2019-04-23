@@ -96,13 +96,17 @@ namespace Fudge {
             _node.setParent(null);
         }
 
+        private *getBranchGenerator(): IterableIterator<Node> {
+            yield this;
+            for (let child of this.children)
+            yield* child.branch;
+        }
+        
         /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
-        public *branch(): IterableIterator<Node> {
-            yield this;
-            for (let child of this.children)
-                yield* child.branch();
+        public get branch(): IterableIterator<Node> {
+            return this.getBranchGenerator();
         }
         // #endregion
 

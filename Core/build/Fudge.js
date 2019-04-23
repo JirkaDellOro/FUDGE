@@ -911,13 +911,16 @@ var Fudge;
             this.children.splice(iFound, 1);
             _node.setParent(null);
         }
+        *getBranchGenerator() {
+            yield this;
+            for (let child of this.children)
+                yield* child.branch;
+        }
         /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
-        *branch() {
-            yield this;
-            for (let child of this.children)
-                yield* child.branch();
+        get branch() {
+            return this.getBranchGenerator();
         }
         // #endregion
         // #region Components
@@ -1410,6 +1413,14 @@ var Fudge;
             this.nodes.set(_node, nodeReferences);
         }
         /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         */
+        static addBranch(_node) {
+            for (let node of _node.branch)
+                this.addNode(node);
+        }
+        /**
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
          * @param _node
          */
@@ -1421,6 +1432,14 @@ var Fudge;
             this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
             this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
             this.nodes.delete(_node);
+        }
+        /**
+         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node) {
+            for (let node of _node.branch)
+                this.removeNode(node);
         }
         /**
          * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
@@ -1448,6 +1467,14 @@ var Fudge;
                 this.createReference(this.buffers, mesh, this.createBuffer);
                 nodeReferences.mesh = mesh;
             }
+        }
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node) {
+            for (let node of _node.branch)
+                this.updateNode(node);
         }
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.

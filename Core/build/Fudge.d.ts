@@ -481,10 +481,11 @@ declare namespace Fudge {
          * @param _node The node to be removed.
          */
         removeChild(_node: Node): void;
+        private getBranchGenerator;
         /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
-        branch(): IterableIterator<Node>;
+        readonly branch: IterableIterator<Node>;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
@@ -643,15 +644,30 @@ declare namespace Fudge {
          */
         static addNode(_node: Node): void;
         /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         */
+        static addBranch(_node: Node): void;
+        /**
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
          * @param _node
          */
         static removeNode(_node: Node): void;
         /**
+         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node: Node): void;
+        /**
          * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
          * @param _node
          */
         static updateNode(_node: Node): void;
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node: Node): void;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */

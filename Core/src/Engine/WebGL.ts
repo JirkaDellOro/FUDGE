@@ -94,6 +94,15 @@ namespace Fudge {
             let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
+
+        /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node 
+         */
+        public static addBranch(_node: Node): void {
+            for (let node of _node.branch)
+                this.addNode(node);
+        }
         /**
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
          * @param _node 
@@ -108,6 +117,15 @@ namespace Fudge {
             this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
 
             this.nodes.delete(_node);
+        }
+
+        /**
+         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * @param _node 
+         */
+        public static removeBranch(_node: Node): void {
+            for (let node of _node.branch)
+                this.removeNode(node);
         }
 
         /**
@@ -139,6 +157,15 @@ namespace Fudge {
                 this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
                 nodeReferences.mesh = mesh;
             }
+        }
+
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node 
+         */
+        public static updateBranch(_node: Node): void {
+            for (let node of _node.branch)
+                this.updateNode(node);
         }
 
         /**
