@@ -750,10 +750,10 @@ var Fudge;
         constructor(_name, _color, _shader) {
             this.name = _name;
             this.shader = _shader;
-            this.positionAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_position"));
-            this.colorAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_color"));
-            this.matrixLocation = Fudge.GLUtil.assert(this.shader.getUniformLocation("u_matrix"));
             this.color = _color;
+            this.positionAttributeLocation = Fudge.GLUtil.assert(this.shader.getAttributeLocation("a_position"));
+            this.colorUniformLocation = Fudge.GLUtil.assert(this.shader.getUniformLocation("u_color"));
+            this.matrixLocation = Fudge.GLUtil.assert(this.shader.getUniformLocation("u_matrix"));
             this.colorBufferSpecification = {
                 size: 3,
                 dataType: Fudge.gl2.UNSIGNED_BYTE,
@@ -799,8 +799,8 @@ var Fudge;
         get PositionAttributeLocation() {
             return this.positionAttributeLocation;
         }
-        get ColorAttributeLocation() {
-            return this.colorAttributeLocation;
+        get ColorUniformLocation() {
+            return this.colorUniformLocation;
         }
         get MatrixUniformLocation() {
             return this.matrixLocation;
@@ -910,11 +910,6 @@ var Fudge;
             _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
             this.children.splice(iFound, 1);
             _node.setParent(null);
-        }
-        *getBranchGenerator() {
-            yield this;
-            for (let child of this.children)
-                yield* child.branch;
         }
         /**
          * Generator yielding the node and all successors in the branch below for iteration
@@ -1110,6 +1105,11 @@ var Fudge;
         setParent(_parent) {
             this.parent = _parent;
         }
+        *getBranchGenerator() {
+            yield this;
+            for (let child of this.children)
+                yield* child.branch;
+        }
     }
     Fudge.Node = Node;
 })(Fudge || (Fudge = {}));
@@ -1225,6 +1225,11 @@ var Fudge;
                     let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
+                    // Supply color
+                    let colorUniformLocation = materialComponent.Material.ColorUniformLocation;
+                    let vec = materialComponent.Material.Color;
+                    let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+                    Fudge.gl2.uniform4fv(colorUniformLocation, color);
                     // Draw call
                     Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }
@@ -1286,12 +1291,11 @@ var Fudge;
          * @param _mesh The node's meshcomponent.
          */
         initializeNodeMaterial(_materialComponent, _meshComponent) {
-            let colorBuffer = Fudge.GLUtil.assert(Fudge.gl2.createBuffer());
-            Fudge.gl2.bindBuffer(Fudge.gl2.ARRAY_BUFFER, colorBuffer);
-            _meshComponent.applyColor(_materialComponent);
-            let colorAttributeLocation = _materialComponent.Material.ColorAttributeLocation;
-            Fudge.gl2.enableVertexAttribArray(colorAttributeLocation);
-            Fudge.GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
+            // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+            // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+            // _meshComponent.applyColor(_materialComponent);
+            //gl2.enableVertexAttribArray(colorUniformLocation);
+            // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
         }
         /**
          * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
@@ -1353,6 +1357,148 @@ var Fudge;
     }
     Fudge.Viewport = Viewport;
 })(Fudge || (Fudge = {}));
+/*/
+namespace Fudge {
+
+    interface ShaderProgram {
+        program: WebGLProgram;
+        attributes: { [name: string]: number };
+        uniforms: { [name: string]: WebGLUniformLocation };
+    }
+
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+    }
+
+    export class WebGLJascha {
+        crc3: WebGL2RenderingContext;
+
+        private createProgram(_shader: Shader): ShaderProgram {
+            let crc3: WebGL2RenderingContext = this.crc3;
+            let shaderProgram: WebGLProgram = new WebGLProgram();
+            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shader.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shader.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.linkProgram(shaderProgram);
+            let error: string = GLUtil.assert<string>(crc3.getProgramInfoLog(shaderProgram));
+            if (error !== "") {
+                throw new Error("Error linking Shader: " + error);
+            }
+            let program: ShaderProgram = {
+                program: shaderProgram,
+                attributes: detectAttributes(),
+                uniforms: detectUniforms()
+            };
+            return program;
+
+
+            function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
+                let webGLShader: WebGLShader = crc3.createShader(_shaderType);
+                crc3.shaderSource(webGLShader, _shaderCode);
+                crc3.compileShader(webGLShader);
+                let error: string = GLUtil.assert<string>(crc3.getShaderInfoLog(webGLShader));
+                if (error !== "") {
+                    throw new Error("Error compiling shader: " + error);
+                }
+                // Check for any compilation errors.
+                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                    alert(crc3.getShaderInfoLog(webGLShader));
+                    return null;
+                }
+                return webGLShader;
+            }
+            function detectAttributes(): { [name: string]: number } {
+                let detectedAttributes: { [name: string]: number } = {};
+                let attributeCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                for (let i: number = 0; i < attributeCount; i++) {
+                    let attributeInfo: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
+                    if (!attributeInfo) {
+                        break;
+                    }
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                }
+                return detectedAttributes;
+            }
+            function detectUniforms(): { [name: string]: WebGLUniformLocation } {
+                let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
+                let uniformCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                for (let i: number = 0; i < uniformCount; i++) {
+                    let info: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
+                    if (!info) {
+                        break;
+                    }
+                    detectedUniforms[info.name] = GLUtil.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
+                }
+                return detectedUniforms;
+            }
+        }
+
+        private deleteProgram(_program: ShaderProgram): void {
+            if (_program) {
+                this.crc3.deleteProgram(_program.program);
+                delete _program.attributes;
+                delete _program.uniforms;
+            }
+
+        }
+
+        private createBuffer(_mesh: Mesh): BufferInfo {
+            let buffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(this.crc3.createBuffer());
+            this.crc3.bindBuffer(this.crc3.ARRAY_BUFFER, buffer);
+            this.crc3.bufferData(this.crc3.ARRAY_BUFFER, _mesh.getVertices(), this.crc3.STATIC_DRAW);
+            let bufferInfo: BufferInfo = { buffer: buffer, target: this.crc3.ARRAY_BUFFER };
+            return bufferInfo;
+        }
+        private deleteBuffer(_bufferInfo: BufferInfo): void {
+            if (_bufferInfo) {
+                this.crc3.bindBuffer(_bufferInfo.target, null);
+                this.crc3.deleteBuffer(_bufferInfo);
+            }
+        }
+
+        private createParameter(_material: Material): WebGLVertexArrayObject {
+            // return new WebGLVertexArrayObject();
+        //    let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+
+        //     _meshComponent.applyColor(_materialComponent);
+        //     let colorPerPosition: number[] = [];
+        //     for (let i: number = 0; i < this.vertexCount; i++) {
+        //         colorPerPosition.push(_material.Color.x, _material.Color.y, _material.Color.z);
+        //     }
+        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
+
+        //     let colorAttributeLocation: number = _materialComponent.Material.ColorAttributeLocation;
+        //     gl2.enableVertexAttribArray(colorAttributeLocation);
+        //     GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
+         
+
+            this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
+            this.colorAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_color"));
+            this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
+
+            this.colorBufferSpecification = {
+                size: 3,
+                dataType: gl2.UNSIGNED_BYTE,
+                normalize: true,
+                stride: 0,
+                offset: 0
+            };
+            this.textureBufferSpecification = {
+                size: 2,
+                dataType: gl2.FLOAT,
+                normalize: true,
+                stride: 0,
+                offset: 0
+            };
+
+
+            this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
+        }
+
+    }
+}
+/*/ 
 var Fudge;
 (function (Fudge) {
     /**
@@ -1383,7 +1529,7 @@ var Fudge;
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    class WebGL {
+    class WebGL extends EventTarget {
         // #region Adding
         /**
          * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
@@ -1419,7 +1565,12 @@ var Fudge;
          */
         static addBranch(_node) {
             for (let node of _node.branch)
-                this.addNode(node);
+                try {
+                    this.addNode(node);
+                }
+                catch (_e) {
+                    console.log(_e);
+                }
         }
         // #endregion
         // #region Removing
@@ -2460,10 +2611,11 @@ var Fudge;
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
                     in vec4 a_position;
-                    in vec4 a_color;
+                    //in vec4 a_color;
                 
                     // The Matrix to transform the positions by.
                     uniform mat4 u_matrix;
+                    uniform vec4 u_color;
                 
                     // Varying color in the fragmentshader.
                     out vec4 v_color;
@@ -2476,7 +2628,7 @@ var Fudge;
                         gl_Position = u_matrix * a_position;
                 
                         // Pass color to fragmentshader.
-                        v_color = a_color;
+                        v_color = u_color;
                     }`;
         }
         loadFragmentShaderSource() {

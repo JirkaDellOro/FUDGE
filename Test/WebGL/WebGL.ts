@@ -15,6 +15,9 @@ namespace WebGL {
         node = Scenes.node;
         child = node.getChildren()[0];
         grandchild = child.getChildren()[0];
+
+        // let webgl: ƒ.WebGL = new ƒ.WebGL();
+        // webgl.addEventListener("snv", hndClick);
     }
 
     function hndClick(_event: Event): void {
@@ -22,29 +25,39 @@ namespace WebGL {
     }
 
     function addNodes(_event: Event): void {
+        dumpWebGL("Add two nodes");
         ƒ.WebGL.addNode(node);
         ƒ.WebGL.addNode(grandchild);
-        dumpWebGL("Two nodes added");
         delegate = updateNode;
     }
     function updateNode(_event: Event): void {
+        dumpWebGL("Update node");
         ƒ.WebGL.updateNode(node);
-        dumpWebGL("node updated");
         delegate = recalculateNode;
     }
     function recalculateNode(_event: Event): void {
+        dumpWebGL("Recalculate nodes");
         ƒ.WebGL.recalculateAllNodeTransforms();
-        dumpWebGL("nodes recalculated");
         delegate = removeFirstNode;
     }
     function removeFirstNode(_event: Event): void {
+        dumpWebGL("Remove second node");
         ƒ.WebGL.removeNode(grandchild);
-        dumpWebGL("second node removed");
         delegate = removeSecondNode;
     }
     function removeSecondNode(_event: Event): void {
+        dumpWebGL("Remove first node");
         ƒ.WebGL.removeNode(node);
-        dumpWebGL("first node removed");
+        delegate = addBranch;
+    }
+    function addBranch(_event: Event): void {
+        dumpWebGL("Add branch");
+        ƒ.WebGL.addBranch(node);
+        delegate = removeBranch;
+    }
+    function removeBranch(_event: Event): void {
+        ƒ.WebGL.removeBranch(node);
+        dumpWebGL("branch removed");
         window.removeEventListener("click", hndClick);
     }
 

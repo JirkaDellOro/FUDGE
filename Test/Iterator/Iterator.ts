@@ -18,7 +18,14 @@ namespace Iterator {
         child.appendChild(child2);
         Scenes.createViewport();
 
+        console.group("Nodes in branch");
         for (let iter of node.branch)
             console.log(iter.name);
+        console.groupEnd();
+
+        console.group("Keys in ...");
+        for (let key in node)
+            console.log(key);
+        console.groupEnd();
     }
 } 

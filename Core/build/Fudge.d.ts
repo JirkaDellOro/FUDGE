@@ -406,7 +406,7 @@ declare namespace Fudge {
         private name;
         private shader;
         private positionAttributeLocation;
-        private colorAttributeLocation;
+        private colorUniformLocation;
         private textureCoordinateAtributeLocation;
         private matrixLocation;
         private color;
@@ -423,7 +423,7 @@ declare namespace Fudge {
         readonly TextureEnabled: boolean;
         readonly TextureSource: string;
         readonly PositionAttributeLocation: number;
-        readonly ColorAttributeLocation: number;
+        readonly ColorUniformLocation: WebGLUniformLocation;
         readonly MatrixUniformLocation: WebGLUniformLocation;
         readonly TextureCoordinateLocation: number;
         /**
@@ -481,7 +481,6 @@ declare namespace Fudge {
          * @param _node The node to be removed.
          */
         removeChild(_node: Node): void;
-        private getBranchGenerator;
         /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
@@ -536,6 +535,7 @@ declare namespace Fudge {
          * @param _parent The parent to be set for this node.
          */
         private setParent;
+        private getBranchGenerator;
     }
 }
 declare namespace Fudge {
@@ -616,8 +616,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-}
-declare namespace Fudge {
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -630,7 +628,7 @@ declare namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    class WebGL {
+    class WebGL extends EventTarget {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs;
         /** Stores references to the vertex array objects and makes them available via the references to materials */

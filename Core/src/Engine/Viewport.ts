@@ -118,6 +118,12 @@ namespace Fudge {
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
+                    // Supply color
+                    let colorUniformLocation: WebGLUniformLocation = materialComponent.Material.ColorUniformLocation;
+                    let vec: Vector3 = materialComponent.Material.Color;
+                    let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+                    gl2.uniform4fv(colorUniformLocation, color);
+                    
                     // Draw call
                     gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }
@@ -179,12 +185,11 @@ namespace Fudge {
          * @param _mesh The node's meshcomponent.
          */
         private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            _meshComponent.applyColor(_materialComponent);
-            let colorAttributeLocation: number = _materialComponent.Material.ColorAttributeLocation;
-            gl2.enableVertexAttribArray(colorAttributeLocation);
-            GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
+            // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+            // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+            // _meshComponent.applyColor(_materialComponent);
+            //gl2.enableVertexAttribArray(colorUniformLocation);
+            // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
         }
 
         /**

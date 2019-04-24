@@ -50,7 +50,7 @@ namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    export class WebGL {
+    export class WebGL extends EventTarget {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
@@ -102,10 +102,14 @@ namespace Fudge {
          */
         public static addBranch(_node: Node): void {
             for (let node of _node.branch)
-                this.addNode(node);
+                try {
+                    this.addNode(node);
+                } catch (_e) {
+                    console.log(_e);
+                }
         }
         // #endregion
-        
+
         // #region Removing
         /**
          * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.

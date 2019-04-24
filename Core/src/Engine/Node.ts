@@ -96,12 +96,6 @@ namespace Fudge {
             _node.setParent(null);
         }
 
-        private *getBranchGenerator(): IterableIterator<Node> {
-            yield this;
-            for (let child of this.children)
-            yield* child.branch;
-        }
-        
         /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
@@ -316,5 +310,11 @@ namespace Fudge {
         private setParent(_parent: Node | null): void {
             this.parent = _parent;
         }
+        
+        private *getBranchGenerator(): IterableIterator<Node> {
+            yield this;
+            for (let child of this.children)
+            yield* child.branch;
+        }        
     }
 }
