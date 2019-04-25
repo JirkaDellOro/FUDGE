@@ -1143,18 +1143,20 @@ var Fudge;
          */
         drawScene() {
             if (this.camera.isActive) {
-                this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
-                let backgroundColor = this.camera.getBackgoundColor();
-                Fudge.gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-                Fudge.gl2.clear(Fudge.gl2.COLOR_BUFFER_BIT | Fudge.gl2.DEPTH_BUFFER_BIT);
-                // Enable backface- and zBuffer-culling.
-                Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
-                Fudge.gl2.enable(Fudge.gl2.DEPTH_TEST);
+                this.prepare();
                 // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-                if (false)
-                    this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
+                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
+        }
+        prepare() {
+            this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
+            let backgroundColor = this.camera.getBackgoundColor();
+            Fudge.gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
+            Fudge.gl2.clear(Fudge.gl2.COLOR_BUFFER_BIT | Fudge.gl2.DEPTH_BUFFER_BIT);
+            // Enable backface- and zBuffer-culling.
+            Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
+            Fudge.gl2.enable(Fudge.gl2.DEPTH_TEST);
         }
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.

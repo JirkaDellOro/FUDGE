@@ -8,10 +8,12 @@ namespace WebGLRendering {
 
     function init(): void {
         Scenes.createMiniScene();
-        Scenes.createViewport();
-
         node = Scenes.node;
         child = node.getChildren()[0];
+
+        let viewPort: ƒ.Viewport = new ƒ.Viewport("TestViewport", node, <ƒ.ComponentCamera>Scenes.camera.getComponent(ƒ.ComponentCamera));
+        viewPort.prepare();
+
 
         // let webgl: ƒ.WebGL = new ƒ.WebGL();
         // webgl.addEventListener("snv", hndClick);
@@ -19,6 +21,7 @@ namespace WebGLRendering {
         ƒ.WebGL.addNode(node);
 
 
+        ƒ.WebGL.recalculateAllNodeTransforms();
         ƒ.WebGL.drawBranch(node, (<ƒ.ComponentCamera>Scenes.camera.getComponent(ƒ.ComponentCamera)));
 
         node.cmpTransform.rotateZ(90);

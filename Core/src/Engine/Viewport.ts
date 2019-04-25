@@ -31,20 +31,22 @@ namespace Fudge {
          */
         public drawScene(): void {
             if (this.camera.isActive) {
-                this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
-                let backgroundColor: Vector3 = this.camera.getBackgoundColor();
-                gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-                gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
-                // Enable backface- and zBuffer-culling.
-                gl2.enable(gl2.CULL_FACE);
-                gl2.enable(gl2.DEPTH_TEST);
+                this.prepare();
                 // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-                if (false)
-                    this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
+                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
 
+        public prepare(): void {
+            this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
+            let backgroundColor: Vector3 = this.camera.getBackgoundColor();
+            gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
+            gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
+            // Enable backface- and zBuffer-culling.
+            gl2.enable(gl2.CULL_FACE);
+            gl2.enable(gl2.DEPTH_TEST);
+        }
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
          * @param _node The node to initialize.
