@@ -7,6 +7,18 @@ Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob
 
 # Apr 15th 2019
 Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190415_Whiteboard_VE_UI_Discussion.jpg)
+Toolbesprechung Vektoreditor
+
+Tools: 
+Select (boxselect, multiselect)
+Add (vertice to existing object, new path)
+Transorm (move, scale, rotate)
+Create Shape (square, triangle, circle)
+(Combine)
+Move canvas
+Freeform kann über on/off toggle automatisch geschlossen werden
+
+-> Schlussfolgerung: Werkzeuge sind für Konsistenz zwischen mit 3D Editor sinnvoll
 
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
