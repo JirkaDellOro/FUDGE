@@ -11,7 +11,7 @@ namespace Fudge {
             this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
         }
 
-        private loadVertexShaderSource(): string {
+        public loadVertexShaderSource(): string {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
@@ -36,7 +36,7 @@ namespace Fudge {
                         v_color = u_color;
                     }`;
         }
-        private loadFragmentShaderSource(): string {
+        public loadFragmentShaderSource(): string {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

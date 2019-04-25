@@ -40,7 +40,8 @@ namespace Fudge {
                 gl2.enable(gl2.DEPTH_TEST);
                 // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
+                if (false)
+                    this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
 
@@ -123,7 +124,7 @@ namespace Fudge {
                     let vec: Vector3 = materialComponent.Material.Color;
                     let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
                     gl2.uniform4fv(colorUniformLocation, color);
-                    
+
                     // Draw call
                     gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }

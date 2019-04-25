@@ -678,7 +678,7 @@ declare namespace Fudge {
          * @param _cameraMatrix
          * @param _matrix
          */
-        static drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _matrix?: Matrix4x4): void;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
@@ -700,15 +700,37 @@ declare namespace Fudge {
          * @param _creator
          */
         private static createReference;
-        private static createProgram;
-        private static createParameter;
-        private static createBuffer;
-        private static deleteProgram;
-        private static deleteParameter;
-        private static deleteBuffer;
-        private static useProgram;
-        private static useParameter;
-        private static useBuffer;
+    }
+}
+declare namespace Fudge {
+    interface ShaderInfo {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+    }
+    interface MaterialInfo {
+        vao: WebGLVertexArrayObject;
+        color: Vector3;
+    }
+    class WebGLJascha {
+        static crc3: WebGL2RenderingContext;
+        static useProgram(_shaderInfo: ShaderInfo, _use: boolean): void;
+        static useParameter(_materialInfo: MaterialInfo): void;
+        static useBuffer(_bufferInfo: BufferInfo): void;
+        static createProgram(_shader: Shader): ShaderInfo;
+        static deleteProgram(_program: ShaderInfo): void;
+        static createBuffer(_mesh: Mesh): BufferInfo;
+        static deleteBuffer(_bufferInfo: BufferInfo): void;
+        static deleteParameter(_materialInfo: MaterialInfo): void;
+        static createParameter(_material: Material): MaterialInfo;
     }
 }
 declare namespace Fudge {
@@ -955,6 +977,8 @@ declare namespace Fudge {
         private program;
         private attributes;
         private uniforms;
+        abstract loadVertexShaderSource(): string;
+        abstract loadFragmentShaderSource(): string;
         /**
          * Get location of an attribute by its name.
          * @param _name Name of the attribute to locate.
@@ -999,8 +1023,8 @@ declare namespace Fudge {
      */
     class ShaderBasic extends Shader {
         constructor();
-        private loadVertexShaderSource;
-        private loadFragmentShaderSource;
+        loadVertexShaderSource(): string;
+        loadFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -1010,7 +1034,7 @@ declare namespace Fudge {
      */
     class ShaderTexture extends Shader {
         constructor();
-        private loadVertexShaderSource;
-        private loadFragmentShaderSource;
+        loadVertexShaderSource(): string;
+        loadFragmentShaderSource(): string;
     }
 }

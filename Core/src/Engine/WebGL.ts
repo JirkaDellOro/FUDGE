@@ -1,3 +1,4 @@
+// <reference path="WebGLJascha.ts"/>
 namespace Fudge {
     export interface BufferSpecification {
         size: number;   // The size of the datasample.
@@ -54,11 +55,11 @@ namespace Fudge {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs: Map<Shader, WebGLReference<WebGLProgram>> = new Map();
+        private static programs: Map<Shader, WebGLReference<ShaderInfo>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private static parameters: Map<Material, WebGLReference<WebGLVertexArrayObject>> = new Map();
+        private static parameters: Map<Material, WebGLReference<MaterialInfo>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers: Map<Mesh, WebGLReference<WebGLBuffer>> = new Map();
+        private static buffers: Map<Mesh, WebGLReference<BufferInfo>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
 
         // #region Adding
@@ -84,13 +85,13 @@ namespace Fudge {
             */
 
             let shader: Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
-            this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
+            this.createReference<Shader, ShaderInfo>(this.programs, shader, WebGLJascha.createProgram);
 
             let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
-            this.createReference<Material, WebGLVertexArrayObject>(this.parameters, material, this.createParameter);
+            this.createReference<Material, MaterialInfo>(this.parameters, material, WebGLJascha.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
-            this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
+            this.createReference<Mesh, BufferInfo>(this.buffers, mesh, WebGLJascha.createBuffer);
 
             let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
@@ -120,9 +121,9 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            this.removeReference<Shader, WebGLProgram>(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference<Material, WebGLVertexArrayObject>(this.parameters, nodeReferences.material, this.deleteParameter);
-            this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, WebGLJascha.deleteProgram);
+            this.removeReference<Material, MaterialInfo>(this.parameters, nodeReferences.material, WebGLJascha.deleteParameter);
+            this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, WebGLJascha.deleteBuffer);
 
             this.nodes.delete(_node);
         }
@@ -149,22 +150,22 @@ namespace Fudge {
 
             let shader: Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
             if (shader !== nodeReferences.shader) {
-                this.removeReference<Shader, WebGLProgram>(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference<Shader, WebGLProgram>(this.programs, shader, this.createProgram);
+                this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, WebGLJascha.deleteProgram);
+                this.createReference<Shader, ShaderInfo>(this.programs, shader, WebGLJascha.createProgram);
                 nodeReferences.shader = shader;
             }
 
             let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
             if (material !== nodeReferences.material) {
-                this.removeReference<Material, WebGLVertexArrayObject>(this.parameters, nodeReferences.material, this.deleteParameter);
-                this.createReference<Material, WebGLVertexArrayObject>(this.parameters, material, this.createParameter);
+                this.removeReference<Material, MaterialInfo>(this.parameters, nodeReferences.material, WebGLJascha.deleteParameter);
+                this.createReference<Material, MaterialInfo>(this.parameters, material, WebGLJascha.createParameter);
                 nodeReferences.material = material;
             }
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference<Mesh, WebGLBuffer>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference<Mesh, WebGLBuffer>(this.buffers, mesh, this.createBuffer);
+                this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, WebGLJascha.deleteBuffer);
+                this.createReference<Mesh, BufferInfo>(this.buffers, mesh, WebGLJascha.createBuffer);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -230,12 +231,17 @@ namespace Fudge {
          * @param _cameraMatrix 
          * @param _matrix 
          */
-        public static drawBranch(_node: Node, _cameraMatrix: Matrix4x4, _matrix?: Matrix4x4): void {
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _matrix?: Matrix4x4): void {
             let references: NodeReferences = this.nodes.get(_node);
-            this.useProgram(this.programs.get(references.shader));
-            this.useParameter(this.parameters.get(references.material));
-            this.useBuffer(this.programs.get(references.shader));
+            if (!references)
+                return; // TODO: nodes without render info should not stop recursion
+            WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
+            WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
+            WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
+            WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
 
+            GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], (<ComponentMesh>_node.getComponent(ComponentMesh)).getBufferSpecification());
+           
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             let transformMatrix: Matrix4x4 = _matrix;
             if (cmpTransform)
@@ -248,15 +254,27 @@ namespace Fudge {
                 transformMatrix = Matrix4x4.multiply(pivot.Matrix, transformMatrix);
 
             // multiply camera matrix
-            // let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cameraMatrix, transformMatrix);
+            let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, transformMatrix);
+
+
+            let matrixLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
             // Supply matrixdata to shader. 
-            //gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
+            gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
             // Draw call
-            //gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
+            // Supply color
+            let colorUniformLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
+            let vec: Vector3 = this.parameters.get(references.material).getReference().color;
+            let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+            gl2.uniform4fv(colorUniformLocation, color);
+
+            // Draw call
+            // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
+            let cmpMesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
+            gl2.drawArrays(gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
 
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cameraMatrix, transformMatrix);
+                this.drawBranch(childNode, _cmpCamera, transformMatrix);
             }
         }
 
@@ -292,7 +310,7 @@ namespace Fudge {
             if (reference.decreaseCounter() == 0) {
                 // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
                 // If data should be used later again, it must then be reconstructed...
-                _deletor(reference);
+                _deletor(reference.getReference());
                 _in.delete(_key);
             }
         }
@@ -318,6 +336,7 @@ namespace Fudge {
         // #endregion
 
         // #region Dummy-Methods
+        /*
         private static createProgram(_shader: Shader): WebGLProgram {
             // return new WebGLProgram();
             return <WebGLProgram>"Program";
@@ -348,6 +367,7 @@ namespace Fudge {
         private static useBuffer(_buffer: WebGLBuffer): void {
             // to be implemented;
         }
+        */
         // #endregion
     }
 }
