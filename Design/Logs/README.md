@@ -7,6 +7,7 @@ Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob
 
 # Apr 15th 2019
 Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190415_Whiteboard_VE_UI_Discussion.jpg)
+
 Toolbesprechung Vektoreditor
 
 Tools: 
