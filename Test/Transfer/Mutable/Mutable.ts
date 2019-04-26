@@ -8,6 +8,8 @@ namespace Mutable {
 
     function init(): void {
         Scenes.createMiniScene();
+        Scenes.createViewport();
+
         cmpTransform = Scenes.node.cmpTransform;
         mutator = cmpTransform.getMutatorForAnimation();
         console.log("Mutator: ", mutator);
@@ -21,8 +23,8 @@ namespace Mutable {
         window.requestAnimationFrame(animate);
         
         angle += 0.03;
-        (mutator.matrix as ƒ.Matrix4x4).data[12] = 50 * Math.sin(angle);
-        (mutator.matrix as ƒ.Matrix4x4).data[5] = Math.cos(1.7 * angle);
+        (mutator.local as ƒ.Matrix4x4).data[12] = 5 * Math.sin(angle);
+        (mutator.local as ƒ.Matrix4x4).data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
 
         Scenes.viewPort.drawScene();
