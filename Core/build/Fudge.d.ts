@@ -209,8 +209,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentPivot extends Component {
-        protected matrix: Matrix4x4;
-        readonly Matrix: Matrix4x4;
+        local: Matrix4x4;
         readonly position: Vector3;
         /**
          * Resets this.matrix to idenity Matrix.
@@ -301,7 +300,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends ComponentPivot {
-        worldMatrix: Matrix4x4;
+        world: Matrix4x4;
         constructor();
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
@@ -677,9 +676,9 @@ declare namespace Fudge {
          * or the identity matrix, if _matrix is null.
          * @param _node
          * @param _cameraMatrix
-         * @param _matrix
+         * @param _world
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _matrix?: Matrix4x4): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix

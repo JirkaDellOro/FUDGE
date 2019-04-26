@@ -234,7 +234,7 @@ var Fudge;
         get ViewProjectionMatrix() {
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
-                let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.Matrix); // TODO: WorldMatrix-> Camera must be calculated
+                let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
                 return Fudge.Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
             }
             catch {
@@ -415,21 +415,18 @@ var Fudge;
     class ComponentPivot extends Fudge.Component {
         constructor() {
             super(...arguments);
-            this.matrix = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
+            this.local = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
             // #endregion
         }
-        get Matrix() {
-            return this.matrix;
-        }
         get position() {
-            return new Fudge.Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
+            return new Fudge.Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
         }
         // #region Transformation
         /**
          * Resets this.matrix to idenity Matrix.
          */
         reset() {
-            this.matrix = Fudge.Matrix4x4.identity;
+            this.local = Fudge.Matrix4x4.identity;
         }
         // #endregion
         // #region Translation
@@ -440,28 +437,28 @@ var Fudge;
          * @param _z The z-value of the translation.
          */
         translate(_x, _y, _z) {
-            this.matrix = Fudge.Matrix4x4.translate(this.matrix, _x, _y, _z);
+            this.local = Fudge.Matrix4x4.translate(this.local, _x, _y, _z);
         }
         /**
          * Translate the transformation along the x-axis.
          * @param _x The value of the translation.
          */
         translateX(_x) {
-            this.matrix = Fudge.Matrix4x4.translate(this.matrix, _x, 0, 0);
+            this.local = Fudge.Matrix4x4.translate(this.local, _x, 0, 0);
         }
         /**
          * Translate the transformation along the y-axis.
          * @param _y The value of the translation.
          */
         translateY(_y) {
-            this.matrix = Fudge.Matrix4x4.translate(this.matrix, 0, _y, 0);
+            this.local = Fudge.Matrix4x4.translate(this.local, 0, _y, 0);
         }
         /**
          * Translate the transformation along the z-axis.
          * @param _z The value of the translation.
          */
         translateZ(_z) {
-            this.matrix = Fudge.Matrix4x4.translate(this.matrix, 0, 0, _z);
+            this.local = Fudge.Matrix4x4.translate(this.local, 0, 0, _z);
         }
         // #endregion
         // #region Rotation
@@ -470,21 +467,21 @@ var Fudge;
          * @param _angle The angle to rotate by.
          */
         rotateX(_angle) {
-            this.matrix = Fudge.Matrix4x4.rotateX(this.matrix, _angle);
+            this.local = Fudge.Matrix4x4.rotateX(this.local, _angle);
         }
         /**
          * Rotate the transformation along the around its y-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateY(_angle) {
-            this.matrix = Fudge.Matrix4x4.rotateY(this.matrix, _angle);
+            this.local = Fudge.Matrix4x4.rotateY(this.local, _angle);
         }
         /**
          * Rotate the transformation along the around its z-Axis.
          * @param _angle The angle to rotate by.
          */
         rotateZ(_zAngle) {
-            this.matrix = Fudge.Matrix4x4.rotateZ(this.matrix, _zAngle);
+            this.local = Fudge.Matrix4x4.rotateZ(this.local, _zAngle);
         }
         /**
          * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
@@ -492,7 +489,7 @@ var Fudge;
          * @param _target The target to look at.
          */
         lookAt(_target) {
-            this.matrix = Fudge.Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
+            this.local = Fudge.Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
         }
         // #endregion
         // #region Scaling
@@ -503,41 +500,41 @@ var Fudge;
          * @param _zScale The value to scale z by.
          */
         scale(_xScale, _yScale, _zScale) {
-            this.matrix = Fudge.Matrix4x4.scale(this.matrix, _xScale, _yScale, _zScale);
+            this.local = Fudge.Matrix4x4.scale(this.local, _xScale, _yScale, _zScale);
         }
         /**
          * Scale the transformation along the x-axis.
          * @param _scale The value to scale by.
          */
         scaleX(_scale) {
-            this.matrix = Fudge.Matrix4x4.scale(this.matrix, _scale, 1, 1);
+            this.local = Fudge.Matrix4x4.scale(this.local, _scale, 1, 1);
         }
         /**
          * Scale the transformation along the y-axis.
          * @param _scale The value to scale by.
          */
         scaleY(_scale) {
-            this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, _scale, 1);
+            this.local = Fudge.Matrix4x4.scale(this.local, 1, _scale, 1);
         }
         /**
          * Scale the transformation along the z-axis.
          * @param _scale The value to scale by.
          */
         scaleZ(_scale) {
-            this.matrix = Fudge.Matrix4x4.scale(this.matrix, 1, 1, _scale);
+            this.local = Fudge.Matrix4x4.scale(this.local, 1, 1, _scale);
         }
         // #endregion
         // #region Seriallization
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                matrix: this.matrix.serialize(),
+                matrix: this.local.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            this.matrix.deserialize(_serialization.matrix);
+            this.local.deserialize(_serialization.matrix);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
@@ -568,10 +565,10 @@ var Fudge;
     class ComponentTransform extends Fudge.ComponentPivot {
         constructor() {
             super();
-            this.worldMatrix = Fudge.Matrix4x4.identity;
+            this.world = Fudge.Matrix4x4.identity;
         }
         get WorldPosition() {
-            return new Fudge.Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
+            return new Fudge.Vector3(this.world.data[12], this.world.data[13], this.world.data[14]);
         }
         serialize() {
             let serialization = {
@@ -1222,10 +1219,10 @@ var Fudge;
                     Fudge.gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     Fudge.gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix = transform.worldMatrix;
+                    let transformMatrix = transform.world;
                     let pivot = _node.getComponent(Fudge.ComponentPivot);
                     if (pivot)
-                        transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
+                        transformMatrix = Fudge.Matrix4x4.multiply(pivot.local, transform.world);
                     let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     Fudge.gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
@@ -1251,8 +1248,8 @@ var Fudge;
             let worldMatrix = _matrix;
             let transform = _node.cmpTransform;
             if (transform) {
-                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.Matrix);
-                transform.worldMatrix = worldMatrix;
+                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.local);
+                transform.world = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
@@ -1526,7 +1523,7 @@ var Fudge;
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix = Fudge.Matrix4x4.identity;
                 if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.worldMatrix;
+                    matrix = parent.cmpTransform.world;
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
@@ -1540,44 +1537,46 @@ var Fudge;
          * or the identity matrix, if _matrix is null.
          * @param _node
          * @param _cameraMatrix
-         * @param _matrix
+         * @param _world
          */
-        static drawBranch(_node, _cmpCamera, _matrix) {
-            let references = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: nodes without render info should not stop recursion
-            Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
-            Fudge.WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
-            Fudge.WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
-            Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
-            Fudge.GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], _node.getComponent(Fudge.ComponentMesh).getBufferSpecification());
+        static drawBranch(_node, _cmpCamera, _world) {
             let cmpTransform = _node.cmpTransform;
-            let transformMatrix = _matrix;
+            let world = _world;
             if (cmpTransform)
-                transformMatrix = cmpTransform.worldMatrix;
-            if (!transformMatrix)
-                transformMatrix = Fudge.Matrix4x4.identity;
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Fudge.Matrix4x4.identity;
+            let worldPivot = world;
             let pivot = _node.getComponent(Fudge.ComponentPivot);
             if (pivot)
-                transformMatrix = Fudge.Matrix4x4.multiply(pivot.Matrix, transformMatrix);
+                worldPivot = Fudge.Matrix4x4.multiply(pivot.local, world);
             // multiply camera matrix
-            let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, transformMatrix);
-            let matrixLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
-            // Supply matrixdata to shader. 
-            Fudge.gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
-            // Draw call
-            // Supply color
-            let colorUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
-            let vec = this.parameters.get(references.material).getReference().color;
-            let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-            Fudge.gl2.uniform4fv(colorUniformLocation, color);
-            // Draw call
-            // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
-            let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
-            Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
+            let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, worldPivot);
+            let references = this.nodes.get(_node);
+            if (references) { // TODO: deal with partial references
+                Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
+                Fudge.WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
+                Fudge.WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
+                Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
+                Fudge.GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], _node.getComponent(Fudge.ComponentMesh).getBufferSpecification());
+                let matrixLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
+                // Supply matrixdata to shader. 
+                Fudge.gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
+                // Draw call
+                // Supply color
+                let colorUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
+                let vec = this.parameters.get(references.material).getReference().color;
+                let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+                Fudge.gl2.uniform4fv(colorUniformLocation, color);
+                // Draw call
+                // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
+                let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
+                Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
+            }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, transformMatrix);
+                this.drawBranch(childNode, _cmpCamera, world);
             }
         }
         /**
@@ -1590,8 +1589,8 @@ var Fudge;
             let worldMatrix = _matrix;
             let transform = _node.cmpTransform;
             if (transform) {
-                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.Matrix);
-                transform.worldMatrix = worldMatrix;
+                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.local);
+                transform.world = worldMatrix;
             }
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);

@@ -114,10 +114,10 @@ namespace Fudge {
                     gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix: Matrix4x4 = transform.worldMatrix;
+                    let transformMatrix: Matrix4x4 = transform.world;
                     let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
                     if (pivot)
-                        transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
+                        transformMatrix = Matrix4x4.multiply(pivot.local, transform.world);
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
@@ -144,8 +144,8 @@ namespace Fudge {
             let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
             if (transform) {
-                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
-                transform.worldMatrix = worldMatrix;
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
+                transform.world = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];

@@ -212,7 +212,7 @@ namespace Fudge {
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix: Matrix4x4 = Matrix4x4.identity;
                 if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.worldMatrix;
+                    matrix = parent.cmpTransform.world;
 
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
@@ -229,52 +229,52 @@ namespace Fudge {
          * or the identity matrix, if _matrix is null.
          * @param _node 
          * @param _cameraMatrix 
-         * @param _matrix 
+         * @param _world 
          */
-        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _matrix?: Matrix4x4): void {
-            let references: NodeReferences = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: nodes without render info should not stop recursion
-            WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
-            WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
-            WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
-            WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
-
-            GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], (<ComponentMesh>_node.getComponent(ComponentMesh)).getBufferSpecification());
-           
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
             let cmpTransform: ComponentTransform = _node.cmpTransform;
-            let transformMatrix: Matrix4x4 = _matrix;
+            let world: Matrix4x4 = _world;
             if (cmpTransform)
-                transformMatrix = cmpTransform.worldMatrix;
-            if (!transformMatrix)
-                transformMatrix = Matrix4x4.identity;
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Matrix4x4.identity;
 
+            let worldPivot: Matrix4x4 = world;
             let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (pivot)
-                transformMatrix = Matrix4x4.multiply(pivot.Matrix, transformMatrix);
+                worldPivot = Matrix4x4.multiply(pivot.local, world);
 
             // multiply camera matrix
-            let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, transformMatrix);
+            let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, worldPivot);
 
+            let references: NodeReferences = this.nodes.get(_node);
+            if (references) { // TODO: deal with partial references
+                WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
+                WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
+                WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
+                WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
 
-            let matrixLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
-            // Supply matrixdata to shader. 
-            gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
-            // Draw call
-            // Supply color
-            let colorUniformLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
-            let vec: Vector3 = this.parameters.get(references.material).getReference().color;
-            let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-            gl2.uniform4fv(colorUniformLocation, color);
+                GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], (<ComponentMesh>_node.getComponent(ComponentMesh)).getBufferSpecification());
 
-            // Draw call
-            // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
-            let cmpMesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-            gl2.drawArrays(gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
+                let matrixLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
+                // Supply matrixdata to shader. 
+                gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
+                // Draw call
+                // Supply color
+                let colorUniformLocation: WebGLUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
+                let vec: Vector3 = this.parameters.get(references.material).getReference().color;
+                let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+                gl2.uniform4fv(colorUniformLocation, color);
 
+                // Draw call
+                // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
+                let cmpMesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
+                gl2.drawArrays(gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
+            }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, transformMatrix);
+                this.drawBranch(childNode, _cmpCamera, world);
             }
         }
 
@@ -288,8 +288,8 @@ namespace Fudge {
             let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
             if (transform) {
-                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
-                transform.worldMatrix = worldMatrix;
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
+                transform.world = worldMatrix;
             }
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
