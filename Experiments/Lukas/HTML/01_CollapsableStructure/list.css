@@ -1,0 +1,36 @@
+ul {
+	padding-left: 20px;
+}
+
+li{
+	list-style: none;
+	background: lightblue;
+	padding: 2px;
+}
+
+.parent::before{
+	content: "-";
+}
+.parent.expanded::before{
+	content: "+";
+}
+
+
+/* .parent {
+	color:red;
+} */
+
+/* li::before{
+	content: "> ";
+} */
+
+#propertiesContainer{
+	width: 300px;
+	height: 500px;
+}
+
+canvas {
+	position: absolute;
+	top: 0;
+	left: 300px;
+}

@@ -1,0 +1,241 @@
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js">
+</script>
+<script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
+<script language="javascript">
+    var config = {
+        content: [{
+            type: 'column',
+            content: [{
+                type: 'row',
+                height: 7,
+                content: [{
+                    type: 'component',
+                    componentName: 'main',
+                    title: 'Menu Bar',
+                }]
+            },
+                {
+                    type: 'row',
+                    height: 65,
+                    content: [{
+                        type: 'component',
+                        componentName: 'main',
+                        title: 'Scene Explorer',
+                        width: 20
+</script>
+// Platzhalter Hierarchie
+<ul class="tree">
+    <li><a href="#">Part 1</a>
+        <ul>
+            <li><a href="#">Item A</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item B</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item C</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item D</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item E</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+
+    <li><a href="#">Part 2</a>
+        <ul>
+            <li><a href="#">Item A</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item B</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item C</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item D</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item E</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+
+    <li><a href="#">Part 3</a>
+        <ul>
+            <li><a href="#">Item A</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item B</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item C</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item D</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+            <li><a href="#">Item E</a>
+                <ul>
+                    <li><a href="#">Sub-item 1</a></li>
+                    <li><a href="#">Sub-item 2</a></li>
+                    <li><a href="#">Sub-item 3</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<script language="javascript">
+        var tree = document.querySelectorAll('ul.tree a:not(:last-child)'),
+                        for(var i = 0; i<tree.length; i++) {
+                            tree[i].addEventListener('click', function (e) {
+                                var parent = e.target.parentElement;
+                                var classList = parent.classList;
+                                if (classList.contains("open")) {
+                                    classList.remove('open');
+                                    var opensubs = parent.querySelectorAll(':scope .open');
+                                    for (var i = 0; i < opensubs.length; i++) {
+                                        opensubs[i].classList.remove('open');
+                                    }
+                                }
+                                else {
+                                    classList.add('open');
+                                }
+                            });
+                        }
+      },
+                {
+                    type: 'component',
+                    componentName: 'second',
+                    title: 'Viewport',
+                    width: 60
+                },
+                {
+                    type: 'component',
+                    componentName: 'second',
+                    title: 'Inspector',
+                    width: 20
+                }]
+        },
+            {
+                type: 'row',
+                content: [{
+                    type: 'component',
+                    componentName: 'third',
+                    title: 'File Explorer',
+                    height: 30,
+                    width: 100
+                }]
+            }]
+    }]
+};
+
+    var myLayout = new GoldenLayout(config);
+    myLayout.registerComponent('testComponent', function (container, componentState) {
+        container.getElement().html('<h2>' + componentState.label + '</h2>');
+    });
+
+    //Layout Changes - listener
+    myLayout.on('stateChanged', function () {
+        //now save the state
+        var state = JSON.stringify(myLayout.toConfig());
+        localStorage.setItem('savedState', state);
+    });
+
+    var myLayout,
+        //if used before, Layout is stored in local, otherwise default is loaded
+        savedState = localStorage.getItem('savedState');
+
+    if (savedState !== null) {
+        myLayout = new GoldenLayout(JSON.parse(savedState));
+    } else {
+        myLayout = new GoldenLayout(config);
+    }
+
+    //save component
+    myLayout.registerComponent('testComponent', function (container, state) {
+
+        // Create the input
+        var input = $('<input type="text" />');
+
+        // Set the initial / saved state
+        if (state.label) {
+            input.val(state.label);
+        }
+
+        // Store state updates
+        input.on('change', function () {
+            container.extendState({
+                label: input.val()
+            });
+        });
+
+        // Append it to the DOM
+        container.getElement().append(input);
+    });
+    myLayout.init();
+</script>

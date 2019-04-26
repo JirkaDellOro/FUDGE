@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="252.737px" height="251.73px" viewBox="0 0 252.737 251.73" enable-background="new 0 0 252.737 251.73"
+	 xml:space="preserve">
+<g id="Pfeil_26" display="none">
+	<rect x="140.869" y="93.133" fill="none" width="111.868" height="64.303"/>
+	<g display="inline">
+		<polygon fill="#1D1D1B" points="140.869,140.794 196.972,140.794 196.972,157.436 252.737,125.282 196.972,93.133 
+			196.972,109.775 140.869,109.775 		"/>
+	</g>
+</g>
+<g id="Pfeil_26_3_" display="none">
+	<rect y="93.133" display="inline" fill="none" width="111.869" height="64.303"/>
+	<g display="inline">
+		<polygon fill="#1D1D1B" points="142.093,109.775 55.766,109.775 55.766,93.133 0,125.287 55.766,157.436 55.766,140.794 
+			142.093,140.794 		"/>
+	</g>
+</g>
+<g id="Pfeil_26_2_" display="none">
+	<rect x="94.717" display="inline" fill="none" width="64.303" height="111.869"/>
+	<g display="inline">
+		<polygon fill="#1D1D1B" points="142.378,111.869 142.378,55.766 159.02,55.766 126.866,0 94.717,55.766 111.359,55.766 
+			111.359,111.869 		"/>
+	</g>
+</g>
+<g id="Pfeil_26_1_" display="none">
+	<rect x="94.717" y="139.862" display="inline" fill="none" width="64.303" height="111.868"/>
+	<g display="inline">
+		<polygon fill="#1D1D1B" points="111.359,139.862 111.359,195.966 94.717,195.966 126.871,251.73 159.02,195.966 142.378,195.966 
+			142.378,139.862 		"/>
+	</g>
+</g>
+<circle display="none" fill="none" stroke="#1D1D1B" stroke-miterlimit="10" cx="126.426" cy="126.134" r="126"/>
+<g id="Neu_laden" display="none">
+	<path display="inline" d="M71.689,157.24c-19.912-27.401-13.821-65.892,13.577-85.802c11.754-8.541,25.537-12.246,39.025-11.571
+		l-8.306,30.615l71-28.98L138.934,4.174l-8.198,28.097c-21.209-2.242-43.286,3.031-61.899,16.558
+		C28.91,77.843,20.064,133.74,49.08,173.67"/>
+	<path display="inline" d="M157.488,170.824"/>
+	<path display="inline" d="M180.586,98.875c19.511,27.688,12.86,66.086-14.825,85.595c-11.877,8.369-25.712,11.873-39.189,11.002
+		l8.75-30.491l-71.414,27.944l47.211,58.02l8.608-27.975c21.174,2.551,43.324-2.4,62.133-15.653
+		c40.345-28.431,50.005-84.192,21.572-124.541"/>
+	<path display="inline" d="M100.928,81.104"/>
+</g>
+<rect x="8.426" y="9.134" fill="none" stroke="#1D1D1B" stroke-width="4" stroke-miterlimit="10" width="234" height="234"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="8.427" cy="9.133" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="242.427" cy="9.133" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="242.426" cy="243.134" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="8.426" cy="243.134" r="7.21"/>
+</svg>

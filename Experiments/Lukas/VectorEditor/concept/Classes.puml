@@ -1,0 +1,168 @@
+@startuml VE Classes
+	skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+' left to right direction
+package FUDGE <<Rectangle>> {
+	package Transfer {
+		package Mutable <<Rectangle>>{
+			
+		}
+	}
+
+	package VectorEditor <<Rectangle>>{
+		interface Shortcut{
+			keys: number[]
+		}
+		class UIHandler{
+			actions: Action[]
+			loadActions()
+			loadShortcuts()
+			createUI()
+			updateUI()
+			deselectAll()
+			updateSelectedObjectUI()
+			updateSelectedObject()
+		}
+
+		class Editor{
+			- selectedPaths: DrawPath[]
+			- selectedPoints: DrawPoint[]
+			+ selectedAction: Action
+			- canvas: HTMLCanvasElement
+			- crc: CanvasRenderingContext2D
+			- scale: number
+			- transformationPoint: Vector2
+			- previousPosition: Vector2
+			+ pressedKeys: number[]
+
+			redrawAll()
+			mousedown()
+			mousemove()
+			mouseup()
+			keydown()
+			keyup()
+			scroll()
+
+		}
+		class UIElement extends DOM.HTMLElement{
+			name: string
+			hover: string
+			help: string
+			extendedHelp: string
+			' element: HTMLElement
+		}
+
+		interface Action implements UIElement{
+			name: string
+			buttonElement: HTMLButtonElement
+			subMenu: UIElement
+			shortcut: Shortcut
+			selectedSubAction: Action
+			subActions: Action[]
+			prequisitesFulfilled(): boolean
+			mousedown()
+			mousemove()
+			mouseup()
+		}
+
+		class SelectAction implements Action {
+
+		}
+		class MoveAction implements Action {
+
+		}
+		class TransformAction implements Action {
+
+		}
+		class CombineAction implements Action {
+
+		}
+		class CreateShapes implements Action {
+
+		}
+		class AddVertex implements Action {
+
+		}
+		class Export implements Action {
+
+		}
+
+		'Associations
+		Shortcut "1"-- "1"Action
+		UIHandler -- "n" Action
+		Editor -- "1" Action
+		Editor .. UIHandler
+		Action "1"--"n" Action
+	}
+	package DrawTypes <<Rectangle>>{
+		class DrawObject extends Mutable.Mutator{
+			+ color: string | CanvasGradient | CanvasPattern
+			+ name: String
+			+ order: number
+			+ lineWidth: number
+			+ transformationPoint: Vector2
+			{static} sort(a: DrawObject, b: DrawObject): number
+		}
+
+		class DrawPath extends DrawObject {
+			- closed: boolean
+			- path2d: Path2D
+			+ points: Vertex[]
+			+ fillColor: string | CanvasGradient | CanvasPattern
+			draw(context: CanvasRenderingContext2D, selected: boolean = false)
+			generatePath2D()
+			addVertexToEnd(bcp1: Vertex)
+			getPath2D(): Path2D
+			move(d: Vector2): Path2D
+		}
+
+		class DrawPoint  extends Mutable.Mutator{
+			# path: Path2D
+			+ x: number
+			+ y: number
+			getPath2D(): Path2D
+			generatePath2D(): Path2D
+			draw(context: CanvasRenderingContext2D, selected: boolean = false)
+			move(dx: number, dy: number): Path2D
+			moveTo(x: number, y: number): Path2D
+		}
+
+		class Vertex extends DrawPoint {
+			tangentIn: TangentPoint
+			tangentOut: TangentPoint
+			+ parent: DrawPath
+			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
+			move(dx: number, dy: number): Path2D
+		}
+
+		class TangentPoint extends DrawPoint {
+			+ parent: Vertex
+			generatePath2D(): Path2D
+		}
+
+		' Associations
+		DrawPath "1" -- "n" Vertex
+		Vertex "1" -- "2" TangentPoint
+	}
+
+	package Math <<rectangle>> {
+		class Vector2{
+			+ x: number
+			+ y: number
+
+			+ equals(obj: Vector2): boolean
+			+ magnitude(): number
+			+ sqrMagnitude(): number
+			+ normalize(): Vector2
+			+ perpendicularVector(): Vector2
+			+ scaled(s: number): Vector2
+
+			{static} dot(a: Vector2, b: Vector2): number
+			{static} add(...params: Vector2[]): Vector2
+	}
+}
+@enduml

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="252.737px" height="251.73px" viewBox="0 0 252.737 251.73" enable-background="new 0 0 252.737 251.73"
+	 xml:space="preserve">
+<g id="Pfeil_26">
+	<rect x="140.869" y="93.133" display="none" fill="none" width="111.868" height="64.303"/>
+	<g>
+		<polygon points="136.402,137.727 171.922,137.727 171.922,148.263 207.228,127.905 171.922,107.552 171.922,118.087 
+			136.402,118.087 		"/>
+	</g>
+</g>
+<g id="Pfeil_26_3_">
+	<rect y="93.133" fill="none" width="111.869" height="64.303"/>
+	<g>
+		<polygon points="137.177,118.087 82.522,118.087 82.522,107.552 47.216,127.909 82.522,148.263 82.522,137.727 137.177,137.727 		
+			"/>
+	</g>
+</g>
+<g id="Pfeil_26_2_">
+	<rect x="106.931" y="44.736" fill="none" width="41.151" height="71.591"/>
+	<g>
+		<polygon points="137.359,119.414 137.359,83.893 147.895,83.893 127.537,48.587 107.183,83.893 117.719,83.893 117.719,119.414 		
+			"/>
+	</g>
+</g>
+<g id="Pfeil_26_1_">
+	<rect x="106.931" y="134.242" fill="none" width="41.151" height="71.591"/>
+	<g>
+		<polygon points="117.719,137.137 117.719,172.657 107.183,172.657 127.541,207.962 147.895,172.657 137.359,172.657 
+			137.359,137.137 		"/>
+	</g>
+</g>
+<circle display="none" fill="none" stroke="#1D1D1B" stroke-miterlimit="10" cx="126.426" cy="126.134" r="126"/>
+<g id="Neu_laden">
+	<path d="M158.66,168.332"/>
+	<path d="M103.785,85.004"/>
+	<path d="M54.992,90.071c2.982-31.54,39.272-54.264,80.896-50.656c17.857,1.548,33.786,7.722,45.963,16.73l-22.598,17.781
+		L232.179,91.5l-0.788-65.521l-21.567,15.192c-18.207-14.985-43.197-25.329-71.475-27.782C77.693,8.133,24.991,41.134,20.646,87.094
+		"/>
+	<path d="M198.169,162.275c-2.982,31.539-39.271,54.263-80.895,50.655c-17.857-1.549-33.787-7.723-45.963-16.729l22.598-17.781
+		l-72.927-17.574l0.789,65.521l21.566-15.192c18.208,14.983,43.197,25.329,71.476,27.783
+		c60.655,5.254,113.357-27.745,117.704-73.706"/>
+</g>
+<rect x="9.426" y="9.134" fill="none" stroke="#1D1D1B" stroke-width="4" stroke-miterlimit="10" width="234" height="234"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="9.427" cy="9.133" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="243.427" cy="9.133" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="243.426" cy="243.134" r="7.21"/>
+<circle fill="#1D1D1B" stroke="#1D1D1B" stroke-miterlimit="10" cx="9.426" cy="243.134" r="7.21"/>
+</svg>

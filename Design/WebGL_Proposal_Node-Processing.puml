@@ -1,147 +1,227 @@
 @startuml WebG.addNode
+skinparam monochrome true
+skinparam shadowing false
+header
+    WebGL.addNode
+endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
-package addNode {
-    |UserProgram|
-    start
-    :WebGL.addNode(_node);
-    |WebGL|
-    if () then (already stored)
-        end
-    else (new)
-        :store reference-object
-        [key: node reference];
-    endif
-    |ComponentMaterial|
-    :getShaderReference;
-    |WebGL|
-    if () then (new)
-        :compileShader;
-        :storeProgram
-        [key : shader reference];
-    else (already stored)
-        :increase
-        shader reference
-        counter;
-    endif
-    |ComponentMaterial|
-    :getMaterialReference;
-    |WebGL|
-    if () then (new)
-        :store static database
-        (e.g. texture)
-        [key= material reference];
-    else (already stored)
-        :increase
-        material reference
-        counter;
-    endif
-    |ComponentMesh|
-    :getMeshReference;
-    |WebGL|
-    if () then (new)
-        :store vertices
-        [key= mesh reference];
-    else (already stored)
-        :increase
-        mesh reference
-        counter;
-    endif
-    :store references
-    in node-reference;
-    |UserProgram|
-    stop
-}
+|Node|
+|UserProgram|
+start
+:WebGL.addNode(_node);
+|WebGL|
+if () then (already stored)
+    end
+else (new)
+    :store reference-object
+    [key: node reference];
+endif
+|Node|
+:getShaderReference;
+|WebGL|
+if () then (new)
+    :compileShader;
+    :storeProgram
+    [key : shader reference];
+else (already stored)
+    :increase
+    shader reference
+    counter;
+endif
+|Node|
+:getMaterialReference;
+|WebGL|
+if () then (new)
+    :store static database
+    (e.g. texture)
+    [key= material reference];
+else (already stored)
+    :increase
+    material reference
+    counter;
+endif
+|Node|
+:getMeshReference;
+|WebGL|
+if () then (new)
+    :store vertices
+    [key= mesh reference];
+else (already stored)
+    :increase
+    mesh reference
+    counter;
+endif
+:store references
+in node-reference;
+|UserProgram|
+stop
 @enduml
+
+' ------------------------------------------
+
 @startuml WebGL.removeNode
+skinparam monochrome true
+skinparam shadowing false
+header
+    WebGL.removeNode
+endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
-package removeNode {
-    |UserProgram|
-    start
-    :WebGL.removeNode(_node);
-    |WebGL|
-    if () then (_node unknown)
-        end
+|Node|
+|UserProgram|
+start
+:WebGL.removeNode(_node);
+|WebGL|
+if () then (_node unknown)
+    end
+endif
+:get counter of
+shader reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete program;
     endif
-    :get counter of
-    shader reference;
-    if () then (counter > 0)
-        :decrease
-        counter;
-        if () then (counter==0)
-            :delete program;
-        endif
-    else ()
-        :ERROR;
+else ()
+    :ERROR;
+endif
+:get counter of
+material reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete material data;
     endif
-    :get counter of
-    material reference;
-    if () then (counter > 0)
-        :decrease
-        counter;
-        if () then (counter==0)
-            :delete material data;
-        endif
-    else ()
-        :ERROR;
+else ()
+    :ERROR;
+endif
+:get counter of
+mesh reference;
+if () then (counter > 0)
+    :decrease
+    counter;
+    if () then (counter==0)
+        :delete mesh vertices;
     endif
-    :get counter of
-    mesh reference;
-    if () then (counter > 0)
-        :decrease
-        counter;
-        if () then (counter==0)
-            :delete mesh vertices;
-        endif
-    else ()
-        :ERROR;
-    endif
-    :add _node to 
-    list of nodes to render;
-    |UserProgram|
-    stop
-}
+else ()
+    :ERROR;
+endif
+|UserProgram|
+stop
 @enduml
+
+' ------------------------------------------
+
 @startuml WebGL.updateNode
+skinparam monochrome true
+skinparam shadowing false
+header
+    WebGL.updateNode
+endheader
 |UserProgram|
-'|Viewport|
 |WebGL|
-'|Node|
-|ComponentMaterial|
-|ComponentMesh|
-package updateNode {
-    |UserProgram|
-    start
-    :WebGL.removeNode(_node);
-    |WebGL|
-    if () then (_node unknown)
-        end
+|Node|
+|UserProgram|
+start
+:WebGL.updateNode(_node);
+|WebGL|
+if () then (_node unknown)
+    end
+endif
+|Node|
+:getShaderReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
     endif
-    |ComponentMaterial|
-    :getShaderReference;
-    |WebGL|
-    :compareReferenceToStored;
-    if () then (same)
-    else ()
-        :decrease existing counter;
-        if () then (new existing)
-            :increase new counter;
+    :update node reference;
+endif
+|Node|
+:getMaterialReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
+    endif
+    :update node reference;
+endif
+|Node|
+:getMeshReference;
+|WebGL|
+:compareReferenceToStored;
+if () then (same)
+else ()
+    :decrease existing counter;
+    if () then (new existing)
+        :increase new counter;
+    else
+        :compile and store;
+    endif
+    :update node reference;
+endif
+|UserProgram|
+stop
+@enduml
+
+' ------------------------------------------
+
+@startuml WebGL.recalculateNodes
+skinparam monochrome true
+skinparam shadowing false
+header
+    WebGL.recalculateNodes
+endheader
+|UserProgram|
+|WebGL|
+|UserProgram|
+:ANIMATION_FRAME<
+|WebGL|
+:ListOfNodesToRender]
+:mark all nodes as undone;
+while () is (more nodes)
+    :node = next node]
+    if () then (node done)
+        note left
+            optimization possible
+            when unchanged nodes
+            are marked as done
+        end note
+    else
+        :recalculateNode(node);
+    endif
+endwhile
+stop
+|WebGL|
+package recalculateNode {
+    :_node]
+    while () is (parent exists&\nnot done)
+        :_node = _node.parent;
+    endwhile
+    :calculate transform;
+    :calculate pivot;
+    :mark _node as done;
+    :node.children]
+    while () is (more children)
+        :child = next child]
+        if () then (child done)
         else
-            :compile and store;
+            :recalculateNode(child);
         endif
-        :update node reference;
-    endif
-    :analogous for material and mesh;
-    |UserProgram|
+    endwhile
     stop
 }
 @enduml
