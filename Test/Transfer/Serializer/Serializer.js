@@ -4,13 +4,10 @@ var TestSerializer;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         Scenes.createMiniScene();
-        Scenes.createViewport();
         let result = testSerialization(Scenes.node);
-        // (<ƒ.Node>result).name = "nlksanfdv";
         console.groupCollapsed("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
-        Scenes.viewPort.drawScene();
     }
     function testSerialization(_object) {
         console.group("Original");
