@@ -1449,7 +1449,7 @@ var Fudge;
             }
         }
         // #endregion
-        // region Meshbuffer
+        // #region Meshbuffer
         static createBuffer(_mesh) {
             let buffer = Fudge.GLUtil.assert(WebGLApi.crc3.createBuffer());
             WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
@@ -1472,7 +1472,7 @@ var Fudge;
             }
         }
         // #endregion
-        // region MaterialParameters
+        // #region MaterialParameters
         static createParameter(_material) {
             let vao = Fudge.GLUtil.assert(Fudge.gl2.createVertexArray());
             let materialInfo = {

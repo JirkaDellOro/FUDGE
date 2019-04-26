@@ -118,8 +118,8 @@ namespace Fudge {
             }
         }
         // #endregion
-        
-        // region Meshbuffer
+
+        // #region Meshbuffer
         protected static createBuffer(_mesh: Mesh): BufferInfo {
             let buffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(WebGLApi.crc3.createBuffer());
             WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
@@ -143,7 +143,7 @@ namespace Fudge {
         }
         // #endregion
 
-        // region MaterialParameters
+        // #region MaterialParameters
         protected static createParameter(_material: Material): MaterialInfo {
             let vao: WebGLVertexArrayObject = GLUtil.assert<WebGLVertexArrayObject>(gl2.createVertexArray());
             let materialInfo: MaterialInfo = {
