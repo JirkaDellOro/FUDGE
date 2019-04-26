@@ -1,0 +1,35 @@
+@startuml UIHandler
+skinparam monochrome true
+
+title Editor
+
+partition redrawAll {
+	start
+	:reset Canvas;
+	:translate Canvas to transformationPoint;
+	:apply scale;
+
+	while() is ([p of paths])
+		:isSelected: boolean = is p in selectedPaths]
+			:crc alpha = 1;
+		if() then ([!isSelected && selectedPaths.length > 0])
+			:crc alpha = 0.5;
+		endif
+		:p.draw(crc, isSelected) ₼;
+	endwhile
+
+	:drawTransformationPoint ₼;
+
+	stop 
+}
+break
+
+partition drawTransformationPoint {
+	start
+	:transformationPath: Path2D]
+	:draw Plus at the position of transformationPoint;
+	:set color to black and line width to 1;
+	:stroke transformationPath;
+	stop
+}
+@enduml

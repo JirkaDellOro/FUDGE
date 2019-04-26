@@ -1,9 +1,11 @@
 @startuml VE Classes
-	skinparam monochrome true
+skinparam monochrome true
 skinparam componentStyle uml2
 skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam handwritten false
+
+title Vector Editor Class Diagramm
 
 ' left to right direction
 package FUDGE <<Rectangle>> {
@@ -29,6 +31,7 @@ package FUDGE <<Rectangle>> {
 		}
 
 		class Editor{
+			- paths: DrawPath[]
 			- selectedPaths: DrawPath[]
 			- selectedPoints: DrawPoint[]
 			+ selectedAction: Action
@@ -36,16 +39,19 @@ package FUDGE <<Rectangle>> {
 			- crc: CanvasRenderingContext2D
 			- scale: number
 			- transformationPoint: Vector2
-			- previousPosition: Vector2
 			+ pressedKeys: number[]
+			- uiHandler: UIHandler
+			- showTangentsShortcut: Shortcut
+			+ tangentsActive: boolean
 
-			redrawAll()
-			mousedown()
-			mousemove()
-			mouseup()
-			keydown()
-			keyup()
-			scroll()
+			- redrawAll()
+			- mousedown()
+			- mousemove()
+			- mouseup()
+			- keydown()
+			- keyup()
+			- scroll()
+			{static} + isShortcutPressed(_s: Shortcut): boolean
 
 		}
 		class UIElement extends DOM.HTMLElement{
@@ -73,7 +79,7 @@ package FUDGE <<Rectangle>> {
 
 		}
 		class MoveAction implements Action {
-
+			- previousPosition: Vector2
 		}
 		class TransformAction implements Action {
 
@@ -105,30 +111,31 @@ package FUDGE <<Rectangle>> {
 			+ order: number
 			+ lineWidth: number
 			+ transformationPoint: Vector2
+			# path2d: Path2D
 			{static} sort(a: DrawObject, b: DrawObject): number
 		}
 
 		class DrawPath extends DrawObject {
 			- closed: boolean
-			- path2d: Path2D
 			+ points: Vertex[]
 			+ fillColor: string | CanvasGradient | CanvasPattern
+			+ transformationPoint: Vector2;
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
 			generatePath2D()
-			addVertexToEnd(bcp1: Vertex)
+			addVertexAtPos(vertex: Vertex, index: number = -1)
 			getPath2D(): Path2D
-			move(d: Vector2): Path2D
+			move(d: Vector2)
 		}
 
-		class DrawPoint  extends Mutable.Mutator{
-			# path: Path2D
-			+ x: number
-			+ y: number
+		class DrawPoint extends Math.Vector2{
+			# path2d: Path2D
+			' + x: number
+			' + y: number
 			getPath2D(): Path2D
 			generatePath2D(): Path2D
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
-			move(dx: number, dy: number): Path2D
-			moveTo(x: number, y: number): Path2D
+			move(delta: Vector2)
+			moveTo(newPos: Vector2)
 		}
 
 		class Vertex extends DrawPoint {
@@ -136,7 +143,7 @@ package FUDGE <<Rectangle>> {
 			tangentOut: TangentPoint
 			+ parent: DrawPath
 			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
-			move(dx: number, dy: number): Path2D
+			move(dx: number, dy: number)
 		}
 
 		class TangentPoint extends DrawPoint {
@@ -150,7 +157,7 @@ package FUDGE <<Rectangle>> {
 	}
 
 	package Math <<rectangle>> {
-		class Vector2{
+		class Vector2 extends Mutable.Mutator{
 			+ x: number
 			+ y: number
 

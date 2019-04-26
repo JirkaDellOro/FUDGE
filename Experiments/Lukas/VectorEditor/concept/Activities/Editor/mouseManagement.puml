@@ -1,0 +1,76 @@
+@startuml Mouse Management
+skinparam monochrome true
+
+title Editor
+
+partition mousedown {
+	:_event: MouseEvent]
+	:_event.preventDefault();
+	if() then ([selectedAction])
+		:selectedAction.mousedown(_event) ₼;
+	endif
+	stop 
+}
+break
+
+partition mousemove {
+	:_event: MouseEvent]
+	:_event.preventDefault();
+	if() then ([selectedAction])
+		:selectedAction.mousemove(_event) ₼;
+	endif
+	stop 
+}
+break
+partition mouseup {
+	:_event: MouseEvent]
+	:_event.preventDefault();
+	if() then ([selectedAction])
+		:selectedAction.mouseup(_event) ₼;
+	endif
+	stop 
+}
+
+partition scroll {
+	:_event: WheelEvent]
+	:_event.preventDefault();
+	:scrollMultiplier: number = 0.9
+	:stepLength: number = 20]
+	if() then ([_event.deltaY > 0])
+		:newScale: number = scale * scaleMultiplier]
+	else 
+		:newScale: number = scale / scaleMultiplier]
+	endif
+
+	:newTransformationPointX:number = 
+	_event.clientX - (_event.clientX - transformationPoint.x) * newScale / scale;
+	:newTransformationPointY:number = 
+	_event.clientY - (_event.clientY - transformationPoint.y) * newScale / scale;
+
+
+	if() then ([isShortcutPressed(scrollVertical)])
+		if() then ([_event.deltaY > 0])
+			:newTransformationPointX = transformationPoint.x + stepLength * newScale / scale;
+		else 
+			:newTransformationPointX = transformationPoint.x - stepLength * newScale / scale;
+		endif
+		:newScale = scale;
+		:newTransformationPointY = transformationPoint.y;
+	elseif() then ([isShortcutPressed(scrollHorizontal)])
+		if() then ([_event.deltaY > 0])
+			:newTransformationPointY = transformationPoint.y - stepLength * newScale / scale;
+		else 
+			:newTransformationPointY = transformationPoint.y + stepLength * newScale / scale;
+		endif
+		:newScale = scale;
+		:newTransformationPointX = transformationPoint.x;
+	endif
+
+	:transformationPoint = (newTransformationPointX, newTransformationPointY);
+	:redrawAll();
+	stop 
+}
+
+
+
+@enduml

@@ -1,0 +1,45 @@
+@startuml Move
+skinparam monochrome true
+
+title Move
+
+partition mousedown {
+	:_event: MosueEvent]
+	stop
+}
+
+partition mousemove {
+	:_event: MosueEvent]
+	if() then ([no buttons pressed])
+	stop
+	endif
+	:delta: Vector2 = new Vector2(
+	previousPosition.x - _event.clientX,
+	previousPosition.y - _event.clientY)]
+	if() then ([left mouse button pressed])
+		if() then ([Editor.selectedPoints.length > 0])
+			while() is ([point of Editor.selectedPoints])
+				:point.move(delta);
+			endwhile
+		elseif () then ([Editor.selectedPaths.length > 0])
+			while() is ([path of Editor.selectedPaths])
+				:path.move(delta);
+			endwhile
+		endif
+	else
+		:Editor.transformationPoint += delta;
+	endif
+	stop
+}
+
+partition mouseup {
+	:_event: MosueEvent]
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	:true]
+}
+
+@enduml

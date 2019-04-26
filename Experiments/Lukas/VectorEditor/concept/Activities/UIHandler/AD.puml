@@ -1,29 +1,30 @@
 @startuml UIHandler
-floating note: UIHandler
-break
+skinparam monochrome true
+
+title UIHandler
+
 partition init {
-start
+	start
 	:loadActions Ѱ;
 	:loadShortcuts ᴪ;
 	:createUI ₼;
-stop 
+	stop 
 }
 break
 
 partition loadActions{
-start
+	start
 	:this.actions = [];
 	:this.actions.push(new SelectAction())
 	this.actions.push(new MoveAction())
 	...;
-stop
+	stop
 }
 
 break
 
 partition createUI {
-
-start
+	start
 	while () is ([a of actions])
 		:create Button for a
 		in Main Toolbar, save
@@ -42,28 +43,53 @@ start
 		:Editor.selectedAction = actions[0];
 	endif
 	:updateUI ₼;
-stop
+	stop
 }
 
 break
 
 partition updateUI {
-
-start
+	start
 	while () is ([a of actions])
 		:deselect a.buttonElement;
 		:make a.subMenu invisible;
+		if() then ([!a.prequisitesFulfilled()])
+			:disable a.buttonElement;
+		endif
 		while () is ([sa of a.subActivities])
 			:deselect sa.buttonElement;
+			if() then ([!sa.prequisitesFulfilled()])
+				:disable sa.buttonElement;
+			endif
 		endwhile
 	endwhile
 	:select Editor.selectedAction.buttonElement;
 	:make Editor.selectedAction.subMenu visible;
 	if() then ([!Editor.selectedAction.selectedSubAction])
-	:E.sA.selectedSubAction = E.sA.subActions[0];
+		:E.sA.selectedSubAction = E.sA.subActions[0];
 	endif
 	:select E.sA.selectedSubAction;
-stop
+	stop
+}
+
+break
+
+partition handleClick{
+	:_event: MouseEvent]
+	if() then ([_event.target is HTMLButtonElement])
+		:runAction: Action = getActionToButton(_event.target)];
+		if() then([runAction.prequisitesFulfilled()])
+			:Editor.selectedAction = runAction;
+			:updateUI ₼;
+		endif
+	endif
+	stop
+}
+
+break
+
+partition getActionToButton{
+	:_button: HTMLButtonElement]
 }
 
 @enduml

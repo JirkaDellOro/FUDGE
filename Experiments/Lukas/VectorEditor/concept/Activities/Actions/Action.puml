@@ -1,0 +1,26 @@
+@startuml Action
+skinparam monochrome true
+
+title Action
+
+partition mousedown {
+	:_event: MosueEvent]
+	stop
+}
+
+partition mousemove {
+	:_event: MosueEvent]
+	stop
+}
+
+partition mouseup {
+	:_event: MosueEvent]
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	:true]
+}
+
+@enduml

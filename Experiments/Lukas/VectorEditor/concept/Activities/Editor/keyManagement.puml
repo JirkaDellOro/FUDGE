@@ -1,0 +1,40 @@
+@startuml key Management
+skinparam monochrome true
+title Editor
+
+partition keydown {
+	:_event: KeyboardEvent]
+	:_event.preventDefault();
+	if() then ([!pressedKeys has _event.keyCode])
+		:pressedKeys.push(_event.keyCode);
+	endif
+
+	if() then ([!tangentsActive && isShortcutPressed(showTangentsShortcut)])
+		:tangentsActive = true;
+		:redrawAll ₼;
+	endif
+
+	while () is ([a in actions])
+		if() then ([isShortcutPressed(a.shortcut)])
+			:selectedAction = a;
+			:uiHandler.updateUI();
+		endif
+	endwhile
+	stop 
+}
+break
+
+partition keyup {
+	:_event: KeyboardEvent]
+	:_event.preventDefault();
+	if() then ([pressedKeys has _event.keyCode])
+		:pressedKeys.remove(_event.keyCode);
+	endif
+	if() then ([tangentsActive && !isShortcutPressed(showTangentsShortcut)])
+		:tangentsActive = false;
+		:redrawAll ₼;
+	endif
+	stop
+}
+
+@enduml
