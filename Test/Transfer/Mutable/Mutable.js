@@ -17,8 +17,8 @@ var Mutable;
     function animate() {
         window.requestAnimationFrame(animate);
         angle += 0.03;
-        mutator.matrix.data[12] = 5 * Math.sin(angle);
-        mutator.matrix.data[5] = Math.cos(1.7 * angle);
+        mutator.local.data[12] = 5 * Math.sin(angle);
+        mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
         Scenes.viewPort.drawScene();
     }

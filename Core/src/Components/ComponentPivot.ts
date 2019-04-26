@@ -118,17 +118,17 @@ namespace Fudge {
         }
         // #endregion
 
-        // #region Seriallization
+        // #region Serialization
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization: Serialization = {
-                matrix: this.local.serialize(),
+                local: this.local.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.local.deserialize(_serialization.matrix);
+            this.local.deserialize(_serialization.local);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
