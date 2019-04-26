@@ -1,0 +1,9 @@
+{
+  "name": "golden-layout",
+  "main": "index.d.ts",
+  "homepage": "https://github.com/deepstreamIO/golden-layout",
+  "version": "1.5.0",
+  "ambientDependencies": {
+    "jquery": "registry:dt/jquery#1.10.0+20160417213236"
+  }
+}
