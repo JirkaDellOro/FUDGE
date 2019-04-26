@@ -19,8 +19,6 @@ package FUDGE <<Rectangle>> {
 		}
 		class UIHandler{
 			actions: Action[]
-			elements: Map<UIElement, Action>
-			shortcuts: Map<Shortcut, Action>
 			loadActions()
 			loadShortcuts()
 			createUI()
@@ -50,19 +48,21 @@ package FUDGE <<Rectangle>> {
 			scroll()
 
 		}
-		interface UIElement{
+		class UIElement extends DOM.HTMLElement{
 			name: string
 			hover: string
 			help: string
 			extendedHelp: string
 			' element: HTMLElement
 		}
-		interface Differentiator implements UIElement{
-			
-		}
+
 		interface Action implements UIElement{
 			name: string
-			differentiators: Differentiator[]
+			buttonElement: HTMLButtonElement
+			subMenu: UIElement
+			shortcut: Shortcut
+			selectedSubAction: Action
+			subActions: Action[]
 			prequisitesFulfilled(): boolean
 			mousedown()
 			mousemove()
@@ -92,11 +92,11 @@ package FUDGE <<Rectangle>> {
 		}
 
 		'Associations
-		Shortcut "n"-- UIHandler
+		Shortcut "1"-- "1"Action
 		UIHandler -- "n" Action
 		Editor -- "1" Action
 		Editor .. UIHandler
-		Differentiator "n" -- "1" Action
+		Action "1"--"n" Action
 	}
 	package DrawTypes <<Rectangle>>{
 		class DrawObject extends Mutable.Mutator{

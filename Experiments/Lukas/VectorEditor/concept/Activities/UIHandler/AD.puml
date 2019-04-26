@@ -1,0 +1,69 @@
+@startuml UIHandler
+floating note: UIHandler
+break
+partition init {
+start
+	:loadActions Ѱ;
+	:loadShortcuts ᴪ;
+	:createUI ₼;
+stop 
+}
+break
+
+partition loadActions{
+start
+	:this.actions = [];
+	:this.actions.push(new SelectAction())
+	this.actions.push(new MoveAction())
+	...;
+stop
+}
+
+break
+
+partition createUI {
+
+start
+	while () is ([a of actions])
+		:create Button for a
+		in Main Toolbar, save
+		it in a.buttonElement;
+		:create secondary Toolbar for a
+		and save it in a.subMenu;
+		while () is ([s of a.subActions])
+			:create Button for s
+			in a.subMenu, save it in
+			s.buttonElement;
+		endwhile
+	endwhile
+	:add Eventlisteners to MainMenu 
+	& secondary Menus container;
+	if () then([!Editor.selectedAction])
+		:Editor.selectedAction = actions[0];
+	endif
+	:updateUI ₼;
+stop
+}
+
+break
+
+partition updateUI {
+
+start
+	while () is ([a of actions])
+		:deselect a.buttonElement;
+		:make a.subMenu invisible;
+		while () is ([sa of a.subActivities])
+			:deselect sa.buttonElement;
+		endwhile
+	endwhile
+	:select Editor.selectedAction.buttonElement;
+	:make Editor.selectedAction.subMenu visible;
+	if() then ([!Editor.selectedAction.selectedSubAction])
+	:E.sA.selectedSubAction = E.sA.subActions[0];
+	endif
+	:select E.sA.selectedSubAction;
+stop
+}
+
+@enduml
