@@ -29,7 +29,7 @@ namespace Fudge {
             }
 
             gl2 = GLUtil.assert<WebGL2RenderingContext>(canvas.getContext("webgl2"), "WebGL-context couldn't be created");
-            WebGLJascha.crc3 = gl2; // HACK!
+            WebGLApi.crc3 = gl2; // HACK!
             return canvas;
         }
 

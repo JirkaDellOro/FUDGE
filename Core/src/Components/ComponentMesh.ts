@@ -18,9 +18,6 @@ namespace Fudge {
             return this.mesh;
         }
 
-        public getVertices(): Float32Array {
-            return this.vertices;
-        }
         public getBufferSpecification(): BufferSpecification {
             return this.bufferSpecification;
         }

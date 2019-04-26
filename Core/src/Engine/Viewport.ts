@@ -56,14 +56,14 @@ namespace Fudge {
                 let transform: ComponentTransform = new ComponentTransform();
                 _node.addComponent(transform);
             }
-            let mesh: ComponentMesh;
+            let cmpMesh: ComponentMesh;
             if (!_node.getComponent(ComponentMesh)) {
                 console.log(`No Mesh attached to node named '${_node.name})'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
+                cmpMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
+                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(cmpMesh.getMesh().getVertices()), gl2.STATIC_DRAW);
                 let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
 
                 if (materialComponent) {
@@ -76,10 +76,10 @@ namespace Fudge {
                     */
                     let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
                     // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
-                    GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
-                    this.initializeNodeMaterial(materialComponent, mesh);
+                    GLUtil.attributePointer(positionAttributeLocation, cmpMesh.getBufferSpecification());
+                    this.initializeNodeMaterial(materialComponent, cmpMesh);
                     if (materialComponent.Material.TextureEnabled) {
-                        this.initializeNodeTexture(materialComponent, mesh);
+                        this.initializeNodeTexture(materialComponent, cmpMesh);
                     }
                 }
             }

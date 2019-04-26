@@ -322,9 +322,6 @@ var Fudge;
         getMesh() {
             return this.mesh;
         }
-        getVertices() {
-            return this.vertices;
-        }
         getBufferSpecification() {
             return this.bufferSpecification;
         }
@@ -667,7 +664,7 @@ var Fudge;
                 document.body.appendChild(canvas);
             }
             Fudge.gl2 = GLUtil.assert(canvas.getContext("webgl2"), "WebGL-context couldn't be created");
-            Fudge.WebGLJascha.crc3 = Fudge.gl2; // HACK!
+            Fudge.WebGLApi.crc3 = Fudge.gl2; // HACK!
             return canvas;
         }
         /**
@@ -1162,14 +1159,14 @@ var Fudge;
                 let transform = new Fudge.ComponentTransform();
                 _node.addComponent(transform);
             }
-            let mesh;
+            let cmpMesh;
             if (!_node.getComponent(Fudge.ComponentMesh)) {
                 console.log(`No Mesh attached to node named '${_node.name})'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = _node.getComponent(Fudge.ComponentMesh);
-                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), Fudge.gl2.STATIC_DRAW);
+                cmpMesh = _node.getComponent(Fudge.ComponentMesh);
+                Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(cmpMesh.getMesh().getVertices()), Fudge.gl2.STATIC_DRAW);
                 let materialComponent = _node.getComponent(Fudge.ComponentMaterial);
                 if (materialComponent) {
                     /*
@@ -1181,10 +1178,10 @@ var Fudge;
                     */
                     let positionAttributeLocation = materialComponent.Material.PositionAttributeLocation;
                     // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
-                    Fudge.GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
-                    this.initializeNodeMaterial(materialComponent, mesh);
+                    Fudge.GLUtil.attributePointer(positionAttributeLocation, cmpMesh.getBufferSpecification());
+                    this.initializeNodeMaterial(materialComponent, cmpMesh);
                     if (materialComponent.Material.TextureEnabled) {
-                        this.initializeNodeTexture(materialComponent, mesh);
+                        this.initializeNodeTexture(materialComponent, cmpMesh);
                     }
                 }
             }
@@ -1356,9 +1353,149 @@ var Fudge;
     }
     Fudge.Viewport = Viewport;
 })(Fudge || (Fudge = {}));
-// <reference path="WebGLJascha.ts"/>
 var Fudge;
-// <reference path="WebGLJascha.ts"/>
+(function (Fudge) {
+    class WebGLApi {
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param shaderInfo
+         * @param bufferInfo
+         * @param materialInfo
+         * @param _projection
+         */
+        static drawMesh(shaderInfo, bufferInfo, materialInfo, _projection) {
+            WebGLApi.useBuffer(bufferInfo);
+            WebGLApi.useParameter(materialInfo);
+            WebGLApi.useProgram(shaderInfo);
+            Fudge.GLUtil.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+            let matrixLocation = shaderInfo.uniforms["u_matrix"];
+            // Supply matrixdata to shader. 
+            WebGLApi.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            // Draw call
+            // Supply color
+            let colorUniformLocation = shaderInfo.uniforms["u_color"];
+            let vec = materialInfo.color;
+            let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+            WebGLApi.crc3.uniform4fv(colorUniformLocation, color);
+            // Draw call
+            WebGLApi.crc3.drawArrays(WebGLApi.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+        }
+        // #region Shaderprogram 
+        static createProgram(_shader) {
+            let crc3 = WebGLApi.crc3;
+            let shaderProgram = crc3.createProgram();
+            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.linkProgram(shaderProgram);
+            let error = Fudge.GLUtil.assert(crc3.getProgramInfoLog(shaderProgram));
+            if (error !== "") {
+                throw new Error("Error linking Shader: " + error);
+            }
+            let program = {
+                program: shaderProgram,
+                attributes: detectAttributes(),
+                uniforms: detectUniforms()
+            };
+            return program;
+            function compileShader(_shaderCode, _shaderType) {
+                let webGLShader = crc3.createShader(_shaderType);
+                crc3.shaderSource(webGLShader, _shaderCode);
+                crc3.compileShader(webGLShader);
+                let error = Fudge.GLUtil.assert(crc3.getShaderInfoLog(webGLShader));
+                if (error !== "") {
+                    throw new Error("Error compiling shader: " + error);
+                }
+                // Check for any compilation errors.
+                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                    alert(crc3.getShaderInfoLog(webGLShader));
+                    return null;
+                }
+                return webGLShader;
+            }
+            function detectAttributes() {
+                let detectedAttributes = {};
+                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                for (let i = 0; i < attributeCount; i++) {
+                    let attributeInfo = Fudge.GLUtil.assert(crc3.getActiveAttrib(shaderProgram, i));
+                    if (!attributeInfo) {
+                        break;
+                    }
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                }
+                return detectedAttributes;
+            }
+            function detectUniforms() {
+                let detectedUniforms = {};
+                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                for (let i = 0; i < uniformCount; i++) {
+                    let info = Fudge.GLUtil.assert(crc3.getActiveUniform(shaderProgram, i));
+                    if (!info) {
+                        break;
+                    }
+                    detectedUniforms[info.name] = Fudge.GLUtil.assert(crc3.getUniformLocation(shaderProgram, info.name));
+                }
+                return detectedUniforms;
+            }
+        }
+        static useProgram(_shaderInfo) {
+            WebGLApi.crc3.useProgram(_shaderInfo.program);
+            WebGLApi.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
+        }
+        static deleteProgram(_program) {
+            if (_program) {
+                WebGLApi.crc3.deleteProgram(_program.program);
+                delete _program.attributes;
+                delete _program.uniforms;
+            }
+        }
+        // #endregion
+        // region Meshbuffer
+        static createBuffer(_mesh) {
+            let buffer = Fudge.GLUtil.assert(WebGLApi.crc3.createBuffer());
+            WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
+            WebGLApi.crc3.bufferData(WebGLApi.crc3.ARRAY_BUFFER, _mesh.getVertices(), WebGLApi.crc3.STATIC_DRAW);
+            let bufferInfo = {
+                buffer: buffer,
+                target: WebGLApi.crc3.ARRAY_BUFFER,
+                specification: _mesh.getBufferSpecification(),
+                vertexCount: _mesh.getVertexCount()
+            };
+            return bufferInfo;
+        }
+        static useBuffer(_bufferInfo) {
+            WebGLApi.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+        }
+        static deleteBuffer(_bufferInfo) {
+            if (_bufferInfo) {
+                WebGLApi.crc3.bindBuffer(_bufferInfo.target, null);
+                WebGLApi.crc3.deleteBuffer(_bufferInfo.buffer);
+            }
+        }
+        // #endregion
+        // region MaterialParameters
+        static createParameter(_material) {
+            let vao = Fudge.GLUtil.assert(Fudge.gl2.createVertexArray());
+            let materialInfo = {
+                vao: vao,
+                color: _material.Color
+            };
+            return materialInfo;
+        }
+        static useParameter(_materialInfo) {
+            WebGLApi.crc3.bindVertexArray(_materialInfo.vao);
+        }
+        static deleteParameter(_materialInfo) {
+            if (_materialInfo) {
+                WebGLApi.crc3.bindVertexArray(null);
+                WebGLApi.crc3.deleteVertexArray(_materialInfo.vao);
+            }
+        }
+    }
+    Fudge.WebGLApi = WebGLApi;
+})(Fudge || (Fudge = {}));
+/// <reference path="WebGLApi.ts"/>
+var Fudge;
+/// <reference path="WebGLApi.ts"/>
 (function (Fudge) {
     /**
      * This class manages the references to the programs, buffers and vertex array objects created and stored with WebGL.
@@ -1388,7 +1525,7 @@ var Fudge;
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    class WebGL extends EventTarget {
+    class WebGL extends Fudge.WebGLApi {
         // #region Adding
         /**
          * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
@@ -1397,24 +1534,12 @@ var Fudge;
         static addNode(_node) {
             if (this.nodes.get(_node))
                 return;
-            /* replaced using generic function, see below. This is here only to look it up and should be deleted soon
-            let rfrProgram: Reference<WebGLProgram>;
-            rfrProgram = this.programs.get(shader);
-            if (rfrProgram)
-                rfrProgram.increaseCounter();
-            else {
-                let program: WebGLProgram = this.createProgram(shader);
-                rfrProgram = new Reference<WebGLProgram>(program);
-                rfrProgram.increaseCounter();
-                this.programs.set(shader, rfrProgram);
-            }
-            */
             let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
-            this.createReference(this.programs, shader, Fudge.WebGLJascha.createProgram);
+            this.createReference(this.programs, shader, this.createProgram);
             let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            this.createReference(this.parameters, material, Fudge.WebGLJascha.createParameter);
+            this.createReference(this.parameters, material, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
-            this.createReference(this.buffers, mesh, Fudge.WebGLJascha.createBuffer);
+            this.createReference(this.buffers, mesh, this.createBuffer);
             let nodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
@@ -1441,9 +1566,9 @@ var Fudge;
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            this.removeReference(this.programs, nodeReferences.shader, Fudge.WebGLJascha.deleteProgram);
-            this.removeReference(this.parameters, nodeReferences.material, Fudge.WebGLJascha.deleteParameter);
-            this.removeReference(this.buffers, nodeReferences.mesh, Fudge.WebGLJascha.deleteBuffer);
+            this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
+            this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
+            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
             this.nodes.delete(_node);
         }
         /**
@@ -1466,20 +1591,20 @@ var Fudge;
                 return;
             let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
             if (shader !== nodeReferences.shader) {
-                this.removeReference(this.programs, nodeReferences.shader, Fudge.WebGLJascha.deleteProgram);
-                this.createReference(this.programs, shader, Fudge.WebGLJascha.createProgram);
+                this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
+                this.createReference(this.programs, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
             let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
             if (material !== nodeReferences.material) {
-                this.removeReference(this.parameters, nodeReferences.material, Fudge.WebGLJascha.deleteParameter);
-                this.createReference(this.parameters, material, Fudge.WebGLJascha.createParameter);
+                this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
+                this.createReference(this.parameters, material, this.createParameter);
                 nodeReferences.material = material;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference(this.buffers, nodeReferences.mesh, Fudge.WebGLJascha.deleteBuffer);
-                this.createReference(this.buffers, mesh, Fudge.WebGLJascha.createBuffer);
+                this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+                this.createReference(this.buffers, mesh, this.createBuffer);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -1545,37 +1670,26 @@ var Fudge;
             if (!world)
                 // neither ComponentTransform found nor world-transformation passed from parent -> use identity
                 world = Fudge.Matrix4x4.identity;
-            let worldPivot = world;
-            let pivot = _node.getComponent(Fudge.ComponentPivot);
-            if (pivot)
-                worldPivot = Fudge.Matrix4x4.multiply(pivot.local, world);
+            let finalTransform = world;
+            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
+            if (cmpPivot)
+                finalTransform = Fudge.Matrix4x4.multiply(cmpPivot.local, world);
             // multiply camera matrix
-            let objectViewProjectionMatrix = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, worldPivot);
-            let references = this.nodes.get(_node);
-            if (references) { // TODO: deal with partial references
-                Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), true);
-                Fudge.WebGLJascha.useBuffer(this.buffers.get(references.mesh).getReference());
-                Fudge.WebGLJascha.useParameter(this.parameters.get(references.material).getReference());
-                Fudge.WebGLJascha.useProgram(this.programs.get(references.shader).getReference(), false);
-                Fudge.GLUtil.attributePointer(this.programs.get(references.shader).getReference().attributes["a_position"], _node.getComponent(Fudge.ComponentMesh).getBufferSpecification());
-                let matrixLocation = this.programs.get(references.shader).getReference().uniforms["u_matrix"];
-                // Supply matrixdata to shader. 
-                Fudge.gl2.uniformMatrix4fv(matrixLocation, false, objectViewProjectionMatrix.data);
-                // Draw call
-                // Supply color
-                let colorUniformLocation = this.programs.get(references.shader).getReference().uniforms["u_color"];
-                let vec = this.parameters.get(references.material).getReference().color;
-                let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-                Fudge.gl2.uniform4fv(colorUniformLocation, color);
-                // Draw call
-                // HACK, routing through ComponentMesh. Mesh-Specifications should be in Mesh
-                let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
-                Fudge.gl2.drawArrays(Fudge.gl2.TRIANGLES, cmpMesh.getBufferSpecification().offset, cmpMesh.getVertexCount());
-            }
+            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            this.drawNode(_node, projection);
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera, world);
             }
+        }
+        static drawNode(_node, _projection) {
+            let references = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+            let bufferInfo = this.buffers.get(references.mesh).getReference();
+            let materialInfo = this.parameters.get(references.material).getReference();
+            let shaderInfo = this.programs.get(references.shader).getReference();
+            this.drawMesh(shaderInfo, bufferInfo, materialInfo, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -1642,154 +1756,6 @@ var Fudge;
     WebGL.nodes = new Map();
     Fudge.WebGL = WebGL;
 })(Fudge || (Fudge = {}));
-//*/
-var Fudge;
-//*/
-(function (Fudge) {
-    class WebGLJascha {
-        static useProgram(_shaderInfo, _use) {
-            if (_use)
-                WebGLJascha.crc3.useProgram(_shaderInfo.program);
-            else {
-                // WebGLJascha.crc3.bindVertexArray(_shaderInfo.   this.vertexArrayObjects[_node.name]);
-                WebGLJascha.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
-            }
-        }
-        static useParameter(_materialInfo) {
-            WebGLJascha.crc3.bindVertexArray(_materialInfo.vao);
-        }
-        static useBuffer(_bufferInfo) {
-            WebGLJascha.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
-        }
-        static createProgram(_shader) {
-            let crc3 = WebGLJascha.crc3;
-            let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shader.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error = Fudge.GLUtil.assert(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
-            }
-            let program = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
-            function compileShader(_shaderCode, _shaderType) {
-                let webGLShader = crc3.createShader(_shaderType);
-                crc3.shaderSource(webGLShader, _shaderCode);
-                crc3.compileShader(webGLShader);
-                let error = Fudge.GLUtil.assert(crc3.getShaderInfoLog(webGLShader));
-                if (error !== "") {
-                    throw new Error("Error compiling shader: " + error);
-                }
-                // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
-                    alert(crc3.getShaderInfoLog(webGLShader));
-                    return null;
-                }
-                return webGLShader;
-            }
-            function detectAttributes() {
-                let detectedAttributes = {};
-                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
-                for (let i = 0; i < attributeCount; i++) {
-                    let attributeInfo = Fudge.GLUtil.assert(crc3.getActiveAttrib(shaderProgram, i));
-                    if (!attributeInfo) {
-                        break;
-                    }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
-                }
-                return detectedAttributes;
-            }
-            function detectUniforms() {
-                let detectedUniforms = {};
-                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
-                for (let i = 0; i < uniformCount; i++) {
-                    let info = Fudge.GLUtil.assert(crc3.getActiveUniform(shaderProgram, i));
-                    if (!info) {
-                        break;
-                    }
-                    detectedUniforms[info.name] = Fudge.GLUtil.assert(crc3.getUniformLocation(shaderProgram, info.name));
-                }
-                return detectedUniforms;
-            }
-        }
-        static deleteProgram(_program) {
-            if (_program) {
-                WebGLJascha.crc3.deleteProgram(_program.program);
-                delete _program.attributes;
-                delete _program.uniforms;
-            }
-        }
-        static createBuffer(_mesh) {
-            let buffer = Fudge.GLUtil.assert(WebGLJascha.crc3.createBuffer());
-            WebGLJascha.crc3.bindBuffer(WebGLJascha.crc3.ARRAY_BUFFER, buffer);
-            WebGLJascha.crc3.bufferData(WebGLJascha.crc3.ARRAY_BUFFER, _mesh.getVertices(), WebGLJascha.crc3.STATIC_DRAW);
-            let bufferInfo = { buffer: buffer, target: WebGLJascha.crc3.ARRAY_BUFFER };
-            return bufferInfo;
-        }
-        static deleteBuffer(_bufferInfo) {
-            if (_bufferInfo) {
-                WebGLJascha.crc3.bindBuffer(_bufferInfo.target, null);
-                WebGLJascha.crc3.deleteBuffer(_bufferInfo.buffer);
-            }
-        }
-        static deleteParameter(_materialInfo) {
-            if (_materialInfo) {
-                //WebGLJascha.crc3.deleteVertexArray(_materialInfo);
-            }
-        }
-        static createParameter(_material) {
-            let vao = Fudge.GLUtil.assert(Fudge.gl2.createVertexArray());
-            // let vertexArrayObjectCreated: WebGLVertexArrayObject | null = gl2.createVertexArray();
-            // if (vertexArrayObjectCreated === null) return;
-            // let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
-            // this.vertexArrayObjects[_node.name] = vertexArrayObject;
-            // bind attribute-array, subsequent calls will use it
-            // gl2.bindVertexArray(vertexArrayObject);
-            let materialInfo = {
-                vao: vao,
-                color: _material.Color
-            };
-            return materialInfo;
-            // return WebGLJascha.crc3.createVertexArray();
-            //    let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            //     gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            //     _meshComponent.applyColor(_materialComponent);
-            //     let colorPerPosition: number[] = [];
-            //     for (let i: number = 0; i < this.vertexCount; i++) {
-            //         colorPerPosition.push(_material.Color.x, _material.Color.y, _material.Color.z);
-            //     }
-            //     gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
-            //     let colorAttributeLocation: number = _materialComponent.Material.ColorAttributeLocation;
-            //     gl2.enableVertexAttribArray(colorAttributeLocation);
-            //     GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
-            // this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
-            // this.colorAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_color"));
-            // this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
-            // this.colorBufferSpecification = {
-            //     size: 3,
-            //     dataType: gl2.UNSIGNED_BYTE,
-            //     normalize: true,
-            //     stride: 0,
-            //     offset: 0
-            // };
-            // this.textureBufferSpecification = {
-            //     size: 2,
-            //     dataType: gl2.FLOAT,
-            //     normalize: true,
-            //     stride: 0,
-            //     offset: 0
-            // };
-            // this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
-        }
-    }
-    Fudge.WebGLJascha = WebGLJascha;
-})(Fudge || (Fudge = {}));
-//*/
 var Fudge;
 (function (Fudge) {
     /**
@@ -2425,18 +2391,42 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class Mesh {
+        getVertices() {
+            return this.vertices;
+        }
+        ;
+        getVertexCount() {
+            return this.vertices.length / this.getBufferSpecification().size;
+        }
+        getBufferSpecification() {
+            return {
+                size: 3,
+                dataType: WebGL2RenderingContext.FLOAT,
+                normalize: false,
+                stride: 0,
+                offset: 0
+            };
+        }
+    }
+    Fudge.Mesh = Mesh;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     /**
      * Simple class to compute the vertexpositions for a box.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshCube {
+    class MeshCube extends Fudge.Mesh {
         constructor(_width, _height, _depth) {
+            super();
             this.width = _width;
             this.height = _height;
             this.depth = _depth;
+            this.create();
         }
-        getVertices() {
-            let vertices = new Float32Array([
+        create() {
+            this.vertices = new Float32Array([
                 //front
                 -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
                 //back
@@ -2450,12 +2440,11 @@ var Fudge;
                 //bottom
                 -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
             ]);
-            for (let iVertex = 0; iVertex < vertices.length; iVertex += 3) {
-                vertices[iVertex] *= this.width / 2;
-                vertices[iVertex + 1] *= this.height / 2;
-                vertices[iVertex + 2] *= this.depth / 2;
+            for (let iVertex = 0; iVertex < this.vertices.length; iVertex += 3) {
+                this.vertices[iVertex] *= this.width / 2;
+                this.vertices[iVertex + 1] *= this.height / 2;
+                this.vertices[iVertex + 2] *= this.depth / 2;
             }
-            return vertices;
         }
         serialize() {
             let serialization = {};

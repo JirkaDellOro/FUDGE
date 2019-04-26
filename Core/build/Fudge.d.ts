@@ -180,7 +180,6 @@ declare namespace Fudge {
         private normals;
         setMesh(_mesh: Mesh): void;
         getMesh(): Mesh;
-        getVertices(): Float32Array;
         getBufferSpecification(): BufferSpecification;
         getVertexCount(): number;
         getNormals(): Float32Array;
@@ -616,6 +615,47 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface ShaderInfo {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+        specification: BufferSpecification;
+        vertexCount: number;
+    }
+    interface MaterialInfo {
+        vao: WebGLVertexArrayObject;
+        color: Vector3;
+    }
+    class WebGLApi {
+        static crc3: WebGL2RenderingContext;
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param shaderInfo
+         * @param bufferInfo
+         * @param materialInfo
+         * @param _projection
+         */
+        protected static drawMesh(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
+        protected static createProgram(_shader: Shader): ShaderInfo;
+        protected static useProgram(_shaderInfo: ShaderInfo): void;
+        protected static deleteProgram(_program: ShaderInfo): void;
+        protected static createBuffer(_mesh: Mesh): BufferInfo;
+        protected static useBuffer(_bufferInfo: BufferInfo): void;
+        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
+        protected static createParameter(_material: Material): MaterialInfo;
+        protected static useParameter(_materialInfo: MaterialInfo): void;
+        protected static deleteParameter(_materialInfo: MaterialInfo): void;
+    }
+}
+declare namespace Fudge {
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -628,7 +668,7 @@ declare namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    class WebGL extends EventTarget {
+    class WebGL extends WebGLApi {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs;
         /** Stores references to the vertex array objects and makes them available via the references to materials */
@@ -679,6 +719,7 @@ declare namespace Fudge {
          * @param _world
          */
         static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
+        private static drawNode;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
@@ -700,37 +741,6 @@ declare namespace Fudge {
          * @param _creator
          */
         private static createReference;
-    }
-}
-declare namespace Fudge {
-    interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
-    }
-    interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-    }
-    interface MaterialInfo {
-        vao: WebGLVertexArrayObject;
-        color: Vector3;
-    }
-    class WebGLJascha {
-        static crc3: WebGL2RenderingContext;
-        static useProgram(_shaderInfo: ShaderInfo, _use: boolean): void;
-        static useParameter(_materialInfo: MaterialInfo): void;
-        static useBuffer(_bufferInfo: BufferInfo): void;
-        static createProgram(_shader: Shader): ShaderInfo;
-        static deleteProgram(_program: ShaderInfo): void;
-        static createBuffer(_mesh: Mesh): BufferInfo;
-        static deleteBuffer(_bufferInfo: BufferInfo): void;
-        static deleteParameter(_materialInfo: MaterialInfo): void;
-        static createParameter(_material: Material): MaterialInfo;
     }
 }
 declare namespace Fudge {
@@ -947,8 +957,13 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface Mesh extends Serializable {
+    abstract class Mesh implements Serializable {
+        protected vertices: Float32Array;
         getVertices(): Float32Array;
+        getVertexCount(): number;
+        getBufferSpecification(): BufferSpecification;
+        abstract serialize(): Serialization;
+        abstract deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -956,12 +971,12 @@ declare namespace Fudge {
      * Simple class to compute the vertexpositions for a box.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshCube implements Mesh {
+    class MeshCube extends Mesh {
         width: number;
         height: number;
         depth: number;
         constructor(_width: number, _height: number, _depth: number);
-        getVertices(): Float32Array;
+        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
