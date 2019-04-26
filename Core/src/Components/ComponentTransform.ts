@@ -33,7 +33,7 @@ namespace Fudge {
             super.mutate(_mutator);
         }
         protected reduceMutator(_mutator: Mutator): void {
-            delete _mutator.worldMatrix;
+            delete _mutator.world;
             super.reduceMutator(_mutator);
         }
     }

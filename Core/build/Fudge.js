@@ -524,17 +524,17 @@ var Fudge;
             this.local = Fudge.Matrix4x4.scale(this.local, 1, 1, _scale);
         }
         // #endregion
-        // #region Seriallization
+        // #region Serialization
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
-                matrix: this.local.serialize(),
+                local: this.local.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            this.local.deserialize(_serialization.matrix);
+            this.local.deserialize(_serialization.local);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
@@ -586,7 +586,7 @@ var Fudge;
             super.mutate(_mutator);
         }
         reduceMutator(_mutator) {
-            delete _mutator.worldMatrix;
+            delete _mutator.world;
             super.reduceMutator(_mutator);
         }
     }
@@ -639,9 +639,7 @@ var Fudge;
     EventTargetStatic.targetStatic = new EventTargetStatic();
     Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
-// Just testing new branch pulled in VSCode. This comment shouldn't show in master-branch...
 var Fudge;
-// Just testing new branch pulled in VSCode. This comment shouldn't show in master-branch...
 (function (Fudge) {
     /**
      * Utility class to sore and/or wrap some functionality.
