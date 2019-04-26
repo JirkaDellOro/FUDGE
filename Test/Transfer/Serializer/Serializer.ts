@@ -5,6 +5,8 @@ namespace TestSerializer {
 
     function init(): void {
         Scenes.createMiniScene();
+        Scenes.createViewport();
+
         let result: ƒ.Serializable = testSerialization(Scenes.node);
         // (<ƒ.Node>result).name = "nlksanfdv";
         console.groupCollapsed("Comparison");

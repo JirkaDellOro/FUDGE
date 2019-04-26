@@ -3,6 +3,7 @@ var Events;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         Scenes.createMiniScene();
+        Scenes.createViewport();
         let node = Scenes.node;
         let child = node.getChildren()[0];
         console.log(child);

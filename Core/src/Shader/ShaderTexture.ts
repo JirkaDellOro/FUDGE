@@ -11,7 +11,7 @@ namespace Fudge {
             this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
         }
 
-        private loadVertexShaderSource(): string {
+        public loadVertexShaderSource(): string {
             return `#version 300 es
  
                     // an attribute is an input (in) to a vertex shader.
@@ -43,7 +43,7 @@ namespace Fudge {
                         v_textureCoordinate = a_textureCoordinate;
                     }`;
         }
-        private loadFragmentShaderSource(): string {
+        public loadFragmentShaderSource(): string {
             return `#version 300 es
             
                     // fragment shaders don't have a default precision so we need

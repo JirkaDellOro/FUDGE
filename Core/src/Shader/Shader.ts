@@ -10,6 +10,10 @@ namespace Fudge {
         private attributes: { [name: string]: number } = {}; // Associative array of shader atrributes.
         private uniforms: { [name: string]: WebGLUniformLocation } = {}; // Associative array of shader uniforms.
 
+        
+        abstract loadVertexShaderSource(): string;
+        abstract loadFragmentShaderSource(): string;
+        
         // Get and set methods.######################################################################################
         /**
          * Get location of an attribute by its name.

@@ -30,11 +30,18 @@ namespace Fudge {
             return this.parent;
         }
 
+        public getAncestor(): Node | null {
+            let ancestor: Node = this;
+            while (ancestor.getParent())
+                ancestor.getParent();
+            return ancestor;
+        }
+
         public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
 
-        // #region Hierarchy
+        // #region Scenetree
         /**
          * Returns a clone of the list of children
          */
@@ -88,6 +95,13 @@ namespace Fudge {
             this.children.splice(iFound, 1);
             _node.setParent(null);
         }
+
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        public get branch(): IterableIterator<Node> {
+            return this.getBranchGenerator();
+        }
         // #endregion
 
         // #region Components
@@ -97,6 +111,16 @@ namespace Fudge {
          */
         public getComponents(_class: typeof Component): Component[] {
             return (this.components[_class.name] || []).slice(0);
+        }
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        public getComponent(_class: typeof Component): Component {
+            let list: Component[] = this.components[_class.name];
+            if (list)
+                return list[0];
+            return null;
         }
 
         /**
@@ -286,5 +310,11 @@ namespace Fudge {
         private setParent(_parent: Node | null): void {
             this.parent = _parent;
         }
+        
+        private *getBranchGenerator(): IterableIterator<Node> {
+            yield this;
+            for (let child of this.children)
+            yield* child.branch;
+        }        
     }
 }

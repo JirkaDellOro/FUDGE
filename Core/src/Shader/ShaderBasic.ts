@@ -11,15 +11,16 @@ namespace Fudge {
             this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
         }
 
-        private loadVertexShaderSource(): string {
+        public loadVertexShaderSource(): string {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
                     in vec4 a_position;
-                    in vec4 a_color;
+                    //in vec4 a_color;
                 
                     // The Matrix to transform the positions by.
                     uniform mat4 u_matrix;
+                    uniform vec4 u_color;
                 
                     // Varying color in the fragmentshader.
                     out vec4 v_color;
@@ -32,10 +33,10 @@ namespace Fudge {
                         gl_Position = u_matrix * a_position;
                 
                         // Pass color to fragmentshader.
-                        v_color = a_color;
+                        v_color = u_color;
                     }`;
         }
-        private loadFragmentShaderSource(): string {
+        public loadFragmentShaderSource(): string {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

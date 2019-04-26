@@ -209,19 +209,12 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentPivot extends Component {
-        protected matrix: Matrix4x4;
-        readonly Matrix: Matrix4x4;
+        local: Matrix4x4;
         readonly position: Vector3;
-        /**
-         * # Transformation methods
-         */
         /**
          * Resets this.matrix to idenity Matrix.
          */
         reset(): void;
-        /**
-         * # Translation methods
-         */
         /**
          * Translate the transformation along the x-, y- and z-axis.
          * @param _x The x-value of the translation.
@@ -245,9 +238,6 @@ declare namespace Fudge {
          */
         translateZ(_z: number): void;
         /**
-         * # Rotation methods
-         */
-        /**
          * Rotate the transformation along the around its x-Axis.
          * @param _angle The angle to rotate by.
          */
@@ -268,9 +258,6 @@ declare namespace Fudge {
          * @param _target The target to look at.
          */
         lookAt(_target: Vector3): void;
-        /**
-         * # Scaling methods
-         */
         /**
          * Scale the transformation along the x-, y- and z-axis.
          * @param _xScale The value to scale x by.
@@ -313,7 +300,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends ComponentPivot {
-        worldMatrix: Matrix4x4;
+        world: Matrix4x4;
         constructor();
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
@@ -327,13 +314,6 @@ declare namespace Fudge {
      * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
 }
 declare namespace Fudge {
     class Color {
@@ -425,7 +405,7 @@ declare namespace Fudge {
         private name;
         private shader;
         private positionAttributeLocation;
-        private colorAttributeLocation;
+        private colorUniformLocation;
         private textureCoordinateAtributeLocation;
         private matrixLocation;
         private color;
@@ -442,7 +422,7 @@ declare namespace Fudge {
         readonly TextureEnabled: boolean;
         readonly TextureSource: string;
         readonly PositionAttributeLocation: number;
-        readonly ColorAttributeLocation: number;
+        readonly ColorUniformLocation: WebGLUniformLocation;
         readonly MatrixUniformLocation: WebGLUniformLocation;
         readonly TextureCoordinateLocation: number;
         /**
@@ -477,6 +457,7 @@ declare namespace Fudge {
          */
         constructor(_name: string);
         getParent(): Node | null;
+        getAncestor(): Node | null;
         readonly cmpTransform: ComponentTransform;
         /**
          * Returns a clone of the list of children
@@ -500,10 +481,19 @@ declare namespace Fudge {
          */
         removeChild(_node: Node): void;
         /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        readonly branch: IterableIterator<Node>;
+        /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
          */
         getComponents(_class: typeof Component): Component[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent(_class: typeof Component): Component;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
@@ -544,6 +534,7 @@ declare namespace Fudge {
          * @param _parent The parent to be set for this node.
          */
         private setParent;
+        private getBranchGenerator;
     }
 }
 declare namespace Fudge {
@@ -568,6 +559,7 @@ declare namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         drawScene(): void;
+        prepare(): void;
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
          * @param _node The node to initialize.
@@ -621,6 +613,124 @@ declare namespace Fudge {
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
          */
         private updateCanvasDisplaySizeAndCamera;
+    }
+}
+declare namespace Fudge {
+    interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
+    }
+    /**
+     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
+     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
+     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     */
+    class WebGL extends EventTarget {
+        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+        private static programs;
+        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        private static parameters;
+        /** Stores references to the vertex buffers and makes them available via the references to meshes */
+        private static buffers;
+        private static nodes;
+        /**
+         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * @param _node
+         */
+        static addNode(_node: Node): void;
+        /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         */
+        static addBranch(_node: Node): void;
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * @param _node
+         */
+        static removeNode(_node: Node): void;
+        /**
+         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node: Node): void;
+        /**
+         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * @param _node
+         */
+        static updateNode(_node: Node): void;
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node: Node): void;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        static recalculateAllNodeTransforms(): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node
+         * @param _cameraMatrix
+         * @param _world
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node
+         * @param _matrix
+         */
+        private static recalculateTransformsOfNodeAndChildren;
+        /**
+         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in
+         * @param _key
+         * @param _deletor
+         */
+        private static removeReference;
+        /**
+         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in
+         * @param _key
+         * @param _creator
+         */
+        private static createReference;
+    }
+}
+declare namespace Fudge {
+    interface ShaderInfo {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+    }
+    interface MaterialInfo {
+        vao: WebGLVertexArrayObject;
+        color: Vector3;
+    }
+    class WebGLJascha {
+        static crc3: WebGL2RenderingContext;
+        static useProgram(_shaderInfo: ShaderInfo, _use: boolean): void;
+        static useParameter(_materialInfo: MaterialInfo): void;
+        static useBuffer(_bufferInfo: BufferInfo): void;
+        static createProgram(_shader: Shader): ShaderInfo;
+        static deleteProgram(_program: ShaderInfo): void;
+        static createBuffer(_mesh: Mesh): BufferInfo;
+        static deleteBuffer(_bufferInfo: BufferInfo): void;
+        static deleteParameter(_materialInfo: MaterialInfo): void;
+        static createParameter(_material: Material): MaterialInfo;
     }
 }
 declare namespace Fudge {
@@ -867,6 +977,8 @@ declare namespace Fudge {
         private program;
         private attributes;
         private uniforms;
+        abstract loadVertexShaderSource(): string;
+        abstract loadFragmentShaderSource(): string;
         /**
          * Get location of an attribute by its name.
          * @param _name Name of the attribute to locate.
@@ -911,8 +1023,8 @@ declare namespace Fudge {
      */
     class ShaderBasic extends Shader {
         constructor();
-        private loadVertexShaderSource;
-        private loadFragmentShaderSource;
+        loadVertexShaderSource(): string;
+        loadFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -922,7 +1034,7 @@ declare namespace Fudge {
      */
     class ShaderTexture extends Shader {
         constructor();
-        private loadVertexShaderSource;
-        private loadFragmentShaderSource;
+        loadVertexShaderSource(): string;
+        loadFragmentShaderSource(): string;
     }
 }

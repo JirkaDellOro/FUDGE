@@ -5,15 +5,15 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentTransform extends ComponentPivot {
-        public worldMatrix: Matrix4x4;
+        public world: Matrix4x4;
 
         public constructor() {
             super();
-            this.worldMatrix = Matrix4x4.identity;
+            this.world = Matrix4x4.identity;
         }
 
         public get WorldPosition(): Vector3 {
-            return new Vector3(this.worldMatrix.data[12], this.worldMatrix.data[13], this.worldMatrix.data[14]);
+            return new Vector3(this.world.data[12], this.world.data[13], this.world.data[14]);
         }
 
         public serialize(): Serialization {

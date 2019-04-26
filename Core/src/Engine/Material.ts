@@ -7,7 +7,7 @@ namespace Fudge {
         private name: string; // The name to call the Material by.
         private shader: Shader; // The shader program used by this BaseMaterial
         private positionAttributeLocation: number; // The attribute on the shader that takes the meshs vertexpositions.
-        private colorAttributeLocation: number; // The attribute on the shader that takes a materials colorvalues.
+        private colorUniformLocation: WebGLUniformLocation; // The attribute on the shader that takes a materials colorvalues.
         private textureCoordinateAtributeLocation: number; // The attribute on the shader that takes the meshs texturecoordinates.
         private matrixLocation: WebGLUniformLocation; // The uniform on the shader to multiply the vertexpositions by to place them in viewspace.
 
@@ -22,11 +22,12 @@ namespace Fudge {
         public constructor(_name: string, _color: Vector3, _shader: Shader) {
             this.name = _name;
             this.shader = _shader;
+            this.color = _color;
+
             this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
-            this.colorAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_color"));
+            this.colorUniformLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_color"));
             this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
 
-            this.color = _color;
             this.colorBufferSpecification = {
                 size: 3,
                 dataType: gl2.UNSIGNED_BYTE,
@@ -74,8 +75,8 @@ namespace Fudge {
         public get PositionAttributeLocation(): number {
             return this.positionAttributeLocation;
         }
-        public get ColorAttributeLocation(): number {
-            return this.colorAttributeLocation;
+        public get ColorUniformLocation(): WebGLUniformLocation {
+            return this.colorUniformLocation;
         }
         public get MatrixUniformLocation(): WebGLUniformLocation {
             return this.matrixLocation;

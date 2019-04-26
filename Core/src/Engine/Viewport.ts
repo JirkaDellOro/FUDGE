@@ -31,19 +31,22 @@ namespace Fudge {
          */
         public drawScene(): void {
             if (this.camera.isActive) {
-                this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
-                let backgroundColor: Vector3 = this.camera.getBackgoundColor();
-                gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-                gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
-                // Enable backface- and zBuffer-culling.
-                gl2.enable(gl2.CULL_FACE);
-                gl2.enable(gl2.DEPTH_TEST);
+                this.prepare();
                 // TODO: don't do this for each viewport, it needs to be done only once per frame
                 this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
                 this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
             }
         }
 
+        public prepare(): void {
+            this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
+            let backgroundColor: Vector3 = this.camera.getBackgoundColor();
+            gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
+            gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
+            // Enable backface- and zBuffer-culling.
+            gl2.enable(gl2.CULL_FACE);
+            gl2.enable(gl2.DEPTH_TEST);
+        }
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
          * @param _node The node to initialize.
@@ -54,14 +57,14 @@ namespace Fudge {
                 _node.addComponent(transform);
             }
             let mesh: ComponentMesh;
-            if (_node.getComponents(ComponentMesh).length == 0) {
-                console.log(`No Mesh attached to node named '${_node.name}'.`);
+            if (!_node.getComponent(ComponentMesh)) {
+                console.log(`No Mesh attached to node named '${_node.name})'.`);
             }
             else {
                 this.initializeNodeBuffer(_node);
-                mesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
+                mesh = <ComponentMesh>_node.getComponent(ComponentMesh);
                 gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
 
                 if (materialComponent) {
                     /*
@@ -102,24 +105,28 @@ namespace Fudge {
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
         private drawObjects(_node: Node, _matrix: Matrix4x4): void {
-            if (_node.getComponents(ComponentMesh).length > 0) {
-                let mesh: ComponentMesh = <ComponentMesh>_node.getComponents(ComponentMesh)[0];
+            let mesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
+            if (mesh) {
                 let transform: ComponentTransform = _node.cmpTransform;
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponents(ComponentMaterial)[0];
+                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
                 if (materialComponent) {
                     materialComponent.Material.Shader.use();
                     gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
                     gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
                     // Compute the matrices
-                    let transformMatrix: Matrix4x4 = transform.worldMatrix;
-                    if (_node.getComponents(ComponentPivot)) {
-                        let pivot: ComponentPivot = <ComponentPivot>_node.getComponents(ComponentPivot)[0];
-                        if (pivot)
-                            transformMatrix = Matrix4x4.multiply(pivot.Matrix, transform.worldMatrix);
-                    }
+                    let transformMatrix: Matrix4x4 = transform.world;
+                    let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
+                    if (pivot)
+                        transformMatrix = Matrix4x4.multiply(pivot.local, transform.world);
                     let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
                     // Supply matrixdata to shader. 
                     gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
+                    // Supply color
+                    let colorUniformLocation: WebGLUniformLocation = materialComponent.Material.ColorUniformLocation;
+                    let vec: Vector3 = materialComponent.Material.Color;
+                    let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+                    gl2.uniform4fv(colorUniformLocation, color);
+
                     // Draw call
                     gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
                 }
@@ -137,8 +144,8 @@ namespace Fudge {
             let worldMatrix: Matrix4x4 = _matrix;
             let transform: ComponentTransform = _node.cmpTransform;
             if (transform) {
-                worldMatrix = Matrix4x4.multiply(_matrix, transform.Matrix);
-                transform.worldMatrix = worldMatrix;
+                worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
+                transform.world = worldMatrix;
             }
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
@@ -181,12 +188,11 @@ namespace Fudge {
          * @param _mesh The node's meshcomponent.
          */
         private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            _meshComponent.applyColor(_materialComponent);
-            let colorAttributeLocation: number = _materialComponent.Material.ColorAttributeLocation;
-            gl2.enableVertexAttribArray(colorAttributeLocation);
-            GLUtil.attributePointer(colorAttributeLocation, _materialComponent.Material.ColorBufferSpecification);
+            // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+            // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+            // _meshComponent.applyColor(_materialComponent);
+            //gl2.enableVertexAttribArray(colorUniformLocation);
+            // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
         }
 
         /**

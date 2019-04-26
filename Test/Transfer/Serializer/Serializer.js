@@ -4,6 +4,7 @@ var TestSerializer;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         Scenes.createMiniScene();
+        Scenes.createViewport();
         let result = testSerialization(Scenes.node);
         // (<ƒ.Node>result).name = "nlksanfdv";
         console.groupCollapsed("Comparison");
