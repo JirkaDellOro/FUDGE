@@ -37,6 +37,8 @@ namespace Fudge {
          */
         public static initializeContext(): HTMLCanvasElement {
             WebGLApi.canvas = document.createElement("canvas");
+            WebGLApi.canvas.width = 800;
+            WebGLApi.canvas.height = 600;
 
             // let canvas: HTMLCanvasElement;
 
@@ -54,7 +56,7 @@ namespace Fudge {
             //     canvas.height = 640;
             //     document.body.appendChild(canvas);
             // }
-            
+
             WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
             return WebGLApi.canvas;
         }

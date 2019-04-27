@@ -3,7 +3,7 @@ namespace WebGLRendering {
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
-        let canvas: HTMLCanvasElement = Scenes.createCanvas(800,600);
+        let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
         ƒ.WebGLApi.initializeContext();
         // console.log(ƒ.WebGLApi.crc3.canvas.width, ƒ.WebGLApi.crc3.canvas.height);
@@ -24,10 +24,10 @@ namespace WebGLRendering {
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube0);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube1);
 
-        cubeRed.cmpTransform.scaleX(5);
-        cubeGreen.cmpTransform.scaleY(5);
+        cubeRed.cmpTransform.scaleX(2);
+        cubeGreen.cmpTransform.scaleY(2);
         let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
-        pivot.scaleZ(5);
+        pivot.scaleZ(2);
         cubeBlue.addComponent(pivot);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 

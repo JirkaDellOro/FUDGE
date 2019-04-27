@@ -1145,6 +1145,8 @@ var Fudge;
          */
         static initializeContext() {
             WebGLApi.canvas = document.createElement("canvas");
+            WebGLApi.canvas.width = 800;
+            WebGLApi.canvas.height = 600;
             // let canvas: HTMLCanvasElement;
             // if (_elementID !== undefined) {         // Check if ID was passed. 
             //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);

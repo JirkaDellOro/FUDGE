@@ -330,8 +330,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-}
-declare namespace Fudge {
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
      * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
