@@ -48,11 +48,11 @@ namespace Fudge {
         }
 
         // #region Shaderprogram 
-        protected static createProgram(_shader: Shader): ShaderInfo {
+        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
             let crc3: WebGL2RenderingContext = WebGLApi.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shader.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shader.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error: string = GLUtil.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {

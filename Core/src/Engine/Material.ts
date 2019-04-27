@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export class Material {
         private name: string; // The name to call the Material by.
-        private shader: Shader; // The shader program used by this BaseMaterial
+        private shaderClass: typeof Shader; // The shader program used by this BaseMaterial
         private positionAttributeLocation: number; // The attribute on the shader that takes the meshs vertexpositions.
         private colorUniformLocation: WebGLUniformLocation; // The attribute on the shader that takes a materials colorvalues.
         private textureCoordinateAtributeLocation: number; // The attribute on the shader that takes the meshs texturecoordinates.
@@ -18,15 +18,14 @@ namespace Fudge {
         private textureBufferSpecification: BufferSpecification;
 
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
-
-        public constructor(_name: string, _color: Vector3, _shader: Shader) {
+        public constructor(_name: string, _color: Vector3, _shader: typeof Shader) {
             this.name = _name;
-            this.shader = _shader;
+            this.shaderClass = _shader;
             this.color = _color;
 
-            this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
-            this.colorUniformLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_color"));
-            this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
+            // this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
+            // this.colorUniformLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_color"));
+            // this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
 
             this.colorBufferSpecification = {
                 size: 3,
@@ -47,8 +46,8 @@ namespace Fudge {
         }
 
         // Get methods. ######################################################################################
-        public get Shader(): Shader {
-            return this.shader;
+        public get Shader(): typeof Shader {
+            return this.shaderClass;
         }
         public get Name(): string {
             return this.name;
@@ -90,17 +89,17 @@ namespace Fudge {
          * Adds and enables a Texture passed to this material.
          * @param _textureSource A string holding the path to the location of the texture.
          */
-        public addTexture(_textureSource: string): void {
-            this.textureEnabled = true;
-            this.textureSource = _textureSource;
-            this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
-        }
+        // public addTexture(_textureSource: string): void {
+        //     this.textureEnabled = true;
+        //     this.textureSource = _textureSource;
+        //     this.textureCoordinateAtributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_textureCoordinate"));
+        // }
         /**
          * Removes and disables a texture that was added to this material.
          */
-        public removeTexture(): void {
-            this.textureEnabled = false;
-            this.textureSource = "";
-        }
+        // public removeTexture(): void {
+        //     this.textureEnabled = false;
+        //     this.textureSource = "";
+        // }
     }
 }

@@ -22,15 +22,15 @@ var Scenes;
     Scenes.createMiniScene = createMiniScene;
     function createViewport() {
         Scenes.viewPort = new ƒ.Viewport("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera));
-        Scenes.viewPort.drawScene();
+        // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }
     Scenes.createViewport = createViewport;
-    function createCamera(_translation = new ƒ.Vector3(10, 10, 50)) {
+    function createCamera(_translation = new ƒ.Vector3(10, 10, 50), _lookAt = new ƒ.Vector3()) {
         let camera = new ƒ.Node("Camera");
         let cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(_translation.x, _translation.y, _translation.z);
-        cmpTransform.lookAt(Scenes.node.cmpTransform.position);
+        cmpTransform.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -40,7 +40,7 @@ var Scenes;
     function createCompleteMeshNode(_name, _shaderClass, _color, _mesh) {
         let node = new ƒ.Node(_name);
         let shader = new _shaderClass();
-        let mtrRed = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, shader);
+        let mtrRed = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, _shaderClass);
         let cmpMesh = new ƒ.ComponentMesh();
         cmpMesh.setMesh(_mesh);
         let cmpMaterial = new ƒ.ComponentMaterial();

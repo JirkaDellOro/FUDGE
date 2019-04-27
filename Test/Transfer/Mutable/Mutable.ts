@@ -27,6 +27,6 @@ namespace Mutable {
         (mutator.local as ƒ.Matrix4x4).data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
 
-        Scenes.viewPort.drawScene();
+        // Scenes.viewPort.drawScene();
     }
 }

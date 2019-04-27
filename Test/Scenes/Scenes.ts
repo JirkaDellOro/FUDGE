@@ -31,15 +31,15 @@ namespace Scenes {
 
     export function createViewport(): void {
         viewPort = new ƒ.Viewport("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera));
-        viewPort.drawScene();
+        // viewPort.drawScene();
         viewPort.showSceneGraph();
     }
 
-    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(10, 10, 50)): ƒ.Node {
+    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(10, 10, 50), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.Node {
         let camera: ƒ.Node = new ƒ.Node("Camera");
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(_translation.x, _translation.y, _translation.z);
-        cmpTransform.lookAt(node.cmpTransform.position);
+        cmpTransform.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         camera.addComponent(cmpCamera);
@@ -49,7 +49,7 @@ namespace Scenes {
     export function createCompleteMeshNode(_name: string, _shaderClass: typeof ƒ.ShaderBasic, _color: ƒ.Vector3, _mesh: ƒ.Mesh): ƒ.Node {
         let node: ƒ.Node = new ƒ.Node(_name);
         let shader: ƒ.Shader = new _shaderClass();
-        let mtrRed: ƒ.Material = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, shader);
+        let mtrRed: ƒ.Material = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, _shaderClass);
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
         cmpMesh.setMesh(_mesh);

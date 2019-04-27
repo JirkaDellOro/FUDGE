@@ -1,17 +1,10 @@
-/// <reference path="Shader.ts"/>
 namespace Fudge {
     /**
-     * Represents a WebGL shaderprogram
+     * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ShaderBasic extends Shader {
-
-        public constructor() {
-            super();
-            this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
-        }
-
-        public loadVertexShaderSource(): string {
+        public static loadVertexShaderSource(): string {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
@@ -36,7 +29,7 @@ namespace Fudge {
                         v_color = u_color;
                     }`;
         }
-        public loadFragmentShaderSource(): string {
+        public static loadFragmentShaderSource(): string {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

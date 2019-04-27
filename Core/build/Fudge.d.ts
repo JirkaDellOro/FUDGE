@@ -402,7 +402,7 @@ declare namespace Fudge {
      */
     class Material {
         private name;
-        private shader;
+        private shaderClass;
         private positionAttributeLocation;
         private colorUniformLocation;
         private textureCoordinateAtributeLocation;
@@ -412,8 +412,8 @@ declare namespace Fudge {
         private textureSource;
         private colorBufferSpecification;
         private textureBufferSpecification;
-        constructor(_name: string, _color: Vector3, _shader: Shader);
-        readonly Shader: Shader;
+        constructor(_name: string, _color: Vector3, _shader: typeof Shader);
+        readonly Shader: typeof Shader;
         readonly Name: string;
         Color: Vector3;
         readonly ColorBufferSpecification: BufferSpecification;
@@ -424,15 +424,6 @@ declare namespace Fudge {
         readonly ColorUniformLocation: WebGLUniformLocation;
         readonly MatrixUniformLocation: WebGLUniformLocation;
         readonly TextureCoordinateLocation: number;
-        /**
-         * Adds and enables a Texture passed to this material.
-         * @param _textureSource A string holding the path to the location of the texture.
-         */
-        addTexture(_textureSource: string): void;
-        /**
-         * Removes and disables a texture that was added to this material.
-         */
-        removeTexture(): void;
     }
 }
 declare namespace Fudge {
@@ -545,8 +536,6 @@ declare namespace Fudge {
         private name;
         private camera;
         private rootNode;
-        private vertexArrayObjects;
-        private buffers;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode
@@ -557,13 +546,11 @@ declare namespace Fudge {
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        drawScene(): void;
         prepare(): void;
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
          * @param _node The node to initialize.
          */
-        initializeViewportNodes(_node: Node): void;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -573,33 +560,27 @@ declare namespace Fudge {
          * @param _node The currend node to be drawn.
          * @param _matrix The viewprojectionmatrix of this viewports camera.
          */
-        private drawObjects;
         /**
          * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
          * @param _node The node which's transform worldmatrix to update.
          */
-        private updateNodeWorldMatrix;
         /**
          * Returns the scenegraph's rootnode for computation of worldmatrices.
          */
-        private viewportNodeSceneGraphRoot;
         /**
          * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
          * @param _node The node to initialize a buffer for.
          */
-        private initializeNodeBuffer;
         /**
          * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeMaterial;
         /**
          * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
          * @param _material The node's materialcomponent.
          * @param _mesh The node's meshcomponent.
          */
-        private initializeNodeTexture;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
@@ -644,7 +625,7 @@ declare namespace Fudge {
          * @param _projection
          */
         protected static drawMesh(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
-        protected static createProgram(_shader: Shader): ShaderInfo;
+        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
         protected static useProgram(_shaderInfo: ShaderInfo): void;
         protected static deleteProgram(_program: ShaderInfo): void;
         protected static createBuffer(_mesh: Mesh): BufferInfo;
@@ -983,72 +964,30 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Abstract superclass for the representation of WebGl shaderprograms.
-     * Adjusted version of a class taken from Travis Vromans WebGL 2D-GameEngine
+     * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     * TODO: revisit licensing
      */
-    abstract class Shader {
-        private program;
-        private attributes;
-        private uniforms;
-        abstract loadVertexShaderSource(): string;
-        abstract loadFragmentShaderSource(): string;
-        /**
-         * Get location of an attribute by its name.
-         * @param _name Name of the attribute to locate.
-         */
-        getAttributeLocation(_name: string): number | null;
-        /**
-          * Get location of uniform by its name.
-          * @param _name Name of the attribute to locate.
-          */
-        getUniformLocation(_name: string): WebGLUniformLocation | null;
-        /**
-         * Use this shader in Rendercontext on callup.
-         */
-        use(): void;
-        protected load(_vertexShaderSource: string, _fragmentShaderSource: string): void;
-        /**
-         * Compiles shader from sourcestring.
-         * @param _source The sourcevariable holding a GLSL shaderstring.
-         * @param _shaderType The type of the shader to be compiled. (vertex or fragment).
-         */
-        private compileShader;
-        /**
-         * Create shaderprogramm that will be used on GPU.
-         * @param vertexShader The compiled vertexshader to be used by the programm.
-         * @param fragmentShader The compiled fragmentshader to be used by the programm.
-         */
-        private createProgram;
-        /**
-         * Iterates through all active attributes on an instance of shader and saves them in an associative array with the attribute's name as key and the location as value
-         */
-        private detectAttributes;
-        /**
-        * Iterates through all active uniforms on an instance of shader and saves them in an associative array with the attribute's name as key and the location as value
-        */
-        private detectUniforms;
+    class Shader {
+        static loadVertexShaderSource(): string;
+        static loadFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
     /**
-     * Represents a WebGL shaderprogram
+     * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderBasic extends Shader {
-        constructor();
-        loadVertexShaderSource(): string;
-        loadFragmentShaderSource(): string;
+        static loadVertexShaderSource(): string;
+        static loadFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
     /**
-     * Represents a WebGL shaderprogram
+     * Textured shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Shader {
-        constructor();
         loadVertexShaderSource(): string;
         loadFragmentShaderSource(): string;
     }

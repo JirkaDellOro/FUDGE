@@ -12,7 +12,7 @@ namespace Fudge {
      * With these references, the already buffered data is retrieved.
      */
     interface NodeReferences {
-        shader: Shader;
+        shader: typeof Shader;
         material: Material;
         mesh: Mesh;
         doneTransformToWorld: boolean;
@@ -51,11 +51,11 @@ namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    export class WebGL extends WebGLApi{
+    export class WebGL extends WebGLApi {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs: Map<Shader, WebGLReference<ShaderInfo>> = new Map();
+        private static programs: Map<typeof Shader, WebGLReference<ShaderInfo>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to materials */
         private static parameters: Map<Material, WebGLReference<MaterialInfo>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
@@ -71,7 +71,7 @@ namespace Fudge {
             if (this.nodes.get(_node))
                 return;
 
-            let shader: Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
+            let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
             this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
 
             let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
@@ -135,7 +135,7 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            let shader: Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
+            let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
             if (shader !== nodeReferences.shader) {
                 this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
                 this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
