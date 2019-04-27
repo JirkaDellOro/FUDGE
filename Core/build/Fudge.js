@@ -1096,8 +1096,6 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTarget {
-        // private vertexArrayObjects: { [key: string]: WebGLVertexArrayObject } = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
-        // private buffers: { [key: string]: WebGLBuffer } = {}; // Associative array that holds a buffer for each node in the tree(branch)
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode
@@ -1116,14 +1114,17 @@ var Fudge;
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        // public drawScene(): void {
-        //     if (this.camera.isActive) {
-        //         this.prepare();
-        //         // TODO: don't do this for each viewport, it needs to be done only once per frame
-        //         this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-        //         this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
-        //     }
-        // }
+        drawScene() {
+            if (this.camera.isActive) {
+                this.prepare();
+                // TODO: don't do this for each viewport, it needs to be done only once per frame
+                //this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
+                //this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
+                // HACK! no need to addBranch and recalc for each viewport and frame
+                Fudge.WebGL.addBranch(this.rootNode);
+                Fudge.WebGL.drawBranch(this.rootNode, this.camera);
+            }
+        }
         prepare() {
             this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
             let backgroundColor = this.camera.getBackgoundColor();

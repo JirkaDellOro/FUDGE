@@ -546,6 +546,7 @@ declare namespace Fudge {
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
+        drawScene(): void;
         prepare(): void;
         /**
          * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.

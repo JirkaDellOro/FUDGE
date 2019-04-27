@@ -47,6 +47,7 @@ namespace Scripts {
     function init(): void {
         Scenes.createMiniScene();
         Scenes.createViewport();
+        Scenes.viewPort.drawScene();
 
         let node: ƒ.Node = Scenes.node;
         let child: ƒ.Node = node.getChildren()[0];

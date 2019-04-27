@@ -7,8 +7,6 @@ namespace Fudge {
         private name: string; // The name to call this viewport by.
         private camera: ComponentCamera; // The camera from which's position and view the tree will be rendered.
         private rootNode: Node; // The first node in the tree(branch) that will be rendered.
-        // private vertexArrayObjects: { [key: string]: WebGLVertexArrayObject } = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
-        // private buffers: { [key: string]: WebGLBuffer } = {}; // Associative array that holds a buffer for each node in the tree(branch)
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _rootNode 
@@ -25,18 +23,21 @@ namespace Fudge {
         public get Name(): string {
             return this.name;
         }
-
+ 
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        // public drawScene(): void {
-        //     if (this.camera.isActive) {
-        //         this.prepare();
-        //         // TODO: don't do this for each viewport, it needs to be done only once per frame
-        //         this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-        //         this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
-        //     }
-        // }
+        public drawScene(): void {
+            if (this.camera.isActive) {
+                this.prepare();
+                // TODO: don't do this for each viewport, it needs to be done only once per frame
+                //this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
+                //this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
+                // HACK! no need to addBranch and recalc for each viewport and frame
+                WebGL.addBranch(this.rootNode);
+                WebGL.drawBranch(this.rootNode, this.camera);
+            }
+        }
 
         public prepare(): void {
             this.updateCanvasDisplaySizeAndCamera(gl2.canvas);

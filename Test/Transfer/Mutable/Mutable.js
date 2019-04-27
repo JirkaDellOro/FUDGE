@@ -1,5 +1,6 @@
 var Mutable;
 (function (Mutable) {
+    var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     let mutator;
     let angle = 0;
@@ -20,7 +21,8 @@ var Mutable;
         mutator.local.data[12] = 5 * Math.sin(angle);
         mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
-        // Scenes.viewPort.drawScene();
+        ƒ.WebGL.recalculateAllNodeTransforms();
+        Scenes.viewPort.drawScene();
     }
 })(Mutable || (Mutable = {}));
 //# sourceMappingURL=Mutable.js.map
