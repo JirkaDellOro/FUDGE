@@ -1117,9 +1117,6 @@ var Fudge;
         drawScene() {
             if (this.camera.isActive) {
                 this.prepare();
-                // TODO: don't do this for each viewport, it needs to be done only once per frame
-                //this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-                //this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
                 // HACK! no need to addBranch and recalc for each viewport and frame
                 Fudge.WebGL.addBranch(this.rootNode);
                 Fudge.WebGL.drawBranch(this.rootNode, this.camera);
@@ -1135,46 +1132,6 @@ var Fudge;
             Fudge.gl2.enable(Fudge.gl2.DEPTH_TEST);
         }
         /**
-         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _node The node to initialize.
-         */
-        // public initializeViewportNodes(_node: Node): void {
-        //     if (!_node.cmpTransform) {
-        //         let transform: ComponentTransform = new ComponentTransform();
-        //         _node.addComponent(transform);
-        //     }
-        //     let cmpMesh: ComponentMesh;
-        //     if (!_node.getComponent(ComponentMesh)) {
-        //         console.log(`No Mesh attached to node named '${_node.name})'.`);
-        //     }
-        //     else {
-        //         this.initializeNodeBuffer(_node);
-        //         cmpMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-        //         gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(cmpMesh.getMesh().getVertices()), gl2.STATIC_DRAW);
-        //         let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
-        //         if (materialComponent) {
-        //             /*
-        //             console.log(`No Material attached to node named '${_node.Name}'.`);
-        //             console.log("Adding standardmaterial...");
-        //             materialComponent = new MaterialComponent();
-        //             materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
-        //             _node.addComponent(materialComponent);
-        //             */
-        //             let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
-        //             // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
-        //             GLUtil.attributePointer(positionAttributeLocation, cmpMesh.getBufferSpecification());
-        //             this.initializeNodeMaterial(materialComponent, cmpMesh);
-        //             if (materialComponent.Material.TextureEnabled) {
-        //                 this.initializeNodeTexture(materialComponent, cmpMesh);
-        //             }
-        //         }
-        //     }
-        //     for (let name in _node.getChildren()) {
-        //         let childNode: Node = _node.getChildren()[name];
-        //         this.initializeViewportNodes(childNode);
-        //     }
-        // }
-        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph() {
@@ -1183,113 +1140,6 @@ var Fudge;
             output += this.rootNode.name;
             console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
         }
-        /**
-         * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
-         * @param _node The currend node to be drawn.
-         * @param _matrix The viewprojectionmatrix of this viewports camera.
-         */
-        // private drawObjects(_node: Node, _matrix: Matrix4x4): void {
-        //     let mesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-        //     if (mesh) {
-        //         let transform: ComponentTransform = _node.cmpTransform;
-        //         let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
-        //         if (materialComponent) {
-        //             materialComponent.Material.Shader.use();
-        //             gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
-        //             gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
-        //             // Compute the matrices
-        //             let transformMatrix: Matrix4x4 = transform.world;
-        //             let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
-        //             if (pivot)
-        //                 transformMatrix = Matrix4x4.multiply(pivot.local, transform.world);
-        //             let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
-        //             // Supply matrixdata to shader. 
-        //             gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
-        //             // Supply color
-        //             let colorUniformLocation: WebGLUniformLocation = materialComponent.Material.ColorUniformLocation;
-        //             let vec: Vector3 = materialComponent.Material.Color;
-        //             let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-        //             gl2.uniform4fv(colorUniformLocation, color);
-        //             // Draw call
-        //             gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
-        //         }
-        //     }
-        //     for (let name in _node.getChildren()) {
-        //         let childNode: Node = _node.getChildren()[name];
-        //         this.drawObjects(childNode, _matrix);
-        //     }
-        // }
-        /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
-         * @param _node The node which's transform worldmatrix to update.
-         */
-        // private updateNodeWorldMatrix(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
-        //     let worldMatrix: Matrix4x4 = _matrix;
-        //     let transform: ComponentTransform = _node.cmpTransform;
-        //     if (transform) {
-        //         worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
-        //         transform.world = worldMatrix;
-        //     }
-        //     for (let name in _node.getChildren()) {
-        //         let childNode: Node = _node.getChildren()[name];
-        //         this.updateNodeWorldMatrix(childNode, worldMatrix);
-        //     }
-        // }
-        /**
-         * Returns the scenegraph's rootnode for computation of worldmatrices.
-         */
-        // private viewportNodeSceneGraphRoot(): Node {
-        //     let sceneGraphRoot: Node = this.rootNode;
-        //     while (sceneGraphRoot.getParent()) {
-        //         sceneGraphRoot = sceneGraphRoot.getParent();
-        //     }
-        //     return sceneGraphRoot;
-        // }
-        /**
-         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
-         * @param _node The node to initialize a buffer for.
-         */
-        // private initializeNodeBuffer(_node: Node): void {
-        //     let bufferCreated: WebGLBuffer | null = gl2.createBuffer();
-        //     if (bufferCreated === null)
-        //         return;
-        //     let buffer: WebGLBuffer = bufferCreated;
-        //     this.buffers[_node.name] = buffer;
-        //     let vertexArrayObjectCreated: WebGLVertexArrayObject | null = gl2.createVertexArray();
-        //     if (vertexArrayObjectCreated === null) return;
-        //     let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
-        //     this.vertexArrayObjects[_node.name] = vertexArrayObject;
-        //     // bind attribute-array, subsequent calls will use it
-        //     gl2.bindVertexArray(vertexArrayObject);
-        //     // bind buffer to ARRAY_BUFFER, subsequent calls work on it
-        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, buffer);
-        // }
-        /**
-         * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-        //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-        //     // _meshComponent.applyColor(_materialComponent);
-        //     //gl2.enableVertexAttribArray(colorUniformLocation);
-        //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
-        // }
-        /**
-         * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-        //     _meshComponent.setTextureCoordinates();
-        //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-        //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-        //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-        // }
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
