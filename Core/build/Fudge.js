@@ -214,7 +214,7 @@ var Fudge;
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
-            this.backgroundColor = new Fudge.Vector3(0.2, 0, 0); // The color of the background the camera will render.
+            this.backgroundColor = new Fudge.Vector3(0, 0, 0); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
@@ -1008,7 +1008,7 @@ var Fudge;
             this.camera = null; // The camera from which's position and view the tree will be rendered.
             this.branch = null; // The first node in the tree(branch) that will be rendered.
             this.crc2 = null;
-            this.rect = null;
+            this.canvas = null;
             /*/*
              * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
              * @param _material The node's materialcomponent.
@@ -1045,8 +1045,14 @@ var Fudge;
             this.name = _name;
             this.branch = _branch;
             this.camera = _camera;
+            this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
-            this.rect = { x: 0, y: 0, width: _canvas.width, height: _canvas.height };
+        }
+        getContext() {
+            return this.crc2;
+        }
+        getRect() {
+            return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
@@ -1059,11 +1065,13 @@ var Fudge;
                 Fudge.WebGL.drawBranch(this.branch, this.camera);
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
                 let rectSource = Fudge.WebGLApi.getRect();
-                this.crc2.drawImage(Fudge.WebGLApi.getCanvas(), rectSource.x, rectSource.y, rectSource.width, rectSource.height, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+                let rectDestination = this.getRect();
+                this.crc2.imageSmoothingEnabled = false;
+                this.crc2.drawImage(Fudge.WebGLApi.crc3.canvas, rectSource.x, rectSource.y, rectSource.width, rectSource.height, rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height);
             }
         }
         prepare() {
-            this.updateCanvasDisplaySizeAndCamera(this.crc2.canvas);
+            this.updateCanvasDisplaySizeAndCamera(this.canvas);
             let backgroundColor = this.camera.getBackgoundColor();
             Fudge.WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             Fudge.WebGLApi.crc3.clear(Fudge.WebGLApi.crc3.COLOR_BUFFER_BIT | Fudge.WebGLApi.crc3.DEPTH_BUFFER_BIT);
@@ -1116,12 +1124,13 @@ var Fudge;
                 canvas.width = width;
                 canvas.height = height;
             }
+            Fudge.WebGLApi.setCanvasSize(0.2 * width, 0.2 * height);
             // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
             if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            Fudge.WebGLApi.crc3.viewport(0, 0, width, height);
+            Fudge.WebGLApi.crc3.viewport(0, 0, 0.2 * width, 0.2 * height); // TODO: scale back to 1!
         }
     }
     Fudge.Viewport = Viewport;
@@ -1145,8 +1154,6 @@ var Fudge;
          */
         static initializeContext() {
             WebGLApi.canvas = document.createElement("canvas");
-            WebGLApi.canvas.width = 800;
-            WebGLApi.canvas.height = 600;
             // let canvas: HTMLCanvasElement;
             // if (_elementID !== undefined) {         // Check if ID was passed. 
             //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);
@@ -1168,8 +1175,9 @@ var Fudge;
         static getRect() {
             return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
         }
-        static getCanvas() {
-            return WebGLApi.canvas;
+        static setCanvasSize(_width, _height) {
+            WebGLApi.crc3.canvas.width = _width;
+            WebGLApi.crc3.canvas.height = _height;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix

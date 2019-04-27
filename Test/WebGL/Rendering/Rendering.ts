@@ -6,11 +6,10 @@ namespace WebGLRendering {
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
         ƒ.WebGLApi.initializeContext();
-        // console.log(ƒ.WebGLApi.crc3.canvas.width, ƒ.WebGLApi.crc3.canvas.height);
 
-        let clrRed: ƒ.Vector3 = new ƒ.Vector3(255, 0, 0);
-        let clrGreen: ƒ.Vector3 = new ƒ.Vector3(0, 255, 0);
-        let clrBlue: ƒ.Vector3 = new ƒ.Vector3(0, 0, 255);
+        let clrRed: ƒ.Vector3 = new ƒ.Vector3(1, 0, 0);
+        let clrGreen: ƒ.Vector3 = new ƒ.Vector3(0, 1, 0);
+        let clrBlue: ƒ.Vector3 = new ƒ.Vector3(0, 0, 1);
         let color: ƒ.Vector3;
         let mtrRed: ƒ.Material = new ƒ.Material(`rgb(${clrRed.x}, ${clrRed.y}, ${clrRed.z})`, clrRed, ƒ.ShaderBasic);
         let mtrGreen: ƒ.Material = new ƒ.Material(`rgb(${clrGreen.x}, ${clrGreen.y}, ${clrGreen.z})`, clrGreen, ƒ.ShaderBasic);
@@ -35,23 +34,22 @@ namespace WebGLRendering {
         parent.appendChild(cubeRed);
         parent.appendChild(cubeGreen);
         parent.appendChild(cubeBlue);
-        
+
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         let viewPort: ƒ.Viewport = new ƒ.Viewport();
         let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize("TestViewport", parent, cmpCamera, canvas);
         viewPort.prepare();
 
-
         ƒ.WebGL.addBranch(parent);
         ƒ.WebGL.recalculateAllNodeTransforms();
         viewPort.draw();
 
-        dumpWebGL("After draw");
-
-        // ƒ.WebGL.updateNode(cubeRed);
-        ƒ.WebGL.removeBranch(cubeBlue);
-        dumpWebGL("After remove");
+        let table: {} = {
+            crc3: { width: ƒ.WebGLApi.crc3.canvas.width, height: ƒ.WebGLApi.crc3.canvas.height },
+            crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
+        };
+        console.table(table, ["width", "height"]);
     }
 
     function dumpWebGL(_label: string): void {

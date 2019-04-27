@@ -37,8 +37,6 @@ namespace Fudge {
          */
         public static initializeContext(): HTMLCanvasElement {
             WebGLApi.canvas = document.createElement("canvas");
-            WebGLApi.canvas.width = 800;
-            WebGLApi.canvas.height = 600;
 
             // let canvas: HTMLCanvasElement;
 
@@ -64,8 +62,9 @@ namespace Fudge {
         public static getRect(): Rectangle {
             return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
         }
-        public static getCanvas(): HTMLCanvasElement {
-            return WebGLApi.canvas;
+        public static setCanvasSize(_width: number, _height: number): void {
+            WebGLApi.crc3.canvas.width = _width;
+            WebGLApi.crc3.canvas.height = _height;
         }
 
         /**

@@ -15,7 +15,7 @@ namespace Fudge {
         public camera: ComponentCamera = null; // The camera from which's position and view the tree will be rendered.
         public branch: Node = null; // The first node in the tree(branch) that will be rendered.
         private crc2: CanvasRenderingContext2D = null;
-        private rect: Rectangle = null;
+        private canvas: HTMLCanvasElement = null;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _branch 
@@ -25,8 +25,15 @@ namespace Fudge {
             this.name = _name;
             this.branch = _branch;
             this.camera = _camera;
+            this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
-            this.rect = { x: 0, y: 0, width: _canvas.width, height: _canvas.height };
+        }
+
+        public getContext(): CanvasRenderingContext2D {
+            return this.crc2;
+        }
+        public getRect(): Rectangle {
+            return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
 
         /**
@@ -41,15 +48,18 @@ namespace Fudge {
 
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
                 let rectSource: Rectangle = WebGLApi.getRect();
+                let rectDestination: Rectangle = this.getRect();
+                this.crc2.imageSmoothingEnabled = false;
                 this.crc2.drawImage(
-                    WebGLApi.getCanvas(),
+                    WebGLApi.crc3.canvas,
                     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
-                    this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+                    rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
+                );
             }
         }
 
         public prepare(): void {
-            this.updateCanvasDisplaySizeAndCamera(this.crc2.canvas);
+            this.updateCanvasDisplaySizeAndCamera(this.canvas);
             let backgroundColor: Vector3 = this.camera.getBackgoundColor();
             WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);
@@ -106,12 +116,13 @@ namespace Fudge {
                 canvas.width = width;
                 canvas.height = height;
             }
+            WebGLApi.setCanvasSize(0.2 * width, 0.2 * height);
             // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
             if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            WebGLApi.crc3.viewport(0, 0, width, height);
+            WebGLApi.crc3.viewport(0, 0, 0.2 * width, 0.2 * height); // TODO: scale back to 1!
         }
 
 

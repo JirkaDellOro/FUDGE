@@ -6,10 +6,9 @@ var WebGLRendering;
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
         ƒ.WebGLApi.initializeContext();
-        // console.log(ƒ.WebGLApi.crc3.canvas.width, ƒ.WebGLApi.crc3.canvas.height);
-        let clrRed = new ƒ.Vector3(255, 0, 0);
-        let clrGreen = new ƒ.Vector3(0, 255, 0);
-        let clrBlue = new ƒ.Vector3(0, 0, 255);
+        let clrRed = new ƒ.Vector3(1, 0, 0);
+        let clrGreen = new ƒ.Vector3(0, 1, 0);
+        let clrBlue = new ƒ.Vector3(0, 0, 1);
         let color;
         let mtrRed = new ƒ.Material(`rgb(${clrRed.x}, ${clrRed.y}, ${clrRed.z})`, clrRed, ƒ.ShaderBasic);
         let mtrGreen = new ƒ.Material(`rgb(${clrGreen.x}, ${clrGreen.y}, ${clrGreen.z})`, clrGreen, ƒ.ShaderBasic);
@@ -38,10 +37,11 @@ var WebGLRendering;
         ƒ.WebGL.addBranch(parent);
         ƒ.WebGL.recalculateAllNodeTransforms();
         viewPort.draw();
-        dumpWebGL("After draw");
-        // ƒ.WebGL.updateNode(cubeRed);
-        ƒ.WebGL.removeBranch(cubeBlue);
-        dumpWebGL("After remove");
+        let table = {
+            crc3: { width: ƒ.WebGLApi.crc3.canvas.width, height: ƒ.WebGLApi.crc3.canvas.height },
+            crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
+        };
+        console.table(table, ["width", "height"]);
     }
     function dumpWebGL(_label) {
         console.group(_label);

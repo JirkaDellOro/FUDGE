@@ -479,13 +479,15 @@ declare namespace Fudge {
         camera: ComponentCamera;
         branch: Node;
         private crc2;
-        private rect;
+        private canvas;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _branch
          * @param _camera
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        getContext(): CanvasRenderingContext2D;
+        getRect(): Rectangle;
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
@@ -544,7 +546,7 @@ declare namespace Fudge {
          */
         static initializeContext(): HTMLCanvasElement;
         static getRect(): Rectangle;
-        static getCanvas(): HTMLCanvasElement;
+        static setCanvasSize(_width: number, _height: number): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param shaderInfo

@@ -8,7 +8,7 @@ namespace Fudge {
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
-        private backgroundColor: Vector3 = new Vector3(0.2, 0, 0); // The color of the background the camera will render.
+        private backgroundColor: Vector3 = new Vector3(0, 0, 0); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
 
