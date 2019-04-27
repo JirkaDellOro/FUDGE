@@ -4,12 +4,12 @@ skinparam monochrome true
 title Move
 
 partition mousedown {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
 }
 
 partition mousemove {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	if() then ([no buttons pressed])
 	stop
 	endif
@@ -33,13 +33,8 @@ partition mousemove {
 }
 
 partition mouseup {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
-}
-
-partition prequisitesFulfilled {
-	start
-	:true]
 }
 
 @enduml

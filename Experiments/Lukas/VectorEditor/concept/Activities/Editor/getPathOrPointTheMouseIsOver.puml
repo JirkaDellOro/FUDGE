@@ -1,0 +1,67 @@
+@startuml getPathOrPointTheMouseIsOver
+skinparam monochrome true
+title Editor
+partition getPathOrPointTheMouseIsOver {
+	:_clientPos: Vector2]
+	:found: DrawPath | DrawPoint = null]
+
+	:found = getPointAtPositionInGroup(selectedPoints);
+	note right: cgeck selected Points first
+	if() then ([found])
+		:return found]
+		detach
+	endif
+
+	while() is ([path in selectedPaths])
+		note right 
+		check selected Paths next
+		but start with the Points in those
+		end note
+		:found = getPointAtPositionInGroup(path.points);
+		if() then ([found])
+			:return found]
+			detach
+		endif
+		if() then ([crc.isPointInPath(path.path2d, _clientPos.x, _clientPos.y)])
+			:return path]
+			detach
+		endif
+	endwhile
+
+	while() is ([path in paths])
+		note left
+		check all
+		remaining paths
+		end note
+		if() then ([crc.isPointInPath(path.path2d, _clientPos.x, _clientPos.y)])
+			:return path]
+			detach
+		endif
+	endwhile
+	:return null]
+	detach
+}
+
+partition getPointAtPositionInGroup {
+	:_points: DrawPoint[] .
+	_clientPos: Vector2 ]
+	while() is ([point in _points])
+		if() then ([crc.isPointInPath(point.path2d, _clientPos.x, _clientPos.y)])
+			:return point]
+			detach
+		endif
+		if () then ([tangentsActive])
+			if() then ([crc.isPointInPath(point.tangentIn.path2d, _clientPos.x, _clientPos.y)])
+				:return point.tangentIn]
+				detach
+			endif
+			if() then ([crc.isPointInPath(point.tangentOut.path2d, _clientPos.x, _clientPos.y)])
+				:return point.tangentOut]
+				detach
+			endif
+		endif
+	endwhile
+	:return null]
+}
+
+@enduml

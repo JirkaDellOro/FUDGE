@@ -62,38 +62,44 @@ package FUDGE <<Rectangle>> {
 			' element: HTMLElement
 		}
 
-		interface Action implements UIElement{
+		class Action extends UIElement{
 			name: string
 			buttonElement: HTMLButtonElement
 			subMenu: UIElement
 			shortcut: Shortcut
 			selectedSubAction: Action
 			subActions: Action[]
-			prequisitesFulfilled(): boolean
+			' cursor: Image
 			mousedown()
 			mousemove()
 			mouseup()
+			prequisitesFulfilled(): boolean
+			additionalDisplay(crc: CanvasRenderingContext2D)
 		}
 
-		class SelectAction implements Action {
-
+		class SelectAction extends Action {
+			boxSelect: boolean
+			multiSelectShortcut: Shortcut
+			move: MoveAction
+			startPosition: Vector2
+			currentPosition: Vector2
 		}
-		class MoveAction implements Action {
+		class MoveAction extends Action {
 			- previousPosition: Vector2
 		}
-		class TransformAction implements Action {
+		class TransformAction extends Action {
 
 		}
-		class CombineAction implements Action {
+		class CombineAction extends Action {
 
 		}
-		class CreateShapes implements Action {
+		class CreateShapes extends Action {
 
 		}
-		class AddVertex implements Action {
+		class AddVertex extends Action {
 
 		}
-		class Export implements Action {
+		class Export extends Action {
 
 		}
 

@@ -4,23 +4,29 @@ skinparam monochrome true
 title Action
 
 partition mousedown {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
 }
 
 partition mousemove {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
 }
 
 partition mouseup {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
 }
 
 partition prequisitesFulfilled {
 	start
 	:true]
+	detach
+}
+
+partition additionalDisplay {
+	:_crc: CanvasRenderingContext2D]
+	stop
 }
 
 @enduml

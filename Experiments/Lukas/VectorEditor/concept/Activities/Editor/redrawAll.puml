@@ -18,7 +18,9 @@ partition redrawAll {
 		:p.draw(crc, isSelected) ₼;
 	endwhile
 
+	:reset transformation;
 	:drawTransformationPoint ₼;
+	:selectedAction.additionalDisplay(crc);
 
 	stop 
 }
