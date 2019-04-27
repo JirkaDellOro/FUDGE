@@ -27,7 +27,7 @@ namespace Fudge {
          * @param materialInfo 
          * @param _projection 
          */
-        protected static drawMesh(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void {
+        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void {
             WebGLApi.useBuffer(bufferInfo);
             WebGLApi.useParameter(materialInfo);
             WebGLApi.useProgram(shaderInfo);

@@ -251,7 +251,7 @@ namespace Fudge {
             let bufferInfo: BufferInfo = this.buffers.get(references.mesh).getReference();
             let materialInfo: MaterialInfo = this.parameters.get(references.material).getReference();
             let shaderInfo: ShaderInfo = this.programs.get(references.shader).getReference();
-            this.drawMesh(shaderInfo, bufferInfo, materialInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
         }
 
         /**

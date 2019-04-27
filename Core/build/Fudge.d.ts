@@ -624,7 +624,7 @@ declare namespace Fudge {
          * @param materialInfo
          * @param _projection
          */
-        protected static drawMesh(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
+        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
         protected static useProgram(_shaderInfo: ShaderInfo): void;
         protected static deleteProgram(_program: ShaderInfo): void;

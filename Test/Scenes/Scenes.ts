@@ -11,7 +11,7 @@ namespace Scenes {
         let child: ƒ.Node = node.getChildren()[0];
 
         let grandchild: ƒ.Node;
-        grandchild = createCompleteMeshNode("Grandchild", ƒ.ShaderBasic, new ƒ.Vector3(0, 255, 0), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Vector3(0, 255, 0), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
@@ -19,7 +19,7 @@ namespace Scenes {
     export function createMiniScene(): void {
         ƒ.GLUtil.initializeContext();
 
-        node = createCompleteMeshNode("Node", ƒ.ShaderBasic, new ƒ.Vector3(255, 0, 0), new ƒ.MeshCube(5, 2, 5));
+        node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.scaleX(2);
 
@@ -46,15 +46,13 @@ namespace Scenes {
         return camera;
     }
 
-    export function createCompleteMeshNode(_name: string, _shaderClass: typeof ƒ.ShaderBasic, _color: ƒ.Vector3, _mesh: ƒ.Mesh): ƒ.Node {
+    export function createCompleteMeshNode(_name: string, _material: ƒ.Material, _mesh: ƒ.Mesh): ƒ.Node {
         let node: ƒ.Node = new ƒ.Node(_name);
-        let shader: ƒ.Shader = new _shaderClass();
-        let mtrRed: ƒ.Material = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, _shaderClass);
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
         cmpMesh.setMesh(_mesh);
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(mtrRed);
+        cmpMaterial.initialize(_material);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);

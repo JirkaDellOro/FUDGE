@@ -5,14 +5,14 @@ var Scenes;
         createMiniScene();
         let child = Scenes.node.getChildren()[0];
         let grandchild;
-        grandchild = createCompleteMeshNode("Grandchild", ƒ.ShaderBasic, new ƒ.Vector3(0, 255, 0), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Vector3(0, 255, 0), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
         ƒ.GLUtil.initializeContext();
-        Scenes.node = createCompleteMeshNode("Node", ƒ.ShaderBasic, new ƒ.Vector3(255, 0, 0), new ƒ.MeshCube(5, 2, 5));
+        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
         Scenes.camera = createCamera();
@@ -37,14 +37,12 @@ var Scenes;
         return camera;
     }
     Scenes.createCamera = createCamera;
-    function createCompleteMeshNode(_name, _shaderClass, _color, _mesh) {
+    function createCompleteMeshNode(_name, _material, _mesh) {
         let node = new ƒ.Node(_name);
-        let shader = new _shaderClass();
-        let mtrRed = new ƒ.Material(`rgb(${_color.x}, ${_color.y}, ${_color.z})`, _color, _shaderClass);
         let cmpMesh = new ƒ.ComponentMesh();
         cmpMesh.setMesh(_mesh);
         let cmpMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(mtrRed);
+        cmpMaterial.initialize(_material);
         let cmpTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);

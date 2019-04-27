@@ -1345,7 +1345,7 @@ var Fudge;
          * @param materialInfo
          * @param _projection
          */
-        static drawMesh(shaderInfo, bufferInfo, materialInfo, _projection) {
+        static draw(shaderInfo, bufferInfo, materialInfo, _projection) {
             WebGLApi.useBuffer(bufferInfo);
             WebGLApi.useParameter(materialInfo);
             WebGLApi.useProgram(shaderInfo);
@@ -1671,7 +1671,7 @@ var Fudge;
             let bufferInfo = this.buffers.get(references.mesh).getReference();
             let materialInfo = this.parameters.get(references.material).getReference();
             let shaderInfo = this.programs.get(references.shader).getReference();
-            this.drawMesh(shaderInfo, bufferInfo, materialInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
