@@ -48,6 +48,7 @@ namespace Fudge {
             this.width = _serialization.width;
             this.height = _serialization.height;
             this.depth = _serialization.depth;
+            this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
         }
     }

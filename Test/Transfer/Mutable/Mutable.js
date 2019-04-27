@@ -22,7 +22,7 @@ var Mutable;
         mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
         ƒ.WebGL.recalculateAllNodeTransforms();
-        Scenes.viewPort.drawScene();
+        Scenes.viewPort.draw();
     }
 })(Mutable || (Mutable = {}));
 //# sourceMappingURL=Mutable.js.map

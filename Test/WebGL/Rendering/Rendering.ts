@@ -3,7 +3,10 @@ namespace WebGLRendering {
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
-        ƒ.GLUtil.initializeContext();
+        let canvas: HTMLCanvasElement = Scenes.createCanvas(800,600);
+        document.body.appendChild(canvas);
+        ƒ.WebGLApi.initializeContext();
+        // console.log(ƒ.WebGLApi.crc3.canvas.width, ƒ.WebGLApi.crc3.canvas.height);
 
         let clrRed: ƒ.Vector3 = new ƒ.Vector3(255, 0, 0);
         let clrGreen: ƒ.Vector3 = new ƒ.Vector3(0, 255, 0);
@@ -21,10 +24,10 @@ namespace WebGLRendering {
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube0);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube1);
 
-        cubeRed.cmpTransform.scaleX(2);
-        cubeGreen.cmpTransform.scaleY(2);
+        cubeRed.cmpTransform.scaleX(5);
+        cubeGreen.cmpTransform.scaleY(5);
         let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
-        pivot.scaleZ(2);
+        pivot.scaleZ(5);
         cubeBlue.addComponent(pivot);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 
@@ -32,14 +35,17 @@ namespace WebGLRendering {
         parent.appendChild(cubeRed);
         parent.appendChild(cubeGreen);
         parent.appendChild(cubeBlue);
-
+        
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let viewPort: ƒ.Viewport = new ƒ.Viewport("TestViewport", parent, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera));
+        let viewPort: ƒ.Viewport = new ƒ.Viewport();
+        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        viewPort.initialize("TestViewport", parent, cmpCamera, canvas);
         viewPort.prepare();
+
 
         ƒ.WebGL.addBranch(parent);
         ƒ.WebGL.recalculateAllNodeTransforms();
-        ƒ.WebGL.drawBranch(parent, (<ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera)));
+        viewPort.draw();
 
         dumpWebGL("After draw");
 

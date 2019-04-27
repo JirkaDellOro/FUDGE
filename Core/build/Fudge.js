@@ -214,7 +214,7 @@ var Fudge;
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
-            this.backgroundColor = new Fudge.Vector3(0, 0, 0); // The color of the background the camera will render.
+            this.backgroundColor = new Fudge.Vector3(0.2, 0, 0); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
@@ -246,7 +246,7 @@ var Fudge;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect = Fudge.gl2.canvas.clientWidth / Fudge.gl2.canvas.clientHeight, _fieldOfView = 45) {
+        projectCentral(_aspect = Fudge.WebGLApi.crc3.canvas.clientWidth / Fudge.WebGLApi.crc3.canvas.clientHeight, _fieldOfView = 45) {
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
             this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
@@ -258,7 +258,7 @@ var Fudge;
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        projectOrthographic(_left = 0, _right = Fudge.gl2.canvas.clientWidth, _bottom = Fudge.gl2.canvas.clientHeight, _top = 0) {
+        projectOrthographic(_left = 0, _right = Fudge.WebGLApi.crc3.canvas.clientWidth, _bottom = Fudge.WebGLApi.crc3.canvas.clientHeight, _top = 0) {
             this.orthographic = true;
             this.projectionMatrix = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
@@ -314,45 +314,89 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.mesh = null;
+            // /**
+            //  * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
+            //  */
+            // private computeNormals(): Float32Array {
+            //     let normals: number[] = [];
+            //     let normal: Vector3 = new Vector3;
+            //     let p: Float32Array = this.vertices;
+            //     for (let i: number = 0; i < p.length; i += 9) {
+            //         let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
+            //         let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
+            //         normal = Vector3.normalize(Vector3.cross(vector1, vector2));
+            //         normals.push(normal.x, normal.y, normal.z);
+            //         normals.push(normal.x, normal.y, normal.z);
+            //         normals.push(normal.x, normal.y, normal.z);
+            //     }
+            //     return new Float32Array(normals);
+            // }
+            // private initialize(_size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false): void {
+            //     this.vertices = this.mesh.getVertices();
+            //     this.bufferSpecification = {
+            //         size: _size,
+            //         dataType: _dataType,
+            //         normalize: _normalize,
+            //         stride: 0,
+            //         offset: 0
+            //     };
+            //     this.vertexCount = this.vertices.length / this.bufferSpecification.size;
+            //     if ((this.vertexCount % this.bufferSpecification.size) != 0) {
+            //         console.log(this.vertexCount);
+            //         throw new Error("Number of entries in positions[] and size do not match.");
+            //     }
+            //     this.normals = this.computeNormals();
+            // }
         }
+        // private vertices: Float32Array; // The Mesh's vertexpositions.
+        // private vertexCount: number; // The amount of Vertices that need to be drawn.
+        // private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
+        // private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
         setMesh(_mesh) {
             this.mesh = _mesh;
-            this.initialize();
+            // this.initialize();
         }
         getMesh() {
             return this.mesh;
         }
-        getBufferSpecification() {
-            return this.bufferSpecification;
-        }
-        getVertexCount() {
-            return this.vertexCount;
-        }
-        getNormals() {
-            return this.normals;
-        }
-        /**
-         * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
-         * @param _materialComponent The materialcomponent attached to the same node.
-         */
-        applyColor(_materialComponent) {
-            let colorPerPosition = [];
-            for (let i = 0; i < this.vertexCount; i++) {
-                colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
-            }
-            Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), Fudge.gl2.STATIC_DRAW);
-        }
-        /**
-         * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
-         */
-        setTextureCoordinates() {
-            let textureCoordinates = [];
-            let quadCount = this.vertexCount / 6;
-            for (let i = 0; i < quadCount; i++) {
-                textureCoordinates.push(0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0);
-            }
-            Fudge.gl2.bufferData(Fudge.gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), Fudge.gl2.STATIC_DRAW);
-        }
+        // public getBufferSpecification(): BufferSpecification {
+        //     return this.bufferSpecification;
+        // }
+        // public getVertexCount(): number {
+        //     return this.vertexCount;
+        // }
+        // public getNormals(): Float32Array {
+        //     return this.normals;
+        // }
+        // /**
+        //  * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
+        //  * @param _materialComponent The materialcomponent attached to the same node.
+        //  */
+        // public applyColor(_materialComponent: ComponentMaterial): void {
+        //     let colorPerPosition: number[] = [];
+        //     for (let i: number = 0; i < this.vertexCount; i++) {
+        //         colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
+        //     }
+        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
+        // }
+        // /**
+        //  * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
+        //  */
+        // public setTextureCoordinates(): void {
+        //     let textureCoordinates: number[] = [];
+        //     let quadCount: number = this.vertexCount / 6;
+        //     for (let i: number = 0; i < quadCount; i++) {
+        //         textureCoordinates.push(
+        //             0, 1,
+        //             1, 1,
+        //             0, 0,
+        //             0, 0,
+        //             1, 1,
+        //             1, 0
+        //         );
+        //     }
+        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
+        // }
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
@@ -365,39 +409,6 @@ var Fudge;
             this.setMesh(mesh);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
-        }
-        /**
-         * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
-         */
-        computeNormals() {
-            let normals = [];
-            let normal = new Fudge.Vector3;
-            let p = this.vertices;
-            for (let i = 0; i < p.length; i += 9) {
-                let vector1 = new Fudge.Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
-                let vector2 = new Fudge.Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
-                normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(vector1, vector2));
-                normals.push(normal.x, normal.y, normal.z);
-                normals.push(normal.x, normal.y, normal.z);
-                normals.push(normal.x, normal.y, normal.z);
-            }
-            return new Float32Array(normals);
-        }
-        initialize(_size = 3, _dataType = Fudge.gl2.FLOAT, _normalize = false) {
-            this.vertices = this.mesh.getVertices();
-            this.bufferSpecification = {
-                size: _size,
-                dataType: _dataType,
-                normalize: _normalize,
-                stride: 0,
-                offset: 0
-            };
-            this.vertexCount = this.vertices.length / this.bufferSpecification.size;
-            if ((this.vertexCount % this.bufferSpecification.size) != 0) {
-                console.log(this.vertexCount);
-                throw new Error("Number of entries in positions[] and size do not match.");
-            }
-            this.normals = this.computeNormals();
         }
     }
     Fudge.ComponentMesh = ComponentMesh;
@@ -639,77 +650,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Utility class to sore and/or wrap some functionality.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class GLUtil {
-        /**
-         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
-         * @param _elementID Optional: ID of a predefined canvaselement.
-         */
-        static initializeContext(_elementID) {
-            let canvas;
-            if (_elementID !== undefined) { // Check if ID was passed. 
-                canvas = document.getElementById(_elementID);
-                if (canvas === undefined) { // Check if element by passed ID exists. Otherwise throw Error.
-                    throw new Error("Cannot find a canvas Element named: " + _elementID);
-                }
-            }
-            else { // If no Canvas ID was passed, create new canvas with default width and height. 
-                console.log("Creating new canvas...");
-                canvas = document.createElement("canvas");
-                canvas.id = "canvas";
-                canvas.width = 800;
-                canvas.height = 640;
-                document.body.appendChild(canvas);
-            }
-            Fudge.gl2 = GLUtil.assert(canvas.getContext("webgl2"), "WebGL-context couldn't be created");
-            Fudge.WebGLApi.crc3 = Fudge.gl2; // HACK!
-            return canvas;
-        }
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            Fudge.gl2.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-        }
-        /**
-         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-         * @param _value // value to check against null
-         * @param _message // optional, additional message for the exception
-         */
-        static assert(_value, _message = "") {
-            if (_value === null)
-                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${Fudge.gl2 ? Fudge.gl2.getError() : ""}`);
-            return _value;
-        }
-        /**
-         * Wrapperclass that binds and initializes a texture.
-         * @param _textureSource A string containing the path to the texture.
-         */
-        static createTexture(_textureSource) {
-            let texture = GLUtil.assert(Fudge.gl2.createTexture());
-            Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
-            // Fill the texture with a 1x1 blue pixel.
-            Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, 1, 1, 0, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
-            // Asynchronously load an image
-            let image = new Image();
-            image.crossOrigin = "anonymous";
-            image.src = _textureSource;
-            image.onload = function () {
-                Fudge.gl2.bindTexture(Fudge.gl2.TEXTURE_2D, texture);
-                Fudge.gl2.texImage2D(Fudge.gl2.TEXTURE_2D, 0, Fudge.gl2.RGBA, Fudge.gl2.RGBA, Fudge.gl2.UNSIGNED_BYTE, image);
-                Fudge.gl2.generateMipmap(Fudge.gl2.TEXTURE_2D);
-            };
-        }
-    }
-    Fudge.GLUtil = GLUtil;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
      * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
      */
@@ -744,23 +684,7 @@ var Fudge;
             this.name = _name;
             this.shaderClass = _shader;
             this.color = _color;
-            // this.positionAttributeLocation = GLUtil.assert<number>(this.shader.getAttributeLocation("a_position"));
-            // this.colorUniformLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_color"));
-            // this.matrixLocation = GLUtil.assert<WebGLUniformLocation>(this.shader.getUniformLocation("u_matrix"));
-            this.colorBufferSpecification = {
-                size: 3,
-                dataType: Fudge.gl2.UNSIGNED_BYTE,
-                normalize: true,
-                stride: 0,
-                offset: 0
-            };
-            this.textureBufferSpecification = {
-                size: 2,
-                dataType: Fudge.gl2.FLOAT,
-                normalize: true,
-                stride: 0,
-                offset: 0
-            };
+            // this.textureBufferSpecification = { size: 2, dataType: gl2.FLOAT, normalize: true, stride: 0, offset: 0 };
             this.textureEnabled = false;
             this.textureSource = "";
         }
@@ -777,29 +701,11 @@ var Fudge;
         set Color(_color) {
             this.color = _color;
         }
-        get ColorBufferSpecification() {
-            return this.colorBufferSpecification;
-        }
-        get TextureBufferSpecification() {
-            return this.textureBufferSpecification;
-        }
         get TextureEnabled() {
             return this.textureEnabled;
         }
         get TextureSource() {
             return this.textureSource;
-        }
-        get PositionAttributeLocation() {
-            return this.positionAttributeLocation;
-        }
-        get ColorUniformLocation() {
-            return this.colorUniformLocation;
-        }
-        get MatrixUniformLocation() {
-            return this.matrixLocation;
-        }
-        get TextureCoordinateLocation() {
-            return this.textureCoordinateAtributeLocation;
         }
     }
     Fudge.Material = Material;
@@ -1096,40 +1002,74 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTarget {
+        constructor() {
+            super(...arguments);
+            this.name = "Viewport"; // The name to call this viewport by.
+            this.camera = null; // The camera from which's position and view the tree will be rendered.
+            this.branch = null; // The first node in the tree(branch) that will be rendered.
+            this.crc2 = null;
+            this.rect = null;
+            /*/*
+             * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
+             * @param _material The node's materialcomponent.
+             * @param _mesh The node's meshcomponent.
+             */
+            // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
+            //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+            //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+            //     // _meshComponent.applyColor(_materialComponent);
+            //     //gl2.enableVertexAttribArray(colorUniformLocation);
+            //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
+            // }
+            /*/*
+             * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
+             * @param _material The node's materialcomponent.
+             * @param _mesh The node's meshcomponent.
+             */
+            // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
+            //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+            //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
+            //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
+            //     _meshComponent.setTextureCoordinates();
+            //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
+            //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
+            //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
+            // }
+        }
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _rootNode
+         * @param _branch
          * @param _camera
          */
-        constructor(_name, _rootNode, _camera) {
-            super();
+        initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
-            this.rootNode = _rootNode;
+            this.branch = _branch;
             this.camera = _camera;
-            // this.initializeViewportNodes(this.rootNode);
-        }
-        get Name() {
-            return this.name;
+            this.crc2 = _canvas.getContext("2d");
+            this.rect = { x: 0, y: 0, width: _canvas.width, height: _canvas.height };
         }
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        drawScene() {
+        draw() {
             if (this.camera.isActive) {
                 this.prepare();
                 // HACK! no need to addBranch and recalc for each viewport and frame
-                Fudge.WebGL.addBranch(this.rootNode);
-                Fudge.WebGL.drawBranch(this.rootNode, this.camera);
+                Fudge.WebGL.addBranch(this.branch);
+                Fudge.WebGL.drawBranch(this.branch, this.camera);
+                // TODO: provide for rendering on only a part of canvas, viewport share common canvas
+                let rectSource = Fudge.WebGLApi.getRect();
+                this.crc2.drawImage(Fudge.WebGLApi.getCanvas(), rectSource.x, rectSource.y, rectSource.width, rectSource.height, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
             }
         }
         prepare() {
-            this.updateCanvasDisplaySizeAndCamera(Fudge.gl2.canvas);
+            this.updateCanvasDisplaySizeAndCamera(this.crc2.canvas);
             let backgroundColor = this.camera.getBackgoundColor();
-            Fudge.gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-            Fudge.gl2.clear(Fudge.gl2.COLOR_BUFFER_BIT | Fudge.gl2.DEPTH_BUFFER_BIT);
+            Fudge.WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
+            Fudge.WebGLApi.crc3.clear(Fudge.WebGLApi.crc3.COLOR_BUFFER_BIT | Fudge.WebGLApi.crc3.DEPTH_BUFFER_BIT);
             // Enable backface- and zBuffer-culling.
-            Fudge.gl2.enable(Fudge.gl2.CULL_FACE);
-            Fudge.gl2.enable(Fudge.gl2.DEPTH_TEST);
+            Fudge.WebGLApi.crc3.enable(Fudge.WebGLApi.crc3.CULL_FACE);
+            Fudge.WebGLApi.crc3.enable(Fudge.WebGLApi.crc3.DEPTH_TEST);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -1137,8 +1077,8 @@ var Fudge;
         showSceneGraph() {
             let output = "SceneGraph for this viewport:";
             output += "\n \n";
-            output += this.rootNode.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
+            output += this.branch.name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
@@ -1181,7 +1121,7 @@ var Fudge;
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            Fudge.gl2.viewport(0, 0, width, height);
+            Fudge.WebGLApi.crc3.viewport(0, 0, width, height);
         }
     }
     Fudge.Viewport = Viewport;
@@ -1189,6 +1129,46 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class WebGLApi {
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert(_value, _message = "") {
+            if (_value === null)
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${WebGLApi.crc3 ? WebGLApi.crc3.getError() : ""}`);
+            return _value;
+        }
+        /**
+         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
+         * @param _elementID Optional: ID of a predefined canvaselement.
+         */
+        static initializeContext() {
+            WebGLApi.canvas = document.createElement("canvas");
+            // let canvas: HTMLCanvasElement;
+            // if (_elementID !== undefined) {         // Check if ID was passed. 
+            //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);
+            //     if (canvas === undefined) {         // Check if element by passed ID exists. Otherwise throw Error.
+            //         throw new Error("Cannot find a canvas Element named: " + _elementID);
+            //     }
+            // }
+            // else { // If no Canvas ID was passed, create new canvas with default width and height. 
+            //     console.log("Creating new canvas...");
+            //     canvas = <HTMLCanvasElement>document.createElement("canvas");
+            //     canvas.id = "canvas";
+            //     canvas.width = 800;
+            //     canvas.height = 640;
+            //     document.body.appendChild(canvas);
+            // }
+            WebGLApi.crc3 = WebGLApi.assert(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            return WebGLApi.canvas;
+        }
+        static getRect() {
+            return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
+        }
+        static getCanvas() {
+            return WebGLApi.canvas;
+        }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param shaderInfo
@@ -1200,7 +1180,7 @@ var Fudge;
             WebGLApi.useBuffer(bufferInfo);
             WebGLApi.useParameter(materialInfo);
             WebGLApi.useProgram(shaderInfo);
-            Fudge.GLUtil.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+            WebGLApi.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
             let matrixLocation = shaderInfo.uniforms["u_matrix"];
             // Supply matrixdata to shader. 
             WebGLApi.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
@@ -1217,10 +1197,10 @@ var Fudge;
         static createProgram(_shaderClass) {
             let crc3 = WebGLApi.crc3;
             let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, Fudge.GLUtil.assert(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, WebGLApi.assert(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, WebGLApi.assert(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
-            let error = Fudge.GLUtil.assert(crc3.getProgramInfoLog(shaderProgram));
+            let error = WebGLApi.assert(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
@@ -1234,7 +1214,7 @@ var Fudge;
                 let webGLShader = crc3.createShader(_shaderType);
                 crc3.shaderSource(webGLShader, _shaderCode);
                 crc3.compileShader(webGLShader);
-                let error = Fudge.GLUtil.assert(crc3.getShaderInfoLog(webGLShader));
+                let error = WebGLApi.assert(crc3.getShaderInfoLog(webGLShader));
                 if (error !== "") {
                     throw new Error("Error compiling shader: " + error);
                 }
@@ -1249,7 +1229,7 @@ var Fudge;
                 let detectedAttributes = {};
                 let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
                 for (let i = 0; i < attributeCount; i++) {
-                    let attributeInfo = Fudge.GLUtil.assert(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo = WebGLApi.assert(crc3.getActiveAttrib(shaderProgram, i));
                     if (!attributeInfo) {
                         break;
                     }
@@ -1261,11 +1241,11 @@ var Fudge;
                 let detectedUniforms = {};
                 let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
                 for (let i = 0; i < uniformCount; i++) {
-                    let info = Fudge.GLUtil.assert(crc3.getActiveUniform(shaderProgram, i));
+                    let info = WebGLApi.assert(crc3.getActiveUniform(shaderProgram, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = Fudge.GLUtil.assert(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = WebGLApi.assert(crc3.getUniformLocation(shaderProgram, info.name));
                 }
                 return detectedUniforms;
             }
@@ -1284,7 +1264,7 @@ var Fudge;
         // #endregion
         // #region Meshbuffer
         static createBuffer(_mesh) {
-            let buffer = Fudge.GLUtil.assert(WebGLApi.crc3.createBuffer());
+            let buffer = WebGLApi.assert(WebGLApi.crc3.createBuffer());
             WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
             WebGLApi.crc3.bufferData(WebGLApi.crc3.ARRAY_BUFFER, _mesh.getVertices(), WebGLApi.crc3.STATIC_DRAW);
             let bufferInfo = {
@@ -1307,7 +1287,7 @@ var Fudge;
         // #endregion
         // #region MaterialParameters
         static createParameter(_material) {
-            let vao = Fudge.GLUtil.assert(Fudge.gl2.createVertexArray());
+            let vao = WebGLApi.assert(WebGLApi.crc3.createVertexArray());
             let materialInfo = {
                 vao: vao,
                 color: _material.Color
@@ -1323,7 +1303,24 @@ var Fudge;
                 WebGLApi.crc3.deleteVertexArray(_materialInfo.vao);
             }
         }
+        // #endregion
+        // #region Utilities
+        // TODO: prepare for multiple contexts/canvases
+        // export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
+        /**
+         * Utility class to sore and/or wrap some functionality.
+         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+         */
+        /**
+                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+                 */
+        static attributePointer(_attributeLocation, _bufferSpecification) {
+            WebGLApi.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
     }
+    WebGLApi.canvas = null;
     Fudge.WebGLApi = WebGLApi;
 })(Fudge || (Fudge = {}));
 /// <reference path="WebGLApi.ts"/>
@@ -2288,6 +2285,7 @@ var Fudge;
             this.width = _serialization.width;
             this.height = _serialization.height;
             this.depth = _serialization.depth;
+            this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
         }
     }

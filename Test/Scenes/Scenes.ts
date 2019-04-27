@@ -9,7 +9,7 @@ namespace Scenes {
         createMiniScene();
 
         let child: ƒ.Node = node.getChildren()[0];
-        
+
         let grandchild: ƒ.Node;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Vector3(0, 255, 0), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
@@ -17,7 +17,7 @@ namespace Scenes {
     }
 
     export function createMiniScene(): void {
-        ƒ.GLUtil.initializeContext();
+        ƒ.WebGLApi.initializeContext();
 
         node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
@@ -30,7 +30,8 @@ namespace Scenes {
     }
 
     export function createViewport(): void {
-        viewPort = new ƒ.Viewport("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera));
+        viewPort = new ƒ.Viewport();
+        viewPort.initialize("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera), null);
         // viewPort.drawScene();
         viewPort.showSceneGraph();
     }
@@ -58,5 +59,13 @@ namespace Scenes {
         node.addComponent(cmpMaterial);
         node.addComponent(cmpTransform);
         return node;
+    }
+
+    export function createCanvas(_width: number = 800, _height: number = 600): HTMLCanvasElement {
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("canvas");
+        canvas.id = "canvas";
+        canvas.width = _width;
+        canvas.height = _height;
+        return canvas;
     }
 }

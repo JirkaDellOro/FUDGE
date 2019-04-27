@@ -11,7 +11,7 @@ var Scenes;
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
-        ƒ.GLUtil.initializeContext();
+        ƒ.WebGLApi.initializeContext();
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
@@ -21,7 +21,8 @@ var Scenes;
     }
     Scenes.createMiniScene = createMiniScene;
     function createViewport() {
-        Scenes.viewPort = new ƒ.Viewport("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera));
+        Scenes.viewPort = new ƒ.Viewport();
+        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), null);
         // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }
@@ -50,5 +51,13 @@ var Scenes;
         return node;
     }
     Scenes.createCompleteMeshNode = createCompleteMeshNode;
+    function createCanvas(_width = 800, _height = 600) {
+        let canvas = document.createElement("canvas");
+        canvas.id = "canvas";
+        canvas.width = _width;
+        canvas.height = _height;
+        return canvas;
+    }
+    Scenes.createCanvas = createCanvas;
 })(Scenes || (Scenes = {}));
 //# sourceMappingURL=Scenes.js.map

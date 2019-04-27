@@ -19,6 +19,52 @@ namespace Fudge {
 
     export class WebGLApi {
         public static crc3: WebGL2RenderingContext;
+        private static canvas: HTMLCanvasElement = null;
+
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        public static assert<T>(_value: T | null, _message: string = ""): T {
+            if (_value === null)
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${WebGLApi.crc3 ? WebGLApi.crc3.getError() : ""}`);
+            return _value;
+        }
+        /**
+         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
+         * @param _elementID Optional: ID of a predefined canvaselement.
+         */
+        public static initializeContext(): HTMLCanvasElement {
+            WebGLApi.canvas = document.createElement("canvas");
+
+            // let canvas: HTMLCanvasElement;
+
+            // if (_elementID !== undefined) {         // Check if ID was passed. 
+            //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);
+            //     if (canvas === undefined) {         // Check if element by passed ID exists. Otherwise throw Error.
+            //         throw new Error("Cannot find a canvas Element named: " + _elementID);
+            //     }
+            // }
+            // else { // If no Canvas ID was passed, create new canvas with default width and height. 
+            //     console.log("Creating new canvas...");
+            //     canvas = <HTMLCanvasElement>document.createElement("canvas");
+            //     canvas.id = "canvas";
+            //     canvas.width = 800;
+            //     canvas.height = 640;
+            //     document.body.appendChild(canvas);
+            // }
+            
+            WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            return WebGLApi.canvas;
+        }
+
+        public static getRect(): Rectangle {
+            return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
+        }
+        public static getCanvas(): HTMLCanvasElement {
+            return WebGLApi.canvas;
+        }
 
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -31,7 +77,7 @@ namespace Fudge {
             WebGLApi.useBuffer(bufferInfo);
             WebGLApi.useParameter(materialInfo);
             WebGLApi.useProgram(shaderInfo);
-            GLUtil.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+            WebGLApi.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
 
             let matrixLocation: WebGLUniformLocation = shaderInfo.uniforms["u_matrix"];
             // Supply matrixdata to shader. 
@@ -51,10 +97,10 @@ namespace Fudge {
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
             let crc3: WebGL2RenderingContext = WebGLApi.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, GLUtil.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, WebGLApi.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, WebGLApi.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
-            let error: string = GLUtil.assert<string>(crc3.getProgramInfoLog(shaderProgram));
+            let error: string = WebGLApi.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
@@ -70,7 +116,7 @@ namespace Fudge {
                 let webGLShader: WebGLShader = crc3.createShader(_shaderType);
                 crc3.shaderSource(webGLShader, _shaderCode);
                 crc3.compileShader(webGLShader);
-                let error: string = GLUtil.assert<string>(crc3.getShaderInfoLog(webGLShader));
+                let error: string = WebGLApi.assert<string>(crc3.getShaderInfoLog(webGLShader));
                 if (error !== "") {
                     throw new Error("Error compiling shader: " + error);
                 }
@@ -85,7 +131,7 @@ namespace Fudge {
                 let detectedAttributes: { [name: string]: number } = {};
                 let attributeCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
                 for (let i: number = 0; i < attributeCount; i++) {
-                    let attributeInfo: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo: WebGLActiveInfo = WebGLApi.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
                     if (!attributeInfo) {
                         break;
                     }
@@ -97,11 +143,11 @@ namespace Fudge {
                 let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
                 let uniformCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
                 for (let i: number = 0; i < uniformCount; i++) {
-                    let info: WebGLActiveInfo = GLUtil.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
+                    let info: WebGLActiveInfo = WebGLApi.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = GLUtil.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = WebGLApi.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
                 }
                 return detectedUniforms;
             }
@@ -121,7 +167,7 @@ namespace Fudge {
 
         // #region Meshbuffer
         protected static createBuffer(_mesh: Mesh): BufferInfo {
-            let buffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(WebGLApi.crc3.createBuffer());
+            let buffer: WebGLBuffer = WebGLApi.assert<WebGLBuffer>(WebGLApi.crc3.createBuffer());
             WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
             WebGLApi.crc3.bufferData(WebGLApi.crc3.ARRAY_BUFFER, _mesh.getVertices(), WebGLApi.crc3.STATIC_DRAW);
             let bufferInfo: BufferInfo = {
@@ -145,7 +191,7 @@ namespace Fudge {
 
         // #region MaterialParameters
         protected static createParameter(_material: Material): MaterialInfo {
-            let vao: WebGLVertexArrayObject = GLUtil.assert<WebGLVertexArrayObject>(gl2.createVertexArray());
+            let vao: WebGLVertexArrayObject = WebGLApi.assert<WebGLVertexArrayObject>(WebGLApi.crc3.createVertexArray());
             let materialInfo: MaterialInfo = {
                 vao: vao,
                 color: _material.Color
@@ -161,6 +207,47 @@ namespace Fudge {
                 WebGLApi.crc3.deleteVertexArray(_materialInfo.vao);
             }
         }
+        // #endregion
+
+        // #region Utilities
+
+        // TODO: prepare for multiple contexts/canvases
+        // export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
+        /**
+         * Utility class to sore and/or wrap some functionality.
+         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+         */
+
+        /**
+                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+                 */
+        private static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
+            WebGLApi.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
+
+
+        /*/*
+         * Wrapperclass that binds and initializes a texture.
+         * @param _textureSource A string containing the path to the texture.
+         */
+        // public static createTexture(_textureSource: string): void {
+        //     let texture: WebGLTexture = GLUtil.assert<WebGLTexture>(gl2.createTexture());
+        //     gl2.bindTexture(gl2.TEXTURE_2D, texture);
+        //     // Fill the texture with a 1x1 blue pixel.
+        //     gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, 1, 1, 0, gl2.RGBA, gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
+        //     // Asynchronously load an image
+        //     let image: HTMLImageElement = new Image();
+        //     image.crossOrigin = "anonymous";
+        //     image.src = _textureSource;
+        //     image.onload = function (): void {
+        //         gl2.bindTexture(gl2.TEXTURE_2D, texture);
+        //         gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, gl2.RGBA, gl2.UNSIGNED_BYTE, image);
+        //         gl2.generateMipmap(gl2.TEXTURE_2D);
+        //     };
+        // }
+
         // #endregion
     }
 }

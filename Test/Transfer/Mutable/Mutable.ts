@@ -28,6 +28,6 @@ namespace Mutable {
         cmpTransform.mutate(mutator);
 
         ƒ.WebGL.recalculateAllNodeTransforms();
-        Scenes.viewPort.drawScene();
+        Scenes.viewPort.draw();
     }
 }

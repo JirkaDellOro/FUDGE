@@ -1,49 +1,61 @@
 namespace Fudge {
+    export interface Rectangle {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+
     /**
      * Represents the interface between the scenegraph, the camera and the renderingcontext.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Viewport extends EventTarget {
-        private name: string; // The name to call this viewport by.
-        private camera: ComponentCamera; // The camera from which's position and view the tree will be rendered.
-        private rootNode: Node; // The first node in the tree(branch) that will be rendered.
+        public name: string = "Viewport"; // The name to call this viewport by.
+        public camera: ComponentCamera = null; // The camera from which's position and view the tree will be rendered.
+        public branch: Node = null; // The first node in the tree(branch) that will be rendered.
+        private crc2: CanvasRenderingContext2D = null;
+        private rect: Rectangle = null;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _rootNode 
+         * @param _branch 
          * @param _camera 
          */
-        public constructor(_name: string, _rootNode: Node, _camera: ComponentCamera) {
-            super();
+        public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
-            this.rootNode = _rootNode;
+            this.branch = _branch;
             this.camera = _camera;
-            // this.initializeViewportNodes(this.rootNode);
+            this.crc2 = _canvas.getContext("2d");
+            this.rect = { x: 0, y: 0, width: _canvas.width, height: _canvas.height };
         }
 
-        public get Name(): string {
-            return this.name;
-        }
- 
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        public drawScene(): void {
+        public draw(): void {
             if (this.camera.isActive) {
                 this.prepare();
                 // HACK! no need to addBranch and recalc for each viewport and frame
-                WebGL.addBranch(this.rootNode);
-                WebGL.drawBranch(this.rootNode, this.camera);
+                WebGL.addBranch(this.branch);
+                WebGL.drawBranch(this.branch, this.camera);
+
+                // TODO: provide for rendering on only a part of canvas, viewport share common canvas
+                let rectSource: Rectangle = WebGLApi.getRect();
+                this.crc2.drawImage(
+                    WebGLApi.getCanvas(),
+                    rectSource.x, rectSource.y, rectSource.width, rectSource.height,
+                    this.rect.x, this.rect.y, this.rect.width, this.rect.height);
             }
         }
 
         public prepare(): void {
-            this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
+            this.updateCanvasDisplaySizeAndCamera(this.crc2.canvas);
             let backgroundColor: Vector3 = this.camera.getBackgoundColor();
-            gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-            gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
+            WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
+            WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);
             // Enable backface- and zBuffer-culling.
-            gl2.enable(gl2.CULL_FACE);
-            gl2.enable(gl2.DEPTH_TEST);
+            WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
+            WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
         }
 
         /**
@@ -52,8 +64,8 @@ namespace Fudge {
         public showSceneGraph(): void {
             let output: string = "SceneGraph for this viewport:";
             output += "\n \n";
-            output += this.rootNode.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
+            output += this.branch.name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
 
         /**
@@ -99,10 +111,10 @@ namespace Fudge {
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            gl2.viewport(0, 0, width, height);
+            WebGLApi.crc3.viewport(0, 0, width, height);
         }
 
-        
+
         /*/*
          * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
          * @param _material The node's materialcomponent.
