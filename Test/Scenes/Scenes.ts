@@ -5,6 +5,39 @@ namespace Scenes {
     export let camera: ƒ.Node;
     export let viewPort: ƒ.Viewport;
 
+    export function createAxisCross(): ƒ.Node {
+        let clrRed: ƒ.Vector3 = new ƒ.Vector3(1, 0, 0);
+        let clrGreen: ƒ.Vector3 = new ƒ.Vector3(0, 1, 0);
+        let clrBlue: ƒ.Vector3 = new ƒ.Vector3(0, 0, 1);
+        
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
+        
+        let meshCube: ƒ.MeshCube = new ƒ.MeshCube(1, 1, 1);
+        
+        let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
+        let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
+        let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+        
+        cubeRed.cmpTransform.scaleX(2);
+        cubeGreen.cmpTransform.scaleY(2);
+        // cubeBlue.cmpTransform.scaleZ(2);
+        // using pivot on blue node, just for testing...
+        let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
+        pivot.scaleZ(2);
+        cubeBlue.addComponent(pivot);
+        cubeBlue.removeComponent(cubeBlue.cmpTransform);
+        
+        // create branch
+        let branch: ƒ.Node = new ƒ.Node("AxisCross");
+        branch.appendChild(cubeRed);
+        branch.appendChild(cubeGreen);
+        branch.appendChild(cubeBlue);
+
+        return branch;
+    }
+
     export function createThreeLevelNodeHierarchy(): void {
         createMiniScene();
 

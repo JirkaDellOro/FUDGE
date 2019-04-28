@@ -1,6 +1,33 @@
 var Scenes;
 (function (Scenes) {
     var ƒ = Fudge;
+    function createAxisCross() {
+        let clrRed = new ƒ.Vector3(1, 0, 0);
+        let clrGreen = new ƒ.Vector3(0, 1, 0);
+        let clrBlue = new ƒ.Vector3(0, 0, 1);
+        let mtrRed = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
+        let mtrGreen = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
+        let mtrBlue = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
+        let meshCube = new ƒ.MeshCube(1, 1, 1);
+        let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
+        let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
+        let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+        cubeRed.cmpTransform.scaleX(2);
+        cubeGreen.cmpTransform.scaleY(2);
+        // cubeBlue.cmpTransform.scaleZ(2);
+        // using pivot on blue node, just for testing...
+        let pivot = new ƒ.ComponentPivot();
+        pivot.scaleZ(2);
+        cubeBlue.addComponent(pivot);
+        cubeBlue.removeComponent(cubeBlue.cmpTransform);
+        // create branch
+        let branch = new ƒ.Node("AxisCross");
+        branch.appendChild(cubeRed);
+        branch.appendChild(cubeGreen);
+        branch.appendChild(cubeBlue);
+        return branch;
+    }
+    Scenes.createAxisCross = createAxisCross;
     function createThreeLevelNodeHierarchy() {
         createMiniScene();
         let child = Scenes.node.getChildren()[0];

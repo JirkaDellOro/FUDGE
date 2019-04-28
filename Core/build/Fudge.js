@@ -1393,7 +1393,7 @@ var Fudge;
                     this.addNode(node);
                 }
                 catch (_e) {
-                    console.log(_e);
+                    //console.log(_e);
                 }
         }
         // #endregion
@@ -1513,7 +1513,7 @@ var Fudge;
             let finalTransform = world;
             let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
             if (cmpPivot)
-                finalTransform = Fudge.Matrix4x4.multiply(cmpPivot.local, world);
+                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
             // multiply camera matrix
             let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
             this.drawNode(_node, projection);

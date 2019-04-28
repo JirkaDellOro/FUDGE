@@ -93,7 +93,7 @@ namespace Fudge {
                 try {
                     this.addNode(node);
                 } catch (_e) {
-                    console.log(_e);
+                    //console.log(_e);
                 }
         }
         // #endregion
@@ -230,7 +230,7 @@ namespace Fudge {
             let finalTransform: Matrix4x4 = world;
             let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (cmpPivot)
-                finalTransform = Matrix4x4.multiply(cmpPivot.local, world);
+                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
 
             // multiply camera matrix
             let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
