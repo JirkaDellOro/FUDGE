@@ -1,4 +1,4 @@
-@startuml UIHandler
+@startuml redrawAll
 skinparam monochrome true
 
 title Editor

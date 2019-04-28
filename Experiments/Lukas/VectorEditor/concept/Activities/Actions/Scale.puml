@@ -14,6 +14,7 @@ partition mousemove {
 	if() then ([no buttons pressed])
 		stop
 	endif
+	' TODO: keep ratio
 	:currentPosition: Vector2 = _event.clientX, _event.clientY
 	delta: Vector2 = previousPosition - currentPosition]
 	:scale: Vector2 = (currentPosition - referencePoint) 

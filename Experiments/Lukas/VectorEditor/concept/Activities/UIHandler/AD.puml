@@ -38,7 +38,8 @@ partition createUI {
 		endwhile
 	endwhile
 	:add Eventlisteners to MainMenu 
-	& secondary Menus container;
+	& secondary Menus 
+	& propertiesMenu container;
 	if () then([!Editor.selectedAction])
 		:Editor.selectedAction = actions[0];
 	endif
@@ -65,10 +66,14 @@ partition updateUI {
 	endwhile
 	:select Editor.selectedAction.buttonElement;
 	:make Editor.selectedAction.subMenu visible;
-	if() then ([!Editor.selectedAction.selectedSubAction])
+	if() then ([!Editor.selectedAction.selectedSubAction &&
+	Editor.selectedAction.subActions.length > 0])
 		:E.sA.selectedSubAction = E.sA.subActions[0];
 	endif
-	:select E.sA.selectedSubAction;
+	if() then ([Editor.selectedAction.selectedSubAction])
+		:select E.sA.selectedSubAction button;
+	endif
+	:update propertiesMenu;
 	stop
 }
 

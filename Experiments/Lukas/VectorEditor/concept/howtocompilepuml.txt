@@ -1,0 +1,1 @@
+java -jar "D:\Programme\plantuml\plantuml.jar" "D:\#Daten\MasterThesis\FUDGE\Experiments\Lukas\VectorEditor\concept\*\*\*.puml" -tsvg -o "D:\#Daten\MasterThesis\FUDGE\Experiments\Lukas\VectorEditor\concept\images"

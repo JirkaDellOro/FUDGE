@@ -38,4 +38,17 @@ partition additionalDisplay {
 	stop
 }
 
+partition addAdditionalSubMenuOptions {
+	start
+	stop
+}
+
+partition exit {
+	start
+	if() then ([selectedSubAction])
+		:selectedSubAction.exit();
+	endif
+	stop
+}
+
 @enduml

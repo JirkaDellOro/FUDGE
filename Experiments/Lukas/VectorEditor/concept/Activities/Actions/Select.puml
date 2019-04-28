@@ -1,6 +1,6 @@
 @startuml Select
-!include VectorEditor/concept/Activities/Design.iuml
-' skinparam monochrome true
+' !include VectorEditor/concept/Activities/Design.iuml
+skinparam monochrome true
 
 title Select
 
@@ -25,6 +25,8 @@ partition mousedown {
 	endif
 	stop
 }
+
+' TODO: doubleclick on Vertex to move
 
 partition mousemove {
 	:_event: MouseEvent]

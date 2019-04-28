@@ -15,6 +15,23 @@ package FUDGE <<Rectangle>> {
 		}
 	}
 
+	package Math <<rectangle>> {
+		class Vector2 extends Mutable.Mutator{
+			+ x: number
+			+ y: number
+
+			+ equals(obj: Vector2): boolean
+			+ magnitude(): number
+			+ sqrMagnitude(): number
+			+ normalize(): Vector2
+			+ perpendicularVector(): Vector2
+			+ scaled(s: number): Vector2
+
+			{static} dot(a: Vector2, b: Vector2): number
+			{static} add(...params: Vector2[]): Vector2
+		}
+	}
+
 	package VectorEditor <<Rectangle>>{
 		interface Shortcut{
 			keys: number[]
@@ -42,6 +59,7 @@ package FUDGE <<Rectangle>> {
 			+ pressedKeys: number[]
 			- uiHandler: UIHandler
 			- showTangentsShortcut: Shortcut
+			- quadraticShapesShortcut: Shortcut
 			+ tangentsActive: boolean
 
 			- redrawAll()
@@ -75,19 +93,21 @@ package FUDGE <<Rectangle>> {
 			mouseup()
 			prequisitesFulfilled(): boolean
 			additionalDisplay(crc: CanvasRenderingContext2D)
+			addAdditionalSubMenuOptions()
+			exit()
 		}
 
-		class SelectAction extends Action {
+		class Select extends Action {
 			boxSelect: boolean
 			multiSelectShortcut: Shortcut
 			move: MoveAction
 			startPosition: Vector2
 			currentPosition: Vector2
 		}
-		class MoveAction extends Action {
+		class Move extends Action {
 			- previousPosition: Vector2
 		}
-		class TransformAction extends Action {
+		class Transform extends Action {
 			scaleUp: DrawPoint
 			scaleDown: DrawPoint
 			scaleLeft: DrawPoint
@@ -103,21 +123,35 @@ package FUDGE <<Rectangle>> {
 			rotate: RotateAction
 			scale: ScaleAction
 		}
-		class ScaleAction extends Action {
+		class Scale extends Action {
 			- previousPosition: Vector2
 			- referencePoint: Vector2
 			- mode: "x" | "y" | "xy"
 		}
-		class RotateAction extends Action {
+		class Rotate extends Action {
 			- previousPosition: Vector2
 		}
-		class CombineAction extends Action {
-
-		}
 		class CreateShapes extends Action {
+			- startPosition: Vector2
+			- currentPosition: Vector2
+			- shapes: Shape[]
+			- selectedShape: Shape
+		}
+		interface Shape {
+			identifier: string
+			createDrawPath(pos1: Vector2, pos2: Vector2): DrawPath
+			additionalParameters:Object
+		}
+		class VertexManipulation extends Action {
 
 		}
-		class AddVertex extends Action {
+		class AddVertexToExistingPath extends Action {
+
+		}
+		class MakeNewPathFromVertices extends Action {
+			- newPath: DrawPath;
+		}
+		class CombineAction extends Action {
 
 		}
 		class Export extends Action {
@@ -130,6 +164,13 @@ package FUDGE <<Rectangle>> {
 		Editor -- "1" Action
 		Editor .. UIHandler
 		Action "1"--"n" Action
+		CreateShapes -- "n" Shape
+		Transform -- Move : subaction
+		Transform -- Scale : subaction
+		Transform -- Rotate : subaction
+		Select -- Move : subaction
+		VertexManipulation -- AddVertexToExistingPath : subaction
+		VertexManipulation -- MakeNewPathFromVertices : subaction
 	}
 	package DrawTypes <<Rectangle>>{
 		class DrawObject extends Mutable.Mutator{
@@ -179,22 +220,6 @@ package FUDGE <<Rectangle>> {
 		' Associations
 		DrawPath "1" -- "n" Vertex
 		Vertex "1" -- "2" TangentPoint
-	}
-
-	package Math <<rectangle>> {
-		class Vector2 extends Mutable.Mutator{
-			+ x: number
-			+ y: number
-
-			+ equals(obj: Vector2): boolean
-			+ magnitude(): number
-			+ sqrMagnitude(): number
-			+ normalize(): Vector2
-			+ perpendicularVector(): Vector2
-			+ scaled(s: number): Vector2
-
-			{static} dot(a: Vector2, b: Vector2): number
-			{static} add(...params: Vector2[]): Vector2
 	}
 }
 @enduml
