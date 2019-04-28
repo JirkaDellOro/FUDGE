@@ -88,7 +88,28 @@ package FUDGE <<Rectangle>> {
 			- previousPosition: Vector2
 		}
 		class TransformAction extends Action {
-
+			scaleUp: DrawPoint
+			scaleDown: DrawPoint
+			scaleLeft: DrawPoint
+			scaleRight: DrawPoint
+			scaleUpLeft: DrawPoint
+			scaleUpRight: DrawPoint
+			scaleDownLeft: DrawPoint
+			scaleDownRight: DrawPoint
+			scalePoints: DrawPoint[]
+			selectedScalePoint: DrawPoint
+			
+			move: MoveAction
+			rotate: RotateAction
+			scale: ScaleAction
+		}
+		class ScaleAction extends Action {
+			- previousPosition: Vector2
+			- referencePoint: Vector2
+			- mode: "x" | "y" | "xy"
+		}
+		class RotateAction extends Action {
+			- previousPosition: Vector2
 		}
 		class CombineAction extends Action {
 
@@ -116,7 +137,7 @@ package FUDGE <<Rectangle>> {
 			+ name: String
 			+ order: number
 			+ lineWidth: number
-			+ transformationPoint: Vector2
+			+ transformationPoint: DrawPoint
 			# path2d: Path2D
 			{static} sort(a: DrawObject, b: DrawObject): number
 		}
@@ -125,19 +146,15 @@ package FUDGE <<Rectangle>> {
 			- closed: boolean
 			+ points: Vertex[]
 			+ fillColor: string | CanvasGradient | CanvasPattern
-			+ transformationPoint: Vector2;
+			' + transformationPoint: Vector2;
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
 			generatePath2D()
 			addVertexAtPos(vertex: Vertex, index: number = -1)
-			getPath2D(): Path2D
 			move(d: Vector2)
 		}
 
 		class DrawPoint extends Math.Vector2{
 			# path2d: Path2D
-			' + x: number
-			' + y: number
-			getPath2D(): Path2D
 			generatePath2D(): Path2D
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
 			move(delta: Vector2)
@@ -145,11 +162,13 @@ package FUDGE <<Rectangle>> {
 		}
 
 		class Vertex extends DrawPoint {
+			activated: boolean
 			tangentIn: TangentPoint
 			tangentOut: TangentPoint
 			+ parent: DrawPath
 			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
 			move(dx: number, dy: number)
+			activate()
 		}
 
 		class TangentPoint extends DrawPoint {

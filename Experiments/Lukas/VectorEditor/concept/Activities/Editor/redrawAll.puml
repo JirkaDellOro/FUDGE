@@ -18,9 +18,17 @@ partition redrawAll {
 		:p.draw(crc, isSelected) ₼;
 	endwhile
 
-	:reset transformation;
-	:drawTransformationPoint ₼;
+	while() is ([point of selectedPoints])
+		if() then ([point is Vertex])
+			:point.draw(crc, true, tangentsActive);
+		else
+			:point.draw(crc, true);
+		endif
+	endwhile
+
+	' :reset transformation;
 	:selectedAction.additionalDisplay(crc);
+	:drawTransformationPoint ₼;
 
 	stop 
 }

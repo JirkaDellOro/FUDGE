@@ -5,6 +5,7 @@ title Move
 
 partition mousedown {
 	:_event: MouseEvent]
+	:previousPosition = (_event.clientX, _event.clientY);
 	stop
 }
 
@@ -29,12 +30,24 @@ partition mousemove {
 	else
 		:Editor.transformationPoint += delta;
 	endif
+	:previousPosition = (_event.clientX, _event.clientY);
 	stop
 }
 
 partition mouseup {
 	:_event: MouseEvent]
 	stop
+}
+
+
+partition prequisitesFulfilled {
+	start
+	if() then([selectedPaths.length > 0 || selectedPoints.length > 0])
+		:true]
+		detach
+	endif
+	:false]
+	detach
 }
 
 @enduml
