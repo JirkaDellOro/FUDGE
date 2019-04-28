@@ -14,25 +14,30 @@ namespace Fudge {
         public name: string = "Viewport"; // The name to call this viewport by.
         public camera: ComponentCamera = null; // The camera from which's position and view the tree will be rendered.
         public branch: Node = null; // The first node in the tree(branch) that will be rendered.
+        public rectSource: Rectangle;
+        public rectDestination: Rectangle;
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _branch 
-         * @param _camera 
-         */
+                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+                 * @param _branch 
+                 * @param _camera 
+                 */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
             this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
+
+            this.rectSource = WebGLApi.getCanvasRect();
+            this.rectDestination = this.getCanvasRectangle();
         }
 
         public getContext(): CanvasRenderingContext2D {
             return this.crc2;
         }
-        public getRect(): Rectangle {
+        public getCanvasRectangle(): Rectangle {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
 
@@ -47,19 +52,25 @@ namespace Fudge {
                 WebGL.drawBranch(this.branch, this.camera);
 
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                let rectSource: Rectangle = WebGLApi.getRect();
-                let rectDestination: Rectangle = this.getRect();
+                let rectSource: Rectangle = WebGLApi.getCanvasRect();
+                let rectDestination: Rectangle = this.getCanvasRectangle();
                 this.crc2.imageSmoothingEnabled = false;
                 this.crc2.drawImage(
                     WebGLApi.crc3.canvas,
-                    rectSource.x, rectSource.y, rectSource.width, rectSource.height,
-                    rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
+                    this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+                    this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
                 );
+                // this.crc2.drawImage(
+                //     WebGLApi.crc3.canvas,
+                //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
+                //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
+                // );
             }
         }
 
         public prepare(): void {
-            this.updateCanvasDisplaySizeAndCamera(this.canvas);
+            // this.updateCanvasDisplaySizeAndCamera(this.canvas);
+            this.camera.projectCentral(1); // square
             let backgroundColor: Vector3 = this.camera.getBackgoundColor();
             WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);

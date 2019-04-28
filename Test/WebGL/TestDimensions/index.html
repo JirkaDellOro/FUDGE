@@ -19,16 +19,28 @@
         }
 
         canvas {
-            float: left;
+            image-rendering: pixelated;
+            display: block;
+            position: absolute;
         }
 
-        input {
-            width: 5em;
-            margin-right: 2em;
+        input[type=number] {
+            width: 4em;
+            margin-right: 1em;
+        }
+
+        div {
+            width: 30em;
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            background-color: beige;
         }
     </style>
 </head>
 
 <body>
-    <canvas width="400" height="300" id="viewport"></canvas>
+    <canvas id="viewport"></canvas>
+    <div name="menu">
+    </div>
 </body>

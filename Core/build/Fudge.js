@@ -1037,21 +1037,23 @@ var Fudge;
             // }
         }
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _branch
-         * @param _camera
-         */
+                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+                 * @param _branch
+                 * @param _camera
+                 */
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
             this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
+            this.rectSource = Fudge.WebGLApi.getCanvasRect();
+            this.rectDestination = this.getCanvasRectangle();
         }
         getContext() {
             return this.crc2;
         }
-        getRect() {
+        getCanvasRectangle() {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
         /**
@@ -1064,14 +1066,20 @@ var Fudge;
                 Fudge.WebGL.addBranch(this.branch);
                 Fudge.WebGL.drawBranch(this.branch, this.camera);
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                let rectSource = Fudge.WebGLApi.getRect();
-                let rectDestination = this.getRect();
+                let rectSource = Fudge.WebGLApi.getCanvasRect();
+                let rectDestination = this.getCanvasRectangle();
                 this.crc2.imageSmoothingEnabled = false;
-                this.crc2.drawImage(Fudge.WebGLApi.crc3.canvas, rectSource.x, rectSource.y, rectSource.width, rectSource.height, rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height);
+                this.crc2.drawImage(Fudge.WebGLApi.crc3.canvas, this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
+                // this.crc2.drawImage(
+                //     WebGLApi.crc3.canvas,
+                //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
+                //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
+                // );
             }
         }
         prepare() {
-            this.updateCanvasDisplaySizeAndCamera(this.canvas);
+            // this.updateCanvasDisplaySizeAndCamera(this.canvas);
+            this.camera.projectCentral(1); // square
             let backgroundColor = this.camera.getBackgoundColor();
             Fudge.WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             Fudge.WebGLApi.crc3.clear(Fudge.WebGLApi.crc3.COLOR_BUFFER_BIT | Fudge.WebGLApi.crc3.DEPTH_BUFFER_BIT);
@@ -1151,34 +1159,28 @@ var Fudge;
          * @param _elementID Optional: ID of a predefined canvaselement.
          */
         static initializeContext() {
+            let contextAttributes = { alpha: false, antialias: false };
             WebGLApi.canvas = document.createElement("canvas");
-            // let canvas: HTMLCanvasElement;
-            // if (_elementID !== undefined) {         // Check if ID was passed. 
-            //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);
-            //     if (canvas === undefined) {         // Check if element by passed ID exists. Otherwise throw Error.
-            //         throw new Error("Cannot find a canvas Element named: " + _elementID);
-            //     }
-            // }
-            // else { // If no Canvas ID was passed, create new canvas with default width and height. 
-            //     console.log("Creating new canvas...");
-            //     canvas = <HTMLCanvasElement>document.createElement("canvas");
-            //     canvas.id = "canvas";
-            //     canvas.width = 800;
-            //     canvas.height = 640;
-            //     document.body.appendChild(canvas);
-            // }
-            WebGLApi.crc3 = WebGLApi.assert(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            WebGLApi.crc3 = WebGLApi.assert(WebGLApi.canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
             // Enable backface- and zBuffer-culling.
             WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
             WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
+            this.rectViewport = this.getCanvasRect();
             return WebGLApi.canvas;
         }
-        static getRect() {
+        static getCanvasRect() {
             return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
         }
         static setCanvasSize(_width, _height) {
             WebGLApi.crc3.canvas.width = _width;
             WebGLApi.crc3.canvas.height = _height;
+        }
+        static setViewportRectangle(_rect) {
+            Object.assign(WebGLApi.rectViewport, _rect);
+            WebGLApi.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+        static getViewportRectangle() {
+            return this.rectViewport;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix

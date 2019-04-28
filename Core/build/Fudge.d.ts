@@ -478,16 +478,18 @@ declare namespace Fudge {
         name: string;
         camera: ComponentCamera;
         branch: Node;
+        rectSource: Rectangle;
+        rectDestination: Rectangle;
         private crc2;
         private canvas;
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _branch
-         * @param _camera
-         */
+                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+                 * @param _branch
+                 * @param _camera
+                 */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         getContext(): CanvasRenderingContext2D;
-        getRect(): Rectangle;
+        getCanvasRectangle(): Rectangle;
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
@@ -534,6 +536,7 @@ declare namespace Fudge {
     class WebGLApi {
         static crc3: WebGL2RenderingContext;
         private static canvas;
+        private static rectViewport;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -545,8 +548,10 @@ declare namespace Fudge {
          * @param _elementID Optional: ID of a predefined canvaselement.
          */
         static initializeContext(): HTMLCanvasElement;
-        static getRect(): Rectangle;
+        static getCanvasRect(): Rectangle;
         static setCanvasSize(_width: number, _height: number): void;
+        static setViewportRectangle(_rect: Rectangle): void;
+        static getViewportRectangle(): Rectangle;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param shaderInfo

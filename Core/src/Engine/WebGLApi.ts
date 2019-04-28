@@ -20,6 +20,7 @@ namespace Fudge {
     export class WebGLApi {
         public static crc3: WebGL2RenderingContext;
         private static canvas: HTMLCanvasElement = null;
+        private static rectViewport: Rectangle;
 
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
@@ -36,38 +37,32 @@ namespace Fudge {
          * @param _elementID Optional: ID of a predefined canvaselement.
          */
         public static initializeContext(): HTMLCanvasElement {
+            let contextAttributes: WebGLContextAttributes = { alpha: false, antialias: false };
             WebGLApi.canvas = document.createElement("canvas");
-
-            // let canvas: HTMLCanvasElement;
-
-            // if (_elementID !== undefined) {         // Check if ID was passed. 
-            //     canvas = <HTMLCanvasElement>document.getElementById(_elementID);
-            //     if (canvas === undefined) {         // Check if element by passed ID exists. Otherwise throw Error.
-            //         throw new Error("Cannot find a canvas Element named: " + _elementID);
-            //     }
-            // }
-            // else { // If no Canvas ID was passed, create new canvas with default width and height. 
-            //     console.log("Creating new canvas...");
-            //     canvas = <HTMLCanvasElement>document.createElement("canvas");
-            //     canvas.id = "canvas";
-            //     canvas.width = 800;
-            //     canvas.height = 640;
-            //     document.body.appendChild(canvas);
-            // }
-
-            WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(
+                WebGLApi.canvas.getContext("webgl2", contextAttributes),
+                "WebGL-context couldn't be created"
+            );
             // Enable backface- and zBuffer-culling.
             WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
             WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
+            this.rectViewport = this.getCanvasRect();
             return WebGLApi.canvas;
         }
 
-        public static getRect(): Rectangle {
+        public static getCanvasRect(): Rectangle {
             return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
         }
         public static setCanvasSize(_width: number, _height: number): void {
             WebGLApi.crc3.canvas.width = _width;
             WebGLApi.crc3.canvas.height = _height;
+        }
+        public static setViewportRectangle(_rect: Rectangle): void {
+            Object.assign(WebGLApi.rectViewport, _rect);
+            WebGLApi.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+        public static getViewportRectangle(): Rectangle {
+            return this.rectViewport;
         }
 
         /**
