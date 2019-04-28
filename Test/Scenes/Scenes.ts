@@ -62,9 +62,13 @@ namespace Scenes {
         node.appendChild(child);
     }
 
-    export function createViewport(): void {
+    export function createViewport(_canvas: HTMLCanvasElement = null): void {
+        if (!_canvas) {
+            _canvas = document.createElement("canvas");
+            document.body.appendChild(_canvas);
+        }
         viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera), null);
+        viewPort.initialize("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera), _canvas);
         // viewPort.drawScene();
         viewPort.showSceneGraph();
     }

@@ -1075,9 +1075,6 @@ var Fudge;
             let backgroundColor = this.camera.getBackgoundColor();
             Fudge.WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             Fudge.WebGLApi.crc3.clear(Fudge.WebGLApi.crc3.COLOR_BUFFER_BIT | Fudge.WebGLApi.crc3.DEPTH_BUFFER_BIT);
-            // Enable backface- and zBuffer-culling.
-            Fudge.WebGLApi.crc3.enable(Fudge.WebGLApi.crc3.CULL_FACE);
-            Fudge.WebGLApi.crc3.enable(Fudge.WebGLApi.crc3.DEPTH_TEST);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -1117,6 +1114,7 @@ var Fudge;
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
          */
         updateCanvasDisplaySizeAndCamera(canvas, multiplier) {
+            let resolutionFactor = 1.0;
             multiplier = multiplier || 1;
             let width = canvas.clientWidth * multiplier | 0;
             let height = canvas.clientHeight * multiplier | 0;
@@ -1124,13 +1122,13 @@ var Fudge;
                 canvas.width = width;
                 canvas.height = height;
             }
-            Fudge.WebGLApi.setCanvasSize(0.2 * width, 0.2 * height);
+            Fudge.WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
             // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
             if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            Fudge.WebGLApi.crc3.viewport(0, 0, 0.2 * width, 0.2 * height); // TODO: scale back to 1!
+            Fudge.WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
         }
     }
     Fudge.Viewport = Viewport;
@@ -1170,6 +1168,9 @@ var Fudge;
             //     document.body.appendChild(canvas);
             // }
             WebGLApi.crc3 = WebGLApi.assert(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            // Enable backface- and zBuffer-culling.
+            WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
+            WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
             return WebGLApi.canvas;
         }
         static getRect() {

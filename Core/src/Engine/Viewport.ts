@@ -63,9 +63,6 @@ namespace Fudge {
             let backgroundColor: Vector3 = this.camera.getBackgoundColor();
             WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);
-            // Enable backface- and zBuffer-culling.
-            WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
-            WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
         }
 
         /**
@@ -109,6 +106,7 @@ namespace Fudge {
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
          */
         private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
+            let resolutionFactor: number = 1.0;
             multiplier = multiplier || 1;
             let width: number = canvas.clientWidth * multiplier | 0;
             let height: number = canvas.clientHeight * multiplier | 0;
@@ -116,13 +114,13 @@ namespace Fudge {
                 canvas.width = width;
                 canvas.height = height;
             }
-            WebGLApi.setCanvasSize(0.2 * width, 0.2 * height);
+            WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
             // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
             if (this.camera.isOrthographic)
                 this.camera.projectOrthographic(0, width, height, 0);
             else
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            WebGLApi.crc3.viewport(0, 0, 0.2 * width, 0.2 * height); // TODO: scale back to 1!
+            WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
         }
 
 

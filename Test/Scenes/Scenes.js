@@ -47,9 +47,13 @@ var Scenes;
         Scenes.node.appendChild(child);
     }
     Scenes.createMiniScene = createMiniScene;
-    function createViewport() {
+    function createViewport(_canvas = null) {
+        if (!_canvas) {
+            _canvas = document.createElement("canvas");
+            document.body.appendChild(_canvas);
+        }
         Scenes.viewPort = new ƒ.Viewport();
-        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), null);
+        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), _canvas);
         // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }

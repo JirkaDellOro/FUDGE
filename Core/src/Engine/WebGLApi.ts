@@ -56,6 +56,9 @@ namespace Fudge {
             // }
 
             WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(WebGLApi.canvas.getContext("webgl2"), "WebGL-context couldn't be created");
+            // Enable backface- and zBuffer-culling.
+            WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
+            WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
             return WebGLApi.canvas;
         }
 
