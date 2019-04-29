@@ -68,6 +68,9 @@
 		},
 		{
 			"path": "Maps"
+		},
+		{
+			"path": "GoldenLayout"
 		}
 	],
 	"settings": {}
