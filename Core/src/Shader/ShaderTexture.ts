@@ -1,15 +1,9 @@
-/// <reference path="Shader.ts"/>
 namespace Fudge {
     /**
-     * Represents a WebGL shaderprogram
+     * Textured shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ShaderTexture extends Shader {
-
-        public constructor() {
-            super();
-            this.load(this.loadVertexShaderSource(), this.loadFragmentShaderSource());
-        }
 
         public loadVertexShaderSource(): string {
             return `#version 300 es

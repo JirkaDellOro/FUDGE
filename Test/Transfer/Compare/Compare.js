@@ -9,7 +9,7 @@ var Compare;
             ;
         for (let prop in _object1) {
             if (prop == "ComponentMaterial")
-                return true;
+                continue;
             if (Number(prop).toString() != prop)
                 console.log(`${prefix} Comparing ${prop}`);
             //Check property exists on both objects
