@@ -1,0 +1,123 @@
+@startuml Animation Editor Class Diagram
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+title Animation Editor Class Diagram
+
+' left to right direction
+package FUDGE <<Rectangle>> {
+	package Components <<Rectangle>> {
+		abstract Component {
+
+		}
+		class ComponentAnimator extends Component{
+			+ animations: Animation[]
+			+ speed: number;
+			+ currentAnimation: Animation
+			+ play(_name: string)
+		}
+	}
+
+	package Animation <<Rectangle>> {
+
+
+		class Animation extends Mutable.Mutator{
+			+ name: string
+			+ animatedObject: MutatorForAnimation
+			+ clips: {[property: string]: Clip}
+			+ startTime: number
+			+ totaltime: number
+			+ events: Event[]
+			+ labels: Label[]
+			+ wrapMode: WrapMode
+			+ fps: number
+			+ update()
+		}
+
+		class Clip extends Mutable.Mutator {
+			+ keys: Key[]
+			+ evaluate(_time: number): number
+			+ addKey(_key:Key)
+			+ removeKey(_key:Key)
+		}
+
+		class Key extends Mutable.Mutator {
+			+ time: number
+			+ value: number
+			- slopeIn: number
+			- slopeOut: number
+			+ functionIn: Function
+			- broken: boolean
+			+ path2d: Path2D
+			+ setSlopeIn(_slope:number)
+			+ setSlopeOut(_slope:number)
+			+ generatePath2D()s
+		}
+
+		class Function {
+			- a: number
+			- b: number
+			- c: number
+			- d: number
+			- keyOut: Key
+			- keyIn: Key
+			+ evaluate(_time: number): number
+			- calculate()
+			- setKeyIn(_key)
+			- setKeyOut(_key)
+		}
+
+		enum WRAPMODE{
+			INHERIT
+			STOPATEND
+			STOPAFTEREND
+			LOOP
+			PINGPONG
+		}
+		' Associations
+		ComponentAnimator "1" -- "n" Animation
+		Animation "1" -- "n" Clip
+		Clip "1" -- "n" Key
+		Key "2" -- "1" Function	
+	}
+	package Animator <<Rectangle>> {
+		class Animator {
+			animations: Animation[]
+			cursorPosition: number
+			crc: CanvasRenderingContext2D
+
+		}
+
+		class UIHandler {
+			views: EditorView[]
+			mousedown()
+			mousemove()
+			mouseup()
+			keydown()
+			keyup()
+			
+			createUI()
+			updateUI()
+			switchView()
+		}
+
+		interface EditorView{
+			updateView()
+		}
+		class KeyEditor implements EditorView {
+		
+		}
+		 
+		class CurveEditor implements EditorView {
+		
+		}
+		
+		' Associations
+		Animator -- "n" Animation
+		Animator "1" -- "1" UIHandler
+	}
+}
+@enduml
