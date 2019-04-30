@@ -28,6 +28,8 @@ var WebGLRendering;
             viewPort.draw();
         }
         let menu = document.getElementsByTagName("div")[0];
+        let uiCamera = new UI.Camera();
+        menu.appendChild(uiCamera);
         appendUIRectangle(menu, "WebGLCanvas");
         appendUIRectangle(menu, "WebGLViewport");
         appendUIRectangle(menu, "Source");
@@ -39,16 +41,16 @@ var WebGLRendering;
     function appendUIRectangle(_parent, _name) {
         let uiRectangle = new UI.Rectangle(_name);
         uiRectangle.appendButton("all");
-        uiRectangle.htmlElement.addEventListener("click", hndClick);
-        uiRectangle.htmlElement.addEventListener("input", hndChange);
+        uiRectangle.addEventListener("click", hndClick);
+        uiRectangle.addEventListener("input", hndChange);
         uiRectangle.appendCheckbox("lock");
-        _parent.appendChild(uiRectangle.htmlElement);
+        _parent.appendChild(uiRectangle);
         uiRectangles[_name] = uiRectangle;
     }
     function hndClick(_event) {
         if (_event.target.tagName != "BUTTON")
             return;
-        let current = _event.currentTarget["uiRectangle"];
+        let current = _event.currentTarget;
         setAll(current.getRect());
     }
     function setAll(_rect) {
@@ -62,7 +64,7 @@ var WebGLRendering;
         update();
     }
     function hndChange(_event) {
-        let target = _event.currentTarget["uiRectangle"];
+        let target = _event.currentTarget;
         setRect(target);
     }
     function setRect(_uiRectangle) {
