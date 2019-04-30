@@ -42,7 +42,7 @@ namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        public projectCentral(_aspect: number = gl2.canvas.clientWidth / gl2.canvas.clientHeight, _fieldOfView: number = 45): void {
+        public projectCentral(_aspect: number = WebGLApi.crc3.canvas.clientWidth / WebGLApi.crc3.canvas.clientHeight, _fieldOfView: number = 45): void {
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
             this.projectionMatrix = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
@@ -54,7 +54,7 @@ namespace Fudge {
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        public projectOrthographic(_left: number = 0, _right: number = gl2.canvas.clientWidth, _bottom: number = gl2.canvas.clientHeight, _top: number = 0): void {
+        public projectOrthographic(_left: number = 0, _right: number = WebGLApi.crc3.canvas.clientWidth, _bottom: number = WebGLApi.crc3.canvas.clientHeight, _top: number = 0): void {
             this.orthographic = true;
             this.projectionMatrix = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
