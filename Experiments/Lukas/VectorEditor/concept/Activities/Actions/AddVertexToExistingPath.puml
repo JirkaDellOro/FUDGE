@@ -1,7 +1,7 @@
 @startuml AddVertexToExistingPath
 skinparam monochrome true
 
-title AddVertexToExistingObject
+title AddVertexToExistingPath
 
 partition mousedown {
 	:_event: MouseEvent]

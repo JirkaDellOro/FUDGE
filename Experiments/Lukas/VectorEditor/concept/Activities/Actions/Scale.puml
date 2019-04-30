@@ -1,7 +1,7 @@
-@startuml Action
+@startuml Scale
 skinparam monochrome true
 
-title Action
+title Scale
 
 partition mousedown {
 	:_event: MouseEvent]
