@@ -1,7 +1,7 @@
-@startuml Action
+@startuml Rotate
 skinparam monochrome true
 
-title Action
+title Rotate
 
 partition mousedown {
 	:_event: MouseEvent]
