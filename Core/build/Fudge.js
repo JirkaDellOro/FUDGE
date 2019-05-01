@@ -214,6 +214,7 @@ var Fudge;
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projectionMatrix = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
+            this.aspect = 1.0;
             this.backgroundColor = new Fudge.Vector3(0, 0, 0); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
@@ -226,6 +227,12 @@ var Fudge;
         }
         getBackgroundEnabled() {
             return this.backgroundEnabled;
+        }
+        getAspect() {
+            return this.aspect;
+        }
+        getFieldOfView() {
+            return this.fieldOfView;
         }
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
@@ -246,7 +253,9 @@ var Fudge;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect = Fudge.WebGLApi.crc3.canvas.clientWidth / Fudge.WebGLApi.crc3.canvas.clientHeight, _fieldOfView = 45) {
+        projectCentral(_aspect = this.aspect, _fieldOfView = this.fieldOfView) {
+            //            public projectCentral(_aspect: number = WebGLApi.crc3.canvas.clientWidth / WebGLApi.crc3.canvas.clientHeight, _fieldOfView: number = 45): void {
+            this.aspect = _aspect;
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
             this.projectionMatrix = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
@@ -268,6 +277,7 @@ var Fudge;
                 backgroundEnabled: this.backgroundEnabled,
                 orthographic: this.orthographic,
                 fieldOfView: this.fieldOfView,
+                aspect: this.aspect,
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
@@ -277,6 +287,7 @@ var Fudge;
             this.backgroundEnabled = _serialization.backgroundEnabled;
             this.orthographic = _serialization.orthographic;
             this.fieldOfView = _serialization.fieldOfView;
+            this.aspect = _serialization.aspect;
             super.deserialize(_serialization[super.constructor.name]);
             if (this.isOrthographic)
                 this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -1009,6 +1020,30 @@ var Fudge;
             this.branch = null; // The first node in the tree(branch) that will be rendered.
             this.crc2 = null;
             this.canvas = null;
+            /**
+             * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
+             * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
+             * @param canvas The canvas to readjust.
+             * @param multiplier A multiplier to adjust the displayzise dimensions by.
+             * /
+            private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
+                let resolutionFactor: number = 1.0;
+                multiplier = multiplier || 1;
+                let width: number = canvas.clientWidth * multiplier | 0;
+                let height: number = canvas.clientHeight * multiplier | 0;
+                if (canvas.width !== width || canvas.height !== height) {
+                    canvas.width = width;
+                    canvas.height = height;
+                }
+                WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
+                // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
+                if (this.camera.isOrthographic)
+                    this.camera.projectOrthographic(0, width, height, 0);
+                else
+                    this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
+                WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
+            }
+            */
             /*/*
              * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
              * @param _material The node's materialcomponent.
@@ -1066,8 +1101,8 @@ var Fudge;
                 Fudge.WebGL.addBranch(this.branch);
                 Fudge.WebGL.drawBranch(this.branch, this.camera);
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                let rectSource = Fudge.WebGLApi.getCanvasRect();
-                let rectDestination = this.getCanvasRectangle();
+                // let rectSource: Rectangle = WebGLApi.getCanvasRect();
+                // let rectDestination: Rectangle = this.getCanvasRectangle();
                 this.crc2.imageSmoothingEnabled = false;
                 this.crc2.drawImage(Fudge.WebGLApi.crc3.canvas, this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
                 // this.crc2.drawImage(
@@ -1079,7 +1114,7 @@ var Fudge;
         }
         prepare() {
             // this.updateCanvasDisplaySizeAndCamera(this.canvas);
-            this.camera.projectCentral(1); // square
+            //this.camera.projectCentral(1); // square
             let backgroundColor = this.camera.getBackgoundColor();
             Fudge.WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             Fudge.WebGLApi.crc3.clear(Fudge.WebGLApi.crc3.COLOR_BUFFER_BIT | Fudge.WebGLApi.crc3.DEPTH_BUFFER_BIT);
@@ -1114,29 +1149,6 @@ var Fudge;
                 output += this.createSceneGraph(child);
             }
             return output;
-        }
-        /**
-         * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-         * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-         * @param canvas The canvas to readjust.
-         * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         */
-        updateCanvasDisplaySizeAndCamera(canvas, multiplier) {
-            let resolutionFactor = 1.0;
-            multiplier = multiplier || 1;
-            let width = canvas.clientWidth * multiplier | 0;
-            let height = canvas.clientHeight * multiplier | 0;
-            if (canvas.width !== width || canvas.height !== height) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-            Fudge.WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
-            // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
-            if (this.camera.isOrthographic)
-                this.camera.projectOrthographic(0, width, height, 0);
-            else
-                this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            Fudge.WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
         }
     }
     Fudge.Viewport = Viewport;

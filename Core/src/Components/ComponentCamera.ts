@@ -8,6 +8,7 @@ namespace Fudge {
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
+        private aspect: number = 1.0;
         private backgroundColor: Vector3 = new Vector3(0, 0, 0); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
@@ -19,8 +20,17 @@ namespace Fudge {
         public getBackgoundColor(): Vector3 {
             return this.backgroundColor;
         }
+
         public getBackgroundEnabled(): boolean {
             return this.backgroundEnabled;
+        }
+
+        public getAspect(): number {
+            return this.aspect;
+        }
+
+        public getFieldOfView(): number {
+            return this.fieldOfView;
         }
 
         /**
@@ -42,7 +52,9 @@ namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        public projectCentral(_aspect: number = WebGLApi.crc3.canvas.clientWidth / WebGLApi.crc3.canvas.clientHeight, _fieldOfView: number = 45): void {
+        public projectCentral(_aspect: number = this.aspect, _fieldOfView: number = this.fieldOfView): void {
+            //            public projectCentral(_aspect: number = WebGLApi.crc3.canvas.clientWidth / WebGLApi.crc3.canvas.clientHeight, _fieldOfView: number = 45): void {
+            this.aspect = _aspect;
             this.fieldOfView = _fieldOfView;
             this.orthographic = false;
             this.projectionMatrix = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
@@ -65,6 +77,7 @@ namespace Fudge {
                 backgroundEnabled: this.backgroundEnabled,
                 orthographic: this.orthographic,
                 fieldOfView: this.fieldOfView,
+                aspect: this.aspect,
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
@@ -74,6 +87,7 @@ namespace Fudge {
             this.backgroundEnabled = _serialization.backgroundEnabled;
             this.orthographic = _serialization.orthographic;
             this.fieldOfView = _serialization.fieldOfView;
+            this.aspect = _serialization.aspect;
             super.deserialize(_serialization[super.constructor.name]);
             if (this.isOrthographic)
                 this.projectOrthographic(); // TODO: serialize and deserialize parameters

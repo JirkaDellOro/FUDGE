@@ -128,11 +128,14 @@ declare namespace Fudge {
         private orthographic;
         private projectionMatrix;
         private fieldOfView;
+        private aspect;
         private backgroundColor;
         private backgroundEnabled;
         readonly isOrthographic: boolean;
         getBackgoundColor(): Vector3;
         getBackgroundEnabled(): boolean;
+        getAspect(): number;
+        getFieldOfView(): number;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -504,13 +507,6 @@ declare namespace Fudge {
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
-        /**
-         * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-         * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-         * @param canvas The canvas to readjust.
-         * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         */
-        private updateCanvasDisplaySizeAndCamera;
     }
 }
 declare namespace Fudge {

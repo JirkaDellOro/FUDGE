@@ -4,6 +4,8 @@ namespace WebGLRendering {
     let uiRectangles: { [name: string]: UI.Rectangle } = {};
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
+    let camera: ƒ.Node;
+    let uiCamera: UI.Camera;
 
     function init(): void {
         // create asset
@@ -17,7 +19,7 @@ namespace WebGLRendering {
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
@@ -32,7 +34,7 @@ namespace WebGLRendering {
         }
 
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
-        let uiCamera: UI.Camera = new UI.Camera();
+        uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
         appendUIRectangle(menu, "WebGLCanvas");
         appendUIRectangle(menu, "WebGLViewport");
@@ -42,13 +44,16 @@ namespace WebGLRendering {
         appendUIRectangle(menu, "CSSRectangle");
 
         setAll({ x: 0, y: 0, width: 300, height: 300 });
+
+        uiCamera.addEventListener("input", hndChangeOnCamera);
+        setCamera();
     }
 
     function appendUIRectangle(_parent: HTMLElement, _name: string): void {
         let uiRectangle: UI.Rectangle = new UI.Rectangle(_name);
         uiRectangle.appendButton("all");
-        uiRectangle.addEventListener("click", hndClick);
-        uiRectangle.addEventListener("input", hndChange);
+        uiRectangle.addEventListener("click", hndClickOnRect);
+        uiRectangle.addEventListener("input", hndChangeOnRect);
 
         uiRectangle.appendCheckbox("lock");
 
@@ -56,11 +61,21 @@ namespace WebGLRendering {
         uiRectangles[_name] = uiRectangle;
     }
 
-    function hndClick(_event: Event): void {
+    function hndClickOnRect(_event: Event): void {
         if ((<HTMLElement>_event.target).tagName != "BUTTON")
             return;
         let current: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
-        setAll(current.getRect());
+        setAll(current.get());
+    }
+
+    function hndChangeOnRect(_event: Event): void {
+        let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
+        setRect(target);
+    }
+
+    function hndChangeOnCamera(_event: Event): void {
+        //let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
+        setCamera();
     }
 
     function setAll(_rect: ƒ.Rectangle): void {
@@ -68,19 +83,14 @@ namespace WebGLRendering {
             let uiRectangle: UI.Rectangle = uiRectangles[name];
             if (uiRectangle.isLocked())
                 continue;
-            uiRectangle.setRect(_rect);
+            uiRectangle.set(_rect);
             setRect(uiRectangle);
         }
         update();
     }
 
-    function hndChange(_event: Event): void {
-        let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
-        setRect(target);
-    }
-
     function setRect(_uiRectangle: UI.Rectangle): void {
-        let rect: ƒ.Rectangle = _uiRectangle.getRect();
+        let rect: ƒ.Rectangle = _uiRectangle.get();
         switch (_uiRectangle.name) {
             case "WebGLCanvas":
                 ƒ.WebGL.setCanvasSize(rect.width, rect.height);
@@ -110,13 +120,23 @@ namespace WebGLRendering {
         update();
     }
 
+    function setCamera(): void {
+        let params: UI.ParamsCamera = uiCamera.get();
+        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera.projectCentral(params.aspect, params.fieldOfView);
+        update();
+    }
+
     function update(): void {
-        uiRectangles["WebGLCanvas"].setRect(ƒ.WebGL.getCanvasRect());
-        uiRectangles["WebGLViewport"].setRect(ƒ.WebGL.getViewportRectangle());
-        uiRectangles["Source"].setRect(viewPort.rectSource);
-        uiRectangles["Destination"].setRect(viewPort.rectDestination);
-        uiRectangles["DomCanvas"].setRect({ x: 0, y: 0, width: canvas.width, height: canvas.height });
+        uiRectangles["WebGLCanvas"].set(ƒ.WebGL.getCanvasRect());
+        uiRectangles["WebGLViewport"].set(ƒ.WebGL.getViewportRectangle());
+        uiRectangles["Source"].set(viewPort.rectSource);
+        uiRectangles["Destination"].set(viewPort.rectDestination);
+        uiRectangles["DomCanvas"].set({ x: 0, y: 0, width: canvas.width, height: canvas.height });
         let client: ClientRect = canvas.getBoundingClientRect();
-        uiRectangles["CSSRectangle"].setRect({ x: client.left, y: client.top, width: client.width, height: client.height });
+        uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });
+
+        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

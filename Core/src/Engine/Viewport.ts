@@ -52,8 +52,8 @@ namespace Fudge {
                 WebGL.drawBranch(this.branch, this.camera);
 
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                let rectSource: Rectangle = WebGLApi.getCanvasRect();
-                let rectDestination: Rectangle = this.getCanvasRectangle();
+                // let rectSource: Rectangle = WebGLApi.getCanvasRect();
+                // let rectDestination: Rectangle = this.getCanvasRectangle();
                 this.crc2.imageSmoothingEnabled = false;
                 this.crc2.drawImage(
                     WebGLApi.crc3.canvas,
@@ -70,7 +70,7 @@ namespace Fudge {
 
         public prepare(): void {
             // this.updateCanvasDisplaySizeAndCamera(this.canvas);
-            this.camera.projectCentral(1); // square
+            //this.camera.projectCentral(1); // square
             let backgroundColor: Vector3 = this.camera.getBackgoundColor();
             WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
             WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);
@@ -115,7 +115,7 @@ namespace Fudge {
          * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
          * @param canvas The canvas to readjust.
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         */
+         * /
         private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
             let resolutionFactor: number = 1.0;
             multiplier = multiplier || 1;
@@ -133,7 +133,7 @@ namespace Fudge {
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
             WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
         }
-
+        */
 
         /*/*
          * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
