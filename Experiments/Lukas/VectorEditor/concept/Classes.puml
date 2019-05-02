@@ -48,9 +48,9 @@ package FUDGE <<Rectangle>> {
 		}
 
 		class Editor{
-			- paths: DrawPath[]
-			- selectedPaths: DrawPath[]
-			- selectedPoints: DrawPoint[]
+			- paths: SketchPath[]
+			- selectedPaths: SketchPath[]
+			- selectedPoints: SketchPoint[]
 			+ selectedAction: Action
 			- canvas: HTMLCanvasElement
 			- crc: CanvasRenderingContext2D
@@ -80,7 +80,7 @@ package FUDGE <<Rectangle>> {
 			' element: HTMLElement
 		}
 
-		class Action extends UIElement{
+		abstract Action extends UIElement{
 			name: string
 			buttonElement: HTMLButtonElement
 			subMenu: UIElement
@@ -97,41 +97,41 @@ package FUDGE <<Rectangle>> {
 			exit()
 		}
 
-		class Select extends Action {
+		class ActionSelect extends Action {
 			boxSelect: boolean
 			multiSelectShortcut: Shortcut
 			move: MoveAction
 			startPosition: Vector2
 			currentPosition: Vector2
 		}
-		class Move extends Action {
+		class ActionMove extends Action {
 			- previousPosition: Vector2
 		}
-		class Transform extends Action {
-			scaleUp: DrawPoint
-			scaleDown: DrawPoint
-			scaleLeft: DrawPoint
-			scaleRight: DrawPoint
-			scaleUpLeft: DrawPoint
-			scaleUpRight: DrawPoint
-			scaleDownLeft: DrawPoint
-			scaleDownRight: DrawPoint
-			scalePoints: DrawPoint[]
-			selectedScalePoint: DrawPoint
+		class ActionTransform extends Action {
+			scaleUp: SketchPoint
+			scaleDown: SketchPoint
+			scaleLeft: SketchPoint
+			scaleRight: SketchPoint
+			scaleUpLeft: SketchPoint
+			scaleUpRight: SketchPoint
+			scaleDownLeft: SketchPoint
+			scaleDownRight: SketchPoint
+			scalePoints: SketchPoint[]
+			selectedScalePoint: SketchPoint
 			
 			move: MoveAction
 			rotate: RotateAction
 			scale: ScaleAction
 		}
-		class Scale extends Action {
+		class ActionScale extends Action {
 			- previousPosition: Vector2
 			- referencePoint: Vector2
 			- mode: "x" | "y" | "xy"
 		}
-		class Rotate extends Action {
+		class ActionRotate extends Action {
 			- previousPosition: Vector2
 		}
-		class CreateShapes extends Action {
+		class ActionCreateShapes extends Action {
 			- startPosition: Vector2
 			- currentPosition: Vector2
 			- shapes: Shape[]
@@ -139,22 +139,22 @@ package FUDGE <<Rectangle>> {
 		}
 		interface Shape {
 			identifier: string
-			createDrawPath(pos1: Vector2, pos2: Vector2): DrawPath
+			createSketchPath(pos1: Vector2, pos2: Vector2): SketchPath
 			additionalParameters:Object
 		}
-		class VertexManipulation extends Action {
+		class ActionVertexManipulation extends Action {
 
 		}
-		class AddVertexToExistingPath extends Action {
+		class ActionAddVertex extends Action {
 
 		}
-		class MakeNewPathFromVertices extends Action {
-			- newPath: DrawPath;
+		class ActionNewPath extends Action {
+			- newPath: SketchPath;
 		}
-		class CombineAction extends Action {
+		class ActionCombine extends Action {
 
 		}
-		class Export extends Action {
+		class ActionExport extends Action {
 
 		}
 
@@ -165,36 +165,36 @@ package FUDGE <<Rectangle>> {
 		Editor .. UIHandler
 		Action "1"--"n" Action
 		CreateShapes -- "n" Shape
-		Transform -- Move : subaction
-		Transform -- Scale : subaction
-		Transform -- Rotate : subaction
-		Select -- Move : subaction
-		VertexManipulation -- AddVertexToExistingPath : subaction
-		VertexManipulation -- MakeNewPathFromVertices : subaction
+		ActionTransform <-- ActionMove : subaction
+		ActionTransform <-- ActionScale : subaction
+		ActionTransform <-- ActionRotate : subaction
+		ActionSelect <-- ActionMove : subaction
+		ActionVertexManipulation <-- ActionAddVertex : subaction
+		ActionVertexManipulation <-- ActionNewPath : subaction
 	}
-	package DrawTypes <<Rectangle>>{
-		class DrawObject extends Mutable.Mutator{
+	package SketchTypes <<Rectangle>>{
+		class SketchObject extends Mutable.Mutator{
 			+ color: string | CanvasGradient | CanvasPattern
 			+ name: String
 			+ order: number
 			+ lineWidth: number
-			+ transformationPoint: DrawPoint
+			+ transformationPoint: SketchPoint
 			# path2d: Path2D
-			{static} sort(a: DrawObject, b: DrawObject): number
+			{static} sort(a: SketchObject, b: SketchObject): number
 		}
 
-		class DrawPath extends DrawObject {
+		class SketchPath extends SketchObject {
 			- closed: boolean
-			+ points: Vertex[]
+			+ points: SketchVertex[]
 			+ fillColor: string | CanvasGradient | CanvasPattern
 			' + transformationPoint: Vector2;
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
 			generatePath2D()
-			addVertexAtPos(vertex: Vertex, index: number = -1)
+			addVertexAtPos(vertex: SketchVertex, index: number = -1)
 			move(d: Vector2)
 		}
 
-		class DrawPoint extends Math.Vector2{
+		class SketchPoint extends Math.Vector2{
 			# path2d: Path2D
 			generatePath2D(): Path2D
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
@@ -202,24 +202,24 @@ package FUDGE <<Rectangle>> {
 			moveTo(newPos: Vector2)
 		}
 
-		class Vertex extends DrawPoint {
+		class SketchVertex extends SketchPoint {
 			activated: boolean
 			tangentIn: TangentPoint
 			tangentOut: TangentPoint
-			+ parent: DrawPath
+			+ parent: SketchPath
 			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
 			move(dx: number, dy: number)
 			activate()
 		}
 
-		class TangentPoint extends DrawPoint {
-			+ parent: Vertex
+		class SketchTangentPoint extends SketchPoint {
+			+ parent: SketchVertex
 			generatePath2D(): Path2D
 		}
 
 		' Associations
-		DrawPath "1" -- "n" Vertex
-		Vertex "1" -- "2" TangentPoint
+		SketchPath "1" -- "n" SketchVertex
+		SketchVertex "1" -- "2" TangentPoint
 	}
 }
 @enduml

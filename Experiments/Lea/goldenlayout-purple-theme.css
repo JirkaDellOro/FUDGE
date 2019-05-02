@@ -1,3 +1,17 @@
+#testbutton
+{
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+    background-image: url("Icons/Button_black-shiny.svg");
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    background-repeat: round;
+    border: none;
+    align-items: center
+}
+
 .lm_goldenlayout {
     background-image: url("brushedMetalHorizon.png");
 }
