@@ -71,6 +71,9 @@
 		},
 		{
 			"path": "GoldenLayout"
+		},
+		{
+			"path": "StaticClass"
 		}
 	],
 	"settings": {}
