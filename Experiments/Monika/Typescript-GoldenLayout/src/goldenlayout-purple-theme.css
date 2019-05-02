@@ -1,3 +1,9 @@
+h2 {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+}
+
 .lm_goldenlayout {
     background-image: url("brushedMetalHorizon.png");
 }

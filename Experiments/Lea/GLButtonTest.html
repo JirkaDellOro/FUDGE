@@ -9,8 +9,8 @@
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'Scene explorer',
-                title: "Scene explorer", 
+                componentName: 'Scene Explorer',
+                title: "Scene Explorer", 
                 componentState: { label: 'A' }
             },
             {
@@ -59,7 +59,9 @@ else
 });
 //Create BarComponent
 var barComponent = function( container, state ){
-    container.getElement().append(' <button name="testbutton" value="Test">TEST</button>');
+    container.getElement().append(' <button name="testbutton" id="TestButton" value="Test"><img src="Icons/Add_white.svg" height="42" width="42"></button>');
+    container.getElement().append(' <button name="testbutton" id="TestButton" value="Test"><img src="Icons/Move_R_S_White.svg" height="42" width="42"></button>');
+    // container.getElement().append(' <div><button name="testbutton" id="TestButton" value="Test"><img src="Icons/Add_white.svg" height="42" width="42"></button></div>');
 }
 
 //Create PersistentComponent
@@ -87,9 +89,9 @@ var persistentComponent = function( container, state ){
   // Append it to the DOM
   container.getElement().append(  '<h2>I\'ll be saved to localStorage</h2>', input );
 };
-myLayout.registerComponent( 'Hierarchy', persistentComponent );
+myLayout.registerComponent( 'Scene Explorer', persistentComponent );
 myLayout.registerComponent( 'Viewport', persistentComponent );
-myLayout.registerComponent( 'Inspector', persistentComponent );
+myLayout.registerComponent( 'Inspector', barComponent );
 myLayout.registerComponent( 'Menubar', barComponent );
 myLayout.init();
 </script>

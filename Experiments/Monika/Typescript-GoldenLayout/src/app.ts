@@ -66,7 +66,7 @@ function stateupdate()
 
 function createSimpleComponent(container:any, state:any)
 {
-    container.getElement().html( '<h2>' + 'state.text' + '</h2>');
+    container.getElement().html( '<button name="testbutton" value="Test">TEST</button>');
 }
 
 function createPersistentComponent(state:string)

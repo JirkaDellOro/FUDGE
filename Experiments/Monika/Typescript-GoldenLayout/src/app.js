@@ -53,7 +53,7 @@ function stateupdate() {
     localStorage.setItem('savedState', state);
 }
 function createSimpleComponent(container, state) {
-    container.getElement().html('<h2>' + 'state.text' + '</h2>');
+    container.getElement().html('<button name="testbutton" value="Test">TEST</button>');
 }
 function createPersistentComponent(state) {
     let config;
