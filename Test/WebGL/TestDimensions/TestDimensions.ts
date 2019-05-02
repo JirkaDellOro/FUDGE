@@ -32,6 +32,8 @@ namespace WebGLRendering {
         }
 
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
+        let uiCamera: UI.Camera = new UI.Camera();
+        menu.appendChild(uiCamera);
         appendUIRectangle(menu, "WebGLCanvas");
         appendUIRectangle(menu, "WebGLViewport");
         appendUIRectangle(menu, "Source");
@@ -45,19 +47,19 @@ namespace WebGLRendering {
     function appendUIRectangle(_parent: HTMLElement, _name: string): void {
         let uiRectangle: UI.Rectangle = new UI.Rectangle(_name);
         uiRectangle.appendButton("all");
-        uiRectangle.htmlElement.addEventListener("click", hndClick);
-        uiRectangle.htmlElement.addEventListener("input", hndChange);
+        uiRectangle.addEventListener("click", hndClick);
+        uiRectangle.addEventListener("input", hndChange);
 
         uiRectangle.appendCheckbox("lock");
 
-        _parent.appendChild(uiRectangle.htmlElement);
+        _parent.appendChild(uiRectangle);
         uiRectangles[_name] = uiRectangle;
     }
 
     function hndClick(_event: Event): void {
         if ((<HTMLElement>_event.target).tagName != "BUTTON")
             return;
-        let current: UI.Rectangle = _event.currentTarget["uiRectangle"];
+        let current: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
         setAll(current.getRect());
     }
 
@@ -73,7 +75,7 @@ namespace WebGLRendering {
     }
 
     function hndChange(_event: Event): void {
-        let target: UI.Rectangle = _event.currentTarget["uiRectangle"];
+        let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
         setRect(target);
     }
 
