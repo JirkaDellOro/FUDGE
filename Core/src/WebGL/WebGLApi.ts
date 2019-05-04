@@ -1,4 +1,11 @@
 namespace Fudge {
+    export interface BufferSpecification {
+        size: number;   // The size of the datasample.
+        dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
+        normalize: boolean; // Flag to normalize the data.
+        stride: number; // Number of indices that will be skipped each iteration.
+        offset: number; // Index of the element to begin with.
+    }
     export interface ShaderInfo {
         program: WebGLProgram;
         attributes: { [name: string]: number };

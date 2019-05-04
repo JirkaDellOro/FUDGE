@@ -62,7 +62,7 @@
 					<a href="fudge.mesh.html">Mesh</a>
 				</li>
 			</ul>
-			<h1>Interface Mesh</h1>
+			<h1>Class Mesh</h1>
 		</div>
 	</div>
 </header>
@@ -73,19 +73,19 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a>
+						<span class="target">Mesh</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">Mesh</span>
+								<a href="fudge.meshcube.html" class="tsd-signature-type">MeshCube</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 			</section>
 			<section class="tsd-panel">
-				<h3>Implemented by</h3>
+				<h3>Implements</h3>
 				<ul class="tsd-hierarchy">
-					<li><a href="../classes/fudge.meshcube.html" class="tsd-signature-type">MeshCube</a></li>
+					<li><a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -95,9 +95,11 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="fudge.mesh.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="fudge.mesh.html#getvertices" class="tsd-kind-icon">get<wbr>Vertices</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="fudge.mesh.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.mesh.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.mesh.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.mesh.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.mesh.html#getvertices" class="tsd-kind-icon">get<wbr>Vertices</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.mesh.html#serialize" class="tsd-kind-icon">serialize</a></li>
 							</ul>
 						</section>
 					</div>
@@ -105,62 +107,96 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="deserialize" class="tsd-anchor"></a>
-					<h3>deserialize</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a></li>
+					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> deserialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudge.serializable.html">Serializable</a>.<a href="fudge.serializable.html#deserialize">deserialize</a></p>
+								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Transfer/Serializer.ts#L10">Transfer/Serializer.ts:10</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Meshes/Mesh.ts#L24">Meshes/Mesh.ts:24</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_serialization: <a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+									<h5>_serialization: <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getbufferspecification" class="tsd-anchor"></a>
+					<h3>get<wbr>Buffer<wbr>Specification</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Buffer<wbr>Specification<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Meshes/Mesh.ts#L13">Meshes/Mesh.ts:13</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getvertexcount" class="tsd-anchor"></a>
+					<h3>get<wbr>Vertex<wbr>Count</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Vertex<wbr>Count<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Meshes/Mesh.ts#L9">Meshes/Mesh.ts:9</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="getvertices" class="tsd-anchor"></a>
 					<h3>get<wbr>Vertices</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
 						<li class="tsd-signature tsd-kind-icon">get<wbr>Vertices<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Float32Array</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Meshes/Mesh.ts#L3">Meshes/Mesh.ts:3</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Meshes/Mesh.ts#L5">Meshes/Mesh.ts:5</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="serialize" class="tsd-anchor"></a>
-					<h3>serialize</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></li>
+					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> serialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudge.serializable.html">Serializable</a>.<a href="fudge.serializable.html#serialize">serialize</a></p>
+								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Transfer/Serializer.ts#L9">Transfer/Serializer.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Meshes/Mesh.ts#L23">Meshes/Mesh.ts:23</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -179,129 +215,30 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum tsd-parent-kind-module">
-						<a href="../enums/fudge.event.html" class="tsd-kind-icon">EVENT</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.color.html" class="tsd-kind-icon">Color</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.component.html" class="tsd-kind-icon">Component</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componentcamera.html" class="tsd-kind-icon">Component<wbr>Camera</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componentmaterial.html" class="tsd-kind-icon">Component<wbr>Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componentmesh.html" class="tsd-kind-icon">Component<wbr>Mesh</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componentpivot.html" class="tsd-kind-icon">Component<wbr>Pivot</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componentscript.html" class="tsd-kind-icon">Component<wbr>Script</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.componenttransform.html" class="tsd-kind-icon">Component<wbr>Transform</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.eventtargetstatic.html" class="tsd-kind-icon">Event<wbr>Target<wbr>Static</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.loop.html" class="tsd-kind-icon">Loop</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.material.html" class="tsd-kind-icon">Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.matrix3x3.html" class="tsd-kind-icon">Matrix3x3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.matrix4x4.html" class="tsd-kind-icon">Matrix4x4</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.meshcube.html" class="tsd-kind-icon">Mesh<wbr>Cube</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.mutable.html" class="tsd-kind-icon">Mutable</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.node.html" class="tsd-kind-icon">Node</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.shader.html" class="tsd-kind-icon">Shader</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.shaderbasic.html" class="tsd-kind-icon">Shader<wbr>Basic</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.shadertexture.html" class="tsd-kind-icon">Shader<wbr>Texture</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.vector3.html" class="tsd-kind-icon">Vector3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudge.viewport.html" class="tsd-kind-icon">Viewport</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.bufferspecification.html" class="tsd-kind-icon">Buffer<wbr>Specification</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mapclasstocomponents.html" class="tsd-kind-icon">Map<wbr>Class<wbr>ToComponents</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mapeventtypetolistener.html" class="tsd-kind-icon">Map<wbr>Event<wbr>Type<wbr>ToListener</a>
-					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.mesh.html" class="tsd-kind-icon">Mesh</a>
 						<ul>
-							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.mesh.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-interface">
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.mesh.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.mesh.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.mesh.html#getvertices" class="tsd-kind-icon">get<wbr>Vertices</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.mesh.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mutator.html" class="tsd-kind-icon">Mutator</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mutatorattributetypes.html" class="tsd-kind-icon">Mutator<wbr>Attribute<wbr>Types</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mutatorforanimation.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>Animation</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.mutatorforuserinterface.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>User<wbr>Interface</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.serializable.html" class="tsd-kind-icon">Serializable</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.serialization.html" class="tsd-kind-icon">Serialization</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
-						<a href="../modules/fudge.html#general" class="tsd-kind-icon">General</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module">
-						<a href="../modules/fudge.html#gl2" class="tsd-kind-icon">gl2</a>
-					</li>
 				</ul>
 			</nav>
 		</div>

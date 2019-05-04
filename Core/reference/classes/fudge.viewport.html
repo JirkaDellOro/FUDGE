@@ -99,21 +99,14 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Constructors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudge.viewport.html#constructor" class="tsd-kind-icon">constructor</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.viewport.html#branch" class="tsd-kind-icon">branch</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.viewport.html#camera" class="tsd-kind-icon">camera</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.viewport.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.viewport.html#rectdestination" class="tsd-kind-icon">rect<wbr>Destination</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.viewport.html#rectsource" class="tsd-kind-icon">rect<wbr>Source</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.viewport.html#eventtarget" class="tsd-kind-icon">Event<wbr>Target</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Accessors</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudge.viewport.html#name" class="tsd-kind-icon">Name</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -121,8 +114,11 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudge.viewport.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudge.viewport.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#drawscene" class="tsd-kind-icon">draw<wbr>Scene</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#initializeviewportnodes" class="tsd-kind-icon">initialize<wbr>Viewport<wbr>Nodes</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#draw" class="tsd-kind-icon">draw</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#getcanvasrectangle" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rectangle</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#prepare" class="tsd-kind-icon">prepare</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudge.viewport.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.viewport.html#showscenegraph" class="tsd-kind-icon">show<wbr>Scene<wbr>Graph</a></li>
 							</ul>
@@ -131,48 +127,57 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-					<a name="constructor" class="tsd-anchor"></a>
-					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Viewport<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _rootNode<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a>, _camera<span class="tsd-signature-symbol">: </span><a href="fudge.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.viewport.html" class="tsd-signature-type">Viewport</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Engine/Viewport.ts#L11">Engine/Viewport.ts:11</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_name: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>_rootNode: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
-								</li>
-								<li>
-									<h5>_camera: <a href="fudge.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-										</div>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudge.viewport.html" class="tsd-signature-type">Viewport</a></h4>
-						</li>
-					</ul>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="branch" class="tsd-anchor"></a>
+					<h3>branch</h3>
+					<div class="tsd-signature tsd-kind-icon">branch<span class="tsd-signature-symbol">:</span> <a href="fudge.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L16">Engine/Viewport.ts:16</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="camera" class="tsd-anchor"></a>
+					<h3>camera</h3>
+					<div class="tsd-signature tsd-kind-icon">camera<span class="tsd-signature-symbol">:</span> <a href="fudge.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L15">Engine/Viewport.ts:15</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Viewport&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L14">Engine/Viewport.ts:14</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="rectdestination" class="tsd-anchor"></a>
+					<h3>rect<wbr>Destination</h3>
+					<div class="tsd-signature tsd-kind-icon">rect<wbr>Destination<span class="tsd-signature-symbol">:</span> <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L18">Engine/Viewport.ts:18</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="rectsource" class="tsd-anchor"></a>
+					<h3>rect<wbr>Source</h3>
+					<div class="tsd-signature tsd-kind-icon">rect<wbr>Source<span class="tsd-signature-symbol">:</span> <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L17">Engine/Viewport.ts:17</a></li>
+						</ul>
+					</aside>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="eventtarget" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> Event<wbr>Target</h3>
@@ -205,26 +210,6 @@
 							</li>
 						</ul>
 					</div>
-				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Accessors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
-					<a name="name" class="tsd-anchor"></a>
-					<h3>Name</h3>
-					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> Name<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Engine/Viewport.ts#L25">Engine/Viewport.ts:25</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-						</li>
-					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
@@ -302,16 +287,16 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="drawscene" class="tsd-anchor"></a>
-					<h3>draw<wbr>Scene</h3>
+					<a name="draw" class="tsd-anchor"></a>
+					<h3>draw</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">draw<wbr>Scene<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">draw<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Engine/Viewport.ts#L32">Engine/Viewport.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L47">Engine/Viewport.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -324,32 +309,91 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="initializeviewportnodes" class="tsd-anchor"></a>
-					<h3>initialize<wbr>Viewport<wbr>Nodes</h3>
+					<a name="getcanvasrectangle" class="tsd-anchor"></a>
+					<h3>get<wbr>Canvas<wbr>Rectangle</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">initialize<wbr>Viewport<wbr>Nodes<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Engine/Viewport.ts#L51">Engine/Viewport.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L40">Engine/Viewport.ts:40</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getcontext" class="tsd-anchor"></a>
+					<h3>get<wbr>Context</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CanvasRenderingContext2D</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L37">Engine/Viewport.ts:37</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">CanvasRenderingContext2D</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="initialize" class="tsd-anchor"></a>
+					<h3>initialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _branch<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a>, _camera<span class="tsd-signature-symbol">: </span><a href="fudge.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _canvas<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLCanvasElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L26">Engine/Viewport.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.</p>
+									<p>Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_node: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
+									<h5>_name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>_branch: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
+								</li>
+								<li>
+									<h5>_camera: <a href="fudge.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>The node to initialize.</p>
 									</div>
 								</li>
+								<li>
+									<h5>_canvas: <span class="tsd-signature-type">HTMLCanvasElement</span></h5>
+								</li>
 							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="prepare" class="tsd-anchor"></a>
+					<h3>prepare</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">prepare<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L71">Engine/Viewport.ts:71</a></li>
+								</ul>
+							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -399,7 +443,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/9fa104a/Core/src/Engine/Viewport.ts#L91">Engine/Viewport.ts:91</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/48a68fd/Core/src/Engine/Viewport.ts#L82">Engine/Viewport.ts:82</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -426,88 +470,28 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum tsd-parent-kind-module">
-						<a href="../enums/fudge.event.html" class="tsd-kind-icon">EVENT</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.color.html" class="tsd-kind-icon">Color</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.component.html" class="tsd-kind-icon">Component</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentcamera.html" class="tsd-kind-icon">Component<wbr>Camera</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentmaterial.html" class="tsd-kind-icon">Component<wbr>Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentmesh.html" class="tsd-kind-icon">Component<wbr>Mesh</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentpivot.html" class="tsd-kind-icon">Component<wbr>Pivot</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componentscript.html" class="tsd-kind-icon">Component<wbr>Script</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.componenttransform.html" class="tsd-kind-icon">Component<wbr>Transform</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.eventtargetstatic.html" class="tsd-kind-icon">Event<wbr>Target<wbr>Static</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.glutil.html" class="tsd-kind-icon">GLUtil</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.loop.html" class="tsd-kind-icon">Loop</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.material.html" class="tsd-kind-icon">Material</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.matrix3x3.html" class="tsd-kind-icon">Matrix3x3</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.matrix4x4.html" class="tsd-kind-icon">Matrix4x4</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.meshcube.html" class="tsd-kind-icon">Mesh<wbr>Cube</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.mutable.html" class="tsd-kind-icon">Mutable</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.node.html" class="tsd-kind-icon">Node</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.serializer.html" class="tsd-kind-icon">Serializer</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shader.html" class="tsd-kind-icon">Shader</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shaderbasic.html" class="tsd-kind-icon">Shader<wbr>Basic</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.shadertexture.html" class="tsd-kind-icon">Shader<wbr>Texture</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="fudge.vector3.html" class="tsd-kind-icon">Vector3</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.viewport.html" class="tsd-kind-icon">Viewport</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudge.viewport.html#constructor" class="tsd-kind-icon">constructor</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.viewport.html#branch" class="tsd-kind-icon">branch</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.viewport.html#camera" class="tsd-kind-icon">camera</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.viewport.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.viewport.html#rectdestination" class="tsd-kind-icon">rect<wbr>Destination</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.viewport.html#rectsource" class="tsd-kind-icon">rect<wbr>Source</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.viewport.html#eventtarget" class="tsd-kind-icon">Event<wbr>Target</a>
-							</li>
-							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
-								<a href="fudge.viewport.html#name" class="tsd-kind-icon">Name</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudge.viewport.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
@@ -516,10 +500,19 @@
 								<a href="fudge.viewport.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudge.viewport.html#drawscene" class="tsd-kind-icon">draw<wbr>Scene</a>
+								<a href="fudge.viewport.html#draw" class="tsd-kind-icon">draw</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudge.viewport.html#initializeviewportnodes" class="tsd-kind-icon">initialize<wbr>Viewport<wbr>Nodes</a>
+								<a href="fudge.viewport.html#getcanvasrectangle" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rectangle</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.viewport.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.viewport.html#initialize" class="tsd-kind-icon">initialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.viewport.html#prepare" class="tsd-kind-icon">prepare</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudge.viewport.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
@@ -531,42 +524,6 @@
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.bufferspecification.html" class="tsd-kind-icon">Buffer<wbr>Specification</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mapclasstocomponents.html" class="tsd-kind-icon">Map<wbr>Class<wbr>ToComponents</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mapeventtypetolistener.html" class="tsd-kind-icon">Map<wbr>Event<wbr>Type<wbr>ToListener</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mesh.html" class="tsd-kind-icon">Mesh</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mutator.html" class="tsd-kind-icon">Mutator</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mutatorattributetypes.html" class="tsd-kind-icon">Mutator<wbr>Attribute<wbr>Types</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mutatorforanimation.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>Animation</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.mutatorforuserinterface.html" class="tsd-kind-icon">Mutator<wbr>For<wbr>User<wbr>Interface</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.serializable.html" class="tsd-kind-icon">Serializable</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
-						<a href="../interfaces/fudge.serialization.html" class="tsd-kind-icon">Serialization</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
-						<a href="../modules/fudge.html#general" class="tsd-kind-icon">General</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module">
-						<a href="../modules/fudge.html#gl2" class="tsd-kind-icon">gl2</a>
-					</li>
 				</ul>
 			</nav>
 		</div>
