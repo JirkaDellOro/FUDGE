@@ -1,12 +1,5 @@
 /// <reference path="WebGLApi.ts"/>
 namespace Fudge {
-    export interface BufferSpecification {
-        size: number;   // The size of the datasample.
-        dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
-        normalize: boolean; // Flag to normalize the data.
-        stride: number; // Number of indices that will be skipped each iteration.
-        offset: number; // Index of the element to begin with.
-    }
     /**
      * To each node registered with WebGL, a reference to the shader, the material and the mesh used is stored separately
      * With these references, the already buffered data is retrieved.
