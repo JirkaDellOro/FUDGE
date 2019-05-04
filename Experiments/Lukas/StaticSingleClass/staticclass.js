@@ -6,14 +6,23 @@ class Shape {
     }
 }
 Shape.shapesRegister = [];
-let Rect = new Shape("Rectangle", createRectShape);
-let Circle = new Shape("Circle", createCircleShape);
 function createRectShape(_x, _y) {
     return new Path2D();
 }
 function createCircleShape(_x, _y) {
     return new Path2D();
 }
+let rect = new Shape("Rectangle", createRectShape);
+let circle = new Shape("Circle", createCircleShape);
+///////////////////////////////////
+class SubShape extends Shape {
+    constructor(_name, _createPath) {
+        super(_name, _createPath);
+    }
+}
+let subShape = new SubShape("SubShape", createCircleShape);
+/////////////////////////////////
+//↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 for (let s of Shape.shapesRegister) {
     console.log(s.name);
 }

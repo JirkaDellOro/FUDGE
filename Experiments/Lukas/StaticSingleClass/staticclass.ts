@@ -11,8 +11,6 @@ class Shape {
 
 }
 
-let Rect: Shape = new Shape("Rectangle", createRectShape);
-let Circle: Shape = new Shape("Circle", createCircleShape);
 
 function createRectShape(_x: number, _y: number): Path2D{
 	return new Path2D();
@@ -20,6 +18,22 @@ function createRectShape(_x: number, _y: number): Path2D{
 function createCircleShape(_x: number, _y: number): Path2D{
 	return new Path2D();
 }
+
+let rect: Shape = new Shape("Rectangle", createRectShape);
+let circle: Shape = new Shape("Circle", createCircleShape);
+
+///////////////////////////////////
+
+class SubShape extends Shape {
+	constructor(_name: string, _createPath:(_x: number, _y: number) => Path2D){
+		super(_name, _createPath);
+	}
+}
+
+let subShape: SubShape = new SubShape("SubShape",createCircleShape);
+
+/////////////////////////////////
+//↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
 for(let s of Shape.shapesRegister){
 	console.log(s.name);
