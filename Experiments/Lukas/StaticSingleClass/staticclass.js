@@ -2,7 +2,7 @@ class Shape {
     constructor(_name, _createPath) {
         this.name = _name;
         this.createPath = _createPath;
-        Shape.shapesRegister.push(this);
+        this.iRegister = Shape.shapesRegister.push(this);
     }
 }
 Shape.shapesRegister = [];
@@ -24,6 +24,6 @@ let subShape = new SubShape("SubShape", createCircleShape);
 /////////////////////////////////
 //↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 for (let s of Shape.shapesRegister) {
-    console.log(s.name);
+    console.log(s.iRegister, s.name);
 }
 //# sourceMappingURL=staticclass.js.map
