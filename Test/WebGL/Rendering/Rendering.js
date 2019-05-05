@@ -6,7 +6,7 @@ var RenderManagerRendering;
         // create asset
         let branch = Scenes.createAxisCross();
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.recalculateAllNodeTransforms();
         // initialize viewport

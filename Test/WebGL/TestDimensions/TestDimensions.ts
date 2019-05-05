@@ -13,7 +13,7 @@ namespace RenderManagerRendering {
         branch.addComponent(new ƒ.ComponentTransform());
 
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.recalculateAllNodeTransforms();
 

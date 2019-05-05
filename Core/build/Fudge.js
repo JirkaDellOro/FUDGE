@@ -1088,7 +1088,7 @@ var Fudge;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
-            this.rectSource = Fudge.RenderOperator.getCanvasRect();
+            this.rectSource = Fudge.RenderManager.getCanvasRect();
             this.rectDestination = this.getCanvasRectangle();
         }
         getContext() {
@@ -1878,17 +1878,17 @@ var Fudge;
         /**
          * Sets up canvas and renderingcontext.
          */
-        static initializeContext() {
+        static initialize() {
             let contextAttributes = { alpha: false, antialias: false };
             let canvas = document.createElement("canvas");
             RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
             // Enable backface- and zBuffer-culling.
             RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
             RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
-            RenderOperator.rectViewport = this.getCanvasRect();
+            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
         static getCanvas() {
-            return this.crc3.canvas;
+            return RenderOperator.crc3.canvas;
         }
         static getCanvasRect() {
             let canvas = RenderOperator.crc3.canvas;
@@ -1903,7 +1903,7 @@ var Fudge;
             RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
         static getViewportRectangle() {
-            return this.rectViewport;
+            return RenderOperator.rectViewport;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -2220,8 +2220,8 @@ var Fudge;
             this.nodes.forEach(recalculateBranchContainingNode);
         }
         static clear(_color = null) {
-            Fudge.RenderOperator.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            Fudge.RenderOperator.crc3.clear(Fudge.RenderOperator.crc3.COLOR_BUFFER_BIT | Fudge.RenderOperator.crc3.DEPTH_BUFFER_BIT);
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
         }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.

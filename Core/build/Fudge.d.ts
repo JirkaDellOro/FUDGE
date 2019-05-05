@@ -785,7 +785,7 @@ declare namespace Fudge {
         /**
          * Sets up canvas and renderingcontext.
          */
-        static initializeContext(): void;
+        static initialize(): void;
         static getCanvas(): HTMLCanvasElement;
         static getCanvasRect(): Rectangle;
         static setCanvasSize(_width: number, _height: number): void;

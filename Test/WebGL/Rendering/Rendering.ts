@@ -7,7 +7,7 @@ namespace RenderManagerRendering {
         let branch: ƒ.Node = Scenes.createAxisCross();
         
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.recalculateAllNodeTransforms();
 

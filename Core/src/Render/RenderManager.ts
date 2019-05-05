@@ -205,8 +205,8 @@ namespace Fudge {
         }
 
         public static clear(_color: Color = null): void {
-            RenderOperator.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            RenderOperator.crc3.clear(RenderOperator.crc3.COLOR_BUFFER_BIT | RenderOperator.crc3.DEPTH_BUFFER_BIT);
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
         }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.

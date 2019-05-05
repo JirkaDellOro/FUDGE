@@ -50,7 +50,7 @@ namespace Scenes {
     }
 
     export function createMiniScene(): void {
-        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.initialize();
 
         node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;

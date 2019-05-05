@@ -31,7 +31,7 @@ namespace Fudge {
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
 
-            this.rectSource = RenderOperator.getCanvasRect();
+            this.rectSource = RenderManager.getCanvasRect();
             this.rectDestination = this.getCanvasRectangle();
         }
 

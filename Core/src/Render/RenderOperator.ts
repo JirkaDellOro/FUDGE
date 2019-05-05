@@ -41,7 +41,7 @@ namespace Fudge {
         /**
          * Sets up canvas and renderingcontext.
          */
-        public static initializeContext(): void {
+        public static initialize(): void {
             let contextAttributes: WebGLContextAttributes = { alpha: false, antialias: false };
             let canvas: HTMLCanvasElement = document.createElement("canvas");
             RenderOperator.crc3 = RenderOperator.assert<WebGL2RenderingContext>(
@@ -51,11 +51,11 @@ namespace Fudge {
             // Enable backface- and zBuffer-culling.
             RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
             RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
-            RenderOperator.rectViewport = this.getCanvasRect();
+            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
 
         public static getCanvas(): HTMLCanvasElement {
-            return this.crc3.canvas;
+            return RenderOperator.crc3.canvas;
         }
         public static getCanvasRect(): Rectangle {
             let canvas: HTMLCanvasElement = RenderOperator.crc3.canvas;
@@ -70,7 +70,7 @@ namespace Fudge {
             RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
         public static getViewportRectangle(): Rectangle {
-            return this.rectViewport;
+            return RenderOperator.rectViewport;
         }
 
         /**
