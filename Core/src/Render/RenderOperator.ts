@@ -24,9 +24,8 @@ namespace Fudge {
         color: Vector3;
     }
 
-    export class WebGLApi {
-        public static crc3: WebGL2RenderingContext;
-        private static canvas: HTMLCanvasElement = null;
+    export class RenderOperator {
+        protected static crc3: WebGL2RenderingContext;
         private static rectViewport: Rectangle;
 
         /**
@@ -36,37 +35,39 @@ namespace Fudge {
         */
         public static assert<T>(_value: T | null, _message: string = ""): T {
             if (_value === null)
-                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${WebGLApi.crc3 ? WebGLApi.crc3.getError() : ""}`);
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
             return _value;
         }
         /**
-         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
-         * @param _elementID Optional: ID of a predefined canvaselement.
+         * Sets up canvas and renderingcontext.
          */
-        public static initializeContext(): HTMLCanvasElement {
+        public static initializeContext(): void {
             let contextAttributes: WebGLContextAttributes = { alpha: false, antialias: false };
-            WebGLApi.canvas = document.createElement("canvas");
-            WebGLApi.crc3 = WebGLApi.assert<WebGL2RenderingContext>(
-                WebGLApi.canvas.getContext("webgl2", contextAttributes),
+            let canvas: HTMLCanvasElement = document.createElement("canvas");
+            RenderOperator.crc3 = RenderOperator.assert<WebGL2RenderingContext>(
+                canvas.getContext("webgl2", contextAttributes),
                 "WebGL-context couldn't be created"
             );
             // Enable backface- and zBuffer-culling.
-            WebGLApi.crc3.enable(WebGLApi.crc3.CULL_FACE);
-            WebGLApi.crc3.enable(WebGLApi.crc3.DEPTH_TEST);
-            this.rectViewport = this.getCanvasRect();
-            return WebGLApi.canvas;
+            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
+            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
+            RenderOperator.rectViewport = this.getCanvasRect();
         }
 
+        public static getCanvas(): HTMLCanvasElement {
+            return this.crc3.canvas;
+        }
         public static getCanvasRect(): Rectangle {
-            return { x: 0, y: 0, width: WebGLApi.canvas.width, height: WebGLApi.canvas.height };
+            let canvas: HTMLCanvasElement = RenderOperator.crc3.canvas;
+            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
         }
         public static setCanvasSize(_width: number, _height: number): void {
-            WebGLApi.crc3.canvas.width = _width;
-            WebGLApi.crc3.canvas.height = _height;
+            RenderOperator.crc3.canvas.width = _width;
+            RenderOperator.crc3.canvas.height = _height;
         }
         public static setViewportRectangle(_rect: Rectangle): void {
-            Object.assign(WebGLApi.rectViewport, _rect);
-            WebGLApi.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+            Object.assign(RenderOperator.rectViewport, _rect);
+            RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
         public static getViewportRectangle(): Rectangle {
             return this.rectViewport;
@@ -80,33 +81,33 @@ namespace Fudge {
          * @param _projection 
          */
         protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void {
-            WebGLApi.useBuffer(bufferInfo);
-            WebGLApi.useParameter(materialInfo);
-            WebGLApi.useProgram(shaderInfo);
-            WebGLApi.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+            RenderOperator.useBuffer(bufferInfo);
+            RenderOperator.useParameter(materialInfo);
+            RenderOperator.useProgram(shaderInfo);
+            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
 
-            let matrixLocation: WebGLUniformLocation = shaderInfo.uniforms["u_matrix"];
             // Supply matrixdata to shader. 
-            WebGLApi.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            // Draw call
+            let matrixLocation: WebGLUniformLocation = shaderInfo.uniforms["u_matrix"];
+            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+
             // Supply color
             let colorUniformLocation: WebGLUniformLocation = shaderInfo.uniforms["u_color"];
             let vec: Vector3 = materialInfo.color;
             let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-            WebGLApi.crc3.uniform4fv(colorUniformLocation, color);
+            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
 
             // Draw call
-            WebGLApi.crc3.drawArrays(WebGLApi.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
         }
 
         // #region Shaderprogram 
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
-            let crc3: WebGL2RenderingContext = WebGLApi.crc3;
+            let crc3: WebGL2RenderingContext = RenderOperator.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, WebGLApi.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, WebGLApi.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
-            let error: string = WebGLApi.assert<string>(crc3.getProgramInfoLog(shaderProgram));
+            let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
@@ -122,7 +123,7 @@ namespace Fudge {
                 let webGLShader: WebGLShader = crc3.createShader(_shaderType);
                 crc3.shaderSource(webGLShader, _shaderCode);
                 crc3.compileShader(webGLShader);
-                let error: string = WebGLApi.assert<string>(crc3.getShaderInfoLog(webGLShader));
+                let error: string = RenderOperator.assert<string>(crc3.getShaderInfoLog(webGLShader));
                 if (error !== "") {
                     throw new Error("Error compiling shader: " + error);
                 }
@@ -137,7 +138,7 @@ namespace Fudge {
                 let detectedAttributes: { [name: string]: number } = {};
                 let attributeCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
                 for (let i: number = 0; i < attributeCount; i++) {
-                    let attributeInfo: WebGLActiveInfo = WebGLApi.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
                     if (!attributeInfo) {
                         break;
                     }
@@ -149,22 +150,22 @@ namespace Fudge {
                 let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
                 let uniformCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
                 for (let i: number = 0; i < uniformCount; i++) {
-                    let info: WebGLActiveInfo = WebGLApi.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
+                    let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = WebGLApi.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
                 }
                 return detectedUniforms;
             }
         }
         protected static useProgram(_shaderInfo: ShaderInfo): void {
-            WebGLApi.crc3.useProgram(_shaderInfo.program);
-            WebGLApi.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
+            RenderOperator.crc3.useProgram(_shaderInfo.program);
+            RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
         }
         protected static deleteProgram(_program: ShaderInfo): void {
             if (_program) {
-                WebGLApi.crc3.deleteProgram(_program.program);
+                RenderOperator.crc3.deleteProgram(_program.program);
                 delete _program.attributes;
                 delete _program.uniforms;
             }
@@ -173,31 +174,31 @@ namespace Fudge {
 
         // #region Meshbuffer
         protected static createBuffer(_mesh: Mesh): BufferInfo {
-            let buffer: WebGLBuffer = WebGLApi.assert<WebGLBuffer>(WebGLApi.crc3.createBuffer());
-            WebGLApi.crc3.bindBuffer(WebGLApi.crc3.ARRAY_BUFFER, buffer);
-            WebGLApi.crc3.bufferData(WebGLApi.crc3.ARRAY_BUFFER, _mesh.getVertices(), WebGLApi.crc3.STATIC_DRAW);
+            let buffer: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
+            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
             let bufferInfo: BufferInfo = {
                 buffer: buffer,
-                target: WebGLApi.crc3.ARRAY_BUFFER,
+                target: RenderOperator.crc3.ARRAY_BUFFER,
                 specification: _mesh.getBufferSpecification(),
                 vertexCount: _mesh.getVertexCount()
             };
             return bufferInfo;
         }
         protected static useBuffer(_bufferInfo: BufferInfo): void {
-            WebGLApi.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
         }
         protected static deleteBuffer(_bufferInfo: BufferInfo): void {
             if (_bufferInfo) {
-                WebGLApi.crc3.bindBuffer(_bufferInfo.target, null);
-                WebGLApi.crc3.deleteBuffer(_bufferInfo.buffer);
+                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
             }
         }
         // #endregion
 
         // #region MaterialParameters
         protected static createParameter(_material: Material): MaterialInfo {
-            let vao: WebGLVertexArrayObject = WebGLApi.assert<WebGLVertexArrayObject>(WebGLApi.crc3.createVertexArray());
+            let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let materialInfo: MaterialInfo = {
                 vao: vao,
                 color: _material.Color
@@ -205,12 +206,12 @@ namespace Fudge {
             return materialInfo;
         }
         protected static useParameter(_materialInfo: MaterialInfo): void {
-            WebGLApi.crc3.bindVertexArray(_materialInfo.vao);
+            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
         }
         protected static deleteParameter(_materialInfo: MaterialInfo): void {
             if (_materialInfo) {
-                WebGLApi.crc3.bindVertexArray(null);
-                WebGLApi.crc3.deleteVertexArray(_materialInfo.vao);
+                RenderOperator.crc3.bindVertexArray(null);
+                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
             }
         }
         // #endregion
@@ -230,7 +231,7 @@ namespace Fudge {
                  * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
                  */
         private static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
-            WebGLApi.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
 
 

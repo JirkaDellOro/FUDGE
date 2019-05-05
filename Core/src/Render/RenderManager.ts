@@ -1,4 +1,4 @@
-/// <reference path="WebGLApi.ts"/>
+/// <reference path="RenderOperator.ts"/>
 namespace Fudge {
     /**
      * To each node registered with WebGL, a reference to the shader, the material and the mesh used is stored separately
@@ -13,10 +13,10 @@ namespace Fudge {
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
     /**
-     * This class manages the references to the programs, buffers and vertex array objects created and stored with WebGL.
+     * This class manages the references to render data used by nodes.
      * Multiple nodes may refer to the same data via their references to shader, material and mesh 
      */
-    class WebGLReference<T> {
+    class Reference<T> {
         private reference: T;
         private count: number = 0;
 
@@ -44,15 +44,15 @@ namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    export class WebGL extends WebGLApi {
+    export class RenderManager extends RenderOperator {
         // private canvas: HTMLCanvasElement; //offscreen render buffer
         // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs: Map<typeof Shader, WebGLReference<ShaderInfo>> = new Map();
+        private static programs: Map<typeof Shader, Reference<ShaderInfo>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private static parameters: Map<Material, WebGLReference<MaterialInfo>> = new Map();
+        private static parameters: Map<Material, Reference<MaterialInfo>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers: Map<Mesh, WebGLReference<BufferInfo>> = new Map();
+        private static buffers: Map<Mesh, Reference<BufferInfo>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
 
         // #region Adding
@@ -84,6 +84,7 @@ namespace Fudge {
         public static addBranch(_node: Node): void {
             for (let node of _node.branch)
                 try {
+                    // may fail when some components are missing. TODO: cleanup
                     this.addNode(node);
                 } catch (_e) {
                     //console.log(_e);
@@ -203,6 +204,10 @@ namespace Fudge {
             this.nodes.forEach(recalculateBranchContainingNode);
         }
 
+        public static clear(_color: Color = null): void {
+            RenderOperator.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            RenderOperator.crc3.clear(RenderOperator.crc3.COLOR_BUFFER_BIT | RenderOperator.crc3.DEPTH_BUFFER_BIT);
+        }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
          * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
@@ -273,8 +278,8 @@ namespace Fudge {
          * @param _key 
          * @param _deletor 
          */
-        private static removeReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
-            let reference: WebGLReference<ReferenceType>;
+        private static removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
+            let reference: Reference<ReferenceType>;
             reference = _in.get(_key);
             if (reference.decreaseCounter() == 0) {
                 // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
@@ -290,14 +295,14 @@ namespace Fudge {
          * @param _key 
          * @param _creator 
          */
-        private static createReference<KeyType, ReferenceType>(_in: Map<KeyType, WebGLReference<ReferenceType>>, _key: KeyType, _creator: Function): void {
-            let reference: WebGLReference<ReferenceType>;
+        private static createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
+            let reference: Reference<ReferenceType>;
             reference = _in.get(_key);
             if (reference)
                 reference.increaseCounter();
             else {
                 let content: ReferenceType = _creator(_key);
-                reference = new WebGLReference<ReferenceType>(content);
+                reference = new Reference<ReferenceType>(content);
                 reference.increaseCounter();
                 _in.set(_key, reference);
             }

@@ -1,5 +1,5 @@
-var WebGLRendering;
-(function (WebGLRendering) {
+var RenderManagerRendering;
+(function (RenderManagerRendering) {
     var ƒ = Fudge;
     window.addEventListener("load", init);
     let uiRectangles = {};
@@ -11,10 +11,10 @@ var WebGLRendering;
         // create asset
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
-        // initialize WebGL and transmit content
-        ƒ.WebGLApi.initializeContext();
-        ƒ.WebGL.addBranch(branch);
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.recalculateAllNodeTransforms();
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -24,7 +24,7 @@ var WebGLRendering;
         ƒ.Loop.start();
         function animate(_event) {
             branch.cmpTransform.rotateY(1);
-            ƒ.WebGL.recalculateAllNodeTransforms();
+            ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
             viewPort.prepare();
             viewPort.draw();
@@ -32,10 +32,10 @@ var WebGLRendering;
         let menu = document.getElementsByTagName("div")[0];
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
-        appendUIRectangle(menu, "WebGLCanvas");
-        appendUIRectangle(menu, "WebGLViewport");
-        appendUIRectangle(menu, "Source");
-        appendUIRectangle(menu, "Destination");
+        appendUIRectangle(menu, "RenderCanvas");
+        appendUIRectangle(menu, "RenderViewport");
+        appendUIRectangle(menu, "ViewportSource");
+        appendUIRectangle(menu, "ViewportDestination");
         appendUIRectangle(menu, "DomCanvas");
         appendUIRectangle(menu, "CSSRectangle");
         setAll({ x: 0, y: 0, width: 300, height: 300 });
@@ -78,16 +78,16 @@ var WebGLRendering;
     function setRect(_uiRectangle) {
         let rect = _uiRectangle.get();
         switch (_uiRectangle.name) {
-            case "WebGLCanvas":
-                ƒ.WebGL.setCanvasSize(rect.width, rect.height);
+            case "RenderCanvas":
+                ƒ.RenderManager.setCanvasSize(rect.width, rect.height);
                 break;
-            case "WebGLViewport":
-                ƒ.WebGL.setViewportRectangle(rect);
+            case "RenderViewport":
+                ƒ.RenderManager.setViewportRectangle(rect);
                 break;
-            case "Source":
+            case "ViewportSource":
                 viewPort.rectSource = rect;
                 break;
-            case "Destination":
+            case "ViewportDestination":
                 viewPort.rectDestination = rect;
                 break;
             case "DomCanvas":
@@ -112,15 +112,15 @@ var WebGLRendering;
         update();
     }
     function update() {
-        uiRectangles["WebGLCanvas"].set(ƒ.WebGL.getCanvasRect());
-        uiRectangles["WebGLViewport"].set(ƒ.WebGL.getViewportRectangle());
-        uiRectangles["Source"].set(viewPort.rectSource);
-        uiRectangles["Destination"].set(viewPort.rectDestination);
+        uiRectangles["RenderCanvas"].set(ƒ.RenderManager.getCanvasRect());
+        uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
+        uiRectangles["ViewportSource"].set(viewPort.rectSource);
+        uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
         uiRectangles["DomCanvas"].set({ x: 0, y: 0, width: canvas.width, height: canvas.height });
         let client = canvas.getBoundingClientRect();
         uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
-})(WebGLRendering || (WebGLRendering = {}));
+})(RenderManagerRendering || (RenderManagerRendering = {}));
 //# sourceMappingURL=TestDimensions.js.map

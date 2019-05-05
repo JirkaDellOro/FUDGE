@@ -1,4 +1,4 @@
-namespace WebGLRendering {
+namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("load", init);
     let uiRectangles: { [name: string]: UI.Rectangle } = {};
@@ -12,10 +12,10 @@ namespace WebGLRendering {
         let branch: ƒ.Node = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
 
-        // initialize WebGL and transmit content
-        ƒ.WebGLApi.initializeContext();
-        ƒ.WebGL.addBranch(branch);
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initializeContext();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.recalculateAllNodeTransforms();
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
@@ -27,7 +27,7 @@ namespace WebGLRendering {
         ƒ.Loop.start();
         function animate(_event: Event): void {
             branch.cmpTransform.rotateY(1);
-            ƒ.WebGL.recalculateAllNodeTransforms();
+            ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
             viewPort.prepare();
             viewPort.draw();
@@ -36,10 +36,10 @@ namespace WebGLRendering {
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
-        appendUIRectangle(menu, "WebGLCanvas");
-        appendUIRectangle(menu, "WebGLViewport");
-        appendUIRectangle(menu, "Source");
-        appendUIRectangle(menu, "Destination");
+        appendUIRectangle(menu, "RenderCanvas");
+        appendUIRectangle(menu, "RenderViewport");
+        appendUIRectangle(menu, "ViewportSource");
+        appendUIRectangle(menu, "ViewportDestination");
         appendUIRectangle(menu, "DomCanvas");
         appendUIRectangle(menu, "CSSRectangle");
 
@@ -92,16 +92,16 @@ namespace WebGLRendering {
     function setRect(_uiRectangle: UI.Rectangle): void {
         let rect: ƒ.Rectangle = _uiRectangle.get();
         switch (_uiRectangle.name) {
-            case "WebGLCanvas":
-                ƒ.WebGL.setCanvasSize(rect.width, rect.height);
+            case "RenderCanvas":
+                ƒ.RenderManager.setCanvasSize(rect.width, rect.height);
                 break;
-            case "WebGLViewport":
-                ƒ.WebGL.setViewportRectangle(rect);
+            case "RenderViewport":
+                ƒ.RenderManager.setViewportRectangle(rect);
                 break;
-            case "Source":
+            case "ViewportSource":
                 viewPort.rectSource = rect;
                 break;
-            case "Destination":
+            case "ViewportDestination":
                 viewPort.rectDestination = rect;
                 break;
             case "DomCanvas":
@@ -128,10 +128,10 @@ namespace WebGLRendering {
     }
 
     function update(): void {
-        uiRectangles["WebGLCanvas"].set(ƒ.WebGL.getCanvasRect());
-        uiRectangles["WebGLViewport"].set(ƒ.WebGL.getViewportRectangle());
-        uiRectangles["Source"].set(viewPort.rectSource);
-        uiRectangles["Destination"].set(viewPort.rectDestination);
+        uiRectangles["RenderCanvas"].set(ƒ.RenderManager.getCanvasRect());
+        uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
+        uiRectangles["ViewportSource"].set(viewPort.rectSource);
+        uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
         uiRectangles["DomCanvas"].set({ x: 0, y: 0, width: canvas.width, height: canvas.height });
         let client: ClientRect = canvas.getBoundingClientRect();
         uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });

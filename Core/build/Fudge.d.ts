@@ -132,7 +132,7 @@ declare namespace Fudge {
         private backgroundColor;
         private backgroundEnabled;
         readonly isOrthographic: boolean;
-        getBackgoundColor(): Vector3;
+        getBackgoundColor(): Color;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
         getFieldOfView(): number;
@@ -292,6 +292,11 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class Color {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+        constructor(_r: number, _g: number, _b: number, _a: number);
     }
 }
 declare namespace Fudge {
@@ -480,10 +485,10 @@ declare namespace Fudge {
         private crc2;
         private canvas;
         /**
-                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-                 * @param _branch
-                 * @param _camera
-                 */
+         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * @param _branch
+         * @param _camera
+         */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         getContext(): CanvasRenderingContext2D;
         getCanvasRectangle(): Rectangle;
@@ -742,36 +747,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    /**
-     * Static superclass for the representation of WebGl shaderprograms.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ShaderBasic extends Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Textured shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ShaderTexture extends Shader {
-        loadVertexShaderSource(): string;
-        loadFragmentShaderSource(): string;
-    }
-}
-declare namespace Fudge {
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -798,9 +773,8 @@ declare namespace Fudge {
         vao: WebGLVertexArrayObject;
         color: Vector3;
     }
-    class WebGLApi {
-        static crc3: WebGL2RenderingContext;
-        private static canvas;
+    class RenderOperator {
+        protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
@@ -809,10 +783,10 @@ declare namespace Fudge {
         */
         static assert<T>(_value: T | null, _message?: string): T;
         /**
-         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
-         * @param _elementID Optional: ID of a predefined canvaselement.
+         * Sets up canvas and renderingcontext.
          */
-        static initializeContext(): HTMLCanvasElement;
+        static initializeContext(): void;
+        static getCanvas(): HTMLCanvasElement;
         static getCanvasRect(): Rectangle;
         static setCanvasSize(_width: number, _height: number): void;
         static setViewportRectangle(_rect: Rectangle): void;
@@ -852,7 +826,7 @@ declare namespace Fudge {
      * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
      * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
      */
-    class WebGL extends WebGLApi {
+    class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs;
         /** Stores references to the vertex array objects and makes them available via the references to materials */
@@ -894,6 +868,7 @@ declare namespace Fudge {
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
         static recalculateAllNodeTransforms(): void;
+        static clear(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
          * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
@@ -925,5 +900,35 @@ declare namespace Fudge {
          * @param _creator
          */
         private static createReference;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Static superclass for the representation of WebGl shaderprograms.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Shader {
+        static loadVertexShaderSource(): string;
+        static loadFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Single color shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderBasic extends Shader {
+        static loadVertexShaderSource(): string;
+        static loadFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Textured shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderTexture extends Shader {
+        loadVertexShaderSource(): string;
+        loadFragmentShaderSource(): string;
     }
 }

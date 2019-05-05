@@ -21,7 +21,7 @@ var Mutable;
         mutator.local.data[12] = 5 * Math.sin(angle);
         mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        ƒ.RenderManager.recalculateAllNodeTransforms();
         Scenes.viewPort.draw();
     }
 })(Mutable || (Mutable = {}));

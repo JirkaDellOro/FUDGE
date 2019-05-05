@@ -1,4 +1,4 @@
-namespace WebGLManagement {
+namespace RenderManagerManagement {
     import ƒ = Fudge;
     let delegate: EventListener = addNodes;
     window.addEventListener("DOMContentLoaded", init);
@@ -16,8 +16,8 @@ namespace WebGLManagement {
         child = node.getChildren()[0];
         grandchild = child.getChildren()[0];
 
-        // let webgl: ƒ.WebGL = new ƒ.WebGL();
-        // webgl.addEventListener("snv", hndClick);
+        // let RenderManager: ƒ.RenderManager = new ƒ.RenderManager();
+        // RenderManager.addEventListener("snv", hndClick);
     }
 
     function hndClick(_event: Event): void {
@@ -25,47 +25,47 @@ namespace WebGLManagement {
     }
 
     function addNodes(_event: Event): void {
-        dumpWebGL("Add two nodes");
-        ƒ.WebGL.addNode(node);
-        ƒ.WebGL.addNode(grandchild);
+        dumpRenderManager("Add two nodes");
+        ƒ.RenderManager.addNode(node);
+        ƒ.RenderManager.addNode(grandchild);
         delegate = updateNode;
     }
     function updateNode(_event: Event): void {
-        dumpWebGL("Update node");
-        ƒ.WebGL.updateNode(node);
+        dumpRenderManager("Update node");
+        ƒ.RenderManager.updateNode(node);
         delegate = recalculateNode;
     }
     function recalculateNode(_event: Event): void {
-        dumpWebGL("Recalculate nodes");
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        dumpRenderManager("Recalculate nodes");
+        ƒ.RenderManager.recalculateAllNodeTransforms();
         delegate = removeFirstNode;
     }
     function removeFirstNode(_event: Event): void {
-        dumpWebGL("Remove second node");
-        ƒ.WebGL.removeNode(grandchild);
+        dumpRenderManager("Remove second node");
+        ƒ.RenderManager.removeNode(grandchild);
         delegate = removeSecondNode;
     }
     function removeSecondNode(_event: Event): void {
-        dumpWebGL("Remove first node");
-        ƒ.WebGL.removeNode(node);
+        dumpRenderManager("Remove first node");
+        ƒ.RenderManager.removeNode(node);
         delegate = addBranch;
     }
     function addBranch(_event: Event): void {
-        dumpWebGL("Add branch");
-        ƒ.WebGL.addBranch(node);
+        dumpRenderManager("Add branch");
+        ƒ.RenderManager.addBranch(node);
         delegate = removeBranch;
     }
     function removeBranch(_event: Event): void {
-        ƒ.WebGL.removeBranch(node);
-        dumpWebGL("branch removed");
+        ƒ.RenderManager.removeBranch(node);
+        dumpRenderManager("branch removed");
         window.removeEventListener("click", hndClick);
     }
 
-    function dumpWebGL(_label: string): void {
+    function dumpRenderManager(_label: string): void {
         console.group(_label);
-        for (let prop in ƒ.WebGL) {
+        for (let prop in ƒ.RenderManager) {
             console.groupCollapsed(prop);
-            console.log(ƒ.WebGL[prop]);
+            console.log(ƒ.RenderManager[prop]);
             console.groupEnd();
         }
         console.groupEnd();

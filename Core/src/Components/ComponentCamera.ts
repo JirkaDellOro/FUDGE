@@ -9,7 +9,7 @@ namespace Fudge {
         private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
         private aspectRatio: number = 1.0;
-        private backgroundColor: Vector3 = new Vector3(0, 0, 0); // The color of the background the camera will render.
+        private backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
 
@@ -17,7 +17,7 @@ namespace Fudge {
             return this.orthographic;
         }
 
-        public getBackgoundColor(): Vector3 {
+        public getBackgoundColor(): Color {
             return this.backgroundColor;
         }
 
@@ -66,7 +66,7 @@ namespace Fudge {
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
-        public projectOrthographic(_left: number = 0, _right: number = WebGLApi.crc3.canvas.clientWidth, _bottom: number = WebGLApi.crc3.canvas.clientHeight, _top: number = 0): void {
+        public projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void {
             this.orthographic = true;
             this.projectionMatrix = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
