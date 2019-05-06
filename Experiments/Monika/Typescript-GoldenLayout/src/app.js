@@ -1,5 +1,6 @@
 let myLayout;
 let savedState;
+// let file:HTML = "test.html"
 let config = {
     content: [{
             type: 'row',
@@ -43,7 +44,7 @@ else {
 }
 //Layout Changes - listener
 myLayout.on('stateChanged', stateupdate);
-myLayout.registerComponent('Viewport', createSimpleComponent);
+myLayout.registerComponent('Viewport', createPersistentComponent);
 myLayout.registerComponent('Hierarchy', createSimpleComponent);
 myLayout.registerComponent('Inspector', createSimpleComponent);
 myLayout.registerComponent('Menubar', createSimpleComponent);
@@ -53,21 +54,21 @@ function stateupdate() {
     localStorage.setItem('savedState', state);
 }
 function createSimpleComponent(container, state) {
-    container.getElement().html('<button name="testbutton" value="Test">TEST</button>');
+    let element = document.createElement("span");
+    element.innerHTML = "<h2>hamanamahanahama</h2>";
+    container.getElement().html(element);
 }
-function createPersistentComponent(state) {
-    let config;
-    let container;
-    config = GoldenLayout.unminifyConfig(state);
+function createPersistentComponent(container, state) {
     if (!typeof window.localStorage) {
         container.getElement().append('<h2 class="err">Your browser doesn\'t support localStorage.</h2>');
         return;
     }
     // Create the input
     let input = $('<input type="text" />');
+    container.getElement().append('<h2>I\'ll be saved to localStorage</h2>', input);
     // Set the initial / saved state
-    if (config.componentState.label) {
-        input.val(config.componentState.label);
+    if (state.label) {
+        input.val(state.label);
     }
     // Store state updates
     input.on('change', function () {
