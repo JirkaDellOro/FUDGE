@@ -8,7 +8,7 @@ endheader
 |RenderManager|
 |RenderOperator|
 |Viewport|
-if () then (camera inactive)
+if () then ([camera inactive])
     end
 else
     :clear(camera.color);
@@ -23,7 +23,7 @@ package clear {
 package addBranch {
     :_node]
     :addNode(_node);
-    while () is (more children)
+    while () is ([more children])
         :child = next child]
         :addBranch(child);
     endwhile
@@ -37,7 +37,7 @@ package drawBranch {
     :calculate projection];
     :drawNode(_node, projection) *;
     |RenderManager|
-    while () is (more children)
+    while () is ([more children])
         :child = next child]
         :drawBranch(child, _camera);
     endwhile
