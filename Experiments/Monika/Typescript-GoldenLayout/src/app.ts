@@ -1,6 +1,7 @@
 
 let myLayout:GoldenLayout;
 let savedState:string;
+// let file:HTML = "test.html"
 let config:GoldenLayout.Config = {
             content: [{
                 type: 'row',
@@ -49,14 +50,11 @@ let config:GoldenLayout.Config = {
         }
         //Layout Changes - listener
         myLayout.on('stateChanged', stateupdate);
-        myLayout.registerComponent( 'Viewport', createSimpleComponent);
-        myLayout.registerComponent( 'Hierarchy', createSimpleComponent);
+        myLayout.registerComponent( 'Viewport', createPersistentComponent);
+        myLayout.registerComponent( 'Hierarchy', simpleComponent);
         myLayout.registerComponent( 'Inspector', createSimpleComponent);
         myLayout.registerComponent( 'Menubar', createSimpleComponent);
         myLayout.init();
-
-
-
 
 function stateupdate()
 {
@@ -66,33 +64,32 @@ function stateupdate()
 
 function createSimpleComponent(container:any, state:any)
 {
-    container.getElement().html( '<button name="testbutton" value="Test">TEST</button>');
+    let element:HTMLSpanElement = document.createElement("span");
+    element.innerHTML = "<h2>hamanamahanahama</h2>";
+    container.getElement().html(element);
 }
 
-function createPersistentComponent(state:string)
+function createPersistentComponent(container:any, state:any)
 {
-    let config:GoldenLayout.ComponentConfig;
-    let container:GoldenLayout.Container;
-
-    config = GoldenLayout.unminifyConfig(state);
-    if( !typeof window.localStorage ) {
+    if( !typeof window.localStorage ) 
+    {
         container.getElement().append(  '<h2 class="err">Your browser doesn\'t support localStorage.</h2>');
         return;
-        }
-        // Create the input
-        let input = $( '<input type="text" />' );
-    
-        // Set the initial / saved state
-        if( config.componentState.label ) {
-        input.val( config.componentState.label );
-        }
-        // Store state updates
-        input.on( 'change', function(){
-        container.setState({
-            label: input.val()
-        });
-        }); 
-        return container
+    }
+    // Create the input
+    let input = $( '<input type="text" />' );
+    container.getElement().append(  '<h2>I\'ll be saved to localStorage</h2>', input );
+    // Set the initial / saved state
+    if( state.label ) {
+    input.val( state.label );
+    }
+    // Store state updates
+    input.on( 'change', function(){
+    container.setState({
+        label: input.val()
+    });
+    }); 
+    return container
 }
 
 

@@ -1,16 +1,27 @@
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js">
-</script>
-<script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
-<link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
-<link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
-<script language="javascript">
-    var config = {
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <script>window.$ = window.jQuery = require('./node_modules/jquery/dist/jquery.js');</script>
+    </script>
+    <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
+    <title>Hello Golden Layout!</title>
+  </head>
+  <body>
+      <script>
+          // You can also require other files to run in this process
+          require('./renderer.js')
+        </script>
+    <script language="javascript">
+var config = {
         content: [{
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'Scene explorer',
-                title: "Scene explorer", 
+                componentName: 'Scene Explorer',
+                title: "Scene Explorer", 
                 componentState: { label: 'A' }
             },
             {
@@ -89,4 +100,6 @@ myLayout.registerComponent( 'Viewport', persistentComponent );
 myLayout.registerComponent( 'Inspector', persistentComponent );
 myLayout.registerComponent( 'Menubar', persistentComponent );
 myLayout.init();
-</script>
+    </script>
+  </body>
+</html>

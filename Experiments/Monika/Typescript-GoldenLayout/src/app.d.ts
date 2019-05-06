@@ -4,4 +4,4 @@ declare let savedState: string;
 declare let config: GoldenLayout.Config;
 declare function stateupdate(): void;
 declare function createSimpleComponent(container: any, state: any): void;
-declare function createPersistentComponent(state: string): GoldenLayout.Container;
+declare function createPersistentComponent(container: any, state: any): any;
