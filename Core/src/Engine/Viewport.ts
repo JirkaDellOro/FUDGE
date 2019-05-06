@@ -18,11 +18,12 @@ namespace Fudge {
         public rectDestination: Rectangle;
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
+        
         /**
-                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-                 * @param _branch 
-                 * @param _camera 
-                 */
+         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * @param _branch 
+         * @param _camera 
+         */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
             this.branch = _branch;
@@ -30,7 +31,7 @@ namespace Fudge {
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
 
-            this.rectSource = WebGLApi.getCanvasRect();
+            this.rectSource = RenderManager.getCanvasRect();
             this.rectDestination = this.getCanvasRectangle();
         }
 
@@ -48,15 +49,16 @@ namespace Fudge {
             if (this.camera.isActive) {
                 this.prepare();
                 // HACK! no need to addBranch and recalc for each viewport and frame
-                WebGL.addBranch(this.branch);
-                WebGL.drawBranch(this.branch, this.camera);
+                RenderManager.clear(this.camera.getBackgoundColor());
+                RenderManager.addBranch(this.branch);
+                RenderManager.drawBranch(this.branch, this.camera);
 
                 // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                let rectSource: Rectangle = WebGLApi.getCanvasRect();
-                let rectDestination: Rectangle = this.getCanvasRectangle();
+                // let rectSource: Rectangle = WebGLApi.getCanvasRect();
+                // let rectDestination: Rectangle = this.getCanvasRectangle();
                 this.crc2.imageSmoothingEnabled = false;
                 this.crc2.drawImage(
-                    WebGLApi.crc3.canvas,
+                    RenderManager.getCanvas(),
                     this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
                     this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
                 );
@@ -70,10 +72,7 @@ namespace Fudge {
 
         public prepare(): void {
             // this.updateCanvasDisplaySizeAndCamera(this.canvas);
-            this.camera.projectCentral(1); // square
-            let backgroundColor: Vector3 = this.camera.getBackgoundColor();
-            WebGLApi.crc3.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-            WebGLApi.crc3.clear(WebGLApi.crc3.COLOR_BUFFER_BIT | WebGLApi.crc3.DEPTH_BUFFER_BIT);
+            //this.camera.projectCentral(1); // square
         }
 
         /**
@@ -115,7 +114,7 @@ namespace Fudge {
          * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
          * @param canvas The canvas to readjust.
          * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         */
+         * /
         private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
             let resolutionFactor: number = 1.0;
             multiplier = multiplier || 1;
@@ -133,7 +132,7 @@ namespace Fudge {
                 this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
             WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
         }
-
+        */
 
         /*/*
          * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.

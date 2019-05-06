@@ -41,13 +41,13 @@ var UI;
             let checkbox = this.querySelector("[type=checkbox]");
             return !checkbox.checked;
         }
-        setRect(_rect) {
+        set(_rect) {
             for (let key in _rect) {
                 let stepper = this.querySelector("#" + key);
                 stepper.value = String(_rect[key]);
             }
         }
-        getRect() {
+        get() {
             let rect = { x: 0, y: 0, width: 0, height: 0 };
             for (let key in rect) {
                 let stepper = this.querySelector("#" + key);
@@ -64,8 +64,22 @@ var UI;
             let legend = document.createElement("legend");
             legend.textContent = this.name;
             this.appendChild(legend);
-            this.appendChild(new Stepper("FOV", { min: 5, max: 100, step: 5, value: 45 }));
-            this.appendChild(new Stepper("Aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("fieldOfView", { min: 5, max: 100, step: 5, value: 45 }));
+            this.appendChild(new Stepper("aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
+        }
+        set(_params) {
+            for (let key in _params) {
+                let stepper = this.querySelector("#" + key);
+                stepper.value = String(_params[key]);
+            }
+        }
+        get() {
+            let params = { aspect: 0, fieldOfView: 0 };
+            for (let key in params) {
+                let stepper = this.querySelector("#" + key);
+                params[key] = String(stepper.value);
+            }
+            return params;
         }
     }
     UI.Camera = Camera;

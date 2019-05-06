@@ -21,6 +21,25 @@ package FUDGE <<Rectangle>> {
 		}
 	}
 
+	package UI {
+		package UI {
+		interface UIElement{
+			name: string
+			hover: string
+			help: string
+			extendedHelp: string
+			' element: HTMLElement
+		}
+		class FudgeButton extends DOM.HTMLButtonElement implements UIElement {
+			functionToCall: function
+		}
+
+		class UIGenerator {
+			createButton(...): FudgeButton
+			createUIElementFromMutator(mutator: Mutator): HTMLElement
+		}
+	}
+
 	package Animation <<Rectangle>> {
 
 
@@ -54,7 +73,8 @@ package FUDGE <<Rectangle>> {
 			+ path2d: Path2D
 			+ setSlopeIn(_slope:number)
 			+ setSlopeOut(_slope:number)
-			+ generatePath2D()s
+			+ generatePath2D()
+			{static} + sort(a: Key, b: Key)
 		}
 
 		class Function {

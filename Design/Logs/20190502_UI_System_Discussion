@@ -1,0 +1,17 @@
+Was muss das UI System erbringen?
+- Aus einem Mutator muss eine UI generiert werden
+- User kann Interface Elemente nach Belieben austauschen und neue anlegen
+- UI System muss Standard-UI Elemente vordefiniert haben für die gängigsten Datentypen, die in FUDGE verwendet werden 
+- User kann mit CSS und HTML/TypeScript eine UI selber gestalten
+
+Hierfür wurde angemerkt, dass folgende Verbindung zwischen UI-Elementen und Datentypen sinnvoll scheint:
+String -> Textbox
+Boolean -> Checkbox
+Numbers -> Stepper
+
+Weiterführendes:
+Gridbased Layouts sollen für FUDGE untersucht werden
+Wie geht GoldenLayout mit DOM-Elementen um?
+CustomElements sind wichtig
+Um das UI einfacher Themeable zu machen, sollten die Button-Grafiken schlicht sein und monochrom sein, um CSS durch 
+Mischmodi & Color-Overlays die Grafiken passend einzufärben

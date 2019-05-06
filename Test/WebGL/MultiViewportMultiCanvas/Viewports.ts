@@ -1,4 +1,4 @@
-namespace WebGLRendering {
+namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("load", init);
 
@@ -7,10 +7,10 @@ namespace WebGLRendering {
         let branch: ƒ.Node = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
 
-        // initialize WebGL and transmit content
-        ƒ.WebGLApi.initializeContext();
-        ƒ.WebGL.addBranch(branch);
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.recalculateAllNodeTransforms();
 
         // initialize viewports
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(0.1, 0, 5), new ƒ.Vector3(0.1, 5, 0), new ƒ.Vector3(5, 0.1, 0), new ƒ.Vector3(3, 3, 5)];
@@ -29,7 +29,7 @@ namespace WebGLRendering {
 
         function animate(_event: Event): void {
             branch.cmpTransform.rotateY(1);
-            ƒ.WebGL.recalculateAllNodeTransforms();
+            ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
             for (let viewPort of viewPorts) {
                 viewPort.prepare();
@@ -38,7 +38,7 @@ namespace WebGLRendering {
         }
 
         // let table: {} = {
-        //     crc3: { width: ƒ.WebGLApi.crc3.canvas.width, height: ƒ.WebGLApi.crc3.canvas.height },
+        //     crc3: { width: ƒ.RenderManager.crc3.canvas.width, height: ƒ.RenderManager.crc3.canvas.height },
         //     crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
         // };
         // console.table(table, ["width", "height"]);

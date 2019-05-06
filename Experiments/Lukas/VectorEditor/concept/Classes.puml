@@ -15,7 +15,7 @@ package FUDGE <<Rectangle>> {
 		}
 	}
 
-	package Math <<rectangle>> {
+	package Math {
 		class Vector2 extends Mutable.Mutator{
 			+ x: number
 			+ y: number
@@ -32,14 +32,19 @@ package FUDGE <<Rectangle>> {
 		}
 	}
 
-	package VectorEditor <<Rectangle>>{
-		interface Shortcut{
-			keys: number[]
+	package UI {
+		interface UIElement{
+			name: string
+			hover: string
+			help: string
+			extendedHelp: string
+			' element: HTMLElement
 		}
+		class FudgeButton extends DOM.HTMLButtonElement implements UIElement {
+			functionToCall: function
+		}
+
 		class UIHandler{
-			actions: Action[]
-			loadActions()
-			loadShortcuts()
 			createUI()
 			updateUI()
 			deselectAll()
@@ -47,20 +52,32 @@ package FUDGE <<Rectangle>> {
 			updateSelectedObject()
 		}
 
+		class UIGenerator {
+			createButton(...): FudgeButton
+			createUIElementFromMutator(mutator: Mutator): HTMLElement
+		}
+	}
+
+	package VectorEditor <<Rectangle>>{
+		interface Shortcut{
+			keys: number[]
+		}
+
 		class Editor{
-			- paths: SketchPath[]
+			- sketch: Sketch
 			- selectedPaths: SketchPath[]
 			- selectedPoints: SketchPoint[]
-			+ selectedAction: Action
+			+ selectedTool: Tool
 			- canvas: HTMLCanvasElement
 			- crc: CanvasRenderingContext2D
 			- scale: number
 			- transformationPoint: Vector2
-			+ pressedKeys: number[]
+			{static} + pressedKeys: number[]
 			- uiHandler: UIHandler
 			- showTangentsShortcut: Shortcut
 			- quadraticShapesShortcut: Shortcut
 			+ tangentsActive: boolean
+			+ changeHistory: sketch[]
 
 			- redrawAll()
 			- mousedown()
@@ -69,45 +86,49 @@ package FUDGE <<Rectangle>> {
 			- keydown()
 			- keyup()
 			- scroll()
+			+ undo()
+			+ redo()
+			+ saveToChangeHistory()
+
 			{static} + isShortcutPressed(_s: Shortcut): boolean
 
 		}
-		class UIElement extends DOM.HTMLElement{
-			name: string
-			hover: string
-			help: string
-			extendedHelp: string
-			' element: HTMLElement
+
+		class ToolManager {
+			tools: Tool[]
+			
+			loadTools()
+			loadShortcuts()
 		}
 
-		abstract Action extends UIElement{
+		abstract Tool implements UIElement{
 			name: string
-			buttonElement: HTMLButtonElement
 			subMenu: UIElement
 			shortcut: Shortcut
-			selectedSubAction: Action
-			subActions: Action[]
+			selectedSubTool: Tool
+			subTools: Tool[]
 			' cursor: Image
 			mousedown()
 			mousemove()
 			mouseup()
+			mousescroll()
 			prequisitesFulfilled(): boolean
 			additionalDisplay(crc: CanvasRenderingContext2D)
 			addAdditionalSubMenuOptions()
 			exit()
 		}
 
-		class ActionSelect extends Action {
+		class ToolSelect extends Tool {
 			boxSelect: boolean
 			multiSelectShortcut: Shortcut
-			move: MoveAction
+			move: MoveTool
 			startPosition: Vector2
 			currentPosition: Vector2
 		}
-		class ActionMove extends Action {
+		class ToolMove extends Tool {
 			- previousPosition: Vector2
 		}
-		class ActionTransform extends Action {
+		class ToolTransform extends Tool {
 			scaleUp: SketchPoint
 			scaleDown: SketchPoint
 			scaleLeft: SketchPoint
@@ -119,19 +140,19 @@ package FUDGE <<Rectangle>> {
 			scalePoints: SketchPoint[]
 			selectedScalePoint: SketchPoint
 			
-			move: MoveAction
-			rotate: RotateAction
-			scale: ScaleAction
+			move: MoveTool
+			rotate: RotateTool
+			scale: ScaleTool
 		}
-		class ActionScale extends Action {
+		class ToolScale extends Tool {
 			- previousPosition: Vector2
 			- referencePoint: Vector2
 			- mode: "x" | "y" | "xy"
 		}
-		class ActionRotate extends Action {
+		class ToolRotate extends Tool {
 			- previousPosition: Vector2
 		}
-		class ActionCreateShapes extends Action {
+		class ToolCreateShapes extends Tool {
 			- startPosition: Vector2
 			- currentPosition: Vector2
 			- shapes: Shape[]
@@ -142,37 +163,47 @@ package FUDGE <<Rectangle>> {
 			createSketchPath(pos1: Vector2, pos2: Vector2): SketchPath
 			additionalParameters:Object
 		}
-		class ActionVertexManipulation extends Action {
+		class ToolVertexManipulation extends Tool {
 
 		}
-		class ActionAddVertex extends Action {
+		class ToolAddVertex extends Tool {
 
 		}
-		class ActionNewPath extends Action {
+		class ToolNewPath extends Tool {
 			- newPath: SketchPath;
 		}
-		class ActionCombine extends Action {
+		class ToolCombine extends Tool {
 
 		}
-		class ActionExport extends Action {
+		' class ToolExport extends Tool {
 
+		' }
+		class ToolAlign extends Tool {
+			medthod: AlignmentMethod	
 		}
+
 
 		'Associations
-		Shortcut "1"-- "1"Action
-		UIHandler -- "n" Action
-		Editor -- "1" Action
-		Editor .. UIHandler
-		Action "1"--"n" Action
-		CreateShapes -- "n" Shape
-		ActionTransform <-- ActionMove : subaction
-		ActionTransform <-- ActionScale : subaction
-		ActionTransform <-- ActionRotate : subaction
-		ActionSelect <-- ActionMove : subaction
-		ActionVertexManipulation <-- ActionAddVertex : subaction
-		ActionVertexManipulation <-- ActionNewPath : subaction
+		ToolManager -- "n" Tool
+		Editor "1"--"1" ToolManager
+		Shortcut "1"-- "1" Tool
+		Editor -- "1" Tool
+		Editor --"1" UIHandler
+		Tool "1"--"n" Tool
+		ToolCreateShapes -- "n" Shape
+		ToolTransform <--"subaction" ToolMove
+		ToolTransform <-- "subaction" ToolScale 
+		ToolTransform <-- "subaction" ToolRotate
+		ToolSelect <-- "subaction" ToolMove
+		ToolVertexManipulation <-- "subaction" ToolAddVertex 
+		ToolVertexManipulation <-- "subaction" ToolNewPath
 	}
 	package SketchTypes <<Rectangle>>{
+		class Sketch extends Mutable.Mutator {
+			objects: SketchObject[]
+			export params...
+		}
+
 		class SketchObject extends Mutable.Mutator{
 			+ color: string | CanvasGradient | CanvasPattern
 			+ name: String
@@ -194,7 +225,7 @@ package FUDGE <<Rectangle>> {
 			move(d: Vector2)
 		}
 
-		class SketchPoint extends Math.Vector2{
+		class SketchPoint extends Vector2{
 			# path2d: Path2D
 			generatePath2D(): Path2D
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
@@ -218,6 +249,7 @@ package FUDGE <<Rectangle>> {
 		}
 
 		' Associations
+		Sketch -- "n" SketchObject
 		SketchPath "1" -- "n" SketchVertex
 		SketchVertex "1" -- "2" TangentPoint
 	}

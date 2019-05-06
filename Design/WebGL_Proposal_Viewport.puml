@@ -4,34 +4,62 @@ skinparam shadowing false
 header
     Viewport.draw
 endheader
-|UserProgram|
 |Viewport|
-|WebGL|
-|UserProgram|
-:ANIMATION_FRAME<
+|RenderManager|
+|RenderOperator|
 |Viewport|
-package draw {
-    :draw();
-    :root, camera]
+if () then (camera inactive)
+    end
+else
+    :clear(camera.color);
+endif
+|RenderManager|
+package clear {
+    :_color]
 }
-|WebGL|
-package draw {
-    :_node, _camera]
-    :get reference-object at key _node
-    -> program, material and vertices]
-    :multiply transform, pivot
-    and camera matrix;
-    :supply information to renderContext;
-    :renderContext.draw;
-    :node.children]
+|Viewport|
+:addBranch(branch);
+|RenderManager|
+package addBranch {
+    :_node]
+    :addNode(_node);
     while () is (more children)
         :child = next child]
-        :draw(child, _camera);
+        :addBranch(child);
     endwhile
 }
 |Viewport|
-:copy WebGL.canvas section
-to Viewport.canvas;
-|UserProgram|
+:drawBranch(branch);
+|RenderManager|
+package drawBranch {
+    :_node, _camera, _world]
+    :calculate finalNodeTransform]
+    :calculate projection];
+    :drawNode(_node, projection) *;
+    |RenderManager|
+    while () is (more children)
+        :child = next child]
+        :drawBranch(child, _camera);
+    endwhile
+}
+|Viewport|
+:copy
+RenderManager.canvas section
+to Viewport.canvas section;
+stop
+|RenderManager|
+package drawNode {
+    :_node, projection]
+    :retrieve buffer-, material-, 
+    shader-info for _node]
+    :draw();
+}
+|RenderOperator|
+package draw {
+    :_renderinfos, _projection]
+    :use infos, bind buffers,
+    supply data to WebGL]
+    :WebGL.drawArrays(...);
+}
 stop
 @enduml

@@ -1,4 +1,4 @@
-namespace WebGLRendering {
+namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     
@@ -6,10 +6,10 @@ namespace WebGLRendering {
         // create asset
         let branch: ƒ.Node = Scenes.createAxisCross();
         
-        // initialize WebGL and transmit content
-        ƒ.WebGLApi.initializeContext();
-        ƒ.WebGL.addBranch(branch);
-        ƒ.WebGL.recalculateAllNodeTransforms();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.recalculateAllNodeTransforms();
 
         // initialize viewport
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
@@ -24,7 +24,7 @@ namespace WebGLRendering {
         viewPort.draw();
 
         let table: {} = {
-            crc3: { width: ƒ.WebGLApi.crc3.canvas.width, height: ƒ.WebGLApi.crc3.canvas.height },
+            crc3: { width: ƒ.RenderManager.getCanvas().width, height: ƒ.RenderManager.getCanvas().height },
             crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
         };
         console.table(table, ["width", "height"]);

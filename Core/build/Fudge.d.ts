@@ -128,11 +128,14 @@ declare namespace Fudge {
         private orthographic;
         private projectionMatrix;
         private fieldOfView;
+        private aspectRatio;
         private backgroundColor;
         private backgroundEnabled;
         readonly isOrthographic: boolean;
-        getBackgoundColor(): Vector3;
+        getBackgoundColor(): Color;
         getBackgroundEnabled(): boolean;
+        getAspect(): number;
+        getFieldOfView(): number;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -288,13 +291,12 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    /**
-     * Small interface used by Material- and Mesh-classes to store datapullspecifications for a WebGLBuffer.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-}
-declare namespace Fudge {
     class Color {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+        constructor(_r: number, _g: number, _b: number, _a: number);
     }
 }
 declare namespace Fudge {
@@ -483,10 +485,10 @@ declare namespace Fudge {
         private crc2;
         private canvas;
         /**
-                 * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-                 * @param _branch
-                 * @param _camera
-                 */
+         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * @param _branch
+         * @param _camera
+         */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         getContext(): CanvasRenderingContext2D;
         getCanvasRectangle(): Rectangle;
@@ -504,169 +506,6 @@ declare namespace Fudge {
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
-        /**
-         * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-         * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-         * @param canvas The canvas to readjust.
-         * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         */
-        private updateCanvasDisplaySizeAndCamera;
-    }
-}
-declare namespace Fudge {
-    interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
-    }
-    interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
-        vertexCount: number;
-    }
-    interface MaterialInfo {
-        vao: WebGLVertexArrayObject;
-        color: Vector3;
-    }
-    class WebGLApi {
-        static crc3: WebGL2RenderingContext;
-        private static canvas;
-        private static rectViewport;
-        /**
-        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
-        */
-        static assert<T>(_value: T | null, _message?: string): T;
-        /**
-         * Sets up canvas and renderingcontext. If no canvasID is passed, a canvas will be created.
-         * @param _elementID Optional: ID of a predefined canvaselement.
-         */
-        static initializeContext(): HTMLCanvasElement;
-        static getCanvasRect(): Rectangle;
-        static setCanvasSize(_width: number, _height: number): void;
-        static setViewportRectangle(_rect: Rectangle): void;
-        static getViewportRectangle(): Rectangle;
-        /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
-         * @param _projection
-         */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
-        protected static useProgram(_shaderInfo: ShaderInfo): void;
-        protected static deleteProgram(_program: ShaderInfo): void;
-        protected static createBuffer(_mesh: Mesh): BufferInfo;
-        protected static useBuffer(_bufferInfo: BufferInfo): void;
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_material: Material): MaterialInfo;
-        protected static useParameter(_materialInfo: MaterialInfo): void;
-        protected static deleteParameter(_materialInfo: MaterialInfo): void;
-        /**
-         * Utility class to sore and/or wrap some functionality.
-         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-         */
-        /**
-                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-                 */
-        private static attributePointer;
-    }
-}
-declare namespace Fudge {
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
-    /**
-     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
-     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
-     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
-     */
-    class WebGL extends WebGLApi {
-        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs;
-        /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private static parameters;
-        /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers;
-        private static nodes;
-        /**
-         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
-         * @param _node
-         */
-        static addNode(_node: Node): void;
-        /**
-         * Register the node and its valid successors in the branch for rendering using [[addNode]]
-         * @param _node
-         */
-        static addBranch(_node: Node): void;
-        /**
-         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
-         * @param _node
-         */
-        static removeNode(_node: Node): void;
-        /**
-         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
-         * @param _node
-         */
-        static removeBranch(_node: Node): void;
-        /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
-         * @param _node
-         */
-        static updateNode(_node: Node): void;
-        /**
-         * Update the node and its valid successors in the branch using [[updateNode]]
-         * @param _node
-         */
-        static updateBranch(_node: Node): void;
-        /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
-         */
-        static recalculateAllNodeTransforms(): void;
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
-         * @param _node
-         * @param _cameraMatrix
-         * @param _world
-         */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
-        private static drawNode;
-        /**
-         * Recursive method receiving a childnode and its parents updated world transform.
-         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
-         * @param _node
-         * @param _matrix
-         */
-        private static recalculateTransformsOfNodeAndChildren;
-        /**
-         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
-         * @param _in
-         * @param _key
-         * @param _deletor
-         */
-        private static removeReference;
-        /**
-         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
-         * @param _in
-         * @param _key
-         * @param _creator
-         */
-        private static createReference;
     }
 }
 declare namespace Fudge {
@@ -905,6 +744,178 @@ declare namespace Fudge {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
+    interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
+    }
+    interface ShaderInfo {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+        specification: BufferSpecification;
+        vertexCount: number;
+    }
+    interface MaterialInfo {
+        vao: WebGLVertexArrayObject;
+        color: Vector3;
+    }
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
+    class RenderOperator {
+        protected static crc3: WebGL2RenderingContext;
+        private static rectViewport;
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert<T>(_value: T | null, _message?: string): T;
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         */
+        static initialize(): void;
+        /**
+         * Return a reference to the offscreen-canvas
+         */
+        static getCanvas(): HTMLCanvasElement;
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
+        static getCanvasRect(): Rectangle;
+        /**
+         * Set the size of the offscreen-canvas.
+         */
+        static setCanvasSize(_width: number, _height: number): void;
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
+        static setViewportRectangle(_rect: Rectangle): void;
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
+        static getViewportRectangle(): Rectangle;
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param shaderInfo
+         * @param bufferInfo
+         * @param materialInfo
+         * @param _projection
+         */
+        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
+        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
+        protected static useProgram(_shaderInfo: ShaderInfo): void;
+        protected static deleteProgram(_program: ShaderInfo): void;
+        protected static createBuffer(_mesh: Mesh): BufferInfo;
+        protected static useBuffer(_bufferInfo: BufferInfo): void;
+        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
+        protected static createParameter(_material: Material): MaterialInfo;
+        protected static useParameter(_materialInfo: MaterialInfo): void;
+        protected static deleteParameter(_materialInfo: MaterialInfo): void;
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        private static attributePointer;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * With these references, the already buffered data is retrieved when rendering.
+     */
+    class RenderManager extends RenderOperator {
+        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+        private static programs;
+        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        private static parameters;
+        /** Stores references to the vertex buffers and makes them available via the references to meshes */
+        private static buffers;
+        private static nodes;
+        /**
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
+         * @param _node
+         */
+        static addNode(_node: Node): void;
+        /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         */
+        static addBranch(_node: Node): void;
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
+         * @param _node
+         */
+        static removeNode(_node: Node): void;
+        /**
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node: Node): void;
+        /**
+         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * @param _node
+         */
+        static updateNode(_node: Node): void;
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node: Node): void;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        static recalculateAllNodeTransforms(): void;
+        static clear(_color?: Color): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node
+         * @param _cameraMatrix
+         * @param _world
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
+        private static drawNode;
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node
+         * @param _matrix
+         */
+        private static recalculateTransformsOfNodeAndChildren;
+        /**
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in
+         * @param _key
+         * @param _deletor
+         */
+        private static removeReference;
+        /**
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in
+         * @param _key
+         * @param _creator
+         */
+        private static createReference;
     }
 }
 declare namespace Fudge {

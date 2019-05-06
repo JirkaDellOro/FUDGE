@@ -38,7 +38,7 @@ var Scenes;
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
-        ƒ.WebGLApi.initializeContext();
+        ƒ.RenderManager.initialize();
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
