@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>WebGLReference | Fudge Core</title>
+	<title>Reference | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.webglreference.html">WebGLReference</a>
+					<a href="fudge.reference.html">Reference</a>
 				</li>
 			</ul>
-			<h1>Class WebGLReference&lt;T&gt;</h1>
+			<h1>Class Reference&lt;T&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -72,7 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>This class manages the references to the programs, buffers and vertex array objects created and stored with WebGL.
+						<p>This class manages the references to render data used by nodes.
 						Multiple nodes may refer to the same data via their references to shader, material and mesh</p>
 					</div>
 				</div>
@@ -89,7 +89,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">WebGLReference</span>
+						<span class="target">Reference</span>
 					</li>
 				</ul>
 			</section>
@@ -100,15 +100,15 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.webglreference.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.reference.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.webglreference.html#decreasecounter" class="tsd-kind-icon">decrease<wbr>Counter</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.webglreference.html#getreference" class="tsd-kind-icon">get<wbr>Reference</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.webglreference.html#increasecounter" class="tsd-kind-icon">increase<wbr>Counter</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.reference.html#decreasecounter" class="tsd-kind-icon">decrease<wbr>Counter</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.reference.html#getreference" class="tsd-kind-icon">get<wbr>Reference</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-not-exported"><a href="fudge.reference.html#increasecounter" class="tsd-kind-icon">increase<wbr>Counter</a></li>
 							</ul>
 						</section>
 					</div>
@@ -120,13 +120,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>WebGLReference<span class="tsd-signature-symbol">(</span>_reference<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.webglreference.html" class="tsd-signature-type">WebGLReference</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Reference<span class="tsd-signature-symbol">(</span>_reference<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.reference.html" class="tsd-signature-type">Reference</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in WebGL/WebGL.ts:21</li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L21">Render/RenderManager.ts:21</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -135,7 +135,7 @@
 									<h5>_reference: <span class="tsd-signature-type">T</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudge.webglreference.html" class="tsd-signature-type">WebGLReference</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudge.reference.html" class="tsd-signature-type">Reference</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -152,7 +152,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in WebGL/WebGL.ts:35</li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L35">Render/RenderManager.ts:35</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -169,7 +169,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in WebGL/WebGL.ts:27</li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L27">Render/RenderManager.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
@@ -186,7 +186,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in WebGL/WebGL.ts:31</li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L31">Render/RenderManager.ts:31</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -211,19 +211,19 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="fudge.webglreference.html" class="tsd-kind-icon">WebGLReference</a>
+						<a href="fudge.reference.html" class="tsd-kind-icon">Reference</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-not-exported">
-								<a href="fudge.webglreference.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudge.reference.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-not-exported">
-								<a href="fudge.webglreference.html#decreasecounter" class="tsd-kind-icon">decrease<wbr>Counter</a>
+								<a href="fudge.reference.html#decreasecounter" class="tsd-kind-icon">decrease<wbr>Counter</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-not-exported">
-								<a href="fudge.webglreference.html#getreference" class="tsd-kind-icon">get<wbr>Reference</a>
+								<a href="fudge.reference.html#getreference" class="tsd-kind-icon">get<wbr>Reference</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-not-exported">
-								<a href="fudge.webglreference.html#increasecounter" class="tsd-kind-icon">increase<wbr>Counter</a>
+								<a href="fudge.reference.html#increasecounter" class="tsd-kind-icon">increase<wbr>Counter</a>
 							</li>
 						</ul>
 					</li>
