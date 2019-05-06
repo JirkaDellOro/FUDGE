@@ -1015,7 +1015,10 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
+     * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
+     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTarget {
@@ -1024,6 +1027,14 @@ var Fudge;
             this.name = "Viewport"; // The name to call this viewport by.
             this.camera = null; // The camera from which's position and view the tree will be rendered.
             this.branch = null; // The first node in the tree(branch) that will be rendered.
+            // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
+            // Multiple viewports using the same canvas shouldn't differ here...
+            this.mapClientToCanvas = new Fudge.MapRectangle();
+            this.mapCanvasToDestination = new Fudge.MapRectangle();
+            this.mapDestinationToSource = new Fudge.MapRectangle();
+            this.mapSourceToRender = new Fudge.MapRectangle();
+            this.mappingRects = true;
+            this.adjustingCamera = true;
             this.crc2 = null;
             this.canvas = null;
             /**
@@ -1101,25 +1112,41 @@ var Fudge;
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw() {
-            if (this.camera.isActive) {
-                this.prepare();
-                // HACK! no need to addBranch and recalc for each viewport and frame
-                Fudge.RenderManager.clear(this.camera.getBackgoundColor());
-                Fudge.RenderManager.addBranch(this.branch);
-                Fudge.RenderManager.drawBranch(this.branch, this.camera);
-                // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-                // let rectSource: Rectangle = WebGLApi.getCanvasRect();
-                // let rectDestination: Rectangle = this.getCanvasRectangle();
-                this.crc2.imageSmoothingEnabled = false;
-                this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
-                // this.crc2.drawImage(
-                //     WebGLApi.crc3.canvas,
-                //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
-                //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
-                // );
-            }
+            if (!this.camera.isActive)
+                return;
+            if (this.mappingRects)
+                this.mapRectangles();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+            // HACK! no need to addBranch and recalc for each viewport and frame
+            Fudge.RenderManager.clear(this.camera.getBackgoundColor());
+            Fudge.RenderManager.addBranch(this.branch);
+            Fudge.RenderManager.drawBranch(this.branch, this.camera);
+            // TODO: provide for rendering on only a part of canvas, viewport share common canvas
+            // let rectSource: Rectangle = WebGLApi.getCanvasRect();
+            // let rectDestination: Rectangle = this.getCanvasRectangle();
+            this.crc2.imageSmoothingEnabled = false;
+            this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
+            // this.crc2.drawImage(
+            //     WebGLApi.crc3.canvas,
+            //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
+            //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
+            // );
         }
-        prepare() {
+        mapRectangles() {
+            let rectCanvas = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
+            this.canvas.width = rectCanvas.width;
+            this.canvas.height = rectCanvas.height;
+            this.rectDestination = this.mapCanvasToDestination.getRect(rectCanvas);
+            this.rectSource = this.mapDestinationToSource.getRect(this.rectDestination);
+            // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
+            this.rectSource.x = this.rectSource.y = 0;
+            // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
+            let rectRender = this.mapSourceToRender.getRect(this.rectSource);
+            Fudge.RenderManager.setViewportRectangle(rectRender);
+            Fudge.RenderManager.setCanvasSize(rectRender.width, rectRender.height);
+        }
+        adjustCamera() {
             // this.updateCanvasDisplaySizeAndCamera(this.canvas);
             //this.camera.projectCentral(1); // square
         }
@@ -1643,6 +1670,26 @@ var Fudge;
         reduceMutator(_mutator) { }
     }
     Fudge.Matrix4x4 = Matrix4x4;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class MapRectangle {
+        constructor() {
+            this.normAnchor = { left: 0, right: 0, top: 0, bottom: 0 };
+            this.pixelBorder = { left: 0, right: 0, top: 0, bottom: 0 };
+        }
+        getRect(_rectFrame) {
+            if (!_rectFrame)
+                return null;
+            let minX = _rectFrame.x + this.normAnchor.left * _rectFrame.width + this.pixelBorder.left;
+            let minY = _rectFrame.y + this.normAnchor.top * _rectFrame.height + this.pixelBorder.top;
+            let maxX = _rectFrame.x + (1 - this.normAnchor.right) * _rectFrame.width - this.pixelBorder.right;
+            let maxY = _rectFrame.y + (1 - this.normAnchor.bottom) * _rectFrame.height - this.pixelBorder.bottom;
+            let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+            return rect;
+        }
+    }
+    Fudge.MapRectangle = MapRectangle;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

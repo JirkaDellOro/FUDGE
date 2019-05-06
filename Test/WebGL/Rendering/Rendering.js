@@ -12,12 +12,13 @@ var RenderManagerRendering;
         // initialize viewport
         let camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera.projectCentral(1, 45);
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
         let viewPort = new ƒ.Viewport();
         viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
         // prepare and draw viewport
-        viewPort.prepare();
+        //viewPort.prepare();
         viewPort.draw();
         let table = {
             crc3: { width: ƒ.RenderManager.getCanvas().width, height: ƒ.RenderManager.getCanvas().height },

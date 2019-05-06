@@ -19,6 +19,7 @@ namespace RenderManagerRendering {
         for (let i: number = 0; i < canvasList.length; i++) {
             let camera: ƒ.Node = Scenes.createCamera(posCameras[i]);
             let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera.projectCentral(1, 45);
             let viewPort: ƒ.Viewport = new ƒ.Viewport();
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
             viewPorts.push(viewPort);
@@ -32,7 +33,7 @@ namespace RenderManagerRendering {
             ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
             for (let viewPort of viewPorts) {
-                viewPort.prepare();
+                //viewPort.prepare();
                 viewPort.draw();
             }
         }

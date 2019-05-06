@@ -17,6 +17,7 @@ var RenderManagerRendering;
         for (let i = 0; i < canvasList.length; i++) {
             let camera = Scenes.createCamera(posCameras[i]);
             let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera.projectCentral(1, 45);
             let viewPort = new ƒ.Viewport();
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
             viewPorts.push(viewPort);
@@ -28,7 +29,7 @@ var RenderManagerRendering;
             ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
             for (let viewPort of viewPorts) {
-                viewPort.prepare();
+                //viewPort.prepare();
                 viewPort.draw();
             }
         }

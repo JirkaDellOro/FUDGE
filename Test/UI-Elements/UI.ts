@@ -3,6 +3,16 @@ namespace UI {
 
     export interface ParamsCamera { aspect?: number; fieldOfView?: number; }
 
+    export class FieldSet extends HTMLFieldSetElement {
+        constructor(_name: string = "FieldSet") {
+            super();
+            this.name = _name;
+            let legend: HTMLLegendElement = document.createElement("legend");
+            legend.textContent = this.name;
+            this.appendChild(legend);
+        }
+    }
+
     export class Stepper extends HTMLSpanElement {
         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
             super();
@@ -17,15 +27,38 @@ namespace UI {
         }
     }
 
-    export class Rectangle extends HTMLFieldSetElement {
+    export class Border extends FieldSet {
+        public border: ƒ.Border;
+        constructor(_name: string = "Border", _step: number = 1) {
+            super(_name);
+            this.appendChild(new Stepper("left", { step: _step}));
+            this.appendChild(new Stepper("right", { step: _step}));
+            this.appendChild(new Stepper("top", { step: _step}));
+            this.appendChild(new Stepper("bottom", { step: _step}));
+        }
+        
+        public get(): ƒ.Border {
+            let border: ƒ.Border = { left: 0, right: 0, top: 0, bottom: 0 };
+            for (let key in border) {
+                let stepper: HTMLInputElement = this.querySelector("#" + key);
+                border[key] = Number(stepper.value);
+            }
+            return border;
+        }
+        
+        public set(_border: ƒ.Border): void {
+            for (let key in _border) {
+                let stepper: HTMLInputElement = this.querySelector("#" + key);
+                stepper.value = String(_border[key]);
+            }
+        }
+    }
+
+    export class Rectangle extends FieldSet {
         public rect: ƒ.Rectangle;
 
         constructor(_name: string = "Rectangle") {
-            super();
-            this.name = _name;
-            let legend: HTMLLegendElement = document.createElement("legend");
-            legend.textContent = this.name;
-            this.appendChild(legend);
+            super(_name);
             this.appendChild(new Stepper("x", { step: 10 }));
             this.appendChild(new Stepper("y", { step: 10 }));
             this.appendChild(new Stepper("width", { step: 10 }));
@@ -96,5 +129,6 @@ namespace UI {
 
     customElements.define("ui-stepper", Stepper, { extends: "span" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
+    customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
 }

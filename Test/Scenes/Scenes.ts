@@ -80,6 +80,7 @@ namespace Scenes {
         cmpTransform.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+        cmpCamera.projectCentral(1, 45);
         camera.addComponent(cmpCamera);
         return camera;
     }
