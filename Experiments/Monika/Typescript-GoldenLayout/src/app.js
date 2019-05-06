@@ -45,7 +45,7 @@ else {
 //Layout Changes - listener
 myLayout.on('stateChanged', stateupdate);
 myLayout.registerComponent('Viewport', createPersistentComponent);
-myLayout.registerComponent('Hierarchy', createSimpleComponent);
+myLayout.registerComponent('Hierarchy', simpleComponent);
 myLayout.registerComponent('Inspector', createSimpleComponent);
 myLayout.registerComponent('Menubar', createSimpleComponent);
 myLayout.init();
