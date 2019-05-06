@@ -1,9 +1,5 @@
 /// <reference path="RenderOperator.ts"/>
 namespace Fudge {
-    /**
-     * To each node registered with WebGL, a reference to the shader, the material and the mesh used is stored separately
-     * With these references, the already buffered data is retrieved.
-     */
     interface NodeReferences {
         shader: typeof Shader;
         material: Material;
@@ -40,13 +36,11 @@ namespace Fudge {
     }
 
     /**
-     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
-     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
-     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the material and the mesh used for each node registered. 
+     * With these references, the already buffered data is retrieved when rendering.
      */
     export class RenderManager extends RenderOperator {
-        // private canvas: HTMLCanvasElement; //offscreen render buffer
-        // private crc3: WebGL2RenderingContext;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs: Map<typeof Shader, Reference<ShaderInfo>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to materials */
@@ -57,7 +51,7 @@ namespace Fudge {
 
         // #region Adding
         /**
-         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node 
          */
         public static addNode(_node: Node): void {
@@ -94,7 +88,7 @@ namespace Fudge {
 
         // #region Removing
         /**
-         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
          * @param _node 
          */
         public static removeNode(_node: Node): void {
@@ -110,7 +104,7 @@ namespace Fudge {
         }
 
         /**
-         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
          * @param _node 
          */
         public static removeBranch(_node: Node): void {
@@ -121,7 +115,7 @@ namespace Fudge {
 
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         public static updateNode(_node: Node): void {
@@ -271,9 +265,9 @@ namespace Fudge {
         }
         // #endregion
 
-        // #region Manage references to WebGL-Data
+        // #region Manage references to render data
         /**
-         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
          * @param _in 
          * @param _key 
          * @param _deletor 
@@ -290,7 +284,7 @@ namespace Fudge {
         }
 
         /**
-         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
          * @param _in 
          * @param _key 
          * @param _creator 

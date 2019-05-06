@@ -773,6 +773,10 @@ declare namespace Fudge {
         vao: WebGLVertexArrayObject;
         color: Vector3;
     }
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
     class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
@@ -783,13 +787,29 @@ declare namespace Fudge {
         */
         static assert<T>(_value: T | null, _message?: string): T;
         /**
-         * Sets up canvas and renderingcontext.
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
         static initialize(): void;
+        /**
+         * Return a reference to the offscreen-canvas
+         */
         static getCanvas(): HTMLCanvasElement;
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
         static getCanvasRect(): Rectangle;
+        /**
+         * Set the size of the offscreen-canvas.
+         */
         static setCanvasSize(_width: number, _height: number): void;
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
         static setViewportRectangle(_rect: Rectangle): void;
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
         static getViewportRectangle(): Rectangle;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -809,22 +829,18 @@ declare namespace Fudge {
         protected static useParameter(_materialInfo: MaterialInfo): void;
         protected static deleteParameter(_materialInfo: MaterialInfo): void;
         /**
-         * Utility class to sore and/or wrap some functionality.
-         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
-        /**
-                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-                 */
         private static attributePointer;
     }
 }
 declare namespace Fudge {
     /**
-     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
-     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
-     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
@@ -835,7 +851,7 @@ declare namespace Fudge {
         private static buffers;
         private static nodes;
         /**
-         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
          */
         static addNode(_node: Node): void;
@@ -845,17 +861,17 @@ declare namespace Fudge {
          */
         static addBranch(_node: Node): void;
         /**
-         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
          * @param _node
          */
         static removeNode(_node: Node): void;
         /**
-         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
          * @param _node
          */
         static removeBranch(_node: Node): void;
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node: Node): void;
@@ -887,14 +903,14 @@ declare namespace Fudge {
          */
         private static recalculateTransformsOfNodeAndChildren;
         /**
-         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
          * @param _in
          * @param _key
          * @param _deletor
          */
         private static removeReference;
         /**
-         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
          * @param _in
          * @param _key
          * @param _creator

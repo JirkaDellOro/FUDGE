@@ -1864,6 +1864,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
     class RenderOperator {
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
@@ -1876,7 +1880,7 @@ var Fudge;
             return _value;
         }
         /**
-         * Sets up canvas and renderingcontext.
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
         static initialize() {
             let contextAttributes = { alpha: false, antialias: false };
@@ -1887,21 +1891,37 @@ var Fudge;
             RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
+        /**
+         * Return a reference to the offscreen-canvas
+         */
         static getCanvas() {
             return RenderOperator.crc3.canvas;
         }
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
         static getCanvasRect() {
             let canvas = RenderOperator.crc3.canvas;
             return { x: 0, y: 0, width: canvas.width, height: canvas.height };
         }
+        /**
+         * Set the size of the offscreen-canvas.
+         */
         static setCanvasSize(_width, _height) {
             RenderOperator.crc3.canvas.width = _width;
             RenderOperator.crc3.canvas.height = _height;
         }
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
         static setViewportRectangle(_rect) {
             Object.assign(RenderOperator.rectViewport, _rect);
             RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
         static getViewportRectangle() {
             return RenderOperator.rectViewport;
         }
@@ -2040,17 +2060,11 @@ var Fudge;
         }
         // #endregion
         // #region Utilities
-        // TODO: prepare for multiple contexts/canvases
-        // export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
         /**
-         * Utility class to sore and/or wrap some functionality.
-         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
-        /**
-                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-                 */
         static attributePointer(_attributeLocation, _bufferSpecification) {
             RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
@@ -2085,14 +2099,14 @@ var Fudge;
         }
     }
     /**
-     * This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
-     * Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
-     * Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends Fudge.RenderOperator {
         // #region Adding
         /**
-         * Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
          */
         static addNode(_node) {
@@ -2124,7 +2138,7 @@ var Fudge;
         // #endregion
         // #region Removing
         /**
-         * Unregister the node so that it won't be rendered any more. Decrease the WebGL references and delete the NodeReferences.
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
          * @param _node
          */
         static removeNode(_node) {
@@ -2137,7 +2151,7 @@ var Fudge;
             this.nodes.delete(_node);
         }
         /**
-         * Unregister the node and its valid successors in the branch to free WebGL resources. Uses [[removeNode]]
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
          * @param _node
          */
         static removeBranch(_node) {
@@ -2147,7 +2161,7 @@ var Fudge;
         // #endregion
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences
+         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node) {
@@ -2278,9 +2292,9 @@ var Fudge;
             }
         }
         // #endregion
-        // #region Manage references to WebGL-Data
+        // #region Manage references to render data
         /**
-         * Removes a WebGL reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
          * @param _in
          * @param _key
          * @param _deletor
@@ -2296,7 +2310,7 @@ var Fudge;
             }
         }
         /**
-         * Increases the counter of WebGL reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
          * @param _in
          * @param _key
          * @param _creator
@@ -2314,8 +2328,6 @@ var Fudge;
             }
         }
     }
-    // private canvas: HTMLCanvasElement; //offscreen render buffer
-    // private crc3: WebGL2RenderingContext;
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.programs = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to materials */

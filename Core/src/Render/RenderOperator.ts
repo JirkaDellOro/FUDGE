@@ -24,6 +24,10 @@ namespace Fudge {
         color: Vector3;
     }
 
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
     export class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport: Rectangle;
@@ -39,7 +43,7 @@ namespace Fudge {
             return _value;
         }
         /**
-         * Sets up canvas and renderingcontext.
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
         public static initialize(): void {
             let contextAttributes: WebGLContextAttributes = { alpha: false, antialias: false };
@@ -54,21 +58,37 @@ namespace Fudge {
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
 
+        /**
+         * Return a reference to the offscreen-canvas
+         */
         public static getCanvas(): HTMLCanvasElement {
             return RenderOperator.crc3.canvas;
         }
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
         public static getCanvasRect(): Rectangle {
             let canvas: HTMLCanvasElement = RenderOperator.crc3.canvas;
             return { x: 0, y: 0, width: canvas.width, height: canvas.height };
         }
+        /**
+         * Set the size of the offscreen-canvas.
+         */
         public static setCanvasSize(_width: number, _height: number): void {
             RenderOperator.crc3.canvas.width = _width;
             RenderOperator.crc3.canvas.height = _height;
         }
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
         public static setViewportRectangle(_rect: Rectangle): void {
             Object.assign(RenderOperator.rectViewport, _rect);
             RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
         public static getViewportRectangle(): Rectangle {
             return RenderOperator.rectViewport;
         }
@@ -217,19 +237,11 @@ namespace Fudge {
         // #endregion
 
         // #region Utilities
-
-        // TODO: prepare for multiple contexts/canvases
-        // export let gl2: WebGL2RenderingContext; // The renderingcontext to be used over all classes.
         /**
-         * Utility class to sore and/or wrap some functionality.
-         * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
-
-        /**
-                 * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-                 * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-                 * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-                 */
         private static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
             RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }

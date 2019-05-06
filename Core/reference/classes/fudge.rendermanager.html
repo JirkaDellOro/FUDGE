@@ -72,9 +72,9 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>This class manages the connection of FUDGE to WebGL and the association of [[Nodes]] with the appropriate WebGL data.
-							Nodes to render (refering shaders, meshes and material) must be registered, which creates and associates the necessary references to WebGL buffers and programs.
-						Renders branches of scenetrees to an offscreen buffer, the viewports will copy from there.</p>
+						<p>Manages the handling of the ressources that are going to be rendered by <a href="fudge.renderoperator.html">RenderOperator</a>.
+							Stores the references to the shader, the material and the mesh used for each node registered.
+						With these references, the already buffered data is retrieved when rendering.</p>
 					</div>
 				</div>
 			</section>
@@ -131,7 +131,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L84">Render/RenderManager.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L78">Render/RenderManager.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -161,12 +161,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L63">Render/RenderManager.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L57">Render/RenderManager.ts:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Register the node for rendering. Create a NodeReference for it and increase the matching WebGL references or create them first if necessary</p>
+									<p>Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -192,7 +192,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#assert">assert</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L36">Render/RenderOperator.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L40">Render/RenderOperator.ts:40</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -235,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L207">Render/RenderManager.ts:207</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L201">Render/RenderManager.ts:201</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -258,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L219">Render/RenderManager.ts:219</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L213">Render/RenderManager.ts:213</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -297,9 +297,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getcanvas">getCanvas</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L57">Render/RenderOperator.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L64">Render/RenderOperator.ts:64</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a reference to the offscreen-canvas</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">HTMLCanvasElement</span></h4>
 						</li>
 					</ul>
@@ -315,9 +320,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getcanvasrect">getCanvasRect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L60">Render/RenderOperator.ts:60</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L70">Render/RenderOperator.ts:70</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
 						</li>
 					</ul>
@@ -333,9 +343,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getviewportrectangle">getViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L72">Render/RenderOperator.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L92">Render/RenderOperator.ts:92</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieve the area on the offscreen-canvas the camera image gets rendered to.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
 						</li>
 					</ul>
@@ -351,12 +366,12 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#initialize">initialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L44">Render/RenderOperator.ts:44</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L48">Render/RenderOperator.ts:48</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Sets up canvas and renderingcontext.</p>
+									<p>Initializes offscreen-canvas, renderingcontext and hardware viewport.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -373,7 +388,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L168">Render/RenderManager.ts:168</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L162">Render/RenderManager.ts:162</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -395,12 +410,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L116">Render/RenderManager.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L110">Render/RenderManager.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Unregister the node and its valid successors in the branch to free WebGL resources. Uses <a href="fudge.rendermanager.html#removenode">removeNode</a></p>
+									<p>Unregister the node and its valid successors in the branch to free renderer resources. Uses <a href="fudge.rendermanager.html#removenode">removeNode</a></p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -425,12 +440,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L100">Render/RenderManager.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L94">Render/RenderManager.ts:94</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Unregister the node so that it won&#39;t be rendered any more. Decrease the WebGL references and delete the NodeReferences.</p>
+									<p>Unregister the node so that it won&#39;t be rendered any more. Decrease the render-data references and delete the node reference.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -456,9 +471,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#setcanvassize">setCanvasSize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L64">Render/RenderOperator.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L77">Render/RenderOperator.ts:77</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the size of the offscreen-canvas.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -483,13 +503,20 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#setviewportrectangle">setViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderOperator.ts#L68">Render/RenderOperator.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L85">Render/RenderOperator.ts:85</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the area on the offscreen-canvas to render the camera image to.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_rect: <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -506,7 +533,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L158">Render/RenderManager.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L152">Render/RenderManager.ts:152</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -536,12 +563,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1e33a77/Core/src/Render/RenderManager.ts#L127">Render/RenderManager.ts:127</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L121">Render/RenderManager.ts:121</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Reflect changes in the node concerning shader, material and mesh, manage the WebGL references accordingly and update the NodeReferences</p>
+									<p>Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
