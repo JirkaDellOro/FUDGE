@@ -9,54 +9,55 @@ skinparam handwritten false
 left to right direction
 'top to bottom direction
 
-package Fudge <<Rectangle>>{
+package Fudge <<Rectangle>> {
   ' gl2: WebGL2RenderingContext
 
   package "Engine" <<Folder>> {
     file "Node" {
-      class Node extends EventTarget {
-        - parent: Node | null
-        - children: Node[]
-        - components: MapClassToComponents
-      }
       interface MapClassToComponents{
         [className: string]: Component[]
       }
       interface MapStringToNode {
         [key: string]: Node
       }
+      class Node extends EventTarget {
+        - parent: Node | null
+        - children: Node[]
+        - components: MapClassToComponents
+      }
     }
     class Color {
-      // to be implemented
+      + r: number
+      + g: number
+      + b: number
+      + a: number
     }
     class Material {
-      - name: string;
-      - shaderClass: typeof Shader;
-      - color: Vector3;
-      - textureEnabled: boolean;
-      - textureSource: string;
+      - name: string
+      - shaderClass: typeof Shader
+      - color: Vector3
+      - textureEnabled: boolean
+      - textureSource: string
     }
-    file "Viewort" {
-      interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      }
-      class Viewport extends EventTarget {
-        + name: string
-        + camera: ComponentCamera
-        + branch: Node
-        + rectSource: Rectangle
-        + rectDestination: Rectangle
-        - canvas: HTMLCanvasElement
-        - crc2: CanvasRenderingContext2D
-      }
+    class Viewport extends EventTarget {
+      + name: string
+      + camera: ComponentCamera
+      + branch: Node
+      + rectSource: Rectangle
+      + rectDestination: Rectangle
+      + mapClientToCanvas: MapRectangle
+      + mapCanvasToDestination: MapRectangle
+      + mapDestinationToSource: MapRectangle
+      + mapSourceToRender: MapRectangle
+      + mappingRects: boolean
+      + adjustingCamera: boolean
+      - canvas: HTMLCanvasElement
+      - crc2: CanvasRenderingContext2D
     }
 
     file "Event"{
       interface MapEventTypeToListener {
-        [eventType: string]: EventListener[];
+        [eventType: string]: EventListener[]
       }
 
       enum EVENT
@@ -72,12 +73,12 @@ package Fudge <<Rectangle>>{
     }
   }
 
-  package "WebGL" <<Folder>> {
+  package "Render" <<Folder>> {
     interface NodeReferences {
-      shader: typeof Shader;
-      material: Material;
-      mesh: Mesh;
-      doneTransformToWorld: boolean;
+      shader: typeof Shader
+      material: Material
+      mesh: Mesh
+      doneTransformToWorld: boolean
     }
     interface BufferSpecification {
       size: number
@@ -86,36 +87,35 @@ package Fudge <<Rectangle>>{
       stride: number
       offset: number
     }
-    class WebGLReference<T> {
-      private reference: T;
-      private count: number = 0;
-    }
-    class WebGL extends WebGLApi {
-      - {static} programs: Map<typeof Shader, WebGLReference<ShaderInfo>>;
-      - {static} parameters: Map<Material, WebGLReference<MaterialInfo>>;
-      - {static} buffers: Map<Mesh, WebGLReference<BufferInfo>>;
-      - {static} nodes: MapNodeToNodeReferences;
-    }
-
     interface ShaderInfo {
-      program: WebGLProgram;
-      attributes: MapNameToValue;
-      uniforms: MapNameToUniformLocation;
+      program: RenderManagerProgram
+      attributes: MapNameToValue
+      uniforms: MapNameToUniformLocation
     }
     interface BufferInfo {
-      buffer: WebGLBuffer;
-      target: number;
-      specification: BufferSpecification;
-      vertexCount: number;
+      buffer: RenderManagerBuffer
+      target: number
+      specification: BufferSpecification
+      vertexCount: number
     }
     interface MaterialInfo {
-      vao: WebGLVertexArrayObject;
-      color: Vector3;
+      vao: RenderManagerVertexArrayObject
+      color: Vector3
     }
-    class WebGLApi {
-      + {static} crc3: WebGL2RenderingContext;
-      + {static} canvas: HTMLCanvasElement;
-      + {static} rectViewport: Rectangle;
+    class Reference<T> {
+      private reference: T
+      private count: number = 0
+    }
+    class RenderManager extends RenderOperator {
+      - {static} programs: Map<typeof Shader, Reference<ShaderInfo>>
+      - {static} parameters: Map<Material, Reference<MaterialInfo>>
+      - {static} buffers: Map<Mesh, Reference<BufferInfo>>
+      - {static} nodes: MapNodeToNodeReferences
+    }
+    class RenderOperator {
+      + {static} crc3: WebGL2RenderingContext
+      + {static} canvas: HTMLCanvasElement
+      + {static} rectViewport: Rectangle
     }
   }
 
@@ -128,11 +128,11 @@ package Fudge <<Rectangle>>{
   package "Transfer" <<Folder>> {
     file "Serializer" {
       interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        serialize(): Serialization
+        deserialize(_serialization: Serialization): Serializable
       }
       interface Serialization {
-        [type: string]: General;
+        [type: string]: General
       }
       class Serializer {
         {static} + serialize(_object: Serializable): Serialization
@@ -192,9 +192,9 @@ package Fudge <<Rectangle>>{
       # vertices: Float32Array
     }
     class MeshCube extends Mesh {
-      + width: number;
-      + height: number;
-      + depth: number;
+      + width: number
+      + height: number
+      + depth: number
     }
   }
 
@@ -208,6 +208,25 @@ package Fudge <<Rectangle>>{
     }
     class Matrix4x4 extends Mutable {
       + data: Float32Array
+    }
+    file "Rectangle" {
+      interface Rectangle {
+        x: number
+        y: number
+        width: number
+        height: number
+      }
+      interface Border {
+        left: number
+        right: number
+        top: number
+        bottom: number
+      }
+      class MapRectangle {
+        + normAnchor: Border
+        + pixelBorder: Border
+        + getRect(_rectFrame: Rectangle): Rectangle
+      }
     }
   }
 
@@ -244,18 +263,18 @@ package Fudge <<Rectangle>>{
   Viewport -->"1 root" Node : displays >
   Viewport -->"1 camera" ComponentCamera : look through >
   Viewport "n" --> "1" CanvasRenderingContext2D : renders >
-  Viewport "n" -> "1" WebGL : feeds data and retrieves image >
-  WebGL "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
-  WebGL "1" o--> "n" NodeReferences : keeps >
-  WebGL "1" o--> "n" WebGLReference : keeps >
-  WebGLReference "1" --> "1" ShaderInfo : shader uses >
-  WebGLReference "1" --> "1" BufferInfo : mesh uses >
-  WebGLReference "1" --> "1" MaterialInfo : material uses >
+  Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
+  RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
+  RenderManager "1" o--> "n" NodeReferences : keeps >
+  RenderManager "1" o--> "n" Reference : keeps >
+  Reference "1" --> "1" ShaderInfo : shader uses >
+  Reference "1" --> "1" BufferInfo : mesh uses >
+  Reference "1" --> "1" MaterialInfo : material uses >
   BufferInfo --> BufferSpecification : provides >
 
   'improve layout
-  'Node -[hidden]- Serializable
-  'Component -[hidden]- Serializable
+  Node -[hidden]- Serializable
+  Component -[hidden]- Serializable
   'Serializer --[hidden]-- Mutable
   'Mutable --[hidden]-- Component
   'Viewport -[hidden]- ComponentCamera

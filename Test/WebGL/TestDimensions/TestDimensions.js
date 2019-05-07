@@ -26,7 +26,7 @@ var RenderManagerRendering;
             branch.cmpTransform.rotateY(1);
             ƒ.RenderManager.recalculateAllNodeTransforms();
             // prepare and draw viewport
-            viewPort.prepare();
+            //viewPort.prepare();
             viewPort.draw();
         }
         let menu = document.getElementsByTagName("div")[0];

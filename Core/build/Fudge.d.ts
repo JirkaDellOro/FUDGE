@@ -466,14 +466,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
     /**
-     * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
+     * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
+     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTarget {
@@ -482,6 +479,12 @@ declare namespace Fudge {
         branch: Node;
         rectSource: Rectangle;
         rectDestination: Rectangle;
+        mapClientToCanvas: MapRectangle;
+        mapCanvasToDestination: MapRectangle;
+        mapDestinationToSource: MapRectangle;
+        mapSourceToRender: MapRectangle;
+        mappingRects: boolean;
+        adjustingCamera: boolean;
         private crc2;
         private canvas;
         /**
@@ -496,7 +499,8 @@ declare namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw(): void;
-        prepare(): void;
+        mapRectangles(): void;
+        adjustCamera(): void;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -640,6 +644,25 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    interface Rectangle {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    interface Border {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+    }
+    class MapRectangle {
+        normAnchor: Border;
+        pixelBorder: Border;
+        getRect(_rectFrame: Rectangle): Rectangle;
     }
 }
 declare namespace Fudge {

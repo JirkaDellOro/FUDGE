@@ -1,5 +1,15 @@
 var UI;
 (function (UI) {
+    class FieldSet extends HTMLFieldSetElement {
+        constructor(_name = "FieldSet") {
+            super();
+            this.name = _name;
+            let legend = document.createElement("legend");
+            legend.textContent = this.name;
+            this.appendChild(legend);
+        }
+    }
+    UI.FieldSet = FieldSet;
     class Stepper extends HTMLSpanElement {
         constructor(_label, params = {}) {
             super();
@@ -14,13 +24,33 @@ var UI;
         }
     }
     UI.Stepper = Stepper;
-    class Rectangle extends HTMLFieldSetElement {
+    class Border extends FieldSet {
+        constructor(_name = "Border", _step = 1) {
+            super(_name);
+            this.appendChild(new Stepper("left", { step: _step }));
+            this.appendChild(new Stepper("right", { step: _step }));
+            this.appendChild(new Stepper("top", { step: _step }));
+            this.appendChild(new Stepper("bottom", { step: _step }));
+        }
+        get() {
+            let border = { left: 0, right: 0, top: 0, bottom: 0 };
+            for (let key in border) {
+                let stepper = this.querySelector("#" + key);
+                border[key] = Number(stepper.value);
+            }
+            return border;
+        }
+        set(_border) {
+            for (let key in _border) {
+                let stepper = this.querySelector("#" + key);
+                stepper.value = String(_border[key]);
+            }
+        }
+    }
+    UI.Border = Border;
+    class Rectangle extends FieldSet {
         constructor(_name = "Rectangle") {
-            super();
-            this.name = _name;
-            let legend = document.createElement("legend");
-            legend.textContent = this.name;
-            this.appendChild(legend);
+            super(_name);
             this.appendChild(new Stepper("x", { step: 10 }));
             this.appendChild(new Stepper("y", { step: 10 }));
             this.appendChild(new Stepper("width", { step: 10 }));
@@ -85,6 +115,7 @@ var UI;
     UI.Camera = Camera;
     customElements.define("ui-stepper", Stepper, { extends: "span" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
+    customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
 })(UI || (UI = {}));
 //# sourceMappingURL=UI.js.map
