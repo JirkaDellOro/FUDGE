@@ -273,8 +273,8 @@ package Fudge <<Rectangle>> {
   BufferInfo --> BufferSpecification : provides >
 
   'improve layout
-  'Node -[hidden]- Serializable
-  'Component -[hidden]- Serializable
+  Node -[hidden]- Serializable
+  Component -[hidden]- Serializable
   'Serializer --[hidden]-- Mutable
   'Mutable --[hidden]-- Component
   'Viewport -[hidden]- ComponentCamera
