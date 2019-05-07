@@ -2,7 +2,7 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 # May 2nd 2019
-Discussion on the requirements the UI System has to fullfil.
+Discussion on the requirements the UI System has to fullfil. ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190502_UI_System_Discussion))
 
 # Apr 16th 2019
 Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_VE_Doodle.jpg)) as well as Animation Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle1.jpg), [2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle2.jpg)).
