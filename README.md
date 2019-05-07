@@ -30,3 +30,4 @@ Furtwangen University Didactic Game Editor
 - Laufzeit-Aufzeichnung für Replay
 - Grapheditor/Wiring z.B. für Shader und Animation
 - Input-Manager
+- Selection-Sets zum Speichern temporärer Gruppierungen
