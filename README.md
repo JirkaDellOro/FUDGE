@@ -16,3 +16,17 @@ Furtwangen University Didactic Game Editor
 ## Documentation
 - [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/Core.puml)
 - [Core Reference](https://jirkadelloro.github.io/FUDGE/Core/reference/)
+
+## Themen für Abschluss- und Studienarbeiten
+- Physikengine  
+- Modeller
+- Shader
+- Primitve 3D-Modelle und 2D-Shapes 
+- Cameratransformation, Axonometrien und VR
+- Spritesheet
+- Partikelsysteme
+- Licht und Schatten
+- Diegetische User-Interface
+- Laufzeit-Aufzeichnung für Replay
+- Grapheditor/Wiring z.B. für Shader und Animation
+- Input-Manager
