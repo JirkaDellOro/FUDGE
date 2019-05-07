@@ -14,10 +14,13 @@ package FUDGE <<Rectangle>> {
 
 		}
 		class ComponentAnimator extends Component{
-			+ animations: Animation[]
 			+ speed: number;
 			+ currentAnimation: Animation
-			+ play(_name: string)
+			+ nextAnimation: Animation
+			+ syncChildrenSpeed: boolean
+			- parentSpeed: number;
+			# setTime(time: number)
+			+ play(name: string)
 		}
 	}
 
@@ -30,7 +33,7 @@ package FUDGE <<Rectangle>> {
 			extendedHelp: string
 			' element: HTMLElement
 		}
-		class FudgeButton extends DOM.HTMLButtonElement implements UIElement {
+		class UIButton extends DOM.HTMLButtonElement implements UIElement {
 			functionToCall: function
 		}
 
@@ -42,21 +45,21 @@ package FUDGE <<Rectangle>> {
 
 	package Animation <<Rectangle>> {
 
-
 		class Animation extends Mutable.Mutator{
 			+ name: string
 			+ animatedObject: MutatorForAnimation
-			+ clips: {[property: string]: Clip}
+			+ clips: {[property: string]: Sequence}
 			+ startTime: number
 			+ totaltime: number
 			+ events: Event[]
 			+ labels: Label[]
-			+ wrapMode: WrapMode
+			+ wrapMode: PLAYMODE
 			+ fps: number
 			+ update()
+			- checkEvents()
 		}
 
-		class Clip extends Mutable.Mutator {
+		class Sequence extends Mutable.Mutator {
 			+ keys: Key[]
 			+ evaluate(_time: number): number
 			+ addKey(_key:Key)
@@ -69,6 +72,7 @@ package FUDGE <<Rectangle>> {
 			- slopeIn: number
 			- slopeOut: number
 			+ functionIn: Function
+			+ functionOut: Function
 			- broken: boolean
 			+ path2d: Path2D
 			+ setSlopeIn(_slope:number)
@@ -90,18 +94,32 @@ package FUDGE <<Rectangle>> {
 			- setKeyOut(_key)
 		}
 
-		enum WRAPMODE{
+		enum PLAYMODE{
 			INHERIT
-			STOPATEND
-			STOPAFTEREND
+			PLAYONCE
+			PLAYONCESTOPAFTER
 			LOOP
 			PINGPONG
+			STOP
 		}
+
+		class Label {
+			time: number
+			name: string
+		}
+
+		class AnimationEvent {
+			name: string
+			time: number
+		}
+
 		' Associations
 		ComponentAnimator "1" -- "n" Animation
-		Animation "1" -- "n" Clip
-		Clip "1" -- "n" Key
-		Key "2" -- "1" Function	
+		Animation "1" -- "n" Sequence
+		Sequence "1" -- "n" Key
+		Key "2" -- "2" Function	
+		Animation -- "n" AnimationEvent
+		Animation -- "n" Label
 	}
 	package Animator <<Rectangle>> {
 		class Animator {

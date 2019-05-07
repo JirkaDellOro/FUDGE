@@ -40,10 +40,17 @@ package FUDGE <<Rectangle>> {
 			extendedHelp: string
 			' element: HTMLElement
 		}
-		class FudgeButton extends DOM.HTMLButtonElement implements UIElement {
+		class UIButton extends DOM.HTMLButtonElement implements UIElement {
 			functionToCall: function
 		}
 
+		class UIGenerator {
+			createButton(...): UIButton
+			createUIElementFromMutator(mutator: Mutator): HTMLElement
+		}
+	}
+
+	package VectorEditor <<Rectangle>>{
 		class UIHandler{
 			createUI()
 			updateUI()
@@ -52,13 +59,6 @@ package FUDGE <<Rectangle>> {
 			updateSelectedObject()
 		}
 
-		class UIGenerator {
-			createButton(...): FudgeButton
-			createUIElementFromMutator(mutator: Mutator): HTMLElement
-		}
-	}
-
-	package VectorEditor <<Rectangle>>{
 		interface Shortcut{
 			keys: number[]
 		}
@@ -190,12 +190,12 @@ package FUDGE <<Rectangle>> {
 		Editor --"1" UIHandler
 		Tool "1"--"n" Tool
 		ToolCreateShapes -- "n" Shape
-		ToolTransform <--"subaction" ToolMove
-		ToolTransform <-- "subaction" ToolScale 
-		ToolTransform <-- "subaction" ToolRotate
-		ToolSelect <-- "subaction" ToolMove
-		ToolVertexManipulation <-- "subaction" ToolAddVertex 
-		ToolVertexManipulation <-- "subaction" ToolNewPath
+		ToolTransform -->"subaction" ToolMove
+		ToolTransform --> "subaction" ToolScale 
+		ToolTransform --> "subaction" ToolRotate
+		ToolSelect --> "subaction" ToolMove
+		ToolVertexManipulation --> "subaction" ToolAddVertex 
+		ToolVertexManipulation --> "subaction" ToolNewPath
 	}
 	package SketchTypes <<Rectangle>>{
 		class Sketch extends Mutable.Mutator {
@@ -250,7 +250,7 @@ package FUDGE <<Rectangle>> {
 		' Associations
 		Sketch -- "n" SketchObject
 		SketchPath "1" -- "n" SketchVertex
-		SketchVertex "1" -- "2" TangentPoint
+		SketchVertex "1" -- "2" SketchTangentPoint
 	}
 }
 @enduml
