@@ -50,7 +50,7 @@ Gibt es Bedarf, FUDGE auf Node laufen zu lassen?
 
 DOM Eventsteuerung
 
-Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)
+Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190319%20Protokoll%20LM))
 
 # Mar 18th 2019
 Presentation of the Core as it stands, general thoughts about it.  
