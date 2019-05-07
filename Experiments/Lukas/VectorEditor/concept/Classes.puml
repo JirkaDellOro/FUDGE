@@ -95,10 +95,8 @@ package FUDGE <<Rectangle>> {
 		}
 
 		class ToolManager {
-			tools: Tool[]
-			
-			loadTools()
-			loadShortcuts()
+			{static} tools: Tool[]
+			{static} registerTool()
 		}
 
 		abstract Tool implements UIElement{
@@ -155,8 +153,9 @@ package FUDGE <<Rectangle>> {
 		class ToolCreateShapes extends Tool {
 			- startPosition: Vector2
 			- currentPosition: Vector2
-			- shapes: Shape[]
+			{static} - shapes: Shape[]
 			- selectedShape: Shape
+			{static} + registerShape()
 		}
 		interface Shape {
 			identifier: string
