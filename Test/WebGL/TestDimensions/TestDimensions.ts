@@ -23,17 +23,9 @@ namespace RenderManagerRendering {
         let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
-        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
-        ƒ.Loop.start();
-        function animate(_event: Event): void {
-            branch.cmpTransform.rotateY(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
-            // prepare and draw viewport
-            //viewPort.prepare();
-            viewPort.draw();
-        }
 
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
+        menu.innerHTML = "Set render-rectangles by hand,<br/>automatic rectangle transformation is turned off";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
         appendUIRectangle(menu, "RenderCanvas");
@@ -44,9 +36,22 @@ namespace RenderManagerRendering {
         appendUIRectangle(menu, "CSSRectangle");
 
         setAll({ x: 0, y: 0, width: 300, height: 300 });
-
+        update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
+        viewPort.mappingRects = false;
+
+        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
+        ƒ.Loop.start();
+        function animate(_event: Event): void {
+            update();
+            branch.cmpTransform.rotateY(1);
+            ƒ.RenderManager.recalculateAllNodeTransforms();
+            // prepare and draw viewport
+            //viewPort.prepare();
+            viewPort.draw();
+        }
+
     }
 
     function appendUIRectangle(_parent: HTMLElement, _name: string): void {
@@ -86,7 +91,6 @@ namespace RenderManagerRendering {
             uiRectangle.set(_rect);
             setRect(uiRectangle);
         }
-        update();
     }
 
     function setRect(_uiRectangle: UI.Rectangle): void {
@@ -117,14 +121,12 @@ namespace RenderManagerRendering {
             default:
                 throw (new Error("Invalid name: " + _uiRectangle.name));
         }
-        update();
     }
 
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
         let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
-        update();
     }
 
     function update(): void {
