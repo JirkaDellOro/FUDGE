@@ -6,7 +6,7 @@ skinparam shadowing false
 skinparam handwritten false
 
 'page 2x2
-left to right direction
+'left to right direction
 'top to bottom direction
 
 package Fudge <<Rectangle>> {
@@ -273,8 +273,10 @@ package Fudge <<Rectangle>> {
   BufferInfo --> BufferSpecification : provides >
 
   'improve layout
-  Node -[hidden]- Serializable
-  Component -[hidden]- Serializable
+  Node -[hidden]right- Component
+  'Node -[hidden]up- Mutable
+  'Node -[hidden]- Serializable
+  'Component -[hidden]- Serializable
   'Serializer --[hidden]-- Mutable
   'Mutable --[hidden]-- Component
   'Viewport -[hidden]- ComponentCamera

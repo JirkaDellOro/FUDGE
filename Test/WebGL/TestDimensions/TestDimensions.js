@@ -20,16 +20,8 @@ var RenderManagerRendering;
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
-        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
-        ƒ.Loop.start();
-        function animate(_event) {
-            branch.cmpTransform.rotateY(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
-            // prepare and draw viewport
-            //viewPort.prepare();
-            viewPort.draw();
-        }
         let menu = document.getElementsByTagName("div")[0];
+        menu.innerHTML = "Set render-rectangles by hand,<br/>automatic rectangle transformation is turned off";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
         appendUIRectangle(menu, "RenderCanvas");
@@ -39,8 +31,20 @@ var RenderManagerRendering;
         appendUIRectangle(menu, "DomCanvas");
         appendUIRectangle(menu, "CSSRectangle");
         setAll({ x: 0, y: 0, width: 300, height: 300 });
+        update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
+        viewPort.mappingRects = false;
+        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
+        ƒ.Loop.start();
+        function animate(_event) {
+            update();
+            branch.cmpTransform.rotateY(1);
+            ƒ.RenderManager.recalculateAllNodeTransforms();
+            // prepare and draw viewport
+            //viewPort.prepare();
+            viewPort.draw();
+        }
     }
     function appendUIRectangle(_parent, _name) {
         let uiRectangle = new UI.Rectangle(_name);
@@ -73,7 +77,6 @@ var RenderManagerRendering;
             uiRectangle.set(_rect);
             setRect(uiRectangle);
         }
-        update();
     }
     function setRect(_uiRectangle) {
         let rect = _uiRectangle.get();
@@ -103,13 +106,11 @@ var RenderManagerRendering;
             default:
                 throw (new Error("Invalid name: " + _uiRectangle.name));
         }
-        update();
     }
     function setCamera() {
         let params = uiCamera.get();
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
-        update();
     }
     function update() {
         uiRectangles["RenderCanvas"].set(ƒ.RenderManager.getCanvasRect());
