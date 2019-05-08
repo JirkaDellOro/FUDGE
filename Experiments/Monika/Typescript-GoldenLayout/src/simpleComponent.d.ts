@@ -1,3 +1,2 @@
-declare class simpleComponent {
-    constructor(container: any, state: any);
+declare namespace GoldenLayoutTest {
 }
