@@ -10,8 +10,8 @@ var Scripts;
                 console.log("Mutation", this);
             };
             this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
-            this.hndAnimationFrame = this.hndAnimationFrame.bind(this); // when using concentional function
-            ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame); // when using arrow-function
+            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using concentional function
+            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.hndLoopFrame); // when using arrow-function
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
         mutate(_mutator) {
@@ -27,11 +27,11 @@ var Scripts;
         hndNodeEvent(_event) {
             console.log("Node event", _event);
         }
-        hndAnimationFrame(_event) {
+        hndLoopFrame(_event) {
             //hndAnimationFrame(_event: Event): void {
             console.log(this.name, this.count++);
             if (this.count > 20)
-                ƒ.Loop.removeEventListener(_event.type, this.hndAnimationFrame);
+                ƒ.Loop.removeEventListener(_event.type, this.hndLoopFrame);
         }
     }
     function init() {

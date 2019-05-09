@@ -314,7 +314,7 @@ declare namespace Fudge {
      */
     enum EVENT {
         /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
-        ANIMATION_FRAME = "animationFrame",
+        LOOP_FRAME = "loopFrame",
         /** dispatched to a [[Component]] when its being added to a [[Node]] */
         COMPONENT_ADD = "componentAdd",
         /** dispatched to a [[Component]] when its being removed from a [[Node]] */

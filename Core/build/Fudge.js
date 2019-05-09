@@ -638,7 +638,7 @@ var Fudge;
     let EVENT;
     (function (EVENT) {
         /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
-        EVENT["ANIMATION_FRAME"] = "animationFrame";
+        EVENT["LOOP_FRAME"] = "loopFrame";
         /** dispatched to a [[Component]] when its being added to a [[Node]] */
         EVENT["COMPONENT_ADD"] = "componentAdd";
         /** dispatched to a [[Component]] when its being removed from a [[Node]] */
@@ -688,7 +688,7 @@ var Fudge;
         }
         static loop(_timestamp) {
             // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
-            let event = new Event(Fudge.EVENT.ANIMATION_FRAME);
+            let event = new Event(Fudge.EVENT.LOOP_FRAME);
             Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
         }

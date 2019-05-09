@@ -42,7 +42,7 @@ namespace RenderManagerRendering {
         viewPort.mappingRects = false;
         viewPort.adjustingCamera = false;
 
-        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
         function animate(_event: Event): void {
             update();

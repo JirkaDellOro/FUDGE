@@ -22,7 +22,7 @@ var RenderManagerRendering;
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
             viewPorts.push(viewPort);
         }
-        ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
         function animate(_event) {
             branch.cmpTransform.rotateY(1);
