@@ -47,8 +47,8 @@ var UI;
             super(_name);
             this.values = { left: 0, right: 0, top: 0, bottom: 0 };
             this.appendChild(new Stepper("left", { step: _step }));
-            this.appendChild(new Stepper("right", { step: _step }));
             this.appendChild(new Stepper("top", { step: _step }));
+            this.appendChild(new Stepper("right", { step: _step }));
             this.appendChild(new Stepper("bottom", { step: _step }));
         }
     }

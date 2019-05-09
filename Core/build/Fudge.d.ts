@@ -655,8 +655,8 @@ declare namespace Fudge {
     }
     interface Border {
         left: number;
-        right: number;
         top: number;
+        right: number;
         bottom: number;
     }
     class MapRectangle {

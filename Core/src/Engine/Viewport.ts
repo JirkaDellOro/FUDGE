@@ -61,7 +61,7 @@ namespace Fudge {
                 this.mapRectangles();
             if (this.adjustingCamera)
                 this.adjustCamera();
-                
+
             // HACK! no need to addBranch and recalc for each viewport and frame
             RenderManager.clear(this.camera.getBackgoundColor());
             RenderManager.addBranch(this.branch);
@@ -86,6 +86,8 @@ namespace Fudge {
 
         public mapRectangles(): void {
             let rectCanvas: Rectangle = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
+            // a canvas can't have an offset relative to its client rectangle
+            rectCanvas.x = rectCanvas.y = 0;
             this.canvas.width = rectCanvas.width;
             this.canvas.height = rectCanvas.height;
             this.rectDestination = this.mapCanvasToDestination.getRect(rectCanvas);

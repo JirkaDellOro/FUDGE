@@ -1135,6 +1135,8 @@ var Fudge;
         }
         mapRectangles() {
             let rectCanvas = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
+            // a canvas can't have an offset relative to its client rectangle
+            rectCanvas.x = rectCanvas.y = 0;
             this.canvas.width = rectCanvas.width;
             this.canvas.height = rectCanvas.height;
             this.rectDestination = this.mapCanvasToDestination.getRect(rectCanvas);
@@ -1675,8 +1677,8 @@ var Fudge;
 (function (Fudge) {
     class MapRectangle {
         constructor() {
-            this.normAnchor = { left: 0, right: 0, top: 0, bottom: 0 };
-            this.pixelBorder = { left: 0, right: 0, top: 0, bottom: 0 };
+            this.normAnchor = { left: 0, top: 0, right: 0, bottom: 0 };
+            this.pixelBorder = { left: 0, top: 0, right: 0, bottom: 0 };
         }
         getRect(_rectFrame) {
             if (!_rectFrame)

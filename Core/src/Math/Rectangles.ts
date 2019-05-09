@@ -7,14 +7,14 @@ namespace Fudge {
     }
     export interface Border {
         left: number;
-        right: number;
         top: number;
+        right: number;
         bottom: number;
     }
 
     export class MapRectangle {
-        public normAnchor: Border = { left: 0, right: 0, top: 0, bottom: 0 };
-        public pixelBorder: Border = { left: 0, right: 0, top: 0, bottom: 0 };
+        public normAnchor: Border = { left: 0, top: 0, right: 0, bottom: 0 };
+        public pixelBorder: Border = { left: 0, top: 0, right: 0, bottom: 0 };
 
         public getRect(_rectFrame: Rectangle): Rectangle {
             if (!_rectFrame)
