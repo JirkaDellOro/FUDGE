@@ -1,0 +1,13 @@
+Ziel
+#Generating and Closing AudioContext
+#Adding SoundSources
+#Adding Effects to existing SoundSources
+#
+
+
+
+TODO
+#TS Version
+
+Probleme
+#

@@ -10,7 +10,7 @@ namespace Scripts {
             super();
             this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
             this.hndAnimationFrame = this.hndAnimationFrame.bind(this); // when using concentional function
-            //ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
+            ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
 

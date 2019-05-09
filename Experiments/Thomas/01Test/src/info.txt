@@ -1,0 +1,9 @@
+Ziel
+#Create AudioContext
+#Add Song to AudioContext
+#Add Effect to AudioContext
+
+TODO
+#
+
+Probleme
