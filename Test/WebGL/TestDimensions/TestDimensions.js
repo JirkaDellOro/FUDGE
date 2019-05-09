@@ -21,7 +21,7 @@ var RenderManagerRendering;
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         let menu = document.getElementsByTagName("div")[0];
-        menu.innerHTML = "Set render-rectangles by hand,<br/>automatic rectangle transformation is turned off";
+        menu.innerHTML = "Set render-rectangles by hand,<br/>automatic rectangle transformation and camera adustment is turned off";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
         appendUIRectangle(menu, "RenderCanvas");
@@ -35,6 +35,7 @@ var RenderManagerRendering;
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
         viewPort.mappingRects = false;
+        viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, animate);
         ƒ.Loop.start();
         function animate(_event) {

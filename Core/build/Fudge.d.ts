@@ -120,15 +120,21 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    enum FOV_DIRECTION {
+        HORIZONTAL = 0,
+        VERTICAL = 1,
+        DIAGONAL = 2
+    }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
         private orthographic;
-        private projectionMatrix;
+        private projection;
         private fieldOfView;
         private aspectRatio;
+        private fovDirection;
         private backgroundColor;
         private backgroundEnabled;
         readonly isOrthographic: boolean;
@@ -146,7 +152,7 @@ declare namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect?: number, _fieldOfView?: number): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FOV_DIRECTION): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -574,7 +580,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number): Matrix4x4;
+        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FOV_DIRECTION): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.

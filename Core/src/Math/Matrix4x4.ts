@@ -215,17 +215,28 @@ namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        public static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number): Matrix4x4 {
+        public static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FOV_DIRECTION): Matrix4x4 {
             let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
-            let f: number = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+            let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv: number = 1.0 / (_near - _far);
             let matrix: Matrix4x4 = new Matrix4x4;
             matrix.data = new Float32Array([
-                f / _aspect, 0, 0, 0,
+                f, 0, 0, 0,
                 0, f, 0, 0,
                 0, 0, (_near + _far) * rangeInv, -1,
                 0, 0, _near * _far * rangeInv * 2, 0
             ]);
+
+            if (_direction == FOV_DIRECTION.DIAGONAL) {
+                _aspect = Math.sqrt(_aspect);
+                matrix.data[0] = f / _aspect;
+                matrix.data[5] = f * _aspect;
+            }
+            else if (_direction == FOV_DIRECTION.VERTICAL)
+                matrix.data[0] = f / _aspect;
+            else //FOV_DIRECTION.HORIZONTAL
+                matrix.data[5] = f * _aspect;
+
             return matrix;
         }
         /**

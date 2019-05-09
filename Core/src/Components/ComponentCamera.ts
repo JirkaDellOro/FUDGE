@@ -1,14 +1,18 @@
 /// <reference path="Component.ts"/>
 namespace Fudge {
+    export enum FOV_DIRECTION {
+        HORIZONTAL, VERTICAL, DIAGONAL
+    }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentCamera extends Component {
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-        private projectionMatrix: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+        private projection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
         private aspectRatio: number = 1.0;
+        private fovDirection: FOV_DIRECTION = FOV_DIRECTION.DIAGONAL;
         private backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
@@ -41,9 +45,9 @@ namespace Fudge {
             try {
                 let cmpTransform: ComponentTransform = this.getContainer().cmpTransform;
                 let viewMatrix: Matrix4x4 = Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Matrix4x4.multiply(this.projectionMatrix, viewMatrix);
+                return Matrix4x4.multiply(this.projection, viewMatrix);
             } catch {
-                return this.projectionMatrix;
+                return this.projection;
             }
         }
 
@@ -52,12 +56,12 @@ namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView): void {
-            //            public projectCentral(_aspect: number = WebGLApi.crc3.canvas.clientWidth / WebGLApi.crc3.canvas.clientHeight, _fieldOfView: number = 45): void {
+        public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FOV_DIRECTION = this.fovDirection): void {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
+            this.fovDirection = _direction;
             this.orthographic = false;
-            this.projectionMatrix = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000); // TODO: remove magic numbers
+            this.projection = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.fovDirection); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -68,7 +72,7 @@ namespace Fudge {
          */
         public projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void {
             this.orthographic = true;
-            this.projectionMatrix = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.projection = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
 
         public serialize(): Serialization {

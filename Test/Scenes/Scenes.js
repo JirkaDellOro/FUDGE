@@ -65,7 +65,7 @@ var Scenes;
         cmpTransform.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
-        cmpCamera.projectCentral(1, 45);
+        cmpCamera.projectCentral(1, 45, ƒ.FOV_DIRECTION.DIAGONAL);
         camera.addComponent(cmpCamera);
         return camera;
     }

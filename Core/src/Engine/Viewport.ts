@@ -100,6 +100,8 @@ namespace Fudge {
             RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
         public adjustCamera(): void {
+            let rect: Rectangle = RenderManager.getViewportRectangle();
+            this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
             // this.updateCanvasDisplaySizeAndCamera(this.canvas);
             //this.camera.projectCentral(1); // square
         }
