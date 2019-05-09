@@ -741,7 +741,7 @@ var Fudge;
         constructor(_name) {
             super();
             this.parent = null; // The parent of this node.
-            this.children = []; // Associative array nodes appended to this node.
+            this.children = []; // array of child nodes appended to this node.
             this.components = {};
             // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
             // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
