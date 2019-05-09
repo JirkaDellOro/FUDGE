@@ -10,15 +10,21 @@ var UI;
         }
         get() {
             for (let key in this.values) {
-                let stepper = this.querySelector("#" + key);
-                this.values[key] = Number(stepper.value);
+                let input = this.querySelector("#" + key);
+                this.values[key] = Number(input.value);
             }
             return this.values;
         }
         set(_values) {
             for (let key in _values) {
-                let stepper = this.querySelector("#" + key);
-                stepper.value = String(_values[key]);
+                let input = this.querySelector("#" + key);
+                input.value = String(_values[key]);
+            }
+        }
+        disable(_config) {
+            for (let key in _config) {
+                let input = this.querySelector("#" + key);
+                input.disabled = _config[key];
             }
         }
     }
@@ -26,7 +32,6 @@ var UI;
     class Stepper extends HTMLSpanElement {
         constructor(_label, params = {}) {
             super();
-            //this = document.createElement("span");
             this.textContent = _label + " ";
             let stepper = document.createElement("input");
             stepper.name = _label;
@@ -38,7 +43,6 @@ var UI;
     }
     UI.Stepper = Stepper;
     class Border extends FieldSet {
-        // public border: ƒ.Border;
         constructor(_name = "Border", _step = 1) {
             super(_name);
             this.values = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -50,7 +54,6 @@ var UI;
     }
     UI.Border = Border;
     class Rectangle extends FieldSet {
-        // public rect: ƒ.Rectangle;
         constructor(_name = "Rectangle") {
             super(_name);
             this.values = { x: 0, y: 0, width: 0, height: 0 };
@@ -74,31 +77,53 @@ var UI;
             let checkbox = this.querySelector("[type=checkbox]");
             return !checkbox.checked;
         }
+        disableAll(_disable) {
+            super.disable({ x: true, y: true, width: true, height: true });
+        }
     }
     UI.Rectangle = Rectangle;
     class Camera extends FieldSet {
         constructor(_name = "Camera") {
-            super();
-            this.name = _name;
+            super(_name);
             this.values = { aspect: 0, fieldOfView: 0 };
-            let legend = document.createElement("legend");
-            legend.textContent = this.name;
-            this.appendChild(legend);
             this.appendChild(new Stepper("fieldOfView", { min: 5, max: 100, step: 5, value: 45 }));
             this.appendChild(new Stepper("aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
         }
     }
     UI.Camera = Camera;
     class MapRectangle extends FieldSet {
-        constructor(_name) {
+        constructor(_name = "MapRectangle") {
             super(_name);
-            this.appendChild(new Rectangle("Result"));
-            this.appendChild(new Border("Border", 0.1));
+            this.values = { Result: {}, Border: {}, Anchor: {} };
+            let result = new Rectangle("Result");
+            result.disableAll(true);
+            this.appendChild(result);
+            this.appendChild(new Border("Border", 1));
             this.appendChild(new Border("Anchor", 0.1));
+        }
+        get() {
+            for (let child of this.children) {
+                let fieldSet = child;
+                let name = fieldSet.name;
+                if (!this.values[name])
+                    continue;
+                this.values[name] = fieldSet.get();
+            }
+            return this.values;
+        }
+        set(_values) {
+            for (let child of this.children) {
+                let fieldSet = child;
+                let name = fieldSet.name;
+                if (!_values[name])
+                    continue;
+                fieldSet.set(_values[name]);
+            }
         }
     }
     UI.MapRectangle = MapRectangle;
     customElements.define("ui-stepper", Stepper, { extends: "span" });
+    customElements.define("ui-maprectangle", MapRectangle, { extends: "fieldset" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });

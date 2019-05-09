@@ -70,7 +70,7 @@ namespace RenderManagerRendering {
         if ((<HTMLElement>_event.target).tagName != "BUTTON")
             return;
         let current: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
-        setAll(current.get());
+        setAll(<ƒ.Rectangle>current.get());
     }
 
     function hndChangeOnRect(_event: Event): void {
@@ -94,7 +94,7 @@ namespace RenderManagerRendering {
     }
 
     function setRect(_uiRectangle: UI.Rectangle): void {
-        let rect: ƒ.Rectangle = _uiRectangle.get();
+        let rect: ƒ.Rectangle = <ƒ.Rectangle>_uiRectangle.get();
         switch (_uiRectangle.name) {
             case "RenderCanvas":
                 ƒ.RenderManager.setCanvasSize(rect.width, rect.height);
