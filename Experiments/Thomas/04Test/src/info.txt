@@ -1,0 +1,10 @@
+Ziel
+#Create different Sounds
+#Combine Sounds in AudioContext
+
+
+TODO
+#Try harder
+
+
+Probleme
