@@ -4,7 +4,6 @@ namespace Events {
 
     function init(): void {
         Scenes.createMiniScene();
-        Scenes.createViewport();
         let node: ƒ.Node = Scenes.node;
         let child: ƒ.Node = node.getChildren()[0];
         console.log(child);

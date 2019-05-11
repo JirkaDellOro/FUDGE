@@ -7,8 +7,10 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Viewport extends EventTarget {
+        private static focus: Viewport;
+
         public name: string = "Viewport"; // The name to call this viewport by.
-        public camera: ComponentCamera = null; // The camera from which's position and view the tree will be rendered.
+        public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
         public branch: Node = null; // The first node in the tree(branch) that will be rendered.
 
         public rectSource: Rectangle;
@@ -26,6 +28,7 @@ namespace Fudge {
 
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
+
 
 
         /**
@@ -110,6 +113,16 @@ namespace Fudge {
 
 
         // #region Events (passing from canvas to viewport and from there into branch)
+        public get hasFocus(): boolean {
+            return (Viewport.focus == this);
+        }
+        public setFocus(_on: boolean): void {
+            if (_on)
+                Viewport.focus = this;
+            else
+                Viewport.focus = null;
+        }
+
         public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
             this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
         }
@@ -135,7 +148,7 @@ namespace Fudge {
                     break;
                 case "dragstart":
                     _dragevent.dataTransfer.setData("text", "Hallo");
-                    // TODO: check if there is no better solution to hide the ghost image of the draggable object
+                    // TODO: check if there is a better solution to hide the ghost image of the draggable object
                     _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
                     break;
             }
@@ -156,6 +169,8 @@ namespace Fudge {
         }
 
         private hndKeyboardEvent: EventListener = (_event: Event) => {
+            if (!this.hasFocus)
+                return;
             let event: KeyboardEventƒ = new KeyboardEventƒ("ƒ" + _event.type, <KeyboardEventƒ>_event);
             this.dispatchEvent(event);
         }

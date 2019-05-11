@@ -524,6 +524,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTarget {
+        private static focus;
         name: string;
         camera: ComponentCamera;
         branch: Node;
@@ -555,6 +556,8 @@ declare namespace Fudge {
         draw(): void;
         mapRectangles(): void;
         adjustCamera(): void;
+        readonly hasFocus: boolean;
+        setFocus(_on: boolean): void;
         activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
         activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
         activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;

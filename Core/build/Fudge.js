@@ -1055,7 +1055,7 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.name = "Viewport"; // The name to call this viewport by.
-            this.camera = null; // The camera from which's position and view the tree will be rendered.
+            this.camera = null; // The camera representing the view parameters to render the branch.
             this.branch = null; // The first node in the tree(branch) that will be rendered.
             // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
             // Multiple viewports using the same canvas shouldn't differ here...
@@ -1077,7 +1077,7 @@ var Fudge;
                         break;
                     case "dragstart":
                         _dragevent.dataTransfer.setData("text", "Hallo");
-                        // TODO: check if there is no better solution to hide the ghost image of the draggable object
+                        // TODO: check if there is a better solution to hide the ghost image of the draggable object
                         _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
                         break;
                 }
@@ -1091,6 +1091,8 @@ var Fudge;
                 this.dispatchEvent(event);
             };
             this.hndKeyboardEvent = (_event) => {
+                if (!this.hasFocus)
+                    return;
                 let event = new Fudge.KeyboardEventƒ("ƒ" + _event.type, _event);
                 this.dispatchEvent(event);
             };
@@ -1194,6 +1196,15 @@ var Fudge;
         }
         // #endregion
         // #region Events (passing from canvas to viewport and from there into branch)
+        get hasFocus() {
+            return (Viewport.focus == this);
+        }
+        setFocus(_on) {
+            if (_on)
+                Viewport.focus = this;
+            else
+                Viewport.focus = null;
+        }
         activatePointerEvent(_type, _on) {
             this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
         }
