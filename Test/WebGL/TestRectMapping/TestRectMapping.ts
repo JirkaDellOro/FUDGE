@@ -93,7 +93,6 @@ namespace RenderManagerRendering {
                 default:
                     throw (new Error("Invalid name: " + key));
             }
-
         }
     }
 
