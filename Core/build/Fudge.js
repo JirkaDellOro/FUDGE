@@ -117,7 +117,7 @@ var Fudge;
             //     (<General>this)[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties
             Object.assign(this, _mutator);
-            this.dispatchEvent(new Event(Fudge.EVENT.MUTATE));
+            this.dispatchEvent(new Event("mutate" /* MUTATE */));
         }
     }
     Fudge.Mutable = Mutable;
@@ -217,6 +217,7 @@ var Fudge;
     class ComponentCamera extends Fudge.Component {
         constructor() {
             super(...arguments);
+            // TODO: a ComponentPivot might be interesting to ease behaviour scripting
             this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projection = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
@@ -284,6 +285,7 @@ var Fudge;
                 backgroundEnabled: this.backgroundEnabled,
                 orthographic: this.orthographic,
                 fieldOfView: this.fieldOfView,
+                fovDirection: this.fovDirection,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -295,12 +297,19 @@ var Fudge;
             this.orthographic = _serialization.orthographic;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
+            this.fovDirection = _serialization.fovDirection;
             super.deserialize(_serialization[super.constructor.name]);
             if (this.isOrthographic)
                 this.projectOrthographic(); // TODO: serialize and deserialize parameters
             else
                 this.projectCentral();
             return this;
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.fovDirection)
+                types.fovDirection = FOV_DIRECTION;
+            return types;
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -632,24 +641,38 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    /**
-     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
-     */
-    let EVENT;
-    (function (EVENT) {
-        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
-        EVENT["LOOP_FRAME"] = "loopFrame";
-        /** dispatched to a [[Component]] when its being added to a [[Node]] */
-        EVENT["COMPONENT_ADD"] = "componentAdd";
-        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
-        EVENT["COMPONENT_REMOVE"] = "componentRemove";
-        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
-        EVENT["CHILD_APPEND"] = "childAdd";
-        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
-        EVENT["CHILD_REMOVE"] = "childRemove";
-        /** dispatched to a [[Mutable]] when its being mutated */
-        EVENT["MUTATE"] = "mutate";
-    })(EVENT = Fudge.EVENT || (Fudge.EVENT = {}));
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
+    Fudge.KeyboardEventƒ = KeyboardEventƒ;
+    class PointerEventƒ extends PointerEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.PointerEventƒ = PointerEventƒ;
+    class DragDropEventƒ extends DragEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.DragDropEventƒ = DragDropEventƒ;
+    class WheelEventƒ extends WheelEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
+    Fudge.WheelEventƒ = WheelEventƒ;
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
      */
@@ -688,7 +711,7 @@ var Fudge;
         }
         static loop(_timestamp) {
             // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
-            let event = new Event(Fudge.EVENT.LOOP_FRAME);
+            let event = new Event("loopFrame" /* LOOP_FRAME */);
             Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
         }
@@ -803,7 +826,7 @@ var Fudge;
             }
             this.children.push(_node);
             _node.setParent(this);
-            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_APPEND, { bubbles: true }));
+            _node.dispatchEvent(new Event("childAdd" /* CHILD_APPEND */, { bubbles: true }));
         }
         /**
          * Removes the reference to the give node from the list of children
@@ -813,7 +836,7 @@ var Fudge;
             let iFound = this.children.indexOf(_node);
             if (iFound < 0)
                 return;
-            _node.dispatchEvent(new Event(Fudge.EVENT.CHILD_REMOVE, { bubbles: true }));
+            _node.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
             this.children.splice(iFound, 1);
             _node.setParent(null);
         }
@@ -856,7 +879,7 @@ var Fudge;
             else
                 this.components[_component.type].push(_component);
             _component.setContainer(this);
-            _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_ADD));
+            _component.dispatchEvent(new Event("componentAdd" /* COMPONENT_ADD */));
         }
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
@@ -869,7 +892,7 @@ var Fudge;
                 let foundAt = componentsOfType.indexOf(_component);
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
-                _component.dispatchEvent(new Event(Fudge.EVENT.COMPONENT_REMOVE));
+                _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
             }
             catch {
                 throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
@@ -1044,30 +1067,37 @@ var Fudge;
             this.adjustingCamera = true;
             this.crc2 = null;
             this.canvas = null;
-            /**
-             * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-             * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-             * @param canvas The canvas to readjust.
-             * @param multiplier A multiplier to adjust the displayzise dimensions by.
-             * /
-            private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
-                let resolutionFactor: number = 1.0;
-                multiplier = multiplier || 1;
-                let width: number = canvas.clientWidth * multiplier | 0;
-                let height: number = canvas.clientHeight * multiplier | 0;
-                if (canvas.width !== width || canvas.height !== height) {
-                    canvas.width = width;
-                    canvas.height = height;
+            this.hndDragDropEvent = (_event) => {
+                let _dragevent = _event;
+                switch (_dragevent.type) {
+                    case "dragover":
+                    case "drop":
+                        _dragevent.preventDefault();
+                        _dragevent.dataTransfer.effectAllowed = "none";
+                        break;
+                    case "dragstart":
+                        _dragevent.dataTransfer.setData("text", "Hallo");
+                        // TODO: check if there is no better solution to hide the ghost image of the draggable object
+                        _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
+                        break;
                 }
-                WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
-                // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
-                if (this.camera.isOrthographic)
-                    this.camera.projectOrthographic(0, width, height, 0);
-                else
-                    this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-                WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
-            }
-            */
+                let event = new Fudge.DragDropEventƒ("ƒ" + _event.type, _dragevent);
+                this.addCanvasPosition(event);
+                this.dispatchEvent(event);
+            };
+            this.hndPointerEvent = (_event) => {
+                let event = new Fudge.PointerEventƒ("ƒ" + _event.type, _event);
+                this.addCanvasPosition(event);
+                this.dispatchEvent(event);
+            };
+            this.hndKeyboardEvent = (_event) => {
+                let event = new Fudge.KeyboardEventƒ("ƒ" + _event.type, _event);
+                this.dispatchEvent(event);
+            };
+            this.hndWheelEvent = (_event) => {
+                let event = new Fudge.WheelEventƒ("ƒ" + _event.type, _event);
+                this.dispatchEvent(event);
+            };
             /*/*
              * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
              * @param _material The node's materialcomponent.
@@ -1116,6 +1146,17 @@ var Fudge;
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
         /**
+         * Logs this viewports scenegraph to the console.
+         */
+        showSceneGraph() {
+            // TODO: move to debug-class
+            let output = "SceneGraph for this viewport:";
+            output += "\n \n";
+            output += this.branch.name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+        }
+        // #region Drawing
+        /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw() {
@@ -1129,16 +1170,8 @@ var Fudge;
             Fudge.RenderManager.clear(this.camera.getBackgoundColor());
             Fudge.RenderManager.addBranch(this.branch);
             Fudge.RenderManager.drawBranch(this.branch, this.camera);
-            // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-            // let rectSource: Rectangle = WebGLApi.getCanvasRect();
-            // let rectDestination: Rectangle = this.getCanvasRectangle();
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
-            // this.crc2.drawImage(
-            //     WebGLApi.crc3.canvas,
-            //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
-            //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
-            // );
         }
         mapRectangles() {
             let rectCanvas = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
@@ -1158,23 +1191,41 @@ var Fudge;
         adjustCamera() {
             let rect = Fudge.RenderManager.getViewportRectangle();
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
-            // this.updateCanvasDisplaySizeAndCamera(this.canvas);
-            //this.camera.projectCentral(1); // square
         }
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        showSceneGraph() {
-            let output = "SceneGraph for this viewport:";
-            output += "\n \n";
-            output += this.branch.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+        // #endregion
+        // #region Events (passing from canvas to viewport and from there into branch)
+        activatePointerEvent(_type, _on) {
+            this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
         }
+        activateKeyboardEvent(_type, _on) {
+            this.activateEvent(this.canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
+        }
+        activateDragDropEvent(_type, _on) {
+            if (_type == "\u0192dragstart" /* START */)
+                this.canvas.draggable = _on;
+            this.activateEvent(this.canvas, _type, this.hndDragDropEvent, _on);
+        }
+        activateWheelEvent(_type, _on) {
+            this.activateEvent(this.canvas, _type, this.hndWheelEvent, _on);
+        }
+        addCanvasPosition(event) {
+            event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
+            event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
+        }
+        activateEvent(_target, _type, _handler, _on) {
+            _type = _type.slice(1); // chip the ƒlorentin
+            if (_on)
+                _target.addEventListener(_type, _handler);
+            else
+                _target.removeEventListener(_type, _handler);
+        }
+        // #endregion
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         createSceneGraph(_fudgeNode) {
+            // TODO: move to debug-class
             let output = "";
             for (let name in _fudgeNode.getChildren()) {
                 let child = _fudgeNode.getChildren()[name];

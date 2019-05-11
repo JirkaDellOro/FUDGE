@@ -28,7 +28,7 @@ declare namespace Fudge {
      * Interface describing the datatypes of the attributes a mutator as strings
      */
     interface MutatorAttributeTypes {
-        [attribute: string]: string;
+        [attribute: string]: string | Object;
     }
     /**
      * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
@@ -163,6 +163,7 @@ declare namespace Fudge {
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
     }
 }
 declare namespace Fudge {
@@ -312,7 +313,7 @@ declare namespace Fudge {
     /**
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
      */
-    enum EVENT {
+    const enum EVENT {
         /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
         LOOP_FRAME = "loopFrame",
         /** dispatched to a [[Component]] when its being added to a [[Node]] */
@@ -325,6 +326,49 @@ declare namespace Fudge {
         CHILD_REMOVE = "childRemove",
         /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate"
+    }
+    /**
+     * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
+     */
+    const enum EVENT_KEYBOARD {
+        UP = "\u0192keyup",
+        DOWN = "\u0192keydown"
+    }
+    const enum EVENT_POINTER {
+        UP = "\u0192pointerup",
+        DOWN = "\u0192pointerdown"
+    }
+    const enum EVENT_DRAGDROP {
+        DRAG = "\u0192drag",
+        DROP = "\u0192drop",
+        START = "\u0192dragstart",
+        END = "\u0192dragend",
+        OVER = "\u0192dragover"
+    }
+    const enum EVENT_WHEEL {
+        WHEEL = "\u0192wheel"
+    }
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type: string, _event: KeyboardEventƒ);
+    }
+    class PointerEventƒ extends PointerEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: PointerEventƒ);
+    }
+    class DragDropEventƒ extends DragEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: DragDropEventƒ);
+    }
+    class WheelEventƒ extends WheelEvent {
+        constructor(type: string, _event: WheelEventƒ);
     }
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
@@ -502,15 +546,25 @@ declare namespace Fudge {
         getContext(): CanvasRenderingContext2D;
         getCanvasRectangle(): Rectangle;
         /**
+         * Logs this viewports scenegraph to the console.
+         */
+        showSceneGraph(): void;
+        /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw(): void;
         mapRectangles(): void;
         adjustCamera(): void;
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        showSceneGraph(): void;
+        activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
+        activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        private hndDragDropEvent;
+        private addCanvasPosition;
+        private hndPointerEvent;
+        private hndKeyboardEvent;
+        private hndWheelEvent;
+        private activateEvent;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.

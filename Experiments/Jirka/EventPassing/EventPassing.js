@@ -2,6 +2,11 @@
 var EventPassing;
 (function (EventPassing) {
     window.addEventListener("load", init);
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
     class PointerEventƒ extends PointerEvent {
         constructor(type, _event) {
             super(type, _event);
@@ -11,14 +16,13 @@ var EventPassing;
             this.pointerY = _event.clientY - this.clientRect.top;
         }
     }
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
     class DragDropEventƒ extends DragEvent {
         constructor(type, _event) {
             super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
         }
     }
     class WheelEventƒ extends WheelEvent {
@@ -44,12 +48,12 @@ var EventPassing;
                         break;
                 }
                 let event = new DragDropEventƒ("ƒ" + _event.type, _dragevent);
+                this.addCanvasPosition(event);
                 this.dispatchEvent(event);
             };
             this.hndPointerEvent = (_event) => {
                 let event = new PointerEventƒ("ƒ" + _event.type, _event);
-                event.canvasX = this.connected.width * event.pointerX / event.clientRect.width;
-                event.canvasY = this.connected.height * event.pointerY / event.clientRect.height;
+                this.addCanvasPosition(event);
                 this.dispatchEvent(event);
             };
             this.hndKeyboardEvent = (_event) => {
@@ -74,6 +78,10 @@ var EventPassing;
         }
         activateWheelEvent(_type, _on) {
             this.activateEvent(this.connected, _type, this.hndWheelEvent, _on);
+        }
+        addCanvasPosition(event) {
+            event.canvasX = this.connected.width * event.pointerX / event.clientRect.width;
+            event.canvasY = this.connected.height * event.pointerY / event.clientRect.height;
         }
         activateEvent(_target, _type, _handler, _on) {
             _type = _type.slice(1); // chip the ƒlorentin

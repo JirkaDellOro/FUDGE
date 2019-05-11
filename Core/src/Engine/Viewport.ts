@@ -50,7 +50,18 @@ namespace Fudge {
         public getCanvasRectangle(): Rectangle {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
+        /**
+         * Logs this viewports scenegraph to the console.
+         */
+        public showSceneGraph(): void {
+            // TODO: move to debug-class
+            let output: string = "SceneGraph for this viewport:";
+            output += "\n \n";
+            output += this.branch.name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+        }
 
+        // #region Drawing
         /**
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
@@ -67,22 +78,13 @@ namespace Fudge {
             RenderManager.addBranch(this.branch);
             RenderManager.drawBranch(this.branch, this.camera);
 
-            // TODO: provide for rendering on only a part of canvas, viewport share common canvas
-            // let rectSource: Rectangle = WebGLApi.getCanvasRect();
-            // let rectDestination: Rectangle = this.getCanvasRectangle();
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(
                 RenderManager.getCanvas(),
                 this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
                 this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
             );
-            // this.crc2.drawImage(
-            //     WebGLApi.crc3.canvas,
-            //     rectSource.x, rectSource.y, rectSource.width, rectSource.height,
-            //     rectDestination.x, rectDestination.y, rectDestination.width, rectDestination.height
-            // );
         }
-
 
         public mapRectangles(): void {
             let rectCanvas: Rectangle = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
@@ -99,28 +101,85 @@ namespace Fudge {
             RenderManager.setViewportRectangle(rectRender);
             RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
+
         public adjustCamera(): void {
             let rect: Rectangle = RenderManager.getViewportRectangle();
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
-            // this.updateCanvasDisplaySizeAndCamera(this.canvas);
-            //this.camera.projectCentral(1); // square
+        }
+        // #endregion
+
+
+        // #region Events (passing from canvas to viewport and from there into branch)
+        public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
+            this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
+        }
+        public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
+            this.activateEvent(this.canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
+        }
+        public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
+            if (_type == EVENT_DRAGDROP.START)
+                this.canvas.draggable = _on;
+            this.activateEvent(this.canvas, _type, this.hndDragDropEvent, _on);
+        }
+        public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
+            this.activateEvent(this.canvas, _type, this.hndWheelEvent, _on);
         }
 
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        public showSceneGraph(): void {
-            let output: string = "SceneGraph for this viewport:";
-            output += "\n \n";
-            output += this.branch.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+        private hndDragDropEvent: EventListener = (_event: Event) => {
+            let _dragevent: DragDropEventƒ = <DragDropEventƒ>_event;
+            switch (_dragevent.type) {
+                case "dragover":
+                case "drop":
+                    _dragevent.preventDefault();
+                    _dragevent.dataTransfer.effectAllowed = "none";
+                    break;
+                case "dragstart":
+                    _dragevent.dataTransfer.setData("text", "Hallo");
+                    // TODO: check if there is no better solution to hide the ghost image of the draggable object
+                    _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
+                    break;
+            }
+            let event: DragDropEventƒ = new DragDropEventƒ("ƒ" + _event.type, _dragevent);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
         }
+
+        private addCanvasPosition(event: PointerEventƒ | DragDropEventƒ): void {
+            event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
+            event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
+        }
+
+        private hndPointerEvent: EventListener = (_event: Event) => {
+            let event: PointerEventƒ = new PointerEventƒ("ƒ" + _event.type, <PointerEventƒ>_event);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
+        }
+
+        private hndKeyboardEvent: EventListener = (_event: Event) => {
+            let event: KeyboardEventƒ = new KeyboardEventƒ("ƒ" + _event.type, <KeyboardEventƒ>_event);
+            this.dispatchEvent(event);
+        }
+
+        private hndWheelEvent: EventListener = (_event: Event) => {
+            let event: WheelEventƒ = new WheelEventƒ("ƒ" + _event.type, <WheelEventƒ>_event);
+            this.dispatchEvent(event);
+        }
+
+        private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
+            _type = _type.slice(1); // chip the ƒlorentin
+            if (_on)
+                _target.addEventListener(_type, _handler);
+            else
+                _target.removeEventListener(_type, _handler);
+        }
+        // #endregion
 
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph(_fudgeNode: Node): string {
+            // TODO: move to debug-class
             let output: string = "";
             for (let name in _fudgeNode.getChildren()) {
                 let child: Node = _fudgeNode.getChildren()[name];
@@ -139,31 +198,6 @@ namespace Fudge {
             }
             return output;
         }
-
-        /**
-         * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-         * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-         * @param canvas The canvas to readjust.
-         * @param multiplier A multiplier to adjust the displayzise dimensions by.
-         * /
-        private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
-            let resolutionFactor: number = 1.0;
-            multiplier = multiplier || 1;
-            let width: number = canvas.clientWidth * multiplier | 0;
-            let height: number = canvas.clientHeight * multiplier | 0;
-            if (canvas.width !== width || canvas.height !== height) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-            WebGLApi.setCanvasSize(resolutionFactor * width, resolutionFactor * height);
-            // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
-            if (this.camera.isOrthographic)
-                this.camera.projectOrthographic(0, width, height, 0);
-            else
-                this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            WebGLApi.crc3.viewport(0, 0, resolutionFactor * width, resolutionFactor * height);
-        }
-        */
 
         /*/*
          * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.

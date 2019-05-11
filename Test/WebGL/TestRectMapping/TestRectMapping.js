@@ -35,7 +35,7 @@ var RenderManagerRendering;
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
         viewPort.mappingRects = true;
-        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
             update();

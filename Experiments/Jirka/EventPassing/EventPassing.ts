@@ -20,6 +20,12 @@ namespace EventPassing {
         WHEEL = "ƒwheel"
     }
 
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type: string, _event: KeyboardEventƒ) {
+            super(type, _event);
+        }
+    }
+
     class PointerEventƒ extends PointerEvent {
         public pointerX: number;
         public pointerY: number;
@@ -36,15 +42,19 @@ namespace EventPassing {
         }
     }
 
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ) {
-            super(type, _event);
-        }
-    }
-
     class DragDropEventƒ extends DragEvent {
+        public pointerX: number;
+        public pointerY: number;
+        public canvasX: number;
+        public canvasY: number;
+        public clientRect: ClientRect;
+
         constructor(type: string, _event: DragDropEventƒ) {
             super(type, _event);
+            let target: HTMLElement = <HTMLElement>_event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
         }
     }
 
@@ -73,7 +83,7 @@ namespace EventPassing {
         }
 
         private hndDragDropEvent: EventListener = (_event: Event) => {
-            let _dragevent: DragEvent = <DragEvent>_event;
+            let _dragevent: DragDropEventƒ = <DragDropEventƒ>_event;
             switch (_dragevent.type) {
                 case "dragover":
                 case "drop":
@@ -87,13 +97,18 @@ namespace EventPassing {
                     break;
             }
             let event: DragDropEventƒ = new DragDropEventƒ("ƒ" + _event.type, _dragevent);
+            this.addCanvasPosition(event);
             this.dispatchEvent(event);
+        }
+
+        private addCanvasPosition(event: PointerEventƒ | DragDropEventƒ): void {
+            event.canvasX = this.connected.width * event.pointerX / event.clientRect.width;
+            event.canvasY = this.connected.height * event.pointerY / event.clientRect.height;
         }
 
         private hndPointerEvent: EventListener = (_event: Event) => {
             let event: PointerEventƒ = new PointerEventƒ("ƒ" + _event.type, <PointerEventƒ>_event);
-            event.canvasX = this.connected.width * event.pointerX / event.clientRect.width;
-            event.canvasY = this.connected.height * event.pointerY / event.clientRect.height;
+            this.addCanvasPosition(event);
             this.dispatchEvent(event);
         }
 
