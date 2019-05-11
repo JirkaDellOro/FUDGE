@@ -16,12 +16,24 @@ namespace Mutable {
         let serialization: ƒ.Serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
 
+        let mttCamera: ƒ.Mutator;
+        mttCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutator();
+        console.log("mttCamera: ", mttCamera);
+        let mttCameraTypes: ƒ.MutatorAttributeTypes;
+        mttCameraTypes = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutatorAttributeTypes(mttCamera);
+        console.log("mttCameraTypes: ", mttCameraTypes);
+        let srlCamera: ƒ.Serialization = Scenes.camera.getComponent(ƒ.ComponentCamera).serialize();
+        console.log("srlCamera: ", srlCamera);
+
+        let srlNode: ƒ.Serialization = Scenes.node.serialize();
+        console.log("srlNode: ", srlNode);
+
         animate();
     }
 
     function animate(): void {
         window.requestAnimationFrame(animate);
-        
+
         angle += 0.03;
         (mutator.local as ƒ.Matrix4x4).data[12] = 5 * Math.sin(angle);
         (mutator.local as ƒ.Matrix4x4).data[5] = Math.cos(1.7 * angle);

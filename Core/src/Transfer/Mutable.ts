@@ -3,7 +3,7 @@ namespace Fudge {
      * Interface describing the datatypes of the attributes a mutator as strings 
      */
     export interface MutatorAttributeTypes {
-        [attribute: string]: string;
+        [attribute: string]: string | Object;
     }
     /**
      * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values

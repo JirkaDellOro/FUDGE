@@ -8,6 +8,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentCamera extends Component {
+        // TODO: a ComponentPivot might be interesting to ease behaviour scripting
         private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
@@ -81,6 +82,7 @@ namespace Fudge {
                 backgroundEnabled: this.backgroundEnabled,
                 orthographic: this.orthographic,
                 fieldOfView: this.fieldOfView,
+                fovDirection: this.fovDirection,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -92,6 +94,7 @@ namespace Fudge {
             this.orthographic = _serialization.orthographic;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
+            this.fovDirection = _serialization.fovDirection;
             super.deserialize(_serialization[super.constructor.name]);
             if (this.isOrthographic)
                 this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -100,6 +103,11 @@ namespace Fudge {
             return this;
         }
 
-
+        public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+            let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+            if (types.fovDirection)
+                types.fovDirection = FOV_DIRECTION;
+            return types;
+        }
     }
 }

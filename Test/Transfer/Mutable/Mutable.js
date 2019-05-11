@@ -13,6 +13,16 @@ var Mutable;
         console.log("Mutator: ", mutator);
         let serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
+        let mttCamera;
+        mttCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutator();
+        console.log("mttCamera: ", mttCamera);
+        let mttCameraTypes;
+        mttCameraTypes = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutatorAttributeTypes(mttCamera);
+        console.log("mttCameraTypes: ", mttCameraTypes);
+        let srlCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).serialize();
+        console.log("srlCamera: ", srlCamera);
+        let srlNode = Scenes.node.serialize();
+        console.log("srlNode: ", srlNode);
         animate();
     }
     function animate() {
