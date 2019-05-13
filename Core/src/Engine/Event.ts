@@ -18,7 +18,11 @@ namespace Fudge {
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
         /** dispatched to a [[Mutable]] when its being mutated */
-        MUTATE = "mutate"
+        MUTATE = "mutate",
+        /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
+        FOCUS_IN = "focusin",
+        /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
+        FOCUS_OUT = "focusout"
     }
 
     /**

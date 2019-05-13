@@ -24,6 +24,9 @@ namespace EventPassing {
             viewPorts.push(viewPort);
             viewPort.draw();
 
+            viewPort.addEventListener(ƒ.EVENT.FOCUS_IN, hndEvent);
+            viewPort.addEventListener(ƒ.EVENT.FOCUS_OUT, hndEvent);
+
             viewPort.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
             viewPort.addEventListener(ƒ.EVENT_POINTER.UP, hndEvent);
 

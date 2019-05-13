@@ -125,10 +125,21 @@ namespace Fudge {
             return (Viewport.focus == this);
         }
         public setFocus(_on: boolean): void {
-            if (_on)
+            if (_on) {
+                if (Viewport.focus == this)
+                    return;
+                if (Viewport.focus)
+                    Viewport.focus.dispatchEvent(new Event(EVENT.FOCUS_OUT));
                 Viewport.focus = this;
-            else
+                this.dispatchEvent(new Event(EVENT.FOCUS_IN));
+            }
+            else {
+                if (Viewport.focus != this)
+                    return;
+
+                this.dispatchEvent(new Event(EVENT.FOCUS_OUT));
                 Viewport.focus = null;
+            }
         }
 
         public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {

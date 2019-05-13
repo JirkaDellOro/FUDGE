@@ -1208,10 +1208,20 @@ var Fudge;
             return (Viewport.focus == this);
         }
         setFocus(_on) {
-            if (_on)
+            if (_on) {
+                if (Viewport.focus == this)
+                    return;
+                if (Viewport.focus)
+                    Viewport.focus.dispatchEvent(new Event("focusout" /* FOCUS_OUT */));
                 Viewport.focus = this;
-            else
+                this.dispatchEvent(new Event("focusin" /* FOCUS_IN */));
+            }
+            else {
+                if (Viewport.focus != this)
+                    return;
+                this.dispatchEvent(new Event("focusout" /* FOCUS_OUT */));
                 Viewport.focus = null;
+            }
         }
         activatePointerEvent(_type, _on) {
             this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);

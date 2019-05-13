@@ -21,6 +21,8 @@ var EventPassing;
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
             viewPorts.push(viewPort);
             viewPort.draw();
+            viewPort.addEventListener("focusin" /* FOCUS_IN */, hndEvent);
+            viewPort.addEventListener("focusout" /* FOCUS_OUT */, hndEvent);
             viewPort.activatePointerEvent("\u0192pointerup" /* UP */, true);
             viewPort.addEventListener("\u0192pointerup" /* UP */, hndEvent);
             viewPort.activateDragDropEvent("\u0192dragstart" /* START */, true);
