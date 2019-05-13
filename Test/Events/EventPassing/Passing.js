@@ -1,5 +1,5 @@
-var Events;
-(function (Events) {
+var EventPassing;
+(function (EventPassing) {
     var ƒ = Fudge;
     let canvas;
     let camera;
@@ -62,5 +62,5 @@ var Events;
         let viewPort = _event.target;
         return viewPort;
     }
-})(Events || (Events = {}));
+})(EventPassing || (EventPassing = {}));
 //# sourceMappingURL=Passing.js.map

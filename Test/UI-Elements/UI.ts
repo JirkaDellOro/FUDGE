@@ -101,7 +101,7 @@ namespace UI {
         }
     }
 
-    export class MapRectangle extends FieldSet<ƒ.MapRectangle> {
+    export class MapRectangle extends FieldSet<ƒ.Framing> {
         constructor(_name: string = "MapRectangle") {
             super(_name);
             this.values = { Result: {}, Border: {}, Anchor: {} };

@@ -1,7 +1,7 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
     var ƒ = Fudge;
-    let map = new ƒ.MapRectangle();
+    let map = new ƒ.Framing();
     let uiResult;
     let frame = { x: 0, y: 0, width: 100, height: 100 };
     let uiMap;

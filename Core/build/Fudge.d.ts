@@ -530,11 +530,11 @@ declare namespace Fudge {
         branch: Node;
         rectSource: Rectangle;
         rectDestination: Rectangle;
-        mapClientToCanvas: MapRectangle;
-        mapCanvasToDestination: MapRectangle;
-        mapDestinationToSource: MapRectangle;
-        mapSourceToRender: MapRectangle;
-        mappingRects: boolean;
+        frameClientToCanvas: Framing;
+        frameCanvasToDestination: Framing;
+        frameDestinationToSource: Framing;
+        frameSourceToRender: Framing;
+        adjustingFrames: boolean;
         adjustingCamera: boolean;
         private crc2;
         private canvas;
@@ -546,6 +546,7 @@ declare namespace Fudge {
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         getContext(): CanvasRenderingContext2D;
         getCanvasRectangle(): Rectangle;
+        getClientRectangle(): Rectangle;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -554,7 +555,7 @@ declare namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw(): void;
-        mapRectangles(): void;
+        adjustFrames(): void;
         adjustCamera(): void;
         readonly hasFocus: boolean;
         setFocus(_on: boolean): void;
@@ -573,6 +574,68 @@ declare namespace Fudge {
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
+    }
+}
+declare namespace Fudge {
+    interface Rectangle {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+    interface Border {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+    }
+    interface Point {
+        x: number;
+        y: number;
+    }
+    /**
+     * Framing describes how to map a rectangle into a given frame
+     * and how points in the frame correspond to points in the resulting rectangle
+     */
+    abstract class Framing {
+        abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        abstract getRect(_rectFrame: Rectangle): Rectangle;
+    }
+    /**
+     * The resulting rectangle has a fixed width and height and display should scale to fit the frame
+     * Points are scaled in the same ratio
+     */
+    class FramingFixed extends Framing {
+        width: number;
+        height: number;
+        setSize(_width: number, _height: number): void;
+        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getRect(_rectFrame: Rectangle): Rectangle;
+    }
+    /**
+     * Width and height of the resulting rectangle are fractions of those of the frame, scaled by normed values normWidth and normHeight.
+     * Display should scale to fit the frame and points are scaled in the same ratio
+     */
+    class FramingScaled extends Framing {
+        normWidth: number;
+        normHeight: number;
+        setScale(_normWidth: number, _normHeight: number): void;
+        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getRect(_rectFrame: Rectangle): Rectangle;
+    }
+    /**
+     * The resulting rectangle fits into a margin given as fractions of the size of the frame given by normAnchor
+     * plus an absolute padding given by pixelBorder. Display should fit into this.
+     */
+    class FramingComplex extends Framing {
+        margin: Border;
+        padding: Border;
+        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getRect(_rectFrame: Rectangle): Rectangle;
     }
 }
 declare namespace Fudge {
@@ -707,25 +770,6 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace Fudge {
-    interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
-    interface Border {
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-    }
-    class MapRectangle {
-        normAnchor: Border;
-        pixelBorder: Border;
-        getRect(_rectFrame: Rectangle): Rectangle;
     }
 }
 declare namespace Fudge {

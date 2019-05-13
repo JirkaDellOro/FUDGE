@@ -1,7 +1,7 @@
 namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("load", init);
-    let uiMaps: { [name: string]: { ui: UI.MapRectangle, map: ƒ.MapRectangle } } = {};
+    let uiMaps: { [name: string]: { ui: UI.MapRectangle, map: ƒ.Framing } } = {};
     let uiClient: UI.Rectangle;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
@@ -29,9 +29,9 @@ namespace RenderManagerRendering {
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
 
-        appendUIMap(menu, "DestinationToSource", viewPort.mapDestinationToSource);
-        appendUIMap(menu, "CanvasToDestination", viewPort.mapCanvasToDestination);
-        appendUIMap(menu, "ClientToCanvas", viewPort.mapClientToCanvas);
+        appendUIMap(menu, "DestinationToSource", viewPort.frameDestinationToSource);
+        appendUIMap(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
+        appendUIMap(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
 
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
@@ -40,7 +40,7 @@ namespace RenderManagerRendering {
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
-        viewPort.mappingRects = true;
+        viewPort.adjustingFrames = true;
 
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
@@ -55,7 +55,7 @@ namespace RenderManagerRendering {
 
     }
 
-    function appendUIMap(_parent: HTMLElement, _name: string, map: ƒ.MapRectangle): void {
+    function appendUIMap(_parent: HTMLElement, _name: string, map: ƒ.Framing): void {
         let uiMap: UI.MapRectangle = new UI.MapRectangle(_name);
         uiMap.addEventListener("input", hndChangeOnMap);
         _parent.appendChild(uiMap);
@@ -79,7 +79,7 @@ namespace RenderManagerRendering {
 
     function setRect(_uiMap: UI.MapRectangle): void {
         let value: {} = _uiMap.get();
-        let map: ƒ.MapRectangle = uiMaps[_uiMap.name].map;
+        let map: ƒ.Framing = uiMaps[_uiMap.name].map;
         for (let key in value) {
             switch (key) {
                 case "Anchor":
@@ -112,7 +112,7 @@ namespace RenderManagerRendering {
 
     function update(): void {
         for (let name in uiMaps) {
-            let uiMap: { ui: UI.MapRectangle, map: ƒ.MapRectangle } = uiMaps[name];
+            let uiMap: { ui: UI.MapRectangle, map: ƒ.Framing } = uiMaps[name];
             uiMap.ui.set({ Anchor: uiMap.map.normAnchor, Border: uiMap.map.pixelBorder });
 
             switch (name) {

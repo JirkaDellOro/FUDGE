@@ -1059,11 +1059,12 @@ var Fudge;
             this.branch = null; // The first node in the tree(branch) that will be rendered.
             // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
             // Multiple viewports using the same canvas shouldn't differ here...
-            this.mapClientToCanvas = new Fudge.MapRectangle();
-            this.mapCanvasToDestination = new Fudge.MapRectangle();
-            this.mapDestinationToSource = new Fudge.MapRectangle();
-            this.mapSourceToRender = new Fudge.MapRectangle();
-            this.mappingRects = true;
+            // different framing methods can be used, this is the default
+            this.frameClientToCanvas = new Fudge.FramingScaled();
+            this.frameCanvasToDestination = new Fudge.FramingComplex();
+            this.frameDestinationToSource = new Fudge.FramingScaled();
+            this.frameSourceToRender = new Fudge.FramingScaled();
+            this.adjustingFrames = true;
             this.adjustingCamera = true;
             this.crc2 = null;
             this.canvas = null;
@@ -1139,13 +1140,16 @@ var Fudge;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
             this.rectSource = Fudge.RenderManager.getCanvasRect();
-            this.rectDestination = this.getCanvasRectangle();
+            this.rectDestination = this.getClientRectangle();
         }
         getContext() {
             return this.crc2;
         }
         getCanvasRectangle() {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
+        }
+        getClientRectangle() {
+            return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -1164,8 +1168,8 @@ var Fudge;
         draw() {
             if (!this.camera.isActive)
                 return;
-            if (this.mappingRects)
-                this.mapRectangles();
+            if (this.adjustingFrames)
+                this.adjustFrames();
             if (this.adjustingCamera)
                 this.adjustCamera();
             // HACK! no need to addBranch and recalc for each viewport and frame
@@ -1175,19 +1179,23 @@ var Fudge;
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
         }
-        mapRectangles() {
-            let rectCanvas = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
-            // a canvas can't have an offset relative to its client rectangle
-            rectCanvas.x = rectCanvas.y = 0;
+        adjustFrames() {
+            // get the rectangle of the canvas area as displayed (consider css)
+            let rectClient = this.getClientRectangle();
+            // adjust the canvas size according to the given framing applied to client
+            let rectCanvas = this.frameClientToCanvas.getRect(rectClient);
             this.canvas.width = rectCanvas.width;
             this.canvas.height = rectCanvas.height;
-            this.rectDestination = this.mapCanvasToDestination.getRect(rectCanvas);
-            this.rectSource = this.mapDestinationToSource.getRect(this.rectDestination);
+            // adjust the destination area on the target-canvas to render to by applying the framing to canvas
+            this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
+            // adjust the area on the source-canvas to render from by applying the framing to destination area
+            this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
             // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
             this.rectSource.x = this.rectSource.y = 0;
             // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
-            let rectRender = this.mapSourceToRender.getRect(this.rectSource);
+            let rectRender = this.frameSourceToRender.getRect(this.rectSource);
             Fudge.RenderManager.setViewportRectangle(rectRender);
+            // no more transformation after this for now, offscreen canvas and render-viewport have the same size
             Fudge.RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
         adjustCamera() {
@@ -1256,6 +1264,118 @@ var Fudge;
         }
     }
     Fudge.Viewport = Viewport;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Framing describes how to map a rectangle into a given frame
+     * and how points in the frame correspond to points in the resulting rectangle
+     */
+    class Framing {
+    }
+    Fudge.Framing = Framing;
+    /**
+     * The resulting rectangle has a fixed width and height and display should scale to fit the frame
+     * Points are scaled in the same ratio
+     */
+    class FramingFixed extends Framing {
+        constructor() {
+            super(...arguments);
+            this.width = 300;
+            this.height = 150;
+        }
+        setSize(_width, _height) {
+            this.width = _width;
+            this.height = _height;
+        }
+        getPoint(_pointInFrame, _rectFrame) {
+            let result = {
+                x: this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width,
+                y: this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height
+            };
+            return result;
+        }
+        getPointInverse(_point, _rect) {
+            let result = {
+                x: _point.x * _rect.width / this.width + _rect.x,
+                y: _point.y * _rect.height / this.height + _rect.y
+            };
+            return result;
+        }
+        getRect(_rectFrame) {
+            return { x: 0, y: 0, width: this.width, height: this.height };
+        }
+    }
+    Fudge.FramingFixed = FramingFixed;
+    /**
+     * Width and height of the resulting rectangle are fractions of those of the frame, scaled by normed values normWidth and normHeight.
+     * Display should scale to fit the frame and points are scaled in the same ratio
+     */
+    class FramingScaled extends Framing {
+        constructor() {
+            super(...arguments);
+            this.normWidth = 1.0;
+            this.normHeight = 1.0;
+        }
+        setScale(_normWidth, _normHeight) {
+            this.normWidth = _normWidth;
+            this.normHeight = _normHeight;
+        }
+        getPoint(_pointInFrame, _rectFrame) {
+            let result = {
+                x: this.normWidth * (_pointInFrame.x - _rectFrame.x),
+                y: this.normHeight * (_pointInFrame.y - _rectFrame.y)
+            };
+            return result;
+        }
+        getPointInverse(_point, _rect) {
+            let result = {
+                x: _point.x * this.normWidth + _rect.x,
+                y: _point.y * this.normHeight + _rect.y
+            };
+            return result;
+        }
+        getRect(_rectFrame) {
+            return { x: 0, y: 0, width: this.normWidth * _rectFrame.width, height: this.normHeight * _rectFrame.height };
+        }
+    }
+    Fudge.FramingScaled = FramingScaled;
+    /**
+     * The resulting rectangle fits into a margin given as fractions of the size of the frame given by normAnchor
+     * plus an absolute padding given by pixelBorder. Display should fit into this.
+     */
+    class FramingComplex extends Framing {
+        constructor() {
+            super(...arguments);
+            this.margin = { left: 0, top: 0, right: 0, bottom: 0 };
+            this.padding = { left: 0, top: 0, right: 0, bottom: 0 };
+        }
+        getPoint(_pointInFrame, _rectFrame) {
+            let result = {
+                x: _pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width,
+                y: _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height
+            };
+            return result;
+        }
+        getPointInverse(_point, _rect) {
+            let result = {
+                x: _point.x + this.padding.left + this.margin.left * _rect.width,
+                y: _point.y + this.padding.top + this.margin.top * _rect.height
+            };
+            return result;
+        }
+        getRect(_rectFrame) {
+            if (!_rectFrame)
+                return null;
+            let minX = _rectFrame.x + this.margin.left * _rectFrame.width + this.padding.left;
+            let minY = _rectFrame.y + this.margin.top * _rectFrame.height + this.padding.top;
+            let maxX = _rectFrame.x + (1 - this.margin.right) * _rectFrame.width - this.padding.right;
+            let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
+            let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+            return rect;
+        }
+    }
+    Fudge.FramingComplex = FramingComplex;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1752,26 +1872,6 @@ var Fudge;
         reduceMutator(_mutator) { }
     }
     Fudge.Matrix4x4 = Matrix4x4;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class MapRectangle {
-        constructor() {
-            this.normAnchor = { left: 0, top: 0, right: 0, bottom: 0 };
-            this.pixelBorder = { left: 0, top: 0, right: 0, bottom: 0 };
-        }
-        getRect(_rectFrame) {
-            if (!_rectFrame)
-                return null;
-            let minX = _rectFrame.x + this.normAnchor.left * _rectFrame.width + this.pixelBorder.left;
-            let minY = _rectFrame.y + this.normAnchor.top * _rectFrame.height + this.pixelBorder.top;
-            let maxX = _rectFrame.x + (1 - this.normAnchor.right) * _rectFrame.width - this.pixelBorder.right;
-            let maxY = _rectFrame.y + (1 - this.normAnchor.bottom) * _rectFrame.height - this.pixelBorder.bottom;
-            let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-            return rect;
-        }
-    }
-    Fudge.MapRectangle = MapRectangle;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

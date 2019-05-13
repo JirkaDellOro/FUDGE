@@ -39,7 +39,7 @@ namespace RenderManagerRendering {
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
-        viewPort.mappingRects = false;
+        viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
 
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);

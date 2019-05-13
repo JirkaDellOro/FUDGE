@@ -18,12 +18,13 @@ namespace Fudge {
 
         // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
         // Multiple viewports using the same canvas shouldn't differ here...
-        public mapClientToCanvas: MapRectangle = new MapRectangle();
-        public mapCanvasToDestination: MapRectangle = new MapRectangle();
-        public mapDestinationToSource: MapRectangle = new MapRectangle();
-        public mapSourceToRender: MapRectangle = new MapRectangle();
+        // different framing methods can be used, this is the default
+        public frameClientToCanvas: Framing = new FramingScaled();
+        public frameCanvasToDestination: Framing = new FramingComplex();
+        public frameDestinationToSource: Framing = new FramingScaled();
+        public frameSourceToRender: Framing = new FramingScaled();
 
-        public mappingRects: boolean = true;
+        public adjustingFrames: boolean = true;
         public adjustingCamera: boolean = true;
 
         private crc2: CanvasRenderingContext2D = null;
@@ -44,7 +45,7 @@ namespace Fudge {
             this.crc2 = _canvas.getContext("2d");
 
             this.rectSource = RenderManager.getCanvasRect();
-            this.rectDestination = this.getCanvasRectangle();
+            this.rectDestination = this.getClientRectangle();
         }
 
         public getContext(): CanvasRenderingContext2D {
@@ -52,6 +53,9 @@ namespace Fudge {
         }
         public getCanvasRectangle(): Rectangle {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
+        }
+        public getClientRectangle(): Rectangle {
+            return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -71,8 +75,8 @@ namespace Fudge {
         public draw(): void {
             if (!this.camera.isActive)
                 return;
-            if (this.mappingRects)
-                this.mapRectangles();
+            if (this.adjustingFrames)
+                this.adjustFrames();
             if (this.adjustingCamera)
                 this.adjustCamera();
 
@@ -89,19 +93,23 @@ namespace Fudge {
             );
         }
 
-        public mapRectangles(): void {
-            let rectCanvas: Rectangle = this.mapClientToCanvas.getRect({ x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight });
-            // a canvas can't have an offset relative to its client rectangle
-            rectCanvas.x = rectCanvas.y = 0;
+        public adjustFrames(): void {
+            // get the rectangle of the canvas area as displayed (consider css)
+            let rectClient: Rectangle = this.getClientRectangle();
+            // adjust the canvas size according to the given framing applied to client
+            let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
             this.canvas.width = rectCanvas.width;
             this.canvas.height = rectCanvas.height;
-            this.rectDestination = this.mapCanvasToDestination.getRect(rectCanvas);
-            this.rectSource = this.mapDestinationToSource.getRect(this.rectDestination);
+            // adjust the destination area on the target-canvas to render to by applying the framing to canvas
+            this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
+            // adjust the area on the source-canvas to render from by applying the framing to destination area
+            this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
             // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
             this.rectSource.x = this.rectSource.y = 0;
             // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
-            let rectRender: Rectangle = this.mapSourceToRender.getRect(this.rectSource);
+            let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
             RenderManager.setViewportRectangle(rectRender);
+            // no more transformation after this for now, offscreen canvas and render-viewport have the same size
             RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
 

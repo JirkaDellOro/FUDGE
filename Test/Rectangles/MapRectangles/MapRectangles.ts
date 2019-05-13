@@ -1,6 +1,6 @@
 namespace RenderManagerRendering {
     import ƒ = Fudge;
-    let map: ƒ.MapRectangle = new ƒ.MapRectangle();
+    let map: ƒ.Framing = new ƒ.Framing();
     let uiResult: UI.Rectangle;
     let frame: ƒ.Rectangle = { x: 0, y: 0, width: 100, height: 100 };
     let uiMap: UI.MapRectangle;

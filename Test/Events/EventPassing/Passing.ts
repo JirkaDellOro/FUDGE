@@ -1,4 +1,4 @@
-namespace Events {
+namespace EventPassing {
     import ƒ = Fudge;
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
