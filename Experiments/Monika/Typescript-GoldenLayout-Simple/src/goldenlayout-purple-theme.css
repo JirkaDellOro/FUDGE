@@ -1,6 +1,14 @@
-h2 {
+.parent::before{
+	content: "➖";
+}
+.parent.folded::before{
+	content: "➕";
+}
+
+h2, legend, label {
     font-family: Arial, sans-serif;
-    font-size: 12px;
+    font-size: .8em;
+    padding:0 .5em;
     color: #999999;
 }
 
