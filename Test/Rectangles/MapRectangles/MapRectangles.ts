@@ -1,6 +1,6 @@
 namespace RenderManagerRendering {
     import ƒ = Fudge;
-    let map: ƒ.Framing = new ƒ.Framing();
+    let map: ƒ.FramingComplex = new ƒ.FramingComplex();
     let uiResult: UI.Rectangle;
     let frame: ƒ.Rectangle = { x: 0, y: 0, width: 100, height: 100 };
     let uiMap: UI.MapRectangle;
@@ -13,7 +13,7 @@ namespace RenderManagerRendering {
         uiMap = new UI.MapRectangle();
         menu.appendChild(uiMap);
         uiMap.addEventListener("input", hndChange); 
-        uiMap.set({ Anchor: map.normAnchor, Border: map.pixelBorder });
+        uiMap.set({ Anchor: map.margin, Border: map.padding });
 
         let uiRectangle: UI.Rectangle = new UI.Rectangle("Frame");
         uiRectangle.addEventListener("input", hndChange);
@@ -38,10 +38,10 @@ namespace RenderManagerRendering {
             for (let key in value) {
                 switch (key) {
                     case "Anchor":
-                        map.normAnchor = <ƒ.Border>value[key];
+                        map.margin = <ƒ.Border>value[key];
                         break;
                     case "Border":
-                        map.pixelBorder = <ƒ.Border>value[key];
+                        map.padding = <ƒ.Border>value[key];
                         break;
                     case "Result":
                         break;

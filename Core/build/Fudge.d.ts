@@ -530,10 +530,10 @@ declare namespace Fudge {
         branch: Node;
         rectSource: Rectangle;
         rectDestination: Rectangle;
-        frameClientToCanvas: Framing;
-        frameCanvasToDestination: Framing;
-        frameDestinationToSource: Framing;
-        frameSourceToRender: Framing;
+        frameClientToCanvas: FramingScaled;
+        frameCanvasToDestination: FramingComplex;
+        frameDestinationToSource: FramingScaled;
+        frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
         private crc2;

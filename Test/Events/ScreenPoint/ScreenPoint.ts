@@ -2,7 +2,7 @@ namespace ScreenPoint {
     import ƒ = Fudge;
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
-    let viewPort: ƒ.Viewport;
+    export let viewPort: ƒ.Viewport;
 
     window.addEventListener("DOMContentLoaded", init);
 
@@ -21,10 +21,9 @@ namespace ScreenPoint {
         viewPort = new ƒ.Viewport();
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
-        viewPort.frameClientToCanvas.normAnchor = { left: 0, top: 0, right: 0.5, bottom: 0.5 };
-        viewPort.frameClientToCanvas.pixelBorder = { left: 0, top: 0, right: 0, bottom: 0 };
-        viewPort.frameCanvasToDestination.normAnchor = { left: 0.5, top: 0.5, right: 0, bottom: 0 };
-        viewPort.frameCanvasToDestination.pixelBorder = { left: 5, top: 5, right: 5, bottom: 5 };
+        viewPort.frameClientToCanvas.setScale(0.5, 0.5);
+        viewPort.frameCanvasToDestination.margin = { left: 0, top: 0.5, right: 0, bottom: 0 };
+        viewPort.frameCanvasToDestination.padding = { left: 5, top: 0, right: 5, bottom: 5 };
         viewPort.draw();
 
         viewPort.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);

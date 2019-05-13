@@ -81,8 +81,8 @@ namespace Fudge {
 
         public getPointInverse(_point: Point, _rect: Rectangle): Point {
             let result: Point = {
-                x: _point.x * this.normWidth + _rect.x,
-                y: _point.y * this.normHeight + _rect.y
+                x: _point.x / this.normWidth + _rect.x,
+                y: _point.y / this.normHeight + _rect.y
             };
             return result;
         }

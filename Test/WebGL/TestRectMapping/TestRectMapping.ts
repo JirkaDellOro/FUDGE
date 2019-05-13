@@ -1,7 +1,7 @@
 namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("load", init);
-    let uiMaps: { [name: string]: { ui: UI.MapRectangle, map: ƒ.Framing } } = {};
+    let uiMaps: { [name: string]: { ui: UI.MapRectangle, map: ƒ.FramingComplex } } = {};
     let uiClient: UI.Rectangle;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
@@ -28,10 +28,14 @@ namespace RenderManagerRendering {
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and mappings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
+        // tslint:disable: no-any 
+        viewPort.frameDestinationToSource = <any>new ƒ.FramingComplex();
+        viewPort.frameClientToCanvas = <any>new ƒ.FramingComplex();
 
-        appendUIMap(menu, "DestinationToSource", viewPort.frameDestinationToSource);
+        appendUIMap(menu, "DestinationToSource", <any>viewPort.frameDestinationToSource);
         appendUIMap(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
-        appendUIMap(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
+        appendUIMap(menu, "ClientToCanvas", <any>viewPort.frameClientToCanvas);
+        // tslint:enable: no-any 
 
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
@@ -55,11 +59,11 @@ namespace RenderManagerRendering {
 
     }
 
-    function appendUIMap(_parent: HTMLElement, _name: string, map: ƒ.Framing): void {
+    function appendUIMap(_parent: HTMLElement, _name: string, _map: ƒ.FramingComplex): void {
         let uiMap: UI.MapRectangle = new UI.MapRectangle(_name);
         uiMap.addEventListener("input", hndChangeOnMap);
         _parent.appendChild(uiMap);
-        uiMaps[_name] = { ui: uiMap, map: map };
+        uiMaps[_name] = { ui: uiMap, map: _map };
     }
 
     function hndChangeOnMap(_event: Event): void {
@@ -79,14 +83,14 @@ namespace RenderManagerRendering {
 
     function setRect(_uiMap: UI.MapRectangle): void {
         let value: {} = _uiMap.get();
-        let map: ƒ.Framing = uiMaps[_uiMap.name].map;
+        let map: ƒ.FramingComplex = uiMaps[_uiMap.name].map;
         for (let key in value) {
             switch (key) {
                 case "Anchor":
-                    map.normAnchor = <ƒ.Border>value[key];
+                    map.margin = <ƒ.Border>value[key];
                     break;
                 case "Border":
-                    map.pixelBorder = <ƒ.Border>value[key];
+                    map.padding = <ƒ.Border>value[key];
                     break;
                 case "Result":
                     break;
@@ -112,8 +116,8 @@ namespace RenderManagerRendering {
 
     function update(): void {
         for (let name in uiMaps) {
-            let uiMap: { ui: UI.MapRectangle, map: ƒ.Framing } = uiMaps[name];
-            uiMap.ui.set({ Anchor: uiMap.map.normAnchor, Border: uiMap.map.pixelBorder });
+            let uiMap: { ui: UI.MapRectangle, map: ƒ.FramingComplex } = uiMaps[name];
+            uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
 
             switch (name) {
                 case "ClientToCanvas":

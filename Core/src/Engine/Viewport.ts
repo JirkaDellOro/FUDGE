@@ -19,10 +19,10 @@ namespace Fudge {
         // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
         // Multiple viewports using the same canvas shouldn't differ here...
         // different framing methods can be used, this is the default
-        public frameClientToCanvas: Framing = new FramingScaled();
-        public frameCanvasToDestination: Framing = new FramingComplex();
-        public frameDestinationToSource: Framing = new FramingScaled();
-        public frameSourceToRender: Framing = new FramingScaled();
+        public frameClientToCanvas: FramingScaled = new FramingScaled();
+        public frameCanvasToDestination: FramingComplex = new FramingComplex();
+        public frameDestinationToSource: FramingScaled = new FramingScaled();
+        public frameSourceToRender: FramingScaled = new FramingScaled();
 
         public adjustingFrames: boolean = true;
         public adjustingCamera: boolean = true;

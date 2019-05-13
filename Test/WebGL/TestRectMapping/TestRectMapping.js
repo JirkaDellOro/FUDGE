@@ -25,9 +25,13 @@ var RenderManagerRendering;
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and mappings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
+        // tslint:disable: no-any 
+        viewPort.frameDestinationToSource = new ƒ.FramingComplex();
+        viewPort.frameClientToCanvas = new ƒ.FramingComplex();
         appendUIMap(menu, "DestinationToSource", viewPort.frameDestinationToSource);
         appendUIMap(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
         appendUIMap(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
+        // tslint:enable: no-any 
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
         menu.appendChild(uiClient);
@@ -46,11 +50,11 @@ var RenderManagerRendering;
             viewPort.draw();
         }
     }
-    function appendUIMap(_parent, _name, map) {
+    function appendUIMap(_parent, _name, _map) {
         let uiMap = new UI.MapRectangle(_name);
         uiMap.addEventListener("input", hndChangeOnMap);
         _parent.appendChild(uiMap);
-        uiMaps[_name] = { ui: uiMap, map: map };
+        uiMaps[_name] = { ui: uiMap, map: _map };
     }
     function hndChangeOnMap(_event) {
         let target = _event.currentTarget;
@@ -70,10 +74,10 @@ var RenderManagerRendering;
         for (let key in value) {
             switch (key) {
                 case "Anchor":
-                    map.normAnchor = value[key];
+                    map.margin = value[key];
                     break;
                 case "Border":
-                    map.pixelBorder = value[key];
+                    map.padding = value[key];
                     break;
                 case "Result":
                     break;
@@ -97,7 +101,7 @@ var RenderManagerRendering;
     function update() {
         for (let name in uiMaps) {
             let uiMap = uiMaps[name];
-            uiMap.ui.set({ Anchor: uiMap.map.normAnchor, Border: uiMap.map.pixelBorder });
+            uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
             switch (name) {
                 case "ClientToCanvas":
                     uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
