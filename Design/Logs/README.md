@@ -1,14 +1,17 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
+# May 14th 2019
+Discussion over the structure of the UI System.
+
 # May 2nd 2019
-Discussion on the requirements the UI System has to fullfil. ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190502_UI_System_Discussion))
+Discussion on the requirements the UI System has to fullfil. ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190502_UI_System_Discussion))
 
 # Apr 16th 2019
-Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_VE_Doodle.jpg)) as well as Animation Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle1.jpg), [2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190416_AE_Doodle2.jpg)).
+Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_VE_Doodle.jpg)) as well as Animation Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_AE_Doodle1.jpg), [2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_AE_Doodle2.jpg)).
 
 # Apr 15th 2019
-Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190415_Whiteboard_VE_UI_Discussion.jpg)
+Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190415_Whiteboard_VE_UI_Discussion.jpg)
 
 Toolbesprechung Vektoreditor
 
@@ -26,10 +29,10 @@ Freeform kann über on/off toggle automatisch geschlossen werden
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
 
-[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/2019-04-11%2016.23.21.jpg)
+[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190411%2016.23.21.jpg)
 
 Pre-Disussion about UI structure between Monika and Lea
-[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190411_UI%20Dicussion%20Monika%20Lea.jpg)
+[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190411_UI%20Dicussion%20Monika%20Lea.jpg)
 
 # Apr 10th 2019
 Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).
