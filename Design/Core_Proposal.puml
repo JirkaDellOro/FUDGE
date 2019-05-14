@@ -10,220 +10,258 @@ left to right direction
 'top to bottom direction
 
 package Fudge <<Rectangle>>{
-    ' gl2: WebGL2RenderingContext
+  ' gl2: WebGL2RenderingContext
 
-    package "Engine" <<Folder>> {
-        file "Node" {
-            class Node extends EventTarget {
-                - parent: Node | null
-                - children: Node[]
-                - components: MapClassToComponents
-            }
-            interface MapClassToComponents{
-                [className: string]: Component[]
-            }
-            interface MapStringToNode {
-                [key: string]: Node
-            }
-        }
-
-        file "WebGL"{
-            interface MapNodeToRenderData {
-                [key: Node]: RenderData
-            }
-            interface RenderData {
-                shader: Shader
-                material: Material
-                mesh: Mesh
-                doneTranformToWorld: boolean
-            }
-            interface BufferSpecification {
-                size: number
-                dataType: number
-                normalize: boolean
-                stride: number
-                offset: number
-            }
-            class Reference<T> {
-                - reference: T
-                - count: number
-            }
-            class WebGL {
-                - canvas: HTMLCanvasElement //offscreen
-                - crc3: WebGL2RenderingContext
-                - programs: Map<Shader, Reference<WebGLProgram>>
-                - arrays: Map<Material, Reference<WebGLVertexArrayObject>>
-                - buffers: Map<Mesh, Reference<WebGLBuffer>>
-            }
-        }
-
-        class Color {
-            // to be implemented
-        }
-        class Material {
-            // to be refactored!
-        }
-        class Viewport extends EventTarget {
-            - name: string
-            - camera: ComponentCamera
-            - rootNode: Node
-            - canvas: HTMLCanvasElement
-            - rectTarget: Rectangle
-        }
-
-        file "Event"{
-            interface MapEventTypeToListener {
-                [eventType: string]: EventListener[];
-            }
-
-            enum EVENT
-
-            class EventTargetStatic extends EventTarget {
-                #{static} targetStatic: EventTargetStatic
-            }
-        }
-
-        class Loop extends EventTargetStatic {
-            - {static} running: boolean = false
-            + {static} start(): void
-        }
+  package "Engine" <<Folder>> {
+    file "Node" {
+      class Node extends EventTarget {
+        - parent: Node | null
+        - children: Node[]
+        - components: MapClassToComponents
+      }
+      interface MapClassToComponents{
+        [className: string]: Component[]
+      }
+      interface MapStringToNode {
+        [key: string]: Node
+      }
+    }
+    class Color {
+      // to be implemented
+    }
+    class Material {
+      - name: string;
+      - shaderClass: typeof Shader;
+      - color: Vector3;
+      - textureEnabled: boolean;
+      - textureSource: string;
+    }
+    file "Viewort" {
+      interface Rectangle {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }
+      class Viewport extends EventTarget {
+        + name: string
+        + camera: ComponentCamera
+        + branch: Node
+        + rectSource: Rectangle
+        + rectDestination: Rectangle
+        - canvas: HTMLCanvasElement
+        - crc2: CanvasRenderingContext2D
+      }
     }
 
-    package "Browser" <<Cloud>> {
-        class EventTarget
-        class WebGL2RenderingContext
-        class HTMLCanvasElement
-        class CanvasRenderingContext2D
-    }
-    package "Transfer" <<Folder>> {
-        file "Serializer" {
-            interface Serializable {
-                serialize(): Serialization;
-                deserialize(_serialization: Serialization): Serializable;
-            }
-            interface Serialization {
-                [type: string]: General;
-            }
-            class Serializer {
-                {static} + serialize(_object: Serializable): Serialization
-                {static} + deserialize(_serialization: Serialization): Serializable
-            }
-        }
-        file "Mutable" {
-            interface MutatorAttributeTypes
-            interface Mutator
+    file "Event"{
+      interface MapEventTypeToListener {
+        [eventType: string]: EventListener[];
+      }
 
-            interface MutatorForAnimation extends Mutator
-            interface MutatorForUserInterface extends Mutator
-            class Mutable extends EventTarget {
-                + getMutator(): Mutator
-                + getMutatorForAnimation(): MutatorForAnimation
-                + getMutatorForUserInterface(): MutatorForUserInterface
-                + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
-                + updateMutator(_mutator: Mutator): void
-                # mutate(_mutator: Mutator): void
-            }
-            Mutable --( Mutator
-        }
+      enum EVENT
+
+      class EventTargetStatic extends EventTarget {
+        #{static} targetStatic: EventTargetStatic
+      }
     }
 
-    package "Components" <<Folder>> {
-        abstract class Component extends Mutable {
-            - container: Node | null
-            - singleton: boolean
-            - active: boolean
-        }
+    class Loop extends EventTargetStatic {
+      - {static} running: boolean = false
+      + {static} start(): void
+    }
+  }
 
-        class ComponentCamera extends Component {
-            - orthographic: boolean
-            - projectionMatrix: Matrix4x4
-            - fieldOfView: number
-            - backgroundColor: Vector3
-            - backgroundEnabled: boolean
-        }
-        class ComponentMaterial extends Component {
-            // to be refactored!
-        }
-        class ComponentMesh extends Component {
-            - mesh: Mesh
-            - vertices: Float32Array
-            - vertexCount: number;
-            - bufferSpecification: BufferSpecification
-            - normals: Float32Array
-        }
-        class ComponentPivot extends Component {
-            # matrix: Matrix4x4
-        }
-        class ComponentTransform extends ComponentPivot {
-            + worldMatrix: Matrix4x4
-        }
-        class ComponentScript extends Component {
-        }
+  package "WebGL" <<Folder>> {
+    interface NodeReferences {
+      shader: typeof Shader;
+      material: Material;
+      mesh: Mesh;
+      doneTransformToWorld: boolean;
+    }
+    interface BufferSpecification {
+      size: number
+      dataType: number
+      normalize: boolean
+      stride: number
+      offset: number
+    }
+    class WebGLReference<T> {
+      private reference: T;
+      private count: number = 0;
+    }
+    class WebGL extends WebGLApi {
+      - {static} programs: Map<typeof Shader, WebGLReference<ShaderInfo>>;
+      - {static} parameters: Map<Material, WebGLReference<MaterialInfo>>;
+      - {static} buffers: Map<Mesh, WebGLReference<BufferInfo>>;
+      - {static} nodes: MapNodeToNodeReferences;
     }
 
-    package "Meshes" <<Folder>> {
-        interface Mesh extends Serializable {
-            getVertices(): Float32Array
-        }
-        class MeshCube implements Mesh {
-            public width: number;
-            public height: number;
-            public depth: number;
-        }
+    interface ShaderInfo {
+      program: WebGLProgram;
+      attributes: MapNameToValue;
+      uniforms: MapNameToUniformLocation;
+    }
+    interface BufferInfo {
+      buffer: WebGLBuffer;
+      target: number;
+      specification: BufferSpecification;
+      vertexCount: number;
+    }
+    interface MaterialInfo {
+      vao: WebGLVertexArrayObject;
+      color: Vector3;
+    }
+    class WebGLApi {
+      + {static} crc3: WebGL2RenderingContext;
+      + {static} canvas: HTMLCanvasElement;
+      + {static} rectViewport: Rectangle;
+    }
+  }
+
+  package "Browser" <<Cloud>> {
+    class EventTarget
+    class WebGL2RenderingContext
+    class HTMLCanvasElement
+    class CanvasRenderingContext2D
+  }
+  package "Transfer" <<Folder>> {
+    file "Serializer" {
+      interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+      }
+      interface Serialization {
+        [type: string]: General;
+      }
+      class Serializer {
+        {static} + serialize(_object: Serializable): Serialization
+        {static} + deserialize(_serialization: Serialization): Serializable
+      }
+    }
+    file "Mutable" {
+      interface MutatorAttributeTypes
+      interface Mutator
+
+      interface MutatorForAnimation extends Mutator
+      interface MutatorForUserInterface extends Mutator
+      class Mutable extends EventTarget {
+        + getMutator(): Mutator
+        + getMutatorForAnimation(): MutatorForAnimation
+        + getMutatorForUserInterface(): MutatorForUserInterface
+        + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
+        + updateMutator(_mutator: Mutator): void
+        # mutate(_mutator: Mutator): void
+      }
+    }
+  }
+
+  package "Components" <<Folder>> {
+    abstract class Component extends Mutable {
+      # singleton: boolean
+      - container: Node | null
+      - active: boolean
     }
 
-    package "Math" <<Folder>> {
-        class Vector3 {
-            - data: number[]
-            // to be refactored, components as x,y,z numbers
-        }
-        class Matrix3x3 {
-            public data: number[]
-        }
-        class Matrix4x4 extends Mutable {
-            public data: Float32Array
-        }
-        Matrix4x4 --() Serializable
+    class ComponentCamera extends Component {
+      - orthographic: boolean
+      - projectionMatrix: Matrix4x4
+      - fieldOfView: number
+      - aspectRatio: number
+      - backgroundColor: Vector3
+      - backgroundEnabled: boolean
     }
-
-    package "Shader" << Folder>> {
-        abstract class Shader {
-            - program: WebGLProgram
-            - attributes: MapStringToNumber
-            - uniforms: MapStringToWebGLUniformLocation
-        }
-        class ShaderBasic extends Shader {
-        }
-        class ShaderTexture extends Shader {
-        }
+    class ComponentMaterial extends Component {
+      - material: Material;
     }
+    class ComponentMesh extends Component {
+      - mesh: Mesh
+    }
+    class ComponentPivot extends Component {
+      + local: Matrix4x4
+    }
+    class ComponentTransform extends ComponentPivot {
+      + world: Matrix4x4
+    }
+    class ComponentScript extends Component {
+    }
+  }
 
-    ' Associations
-    Node  ..|> Serializable
-    Node "0..1 parent" o-left- "n children" Node
-    Node "1 container" o-- "n components" Component
-    Component ..|> Serializable
-    ComponentMesh "n" --> "1" Mesh
-    ComponentPivot -->"1" Matrix4x4
-    ComponentTransform -->"1" Matrix4x4
-    Viewport -->"1 root" Node : displays >
-    Viewport -->"1 camera" ComponentCamera : look through >
-    Shader "n"-->"1" Material : uses >
-    ComponentMaterial "n" --> "1" Shader : refers >
-    Viewport "n" --> "1" CanvasRenderingContext2D : renders >
-    Viewport "n" --> "1" WebGL : feeds data >
-    WebGL "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
-    'HTMLCanvasElement -- CanvasRenderingContext2D
+  package "Meshes" <<Folder>> {
+    class Mesh {
+      # vertices: Float32Array
+    }
+    class MeshCube extends Mesh {
+      + width: number;
+      + height: number;
+      + depth: number;
+    }
+  }
 
-    'improve layout
-    'Node -[hidden]- Serializable
-    'Component -[hidden]- Serializable
-    'Serializer --[hidden]-- Mutable
-    'Mutable --[hidden]-- Component
-    'Viewport -[hidden]- ComponentCamera
-    'Engine -[hidden]- Meshes
-    Engine -[hidden]- Browser
-    Loop -[hidden]- Material
-    'Meshes --[hidden]up-- Shader
-}
-@enduml
+  package "Math" <<Folder>> {
+    class Vector3 {
+      - data: number[]
+      // to be refactored, components as x,y,z numbers
+    }
+    class Matrix3x3 {
+      + data: number[]
+    }
+    class Matrix4x4 extends Mutable {
+      + data: Float32Array
+    }
+  }
+
+  package "Shader" << Folder>> {
+    abstract class Shader {
+      + {static} loadVertexShaderSource(): string
+      + {static} loadFragmentShaderSource(): string
+    }
+    class ShaderBasic extends Shader {
+    }
+    class ShaderTexture extends Shader {
+    }
+  }
+
+  ' Associations
+  Mesh --() Serializable
+  Component --() Serializable
+  Node  --() Serializable
+  Matrix4x4 --() Serializable
+  Serializer  -(0- Serializable
+  Serializer  -(0- Serialization
+
+  Mutable -(0- Mutator
+  Mutable -(0- MutatorAttributeTypes
+
+  Node "0..1 parent" o-left- "n children" Node
+  Node "1 container" o-- "n components" Component
+
+  ComponentMesh "n" --> "1" Mesh
+  ComponentPivot -->"1" Matrix4x4
+  ComponentTransform -->"1" Matrix4x4
+  ComponentMaterial "n" --> "1" Shader : refers >
+  Shader "n"-->"1" Material : uses >
+  Viewport -->"1 root" Node : displays >
+  Viewport -->"1 camera" ComponentCamera : look through >
+  Viewport "n" --> "1" CanvasRenderingContext2D : renders >
+  Viewport "n" -> "1" WebGL : feeds data and retrieves image >
+  WebGL "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
+  WebGL "1" o--> "n" NodeReferences : keeps >
+  WebGL "1" o--> "n" WebGLReference : keeps >
+  WebGLReference "1" --> "1" ShaderInfo : shader uses >
+  WebGLReference "1" --> "1" BufferInfo : mesh uses >
+  WebGLReference "1" --> "1" MaterialInfo : material uses >
+  BufferInfo --> BufferSpecification : provides >
+
+  'improve layout
+  'Node -[hidden]- Serializable
+  'Component -[hidden]- Serializable
+  'Serializer --[hidden]-- Mutable
+  'Mutable --[hidden]-- Component
+  'Viewport -[hidden]- ComponentCamera
+  'Engine -[hidden]- Meshes
+  'Engine -[hidden]- Browser
+  'Loop -[hidden]- Material
+  'Meshes --[hidden]up-- Shader
+  'EventTarget -[hidden] EventTargetStatic
+  @enduml

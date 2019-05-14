@@ -1,27 +1,30 @@
-var WebGLRendering;
-(function (WebGLRendering) {
+var RenderManagerRendering;
+(function (RenderManagerRendering) {
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
-    let node;
-    let child;
-    let grandchild;
     function init() {
-        Scenes.createThreeLevelNodeHierarchy();
-        node = Scenes.node;
-        child = node.getChildren()[0];
-        let viewPort = new ƒ.Viewport("TestViewport", node, Scenes.camera.getComponent(ƒ.ComponentCamera));
-        viewPort.prepare();
-        // let webgl: ƒ.WebGL = new ƒ.WebGL();
-        // webgl.addEventListener("snv", hndClick);
-        ƒ.WebGL.addBranch(node);
-        ƒ.WebGL.recalculateAllNodeTransforms();
-        ƒ.WebGL.drawBranch(node, Scenes.camera.getComponent(ƒ.ComponentCamera));
-        node.cmpTransform.rotateZ(60);
-        ƒ.WebGL.recalculateAllNodeTransforms();
-        // viewPort.prepare();
-        ƒ.WebGL.drawBranch(node, Scenes.camera.getComponent(ƒ.ComponentCamera));
-        ƒ.WebGL.updateNode(node);
-        ƒ.WebGL.removeNode(node);
+        // create asset
+        let branch = Scenes.createAxisCross();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.recalculateAllNodeTransforms();
+        // initialize viewport
+        let camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera.projectCentral(1, 45);
+        let canvas = Scenes.createCanvas();
+        document.body.appendChild(canvas);
+        let viewPort = new ƒ.Viewport();
+        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
+        // prepare and draw viewport
+        //viewPort.prepare();
+        viewPort.draw();
+        let table = {
+            crc3: { width: ƒ.RenderManager.getCanvas().width, height: ƒ.RenderManager.getCanvas().height },
+            crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
+        };
+        console.table(table, ["width", "height"]);
     }
-})(WebGLRendering || (WebGLRendering = {}));
+})(RenderManagerRendering || (RenderManagerRendering = {}));
 //# sourceMappingURL=Rendering.js.map

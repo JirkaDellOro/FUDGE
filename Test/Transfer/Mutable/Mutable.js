@@ -1,5 +1,6 @@
 var Mutable;
 (function (Mutable) {
+    var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     let mutator;
     let angle = 0;
@@ -12,6 +13,16 @@ var Mutable;
         console.log("Mutator: ", mutator);
         let serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
+        let mttCamera;
+        mttCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutator();
+        console.log("mttCamera: ", mttCamera);
+        let mttCameraTypes;
+        mttCameraTypes = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutatorAttributeTypes(mttCamera);
+        console.log("mttCameraTypes: ", mttCameraTypes);
+        let srlCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).serialize();
+        console.log("srlCamera: ", srlCamera);
+        let srlNode = Scenes.node.serialize();
+        console.log("srlNode: ", srlNode);
         animate();
     }
     function animate() {
@@ -20,7 +31,8 @@ var Mutable;
         mutator.local.data[12] = 5 * Math.sin(angle);
         mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
-        Scenes.viewPort.drawScene();
+        ƒ.RenderManager.recalculateAllNodeTransforms();
+        Scenes.viewPort.draw();
     }
 })(Mutable || (Mutable = {}));
 //# sourceMappingURL=Mutable.js.map

@@ -32,6 +32,7 @@ partition keyup {
 	endif
 	if() then ([tangentsActive && !isShortcutPressed(showTangentsShortcut)])
 		:tangentsActive = false;
+		:remove Tangents from selectedPoints;
 		:redrawAll ₼;
 	endif
 	stop

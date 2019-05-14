@@ -9,19 +9,20 @@ namespace Canvas3D {
 
     class WebGL {
         public content: number[] = [0, 0, 0, 1];
-        private crc3: WebGLRenderingContext = null;
+        private crc3: WebGL2RenderingContext = null;
         private canvas: HTMLCanvasElement = null;
         private readonly rect: Rectangle = null;
 
         constructor(/* size ? */) {
             this.canvas = document.createElement("canvas");
+            console.log(this.canvas.width, this.canvas.height);
             this.getContextFromCanvas(this.canvas);
             this.rect = { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
-            console.log(this.crc3);
+            console.log(this.crc3.canvas.width, this.crc3.canvas.height);
         }
 
         public getContextFromCanvas(canvas: HTMLCanvasElement /*| OffscreenCanvas*/): WebGLRenderingContext {
-            this.crc3 = canvas.getContext("webgl");
+            this.crc3 = canvas.getContext("webgl2");
             return this.crc3;
         }
 
@@ -35,7 +36,7 @@ namespace Canvas3D {
         }
 
         public copyToCanvas(_crc2: CanvasRenderingContext2D, _rectSource: Rectangle, _rectDestination: Rectangle): void {
-            void _crc2.drawImage(
+            _crc2.drawImage(
                 this.canvas,
                 _rectSource.x, _rectSource.y, _rectSource.width, _rectSource.height,
                 _rectDestination.x, _rectDestination.y, _rectDestination.width, _rectDestination.height);

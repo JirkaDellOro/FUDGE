@@ -5,14 +5,12 @@ namespace TestSerializer {
 
     function init(): void {
         Scenes.createMiniScene();
-        Scenes.createViewport();
 
         let result: ƒ.Serializable = testSerialization(Scenes.node);
-        // (<ƒ.Node>result).name = "nlksanfdv";
         console.groupCollapsed("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
-        Scenes.viewPort.drawScene();
+        
     }
 
     function testSerialization(_object: ƒ.Serializable): ƒ.Serializable {

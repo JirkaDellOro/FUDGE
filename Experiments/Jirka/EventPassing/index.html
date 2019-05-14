@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>EventPassing</title>
+    <script src="EventPassing.js"></script>
+    <style>
+        fieldset {
+            width: 400px;
+            height: 400px;
+            padding: 40;
+            margin: 40;
+            background-color: beige;
+        }
+
+        canvas {
+            border-width: 1px;
+            border-style: solid;
+            background-color: aquamarine;
+            height: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <fieldset>
+        <legend>Create mousevents here</legend>
+        <canvas width="400" height="200"></canvas>
+        <script>
+            let crc2 = document.querySelector("canvas").getContext("2d");
+            crc2.fillRect(0, 0, 10, 10);
+            crc2.fillRect(400,200,-10,-10);
+        </script>
+    </fieldset>
+    <input type="text" name="text" id=""/>
+</body>
+
+</html>

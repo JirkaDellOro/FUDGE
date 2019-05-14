@@ -9,10 +9,10 @@ var Scripts;
             this.hndMutation = (_event) => {
                 console.log("Mutation", this);
             };
-            this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
-            this.hndAnimationFrame = this.hndAnimationFrame.bind(this); // when using concentional function
-            //ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
-            this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
+            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentAdd);
+            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using concentional function
+            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.hndLoopFrame); // when using arrow-function
+            this.addEventListener("mutate" /* MUTATE */, this.hndMutation);
         }
         mutate(_mutator) {
             super.mutate(_mutator);
@@ -21,22 +21,23 @@ var Scripts;
             console.log("Component event", _event);
             console.log("Container", this.getContainer());
             console.log("Target is this?", _event.target == this, this.name);
-            this.getContainer().addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndNodeEvent);
-            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
+            this.getContainer().addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndNodeEvent);
+            this.getContainer().addEventListener("childRemove" /* CHILD_REMOVE */, this.hndNodeEvent);
         }
         hndNodeEvent(_event) {
             console.log("Node event", _event);
         }
-        hndAnimationFrame(_event) {
+        hndLoopFrame(_event) {
             //hndAnimationFrame(_event: Event): void {
             console.log(this.name, this.count++);
             if (this.count > 20)
-                ƒ.Loop.removeEventListener(_event.type, this.hndAnimationFrame);
+                ƒ.Loop.removeEventListener(_event.type, this.hndLoopFrame);
         }
     }
     function init() {
         Scenes.createMiniScene();
         Scenes.createViewport();
+        Scenes.viewPort.draw();
         let node = Scenes.node;
         let child = node.getChildren()[0];
         let test = new Test();

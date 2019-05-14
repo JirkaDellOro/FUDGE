@@ -9,8 +9,8 @@ namespace Scripts {
         constructor() {
             super();
             this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
-            this.hndAnimationFrame = this.hndAnimationFrame.bind(this); // when using concentional function
-            //ƒ.Loop.addEventListener(ƒ.EVENT.ANIMATION_FRAME, this.hndAnimationFrame);  // when using arrow-function
+            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using concentional function
+            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.hndLoopFrame);  // when using arrow-function
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
 
@@ -35,11 +35,11 @@ namespace Scripts {
             console.log("Node event", _event);
         }
 
-        private hndAnimationFrame(_event: Event): void {
+        private hndLoopFrame(_event: Event): void {
             //hndAnimationFrame(_event: Event): void {
             console.log(this.name, this.count++);
             if (this.count > 20)
-                ƒ.Loop.removeEventListener(_event.type, this.hndAnimationFrame);
+                ƒ.Loop.removeEventListener(_event.type, this.hndLoopFrame);
         }
     }
 
@@ -47,6 +47,7 @@ namespace Scripts {
     function init(): void {
         Scenes.createMiniScene();
         Scenes.createViewport();
+        Scenes.viewPort.draw();
 
         let node: ƒ.Node = Scenes.node;
         let child: ƒ.Node = node.getChildren()[0];

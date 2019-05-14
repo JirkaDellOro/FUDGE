@@ -1,220 +1,219 @@
 namespace Fudge {
     /**
-     * Represents the interface between the scenegraph, the camera and the renderingcontext.
+     * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
+     * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
+     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Viewport extends EventTarget {
-        private name: string; // The name to call this viewport by.
-        private camera: ComponentCamera; // The camera from which's position and view the tree will be rendered.
-        private rootNode: Node; // The first node in the tree(branch) that will be rendered.
-        private vertexArrayObjects: { [key: string]: WebGLVertexArrayObject } = {}; // Associative array that holds a vertexarrayobject for each node in the tree(branch)
-        private buffers: { [key: string]: WebGLBuffer } = {}; // Associative array that holds a buffer for each node in the tree(branch)
+        private static focus: Viewport;
+
+        public name: string = "Viewport"; // The name to call this viewport by.
+        public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
+        public branch: Node = null; // The first node in the tree(branch) that will be rendered.
+
+        public rectSource: Rectangle;
+        public rectDestination: Rectangle;
+
+        // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
+        // Multiple viewports using the same canvas shouldn't differ here...
+        // different framing methods can be used, this is the default
+        public frameClientToCanvas: FramingScaled = new FramingScaled();
+        public frameCanvasToDestination: FramingComplex = new FramingComplex();
+        public frameDestinationToSource: FramingScaled = new FramingScaled();
+        public frameSourceToRender: FramingScaled = new FramingScaled();
+
+        public adjustingFrames: boolean = true;
+        public adjustingCamera: boolean = true;
+
+        private crc2: CanvasRenderingContext2D = null;
+        private canvas: HTMLCanvasElement = null;
+
+
+
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
-         * @param _rootNode 
+         * @param _branch 
          * @param _camera 
          */
-        public constructor(_name: string, _rootNode: Node, _camera: ComponentCamera) {
-            super();
+        public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
-            this.rootNode = _rootNode;
+            this.branch = _branch;
             this.camera = _camera;
-            this.initializeViewportNodes(this.rootNode);
+            this.canvas = _canvas;
+            this.crc2 = _canvas.getContext("2d");
+
+            this.rectSource = RenderManager.getCanvasRect();
+            this.rectDestination = this.getClientRectangle();
         }
 
-        public get Name(): string {
-            return this.name;
+        public getContext(): CanvasRenderingContext2D {
+            return this.crc2;
         }
-
-        /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
-         */
-        public drawScene(): void {
-            if (this.camera.isActive) {
-                this.prepare();
-                // TODO: don't do this for each viewport, it needs to be done only once per frame
-                this.updateNodeWorldMatrix(this.viewportNodeSceneGraphRoot());
-                this.drawObjects(this.rootNode, this.camera.ViewProjectionMatrix);
-            }
+        public getCanvasRectangle(): Rectangle {
+            return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
-
-        public prepare(): void {
-            this.updateCanvasDisplaySizeAndCamera(gl2.canvas);
-            let backgroundColor: Vector3 = this.camera.getBackgoundColor();
-            gl2.clearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, this.camera.getBackgroundEnabled() ? 1 : 0);
-            gl2.clear(gl2.COLOR_BUFFER_BIT | gl2.DEPTH_BUFFER_BIT);
-            // Enable backface- and zBuffer-culling.
-            gl2.enable(gl2.CULL_FACE);
-            gl2.enable(gl2.DEPTH_TEST);
+        public getClientRectangle(): Rectangle {
+            return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
-        /**
-         * Initializes the vertexbuffer, material and texture for a passed node and calls this function recursive for all its children.
-         * @param _node The node to initialize.
-         */
-        public initializeViewportNodes(_node: Node): void {
-            if (!_node.cmpTransform) {
-                let transform: ComponentTransform = new ComponentTransform();
-                _node.addComponent(transform);
-            }
-            let mesh: ComponentMesh;
-            if (!_node.getComponent(ComponentMesh)) {
-                console.log(`No Mesh attached to node named '${_node.name})'.`);
-            }
-            else {
-                this.initializeNodeBuffer(_node);
-                mesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-                gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(mesh.getVertices()), gl2.STATIC_DRAW);
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
-
-                if (materialComponent) {
-                    /*
-                    console.log(`No Material attached to node named '${_node.Name}'.`);
-                    console.log("Adding standardmaterial...");
-                    materialComponent = new MaterialComponent();
-                    materialComponent.initialize(AssetManager.getMaterial("standardMaterial"));
-                    _node.addComponent(materialComponent);
-                    */
-                    let positionAttributeLocation: number = materialComponent.Material.PositionAttributeLocation;
-                    // uses vertexArrayObject bound in initializeNodeBuffer, implicitely also binding the attribute to the current ARRAY_BUFFER
-                    GLUtil.attributePointer(positionAttributeLocation, mesh.getBufferSpecification());
-                    this.initializeNodeMaterial(materialComponent, mesh);
-                    if (materialComponent.Material.TextureEnabled) {
-                        this.initializeNodeTexture(materialComponent, mesh);
-                    }
-                }
-            }
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.initializeViewportNodes(childNode);
-            }
-        }
-
         /**
          * Logs this viewports scenegraph to the console.
          */
         public showSceneGraph(): void {
+            // TODO: move to debug-class
             let output: string = "SceneGraph for this viewport:";
             output += "\n \n";
-            output += this.rootNode.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.rootNode));
+            output += this.branch.name;
+            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
 
+        // #region Drawing
         /**
-         * Draws the passed node with the passed viewprojectionmatrix and calls this function recursive for all its children.
-         * @param _node The currend node to be drawn.
-         * @param _matrix The viewprojectionmatrix of this viewports camera.
+         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
-        private drawObjects(_node: Node, _matrix: Matrix4x4): void {
-            let mesh: ComponentMesh = <ComponentMesh>_node.getComponent(ComponentMesh);
-            if (mesh) {
-                let transform: ComponentTransform = _node.cmpTransform;
-                let materialComponent: ComponentMaterial = <ComponentMaterial>_node.getComponent(ComponentMaterial);
-                if (materialComponent) {
-                    materialComponent.Material.Shader.use();
-                    gl2.bindVertexArray(this.vertexArrayObjects[_node.name]);
-                    gl2.enableVertexAttribArray(materialComponent.Material.PositionAttributeLocation);
-                    // Compute the matrices
-                    let transformMatrix: Matrix4x4 = transform.world;
-                    let pivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
-                    if (pivot)
-                        transformMatrix = Matrix4x4.multiply(pivot.local, transform.world);
-                    let objectViewProjectionMatrix: Matrix4x4 = Matrix4x4.multiply(_matrix, transformMatrix);
-                    // Supply matrixdata to shader. 
-                    gl2.uniformMatrix4fv(materialComponent.Material.MatrixUniformLocation, false, objectViewProjectionMatrix.data);
-                    // Supply color
-                    let colorUniformLocation: WebGLUniformLocation = materialComponent.Material.ColorUniformLocation;
-                    let vec: Vector3 = materialComponent.Material.Color;
-                    let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-                    gl2.uniform4fv(colorUniformLocation, color);
-
-                    // Draw call
-                    gl2.drawArrays(gl2.TRIANGLES, mesh.getBufferSpecification().offset, mesh.getVertexCount());
-                }
-            }
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.drawObjects(childNode, _matrix);
-            }
-        }
-        /**
-         * Updates the transforms worldmatrix of a passed node for the drawcall and calls this function recursively for all its children.
-         * @param _node The node which's transform worldmatrix to update.
-         */
-        private updateNodeWorldMatrix(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
-            let worldMatrix: Matrix4x4 = _matrix;
-            let transform: ComponentTransform = _node.cmpTransform;
-            if (transform) {
-                worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
-                transform.world = worldMatrix;
-            }
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.updateNodeWorldMatrix(childNode, worldMatrix);
-            }
-        }
-        /**
-         * Returns the scenegraph's rootnode for computation of worldmatrices.
-         */
-        private viewportNodeSceneGraphRoot(): Node {
-            let sceneGraphRoot: Node = this.rootNode;
-            while (sceneGraphRoot.getParent()) {
-                sceneGraphRoot = sceneGraphRoot.getParent();
-            }
-            return sceneGraphRoot;
-        }
-        /**
-         * Initializes a vertexbuffer for every passed node. // TODO: room for optimization when nodes share the same mesh
-         * @param _node The node to initialize a buffer for.
-         */
-        private initializeNodeBuffer(_node: Node): void {
-            let bufferCreated: WebGLBuffer | null = gl2.createBuffer();
-            if (bufferCreated === null)
+        public draw(): void {
+            if (!this.camera.isActive)
                 return;
-            let buffer: WebGLBuffer = bufferCreated;
-            this.buffers[_node.name] = buffer;
-            let vertexArrayObjectCreated: WebGLVertexArrayObject | null = gl2.createVertexArray();
-            if (vertexArrayObjectCreated === null) return;
-            let vertexArrayObject: WebGLVertexArrayObject = vertexArrayObjectCreated;
-            this.vertexArrayObjects[_node.name] = vertexArrayObject;
-            // bind attribute-array, subsequent calls will use it
-            gl2.bindVertexArray(vertexArrayObject);
-            // bind buffer to ARRAY_BUFFER, subsequent calls work on it
-            gl2.bindBuffer(gl2.ARRAY_BUFFER, buffer);
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+
+            // HACK! no need to addBranch and recalc for each viewport and frame
+            RenderManager.clear(this.camera.getBackgoundColor());
+            RenderManager.addBranch(this.branch);
+            RenderManager.drawBranch(this.branch, this.camera);
+
+            this.crc2.imageSmoothingEnabled = false;
+            this.crc2.drawImage(
+                RenderManager.getCanvas(),
+                this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+                this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+            );
         }
 
-        /**
-         * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            // _meshComponent.applyColor(_materialComponent);
-            //gl2.enableVertexAttribArray(colorUniformLocation);
-            // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
+        public adjustFrames(): void {
+            // get the rectangle of the canvas area as displayed (consider css)
+            let rectClient: Rectangle = this.getClientRectangle();
+            // adjust the canvas size according to the given framing applied to client
+            let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
+            this.canvas.width = rectCanvas.width;
+            this.canvas.height = rectCanvas.height;
+            // adjust the destination area on the target-canvas to render to by applying the framing to canvas
+            this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
+            // adjust the area on the source-canvas to render from by applying the framing to destination area
+            this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
+            // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
+            this.rectSource.x = this.rectSource.y = 0;
+            // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
+            let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
+            RenderManager.setViewportRectangle(rectRender);
+            // no more transformation after this for now, offscreen canvas and render-viewport have the same size
+            RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
 
-        /**
-         * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-            let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-            gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            _meshComponent.setTextureCoordinates();
-            gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-            GLUtil.createTexture(_materialComponent.Material.TextureSource);
+        public adjustCamera(): void {
+            let rect: Rectangle = RenderManager.getViewportRectangle();
+            this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
         }
+        // #endregion
+
+
+        // #region Events (passing from canvas to viewport and from there into branch)
+        public get hasFocus(): boolean {
+            return (Viewport.focus == this);
+        }
+        public setFocus(_on: boolean): void {
+            if (_on) {
+                if (Viewport.focus == this)
+                    return;
+                if (Viewport.focus)
+                    Viewport.focus.dispatchEvent(new Event(EVENT.FOCUS_OUT));
+                Viewport.focus = this;
+                this.dispatchEvent(new Event(EVENT.FOCUS_IN));
+            }
+            else {
+                if (Viewport.focus != this)
+                    return;
+
+                this.dispatchEvent(new Event(EVENT.FOCUS_OUT));
+                Viewport.focus = null;
+            }
+        }
+
+        public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
+            this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
+        }
+        public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
+            this.activateEvent(this.canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
+        }
+        public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
+            if (_type == EVENT_DRAGDROP.START)
+                this.canvas.draggable = _on;
+            this.activateEvent(this.canvas, _type, this.hndDragDropEvent, _on);
+        }
+        public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
+            this.activateEvent(this.canvas, _type, this.hndWheelEvent, _on);
+        }
+
+        private hndDragDropEvent: EventListener = (_event: Event) => {
+            let _dragevent: DragDropEventƒ = <DragDropEventƒ>_event;
+            switch (_dragevent.type) {
+                case "dragover":
+                case "drop":
+                    _dragevent.preventDefault();
+                    _dragevent.dataTransfer.effectAllowed = "none";
+                    break;
+                case "dragstart":
+                    _dragevent.dataTransfer.setData("text", "Hallo");
+                    // TODO: check if there is a better solution to hide the ghost image of the draggable object
+                    _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
+                    break;
+            }
+            let event: DragDropEventƒ = new DragDropEventƒ("ƒ" + _event.type, _dragevent);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
+        }
+
+        private addCanvasPosition(event: PointerEventƒ | DragDropEventƒ): void {
+            event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
+            event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
+        }
+
+        private hndPointerEvent: EventListener = (_event: Event) => {
+            let event: PointerEventƒ = new PointerEventƒ("ƒ" + _event.type, <PointerEventƒ>_event);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
+        }
+
+        private hndKeyboardEvent: EventListener = (_event: Event) => {
+            if (!this.hasFocus)
+                return;
+            let event: KeyboardEventƒ = new KeyboardEventƒ("ƒ" + _event.type, <KeyboardEventƒ>_event);
+            this.dispatchEvent(event);
+        }
+
+        private hndWheelEvent: EventListener = (_event: Event) => {
+            let event: WheelEventƒ = new WheelEventƒ("ƒ" + _event.type, <WheelEventƒ>_event);
+            this.dispatchEvent(event);
+        }
+
+        private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
+            _type = _type.slice(1); // chip the ƒlorentin
+            if (_on)
+                _target.addEventListener(_type, _handler);
+            else
+                _target.removeEventListener(_type, _handler);
+        }
+        // #endregion
 
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph(_fudgeNode: Node): string {
+            // TODO: move to debug-class
             let output: string = "";
             for (let name in _fudgeNode.getChildren()) {
                 let child: Node = _fudgeNode.getChildren()[name];
@@ -234,26 +233,32 @@ namespace Fudge {
             return output;
         }
 
-        /**
-         * Updates the displaysize of the passed canvas depending on the client's size and an optional multiplier.
-         * Adjusts the viewports camera and the renderingcontexts viewport to fit the canvassize.
-         * @param canvas The canvas to readjust.
-         * @param multiplier A multiplier to adjust the displayzise dimensions by.
+        /*/*
+         * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
+         * @param _material The node's materialcomponent.
+         * @param _mesh The node's meshcomponent.
          */
-        private updateCanvasDisplaySizeAndCamera(canvas: HTMLCanvasElement, multiplier?: number): void {
-            multiplier = multiplier || 1;
-            let width: number = canvas.clientWidth * multiplier | 0;
-            let height: number = canvas.clientHeight * multiplier | 0;
-            if (canvas.width !== width || canvas.height !== height) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-            // TODO: camera should adjust itself to resized canvas by e.g. this.camera.resize(...)
-            if (this.camera.isOrthographic)
-                this.camera.projectOrthographic(0, width, height, 0);
-            else
-                this.camera.projectCentral(width / height); //, this.camera.FieldOfView);
-            gl2.viewport(0, 0, width, height);
-        }
+        // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
+        //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
+        //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
+        //     // _meshComponent.applyColor(_materialComponent);
+        //     //gl2.enableVertexAttribArray(colorUniformLocation);
+        //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
+        // }
+
+        /*/*
+         * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
+         * @param _material The node's materialcomponent.
+         * @param _mesh The node's meshcomponent.
+         */
+        // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
+        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
+        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
+        //     _meshComponent.setTextureCoordinates();
+        //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
+        //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
+        //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
+        // }
     }
 }

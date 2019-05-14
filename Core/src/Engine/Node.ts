@@ -10,7 +10,7 @@ namespace Fudge {
     export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
         private parent: Node | null = null; // The parent of this node.
-        private children: Node[] = []; // Associative array nodes appended to this node.
+        private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};
         // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
         // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)

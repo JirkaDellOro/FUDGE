@@ -4,15 +4,17 @@ skinparam monochrome true
 title Move
 
 partition mousedown {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
+	:previousPosition = (_event.clientX, _event.clientY);
 	stop
 }
 
 partition mousemove {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	if() then ([no buttons pressed])
-	stop
+		stop
 	endif
+	' TODO: if only one tangent is selected, make its opposite move accordingly
 	:delta: Vector2 = new Vector2(
 	previousPosition.x - _event.clientX,
 	previousPosition.y - _event.clientY)]
@@ -29,17 +31,24 @@ partition mousemove {
 	else
 		:Editor.transformationPoint += delta;
 	endif
+	:previousPosition = (_event.clientX, _event.clientY);
 	stop
 }
 
 partition mouseup {
-	:_event: MosueEvent]
+	:_event: MouseEvent]
 	stop
 }
 
+
 partition prequisitesFulfilled {
 	start
-	:true]
+	if() then([selectedPaths.length > 0 || selectedPoints.length > 0])
+		:true]
+		detach
+	endif
+	:false]
+	detach
 }
 
 @enduml

@@ -15,7 +15,7 @@ namespace Fudge {
         }
         private static loop(_timestamp: number): void {
             // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
-            let event: Event = new Event(EVENT.ANIMATION_FRAME);
+            let event: Event = new Event(EVENT.LOOP_FRAME);
             Loop.targetStatic.dispatchEvent(event);
             window.requestAnimationFrame(Loop.loop);
         }
