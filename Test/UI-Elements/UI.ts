@@ -2,6 +2,7 @@ namespace UI {
     import ƒ = Fudge;
 
     export interface ParamsCamera { aspect?: number; fieldOfView?: number; }
+    export interface Size { width: number; height: number; }
 
     export class FieldSet<T> extends HTMLFieldSetElement {
         protected values: {};
@@ -101,15 +102,36 @@ namespace UI {
         }
     }
 
-    export class MapRectangle extends FieldSet<ƒ.Framing> {
+    export class FramingScaled extends FieldSet<Size> {
+        result: UI.Rectangle;
+
+        constructor(_name: string = "Scale") {
+            super(_name);
+            this.values = { normWidth: 1, normHeight: 1 };
+            this.result = new Rectangle("Result");
+            this.result.disableAll(true);
+            this.appendChild(this.result);
+            this.appendChild(new Stepper("normWidth", {step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("normHeight", {step: 0.1, value: 1 }));
+        }
+
+        public set(_values: {}): void {
+            if (_values["Result"])
+                this.result.set(_values["Result"]);
+            else
+                super.set(_values);
+        }
+    }
+
+    export class FramingComplex extends FieldSet<ƒ.Framing> {
         constructor(_name: string = "MapRectangle") {
             super(_name);
-            this.values = { Result: {}, Border: {}, Anchor: {} };
+            this.values = { Result: {}, Padding: {}, Margin: {} };
             let result: UI.Rectangle = new Rectangle("Result");
             result.disableAll(true);
             this.appendChild(result);
-            this.appendChild(new Border("Border", 1));
-            this.appendChild(new Border("Anchor", 0.1));
+            this.appendChild(new Border("Padding", 1));
+            this.appendChild(new Border("Margin", 0.1));
         }
 
         public get(): {} {
@@ -135,7 +157,8 @@ namespace UI {
     }
 
     customElements.define("ui-stepper", Stepper, { extends: "span" });
-    customElements.define("ui-maprectangle", MapRectangle, { extends: "fieldset" });
+    customElements.define("ui-framingcomplex", FramingComplex, { extends: "fieldset" });
+    customElements.define("ui-scale", FramingScaled, { extends: "fieldset" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });

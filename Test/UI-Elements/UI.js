@@ -91,15 +91,33 @@ var UI;
         }
     }
     UI.Camera = Camera;
-    class MapRectangle extends FieldSet {
+    class FramingScaled extends FieldSet {
+        constructor(_name = "Scale") {
+            super(_name);
+            this.values = { normWidth: 1, normHeight: 1 };
+            this.result = new Rectangle("Result");
+            this.result.disableAll(true);
+            this.appendChild(this.result);
+            this.appendChild(new Stepper("normWidth", { step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("normHeight", { step: 0.1, value: 1 }));
+        }
+        set(_values) {
+            if (_values["Result"])
+                this.result.set(_values["Result"]);
+            else
+                super.set(_values);
+        }
+    }
+    UI.FramingScaled = FramingScaled;
+    class FramingComplex extends FieldSet {
         constructor(_name = "MapRectangle") {
             super(_name);
-            this.values = { Result: {}, Border: {}, Anchor: {} };
+            this.values = { Result: {}, Padding: {}, Margin: {} };
             let result = new Rectangle("Result");
             result.disableAll(true);
             this.appendChild(result);
-            this.appendChild(new Border("Border", 1));
-            this.appendChild(new Border("Anchor", 0.1));
+            this.appendChild(new Border("Padding", 1));
+            this.appendChild(new Border("Margin", 0.1));
         }
         get() {
             for (let child of this.children) {
@@ -121,9 +139,10 @@ var UI;
             }
         }
     }
-    UI.MapRectangle = MapRectangle;
+    UI.FramingComplex = FramingComplex;
     customElements.define("ui-stepper", Stepper, { extends: "span" });
-    customElements.define("ui-maprectangle", MapRectangle, { extends: "fieldset" });
+    customElements.define("ui-framingcomplex", FramingComplex, { extends: "fieldset" });
+    customElements.define("ui-scale", FramingScaled, { extends: "fieldset" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });

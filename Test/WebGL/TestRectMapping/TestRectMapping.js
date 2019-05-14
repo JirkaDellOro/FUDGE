@@ -22,16 +22,12 @@ var RenderManagerRendering;
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         let menu = document.getElementsByTagName("div")[0];
-        menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and mappings";
+        menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
-        // tslint:disable: no-any 
-        viewPort.frameDestinationToSource = new ƒ.FramingComplex();
-        viewPort.frameClientToCanvas = new ƒ.FramingComplex();
-        appendUIMap(menu, "DestinationToSource", viewPort.frameDestinationToSource);
-        appendUIMap(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
-        appendUIMap(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
-        // tslint:enable: no-any 
+        appendUIScale(menu, "DestinationToSource", viewPort.frameDestinationToSource);
+        appendUIComplex(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
+        appendUIScale(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
         menu.appendChild(uiClient);
@@ -50,15 +46,25 @@ var RenderManagerRendering;
             viewPort.draw();
         }
     }
-    function appendUIMap(_parent, _name, _map) {
-        let uiMap = new UI.MapRectangle(_name);
-        uiMap.addEventListener("input", hndChangeOnMap);
+    function appendUIComplex(_parent, _name, _map) {
+        let uiMap = new UI.FramingComplex(_name);
+        uiMap.addEventListener("input", hndChangeOnComplex);
         _parent.appendChild(uiMap);
         uiMaps[_name] = { ui: uiMap, map: _map };
     }
-    function hndChangeOnMap(_event) {
+    function appendUIScale(_parent, _name, _map) {
+        let uiMap = new UI.FramingScaled(_name);
+        uiMap.addEventListener("input", hndChangeOnScale);
+        _parent.appendChild(uiMap);
+        uiMaps[_name] = { ui: uiMap, map: _map };
+    }
+    function hndChangeOnComplex(_event) {
         let target = _event.currentTarget;
-        setRect(target);
+        setRectComplex(target);
+    }
+    function hndChangeOnScale(_event) {
+        let target = _event.currentTarget;
+        setRectScale(target);
     }
     function hndChangeOnCamera(_event) {
         //let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
@@ -68,15 +74,15 @@ var RenderManagerRendering;
         let target = _event.currentTarget;
         setClient(target);
     }
-    function setRect(_uiMap) {
+    function setRectComplex(_uiMap) {
         let value = _uiMap.get();
         let map = uiMaps[_uiMap.name].map;
         for (let key in value) {
             switch (key) {
-                case "Anchor":
+                case "Margin":
                     map.margin = value[key];
                     break;
-                case "Border":
+                case "Padding":
                     map.padding = value[key];
                     break;
                 case "Result":
@@ -85,6 +91,11 @@ var RenderManagerRendering;
                     throw (new Error("Invalid name: " + key));
             }
         }
+    }
+    function setRectScale(_uiMap) {
+        let value = _uiMap.get();
+        let map = uiMaps[_uiMap.name].map;
+        map.setScale(value.normWidth, value.normHeight);
     }
     function setCamera() {
         let params = uiCamera.get();
@@ -100,18 +111,26 @@ var RenderManagerRendering;
     }
     function update() {
         for (let name in uiMaps) {
-            let uiMap = uiMaps[name];
-            uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
+            // uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
             switch (name) {
-                case "ClientToCanvas":
+                case "ClientToCanvas": {
+                    let uiMap = uiMaps[name];
+                    uiMap.ui.set(uiMap.map);
                     uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
                     break;
-                case "CanvasToDestination":
+                }
+                case "CanvasToDestination": {
+                    let uiMap = uiMaps[name];
+                    uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
                     uiMap.ui.set({ Result: viewPort.rectDestination });
                     break;
-                case "DestinationToSource":
+                }
+                case "DestinationToSource": {
+                    let uiMap = uiMaps[name];
+                    uiMap.ui.set(uiMap.map);
                     uiMap.ui.set({ Result: viewPort.rectSource });
                     break;
+                }
             }
         }
         let clientRect = canvas.getBoundingClientRect();

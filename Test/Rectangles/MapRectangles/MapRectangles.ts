@@ -3,14 +3,14 @@ namespace RenderManagerRendering {
     let map: ƒ.FramingComplex = new ƒ.FramingComplex();
     let uiResult: UI.Rectangle;
     let frame: ƒ.Rectangle = { x: 0, y: 0, width: 100, height: 100 };
-    let uiMap: UI.MapRectangle;
+    let uiMap: UI.FramingComplex;
 
     window.addEventListener("load", init);
 
     function init(): void {
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
 
-        uiMap = new UI.MapRectangle();
+        uiMap = new UI.FramingComplex();
         menu.appendChild(uiMap);
         uiMap.addEventListener("input", hndChange); 
         uiMap.set({ Anchor: map.margin, Border: map.padding });
