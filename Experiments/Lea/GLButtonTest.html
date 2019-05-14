@@ -59,9 +59,27 @@ else
 });
 //Create BarComponent
 var barComponent = function( container, state ){
-    container.getElement().append(' <button name="testbutton" id="TestButton" value="Test"><img src="Icons/Add_white.svg" height="20" width="20"></button>');
-    container.getElement().append(' <button name="testbutton" id="TestButton" value="Test"><img src="Icons/Move_R_S_White.svg" height="20" width="20"></button>');
-    // container.getElement().append(' <div><button name="testbutton" id="TestButton" value="Test"><img src="Icons/Add_white.svg" height="42" width="42"></button></div>');
+    container.getElement().append(' <button name="testbutton" id="file" value="Test">File</button>');
+    container.getElement().append(' <button name="testbutton" id="edit" value="Test">Edit</button>');
+    container.getElement().append(' <button name="testbutton" id="view" value="Test">View</button>');
+}
+//clickable dropdown menu
+function dropdown() {
+  document.getElementById("testbutton").classList.toggle("show");
+}
+
+// Close the dropdown if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
 }
 
 //Create PersistentComponent
@@ -95,3 +113,20 @@ myLayout.registerComponent( 'Inspector', barComponent );
 myLayout.registerComponent( 'Menubar', barComponent );
 myLayout.init();
 </script>
+<div class="dropdown">
+
+    <div id="File" class="dropdown-content">
+      <a href="#new">New</a>
+      <a href="#open">Open</a>
+      <a href="#save">Save</a>
+      <a href="#saveas">Save as</a>
+      <a href="#settings">Settings</a>
+    </div>
+    <div id="Edit" class="dropdown-content">
+        <a href="#undo">Undo</a>
+        <a href="#redo">Redo</a>
+        <a href="#selectall">Select all</a>
+        <a href="#deselect">Deselect</a>
+        <a href="#transform">Transform</a>
+      </div>
+  </div>
