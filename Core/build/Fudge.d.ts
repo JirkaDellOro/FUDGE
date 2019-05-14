@@ -410,10 +410,10 @@ declare namespace Fudge {
         private color;
         private textureEnabled;
         private textureSource;
-        constructor(_name: string, _color: Vector3, _shader: typeof Shader);
+        constructor(_name: string, _color: Color, _shader: typeof Shader);
         readonly Shader: typeof Shader;
         readonly Name: string;
-        Color: Vector3;
+        Color: Color;
         readonly TextureEnabled: boolean;
         readonly TextureSource: string;
     }
@@ -965,7 +965,7 @@ declare namespace Fudge {
     }
     interface MaterialInfo {
         vao: WebGLVertexArrayObject;
-        color: Vector3;
+        color: Color;
     }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.

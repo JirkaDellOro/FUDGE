@@ -21,7 +21,7 @@ namespace Fudge {
 
     export interface MaterialInfo {
         vao: WebGLVertexArrayObject;
-        color: Vector3;
+        color: Color;
     }
 
     /**
@@ -112,8 +112,8 @@ namespace Fudge {
 
             // Supply color
             let colorUniformLocation: WebGLUniformLocation = shaderInfo.uniforms["u_color"];
-            let vec: Vector3 = materialInfo.color;
-            let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+            let c: Color = materialInfo.color;
+            let color: Float32Array = new Float32Array([c.r, c.g, c.b, 1.0]);
             RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
 
             // Draw call

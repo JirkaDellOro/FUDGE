@@ -2242,8 +2242,8 @@ var Fudge;
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
             // Supply color
             let colorUniformLocation = shaderInfo.uniforms["u_color"];
-            let vec = materialInfo.color;
-            let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
+            let c = materialInfo.color;
+            let color = new Float32Array([c.r, c.g, c.b, 1.0]);
             RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
             // Draw call
             RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);

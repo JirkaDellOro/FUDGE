@@ -6,7 +6,7 @@ skinparam shadowing false
 skinparam handwritten false
 
 'page 2x2
-'left to right direction
+left to right direction
 'top to bottom direction
 
 package Fudge <<Rectangle>> {
@@ -24,6 +24,8 @@ package Fudge <<Rectangle>> {
         - parent: Node | null
         - children: Node[]
         - components: MapClassToComponents
+        - listeners: MapEventTypeToListener
+        - captures: MapEventTypeToListener
       }
     }
     class Color {
@@ -35,7 +37,7 @@ package Fudge <<Rectangle>> {
     class Material {
       - name: string
       - shaderClass: typeof Shader
-      - color: Vector3
+      - color: Color
       - textureEnabled: boolean
       - textureSource: string
     }
@@ -45,10 +47,10 @@ package Fudge <<Rectangle>> {
       + branch: Node
       + rectSource: Rectangle
       + rectDestination: Rectangle
-      + mapClientToCanvas: MapRectangle
-      + mapCanvasToDestination: MapRectangle
-      + mapDestinationToSource: MapRectangle
-      + mapSourceToRender: MapRectangle
+      + frameClientToCanvas: Framing
+      + frameCanvasToDestination: Framing
+      + frameDestinationToSource: Framing
+      + frameSourceToRender: Framing
       + mappingRects: boolean
       + adjustingCamera: boolean
       - canvas: HTMLCanvasElement
@@ -88,12 +90,12 @@ package Fudge <<Rectangle>> {
       offset: number
     }
     interface ShaderInfo {
-      program: RenderManagerProgram
+      program: WebGLProgram
       attributes: MapNameToValue
       uniforms: MapNameToUniformLocation
     }
     interface BufferInfo {
-      buffer: RenderManagerBuffer
+      buffer: WebGLBuffer
       target: number
       specification: BufferSpecification
       vertexCount: number
@@ -103,8 +105,8 @@ package Fudge <<Rectangle>> {
       color: Vector3
     }
     class Reference<T> {
-      private reference: T
-      private count: number = 0
+      - reference: T
+      - count: number = 0
     }
     class RenderManager extends RenderOperator {
       - {static} programs: Map<typeof Shader, Reference<ShaderInfo>>
@@ -113,9 +115,8 @@ package Fudge <<Rectangle>> {
       - {static} nodes: MapNodeToNodeReferences
     }
     class RenderOperator {
-      + {static} crc3: WebGL2RenderingContext
-      + {static} canvas: HTMLCanvasElement
-      + {static} rectViewport: Rectangle
+      # {static} crc3: WebGL2RenderingContext
+      - {static} rectViewport: Rectangle
     }
   }
 
@@ -135,8 +136,8 @@ package Fudge <<Rectangle>> {
         [type: string]: General
       }
       class Serializer {
-        {static} + serialize(_object: Serializable): Serialization
-        {static} + deserialize(_serialization: Serialization): Serializable
+        + {static}serialize(_object: Serializable): Serialization
+        + {static}deserialize(_serialization: Serialization): Serializable
       }
     }
     file "Mutable" {
@@ -145,7 +146,7 @@ package Fudge <<Rectangle>> {
 
       interface MutatorForAnimation extends Mutator
       interface MutatorForUserInterface extends Mutator
-      class Mutable extends EventTarget {
+      abstract class Mutable extends EventTarget {
         + getMutator(): Mutator
         + getMutatorForAnimation(): MutatorForAnimation
         + getMutatorForUserInterface(): MutatorForUserInterface
@@ -168,7 +169,7 @@ package Fudge <<Rectangle>> {
       - projectionMatrix: Matrix4x4
       - fieldOfView: number
       - aspectRatio: number
-      - backgroundColor: Vector3
+      - backgroundColor: Color
       - backgroundEnabled: boolean
     }
     class ComponentMaterial extends Component {
@@ -209,7 +210,7 @@ package Fudge <<Rectangle>> {
     class Matrix4x4 extends Mutable {
       + data: Float32Array
     }
-    file "Rectangle" {
+    file "Framing" {
       interface Rectangle {
         x: number
         y: number
@@ -222,16 +223,28 @@ package Fudge <<Rectangle>> {
         top: number
         bottom: number
       }
-      class MapRectangle {
-        + normAnchor: Border
-        + pixelBorder: Border
-        + getRect(_rectFrame: Rectangle): Rectangle
+      abstract class Framing {
+        +  getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point
+        +  getPointInverse(_point: Point, _rect: Rectangle): Point
+        +  getRect(_rectFrame: Rectangle): Rectangle
+      }
+      class FramingComplex extends Framing {
+        + margin: Border
+        + padding: Border
+      }
+      class FramingFixed extends Framing {
+        + width: number
+        + height: number
+      }
+      class FramingScaled extends Framing {
+        + width: number
+        + height: number
       }
     }
   }
 
   package "Shader" << Folder>> {
-    abstract class Shader {
+    class Shader {
       + {static} loadVertexShaderSource(): string
       + {static} loadFragmentShaderSource(): string
     }
@@ -241,21 +254,22 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  ' Associations
+  'Interface consumption
   Mesh --() Serializable
   Component --() Serializable
   Node  --() Serializable
   Matrix4x4 --() Serializable
   Serializer  -(0- Serializable
   Serializer  -(0- Serialization
-
   Mutable -(0- Mutator
   Mutable -(0- MutatorAttributeTypes
+  Node "1" -0)- "2" MapEventTypeToListener
 
+  'Associations, Compositions, Aggregations
   Node "0..1 parent" o-left- "n children" Node
   Node "1 container" o-- "n components" Component
 
-  ComponentMesh "n" --> "1" Mesh
+  ComponentMesh "n" --> "1" Mesh : refers >
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
   ComponentMaterial "n" --> "1" Shader : refers >
@@ -264,6 +278,7 @@ package Fudge <<Rectangle>> {
   Viewport -->"1 camera" ComponentCamera : look through >
   Viewport "n" --> "1" CanvasRenderingContext2D : renders >
   Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
+  Viewport "1" -> "4" Framing : uses >
   RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
   RenderManager "1" o--> "n" NodeReferences : keeps >
   RenderManager "1" o--> "n" Reference : keeps >
@@ -271,6 +286,8 @@ package Fudge <<Rectangle>> {
   Reference "1" --> "1" BufferInfo : mesh uses >
   Reference "1" --> "1" MaterialInfo : material uses >
   BufferInfo --> BufferSpecification : provides >
+  Framing -0)- Rectangle
+  FramingComplex "1" -0)- "2" Border 
 
   'improve layout
   Node -[hidden]right- Component

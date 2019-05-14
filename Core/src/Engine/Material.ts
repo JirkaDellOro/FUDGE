@@ -7,12 +7,12 @@ namespace Fudge {
         private name: string; // The name to call the Material by.
         private shaderClass: typeof Shader; // The shader program used by this BaseMaterial
 
-        private color: Vector3;
+        private color: Color;
         private textureEnabled: boolean;
         private textureSource: string;
 
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
-        public constructor(_name: string, _color: Vector3, _shader: typeof Shader) {
+        public constructor(_name: string, _color: Color, _shader: typeof Shader) {
             this.name = _name;
             this.shaderClass = _shader;
             this.color = _color;
@@ -28,10 +28,10 @@ namespace Fudge {
         public get Name(): string {
             return this.name;
         }
-        public get Color(): Vector3 {
+        public get Color(): Color {
             return this.color;
         }
-        public set Color(_color: Vector3) {
+        public set Color(_color: Color) {
             this.color = _color;
         }
         public get TextureEnabled(): boolean {

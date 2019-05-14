@@ -2,9 +2,9 @@ var Scenes;
 (function (Scenes) {
     var ƒ = Fudge;
     function createAxisCross() {
-        let clrRed = new ƒ.Vector3(1, 0, 0);
-        let clrGreen = new ƒ.Vector3(0, 1, 0);
-        let clrBlue = new ƒ.Vector3(0, 0, 1);
+        let clrRed = new ƒ.Color(1, 0, 0, 1);
+        let clrGreen = new ƒ.Color(0, 1, 0, 1);
+        let clrBlue = new ƒ.Color(0, 0, 1, 1);
         let mtrRed = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
         let mtrGreen = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
         let mtrBlue = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
@@ -32,14 +32,14 @@ var Scenes;
         createMiniScene();
         let child = Scenes.node.getChildren()[0];
         let grandchild;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Vector3(0, 255, 0), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Color(0, 1, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
         ƒ.RenderManager.initialize();
-        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
+        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Color(1, 0, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
         Scenes.camera = createCamera();
