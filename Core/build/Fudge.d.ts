@@ -523,7 +523,7 @@ declare namespace Fudge {
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * through a series of [[Framing]] objects. The stages involved are in order of rendering
      * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -548,8 +548,17 @@ declare namespace Fudge {
          * @param _camera
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
         getContext(): CanvasRenderingContext2D;
+        /**
+         * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
+         */
         getCanvasRectangle(): Rectangle;
+        /**
+         * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
+         */
         getClientRectangle(): Rectangle;
         /**
          * Logs this viewports scenegraph to the console.
@@ -559,18 +568,69 @@ declare namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw(): void;
+        /**
+         * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
+         */
         adjustFrames(): void;
+        /**
+         * Adjust the camera parameters to fit the rendering into the render vieport
+         */
         adjustCamera(): void;
+        /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
         readonly hasFocus: boolean;
+        /**
+         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+         *
+         * @param _on
+         */
         setFocus(_on: boolean): void;
+        /**
+         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        /**
+         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        /**
+         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
+        /**
+         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        /**
+         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
+         */
         private hndDragDropEvent;
+        /**
+         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
+         * @param event
+         */
         private addCanvasPosition;
+        /**
+         * Handle pointer events and dispatch to viewport as FUDGE-Event
+         */
         private hndPointerEvent;
+        /**
+         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
+         */
         private hndKeyboardEvent;
+        /**
+         * Handle wheel event and dispatch to viewport as FUDGE-Event
+         */
         private hndWheelEvent;
         private activateEvent;
         /**
