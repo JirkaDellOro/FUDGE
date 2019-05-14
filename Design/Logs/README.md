@@ -1,6 +1,9 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
+# May 14th 2019
+Discussion over the structure of the UI System.
+
 # May 2nd 2019
 Discussion on the requirements the UI System has to fullfil. ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/20190502_UI_System_Discussion))
 
