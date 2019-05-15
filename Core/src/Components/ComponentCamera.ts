@@ -1,7 +1,14 @@
 /// <reference path="Component.ts"/>
 namespace Fudge {
-    export enum FOV_DIRECTION {
+    export enum FIELD_OF_VIEW {
         HORIZONTAL, VERTICAL, DIAGONAL
+    }
+    // string-enum for testing ui-features. TODO: change back to number enum if strings not needed
+    export enum PROJECTION {
+        CENTRAL = "central",
+        ORTHOGRAPHIC = "orthographic",
+        DIMETRIC = "dimetric",
+        STEREO = "stereo"
     }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
@@ -9,17 +16,18 @@ namespace Fudge {
      */
     export class ComponentCamera extends Component {
         // TODO: a ComponentPivot might be interesting to ease behaviour scripting
-        private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-        private projection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+        //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+        private projection: PROJECTION = PROJECTION.CENTRAL;
+        private transform: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
         private aspectRatio: number = 1.0;
-        private fovDirection: FOV_DIRECTION = FOV_DIRECTION.DIAGONAL;
+        private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
         private backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
 
-        public get isOrthographic(): boolean {
-            return this.orthographic;
+        public getProjection(): PROJECTION {
+            return this.projection;
         }
 
         public getBackgoundColor(): Color {
@@ -46,9 +54,9 @@ namespace Fudge {
             try {
                 let cmpTransform: ComponentTransform = this.getContainer().cmpTransform;
                 let viewMatrix: Matrix4x4 = Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Matrix4x4.multiply(this.projection, viewMatrix);
+                return Matrix4x4.multiply(this.transform, viewMatrix);
             } catch {
-                return this.projection;
+                return this.transform;
             }
         }
 
@@ -57,12 +65,12 @@ namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FOV_DIRECTION = this.fovDirection): void {
+        public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
-            this.fovDirection = _direction;
-            this.orthographic = false;
-            this.projection = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.fovDirection); // TODO: remove magic numbers
+            this.direction = _direction;
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -72,17 +80,17 @@ namespace Fudge {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         public projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void {
-            this.orthographic = true;
-            this.projection = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.projection = PROJECTION.ORTHOGRAPHIC;
+            this.transform = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
 
         public serialize(): Serialization {
             let serialization: Serialization = {
                 backgroundColor: this.backgroundColor,
                 backgroundEnabled: this.backgroundEnabled,
-                orthographic: this.orthographic,
+                projection: this.projection,
                 fieldOfView: this.fieldOfView,
-                fovDirection: this.fovDirection,
+                direction: this.direction,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -91,23 +99,34 @@ namespace Fudge {
         public deserialize(_serialization: Serialization): Serializable {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
-            this.orthographic = _serialization.orthographic;
+            this.projection = _serialization.projection;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
-            this.fovDirection = _serialization.fovDirection;
+            this.direction = _serialization.direction;
             super.deserialize(_serialization[super.constructor.name]);
-            if (this.isOrthographic)
-                this.projectOrthographic(); // TODO: serialize and deserialize parameters
-            else
-                this.projectCentral();
+            switch (this.projection) {
+                case PROJECTION.ORTHOGRAPHIC:
+                    this.projectOrthographic(); // TODO: serialize and deserialize parameters
+                    break;
+                case PROJECTION.CENTRAL:
+                    this.projectCentral();
+                    break;
+            }
             return this;
         }
 
         public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
             let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-            if (types.fovDirection)
-                types.fovDirection = FOV_DIRECTION;
+            if (types.direction)
+                types.direction = FIELD_OF_VIEW;
+            if (types.projection)
+                types.projection = PROJECTION;
             return types;
+        }
+
+        protected reduceMutator(_mutator: Mutator): void {
+            delete _mutator.transform;
+            super.reduceMutator(_mutator);
         }
     }
 }

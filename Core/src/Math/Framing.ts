@@ -20,10 +20,11 @@ namespace Fudge {
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle 
      */
-    export abstract class Framing {
+    export abstract class Framing extends Mutable {
         public abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         public abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
         public abstract getRect(_rectFrame: Rectangle): Rectangle;
+        protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
@@ -126,6 +127,10 @@ namespace Fudge {
 
             let rect: Rectangle = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
             return rect;
+        }
+
+        public getMutator(): Mutator {
+            return {margin: this.margin, padding: this.padding};
         }
     }
 }

@@ -204,12 +204,20 @@ var Fudge;
 var Fudge;
 /// <reference path="Component.ts"/>
 (function (Fudge) {
-    let FOV_DIRECTION;
-    (function (FOV_DIRECTION) {
-        FOV_DIRECTION[FOV_DIRECTION["HORIZONTAL"] = 0] = "HORIZONTAL";
-        FOV_DIRECTION[FOV_DIRECTION["VERTICAL"] = 1] = "VERTICAL";
-        FOV_DIRECTION[FOV_DIRECTION["DIAGONAL"] = 2] = "DIAGONAL";
-    })(FOV_DIRECTION = Fudge.FOV_DIRECTION || (Fudge.FOV_DIRECTION = {}));
+    let FIELD_OF_VIEW;
+    (function (FIELD_OF_VIEW) {
+        FIELD_OF_VIEW[FIELD_OF_VIEW["HORIZONTAL"] = 0] = "HORIZONTAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
+    })(FIELD_OF_VIEW = Fudge.FIELD_OF_VIEW || (Fudge.FIELD_OF_VIEW = {}));
+    // string-enum for testing ui-features. TODO: change back to number enum if strings not needed
+    let PROJECTION;
+    (function (PROJECTION) {
+        PROJECTION["CENTRAL"] = "central";
+        PROJECTION["ORTHOGRAPHIC"] = "orthographic";
+        PROJECTION["DIMETRIC"] = "dimetric";
+        PROJECTION["STEREO"] = "stereo";
+    })(PROJECTION = Fudge.PROJECTION || (Fudge.PROJECTION = {}));
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -218,17 +226,18 @@ var Fudge;
         constructor() {
             super(...arguments);
             // TODO: a ComponentPivot might be interesting to ease behaviour scripting
-            this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-            this.projection = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+            //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
             this.aspectRatio = 1.0;
-            this.fovDirection = FOV_DIRECTION.DIAGONAL;
+            this.direction = FIELD_OF_VIEW.DIAGONAL;
             this.backgroundColor = new Fudge.Color(0, 0, 0, 1); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
-        get isOrthographic() {
-            return this.orthographic;
+        getProjection() {
+            return this.projection;
         }
         getBackgoundColor() {
             return this.backgroundColor;
@@ -250,10 +259,10 @@ var Fudge;
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
                 let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Fudge.Matrix4x4.multiply(this.projection, viewMatrix);
+                return Fudge.Matrix4x4.multiply(this.transform, viewMatrix);
             }
             catch {
-                return this.projection;
+                return this.transform;
             }
         }
         /**
@@ -261,12 +270,12 @@ var Fudge;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.fovDirection) {
+        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction) {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
-            this.fovDirection = _direction;
-            this.orthographic = false;
-            this.projection = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.fovDirection); // TODO: remove magic numbers
+            this.direction = _direction;
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -276,16 +285,16 @@ var Fudge;
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left = 0, _right = Fudge.RenderManager.getCanvas().clientWidth, _bottom = Fudge.RenderManager.getCanvas().clientHeight, _top = 0) {
-            this.orthographic = true;
-            this.projection = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.projection = PROJECTION.ORTHOGRAPHIC;
+            this.transform = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
         serialize() {
             let serialization = {
                 backgroundColor: this.backgroundColor,
                 backgroundEnabled: this.backgroundEnabled,
-                orthographic: this.orthographic,
+                projection: this.projection,
                 fieldOfView: this.fieldOfView,
-                fovDirection: this.fovDirection,
+                direction: this.direction,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -294,22 +303,32 @@ var Fudge;
         deserialize(_serialization) {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
-            this.orthographic = _serialization.orthographic;
+            this.projection = _serialization.projection;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
-            this.fovDirection = _serialization.fovDirection;
+            this.direction = _serialization.direction;
             super.deserialize(_serialization[super.constructor.name]);
-            if (this.isOrthographic)
-                this.projectOrthographic(); // TODO: serialize and deserialize parameters
-            else
-                this.projectCentral();
+            switch (this.projection) {
+                case PROJECTION.ORTHOGRAPHIC:
+                    this.projectOrthographic(); // TODO: serialize and deserialize parameters
+                    break;
+                case PROJECTION.CENTRAL:
+                    this.projectCentral();
+                    break;
+            }
             return this;
         }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
-            if (types.fovDirection)
-                types.fovDirection = FOV_DIRECTION;
+            if (types.direction)
+                types.direction = FIELD_OF_VIEW;
+            if (types.projection)
+                types.projection = PROJECTION;
             return types;
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.transform;
+            super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -1342,7 +1361,8 @@ var Fudge;
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    class Framing {
+    class Framing extends Fudge.Mutable {
+        reduceMutator(_mutator) { }
     }
     Fudge.Framing = Framing;
     /**
@@ -1444,6 +1464,9 @@ var Fudge;
             let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
             let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
             return rect;
+        }
+        getMutator() {
+            return { margin: this.margin, padding: this.padding };
         }
     }
     Fudge.FramingComplex = FramingComplex;
@@ -1770,12 +1793,12 @@ var Fudge;
                 0, 0, (_near + _far) * rangeInv, -1,
                 0, 0, _near * _far * rangeInv * 2, 0
             ]);
-            if (_direction == Fudge.FOV_DIRECTION.DIAGONAL) {
+            if (_direction == Fudge.FIELD_OF_VIEW.DIAGONAL) {
                 _aspect = Math.sqrt(_aspect);
                 matrix.data[0] = f / _aspect;
                 matrix.data[5] = f * _aspect;
             }
-            else if (_direction == Fudge.FOV_DIRECTION.VERTICAL)
+            else if (_direction == Fudge.FIELD_OF_VIEW.VERTICAL)
                 matrix.data[0] = f / _aspect;
             else //FOV_DIRECTION.HORIZONTAL
                 matrix.data[5] = f * _aspect;

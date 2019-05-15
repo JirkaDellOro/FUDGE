@@ -120,24 +120,30 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum FOV_DIRECTION {
+    enum FIELD_OF_VIEW {
         HORIZONTAL = 0,
         VERTICAL = 1,
         DIAGONAL = 2
+    }
+    enum PROJECTION {
+        CENTRAL = "central",
+        ORTHOGRAPHIC = "orthographic",
+        DIMETRIC = "dimetric",
+        STEREO = "stereo"
     }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
-        private orthographic;
         private projection;
+        private transform;
         private fieldOfView;
         private aspectRatio;
-        private fovDirection;
+        private direction;
         private backgroundColor;
         private backgroundEnabled;
-        readonly isOrthographic: boolean;
+        getProjection(): PROJECTION;
         getBackgoundColor(): Color;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
@@ -152,7 +158,7 @@ declare namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FOV_DIRECTION): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -164,6 +170,7 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -661,10 +668,11 @@ declare namespace Fudge {
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    abstract class Framing {
+    abstract class Framing extends Mutable {
         abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
         abstract getRect(_rectFrame: Rectangle): Rectangle;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
@@ -700,6 +708,7 @@ declare namespace Fudge {
         getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         getPointInverse(_point: Point, _rect: Rectangle): Point;
         getRect(_rectFrame: Rectangle): Rectangle;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -764,7 +773,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FOV_DIRECTION): Matrix4x4;
+        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.

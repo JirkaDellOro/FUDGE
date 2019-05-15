@@ -25,7 +25,8 @@ namespace UI {
         public set(_values: {}): void {
             for (let key in _values) {
                 let input: HTMLInputElement = this.querySelector("#" + key);
-                input.value = String(_values[key]);
+                if (input)
+                    input.value = String(_values[key]);
             }
         }
         public disable(_config: {}): void {
@@ -105,14 +106,14 @@ namespace UI {
     export class FramingScaled extends FieldSet<Size> {
         result: UI.Rectangle;
 
-        constructor(_name: string = "Scale") {
+        constructor(_name: string = "FramingScaled") {
             super(_name);
             this.values = { normWidth: 1, normHeight: 1 };
             this.result = new Rectangle("Result");
             this.result.disableAll(true);
             this.appendChild(this.result);
-            this.appendChild(new Stepper("normWidth", {step: 0.1, value: 1 }));
-            this.appendChild(new Stepper("normHeight", {step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("normWidth", { step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("normHeight", { step: 0.1, value: 1 }));
         }
 
         public set(_values: {}): void {
@@ -124,7 +125,7 @@ namespace UI {
     }
 
     export class FramingComplex extends FieldSet<ƒ.Framing> {
-        constructor(_name: string = "MapRectangle") {
+        constructor(_name: string = "FramingComplex") {
             super(_name);
             this.values = { Result: {}, Padding: {}, Margin: {} };
             let result: UI.Rectangle = new Rectangle("Result");

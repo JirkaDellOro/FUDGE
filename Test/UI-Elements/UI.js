@@ -18,7 +18,8 @@ var UI;
         set(_values) {
             for (let key in _values) {
                 let input = this.querySelector("#" + key);
-                input.value = String(_values[key]);
+                if (input)
+                    input.value = String(_values[key]);
             }
         }
         disable(_config) {
@@ -92,7 +93,7 @@ var UI;
     }
     UI.Camera = Camera;
     class FramingScaled extends FieldSet {
-        constructor(_name = "Scale") {
+        constructor(_name = "FramingScaled") {
             super(_name);
             this.values = { normWidth: 1, normHeight: 1 };
             this.result = new Rectangle("Result");
@@ -110,7 +111,7 @@ var UI;
     }
     UI.FramingScaled = FramingScaled;
     class FramingComplex extends FieldSet {
-        constructor(_name = "MapRectangle") {
+        constructor(_name = "FramingComplex") {
             super(_name);
             this.values = { Result: {}, Padding: {}, Margin: {} };
             let result = new Rectangle("Result");
