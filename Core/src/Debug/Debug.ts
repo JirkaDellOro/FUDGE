@@ -30,7 +30,7 @@ namespace Fudge {
                 delete (Debug.delegates[filter][_target]);
 
             switch (_target) {
-                case DebugConsole:
+                case DEBUG_TARGET.CONSOLE:
                     Debug.setFilterConsole(_filter);
                     break;
                 case DEBUG_TARGET.ALERT:
@@ -41,7 +41,7 @@ namespace Fudge {
 
         public static setFilterConsole(_filter: DEBUG_FILTER): void {
             if (_filter | DEBUG_FILTER.INFO)
-                Debug.delegates[DEBUG_FILTER.INFO][DebugConsole] = console.info;
+                Debug.delegates[DEBUG_FILTER.INFO][DEBUG_TARGET.CONSOLE] = console.info;
         }
 
         public static info(_message: Object, ..._args: Object[]): void {

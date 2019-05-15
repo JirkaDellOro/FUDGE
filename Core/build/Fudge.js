@@ -715,7 +715,7 @@ var Fudge;
             for (let filter in Debug.delegates)
                 delete (Debug.delegates[filter][_target]);
             switch (_target) {
-                case Fudge.DebugConsole:
+                case Fudge.DEBUG_TARGET.CONSOLE:
                     Debug.setFilterConsole(_filter);
                     break;
                 case Fudge.DEBUG_TARGET.ALERT:
@@ -725,7 +725,7 @@ var Fudge;
         }
         static setFilterConsole(_filter) {
             if (_filter | Fudge.DEBUG_FILTER.INFO)
-                Debug.delegates[Fudge.DEBUG_FILTER.INFO][Fudge.DebugConsole] = console.info;
+                Debug.delegates[Fudge.DEBUG_FILTER.INFO][Fudge.DEBUG_TARGET.CONSOLE] = console.info;
         }
         static info(_message, ..._args) {
             let delegates = Debug.delegates[Fudge.DEBUG_FILTER.INFO];
