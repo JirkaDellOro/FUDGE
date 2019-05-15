@@ -671,10 +671,10 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class DebugTarget {
-        static mergeArguments(_message, _args = null) {
+        static mergeArguments(_message, ..._args) {
             let out = JSON.stringify(_message);
-            if (_args)
-                out += "\n" + JSON.stringify(_args, null, 2);
+            for (let arg of _args)
+                out += "\n" + JSON.stringify(arg, null, 2);
             return out;
         }
     }
@@ -686,15 +686,18 @@ var Fudge;
 (function (Fudge) {
     class DebugAlert extends Fudge.DebugTarget {
         static createDelegate(_headline) {
-            let delegate = function (_message, _args = null) {
-                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, _args);
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, ..._args);
                 alert(out);
             };
             return delegate;
         }
     }
     DebugAlert.delegates = {
-        [Fudge.DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info")
+        [Fudge.DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info"),
+        [Fudge.DEBUG_FILTER.LOG]: DebugAlert.createDelegate("Log"),
+        [Fudge.DEBUG_FILTER.WARN]: DebugAlert.createDelegate("Warn"),
+        [Fudge.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate("Error")
     };
     Fudge.DebugAlert = DebugAlert;
 })(Fudge || (Fudge = {}));
@@ -729,7 +732,7 @@ var Fudge;
                 if (parsed == Fudge.DEBUG_FILTER.ALL)
                     break;
                 if (_filter & parsed)
-                    Debug.delegates[_filter].set(_target, _target.delegates[_filter]);
+                    Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
         static info(_message, ..._args) {
@@ -748,7 +751,7 @@ var Fudge;
             let delegates = Debug.delegates[_filter];
             for (let delegate of delegates.values())
                 if (_args.length > 0)
-                    delegate(_message, _args);
+                    delegate(_message, ..._args);
                 else
                     delegate(_message);
         }
@@ -761,6 +764,14 @@ var Fudge;
         [Fudge.DEBUG_FILTER.ERROR]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.ERROR]]])
     };
     Fudge.Debug = Debug;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    class DebugDialog extends Fudge.DebugTarget {
+    }
+    Fudge.DebugDialog = DebugDialog;
 })(Fudge || (Fudge = {}));
 /// <reference path="DebugTarget.ts"/>
 var Fudge;

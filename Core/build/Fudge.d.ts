@@ -328,7 +328,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     abstract class DebugTarget {
         delegates: MapDebugFilterToFunction;
-        static mergeArguments(_message: Object, _args?: Object[]): string;
+        static mergeArguments(_message: Object, ..._args: Object[]): string;
     }
 }
 declare namespace Fudge {
@@ -351,6 +351,10 @@ declare namespace Fudge {
         static warn(_message: Object, ..._args: Object[]): void;
         static error(_message: Object, ..._args: Object[]): void;
         private static delegate;
+    }
+}
+declare namespace Fudge {
+    class DebugDialog extends DebugTarget {
     }
 }
 declare namespace Fudge {

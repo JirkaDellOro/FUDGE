@@ -20,7 +20,7 @@ namespace Fudge {
                 if (parsed == DEBUG_FILTER.ALL)
                     break;
                 if (_filter & parsed)
-                    Debug.delegates[_filter].set(_target, _target.delegates[_filter]);
+                    Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
 
@@ -41,7 +41,7 @@ namespace Fudge {
             let delegates: MapDebugTargetToFunction = Debug.delegates[_filter];
             for (let delegate of delegates.values())
                 if (_args.length > 0)
-                    delegate(_message, _args);
+                    delegate(_message, ..._args);
                 else
                     delegate(_message);
         }
