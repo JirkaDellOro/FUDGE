@@ -646,6 +646,117 @@ var Fudge;
     }
     Fudge.ComponentTransform = ComponentTransform;
 })(Fudge || (Fudge = {}));
+// <reference path="DebugAlert.ts"/>
+var Fudge;
+// <reference path="DebugAlert.ts"/>
+(function (Fudge) {
+    let DEBUG_FILTER;
+    (function (DEBUG_FILTER) {
+        DEBUG_FILTER[DEBUG_FILTER["NONE"] = 0] = "NONE";
+        DEBUG_FILTER[DEBUG_FILTER["INFO"] = 1] = "INFO";
+        DEBUG_FILTER[DEBUG_FILTER["LOG"] = 2] = "LOG";
+        DEBUG_FILTER[DEBUG_FILTER["WARN"] = 4] = "WARN";
+        DEBUG_FILTER[DEBUG_FILTER["ERROR"] = 8] = "ERROR";
+        DEBUG_FILTER[DEBUG_FILTER["ALL"] = 15] = "ALL";
+    })(DEBUG_FILTER = Fudge.DEBUG_FILTER || (Fudge.DEBUG_FILTER = {}));
+    let DEBUG_TARGET;
+    (function (DEBUG_TARGET) {
+        DEBUG_TARGET["CONSOLE"] = "console";
+        DEBUG_TARGET["ALERT"] = "alert";
+        DEBUG_TARGET["TEXTAREA"] = "textarea";
+        DEBUG_TARGET["FILE"] = "file";
+        DEBUG_TARGET["SERVER"] = "server";
+    })(DEBUG_TARGET = Fudge.DEBUG_TARGET || (Fudge.DEBUG_TARGET = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class DebugAlert {
+        static createDelegate(_headline) {
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.Debug.mergeArguments(_message, _args);
+                alert(out);
+            };
+            return delegate;
+        }
+    }
+    DebugAlert.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info")
+    };
+    Fudge.DebugAlert = DebugAlert;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class DebugConsole {
+    }
+    DebugConsole.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: console.info,
+        [Fudge.DEBUG_FILTER.LOG]: console.log,
+        [Fudge.DEBUG_FILTER.WARN]: console.warn,
+        [Fudge.DEBUG_FILTER.ERROR]: console.error
+    };
+    Fudge.DebugConsole = DebugConsole;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+var Fudge;
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+(function (Fudge) {
+    class Debug {
+        static mergeArguments(_message, ..._args) {
+            let out = JSON.stringify(_message);
+            if (_args.length > 0)
+                out += "\n" + JSON.stringify(_args, null, 2);
+            return out;
+        }
+        static setFilter(_target, _filter) {
+            for (let filter in Debug.delegates)
+                delete (Debug.delegates[filter][_target]);
+            switch (_target) {
+                case Fudge.DebugConsole:
+                    Debug.setFilterConsole(_filter);
+                    break;
+                case Fudge.DEBUG_TARGET.ALERT:
+                    Debug.delegates[Fudge.DEBUG_FILTER.INFO][Fudge.DEBUG_TARGET.ALERT] = Fudge.DebugAlert.delegates[Fudge.DEBUG_FILTER.INFO];
+                    break;
+            }
+        }
+        static setFilterConsole(_filter) {
+            if (_filter | Fudge.DEBUG_FILTER.INFO)
+                Debug.delegates[Fudge.DEBUG_FILTER.INFO][Fudge.DebugConsole] = console.info;
+        }
+        static info(_message, ..._args) {
+            let delegates = Debug.delegates[Fudge.DEBUG_FILTER.INFO];
+            for (let target in delegates)
+                if (_args.length > 0)
+                    delegates[target](_message, _args);
+                else
+                    delegates[target](_message);
+        }
+    }
+    // public static textArea: HTMLTextAreaElement;
+    // private static delegates: { [filter: number]: MapDebugTargetToFunction } = {
+    //     [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]])
+    //     // [DEBUG_FILTER.LOG]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.LOG] },
+    //     // [DEBUG_FILTER.WARN]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.WARN] },
+    //     // [DEBUG_FILTER.ERROR]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.ERROR] }
+    // };
+    Debug.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: { [Fudge.DEBUG_TARGET.CONSOLE]: Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.INFO] },
+        [Fudge.DEBUG_FILTER.LOG]: { [Fudge.DEBUG_TARGET.CONSOLE]: Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.LOG] },
+        [Fudge.DEBUG_FILTER.WARN]: { [Fudge.DEBUG_TARGET.CONSOLE]: Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.WARN] },
+        [Fudge.DEBUG_FILTER.ERROR]: { [Fudge.DEBUG_TARGET.CONSOLE]: Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.ERROR] }
+    };
+    Fudge.Debug = Debug;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class DebugTarget {
+    }
+    Fudge.DebugTarget = DebugTarget;
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class Color {

@@ -305,6 +305,54 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    enum DEBUG_FILTER {
+        NONE = 0,
+        INFO = 1,
+        LOG = 2,
+        WARN = 4,
+        ERROR = 8,
+        ALL = 15
+    }
+    enum DEBUG_TARGET {
+        CONSOLE = "console",
+        ALERT = "alert",
+        TEXTAREA = "textarea",
+        FILE = "file",
+        SERVER = "server"
+    }
+    interface MapDebugTargetToFunction {
+        [target: string]: Function;
+    }
+    interface MapDebugFilterToFunction {
+        [filter: number]: Function;
+    }
+}
+declare namespace Fudge {
+    class DebugAlert {
+        static delegates: MapDebugFilterToFunction;
+        static createDelegate(_headline: string): Function;
+    }
+}
+declare namespace Fudge {
+    class DebugConsole {
+        static delegates: MapDebugFilterToFunction;
+    }
+}
+declare namespace Fudge {
+    class Debug {
+        private static delegates;
+        static mergeArguments(_message: Object, ..._args: Object[]): string;
+        static setFilter(_target: DEBUG_TARGET, _filter: DEBUG_FILTER): void;
+        static setFilterConsole(_filter: DEBUG_FILTER): void;
+        static info(_message: Object, ..._args: Object[]): void;
+    }
+}
+declare namespace Fudge {
+    abstract class DebugTarget {
+        abstract delegates: MapDebugFilterToFunction;
+    }
+}
+declare namespace Fudge {
     class Color {
         r: number;
         g: number;
