@@ -3,54 +3,47 @@
 /// <reference path="DebugConsole.ts"/>
 namespace Fudge {
     export class Debug {
-        // public static textArea: HTMLTextAreaElement;
-        // private static delegates: { [filter: number]: MapDebugTargetToFunction } = {
-        //     [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]])
-        //     // [DEBUG_FILTER.LOG]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.LOG] },
-        //     // [DEBUG_FILTER.WARN]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.WARN] },
-        //     // [DEBUG_FILTER.ERROR]: { typeof DebugConsole: DebugConsole.delegates[DEBUG_FILTER.ERROR] }
-        // };
-        
-        private static delegates: { [filter: string]: MapDebugTargetToFunction } = {
-            [DEBUG_FILTER.INFO]: { [DEBUG_TARGET.CONSOLE]: DebugConsole.delegates[DEBUG_FILTER.INFO] },
-            [DEBUG_FILTER.LOG]: { [DEBUG_TARGET.CONSOLE]: DebugConsole.delegates[DEBUG_FILTER.LOG] },
-            [DEBUG_FILTER.WARN]: { [DEBUG_TARGET.CONSOLE]: DebugConsole.delegates[DEBUG_FILTER.WARN] },
-            [DEBUG_FILTER.ERROR]: { [DEBUG_TARGET.CONSOLE]: DebugConsole.delegates[DEBUG_FILTER.ERROR] }
+        // TODO: implement anonymous function setting up all filters
+        private static delegates: { [filter: number]: MapDebugTargetToFunction } = {
+            [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]]]),
+            [DEBUG_FILTER.LOG]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.LOG]]]),
+            [DEBUG_FILTER.WARN]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.WARN]]]),
+            [DEBUG_FILTER.ERROR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.ERROR]]])
         };
 
-        public static mergeArguments(_message: Object, ..._args: Object[]): string {
-            let out: string = JSON.stringify(_message);
-            if (_args.length > 0)
-                out += "\n" + JSON.stringify(_args, null, 2);
-            return out;
-        }
-
-        public static setFilter(_target: DEBUG_TARGET, _filter: DEBUG_FILTER): void {
+        public static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void {
             for (let filter in Debug.delegates)
-                delete (Debug.delegates[filter][_target]);
+                Debug.delegates[filter].delete(_target);
 
-            switch (_target) {
-                case DEBUG_TARGET.CONSOLE:
-                    Debug.setFilterConsole(_filter);
+            for (let filter in DEBUG_FILTER) {
+                let parsed: number = parseInt(filter);
+                if (parsed == DEBUG_FILTER.ALL)
                     break;
-                case DEBUG_TARGET.ALERT:
-                    Debug.delegates[DEBUG_FILTER.INFO][DEBUG_TARGET.ALERT] = DebugAlert.delegates[DEBUG_FILTER.INFO];
-                    break;
+                if (_filter & parsed)
+                    Debug.delegates[_filter].set(_target, _target.delegates[_filter]);
             }
         }
 
-        public static setFilterConsole(_filter: DEBUG_FILTER): void {
-            if (_filter | DEBUG_FILTER.INFO)
-                Debug.delegates[DEBUG_FILTER.INFO][DEBUG_TARGET.CONSOLE] = console.info;
+        public static info(_message: Object, ..._args: Object[]): void {
+            Debug.delegate(DEBUG_FILTER.INFO, _message, _args);
+        }
+        public static log(_message: Object, ..._args: Object[]): void {
+            Debug.delegate(DEBUG_FILTER.LOG, _message, _args);
+        }
+        public static warn(_message: Object, ..._args: Object[]): void {
+            Debug.delegate(DEBUG_FILTER.WARN, _message, _args);
+        }
+        public static error(_message: Object, ..._args: Object[]): void {
+            Debug.delegate(DEBUG_FILTER.ERROR, _message, _args);
         }
 
-        public static info(_message: Object, ..._args: Object[]): void {
-            let delegates: MapDebugTargetToFunction = Debug.delegates[DEBUG_FILTER.INFO];
-            for (let target in delegates)
+        private static delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void {
+            let delegates: MapDebugTargetToFunction = Debug.delegates[_filter];
+            for (let delegate of delegates.values())
                 if (_args.length > 0)
-                    delegates[target](_message, _args);
+                    delegate(_message, _args);
                 else
-                    delegates[target](_message);
+                    delegate(_message);
         }
     }
 }

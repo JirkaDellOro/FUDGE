@@ -1,4 +1,4 @@
-namespace EventPassing {
+namespace TestDebug {
     import ƒ = Fudge;
 
     window.addEventListener("DOMContentLoaded", init);
@@ -7,9 +7,11 @@ namespace EventPassing {
         let test: Object = { n: 10, t: "Text", b: true, o: {} };
         // console.info("Object: ", test);
         ƒ.Debug.info(test);
-        ƒ.Debug.setFilter(ƒ.DEBUG_TARGET.ALERT, ƒ.DEBUG_FILTER.INFO);
+        ƒ.Debug.setFilter(ƒ.DebugAlert, ƒ.DEBUG_FILTER.INFO);
         ƒ.Debug.info(test);
-        ƒ.Debug.setFilter(ƒ.DEBUG_TARGET.ALERT, ƒ.DEBUG_FILTER.NONE);
+        ƒ.Debug.info(test, test);
+        // ƒ.Debug.warn(test, test);
+        ƒ.Debug.setFilter(ƒ.DebugAlert, ƒ.DEBUG_FILTER.NONE);
         ƒ.Debug.info(test);
         // ƒ.Debug.log("Hallo", test);
         // ƒ.Debug.warn("Hallo", test);

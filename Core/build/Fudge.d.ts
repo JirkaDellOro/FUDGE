@@ -320,36 +320,44 @@ declare namespace Fudge {
         FILE = "file",
         SERVER = "server"
     }
-    interface MapDebugTargetToFunction {
-        [target: string]: Function;
-    }
+    type MapDebugTargetToFunction = Map<DebugTarget, Function>;
     interface MapDebugFilterToFunction {
         [filter: number]: Function;
     }
 }
 declare namespace Fudge {
-    class DebugAlert {
+    abstract class DebugTarget {
+        delegates: MapDebugFilterToFunction;
+        static mergeArguments(_message: Object, _args?: Object[]): string;
+    }
+}
+declare namespace Fudge {
+    class DebugAlert extends DebugTarget {
         static delegates: MapDebugFilterToFunction;
         static createDelegate(_headline: string): Function;
     }
 }
 declare namespace Fudge {
-    class DebugConsole {
+    class DebugConsole extends DebugTarget {
         static delegates: MapDebugFilterToFunction;
     }
 }
 declare namespace Fudge {
     class Debug {
         private static delegates;
-        static mergeArguments(_message: Object, ..._args: Object[]): string;
-        static setFilter(_target: DEBUG_TARGET, _filter: DEBUG_FILTER): void;
-        static setFilterConsole(_filter: DEBUG_FILTER): void;
+        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
         static info(_message: Object, ..._args: Object[]): void;
+        static log(_message: Object, ..._args: Object[]): void;
+        static warn(_message: Object, ..._args: Object[]): void;
+        static error(_message: Object, ..._args: Object[]): void;
+        private static delegate;
     }
 }
 declare namespace Fudge {
-    abstract class DebugTarget {
-        abstract delegates: MapDebugFilterToFunction;
+    class DebugTextArea extends DebugTarget {
+        static textArea: HTMLTextAreaElement;
+        static delegates: MapDebugFilterToFunction;
+        static createDelegate(_headline: string): Function;
     }
 }
 declare namespace Fudge {
