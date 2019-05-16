@@ -1,0 +1,6 @@
+- Reviewed UIGenerator Experiment
+- There should be a clearer seperation between CSS and Typescript Code 
+  -> UIGenerator should not manipulate Style 
+  -> Use classes for changing style of Objects.
+- Enums should turn into dropdown menues during UI Generation
+  -> Use MutatorTypes to build structure, fill later

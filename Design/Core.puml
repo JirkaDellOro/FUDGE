@@ -12,6 +12,32 @@ left to right direction
 package Fudge <<Rectangle>> {
   ' gl2: WebGL2RenderingContext
 
+  package "Debug"{
+    enum DEBUG_FILTER
+    interface MapDebugTargetToDelegate
+    interface MapDebugFilterToDelegate
+    class Debug {
+      - {static} delegates: { [filter: number]: MapDebugTargetToDelegate
+      + {static} setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void
+      + {static} info(_message: Object, ..._args: Object[]): void
+      + {static} log(_message: Object, ..._args: Object[]): void
+      + {static} warn(_message: Object, ..._args: Object[]): void
+      + {static} error(_message: Object, ..._args: Object[]): void
+    }
+    abstract class DebugTarget {
+      + delegates: MapDebugFilterToDelegate
+    }
+    class DebugConsole extends DebugTarget {
+    }
+    class DebugAlert extends DebugTarget {
+    }
+    class DebugFile extends DebugTarget {
+    }
+    class DebugServer extends DebugTarget {
+    }
+    class DebugDialog extends DebugTarget {
+    }
+  }
   package "Engine" <<Folder>> {
     file "Node" {
       interface MapClassToComponents{
@@ -136,8 +162,8 @@ package Fudge <<Rectangle>> {
         [type: string]: General
       }
       class Serializer {
-        + {static}serialize(_object: Serializable): Serialization
-        + {static}deserialize(_serialization: Serialization): Serializable
+        + {static} serialize(_object: Serializable): Serialization
+        + {static} deserialize(_serialization: Serialization): Serializable
       }
     }
     file "Mutable" {
@@ -224,9 +250,9 @@ package Fudge <<Rectangle>> {
         bottom: number
       }
       abstract class Framing {
-        +  getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point
-        +  getPointInverse(_point: Point, _rect: Rectangle): Point
-        +  getRect(_rectFrame: Rectangle): Rectangle
+        + getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point
+        + getPointInverse(_point: Point, _rect: Rectangle): Point
+        + getRect(_rectFrame: Rectangle): Rectangle
       }
       class FramingComplex extends Framing {
         + margin: Border
@@ -273,21 +299,30 @@ package Fudge <<Rectangle>> {
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
   ComponentMaterial "n" --> "1" Shader : refers >
+
   Shader "n"-->"1" Material : uses >
+  
   Viewport -->"1 root" Node : displays >
   Viewport -->"1 camera" ComponentCamera : look through >
   Viewport "n" --> "1" CanvasRenderingContext2D : renders >
   Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
   Viewport "1" -> "4" Framing : uses >
+  
   RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
   RenderManager "1" o--> "n" NodeReferences : keeps >
   RenderManager "1" o--> "n" Reference : keeps >
+  
   Reference "1" --> "1" ShaderInfo : shader uses >
   Reference "1" --> "1" BufferInfo : mesh uses >
   Reference "1" --> "1" MaterialInfo : material uses >
+  
   BufferInfo --> BufferSpecification : provides >
+  
   Framing -0)- Rectangle
-  FramingComplex "1" -0)- "2" Border 
+  FramingComplex "1" -0)- "2" Border
+  
+  Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
+  MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
 
   'improve layout
   Node -[hidden]right- Component

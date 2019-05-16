@@ -204,12 +204,20 @@ var Fudge;
 var Fudge;
 /// <reference path="Component.ts"/>
 (function (Fudge) {
-    let FOV_DIRECTION;
-    (function (FOV_DIRECTION) {
-        FOV_DIRECTION[FOV_DIRECTION["HORIZONTAL"] = 0] = "HORIZONTAL";
-        FOV_DIRECTION[FOV_DIRECTION["VERTICAL"] = 1] = "VERTICAL";
-        FOV_DIRECTION[FOV_DIRECTION["DIAGONAL"] = 2] = "DIAGONAL";
-    })(FOV_DIRECTION = Fudge.FOV_DIRECTION || (Fudge.FOV_DIRECTION = {}));
+    let FIELD_OF_VIEW;
+    (function (FIELD_OF_VIEW) {
+        FIELD_OF_VIEW[FIELD_OF_VIEW["HORIZONTAL"] = 0] = "HORIZONTAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
+    })(FIELD_OF_VIEW = Fudge.FIELD_OF_VIEW || (Fudge.FIELD_OF_VIEW = {}));
+    // string-enum for testing ui-features. TODO: change back to number enum if strings not needed
+    let PROJECTION;
+    (function (PROJECTION) {
+        PROJECTION["CENTRAL"] = "central";
+        PROJECTION["ORTHOGRAPHIC"] = "orthographic";
+        PROJECTION["DIMETRIC"] = "dimetric";
+        PROJECTION["STEREO"] = "stereo";
+    })(PROJECTION = Fudge.PROJECTION || (Fudge.PROJECTION = {}));
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -218,17 +226,18 @@ var Fudge;
         constructor() {
             super(...arguments);
             // TODO: a ComponentPivot might be interesting to ease behaviour scripting
-            this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-            this.projection = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+            //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
             this.aspectRatio = 1.0;
-            this.fovDirection = FOV_DIRECTION.DIAGONAL;
+            this.direction = FIELD_OF_VIEW.DIAGONAL;
             this.backgroundColor = new Fudge.Color(0, 0, 0, 1); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
-        get isOrthographic() {
-            return this.orthographic;
+        getProjection() {
+            return this.projection;
         }
         getBackgoundColor() {
             return this.backgroundColor;
@@ -250,10 +259,10 @@ var Fudge;
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
                 let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Fudge.Matrix4x4.multiply(this.projection, viewMatrix);
+                return Fudge.Matrix4x4.multiply(this.transform, viewMatrix);
             }
             catch {
-                return this.projection;
+                return this.transform;
             }
         }
         /**
@@ -261,12 +270,12 @@ var Fudge;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.fovDirection) {
+        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction) {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
-            this.fovDirection = _direction;
-            this.orthographic = false;
-            this.projection = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.fovDirection); // TODO: remove magic numbers
+            this.direction = _direction;
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -276,16 +285,16 @@ var Fudge;
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left = 0, _right = Fudge.RenderManager.getCanvas().clientWidth, _bottom = Fudge.RenderManager.getCanvas().clientHeight, _top = 0) {
-            this.orthographic = true;
-            this.projection = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.projection = PROJECTION.ORTHOGRAPHIC;
+            this.transform = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
         serialize() {
             let serialization = {
                 backgroundColor: this.backgroundColor,
                 backgroundEnabled: this.backgroundEnabled,
-                orthographic: this.orthographic,
+                projection: this.projection,
                 fieldOfView: this.fieldOfView,
-                fovDirection: this.fovDirection,
+                direction: this.direction,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -294,22 +303,32 @@ var Fudge;
         deserialize(_serialization) {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
-            this.orthographic = _serialization.orthographic;
+            this.projection = _serialization.projection;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
-            this.fovDirection = _serialization.fovDirection;
+            this.direction = _serialization.direction;
             super.deserialize(_serialization[super.constructor.name]);
-            if (this.isOrthographic)
-                this.projectOrthographic(); // TODO: serialize and deserialize parameters
-            else
-                this.projectCentral();
+            switch (this.projection) {
+                case PROJECTION.ORTHOGRAPHIC:
+                    this.projectOrthographic(); // TODO: serialize and deserialize parameters
+                    break;
+                case PROJECTION.CENTRAL:
+                    this.projectCentral();
+                    break;
+            }
             return this;
         }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
-            if (types.fovDirection)
-                types.fovDirection = FOV_DIRECTION;
+            if (types.direction)
+                types.direction = FIELD_OF_VIEW;
+            if (types.projection)
+                types.projection = PROJECTION;
             return types;
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.transform;
+            super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -626,6 +645,204 @@ var Fudge;
         }
     }
     Fudge.ComponentTransform = ComponentTransform;
+})(Fudge || (Fudge = {}));
+// <reference path="DebugAlert.ts"/>
+var Fudge;
+// <reference path="DebugAlert.ts"/>
+(function (Fudge) {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    let DEBUG_FILTER;
+    (function (DEBUG_FILTER) {
+        DEBUG_FILTER[DEBUG_FILTER["NONE"] = 0] = "NONE";
+        DEBUG_FILTER[DEBUG_FILTER["INFO"] = 1] = "INFO";
+        DEBUG_FILTER[DEBUG_FILTER["LOG"] = 2] = "LOG";
+        DEBUG_FILTER[DEBUG_FILTER["WARN"] = 4] = "WARN";
+        DEBUG_FILTER[DEBUG_FILTER["ERROR"] = 8] = "ERROR";
+        DEBUG_FILTER[DEBUG_FILTER["ALL"] = 15] = "ALL";
+    })(DEBUG_FILTER = Fudge.DEBUG_FILTER || (Fudge.DEBUG_FILTER = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
+    class DebugTarget {
+        static mergeArguments(_message, ..._args) {
+            let out = JSON.stringify(_message);
+            for (let arg of _args)
+                out += "\n" + JSON.stringify(arg, null, 2);
+            return out;
+        }
+    }
+    Fudge.DebugTarget = DebugTarget;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to the alert box
+     */
+    class DebugAlert extends Fudge.DebugTarget {
+        static createDelegate(_headline) {
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, ..._args);
+                alert(out);
+            };
+            return delegate;
+        }
+    }
+    DebugAlert.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info"),
+        [Fudge.DEBUG_FILTER.LOG]: DebugAlert.createDelegate("Log"),
+        [Fudge.DEBUG_FILTER.WARN]: DebugAlert.createDelegate("Warn"),
+        [Fudge.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate("Error")
+    };
+    Fudge.DebugAlert = DebugAlert;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends Fudge.DebugTarget {
+    }
+    DebugConsole.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: console.info,
+        [Fudge.DEBUG_FILTER.LOG]: console.log,
+        [Fudge.DEBUG_FILTER.WARN]: console.warn,
+        [Fudge.DEBUG_FILTER.ERROR]: console.error
+    };
+    Fudge.DebugConsole = DebugConsole;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+var Fudge;
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+(function (Fudge) {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
+    class Debug {
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
+        static setFilter(_target, _filter) {
+            for (let filter in Debug.delegates)
+                Debug.delegates[filter].delete(_target);
+            for (let filter in Fudge.DEBUG_FILTER) {
+                let parsed = parseInt(filter);
+                if (parsed == Fudge.DEBUG_FILTER.ALL)
+                    break;
+                if (_filter & parsed)
+                    Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
+            }
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
+        static info(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.INFO, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
+        static log(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.LOG, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static warn(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.WARN, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static error(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.ERROR, _message, _args);
+        }
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
+        static delegate(_filter, _message, _args) {
+            let delegates = Debug.delegates[_filter];
+            for (let delegate of delegates.values())
+                if (_args.length > 0)
+                    delegate(_message, ..._args);
+                else
+                    delegate(_message);
+        }
+    }
+    /**
+     * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+     */
+    // TODO: implement anonymous function setting up all filters
+    Debug.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.INFO]]]),
+        [Fudge.DEBUG_FILTER.LOG]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.LOG]]]),
+        [Fudge.DEBUG_FILTER.WARN]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.WARN]]]),
+        [Fudge.DEBUG_FILTER.ERROR]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.ERROR]]])
+    };
+    Fudge.Debug = Debug;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to a HTMLDialogElement
+     */
+    class DebugDialog extends Fudge.DebugTarget {
+    }
+    Fudge.DebugDialog = DebugDialog;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
+    class DebugTextArea extends Fudge.DebugTarget {
+        static createDelegate(_headline) {
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, _args);
+                DebugTextArea.textArea.textContent += out;
+            };
+            return delegate;
+        }
+    }
+    DebugTextArea.textArea = document.createElement("textarea");
+    DebugTextArea.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: Fudge.DebugAlert.createDelegate("Info")
+    };
+    Fudge.DebugTextArea = DebugTextArea;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1342,7 +1559,8 @@ var Fudge;
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    class Framing {
+    class Framing extends Fudge.Mutable {
+        reduceMutator(_mutator) { }
     }
     Fudge.Framing = Framing;
     /**
@@ -1444,6 +1662,9 @@ var Fudge;
             let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
             let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
             return rect;
+        }
+        getMutator() {
+            return { margin: this.margin, padding: this.padding };
         }
     }
     Fudge.FramingComplex = FramingComplex;
@@ -1770,12 +1991,12 @@ var Fudge;
                 0, 0, (_near + _far) * rangeInv, -1,
                 0, 0, _near * _far * rangeInv * 2, 0
             ]);
-            if (_direction == Fudge.FOV_DIRECTION.DIAGONAL) {
+            if (_direction == Fudge.FIELD_OF_VIEW.DIAGONAL) {
                 _aspect = Math.sqrt(_aspect);
                 matrix.data[0] = f / _aspect;
                 matrix.data[5] = f * _aspect;
             }
-            else if (_direction == Fudge.FOV_DIRECTION.VERTICAL)
+            else if (_direction == Fudge.FIELD_OF_VIEW.VERTICAL)
                 matrix.data[0] = f / _aspect;
             else //FOV_DIRECTION.HORIZONTAL
                 matrix.data[5] = f * _aspect;

@@ -1,7 +1,5 @@
 let audioContext:AudioContext = null;
-let selectedSong;
 let volume:number = 50;
-let output: = document.getElementById('output').innerHTML;
 let url:string;
 
 
@@ -18,20 +16,20 @@ function PlaySong():void {
     // Create AudioContext instance
     audioContext = new (window["AudioContext"] || window["webkitAudioContext"])();
     // Create a buffer for the incoming sound content
-    var source = audioContext.createBufferSource();
+    const source:AudioBufferSourceNode = audioContext.createBufferSource();
 
     // Create XHR to get the audio contents
-    var request = new XMLHttpRequest();
+    const request:XMLHttpRequest = new XMLHttpRequest();
 
     // Set the audio file src here
     request.open('GET', url, true);
     // Setting the responseType to arraybuffer sets up audio decoding
     request.responseType = 'arraybuffer';
-    request.onload = function() {
+    request.onload = function():void {
             // Decode the audio once the require is complete
             audioContext.decodeAudioData(
                 request.response,
-                function(buffer) {
+                function(buffer:AudioBuffer):void {
                     source.buffer = buffer;
                     // Connect the audio to source (multiple audio buffers can be connected!)
                     source.connect(audioContext.destination);
@@ -40,7 +38,7 @@ function PlaySong():void {
                     // Play the sound!
                     source.start(0);
                 },
-                function(e) {
+                function(e:Error) {
                     console.log('Audio error', e);
                 });
         }
@@ -50,10 +48,11 @@ function PlaySong():void {
 
 
 function SetSong():void {
-    let ele:HTMLElement = document.getElementById("songs");
+    const ele:HTMLElement = document.getElementById("songs");
+    const song:HTMLElement = document.getElementById("songSelection");
     let selected:string = ele.options[ele.selectedIndex].value;
-    let song:HTMLElement = document.getElementById("songSelection");
-    song.innerHTML = selected;
+    
+    song.innerHTML = ele.options[ele.selectedIndex].innerHTML;
 
     switch (selected) {
         case 'songone':
@@ -72,6 +71,6 @@ function SetSong():void {
 
 function SetVolume(vol:number):void {
     volume = vol;
-    output = volume;
+    document.getElementById('output').innerHTML = volume;
     console.log(volume);
 }

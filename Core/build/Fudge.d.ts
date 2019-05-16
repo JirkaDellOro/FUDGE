@@ -120,24 +120,30 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum FOV_DIRECTION {
+    enum FIELD_OF_VIEW {
         HORIZONTAL = 0,
         VERTICAL = 1,
         DIAGONAL = 2
+    }
+    enum PROJECTION {
+        CENTRAL = "central",
+        ORTHOGRAPHIC = "orthographic",
+        DIMETRIC = "dimetric",
+        STEREO = "stereo"
     }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
-        private orthographic;
         private projection;
+        private transform;
         private fieldOfView;
         private aspectRatio;
-        private fovDirection;
+        private direction;
         private backgroundColor;
         private backgroundEnabled;
-        readonly isOrthographic: boolean;
+        getProjection(): PROJECTION;
         getBackgoundColor(): Color;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
@@ -152,7 +158,7 @@ declare namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FOV_DIRECTION): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -164,6 +170,7 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -295,6 +302,119 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    enum DEBUG_FILTER {
+        NONE = 0,
+        INFO = 1,
+        LOG = 2,
+        WARN = 4,
+        ERROR = 8,
+        ALL = 15
+    }
+    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    interface MapDebugFilterToDelegate {
+        [filter: number]: Function;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
+    abstract class DebugTarget {
+        delegates: MapDebugFilterToDelegate;
+        static mergeArguments(_message: Object, ..._args: Object[]): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to the alert box
+     */
+    class DebugAlert extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+        static createDelegate(_headline: string): Function;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+    }
+}
+declare namespace Fudge {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
+    class Debug {
+        /**
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         */
+        private static delegates;
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
+        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
+        static info(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
+        static log(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static warn(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static error(_message: Object, ..._args: Object[]): void;
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
+        private static delegate;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to a HTMLDialogElement
+     */
+    class DebugDialog extends DebugTarget {
+    }
+}
+declare namespace Fudge {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
+    class DebugTextArea extends DebugTarget {
+        static textArea: HTMLTextAreaElement;
+        static delegates: MapDebugFilterToDelegate;
+        static createDelegate(_headline: string): Function;
     }
 }
 declare namespace Fudge {
@@ -661,10 +781,11 @@ declare namespace Fudge {
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    abstract class Framing {
+    abstract class Framing extends Mutable {
         abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
         abstract getRect(_rectFrame: Rectangle): Rectangle;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
@@ -700,6 +821,7 @@ declare namespace Fudge {
         getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         getPointInverse(_point: Point, _rect: Rectangle): Point;
         getRect(_rectFrame: Rectangle): Rectangle;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -764,7 +886,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FOV_DIRECTION): Matrix4x4;
+        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
