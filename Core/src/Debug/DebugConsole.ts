@@ -4,7 +4,7 @@ namespace Fudge {
      * Routing to the standard-console
      */
     export class DebugConsole extends DebugTarget {
-        public static delegates: MapDebugFilterToFunction = {
+        public static delegates: MapDebugFilterToDelegate = {
             [DEBUG_FILTER.INFO]: console.info,
             [DEBUG_FILTER.LOG]: console.log,
             [DEBUG_FILTER.WARN]: console.warn,

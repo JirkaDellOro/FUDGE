@@ -650,6 +650,9 @@ var Fudge;
 var Fudge;
 // <reference path="DebugAlert.ts"/>
 (function (Fudge) {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
     let DEBUG_FILTER;
     (function (DEBUG_FILTER) {
         DEBUG_FILTER[DEBUG_FILTER["NONE"] = 0] = "NONE";
@@ -659,17 +662,12 @@ var Fudge;
         DEBUG_FILTER[DEBUG_FILTER["ERROR"] = 8] = "ERROR";
         DEBUG_FILTER[DEBUG_FILTER["ALL"] = 15] = "ALL";
     })(DEBUG_FILTER = Fudge.DEBUG_FILTER || (Fudge.DEBUG_FILTER = {}));
-    let DEBUG_TARGET;
-    (function (DEBUG_TARGET) {
-        DEBUG_TARGET["CONSOLE"] = "console";
-        DEBUG_TARGET["ALERT"] = "alert";
-        DEBUG_TARGET["TEXTAREA"] = "textarea";
-        DEBUG_TARGET["FILE"] = "file";
-        DEBUG_TARGET["SERVER"] = "server";
-    })(DEBUG_TARGET = Fudge.DEBUG_TARGET || (Fudge.DEBUG_TARGET = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
     class DebugTarget {
         static mergeArguments(_message, ..._args) {
             let out = JSON.stringify(_message);
@@ -684,6 +682,9 @@ var Fudge;
 var Fudge;
 /// <reference path="DebugTarget.ts"/>
 (function (Fudge) {
+    /**
+     * Routing to the alert box
+     */
     class DebugAlert extends Fudge.DebugTarget {
         static createDelegate(_headline) {
             let delegate = function (_message, ..._args) {
@@ -705,6 +706,9 @@ var Fudge;
 var Fudge;
 /// <reference path="DebugTarget.ts"/>
 (function (Fudge) {
+    /**
+     * Routing to the standard-console
+     */
     class DebugConsole extends Fudge.DebugTarget {
     }
     DebugConsole.delegates = {
@@ -723,7 +727,16 @@ var Fudge;
 /// <reference path="DebugAlert.ts"/>
 /// <reference path="DebugConsole.ts"/>
 (function (Fudge) {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
     class Debug {
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
         static setFilter(_target, _filter) {
             for (let filter in Debug.delegates)
                 Debug.delegates[filter].delete(_target);
@@ -735,18 +748,48 @@ var Fudge;
                     Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
             }
         }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
         static info(_message, ..._args) {
             Debug.delegate(Fudge.DEBUG_FILTER.INFO, _message, _args);
         }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
         static log(_message, ..._args) {
             Debug.delegate(Fudge.DEBUG_FILTER.LOG, _message, _args);
         }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
         static warn(_message, ..._args) {
             Debug.delegate(Fudge.DEBUG_FILTER.WARN, _message, _args);
         }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
         static error(_message, ..._args) {
             Debug.delegate(Fudge.DEBUG_FILTER.ERROR, _message, _args);
         }
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
         static delegate(_filter, _message, _args) {
             let delegates = Debug.delegates[_filter];
             for (let delegate of delegates.values())
@@ -756,6 +799,9 @@ var Fudge;
                     delegate(_message);
         }
     }
+    /**
+     * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+     */
     // TODO: implement anonymous function setting up all filters
     Debug.delegates = {
         [Fudge.DEBUG_FILTER.INFO]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.INFO]]]),
@@ -769,6 +815,9 @@ var Fudge;
 var Fudge;
 /// <reference path="DebugTarget.ts"/>
 (function (Fudge) {
+    /**
+     * Routing to a HTMLDialogElement
+     */
     class DebugDialog extends Fudge.DebugTarget {
     }
     Fudge.DebugDialog = DebugDialog;
@@ -777,6 +826,9 @@ var Fudge;
 var Fudge;
 /// <reference path="DebugTarget.ts"/>
 (function (Fudge) {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
     class DebugTextArea extends Fudge.DebugTarget {
         static createDelegate(_headline) {
             let delegate = function (_message, ..._args) {

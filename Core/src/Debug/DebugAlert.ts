@@ -4,7 +4,7 @@ namespace Fudge {
      * Routing to the alert box
      */
     export class DebugAlert extends DebugTarget {
-        public static delegates: MapDebugFilterToFunction = {
+        public static delegates: MapDebugFilterToDelegate = {
             [DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info"),
             [DEBUG_FILTER.LOG]: DebugAlert.createDelegate("Log"),
             [DEBUG_FILTER.WARN]: DebugAlert.createDelegate("Warn"),

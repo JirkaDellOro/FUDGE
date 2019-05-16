@@ -305,6 +305,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
     enum DEBUG_FILTER {
         NONE = 0,
         INFO = 1,
@@ -313,54 +316,104 @@ declare namespace Fudge {
         ERROR = 8,
         ALL = 15
     }
-    enum DEBUG_TARGET {
-        CONSOLE = "console",
-        ALERT = "alert",
-        TEXTAREA = "textarea",
-        FILE = "file",
-        SERVER = "server"
-    }
-    type MapDebugTargetToFunction = Map<DebugTarget, Function>;
-    interface MapDebugFilterToFunction {
+    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    interface MapDebugFilterToDelegate {
         [filter: number]: Function;
     }
 }
 declare namespace Fudge {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
     abstract class DebugTarget {
-        delegates: MapDebugFilterToFunction;
+        delegates: MapDebugFilterToDelegate;
         static mergeArguments(_message: Object, ..._args: Object[]): string;
     }
 }
 declare namespace Fudge {
+    /**
+     * Routing to the alert box
+     */
     class DebugAlert extends DebugTarget {
-        static delegates: MapDebugFilterToFunction;
+        static delegates: MapDebugFilterToDelegate;
         static createDelegate(_headline: string): Function;
     }
 }
 declare namespace Fudge {
+    /**
+     * Routing to the standard-console
+     */
     class DebugConsole extends DebugTarget {
-        static delegates: MapDebugFilterToFunction;
+        static delegates: MapDebugFilterToDelegate;
     }
 }
 declare namespace Fudge {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
     class Debug {
+        /**
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         */
         private static delegates;
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
         static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
         static info(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
         static log(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
         static warn(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
         static error(_message: Object, ..._args: Object[]): void;
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
         private static delegate;
     }
 }
 declare namespace Fudge {
+    /**
+     * Routing to a HTMLDialogElement
+     */
     class DebugDialog extends DebugTarget {
     }
 }
 declare namespace Fudge {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
     class DebugTextArea extends DebugTarget {
         static textArea: HTMLTextAreaElement;
-        static delegates: MapDebugFilterToFunction;
+        static delegates: MapDebugFilterToDelegate;
         static createDelegate(_headline: string): Function;
     }
 }

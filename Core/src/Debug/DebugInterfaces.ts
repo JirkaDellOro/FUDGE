@@ -22,7 +22,6 @@ namespace Fudge {
     // }
 
     // export interface MapDebugTargetToFunction { [target: string]: Function; }
-    export type MapDebugTargetToFunction = Map<DebugTarget, Function>;
-    export interface MapDebugFilterToFunction { [filter: number]: Function; }
-
+    export type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    export interface MapDebugFilterToDelegate { [filter: number]: Function; }
 }

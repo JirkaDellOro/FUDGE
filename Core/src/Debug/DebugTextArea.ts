@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export class DebugTextArea extends DebugTarget {
         public static textArea: HTMLTextAreaElement = document.createElement("textarea");
-        public static delegates: MapDebugFilterToFunction = {
+        public static delegates: MapDebugFilterToDelegate = {
             [DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info")
         };
         public static createDelegate(_headline: string): Function {

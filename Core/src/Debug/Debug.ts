@@ -11,7 +11,7 @@ namespace Fudge {
          * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
          */
         // TODO: implement anonymous function setting up all filters
-        private static delegates: { [filter: number]: MapDebugTargetToFunction } = {
+        private static delegates: { [filter: number]: MapDebugTargetToDelegate } = {
             [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]]]),
             [DEBUG_FILTER.LOG]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.LOG]]]),
             [DEBUG_FILTER.WARN]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.WARN]]]),
@@ -79,7 +79,7 @@ namespace Fudge {
          * @param _args 
          */
         private static delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void {
-            let delegates: MapDebugTargetToFunction = Debug.delegates[_filter];
+            let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
             for (let delegate of delegates.values())
                 if (_args.length > 0)
                     delegate(_message, ..._args);
