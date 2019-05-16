@@ -1,5 +1,8 @@
 /// <reference path="DebugTarget.ts"/>
 namespace Fudge {
+    /**
+     * Routing to the standard-console
+     */
     export class DebugConsole extends DebugTarget {
         public static delegates: MapDebugFilterToFunction = {
             [DEBUG_FILTER.INFO]: console.info,

@@ -1,5 +1,8 @@
 // <reference path="DebugAlert.ts"/>
 namespace Fudge {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
     export enum DEBUG_FILTER {
         NONE = 0x00,
         INFO = 0x01,
@@ -8,13 +11,15 @@ namespace Fudge {
         ERROR = 0x08,
         ALL = INFO | LOG | WARN | ERROR
     }
-    export enum DEBUG_TARGET {
-        CONSOLE = "console",
-        ALERT = "alert",
-        TEXTAREA = "textarea",
-        FILE = "file",
-        SERVER = "server"
-    }
+    // reminescent of an early attempt of Debug
+    // export enum DEBUG_TARGET {
+    //     CONSOLE = "console",
+    //     ALERT = "alert",
+    //     TEXTAREA = "textarea",
+    //     DIALOG = "dialog",
+    //     FILE = "file",
+    //     SERVER = "server"
+    // }
 
     // export interface MapDebugTargetToFunction { [target: string]: Function; }
     export type MapDebugTargetToFunction = Map<DebugTarget, Function>;

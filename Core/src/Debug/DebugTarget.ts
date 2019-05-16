@@ -1,4 +1,7 @@
 namespace Fudge {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
     export abstract class DebugTarget {
         public delegates: MapDebugFilterToFunction;
         public static mergeArguments(_message: Object, ..._args: Object[]): string {

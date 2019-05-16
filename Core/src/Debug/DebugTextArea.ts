@@ -1,5 +1,8 @@
 /// <reference path="DebugTarget.ts"/>
 namespace Fudge {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
     export class DebugTextArea extends DebugTarget {
         public static textArea: HTMLTextAreaElement = document.createElement("textarea");
         public static delegates: MapDebugFilterToFunction = {

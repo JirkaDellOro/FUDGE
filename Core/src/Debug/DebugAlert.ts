@@ -1,5 +1,8 @@
 /// <reference path="DebugTarget.ts"/>
 namespace Fudge {
+    /**
+     * Routing to the alert box
+     */
     export class DebugAlert extends DebugTarget {
         public static delegates: MapDebugFilterToFunction = {
             [DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info"),
