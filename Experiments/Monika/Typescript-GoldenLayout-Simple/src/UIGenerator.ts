@@ -1,8 +1,10 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
 namespace GoldenLayoutTest {
     import ƒ = Fudge;
+
     export class UIGenerator {
         public static createFromMutator(mutator: ƒ.Mutator, element: HTMLElement) {
+            // let mutator: ƒ.Mutator = { people: [{ name: "Lukas", age: 24 }, { name: "Jirka", age: 54 }], cars: [{ brand: "Audi", km: 20000, new: false }, { brand: "VW", km: 100000, new: true }] };
             UIGenerator.generateUI(mutator, element);
         }
 
@@ -10,67 +12,83 @@ namespace GoldenLayoutTest {
             for (let key in _obj) {
                 let value: Object = _obj[key];
                 if (value instanceof Object) {
-                    let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
-                    let legend: HTMLLegendElement = document.createElement("legend");
-                    legend.innerHTML = key;
-                    legend.classList.add("unfoldable");
-                    fieldset.classList.add("parent");
+                    let fieldset:HTMLElement = UIGenerator.createFieldset(key, _parent);
                     fieldset.addEventListener("click", UIGenerator.toggleListObj);
-                    fieldset.appendChild(legend);
-                    fieldset.style.display = "list-item"
                     this.generateUI(<ƒ.Mutator>value, fieldset);
                     _parent.appendChild(fieldset);
                 }
                 else {
-                    let valueInput: HTMLElement;
-                    let nametag: HTMLElement = document.createElement("label");
-                    nametag.style.display = "inline";
-                    nametag.innerHTML = key + ":";
-                    
-                    _parent.appendChild(nametag);
                     switch (typeof value) {
                         case "number":
-                            valueInput = document.createElement("input");
-                            (<HTMLInputElement>valueInput).value = value;
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createTextElement(key, value, _parent)
                             break;
                         case "boolean":
-                            valueInput = document.createElement("input");
-                            (<HTMLInputElement>valueInput).type = "checkbox";
-                            (<HTMLInputElement>valueInput).checked = value;
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createCheckboxElement(key, value, _parent);
                             break;
                         case "string":
-                            valueInput = document.createElement("input");
-                            (<HTMLInputElement>valueInput).value = value;
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createTextElement(key, value, _parent)
                             break;
                         default:
-                            valueInput = document.createElement("a");
                             break;
                     }
-                    valueInput.style.display = "inline";
-                    _parent.appendChild(valueInput);
-
                 }
             }
+        }
+        public static createFieldset(_legend: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
+            let legend: HTMLLegendElement = document.createElement("legend");
+            legend.innerHTML = _legend;
+            fieldset.appendChild(legend);
+            legend.classList.add("unfoldable");
+            fieldset.classList.add(_class);
+            return fieldset;
+        }
+        public static createLabelElement(_id:string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let label: HTMLElement = document.createElement("label");
+            label.innerHTML = _value;
+            label.classList.add(_class);
+            label.id = _id;
+            _parent.appendChild(label);
+            return label;
+        }
 
+        public static createTextElement(_id: string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let valueInput: HTMLInputElement = document.createElement("input");
+            valueInput.value = _value;
+            valueInput.classList.add(_class);
+            valueInput.id = _id;
+            _parent.appendChild(valueInput);
+            return valueInput;
+        }
+
+        public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _class?: string): HTMLElement {
+            let valueInput: HTMLInputElement = document.createElement("input");
+            valueInput.type = "checkbox";
+            valueInput.checked = _value;
+            valueInput.classList.add(_class);
+            valueInput.id = _id;
+            _parent.appendChild(valueInput);
+            return valueInput;
         }
 
         private static toggleListObj(_event: MouseEvent): void {
             _event.preventDefault();
             if (_event.target != _event.currentTarget) return;
             let target: HTMLElement = <HTMLElement>_event.target;
-            
-            let children: HTMLCollection = target.children;
-            
-            for (let i = 0; i < children.length; i++) {
 
+            let children: HTMLCollection = target.children;
+
+            for (let i = 0; i < children.length; i++) {
                 let child: HTMLElement = <HTMLElement>children[i];
                 if (!child.classList.contains("unfoldable")) {
                     let childNowVisible: boolean = child.style.display == "none" ? true : false;
-                    let displayStyle:string = child.tagName == "FIELDSET" ? "list-item" : "inline";
+                    let displayStyle: string = child.tagName == "FIELDSET" ? "list-item" : "inline";
                     child.style.display = childNowVisible ? displayStyle : "none";
                     childNowVisible ? target.classList.remove("folded") : target.classList.add("folded");
                 }
-
             }
         }
     }

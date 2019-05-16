@@ -7,17 +7,23 @@ namespace GoldenLayoutTest {
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'Hierarchy',
-                title: "Hierarchy",
+                componentName: 'Inspector',
+                title: "Inspector",
+            },
+            {
+                type: 'component',
+                componentName: 'Viewport',
+                title: "Viewport",
             }]
         }]
     };
-
-    myLayout = new GoldenLayout(config);
-    myLayout.registerComponent('Hierarchy', function (container:any, state:any) {
+    function createSimpleComponent (container: any, state: any) {
         // return SimpleComponent.create(container, state);
         return new SimpleComponent(container, state);
-    });
+    }
+    myLayout = new GoldenLayout(config);
+    myLayout.registerComponent('Inspector', createSimpleComponent);
+    myLayout.registerComponent('Viewport', createSimpleComponent);
     console.log("I work");
 
     myLayout.init();

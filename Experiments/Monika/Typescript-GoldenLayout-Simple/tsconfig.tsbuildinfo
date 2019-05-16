@@ -154,15 +154,15 @@
         "signature": "c701ceb2f8615d60e99531c3667c570bfdd84cea45ce4421ea908153c49436e3"
       },
       "c:/users/akiko/documents/github/fudge/core/build/fudge.d.ts": {
-        "version": "bd795219234a2ea9b5914069b59bb3eb9724696ba36820ac746cc42d635ee279",
-        "signature": "bd795219234a2ea9b5914069b59bb3eb9724696ba36820ac746cc42d635ee279"
+        "version": "99e0bfe2899df1b0e20aa65777736a36356d88fb26b775c106be4add5de34c26",
+        "signature": "99e0bfe2899df1b0e20aa65777736a36356d88fb26b775c106be4add5de34c26"
       },
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/uigenerator.ts": {
-        "version": "5ba20df09f3a5ea034b0d85c9b9f454efb5f53f9b692225fec3923b48a2a3a38",
-        "signature": "c983b99b7ebcfe5e9881fcc72eb3cb85a6ee88746ae6728b5eed55cf43011baf"
+        "version": "c15b6cd29c46da00a19740452561a8c37039fda26a931202810923e2e73d48ff",
+        "signature": "a9af5e9a32dba21fc8e286b04fa1b0083ea59a41aad0a3bbca3900405fd0a559"
       },
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/app.ts": {
-        "version": "7b97691c45465ff36b5d6b0d33b0f57858e7936e727c650cf109af19bbd030c5",
+        "version": "6383a7b5d014ea1240abe091d0939341cad513db383ab103f925cb47b01b4bf5",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/golden-layout/index.d.ts": {
@@ -244,9 +244,9 @@
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.intl.d.ts",
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
+      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/simplecomponent.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/webgl2/index.d.ts",
       "c:/users/akiko/documents/github/fudge/core/build/fudge.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/uigenerator.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/app.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/golden-layout/index.d.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/jquery/jquerystatic.d.ts",
@@ -255,7 +255,7 @@
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/jquery/legacy.d.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/sizzle/index.d.ts",
       "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/node_modules/@types/jquery/index.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/simplecomponent.ts"
+      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout-simple/src/uigenerator.ts"
     ]
   },
   "version": "3.4.3"

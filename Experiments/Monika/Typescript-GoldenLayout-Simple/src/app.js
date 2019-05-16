@@ -8,16 +8,23 @@ var GoldenLayoutTest;
                 type: 'row',
                 content: [{
                         type: 'component',
-                        componentName: 'Hierarchy',
-                        title: "Hierarchy",
+                        componentName: 'Inspector',
+                        title: "Inspector",
+                    },
+                    {
+                        type: 'component',
+                        componentName: 'Viewport',
+                        title: "Viewport",
                     }]
             }]
     };
-    myLayout = new GoldenLayout(config);
-    myLayout.registerComponent('Hierarchy', function (container, state) {
+    function createSimpleComponent(container, state) {
         // return SimpleComponent.create(container, state);
         return new GoldenLayoutTest.SimpleComponent(container, state);
-    });
+    }
+    myLayout = new GoldenLayout(config);
+    myLayout.registerComponent('Inspector', createSimpleComponent);
+    myLayout.registerComponent('Viewport', createSimpleComponent);
     console.log("I work");
     myLayout.init();
 })(GoldenLayoutTest || (GoldenLayoutTest = {}));
