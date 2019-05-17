@@ -7,6 +7,7 @@ var GoldenLayoutTest;
             UIGenerator.generateUI(mutator, element);
         }
         static generateUI(_obj, _parent) {
+            _obj.constructor.name;
             for (let key in _obj) {
                 let value = _obj[key];
                 if (value instanceof Object) {
