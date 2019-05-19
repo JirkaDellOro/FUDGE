@@ -105,6 +105,9 @@
 		},
 		{
 			"path": "Audio"
+		},
+		{
+			"path": "DeconstructMixin"
 		}
 	],
 	"settings": {}
