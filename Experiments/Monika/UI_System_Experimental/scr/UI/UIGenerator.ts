@@ -5,10 +5,10 @@ namespace UI {
     export class UIGenerator {
         public static createFromMutator(mutable: ƒ.Mutable, element: HTMLElement) {
             let name:string = mutable.constructor.name;
-            console.log(name);
             let types: ƒ.MutatorAttributeTypes;
             let mutator: ƒ.Mutator = mutable.getMutator();
             let fieldset = UIGenerator.createFieldset(name, element);
+            
             types = mutable.getMutatorAttributeTypes(mutator);
             UIGenerator.generateUI(mutator, types, fieldset);
         }
@@ -57,16 +57,22 @@ namespace UI {
             _parent.appendChild(dropdown);
             return dropdown;
         }
+
         public static createFieldset(_legend: string, _parent: HTMLElement, _class?: string): HTMLElement {
             let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
             let legend: HTMLLegendElement = document.createElement("legend");
             legend.innerHTML = _legend;
+            let toggleButton:HTMLButtonElement = document.createElement("button");
+            toggleButton.addEventListener("click", UIGenerator.toggleFoldElement);
+            toggleButton.innerHTML = "v";
+            legend.appendChild(toggleButton);
             fieldset.appendChild(legend);
             legend.classList.add("unfoldable");
             fieldset.classList.add(_class);
             _parent.appendChild(fieldset);
             return fieldset;
         }
+        
         public static createLabelElement(_id: string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
             let label: HTMLElement = document.createElement("label");
             label.innerHTML = _value;
@@ -95,20 +101,22 @@ namespace UI {
             return valueInput;
         }
 
-        private static toggleListObj(_event: MouseEvent): void {
+        private static toggleFoldElement(_event: MouseEvent): void {
             _event.preventDefault();
             if (_event.target != _event.currentTarget) return;
             let target: HTMLElement = <HTMLElement>_event.target;
-
-            let children: HTMLCollection = target.children;
-
+            let foldTarget = target.parentElement.parentElement;
+            let foldToggle:Boolean;
+            //Toggle the folding behaviour of the Folding Target
+            foldTarget.classList.contains("fieldset_folded") ? foldToggle = false : foldToggle = true;
+            foldToggle == true ? foldTarget.classList.add("fieldset_folded"):foldTarget.classList.remove("fieldset_folded");
+            foldToggle == true ? target.innerHTML=">":target.innerHTML="v";
+            let children: HTMLCollection = foldTarget.children;
+            
             for (let i = 0; i < children.length; i++) {
                 let child: HTMLElement = <HTMLElement>children[i];
                 if (!child.classList.contains("unfoldable")) {
-                    let childNowVisible: boolean = child.style.display == "none" ? true : false;
-                    let displayStyle: string = child.tagName == "FIELDSET" ? "list-item" : "inline";
-                    child.style.display = childNowVisible ? displayStyle : "none";
-                    childNowVisible ? target.classList.remove("folded") : target.classList.add("folded");
+                    foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
                 }
             }
         }

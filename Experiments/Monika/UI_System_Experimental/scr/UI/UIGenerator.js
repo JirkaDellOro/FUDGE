@@ -4,7 +4,6 @@ var UI;
     class UIGenerator {
         static createFromMutator(mutable, element) {
             let name = mutable.constructor.name;
-            console.log(name);
             let types;
             let mutator = mutable.getMutator();
             let fieldset = UIGenerator.createFieldset(name, element);
@@ -59,6 +58,10 @@ var UI;
             let fieldset = document.createElement("fieldset");
             let legend = document.createElement("legend");
             legend.innerHTML = _legend;
+            let toggleButton = document.createElement("button");
+            toggleButton.addEventListener("click", UIGenerator.toggleFoldElement);
+            toggleButton.innerHTML = "v";
+            legend.appendChild(toggleButton);
             fieldset.appendChild(legend);
             legend.classList.add("unfoldable");
             fieldset.classList.add(_class);
@@ -90,19 +93,22 @@ var UI;
             _parent.appendChild(valueInput);
             return valueInput;
         }
-        static toggleListObj(_event) {
+        static toggleFoldElement(_event) {
             _event.preventDefault();
             if (_event.target != _event.currentTarget)
                 return;
             let target = _event.target;
-            let children = target.children;
+            let foldTarget = target.parentElement.parentElement;
+            let foldToggle;
+            //Toggle the folding behaviour of the Folding Target
+            foldTarget.classList.contains("fieldset_folded") ? foldToggle = false : foldToggle = true;
+            foldToggle == true ? foldTarget.classList.add("fieldset_folded") : foldTarget.classList.remove("fieldset_folded");
+            foldToggle == true ? target.innerHTML = ">" : target.innerHTML = "v";
+            let children = foldTarget.children;
             for (let i = 0; i < children.length; i++) {
                 let child = children[i];
                 if (!child.classList.contains("unfoldable")) {
-                    let childNowVisible = child.style.display == "none" ? true : false;
-                    let displayStyle = child.tagName == "FIELDSET" ? "list-item" : "inline";
-                    child.style.display = childNowVisible ? displayStyle : "none";
-                    childNowVisible ? target.classList.remove("folded") : target.classList.add("folded");
+                    foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
                 }
             }
         }
