@@ -3,34 +3,37 @@ namespace UI {
     import ƒ = Fudge;
 
     export class UIGenerator {
-        public static createFromMutator(mutator: ƒ.Mutable, element: HTMLElement) {
-            // let mutator: ƒ.Mutator = { people: [{ name: "Lukas", age: 24 }, { name: "Jirka", age: 54 }], cars: [{ brand: "Audi", km: 20000, new: false }, { brand: "VW", km: 100000, new: true }] };
-            UIGenerator.generateUI(mutator, element);
+        public static createFromMutator(mutable: ƒ.Mutable, element: HTMLElement) {
+            let name:string = mutable.constructor.name;
+            console.log(name);
+            let types: ƒ.MutatorAttributeTypes;
+            let mutator: ƒ.Mutator = mutable.getMutator();
+            let fieldset = UIGenerator.createFieldset(name, element);
+            types = mutable.getMutatorAttributeTypes(mutator);
+            UIGenerator.generateUI(mutator, types, fieldset);
         }
 
-        private static generateUI(_obj: ƒ.Mutable, _parent: HTMLElement): void {
-            let types: ƒ.MutatorAttributeTypes;
-            let mutator:ƒ.Mutator = _obj.getMutator();
-            types = _obj.getMutatorAttributeTypes(mutator);
-            for (let key in _obj) {
-                let value: Object = _obj[key];
-                if (value instanceof Object) {
-                    let fieldset:HTMLElement = UIGenerator.createFieldset(key, _parent);
-                    fieldset.addEventListener("click", UIGenerator.toggleListObj);
-                    this.generateUI(<ƒ.Mutable>value, fieldset);
-                    _parent.appendChild(fieldset);
+        private static generateUI(_obj: ƒ.Mutator, _types: ƒ.MutatorAttributeTypes, _parent: HTMLElement): void {
+            for (let key in _types) {
+                let type: Object = _types[key];
+                let value: string = _obj[key].toString();
+                if (type instanceof Object) {
+                    //Type is Enum
+                    UIGenerator.createLabelElement(key, key, _parent);
+                    UIGenerator.createDropdown(type, value, _parent)
                 }
                 else {
-                    switch (typeof value) {
-                        case "number":
+                    switch (type) {
+                        case "Number":
                             UIGenerator.createLabelElement(key, key, _parent);
                             UIGenerator.createTextElement(key, value, _parent)
                             break;
-                        case "boolean":
+                        case "Boolean":
                             UIGenerator.createLabelElement(key, key, _parent);
-                            UIGenerator.createCheckboxElement(key, value, _parent);
+                            let enabled:boolean = value == "true" ? true : false;
+                            UIGenerator.createCheckboxElement(key, enabled, _parent);
                             break;
-                        case "string":
+                        case "String":
                             UIGenerator.createLabelElement(key, key, _parent);
                             UIGenerator.createTextElement(key, value, _parent)
                             break;
@@ -40,6 +43,20 @@ namespace UI {
                 }
             }
         }
+        public static createDropdown(_content: Object, _value: string, _parent: HTMLElement, _class?: string) {
+            let dropdown: HTMLSelectElement = document.createElement("select");
+            for (let value in _content) {
+                let entry: HTMLOptionElement = document.createElement("option");
+                entry.text = value;
+                entry.value = value;
+                if (value.toUpperCase() == _value.toUpperCase()) {
+                    entry.selected = true;
+                }
+                dropdown.add(entry);
+            }
+            _parent.appendChild(dropdown);
+            return dropdown;
+        }
         public static createFieldset(_legend: string, _parent: HTMLElement, _class?: string): HTMLElement {
             let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
             let legend: HTMLLegendElement = document.createElement("legend");
@@ -47,9 +64,10 @@ namespace UI {
             fieldset.appendChild(legend);
             legend.classList.add("unfoldable");
             fieldset.classList.add(_class);
+            _parent.appendChild(fieldset);
             return fieldset;
         }
-        public static createLabelElement(_id:string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
+        public static createLabelElement(_id: string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
             let label: HTMLElement = document.createElement("label");
             label.innerHTML = _value;
             label.classList.add(_class);

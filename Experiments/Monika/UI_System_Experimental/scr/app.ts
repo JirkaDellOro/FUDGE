@@ -18,7 +18,6 @@ namespace UI {
         }]
     };
     function createSimpleComponent (container: any, state: any) {
-        // return SimpleComponent.create(container, state);
         return new SimpleComponent(container, state);
     }
     myLayout = new GoldenLayout(config);

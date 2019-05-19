@@ -148,4 +148,4 @@ var UI;
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
 })(UI || (UI = {}));
-//# sourceMappingURL=UI.js.map
+//# sourceMappingURL=UIElements.js.map

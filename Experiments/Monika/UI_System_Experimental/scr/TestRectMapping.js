@@ -1,13 +1,13 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var UI;
+(function (UI) {
     var ƒ = Fudge;
     window.addEventListener("load", init);
     let uiMaps = {};
-    let uiClient;
+    // let uiClient: UI.Rectangle;
     let canvas;
     let viewPort = new ƒ.Viewport();
     let camera;
-    let uiCamera;
+    // let uiCamera: UI.Camera;
     function init() {
         // create asset
         let branch = Scenes.createAxisCross();
@@ -21,19 +21,19 @@ var RenderManagerRendering;
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
-        let menu = document.getElementsByTagName("div")[0];
-        menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
-        uiCamera = new UI.Camera();
-        menu.appendChild(uiCamera);
-        appendUIScale(menu, "DestinationToSource", viewPort.frameDestinationToSource);
-        appendUIComplex(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
-        appendUIScale(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
-        uiClient = new UI.Rectangle("ClientRectangle");
-        uiClient.addEventListener("input", hndChangeOnClient);
-        menu.appendChild(uiClient);
+        // let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
+        // menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
+        // uiCamera = new UI.Camera();
+        // menu.appendChild(uiCamera);
+        // appendUIScale(menu, "DestinationToSource", viewPort.frameDestinationToSource);
+        // appendUIComplex(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
+        // appendUIScale(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
+        // uiClient = new UI.Rectangle("ClientRectangle");
+        // uiClient.addEventListener("input", hndChangeOnClient);
+        // menu.appendChild(uiClient);
         update();
-        uiCamera.addEventListener("input", hndChangeOnCamera);
-        setCamera();
+        // uiCamera.addEventListener("input", hndChangeOnCamera);
+        // setCamera();
         viewPort.adjustingFrames = true;
         logMutatorInfo("Camera", cmpCamera);
         for (let name in uiMaps) {
@@ -58,69 +58,69 @@ var RenderManagerRendering;
         console.log("Mutator: ", mutator);
         console.groupEnd();
     }
-    function appendUIComplex(_parent, _name, _framing) {
-        let uiMap = new UI.FramingComplex(_name);
-        uiMap.addEventListener("input", hndChangeOnComplex);
-        _parent.appendChild(uiMap);
-        uiMaps[_name] = { ui: uiMap, framing: _framing };
-    }
-    function appendUIScale(_parent, _name, _framing) {
-        let uiMap = new UI.FramingScaled(_name);
-        uiMap.addEventListener("input", hndChangeOnScale);
-        _parent.appendChild(uiMap);
-        uiMaps[_name] = { ui: uiMap, framing: _framing };
-    }
-    function hndChangeOnComplex(_event) {
-        let target = _event.currentTarget;
-        setRectComplex(target);
-    }
-    function hndChangeOnScale(_event) {
-        let target = _event.currentTarget;
-        setRectScale(target);
-    }
-    function hndChangeOnCamera(_event) {
-        //let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
-        setCamera();
-    }
-    function hndChangeOnClient(_event) {
-        let target = _event.currentTarget;
-        setClient(target);
-    }
-    function setRectComplex(_uiMap) {
-        let value = _uiMap.get();
-        let framing = uiMaps[_uiMap.name].framing;
-        for (let key in value) {
-            switch (key) {
-                case "Margin":
-                    framing.margin = value[key];
-                    break;
-                case "Padding":
-                    framing.padding = value[key];
-                    break;
-                case "Result":
-                    break;
-                default:
-                    throw (new Error("Invalid name: " + key));
-            }
-        }
-    }
-    function setRectScale(_uiMap) {
-        let value = _uiMap.get();
-        let framing = uiMaps[_uiMap.name].framing;
-        framing.setScale(value.normWidth, value.normHeight);
-    }
-    function setCamera() {
-        let params = uiCamera.get();
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
-        cmpCamera.projectCentral(params.aspect, params.fieldOfView);
-    }
-    function setClient(_uiRectangle) {
-        let rect = _uiRectangle.get();
-        canvas.style.left = rect.x + "px";
-        canvas.style.top = rect.y + "px";
-        canvas.style.width = rect.width + "px";
-        canvas.style.height = rect.height + "px";
-    }
+    // function appendUIComplex(_parent: HTMLElement, _name: string, _framing: ƒ.FramingComplex): void {
+    //     let uiMap: UI.FramingComplex = new UI.FramingComplex(_name);
+    //     uiMap.addEventListener("input", hndChangeOnComplex);
+    //     _parent.appendChild(uiMap);
+    //     uiMaps[_name] = { ui: uiMap, framing: _framing };
+    // }
+    // function appendUIScale(_parent: HTMLElement, _name: string, _framing: ƒ.FramingScaled): void {
+    //     let uiMap: UI.FramingScaled = new UI.FramingScaled(_name);
+    //     uiMap.addEventListener("input", hndChangeOnScale);
+    //     _parent.appendChild(uiMap);
+    //     uiMaps[_name] = { ui: uiMap, framing: _framing };
+    // }
+    // function hndChangeOnComplex(_event: Event): void {
+    //     let target: UI.FramingComplex = <UI.FramingComplex>_event.currentTarget;
+    //     setRectComplex(target);
+    // }
+    // function hndChangeOnScale(_event: Event): void {
+    //     let target: UI.FramingScaled = <UI.FramingScaled>_event.currentTarget;
+    //     setRectScale(target);
+    // }
+    // function hndChangeOnCamera(_event: Event): void {
+    //     //let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
+    //     setCamera();
+    // }
+    // function hndChangeOnClient(_event: Event): void {
+    //     let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
+    //     setClient(target);
+    // }
+    // function setRectComplex(_uiMap: UI.FramingComplex): void {
+    //     let value: {} = _uiMap.get();
+    //     let framing: ƒ.FramingComplex = <ƒ.FramingComplex>uiMaps[_uiMap.name].framing;
+    //     for (let key in value) {
+    //         switch (key) {
+    //             case "Margin":
+    //                 framing.margin = <ƒ.Border>value[key];
+    //                 break;
+    //             case "Padding":
+    //                 framing.padding = <ƒ.Border>value[key];
+    //                 break;
+    //             case "Result":
+    //                 break;
+    //             default:
+    //                 throw (new Error("Invalid name: " + key));
+    //         }
+    //     }
+    // }
+    // function setRectScale(_uiMap: UI.FramingScaled): void {
+    //     let value: { normWidth: number, normHeight: number } = <{ normWidth: number, normHeight: number }>_uiMap.get();
+    //     let framing: ƒ.FramingScaled = <ƒ.FramingScaled>uiMaps[_uiMap.name].framing;
+    //     framing.setScale(value.normWidth, value.normHeight);
+    // }
+    // function setCamera(): void {
+    //     let params: UI.ParamsCamera = uiCamera.get();
+    //     let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+    //     cmpCamera.projectCentral(params.aspect, params.fieldOfView);
+    // }
+    // function setClient(_uiRectangle: UI.Rectangle): void {
+    //     let rect: ƒ.Rectangle = <ƒ.Rectangle>_uiRectangle.get();
+    //     canvas.style.left = rect.x + "px";
+    //     canvas.style.top = rect.y + "px";
+    //     canvas.style.width = rect.width + "px";
+    //     canvas.style.height = rect.height + "px";
+    // }
     function update() {
         for (let name in uiMaps) {
             // uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
@@ -145,10 +145,10 @@ var RenderManagerRendering;
                 }
             }
         }
-        let clientRect = canvas.getBoundingClientRect();
-        uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
-        uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
+        //     let clientRect: ClientRect = canvas.getBoundingClientRect();
+        //     uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
+        //     let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        //     uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(UI || (UI = {}));
 //# sourceMappingURL=TestRectMapping.js.map

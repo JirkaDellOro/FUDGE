@@ -1,5 +1,5 @@
-var GoldenLayoutTest;
-(function (GoldenLayoutTest) {
+var UI;
+(function (UI) {
     let myLayout;
     let savedState;
     // let file:HTML = "test.html"
@@ -19,13 +19,12 @@ var GoldenLayoutTest;
             }]
     };
     function createSimpleComponent(container, state) {
-        // return SimpleComponent.create(container, state);
-        return new GoldenLayoutTest.SimpleComponent(container, state);
+        return new UI.SimpleComponent(container, state);
     }
     myLayout = new GoldenLayout(config);
     myLayout.registerComponent('Inspector', createSimpleComponent);
     myLayout.registerComponent('Viewport', createSimpleComponent);
     console.log("I work");
     myLayout.init();
-})(GoldenLayoutTest || (GoldenLayoutTest = {}));
+})(UI || (UI = {}));
 //# sourceMappingURL=app.js.map

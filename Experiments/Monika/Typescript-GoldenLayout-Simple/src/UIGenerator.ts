@@ -9,7 +9,7 @@ namespace GoldenLayoutTest {
         }
 
         private static generateUI(_obj: ƒ.Mutator, _parent: HTMLElement): void {
-            _obj.constructor.name;
+            
             for (let key in _obj) {
                 let value: Object = _obj[key];
                 if (value instanceof Object) {

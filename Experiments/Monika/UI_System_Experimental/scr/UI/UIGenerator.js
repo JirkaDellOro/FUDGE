@@ -1,31 +1,37 @@
-/// <reference path="../../../../Core/build/Fudge.d.ts"/>
-var GoldenLayoutTest;
-(function (GoldenLayoutTest) {
+/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+var UI;
+(function (UI) {
     class UIGenerator {
-        static createFromMutator(mutator, element) {
-            // let mutator: ƒ.Mutator = { people: [{ name: "Lukas", age: 24 }, { name: "Jirka", age: 54 }], cars: [{ brand: "Audi", km: 20000, new: false }, { brand: "VW", km: 100000, new: true }] };
-            UIGenerator.generateUI(mutator, element);
+        static createFromMutator(mutable, element) {
+            let name = mutable.constructor.name;
+            console.log(name);
+            let types;
+            let mutator = mutable.getMutator();
+            let fieldset = UIGenerator.createFieldset(name, element);
+            types = mutable.getMutatorAttributeTypes(mutator);
+            UIGenerator.generateUI(mutator, types, fieldset);
         }
-        static generateUI(_obj, _parent) {
-            for (let key in _obj) {
-                let value = _obj[key];
-                if (value instanceof Object) {
-                    let fieldset = UIGenerator.createFieldset(key, _parent);
-                    fieldset.addEventListener("click", UIGenerator.toggleListObj);
-                    this.generateUI(value, fieldset);
-                    _parent.appendChild(fieldset);
+        static generateUI(_obj, _types, _parent) {
+            for (let key in _types) {
+                let type = _types[key];
+                let value = _obj[key].toString();
+                if (type instanceof Object) {
+                    //Type is Enum
+                    UIGenerator.createLabelElement(key, key, _parent);
+                    UIGenerator.createDropdown(type, value, _parent);
                 }
                 else {
-                    switch (typeof value) {
-                        case "number":
+                    switch (type) {
+                        case "Number":
                             UIGenerator.createLabelElement(key, key, _parent);
                             UIGenerator.createTextElement(key, value, _parent);
                             break;
-                        case "boolean":
+                        case "Boolean":
                             UIGenerator.createLabelElement(key, key, _parent);
-                            UIGenerator.createCheckboxElement(key, value, _parent);
+                            let enabled = value == "true" ? true : false;
+                            UIGenerator.createCheckboxElement(key, enabled, _parent);
                             break;
-                        case "string":
+                        case "String":
                             UIGenerator.createLabelElement(key, key, _parent);
                             UIGenerator.createTextElement(key, value, _parent);
                             break;
@@ -35,6 +41,20 @@ var GoldenLayoutTest;
                 }
             }
         }
+        static createDropdown(_content, _value, _parent, _class) {
+            let dropdown = document.createElement("select");
+            for (let value in _content) {
+                let entry = document.createElement("option");
+                entry.text = value;
+                entry.value = value;
+                if (value.toUpperCase() == _value.toUpperCase()) {
+                    entry.selected = true;
+                }
+                dropdown.add(entry);
+            }
+            _parent.appendChild(dropdown);
+            return dropdown;
+        }
         static createFieldset(_legend, _parent, _class) {
             let fieldset = document.createElement("fieldset");
             let legend = document.createElement("legend");
@@ -42,6 +62,7 @@ var GoldenLayoutTest;
             fieldset.appendChild(legend);
             legend.classList.add("unfoldable");
             fieldset.classList.add(_class);
+            _parent.appendChild(fieldset);
             return fieldset;
         }
         static createLabelElement(_id, _value, _parent, _class) {
@@ -86,6 +107,6 @@ var GoldenLayoutTest;
             }
         }
     }
-    GoldenLayoutTest.UIGenerator = UIGenerator;
-})(GoldenLayoutTest || (GoldenLayoutTest = {}));
+    UI.UIGenerator = UIGenerator;
+})(UI || (UI = {}));
 //# sourceMappingURL=UIGenerator.js.map
