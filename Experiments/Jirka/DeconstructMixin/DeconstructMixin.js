@@ -73,5 +73,6 @@ var DeconstructMixin;
     console.log("Create mixGeneric");
     let mixGeneric = new MixGeneric(Test1, Test2);
     console.log("Result", mixGeneric);
+    let mix = { a: 10, x: 1, y: 2, z: 3 };
 })(DeconstructMixin || (DeconstructMixin = {}));
 //# sourceMappingURL=DeconstructMixin.js.map

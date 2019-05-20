@@ -2,6 +2,14 @@ namespace DeconstructMixin {
     interface ITest {
         [key: string]: string | number | boolean;
     }
+    interface ITest2 {
+        x: number;
+        y: number;
+    }
+    interface IMix extends ITest, ITest2 {
+        z: number;
+    }
+
     class Test {
         props: ITest = { s: "test", n: 0, b: true };
         constructor() {
@@ -80,4 +88,6 @@ namespace DeconstructMixin {
     console.log("Create mixGeneric");
     let mixGeneric: MixGeneric = new MixGeneric(Test1, Test2);
     console.log("Result", mixGeneric);
+
+    let mix: IMix = { a: 10, x: 1, y: 2, z: 3 };
 }
