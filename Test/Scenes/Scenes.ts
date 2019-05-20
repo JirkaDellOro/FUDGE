@@ -68,7 +68,7 @@ namespace Scenes {
             document.body.appendChild(_canvas);
         }
         viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera), _canvas);
+        viewPort.initialize("TestViewport", node, camera.getComponent(ƒ.ComponentCamera), _canvas);
         // viewPort.drawScene();
         viewPort.showSceneGraph();
     }

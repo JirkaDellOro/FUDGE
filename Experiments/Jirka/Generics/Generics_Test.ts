@@ -1,52 +1,34 @@
 namespace GenericsTest {
-    function printType<T>(_p: T): T {
-        var p: T;
-        console.log(typeof (p) == typeof (_p));
-        return p;
-    }
-
-    class GenericsTest<T> {
-        t: T;
-        constructor() {
-            //
-        }
-        getT(): T {
-            return this.t;
-        }
-    }
-
-    class TypedArrayHandler<T> {
-        arr: T[] = new Array(10);
-    }
-
     class Base {
+        x: number = 10;
         public sayHello(): void {
             console.log("Hi, I'm Base");
         }
     }
     class Sub extends Base {
+        t: string = "Hallo";
         public sayHello(): void {
-            console.log("Hi, I'm Sub");
+            console.log("Hi, I'm Sub", this.t);
+        }
+    }
+    class Sub2 extends Base {
+        t: string = "Hallo again";
+        public sayHello(): void {
+            console.log("Hi, I'm Sub2", this.t);
         }
     }
 
-    function implicitGeneric<T extends Base>(_type: typeof Base): Base[] {
-        let result: Base[] = <T[]>[new _type(), new _type()];
+    function implicitGeneric<T extends Base>(_type: typeof Base): T[] {
+        let result: T[] = <T[]>[new _type(), new _type()];
         return result;
     }
 
-    var tah: TypedArrayHandler<string> = new TypedArrayHandler<string>();
-    tah.arr[0] = "123";
-
-    var res: string = printType<string>("Hallo");
-
-    var gt: GenericsTest<string>;
-    gt = new GenericsTest<string>();
-    //gt.t = "Hallo";
-    console.log(gt.getT());
-    console.log(typeof (gt));
-
-    let t: Base[] = implicitGeneric(Sub);
+    implicitGeneric(Sub);
+    let t: Sub[] = implicitGeneric(Sub);
     console.log(t);
-    t.forEach((t: Sub): void => { t.sayHello(); });
+    t[0].sayHello();
+    let t2: Sub2[] = implicitGeneric(Sub2);
+    console.log(t2);
+    t2[0].sayHello();
+    // t.forEach((t: Sub): void => { t.sayHello(); });
 }

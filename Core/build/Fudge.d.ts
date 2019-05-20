@@ -590,12 +590,12 @@ declare namespace Fudge {
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
          */
-        getComponents<T extends Component>(_class: typeof Component): Component[];
+        getComponents<T extends Component>(_class: typeof Component): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        getComponent(_class: typeof Component): Component;
+        getComponent<T extends Component>(_class: typeof Component): T;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
