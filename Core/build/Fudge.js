@@ -1,6 +1,26 @@
 "use strict";
 var Fudge;
 (function (Fudge) {
+    class Coat extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.name = "Coat";
+            this.params = {};
+        }
+    }
+    class CoatColored extends Coat {
+        constructor() {
+            super(...arguments);
+            this.params = {
+                color: new Fudge.Color(0.5, 0.5, 0.5, 1)
+            };
+        }
+        reduceMutator() { }
+    }
+    Fudge.CoatColored = CoatColored;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     class Serializer {
         // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
@@ -332,6 +352,16 @@ var Fudge;
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Attaches a [[Shader]] and a [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentCoat extends Fudge.Component {
+    }
+    Fudge.ComponentCoat = ComponentCoat;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

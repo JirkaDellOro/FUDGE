@@ -1,5 +1,18 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
+    interface ShaderParameters {
+        [key: string]: number | Color;
+    }
+    abstract class Coat extends Mutable {
+        name: string;
+        params: ShaderParameters;
+    }
+    class CoatColored extends Coat {
+        params: ShaderParameters;
+        reduceMutator(): void;
+    }
+}
+declare namespace Fudge {
     type General = any;
     interface Serialization {
         [type: string]: General;
@@ -171,6 +184,14 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Attaches a [[Shader]] and a [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentCoat extends Component {
     }
 }
 declare namespace Fudge {

@@ -1,6 +1,6 @@
 namespace DeconstructMixin {
     interface ITest {
-        [key: string]: string | number | boolean;
+        [key: string]: string | number | boolean | Function;
     }
     interface ITest2 {
         x: number;
@@ -11,9 +11,9 @@ namespace DeconstructMixin {
     }
 
     class Test {
-        props: ITest = { s: "test", n: 0, b: true };
+        props: ITest = { s: "test", n: 0, b: true, f: () => console.log("TestFunc") };
         constructor() {
-            // console.log("Test constructed", this);
+            console.log("Test constructed", this);
         }
     }
 
@@ -90,4 +90,5 @@ namespace DeconstructMixin {
     console.log("Result", mixGeneric);
 
     let mix: IMix = { a: 10, x: 1, y: 2, z: 3 };
+    console.log(mix);
 }

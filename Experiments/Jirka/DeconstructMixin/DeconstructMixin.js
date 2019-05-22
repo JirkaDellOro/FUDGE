@@ -3,8 +3,8 @@ var DeconstructMixin;
 (function (DeconstructMixin) {
     class Test {
         constructor() {
-            this.props = { s: "test", n: 0, b: true };
-            // console.log("Test constructed", this);
+            this.props = { s: "test", n: 0, b: true, f: () => console.log("TestFunc") };
+            console.log("Test constructed", this);
         }
     }
     class Test1 extends Test {
@@ -74,5 +74,6 @@ var DeconstructMixin;
     let mixGeneric = new MixGeneric(Test1, Test2);
     console.log("Result", mixGeneric);
     let mix = { a: 10, x: 1, y: 2, z: 3 };
+    console.log(mix);
 })(DeconstructMixin || (DeconstructMixin = {}));
 //# sourceMappingURL=DeconstructMixin.js.map
