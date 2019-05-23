@@ -96,6 +96,7 @@ namespace Fudge {
             };
             return serialization;
         }
+        
         public deserialize(_serialization: Serialization): Serializable {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
@@ -123,7 +124,11 @@ namespace Fudge {
                 types.projection = PROJECTION;
             return types;
         }
-
+        
+        public mutate(_mutator: Mutator): void {
+            super.mutate(_mutator);
+        }
+        
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.transform;
             super.reduceMutator(_mutator);
