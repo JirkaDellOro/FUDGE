@@ -124,8 +124,8 @@ namespace Fudge {
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
             let crc3: WebGL2RenderingContext = RenderOperator.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
@@ -221,7 +221,8 @@ namespace Fudge {
             let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let materialInfo: MaterialInfo = {
                 vao: vao,
-                color: _material.Color
+                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
+                color: <Color>(<CoatColored>_material.getCoat()).params.color
             };
             return materialInfo;
         }

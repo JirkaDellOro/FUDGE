@@ -4,7 +4,11 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ShaderBasic extends Shader {
-        public static loadVertexShaderSource(): string {
+        public static getCoat(): typeof Coat {
+            return CoatColored;
+        }
+
+        public static getVertexShaderSource(): string {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
@@ -29,7 +33,7 @@ namespace Fudge {
                         v_color = u_color;
                     }`;
         }
-        public static loadFragmentShaderSource(): string {
+        public static getFragmentShaderSource(): string {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

@@ -1,64 +1,6 @@
 "use strict";
 var Fudge;
 (function (Fudge) {
-    class Coat extends Fudge.Mutable {
-        constructor() {
-            super(...arguments);
-            this.name = "Coat";
-            this.params = {};
-        }
-    }
-    class CoatColored extends Coat {
-        constructor() {
-            super(...arguments);
-            this.params = {
-                color: new Fudge.Color(0.5, 0.5, 0.5, 1)
-            };
-        }
-        reduceMutator() { }
-    }
-    Fudge.CoatColored = CoatColored;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object) {
-            let serialization = {};
-            serialization[_object.constructor.name] = _object.serialize();
-            return serialization;
-        }
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-    }
-    Fudge.Serializer = Serializer;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     /**
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
@@ -141,6 +83,71 @@ var Fudge;
         }
     }
     Fudge.Mutable = Mutable;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    class Coat extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.name = "Coat";
+            this.params = {};
+        }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        reduceMutator() { }
+    }
+    Fudge.Coat = Coat;
+    class CoatColored extends Coat {
+        constructor() {
+            super(...arguments);
+            this.params = {
+                color: new Fudge.Color(0.5, 0.5, 0.5, 1)
+            };
+        }
+        reduceMutator() { }
+    }
+    Fudge.CoatColored = CoatColored;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class Serializer {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object) {
+            let serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
+        }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
@@ -346,22 +353,15 @@ var Fudge;
                 types.projection = PROJECTION;
             return types;
         }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
         reduceMutator(_mutator) {
             delete _mutator.transform;
             super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Attaches a [[Shader]] and a [[Coat]]
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ComponentCoat extends Fudge.Component {
-    }
-    Fudge.ComponentCoat = ComponentCoat;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -973,33 +973,46 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
+        // private color: Color;
+        // private textureEnabled: boolean;
+        // private textureSource: string;
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
-        constructor(_name, _color, _shader) {
+        constructor(_name, _shader, _coat) {
             this.name = _name;
-            this.shaderClass = _shader;
-            this.color = _color;
+            this.shaderType = _shader;
+            if (_shader) {
+                if (_coat)
+                    this.setCoat(_coat);
+                else
+                    this.setCoat(this.createCoatMatchingShader());
+            }
             // this.textureBufferSpecification = { size: 2, dataType: gl2.FLOAT, normalize: true, stride: 0, offset: 0 };
-            this.textureEnabled = false;
-            this.textureSource = "";
+            //this.textureEnabled = false;
+            //this.textureSource = "";
+        }
+        createCoatMatchingShader() {
+            let coat = new (this.shaderType.getCoat())();
+            return coat;
+        }
+        setCoat(_coat) {
+            if (_coat.constructor != this.shaderType.getCoat())
+                throw (new Error("Shader and coat don't match"));
+            this.coat = _coat;
+        }
+        getCoat() {
+            return this.coat;
+        }
+        setShader(_shaderType) {
+            this.shaderType = _shaderType;
+            let coat = this.createCoatMatchingShader();
+            coat.mutate(this.coat.getMutator());
         }
         // Get methods. ######################################################################################
         get Shader() {
-            return this.shaderClass;
+            return this.shaderType;
         }
         get Name() {
             return this.name;
-        }
-        get Color() {
-            return this.color;
-        }
-        set Color(_color) {
-            this.color = _color;
-        }
-        get TextureEnabled() {
-            return this.textureEnabled;
-        }
-        get TextureSource() {
-            return this.textureSource;
         }
     }
     Fudge.Material = Material;
@@ -2503,8 +2516,8 @@ var Fudge;
         static createProgram(_shaderClass) {
             let crc3 = RenderOperator.crc3;
             let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
@@ -2596,7 +2609,8 @@ var Fudge;
             let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
             let materialInfo = {
                 vao: vao,
-                color: _material.Color
+                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
+                color: _material.getCoat().params.color
             };
             return materialInfo;
         }
@@ -2888,15 +2902,19 @@ var Fudge;
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
+/// <reference path="../Coat/Coat.ts"/>
 var Fudge;
+/// <reference path="../Coat/Coat.ts"/>
 (function (Fudge) {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
-        static loadVertexShaderSource() { return null; }
-        static loadFragmentShaderSource() { return null; }
+        // The type of coat that can be used with this shader to create a material
+        static getCoat() { return null; }
+        static getVertexShaderSource() { return null; }
+        static getFragmentShaderSource() { return null; }
     }
     Fudge.Shader = Shader;
 })(Fudge || (Fudge = {}));
@@ -2907,7 +2925,10 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderBasic extends Fudge.Shader {
-        static loadVertexShaderSource() {
+        static getCoat() {
+            return Fudge.CoatColored;
+        }
+        static getVertexShaderSource() {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
@@ -2932,7 +2953,7 @@ var Fudge;
                         v_color = u_color;
                     }`;
         }
-        static loadFragmentShaderSource() {
+        static getFragmentShaderSource() {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

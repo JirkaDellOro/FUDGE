@@ -10,9 +10,16 @@ namespace Scenes {
         let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 1);
         let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 1);
 
-        let mtrRed: ƒ.Material = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
-        let mtrGreen: ƒ.Material = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
-        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored();
+        coatRed.params.color = clrRed; 
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored();
+        coatGreen.params.color = clrGreen; 
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored();
+        coatBlue.params.color = clrBlue; 
+
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
 
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube(1, 1, 1);
 
@@ -44,7 +51,7 @@ namespace Scenes {
         let child: ƒ.Node = node.getChildren()[0];
 
         let grandchild: ƒ.Node;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Color(0, 1, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
@@ -52,7 +59,7 @@ namespace Scenes {
     export function createMiniScene(): void {
         ƒ.RenderManager.initialize();
 
-        node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Color(1, 0, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
+        node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.scaleX(2);
 

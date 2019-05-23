@@ -59,7 +59,7 @@ namespace Fudge {
                 return;
 
             let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
-            this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+            this.createReference<typeof Shader, ShaderInfo>(this.programs, shader, this.createProgram);
 
             let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
             this.createReference<Material, MaterialInfo>(this.parameters, material, this.createParameter);
@@ -96,7 +96,7 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
+            this.removeReference<typeof Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
             this.removeReference<Material, MaterialInfo>(this.parameters, nodeReferences.material, this.deleteParameter);
             this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
 
@@ -125,8 +125,8 @@ namespace Fudge {
 
             let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
             if (shader !== nodeReferences.shader) {
-                this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+                this.removeReference<typeof Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
+                this.createReference<typeof Shader, ShaderInfo>(this.programs, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
 

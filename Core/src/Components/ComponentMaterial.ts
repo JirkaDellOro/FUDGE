@@ -5,7 +5,7 @@ namespace Fudge {
      */
     export class ComponentMaterial extends Component {
         private material: Material;
-        
+
         // TODO: Shader defines material-parameter. Can then the material be independent of the shader? Different structure needed
         public initialize(_material: Material): void {
             this.material = _material;
@@ -14,5 +14,6 @@ namespace Fudge {
         public get Material(): Material {
             return this.material;
         }
+
     }
 }

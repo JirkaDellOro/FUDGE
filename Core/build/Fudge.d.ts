@@ -1,42 +1,5 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
-    interface ShaderParameters {
-        [key: string]: number | Color;
-    }
-    abstract class Coat extends Mutable {
-        name: string;
-        params: ShaderParameters;
-    }
-    class CoatColored extends Coat {
-        params: ShaderParameters;
-        reduceMutator(): void;
-    }
-}
-declare namespace Fudge {
-    type General = any;
-    interface Serialization {
-        [type: string]: General;
-    }
-    interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-    class Serializer {
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object: Serializable): Serialization;
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -94,6 +57,45 @@ declare namespace Fudge {
          * @param _mutator
          */
         protected abstract reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    interface ShaderParameters {
+        [key: string]: number | Color;
+    }
+    class Coat extends Mutable {
+        name: string;
+        params: ShaderParameters;
+        mutate(_mutator: Mutator): void;
+        reduceMutator(): void;
+    }
+    class CoatColored extends Coat {
+        params: ShaderParameters;
+        reduceMutator(): void;
+    }
+}
+declare namespace Fudge {
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -183,15 +185,8 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Attaches a [[Shader]] and a [[Coat]]
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ComponentCoat extends Component {
     }
 }
 declare namespace Fudge {
@@ -547,16 +542,15 @@ declare namespace Fudge {
      */
     class Material {
         private name;
-        private shaderClass;
-        private color;
-        private textureEnabled;
-        private textureSource;
-        constructor(_name: string, _color: Color, _shader: typeof Shader);
+        private shaderType;
+        private coat;
+        constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        createCoatMatchingShader(): Coat;
+        setCoat(_coat: Coat): void;
+        getCoat(): Coat;
+        setShader(_shaderType: typeof Shader): void;
         readonly Shader: typeof Shader;
         readonly Name: string;
-        Color: Color;
-        readonly TextureEnabled: boolean;
-        readonly TextureSource: string;
     }
 }
 declare namespace Fudge {
@@ -1261,8 +1255,9 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -1271,8 +1266,9 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderBasic extends Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
