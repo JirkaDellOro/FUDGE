@@ -1,20 +1,24 @@
 namespace InjectMethod {
 
-    // fool typescript 
+    // fool typescript in order to use function "injected"   
     interface Test {
         injected?: Function;
     }
-    
+    // enforce existence of functino "replaced" to be replaced by decoration
+    interface Decoratable {
+        replaced: Function;
+    }
+
     // @injectViaConstructorReplacement()
     @injectViaConstructorExtension
-    class Test {
+    class Test implements Decoratable {
         name: string;
 
         constructor(_name: string) {
             this.name = _name;
         }
 
-        @replace
+        @replaceViaMethodDecorator // function must already exist
         public replaced(): void {
             console.log("Hi, I've NOT been replaced for ", this);
         }
@@ -24,7 +28,7 @@ namespace InjectMethod {
         }
     }
 
-    function replace(_target: Object, _propertyKey: string, _descriptor: PropertyDescriptor): void {
+    function replaceViaMethodDecorator(_target: Decoratable, _propertyKey: string, _descriptor: PropertyDescriptor): void {
         console.log(_target, _propertyKey, _descriptor);
         console.log(_target.constructor == Test);
         _descriptor.value = function (this: Object): void {
@@ -53,7 +57,7 @@ namespace InjectMethod {
         });
     }
 
-    
+
     let test: Test = new Test("Test-Instance_1");
     console.log(Test);
     test.injected();
