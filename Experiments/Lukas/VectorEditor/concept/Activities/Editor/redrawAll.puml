@@ -27,7 +27,7 @@ partition redrawAll {
 	endwhile
 
 	' :reset transformation;
-	:selectedAction.additionalDisplay(crc);
+	:selectedTool.additionalDisplay(crc);
 	:drawTransformationPoint ₼;
 
 	stop 

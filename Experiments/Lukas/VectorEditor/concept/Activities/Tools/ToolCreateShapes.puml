@@ -1,7 +1,7 @@
-@startuml CreateShapes
+@startuml ToolCreateShapes
 skinparam monochrome true
 
-title CreateShapes
+title ToolCreateShapes
 
 partition mousedown {
 	:_event: MouseEvent]
@@ -44,6 +44,12 @@ partition addAdditionalSubMenuOptions {
 		:switch(typeof sS.aP[s])
 		-> create a HTML Input Element accordingly;
 	endwhile
+	stop
+}
+
+partition registerShape {
+	:_shape: typeof Shape]
+	:ToolCreateShapes.shapes.push(_shape)]
 }
 
 @enduml

@@ -1,8 +1,8 @@
-@startuml Select
+@startuml ToolSelect
 ' !include VectorEditor/concept/Activities/Design.iuml
 skinparam monochrome true
 
-title Select
+title ToolSelect
 
 partition mousedown {
 	:_event: MouseEvent]

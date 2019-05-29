@@ -1,24 +1,24 @@
-@startuml Transform
+@startuml ToolTransform
 skinparam monochrome true
 
-title Transform
+title ToolTransform
 
 partition mousedown {
 	:_event: MouseEvent]
 	:point: DrawPoint = Editor.getPathOrPointTheMouseIsOver()]
 	:rect: TransformRect = calculateTransformationRect()]
 	if () then ([point])
-		:selectedSubAction = scale;
+		:selectedSubTool = scale;
 		:selectedScalePoint = point;
 		:switch(point)
 		-> set scale.mode accordingly
 		-> set scale.referencePoint accordingly;
 	elseif () then ([mouse inside rect])
-		:selectedSubAction = move;
+		:selectedSubTool = move;
 	else
-		:selectedSubAction = rotate;
+		:selectedSubTool = rotate;
 	endif
-	:selectedSubAction.mousedown(_event);
+	:selectedSubTool.mousedown(_event);
 	stop
 }
 
@@ -29,7 +29,7 @@ partition mousedown {
 
 partition mouseup {
 	:_event: MouseEvent]
-	:selectedSubAction = null;
+	:selectedSubTool = null;
 	stop
 }
 

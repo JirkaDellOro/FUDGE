@@ -1,12 +1,12 @@
-@startuml VertexManipulation
+@startuml ToolVertexManipulation
 skinparam monochrome true
 
-title VertexManipulation
+title ToolVertexManipulation
 
 ' partition mousedown {
 ' 	:_event: MouseEvent]
-' 	if() then ([selectedSubAction])
-' 		:selectedSubAction.mousedown(_event);
+' 	if() then ([selectedSubTool])
+' 		:selectedSubTool.mousedown(_event);
 ' 	endif
 ' 	stop
 ' }

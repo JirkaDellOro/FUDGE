@@ -1,7 +1,7 @@
-@startuml Move
+@startuml ToolMove
 skinparam monochrome true
 
-title Move
+title ToolMove
 
 partition mousedown {
 	:_event: MouseEvent]

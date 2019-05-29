@@ -5,32 +5,44 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam handwritten false
 
-title Vector Editor Class Diagramm
+' title Vector Editor Class Diagramm
 
 ' left to right direction
 package FUDGE <<Rectangle>> {
-	package Transfer {
-		package Mutable <<Rectangle>>{
-			
-		}
-	}
+	' package Transfer {
+	' 	package Mutable <<Rectangle>>{
+	' 		interface Mutator
 
-	package Math {
-		class Vector2 extends Mutable.Mutator{
-			+ x: number
-			+ y: number
+	' 		interface MutatorForAnimation extends Mutator
+	' 		interface MutatorForUserInterface extends Mutator
+	' 		abstract class Mutable {
+	' 			+ getMutator(): Mutator
+	' 			+ getMutatorForAnimation(): MutatorForAnimation
+	' 			+ getMutatorForUserInterface(): MutatorForUserInterface
+	' 			+ getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
+	' 			+ updateMutator(_mutator: Mutator): void
+	' 			# mutate(_mutator: Mutator): void
+	' 		}
+	' 	}
+	' }
+	' Mutable -up- Mutator: uses
 
-			+ equals(obj: Vector2): boolean
-			+ magnitude(): number
-			+ sqrMagnitude(): number
-			+ normalize(): Vector2
-			+ perpendicularVector(): Vector2
-			+ scaled(s: number): Vector2
+	' package Math {
+	' 	class Vector2 extends Mutable{
+	' 		' + x: number
+	' 		' + y: number
 
-			{static} dot(a: Vector2, b: Vector2): number
-			{static} add(...params: Vector2[]): Vector2
-		}
-	}
+	' 		' + equals(obj: Vector2): boolean
+	' 		' + magnitude(): number
+	' 		' + sqrMagnitude(): number
+	' 		' + normalize(): Vector2
+	' 		' + perpendicularVector(): Vector2
+	' 		' + scaled(s: number): Vector2
+
+	' 		' {static} dot(a: Vector2, b: Vector2): number
+	' 		' {static} add(...params: Vector2[]): Vector2
+	' 	}
+	' }
 
 	package UI {
 		interface UIElement{
@@ -41,7 +53,7 @@ package FUDGE <<Rectangle>> {
 			' element: HTMLElement
 		}
 		class UIButton extends DOM.HTMLButtonElement implements UIElement {
-			functionToCall: function
+			functionToCall: Function
 		}
 
 		class UIGenerator {
@@ -50,207 +62,209 @@ package FUDGE <<Rectangle>> {
 		}
 	}
 
-	package VectorEditor <<Rectangle>>{
-		class UIHandler{
-			createUI()
-			updateUI()
-			deselectAll()
-			updateSelectedObjectUI()
-			updateSelectedObject()
-		}
+	' package VectorEditor <<Rectangle>>{
+	' 	class UIHandler{
+	' 		createUI()
+	' 		updateUI()
+	' 		deselectAll()
+	' 		updateSelectedObjectUI()
+	' 		updateSelectedObject()
+	' 	}
 
-		interface Shortcut{
-			keys: number[]
-		}
+	' 	interface Shortcut{
+	' 		keys: string[]
+	' 	}
 
-		class Editor{
-			- sketch: Sketch
-			- selectedPaths: SketchPath[]
-			- selectedPoints: SketchPoint[]
-			+ selectedTool: Tool
-			- canvas: HTMLCanvasElement
-			- crc: CanvasRenderingContext2D
-			- scale: number
-			- transformationPoint: Vector2
-			{static} + pressedKeys: number[]
-			- uiHandler: UIHandler
-			- showTangentsShortcut: Shortcut
-			- quadraticShapesShortcut: Shortcut
-			+ tangentsActive: boolean
-			+ changeHistory: sketch[]
+	' 	class Editor{
+	' 		- sketch: Sketch
+	' 		- selectedPaths: SketchPath[]
+	' 		- selectedPoints: SketchPoint[]
+	' 		+ selectedTool: Tool
+	' 		- canvas: HTMLCanvasElement
+	' 		- crc: CanvasRenderingContext2D
+	' 		- scale: number
+	' 		- transformationPoint: Vector2
+	' 		{static} + pressedKeys: number[]
+	' 		- uiHandler: UIHandler
+	' 		- showTangentsShortcut: Shortcut
+	' 		- quadraticShapesShortcut: Shortcut
+	' 		+ tangentsActive: boolean
+	' 		+ changeHistory: sketch[]
 
-			- redrawAll()
-			- mousedown()
-			- mousemove()
-			- mouseup()
-			- keydown()
-			- keyup()
-			- scroll()
-			+ undo()
-			+ redo()
-			+ saveToChangeHistory()
+	' 		- redrawAll()
+	' 		- mousedown()
+	' 		- mousemove()
+	' 		- mouseup()
+	' 		- keydown()
+	' 		- keyup()
+	' 		- scroll()
+	' 		+ undo()
+	' 		+ redo()
+	' 		+ saveToChangeHistory()
 
-			{static} + isShortcutPressed(_s: Shortcut): boolean
+	' 		{static} + isShortcutPressed(_s: Shortcut): boolean
 
-		}
+	' 	}
 
-		class ToolManager {
-			{static} tools: Tool[]
-			{static} registerTool()
-		}
+	' 	class ToolManager {
+	' 		{static} tools: typeof Tool[]
+	' 		{static} registerTool()
+	' 	}
 
-		abstract Tool implements UIElement{
-			name: string
-			subMenu: UIElement
-			shortcut: Shortcut
-			selectedSubTool: Tool
-			subTools: Tool[]
-			' cursor: Image
-			mousedown()
-			mousemove()
-			mouseup()
-			mousescroll()
-			prequisitesFulfilled(): boolean
-			additionalDisplay(crc: CanvasRenderingContext2D)
-			addAdditionalSubMenuOptions()
-			exit()
-		}
+	' 	class Tool {
+	' 		subMenu: UIElement
+	' 		shortcut: Shortcut
+	' 		selectedSubTool: Tool
+	' 		subTools: Tool[]
+	' 		' cursor: Image
+	' 		mousedown()
+	' 		mousemove()
+	' 		mouseup()
+	' 		mousescroll()
+	' 		prequisitesFulfilled(): boolean
+	' 		additionalDisplay(crc: CanvasRenderingContext2D)
+	' 		addAdditionalSubMenuOptions()
+	' 		exit()
+	' 	}
 
-		class ToolSelect extends Tool {
-			boxSelect: boolean
-			multiSelectShortcut: Shortcut
-			move: MoveTool
-			startPosition: Vector2
-			currentPosition: Vector2
-		}
-		class ToolMove extends Tool {
-			- previousPosition: Vector2
-		}
-		class ToolTransform extends Tool {
-			scaleUp: SketchPoint
-			scaleDown: SketchPoint
-			scaleLeft: SketchPoint
-			scaleRight: SketchPoint
-			scaleUpLeft: SketchPoint
-			scaleUpRight: SketchPoint
-			scaleDownLeft: SketchPoint
-			scaleDownRight: SketchPoint
-			scalePoints: SketchPoint[]
-			selectedScalePoint: SketchPoint
+	' 	class ToolSelect extends Tool {
+	' 		boxSelect: boolean
+	' 		multiSelectShortcut: Shortcut
+	' 		move: MoveTool
+	' 		startPosition: Vector2
+	' 		currentPosition: Vector2
+	' 	}
+	' 	class ToolMove extends Tool {
+	' 		- previousPosition: Vector2
+	' 	}
+	' 	class ToolTransform extends Tool {
+	' 		scaleUp: SketchPoint
+	' 		scaleDown: SketchPoint
+	' 		scaleLeft: SketchPoint
+	' 		scaleRight: SketchPoint
+	' 		scaleUpLeft: SketchPoint
+	' 		scaleUpRight: SketchPoint
+	' 		scaleDownLeft: SketchPoint
+	' 		scaleDownRight: SketchPoint
+	' 		scalePoints: SketchPoint[]
+	' 		selectedScalePoint: SketchPoint
 			
-			move: MoveTool
-			rotate: RotateTool
-			scale: ScaleTool
-		}
-		class ToolScale extends Tool {
-			- previousPosition: Vector2
-			- referencePoint: Vector2
-			- mode: "x" | "y" | "xy"
-		}
-		class ToolRotate extends Tool {
-			- previousPosition: Vector2
-		}
-		class ToolCreateShapes extends Tool {
-			- startPosition: Vector2
-			- currentPosition: Vector2
-			{static} - shapes: Shape[]
-			- selectedShape: Shape
-			{static} + registerShape()
-		}
-		interface Shape {
-			identifier: string
-			createSketchPath(pos1: Vector2, pos2: Vector2): SketchPath
-			additionalParameters:Object
-		}
-		class ToolVertexManipulation extends Tool {
+	' 		move: MoveTool
+	' 		rotate: RotateTool
+	' 		scale: ScaleTool
+	' 	}
+	' 	class ToolScale extends Tool {
+	' 		- previousPosition: Vector2
+	' 		- referencePoint: Vector2
+	' 		- mode: "x" | "y" | "xy"
+	' 	}
+	' 	class ToolRotate extends Tool {
+	' 		- previousPosition: Vector2
+	' 	}
+	' 	class ToolCreateShapes extends Tool {
+	' 		- startPosition: Vector2
+	' 		- currentPosition: Vector2
+	' 		{static} - shapes: typeof Shape[]
+	' 		- selectedShape: Shape
+	' 		{static} + registerShape()
+	' 	}
+	' 	interface Shape {
+	' 		identifier: string
+	' 		createSketchPath(pos1: Vector2, pos2: Vector2): SketchPath
+	' 		additionalParameters:Object
+	' 	}
+	' 	class ToolVertexManipulation extends Tool {
 
-		}
-		class ToolAddVertex extends Tool {
+	' 	}
+	' 	class ToolAddVertex extends Tool {
 
-		}
-		class ToolNewPath extends Tool {
-			- newPath: SketchPath;
-		}
-		class ToolCombine extends Tool {
+	' 	}
+	' 	class ToolNewPath extends Tool {
+	' 		- newPath: SketchPath;
+	' 	}
+	' 	class ToolCombine extends Tool {
 
-		}
-		' class ToolExport extends Tool {
+	' 	}
+	' 	' class ToolExport extends Tool {
 
-		' }
-		class ToolAlign extends Tool {
-			medthod: AlignmentMethod	
-		}
+	' 	' }
+	' 	class ToolAlign extends Tool {
+	' 		medthod: AlignmentMethod	
+	' 	}
 
 
-		'Associations
-		ToolManager -- "n" Tool
-		Editor "1"--"1" ToolManager
-		Shortcut "1"-- "1" Tool
-		Editor -- "1" Tool
-		Editor --"1" UIHandler
-		Tool "1"--"n" Tool
-		ToolCreateShapes -- "n" Shape
-		ToolTransform -->"subaction" ToolMove
-		ToolTransform --> "subaction" ToolScale 
-		ToolTransform --> "subaction" ToolRotate
-		ToolSelect --> "subaction" ToolMove
-		ToolVertexManipulation --> "subaction" ToolAddVertex 
-		ToolVertexManipulation --> "subaction" ToolNewPath
-	}
-	package SketchTypes <<Rectangle>>{
-		class Sketch extends Mutable.Mutator {
-			objects: SketchObject[]
-			export params...
-		}
+	' 	' Associations
+	' 	ToolManager -- "n" Tool
+	' 	Editor "1"-right-"1" ToolManager
+	' 	Shortcut "1" -right- "1" Tool
+	' 	Editor -- "1" Tool
+	' 	Editor -left- "1" UIHandler
+	' 	Tool "1"--"n" Tool
+	' 	ToolCreateShapes -- "n" Shape
+	' 	ToolTransform -->"subtool" ToolMove
+	' 	ToolTransform --> "subtool" ToolScale 
+	' 	ToolTransform --> "subtool" ToolRotate
+	' 	ToolSelect --> "subtool" ToolMove
+	' 	ToolVertexManipulation --> "subtool" ToolAddVertex 
+	' 	ToolVertexManipulation --> "subtool" ToolNewPath
+	' 	' UIElement -0)- UIButton
+	' 	' UIElement -0)- Tool
+	' 	Tool --() UIElement
+	' }
+	' package SketchTypes <<Rectangle>>{
+	' 	class Sketch extends Mutable {
+	' 		objects: SketchObject[]
+	' 		export params...
+	' 	}
 
-		class SketchObject extends Mutable.Mutator{
-			+ color: string | CanvasGradient | CanvasPattern
-			+ name: String
-			+ order: number
-			+ lineWidth: number
-			+ transformationPoint: SketchPoint
-			# path2d: Path2D
-			{static} sort(a: SketchObject, b: SketchObject): number
-		}
+	' 	class SketchObject extends Mutable{
+	' 		+ color: string | CanvasGradient | CanvasPattern
+	' 		+ name: String
+	' 		+ order: number
+	' 		+ lineWidth: number
+	' 		' + transformationPoint: SketchPoint
+	' 		# path2d: Path2D
+	' 		{static} sort(a: SketchObject, b: SketchObject): number
+	' 	}
 
-		class SketchPath extends SketchObject {
-			- closed: boolean
-			+ points: SketchVertex[]
-			+ fillColor: string | CanvasGradient | CanvasPattern
-			' + transformationPoint: Vector2;
-			draw(context: CanvasRenderingContext2D, selected: boolean = false)
-			generatePath2D()
-			addVertexAtPos(vertex: SketchVertex, index: number = -1)
-			move(d: Vector2)
-		}
+	' 	class SketchPath extends SketchObject {
+	' 		- closed: boolean
+	' 		+ points: SketchVertex[]
+	' 		+ fillColor: string | CanvasGradient | CanvasPattern
+	' 		' + transformationPoint: Vector2;
+	' 		draw(context: CanvasRenderingContext2D, selected: boolean = false)
+	' 		generatePath2D()
+	' 		addVertexAtPos(vertex: SketchVertex, index: number = -1)
+	' 		move(d: Vector2)
+	' 	}
 
-		class SketchPoint extends Vector2{
-			# path2d: Path2D
-			generatePath2D(): Path2D
-			draw(context: CanvasRenderingContext2D, selected: boolean = false)
-			move(delta: Vector2)
-			moveTo(newPos: Vector2)
-		}
+	' 	class SketchPoint extends Vector2{
+	' 		# path2d: Path2D
+	' 		generatePath2D(): Path2D
+	' 		draw(context: CanvasRenderingContext2D, selected: boolean = false)
+	' 		move(delta: Vector2)
+	' 		moveTo(newPos: Vector2)
+	' 	}
 
-		class SketchVertex extends SketchPoint {
-			activated: boolean
-			tangentIn: TangentPoint
-			tangentOut: TangentPoint
-			+ parent: SketchPath
-			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
-			move(dx: number, dy: number)
-			activate()
-		}
+	' 	class SketchVertex extends SketchPoint {
+	' 		activated: boolean
+	' 		tangentIn: TangentPoint
+	' 		tangentOut: TangentPoint
+	' 		+ parent: SketchPath
+	' 		draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
+	' 		move(dx: number, dy: number)
+	' 		activate()
+	' 	}
 
-		class SketchTangentPoint extends SketchPoint {
-			+ parent: SketchVertex
-			generatePath2D(): Path2D
-		}
+	' 	class SketchTangentPoint extends SketchPoint {
+	' 		+ parent: SketchVertex
+	' 		generatePath2D(): Path2D
+	' 	}
 
-		' Associations
-		Sketch -- "n" SketchObject
-		SketchPath "1" -- "n" SketchVertex
-		SketchVertex "1" -- "2" SketchTangentPoint
-	}
+	' 	' Associations
+	' 	Sketch -- "n" SketchObject
+	' 	SketchPath "1" -- "n" SketchVertex : made of
+	' 	SketchVertex "1" -- "2" SketchTangentPoint : has
+	' }
 }
 @enduml

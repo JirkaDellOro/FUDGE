@@ -1,0 +1,49 @@
+@startuml Animation
+skinparam monochrome true
+
+title Animation
+
+partition update {
+	:_time: number]
+	
+	if() then ([time ])
+		:set ranOnce to true;
+	endif
+
+	:depending on the playmode,
+	change the _time to fit inbetween
+	0 and totaltime and be in the right
+	position in the loop;
+	:also set runningBackwards depending on that;
+
+	while() is ([key in sequences])
+		:animatedObject[key] = sequences[key].evaluate(_time, runningBackwards); 
+	endwhile
+	:animatedObject.updateMutator(animatedObject);
+
+	:checkEvents(runningBackwards, _time);
+	
+	:previousTime = _time;
+	stop
+}
+
+partition checkEvents {
+	:_runningBackwards: boolean
+	:_time: number]
+	while () is ([event of events])
+		if() then ([!_runningBackwards && previousTime < event.time < _time])
+			:sendAnimationEvent(event.name);
+		elseif () then ([_runningBackwards && previousTime > event.time > _time])
+			:sendAnimationEvent(event.name);
+		endif
+	endwhile
+	stop
+}
+
+partition sendAnimationEvent {
+	:_name: string]
+	:fire Event named _name;
+	stop
+}
+
+@enduml

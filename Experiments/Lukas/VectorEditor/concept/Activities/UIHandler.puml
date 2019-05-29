@@ -5,18 +5,19 @@ title UIHandler
 
 partition init {
 	start
-	:loadActions Ѱ;
-	:loadShortcuts ᴪ;
+	'ᴪ Ѱ
+	:loadTools ₼;
+	:loadShortcuts ₼;
 	:createUI ₼;
 	stop 
 }
 break
 
-partition loadActions{
+partition loadTools{
 	start
-	:this.actions = [];
-	:this.actions.push(new SelectAction())
-	this.actions.push(new MoveAction())
+	:this.tools = [];
+	:this.tools.push(new ToolSelect())
+	this.tools.push(new ToolMove())
 	...;
 	stop
 }
@@ -25,13 +26,13 @@ break
 
 partition createUI {
 	start
-	while () is ([a of actions])
+	while () is ([a of tools])
 		:create Button for a
 		in Main Toolbar, save
 		it in a.buttonElement;
 		:create secondary Toolbar for a
 		and save it in a.subMenu;
-		while () is ([s of a.subActions])
+		while () is ([s of a.subTools])
 			:create Button for s
 			in a.subMenu, save it in
 			s.buttonElement;
@@ -40,8 +41,8 @@ partition createUI {
 	:add Eventlisteners to MainMenu 
 	& secondary Menus 
 	& propertiesMenu container;
-	if () then([!Editor.selectedAction])
-		:Editor.selectedAction = actions[0];
+	if () then([!Editor.selectedTool])
+		:Editor.selectedTool = tools[0];
 	endif
 	:updateUI ₼;
 	stop
@@ -51,7 +52,7 @@ break
 
 partition updateUI {
 	start
-	while () is ([a of actions])
+	while () is ([a of tools])
 		:deselect a.buttonElement;
 		:make a.subMenu invisible;
 		if() then ([!a.prequisitesFulfilled()])
@@ -64,14 +65,14 @@ partition updateUI {
 			endif
 		endwhile
 	endwhile
-	:select Editor.selectedAction.buttonElement;
-	:make Editor.selectedAction.subMenu visible;
-	if() then ([!Editor.selectedAction.selectedSubAction &&
-	Editor.selectedAction.subActions.length > 0])
-		:E.sA.selectedSubAction = E.sA.subActions[0];
+	:select Editor.selectedTool.buttonElement;
+	:make Editor.selectedTool.subMenu visible;
+	if() then ([!Editor.selectedTool.selectedSubTool &&
+	Editor.selectedTool.subTools.length > 0])
+		:E.sA.selectedSubTool = E.sA.subTools[0];
 	endif
-	if() then ([Editor.selectedAction.selectedSubAction])
-		:select E.sA.selectedSubAction button;
+	if() then ([Editor.selectedTool.selectedSubTool])
+		:select E.sA.selectedSubTool button;
 	endif
 	:update propertiesMenu;
 	stop
@@ -82,9 +83,9 @@ break
 partition handleClick{
 	:_event: MouseEvent]
 	if() then ([_event.target is HTMLButtonElement])
-		:runAction: Action = getActionToButton(_event.target)];
-		if() then([runAction.prequisitesFulfilled()])
-			:Editor.selectedAction = runAction;
+		:runTool: Tool = getToolToButton(_event.target)];
+		if() then([runTool.prequisitesFulfilled()])
+			:Editor.selectedTool = runTool;
 			:updateUI ₼;
 		endif
 	endif
@@ -93,7 +94,7 @@ partition handleClick{
 
 break
 
-partition getActionToButton{
+partition getToolToButton{
 	:_button: HTMLButtonElement]
 }
 

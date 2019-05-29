@@ -1,0 +1,95 @@
+@startuml Sequence
+skinparam monochrome true
+
+title Sequence
+
+partition evaluate {
+	:_time: number
+	_runningBackwards: boolean = false]
+
+	if () then ([keys.length = 0])
+		:Throw Error]
+	detach
+	endif
+	if () then ([keys.length = 1])
+		:keys[0].value]
+	detach
+	endif
+
+	if () then ([!_runningBackwards && [keys[0].time < _time]])
+		:keys[0].value]
+		detach
+	endif
+
+	if () then ([_runningBackwards && [keys[-1].time > _time]])
+		:keys[-1].value]
+		detach
+	endif
+
+	if() then ([!_runningBackwards])
+		:leftKey = keys[0] ]
+		while () is ([k of keys])
+			if() then ([k.time > leftKey.time && < _time])
+				:leftKey = key;
+			endif
+		endwhile
+		:leftKey.functionOut.evaluate(_time) ]
+	else
+		:rightKey = keys[-1] ]
+		while () is ([k of keys])
+			if() then ([k.time < rightKey.time && > _time])
+				:rightKey = key;
+			endif
+		endwhile
+		:rightKey.functionIn.evaluate(_time) ]
+	endif
+	detach
+}
+
+partition addKey {
+	:_key: Key]
+	if() then ([keys.length = 0])
+		:keys.push(key);
+		detach
+	endif
+	:keys.sort(Key.sort);
+	:i: number = 0]
+	while() is ([i < keys.length])
+		if() then ([keys[i].time > _key.time])
+			:insert k into keys at i;
+			:generateNewFunctions();
+			:break;
+		endif
+		:i++;
+	endwhile
+	stop
+}
+
+partition removeKey {
+	:_key: Key]
+	:ind: keys.getIndexOf(_key)]
+	:keys.splice(ind,1);
+	:keys.sort(Key.sort);
+	:generateNewFunctions();
+	stop
+}
+
+partition generateNewFunctions {
+	start
+	if() then ([keys.length = 0])
+		:throw Error;
+		detach
+	endif
+	:i: number = 0]
+	while() is ([i < keys.length])
+		:f: Function = new Function (keys[i-1], keys[i]);
+		:keys[i].functionIn = f;
+		if() then ([i > 0])
+			:keys[i-1].functionOut = f;
+		endif
+	endwhile
+	:f: Function = new Function (keys[keys.length - 1], null);
+	:keys[keys.length - 1].functionOut = f;
+}
+
+@enduml
