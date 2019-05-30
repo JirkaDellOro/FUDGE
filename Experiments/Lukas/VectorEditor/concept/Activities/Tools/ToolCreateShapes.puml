@@ -25,14 +25,14 @@ partition mousemove {
 
 partition mouseup {
 	:_event: MouseEvent]
-	:newPath: DrawPath = selectedShape.createDrawPath(
+	:newPath: SketchPath = selectedShape.createSketchPath(
 		startPosition, currentPosition)]
 	stop
 }
 
 partition additionalDisplay {
 	:_crc: CanvasRenderingContext2D]
-	:electedShape.createDrawPath(
+	:electedShape.createSketchPath(
 		startPosition, currentPosition)
 		.draw(_crc);
 	stop

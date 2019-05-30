@@ -5,7 +5,7 @@ title ToolTransform
 
 partition mousedown {
 	:_event: MouseEvent]
-	:point: DrawPoint = Editor.getPathOrPointTheMouseIsOver()]
+	:point: SketchPoint = Editor.getPathOrPointTheMouseIsOver()]
 	:rect: TransformRect = calculateTransformationRect()]
 	if () then ([point])
 		:selectedSubTool = scale;

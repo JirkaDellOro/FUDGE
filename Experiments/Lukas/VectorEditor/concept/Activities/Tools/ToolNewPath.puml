@@ -8,10 +8,10 @@ partition mousedown {
 	if() then ([isPointInPath(newPath.points[0].path2d, clientX, clientY)])
 		:newPath.close();
 		:Editor.paths.push(newPath);
-		:newPath = new DrawPath();
+		:newPath = new SketchPath();
 		stop
 	endif
-	:newPath.addVertexToPos(new Vertex (clientX, clientY),-1);
+	:newPath.addVertexToPos(new SketchVertex (clientX, clientY),-1);
 	stop
 }
 

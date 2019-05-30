@@ -19,7 +19,7 @@ partition redrawAll {
 	endwhile
 
 	while() is ([point of selectedPoints])
-		if() then ([point is Vertex])
+		if() then ([point is SketchVertex])
 			:point.draw(crc, true, tangentsActive);
 		else
 			:point.draw(crc, true);

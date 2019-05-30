@@ -1,7 +1,7 @@
-@startuml DrawPoint
+@startuml SketchPoint
 skinparam monochrome true
 
-title DrawPoint
+title SketchPoint
 
 partition draw {
 	:_context: CanvasRenderingContext

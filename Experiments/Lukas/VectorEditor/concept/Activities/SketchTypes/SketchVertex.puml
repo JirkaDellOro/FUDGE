@@ -1,7 +1,7 @@
-@startuml Vertex
+@startuml SketchVertex
 skinparam monochrome true
 
-title Vertex
+title SketchVertex
 
 partition draw {
 	:_context: CanvasRenderingContext

@@ -1,10 +1,10 @@
-@startuml DrawPath
+@startuml SketchPath
 skinparam monochrome true
 
-title DrawPath
+title SketchPath
 
 partition addVertexAtPos {
-	:_vertex: Vertex
+	:_vertex: SketchVertex
 	_index: number = -1;
 	if() then ([_index < 0])
 		:_index = points.length + _index;
@@ -13,7 +13,7 @@ partition addVertexAtPos {
 		:Error: out of bounds]
 		stop
 	endif
-	:tmp: DrawPoint[] = points.splice(_index,points.length-_index)]
+	:tmp: SketchPoint[] = points.splice(_index,points.length-_index)]
 	:points.push(_vertex);
 	:points = points + tmp;
 	stop

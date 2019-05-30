@@ -10,7 +10,7 @@ partition mousedown {
 	note: this is the hard part
 	:index: number = the following vertex index]
 	:Editor.selectedPath.addVertexAtPosition(
-		new Vertex(clientX, clientY), index);
+		new SketchVertex(clientX, clientY), index);
 	stop
 }
 

@@ -1,7 +1,7 @@
-@startuml Tangent
+@startuml SketchTangentPoint
 skinparam monochrome true
 
-title Tangent
+title SketchTangentPoint
 
 partition generatePath2D {
 	start

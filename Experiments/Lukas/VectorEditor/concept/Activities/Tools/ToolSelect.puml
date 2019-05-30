@@ -6,7 +6,7 @@ title ToolSelect
 
 partition mousedown {
 	:_event: MouseEvent]
-	:selectedObject: DrawPoint | DrawPath = 
+	:selectedObject: SketchPoint | SketchPath = 
 	Editor.getPathOrPointTheMouseIsOver()]
 	if() then ([selectedObject])
 		if() then ([Editor.isShortcutPressed(multiSelectShortcut)])
@@ -26,7 +26,7 @@ partition mousedown {
 	stop
 }
 
-' TODO: doubleclick on Vertex to move
+' TODO: doubleclick on SketchVertex to move
 
 partition mousemove {
 	:_event: MouseEvent]
