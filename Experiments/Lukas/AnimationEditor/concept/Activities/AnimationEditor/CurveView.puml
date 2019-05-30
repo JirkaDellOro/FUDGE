@@ -1,0 +1,32 @@
+@startuml CurveView
+skinparam monochrome true
+
+title CurveView
+
+partition moveKeyTo {
+	:_k: Key 
+	_pos: Vector 2]
+	:set _k.value to _pos.y, according to scale;
+	:set _k.time to _pos.x, according to scale;
+	stop
+}
+
+partition updateView {
+	:get all Keys that should be visible;
+	:draw the Keys with Bezier Curves
+	inbetween them according to scale;
+	if() then (editor.selectedKey)
+		:draw the selectedKey in bold;
+		:draw Slopes of selectedKey;
+	endif
+	stop
+}
+
+partition scroll {
+	:change: Vector2]
+	:if scroll is a zoom, increase/decrease scale in both x and y;
+	:updateView();
+	stop
+}
+
+@enduml

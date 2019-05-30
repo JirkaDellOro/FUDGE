@@ -1,0 +1,72 @@
+@startuml AnimationEditor
+skinparam monochrome true
+
+title Editor
+
+partition mousedown {
+	:_event: MouseEvent]
+	if() then ([mouse above key in canvas])
+		:selectedKey = key
+		selectedSlope = "";
+	else if() then ([mouse above left slope anker in canvas])
+		:selectedSlope = "left";
+	else if() then ([mouse above right slope anker in canvas])
+		:selectedSlope = "right";
+	else
+		:selectedKey = null
+		selectedSlope = "";
+	endif
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([!left button pressed])
+		stop
+	endif
+	if() then ([!selectedKey])
+		stop
+	endif
+	:adjust mouse x position to closest Section;
+	if() then ([selectedSlope = ""])
+		:uiHandler.selectedView.moveKeyTo(selectedKey, Mouseposition);
+	else
+		:set selectedSlope value depending on
+		the relative mouse position to the key;
+	endif
+	:uiHandler.selectedView.updateView();
+	stop
+}
+
+partition mouseup {
+	:_event: MouseEvent]
+	stop
+}
+
+partition keydown {
+	:_event: KeyboardEvent]
+	:_event.preventDefault();
+	if() then ([!pressedKeys has _event.keyCode])
+		:pressedKeys.push(_event.keyCode);
+	endif
+	stop 
+}
+break
+
+partition keyup {
+	:_event: KeyboardEvent]
+	:_event.preventDefault();
+	if() then ([pressedKeys has _event.keyCode])
+		:pressedKeys.remove(_event.keyCode);
+	endif
+	stop
+}
+
+partition scroll {
+	:_event: WheelEvent]
+	:depending on pressed keys, make it a zoom
+	or a scroll and propagate that to uiHandler.selectedView;
+	stop
+}
+
+@enduml
