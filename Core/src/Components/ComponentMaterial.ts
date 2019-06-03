@@ -11,7 +11,7 @@ namespace Fudge {
             this.material = _material;
         }
 
-        public get Material(): Material {
+        public getMaterial(): Material {
             return this.material;
         }
 

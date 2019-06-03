@@ -6,9 +6,9 @@ namespace Scenes {
     export let viewPort: ƒ.Viewport;
 
     export function createAxisCross(): ƒ.Node {
-        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
-        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 1);
-        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 1);
+        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 0.5);
+        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 0.5);
+        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 0.5);
 
         let coatRed: ƒ.CoatColored = new ƒ.CoatColored();
         coatRed.params.color = clrRed; 
@@ -75,7 +75,7 @@ namespace Scenes {
             document.body.appendChild(_canvas);
         }
         viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", node, camera.getComponent(ƒ.ComponentCamera), _canvas);
+        viewPort.initialize("TestViewport", node, camera.getComponent(ƒ.ComponentMaterial), _canvas);
         // viewPort.drawScene();
         viewPort.showSceneGraph();
     }

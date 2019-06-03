@@ -4,7 +4,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Material {
-        private name: string; // The name to call the Material by.
+        public name: string; // The name to call the Material by.
         private shaderType: typeof Shader; // The shader program used by this BaseMaterial
         private coat: Coat;
 
@@ -49,11 +49,8 @@ namespace Fudge {
         }
 
         // Get methods. ######################################################################################
-        public get Shader(): typeof Shader {
+        public getShader(): typeof Shader {
             return this.shaderType;
-        }
-        public get Name(): string {
-            return this.name;
         }
         // public get Color(): Color {
         //     return this.color;

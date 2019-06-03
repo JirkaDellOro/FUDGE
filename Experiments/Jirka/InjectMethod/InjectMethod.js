@@ -20,17 +20,21 @@ var InjectMethod;
         }
     };
     __decorate([
-        replace
+        replaceViaMethodDecorator // function must already exist
     ], Test.prototype, "replaced", null);
     Test = __decorate([
         injectViaConstructorExtension
     ], Test);
-    function replace(_target, _propertyKey, _descriptor) {
+    function replaceViaMethodDecorator(_target, _propertyKey, _descriptor) {
         console.log(_target, _propertyKey, _descriptor);
         console.log(_target.constructor == Test);
         _descriptor.value = function () {
             console.log("Hi, I've been replaced for ", this);
+            innerCall(this);
         };
+    }
+    function innerCall(_o) {
+        console.log("And this is an inner call from ", _o);
     }
     function injectViaConstructorReplacement() {
         function injected() {

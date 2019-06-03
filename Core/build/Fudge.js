@@ -1,4 +1,10 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var Fudge;
 (function (Fudge) {
     /**
@@ -84,9 +90,35 @@ var Fudge;
     }
     Fudge.Mutable = Mutable;
 })(Fudge || (Fudge = {}));
+///<reference path="../Coat/Coat.ts"/>
+var Fudge;
+///<reference path="../Coat/Coat.ts"/>
+(function (Fudge) {
+    let coatExtensions = {
+        "CoatColored": extendCoatColored
+    };
+    function decorateCoatWithRenderExtension(_constructor) {
+        let coatExtension = coatExtensions[_constructor.name];
+        if (!coatExtension) {
+            Fudge.Debug.error("No extension decorator defined for " + _constructor.name);
+        }
+        Object.defineProperty(_constructor.prototype, "setRenderData", {
+            value: coatExtension
+        });
+    }
+    Fudge.decorateCoatWithRenderExtension = decorateCoatWithRenderExtension;
+    function extendCoatColored(_shaderInfo) {
+        let colorUniformLocation = _shaderInfo.uniforms["u_color"];
+        let c = this.params.color;
+        let color = new Float32Array([c.r, c.g, c.b, c.a]);
+        Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+    }
+})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderExtensions.ts"/>
 var Fudge;
 /// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderExtensions.ts"/>
 (function (Fudge) {
     class Coat extends Fudge.Mutable {
         constructor() {
@@ -97,10 +129,11 @@ var Fudge;
         mutate(_mutator) {
             super.mutate(_mutator);
         }
+        setRenderData(_shaderInfo) { }
         reduceMutator() { }
     }
     Fudge.Coat = Coat;
-    class CoatColored extends Coat {
+    let CoatColored = class CoatColored extends Coat {
         constructor() {
             super(...arguments);
             this.params = {
@@ -108,7 +141,10 @@ var Fudge;
             };
         }
         reduceMutator() { }
-    }
+    };
+    CoatColored = __decorate([
+        Fudge.decorateCoatWithRenderExtension
+    ], CoatColored);
     Fudge.CoatColored = CoatColored;
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -374,7 +410,7 @@ var Fudge;
         initialize(_material) {
             this.material = _material;
         }
-        get Material() {
+        getMaterial() {
             return this.material;
         }
     }
@@ -1008,11 +1044,8 @@ var Fudge;
             coat.mutate(this.coat.getMutator());
         }
         // Get methods. ######################################################################################
-        get Shader() {
+        getShader() {
             return this.shaderType;
-        }
-        get Name() {
-            return this.name;
         }
     }
     Fudge.Material = Material;
@@ -2462,6 +2495,12 @@ var Fudge;
             return RenderOperator.crc3.canvas;
         }
         /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext() {
+            return RenderOperator.crc3;
+        }
+        /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         static getCanvasRect() {
@@ -2491,26 +2530,22 @@ var Fudge;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
          * @param _projection
          */
-        static draw(shaderInfo, bufferInfo, materialInfo, _projection) {
-            RenderOperator.useBuffer(bufferInfo);
-            RenderOperator.useParameter(materialInfo);
-            RenderOperator.useProgram(shaderInfo);
-            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+        static draw(_shaderInfo, _bufferInfo, _coatInfo, _projection) {
+            RenderOperator.useBuffer(_bufferInfo);
+            RenderOperator.useParameter(_coatInfo);
+            RenderOperator.useProgram(_shaderInfo);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
             // Supply matrixdata to shader. 
-            let matrixLocation = shaderInfo.uniforms["u_matrix"];
+            let matrixLocation = _shaderInfo.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            // Supply color
-            let colorUniformLocation = shaderInfo.uniforms["u_color"];
-            let c = materialInfo.color;
-            let color = new Float32Array([c.r, c.g, c.b, 1.0]);
-            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
+            _coatInfo.coat.setRenderData(_shaderInfo);
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
         }
         // #region Shaderprogram 
         static createProgram(_shaderClass) {
@@ -2605,22 +2640,22 @@ var Fudge;
         }
         // #endregion
         // #region MaterialParameters
-        static createParameter(_material) {
+        static createParameter(_coat) {
             let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
-            let materialInfo = {
+            let coatInfo = {
                 vao: vao,
                 // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
-                color: _material.getCoat().params.color
+                coat: _coat
             };
-            return materialInfo;
+            return coatInfo;
         }
-        static useParameter(_materialInfo) {
-            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
+        static useParameter(_coatInfo) {
+            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
-        static deleteParameter(_materialInfo) {
-            if (_materialInfo) {
+        static deleteParameter(_coatInfo) {
+            if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
+                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
         // #endregion
@@ -2642,7 +2677,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * This class manages the references to render data used by nodes.
-     * Multiple nodes may refer to the same data via their references to shader, material and mesh
+     * Multiple nodes may refer to the same data via their references to shader, coat and mesh
      */
     class Reference {
         constructor(_reference) {
@@ -2665,7 +2700,7 @@ var Fudge;
     }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends Fudge.RenderOperator {
@@ -2677,13 +2712,16 @@ var Fudge;
         static addNode(_node) {
             if (this.nodes.get(_node))
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            if (!cmpMaterial)
+                return;
+            let shader = cmpMaterial.getMaterial().getShader();
             this.createReference(this.programs, shader, this.createProgram);
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            this.createReference(this.parameters, material, this.createParameter);
+            let coat = cmpMaterial.getMaterial().getCoat();
+            this.createReference(this.parameters, coat, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             this.createReference(this.buffers, mesh, this.createBuffer);
-            let nodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
         /**
@@ -2697,7 +2735,7 @@ var Fudge;
                     this.addNode(node);
                 }
                 catch (_e) {
-                    //console.log(_e);
+                    console.log(_e);
                 }
         }
         // #endregion
@@ -2711,7 +2749,7 @@ var Fudge;
             if (!nodeReferences)
                 return;
             this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
+            this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
             this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
             this.nodes.delete(_node);
         }
@@ -2726,24 +2764,25 @@ var Fudge;
         // #endregion
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node) {
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            let shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
                 this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
                 this.createReference(this.programs, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            if (material !== nodeReferences.material) {
-                this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
-                this.createReference(this.parameters, material, this.createParameter);
-                nodeReferences.material = material;
+            let coat = cmpMaterial.getMaterial().getCoat();
+            if (coat !== nodeReferences.coat) {
+                this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
+                this.createReference(this.parameters, coat, this.createParameter);
+                nodeReferences.coat = coat;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
@@ -2835,9 +2874,9 @@ var Fudge;
             if (!references)
                 return; // TODO: deal with partial references
             let bufferInfo = this.buffers.get(references.mesh).getReference();
-            let materialInfo = this.parameters.get(references.material).getReference();
+            let coatInfo = this.parameters.get(references.coat).getReference();
             let shaderInfo = this.programs.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -2895,7 +2934,7 @@ var Fudge;
     }
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.programs = new Map();
-    /** Stores references to the vertex array objects and makes them available via the references to materials */
+    /** Stores references to the vertex array objects and makes them available via the references to coats */
     RenderManager.parameters = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
     RenderManager.buffers = new Map();

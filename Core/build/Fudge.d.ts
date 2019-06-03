@@ -60,6 +60,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    function decorateCoatWithRenderExtension(_constructor: Function): void;
+}
+declare namespace Fudge {
     interface ShaderParameters {
         [key: string]: number | Color;
     }
@@ -67,6 +70,7 @@ declare namespace Fudge {
         name: string;
         params: ShaderParameters;
         mutate(_mutator: Mutator): void;
+        setRenderData(_shaderInfo: ShaderInfo): void;
         reduceMutator(): void;
     }
     class CoatColored extends Coat {
@@ -197,7 +201,7 @@ declare namespace Fudge {
     class ComponentMaterial extends Component {
         private material;
         initialize(_material: Material): void;
-        readonly Material: Material;
+        getMaterial(): Material;
     }
 }
 declare namespace Fudge {
@@ -541,7 +545,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
-        private name;
+        name: string;
         private shaderType;
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
@@ -549,8 +553,7 @@ declare namespace Fudge {
         setCoat(_coat: Coat): void;
         getCoat(): Coat;
         setShader(_shaderType: typeof Shader): void;
-        readonly Shader: typeof Shader;
-        readonly Name: string;
+        getShader(): typeof Shader;
     }
 }
 declare namespace Fudge {
@@ -1100,9 +1103,9 @@ declare namespace Fudge {
         specification: BufferSpecification;
         vertexCount: number;
     }
-    interface MaterialInfo {
+    interface CoatInfo {
         vao: WebGLVertexArrayObject;
-        color: Color;
+        coat: Coat;
     }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
@@ -1126,6 +1129,10 @@ declare namespace Fudge {
          */
         static getCanvas(): HTMLCanvasElement;
         /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext(): WebGL2RenderingContext;
+        /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         static getCanvasRect(): Rectangle;
@@ -1144,21 +1151,21 @@ declare namespace Fudge {
         static getViewportRectangle(): Rectangle;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
          * @param _projection
          */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
+        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
         protected static useProgram(_shaderInfo: ShaderInfo): void;
         protected static deleteProgram(_program: ShaderInfo): void;
         protected static createBuffer(_mesh: Mesh): BufferInfo;
         protected static useBuffer(_bufferInfo: BufferInfo): void;
         protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_material: Material): MaterialInfo;
-        protected static useParameter(_materialInfo: MaterialInfo): void;
-        protected static deleteParameter(_materialInfo: MaterialInfo): void;
+        protected static createParameter(_coat: Coat): CoatInfo;
+        protected static useParameter(_coatInfo: CoatInfo): void;
+        protected static deleteParameter(_coatInfo: CoatInfo): void;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
@@ -1170,13 +1177,13 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs;
-        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        /** Stores references to the vertex array objects and makes them available via the references to coats */
         private static parameters;
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
         private static buffers;
@@ -1202,7 +1209,7 @@ declare namespace Fudge {
          */
         static removeBranch(_node: Node): void;
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node: Node): void;

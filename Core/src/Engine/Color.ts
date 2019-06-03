@@ -11,10 +11,5 @@ namespace Fudge {
             this.b = _b;
             this.a = _a;
         }
-
-        // @replaceByRenderOperator
-        getRenderData(): Object {
-            return "Test";
-        }
     }
 }

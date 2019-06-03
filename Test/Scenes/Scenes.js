@@ -2,9 +2,9 @@ var Scenes;
 (function (Scenes) {
     var ƒ = Fudge;
     function createAxisCross() {
-        let clrRed = new ƒ.Color(1, 0, 0, 1);
-        let clrGreen = new ƒ.Color(0, 1, 0, 1);
-        let clrBlue = new ƒ.Color(0, 0, 1, 1);
+        let clrRed = new ƒ.Color(1, 0, 0, 0.5);
+        let clrGreen = new ƒ.Color(0, 1, 0, 0.5);
+        let clrBlue = new ƒ.Color(0, 0, 1, 0.5);
         let coatRed = new ƒ.CoatColored();
         coatRed.params.color = clrRed;
         let coatGreen = new ƒ.CoatColored();
@@ -59,7 +59,7 @@ var Scenes;
             document.body.appendChild(_canvas);
         }
         Scenes.viewPort = new ƒ.Viewport();
-        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), _canvas);
+        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentMaterial), _canvas);
         // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }

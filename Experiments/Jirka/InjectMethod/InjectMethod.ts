@@ -4,7 +4,7 @@ namespace InjectMethod {
     interface Test {
         injected?: Function;
     }
-    // enforce existence of functino "replaced" to be replaced by decoration
+    // enforce existence of function "replaced" to be replaced by decoration
     interface Decoratable {
         replaced: Function;
     }
@@ -33,7 +33,12 @@ namespace InjectMethod {
         console.log(_target.constructor == Test);
         _descriptor.value = function (this: Object): void {
             console.log("Hi, I've been replaced for ", this);
+            innerCall(this);
         };
+    }
+
+    function innerCall( _o: Object): void {
+        console.log("And this is an inner call from ", _o);
     }
 
     function injectViaConstructorReplacement(): Function {
