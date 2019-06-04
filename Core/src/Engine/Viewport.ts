@@ -284,33 +284,5 @@ namespace Fudge {
             }
             return output;
         }
-
-        /*/*
-         * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-        //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-        //     // _meshComponent.applyColor(_materialComponent);
-        //     //gl2.enableVertexAttribArray(colorUniformLocation);
-        //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
-        // }
-
-        /*/*
-         * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-        //     _meshComponent.setTextureCoordinates();
-        //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-        //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-        //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-        // }
     }
 }

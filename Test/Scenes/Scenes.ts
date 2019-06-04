@@ -10,12 +10,9 @@ namespace Scenes {
         let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 0.5);
         let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 0.5);
 
-        let coatRed: ƒ.CoatColored = new ƒ.CoatColored();
-        coatRed.params.color = clrRed; 
-        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored();
-        coatGreen.params.color = clrGreen; 
-        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored();
-        coatBlue.params.color = clrBlue; 
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(clrGreen);
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(clrBlue);
 
         let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
         let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);

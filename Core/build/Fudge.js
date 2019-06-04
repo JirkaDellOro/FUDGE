@@ -106,28 +106,249 @@ var Fudge;
         }
         static extendCoatColored(_shaderInfo) {
             let colorUniformLocation = _shaderInfo.uniforms["u_color"];
-            let c = this.params.color;
-            let color = new Float32Array([c.r, c.g, c.b, c.a]);
+            let { r, g, b, a } = this.color;
+            let color = new Float32Array([r, g, b, a]);
             Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+        }
+        static extendCoatTextured(_shaderInfo) {
+            let textureBufferSpecification = { size: 2, dataType: WebGLRenderingContext.FLOAT, normalize: true, stride: 0, offset: 0 };
+            let textureCoordinateAtributeLocation = Fudge.RenderManager.assert(_shaderInfo.attributes["a_textureCoordinate"]);
         }
     }
     RenderExtender.coatExtensions = {
-        "CoatColored": RenderExtender.extendCoatColored
+        "CoatColored": RenderExtender.extendCoatColored,
+        "CoatTextured": RenderExtender.extendCoatTextured
     };
     Fudge.RenderExtender = RenderExtender;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
+    class RenderOperator {
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert(_value, _message = "") {
+            if (_value === null)
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
+            return _value;
+        }
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         */
+        static initialize() {
+            let contextAttributes = { alpha: false, antialias: false };
+            let canvas = document.createElement("canvas");
+            RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
+            // Enable backface- and zBuffer-culling.
+            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
+            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
+            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+        }
+        /**
+         * Return a reference to the offscreen-canvas
+         */
+        static getCanvas() {
+            return RenderOperator.crc3.canvas;
+        }
+        /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext() {
+            return RenderOperator.crc3;
+        }
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
+        static getCanvasRect() {
+            let canvas = RenderOperator.crc3.canvas;
+            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
+        }
+        /**
+         * Set the size of the offscreen-canvas.
+         */
+        static setCanvasSize(_width, _height) {
+            RenderOperator.crc3.canvas.width = _width;
+            RenderOperator.crc3.canvas.height = _height;
+        }
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
+        static setViewportRectangle(_rect) {
+            Object.assign(RenderOperator.rectViewport, _rect);
+            RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
+        static getViewportRectangle() {
+            return RenderOperator.rectViewport;
+        }
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
+         * @param _projection
+         */
+        static draw(_shaderInfo, _bufferInfo, _coatInfo, _projection) {
+            RenderOperator.useBuffer(_bufferInfo);
+            RenderOperator.useParameter(_coatInfo);
+            RenderOperator.useProgram(_shaderInfo);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
+            // Supply matrixdata to shader. 
+            let matrixLocation = _shaderInfo.uniforms["u_matrix"];
+            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            _coatInfo.coat.setRenderData(_shaderInfo);
+            // Draw call
+            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
+        }
+        // #region Shaderprogram 
+        static createProgram(_shaderClass) {
+            let crc3 = RenderOperator.crc3;
+            let shaderProgram = crc3.createProgram();
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.linkProgram(shaderProgram);
+            let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
+            if (error !== "") {
+                throw new Error("Error linking Shader: " + error);
+            }
+            let program = {
+                program: shaderProgram,
+                attributes: detectAttributes(),
+                uniforms: detectUniforms()
+            };
+            return program;
+            function compileShader(_shaderCode, _shaderType) {
+                let webGLShader = crc3.createShader(_shaderType);
+                crc3.shaderSource(webGLShader, _shaderCode);
+                crc3.compileShader(webGLShader);
+                let error = RenderOperator.assert(crc3.getShaderInfoLog(webGLShader));
+                if (error !== "") {
+                    throw new Error("Error compiling shader: " + error);
+                }
+                // Check for any compilation errors.
+                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                    alert(crc3.getShaderInfoLog(webGLShader));
+                    return null;
+                }
+                return webGLShader;
+            }
+            function detectAttributes() {
+                let detectedAttributes = {};
+                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                for (let i = 0; i < attributeCount; i++) {
+                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(shaderProgram, i));
+                    if (!attributeInfo) {
+                        break;
+                    }
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                }
+                return detectedAttributes;
+            }
+            function detectUniforms() {
+                let detectedUniforms = {};
+                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                for (let i = 0; i < uniformCount; i++) {
+                    let info = RenderOperator.assert(crc3.getActiveUniform(shaderProgram, i));
+                    if (!info) {
+                        break;
+                    }
+                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(shaderProgram, info.name));
+                }
+                return detectedUniforms;
+            }
+        }
+        static useProgram(_shaderInfo) {
+            RenderOperator.crc3.useProgram(_shaderInfo.program);
+            RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
+        }
+        static deleteProgram(_program) {
+            if (_program) {
+                RenderOperator.crc3.deleteProgram(_program.program);
+                delete _program.attributes;
+                delete _program.uniforms;
+            }
+        }
+        // #endregion
+        // #region Meshbuffer
+        static createBuffer(_mesh) {
+            let buffer = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
+            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
+            let bufferInfo = {
+                buffer: buffer,
+                target: RenderOperator.crc3.ARRAY_BUFFER,
+                specification: _mesh.getBufferSpecification(),
+                vertexCount: _mesh.getVertexCount()
+            };
+            return bufferInfo;
+        }
+        static useBuffer(_bufferInfo) {
+            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+        }
+        static deleteBuffer(_bufferInfo) {
+            if (_bufferInfo) {
+                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
+            }
+        }
+        // #endregion
+        // #region MaterialParameters
+        static createParameter(_coat) {
+            let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
+            let coatInfo = {
+                vao: vao,
+                coat: _coat
+            };
+            return coatInfo;
+        }
+        static useParameter(_coatInfo) {
+            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
+        }
+        static deleteParameter(_coatInfo) {
+            if (_coatInfo) {
+                RenderOperator.crc3.bindVertexArray(null);
+                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
+            }
+        }
+        // #endregion
+        // #region Utilities
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static attributePointer(_attributeLocation, _bufferSpecification) {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
+    }
+    Fudge.RenderOperator = RenderOperator;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Mutable.ts"/>
 /// <reference path="../Render/RenderExtender.ts"/>
+/// <reference path="../Render/RenderOperator.ts"/>
 var Fudge;
 /// <reference path="../Transfer/Mutable.ts"/>
 /// <reference path="../Render/RenderExtender.ts"/>
+/// <reference path="../Render/RenderOperator.ts"/>
 (function (Fudge) {
+    // interface ShaderParameters {
+    //     [key: string]: number | Color;
+    // }
     class Coat extends Fudge.Mutable {
         constructor() {
             super(...arguments);
             this.name = "Coat";
-            this.params = {};
         }
+        // public params: ShaderParameters = {};
         mutate(_mutator) {
             super.mutate(_mutator);
         }
@@ -136,18 +357,47 @@ var Fudge;
     }
     Fudge.Coat = Coat;
     let CoatColored = class CoatColored extends Coat {
-        constructor() {
-            super(...arguments);
-            this.params = {
-                color: new Fudge.Color(0.5, 0.5, 0.5, 1)
-            };
+        constructor(_color) {
+            super();
+            this.color = _color || new Fudge.Color(0.5, 0.5, 0.5, 1);
         }
-        reduceMutator() { }
     };
     CoatColored = __decorate([
         Fudge.RenderExtender.decorateCoat
     ], CoatColored);
     Fudge.CoatColored = CoatColored;
+    // @RenderExtender.decorateCoat
+    class CoatTextured extends Coat {
+    }
+    Fudge.CoatTextured = CoatTextured;
+    /**
+     * Adds and enables a Texture passed to this material.
+     * @param _textureSource A string holding the path to the location of the texture.
+     */
+    // public addTexture(_textureSource: string): void {
+    //     this.textureEnabled = true;
+    // }
+    /**
+     * Removes and disables a texture that was added to this material.
+     */
+    // public removeTexture(): void {
+    //     this.textureEnabled = false;
+    //     this.textureSource = "";
+    // }
+    /*/*
+     * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
+     * @param _material The node's materialcomponent.
+     * @param _mesh The node's meshcomponent.
+     */
+    // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
+    //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+    //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
+    //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
+    //     _meshComponent.setTextureCoordinates();
+    //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
+    //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
+    //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
+    // }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1007,14 +1257,10 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
-        // private color: Color;
-        // private textureEnabled: boolean;
-        // private textureSource: string;
-        // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
         constructor(_name, _shader, _coat) {
             this.name = _name;
             this.shaderType = _shader;
@@ -1024,9 +1270,6 @@ var Fudge;
                 else
                     this.setCoat(this.createCoatMatchingShader());
             }
-            // this.textureBufferSpecification = { size: 2, dataType: gl2.FLOAT, normalize: true, stride: 0, offset: 0 };
-            //this.textureEnabled = false;
-            //this.textureSource = "";
         }
         createCoatMatchingShader() {
             let coat = new (this.shaderType.getCoat())();
@@ -1045,7 +1288,6 @@ var Fudge;
             let coat = this.createCoatMatchingShader();
             coat.mutate(this.coat.getMutator());
         }
-        // Get methods. ######################################################################################
         getShader() {
             return this.shaderType;
         }
@@ -1409,32 +1651,6 @@ var Fudge;
                 let event = new Fudge.WheelEventƒ("ƒ" + _event.type, _event);
                 this.dispatchEvent(event);
             };
-            /*/*
-             * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-             * @param _material The node's materialcomponent.
-             * @param _mesh The node's meshcomponent.
-             */
-            // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            //     // _meshComponent.applyColor(_materialComponent);
-            //     //gl2.enableVertexAttribArray(colorUniformLocation);
-            //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
-            // }
-            /*/*
-             * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-             * @param _material The node's materialcomponent.
-             * @param _mesh The node's meshcomponent.
-             */
-            // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-            //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-            //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            //     _meshComponent.setTextureCoordinates();
-            //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-            //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-            // }
         }
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
@@ -2460,218 +2676,6 @@ var Fudge;
         }
     }
     Fudge.MeshCube = MeshCube;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
-     */
-    class RenderOperator {
-        /**
-        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
-        */
-        static assert(_value, _message = "") {
-            if (_value === null)
-                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
-            return _value;
-        }
-        /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
-         */
-        static initialize() {
-            let contextAttributes = { alpha: false, antialias: false };
-            let canvas = document.createElement("canvas");
-            RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
-            // Enable backface- and zBuffer-culling.
-            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
-            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
-            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
-        }
-        /**
-         * Return a reference to the offscreen-canvas
-         */
-        static getCanvas() {
-            return RenderOperator.crc3.canvas;
-        }
-        /**
-         * Return a reference to the rendering context
-         */
-        static getRenderingContext() {
-            return RenderOperator.crc3;
-        }
-        /**
-         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
-         */
-        static getCanvasRect() {
-            let canvas = RenderOperator.crc3.canvas;
-            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
-        }
-        /**
-         * Set the size of the offscreen-canvas.
-         */
-        static setCanvasSize(_width, _height) {
-            RenderOperator.crc3.canvas.width = _width;
-            RenderOperator.crc3.canvas.height = _height;
-        }
-        /**
-         * Set the area on the offscreen-canvas to render the camera image to.
-         * @param _rect
-         */
-        static setViewportRectangle(_rect) {
-            Object.assign(RenderOperator.rectViewport, _rect);
-            RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
-        }
-        /**
-         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
-         */
-        static getViewportRectangle() {
-            return RenderOperator.rectViewport;
-        }
-        /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _shaderInfo
-         * @param _bufferInfo
-         * @param _coatInfo
-         * @param _projection
-         */
-        static draw(_shaderInfo, _bufferInfo, _coatInfo, _projection) {
-            RenderOperator.useBuffer(_bufferInfo);
-            RenderOperator.useParameter(_coatInfo);
-            RenderOperator.useProgram(_shaderInfo);
-            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
-            // Supply matrixdata to shader. 
-            let matrixLocation = _shaderInfo.uniforms["u_matrix"];
-            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            _coatInfo.coat.setRenderData(_shaderInfo);
-            // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
-        }
-        // #region Shaderprogram 
-        static createProgram(_shaderClass) {
-            let crc3 = RenderOperator.crc3;
-            let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
-            }
-            let program = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
-            function compileShader(_shaderCode, _shaderType) {
-                let webGLShader = crc3.createShader(_shaderType);
-                crc3.shaderSource(webGLShader, _shaderCode);
-                crc3.compileShader(webGLShader);
-                let error = RenderOperator.assert(crc3.getShaderInfoLog(webGLShader));
-                if (error !== "") {
-                    throw new Error("Error compiling shader: " + error);
-                }
-                // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
-                    alert(crc3.getShaderInfoLog(webGLShader));
-                    return null;
-                }
-                return webGLShader;
-            }
-            function detectAttributes() {
-                let detectedAttributes = {};
-                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
-                for (let i = 0; i < attributeCount; i++) {
-                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(shaderProgram, i));
-                    if (!attributeInfo) {
-                        break;
-                    }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
-                }
-                return detectedAttributes;
-            }
-            function detectUniforms() {
-                let detectedUniforms = {};
-                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
-                for (let i = 0; i < uniformCount; i++) {
-                    let info = RenderOperator.assert(crc3.getActiveUniform(shaderProgram, i));
-                    if (!info) {
-                        break;
-                    }
-                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(shaderProgram, info.name));
-                }
-                return detectedUniforms;
-            }
-        }
-        static useProgram(_shaderInfo) {
-            RenderOperator.crc3.useProgram(_shaderInfo.program);
-            RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
-        }
-        static deleteProgram(_program) {
-            if (_program) {
-                RenderOperator.crc3.deleteProgram(_program.program);
-                delete _program.attributes;
-                delete _program.uniforms;
-            }
-        }
-        // #endregion
-        // #region Meshbuffer
-        static createBuffer(_mesh) {
-            let buffer = RenderOperator.assert(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
-            let bufferInfo = {
-                buffer: buffer,
-                target: RenderOperator.crc3.ARRAY_BUFFER,
-                specification: _mesh.getBufferSpecification(),
-                vertexCount: _mesh.getVertexCount()
-            };
-            return bufferInfo;
-        }
-        static useBuffer(_bufferInfo) {
-            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
-        }
-        static deleteBuffer(_bufferInfo) {
-            if (_bufferInfo) {
-                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
-            }
-        }
-        // #endregion
-        // #region MaterialParameters
-        static createParameter(_coat) {
-            let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
-            let coatInfo = {
-                vao: vao,
-                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
-                coat: _coat
-            };
-            return coatInfo;
-        }
-        static useParameter(_coatInfo) {
-            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
-        }
-        static deleteParameter(_coatInfo) {
-            if (_coatInfo) {
-                RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
-            }
-        }
-        // #endregion
-        // #region Utilities
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-        }
-    }
-    Fudge.RenderOperator = RenderOperator;
 })(Fudge || (Fudge = {}));
 /// <reference path="RenderOperator.ts"/>
 var Fudge;

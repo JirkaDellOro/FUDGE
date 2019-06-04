@@ -64,23 +64,124 @@ declare namespace Fudge {
         private static coatExtensions;
         static decorateCoat(_constructor: Function): void;
         private static extendCoatColored;
+        private static extendCoatTextured;
     }
 }
 declare namespace Fudge {
-    interface ShaderParameters {
-        [key: string]: number | Color;
+    interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
     }
+    interface ShaderInfo {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface BufferInfo {
+        buffer: WebGLBuffer;
+        target: number;
+        specification: BufferSpecification;
+        vertexCount: number;
+    }
+    interface CoatInfo {
+        vao: WebGLVertexArrayObject;
+        coat: Coat;
+    }
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
+    class RenderOperator {
+        protected static crc3: WebGL2RenderingContext;
+        private static rectViewport;
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert<T>(_value: T | null, _message?: string): T;
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         */
+        static initialize(): void;
+        /**
+         * Return a reference to the offscreen-canvas
+         */
+        static getCanvas(): HTMLCanvasElement;
+        /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext(): WebGL2RenderingContext;
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
+        static getCanvasRect(): Rectangle;
+        /**
+         * Set the size of the offscreen-canvas.
+         */
+        static setCanvasSize(_width: number, _height: number): void;
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
+        static setViewportRectangle(_rect: Rectangle): void;
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
+        static getViewportRectangle(): Rectangle;
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
+         * @param _projection
+         */
+        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void;
+        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
+        protected static useProgram(_shaderInfo: ShaderInfo): void;
+        protected static deleteProgram(_program: ShaderInfo): void;
+        protected static createBuffer(_mesh: Mesh): BufferInfo;
+        protected static useBuffer(_bufferInfo: BufferInfo): void;
+        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
+        protected static createParameter(_coat: Coat): CoatInfo;
+        protected static useParameter(_coatInfo: CoatInfo): void;
+        protected static deleteParameter(_coatInfo: CoatInfo): void;
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        private static attributePointer;
+    }
+}
+declare namespace Fudge {
     class Coat extends Mutable {
         name: string;
-        params: ShaderParameters;
         mutate(_mutator: Mutator): void;
         setRenderData(_shaderInfo: ShaderInfo): void;
-        reduceMutator(): void;
+        protected reduceMutator(): void;
     }
     class CoatColored extends Coat {
-        params: ShaderParameters;
-        reduceMutator(): void;
+        color: Color;
+        constructor(_color?: Color);
     }
+    class CoatTextured extends Coat {
+        private textureSource;
+    }
+    /**
+     * Adds and enables a Texture passed to this material.
+     * @param _textureSource A string holding the path to the location of the texture.
+     */
+    /**
+     * Removes and disables a texture that was added to this material.
+     */
 }
 declare namespace Fudge {
     type General = any;
@@ -545,8 +646,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
         name: string;
@@ -1082,100 +1183,6 @@ declare namespace Fudge {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
-    interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
-    }
-    interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
-        vertexCount: number;
-    }
-    interface CoatInfo {
-        vao: WebGLVertexArrayObject;
-        coat: Coat;
-    }
-    /**
-     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
-     */
-    class RenderOperator {
-        protected static crc3: WebGL2RenderingContext;
-        private static rectViewport;
-        /**
-        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
-        */
-        static assert<T>(_value: T | null, _message?: string): T;
-        /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
-         */
-        static initialize(): void;
-        /**
-         * Return a reference to the offscreen-canvas
-         */
-        static getCanvas(): HTMLCanvasElement;
-        /**
-         * Return a reference to the rendering context
-         */
-        static getRenderingContext(): WebGL2RenderingContext;
-        /**
-         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
-         */
-        static getCanvasRect(): Rectangle;
-        /**
-         * Set the size of the offscreen-canvas.
-         */
-        static setCanvasSize(_width: number, _height: number): void;
-        /**
-         * Set the area on the offscreen-canvas to render the camera image to.
-         * @param _rect
-         */
-        static setViewportRectangle(_rect: Rectangle): void;
-        /**
-         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
-         */
-        static getViewportRectangle(): Rectangle;
-        /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _shaderInfo
-         * @param _bufferInfo
-         * @param _coatInfo
-         * @param _projection
-         */
-        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void;
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
-        protected static useProgram(_shaderInfo: ShaderInfo): void;
-        protected static deleteProgram(_program: ShaderInfo): void;
-        protected static createBuffer(_mesh: Mesh): BufferInfo;
-        protected static useBuffer(_bufferInfo: BufferInfo): void;
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_coat: Coat): CoatInfo;
-        protected static useParameter(_coatInfo: CoatInfo): void;
-        protected static deleteParameter(_coatInfo: CoatInfo): void;
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        private static attributePointer;
     }
 }
 declare namespace Fudge {

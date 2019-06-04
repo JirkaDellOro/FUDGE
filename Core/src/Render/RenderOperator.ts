@@ -224,7 +224,6 @@ namespace Fudge {
             let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let coatInfo: CoatInfo = {
                 vao: vao,
-                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
                 coat: _coat
             };
             return coatInfo;
