@@ -94,31 +94,33 @@ var Fudge;
 var Fudge;
 ///<reference path="../Coat/Coat.ts"/>
 (function (Fudge) {
-    let coatExtensions = {
-        "CoatColored": extendCoatColored
-    };
-    function decorateCoatWithRenderExtension(_constructor) {
-        let coatExtension = coatExtensions[_constructor.name];
-        if (!coatExtension) {
-            Fudge.Debug.error("No extension decorator defined for " + _constructor.name);
+    class RenderExtender {
+        static decorateCoat(_constructor) {
+            let coatExtension = RenderExtender.coatExtensions[_constructor.name];
+            if (!coatExtension) {
+                Fudge.Debug.error("No extension decorator defined for " + _constructor.name);
+            }
+            Object.defineProperty(_constructor.prototype, "setRenderData", {
+                value: coatExtension
+            });
         }
-        Object.defineProperty(_constructor.prototype, "setRenderData", {
-            value: coatExtension
-        });
+        static extendCoatColored(_shaderInfo) {
+            let colorUniformLocation = _shaderInfo.uniforms["u_color"];
+            let c = this.params.color;
+            let color = new Float32Array([c.r, c.g, c.b, c.a]);
+            Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+        }
     }
-    Fudge.decorateCoatWithRenderExtension = decorateCoatWithRenderExtension;
-    function extendCoatColored(_shaderInfo) {
-        let colorUniformLocation = _shaderInfo.uniforms["u_color"];
-        let c = this.params.color;
-        let color = new Float32Array([c.r, c.g, c.b, c.a]);
-        Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
-    }
+    RenderExtender.coatExtensions = {
+        "CoatColored": RenderExtender.extendCoatColored
+    };
+    Fudge.RenderExtender = RenderExtender;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtensions.ts"/>
+/// <reference path="../Render/RenderExtender.ts"/>
 var Fudge;
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtensions.ts"/>
+/// <reference path="../Render/RenderExtender.ts"/>
 (function (Fudge) {
     class Coat extends Fudge.Mutable {
         constructor() {
@@ -143,7 +145,7 @@ var Fudge;
         reduceMutator() { }
     };
     CoatColored = __decorate([
-        Fudge.decorateCoatWithRenderExtension
+        Fudge.RenderExtender.decorateCoat
     ], CoatColored);
     Fudge.CoatColored = CoatColored;
 })(Fudge || (Fudge = {}));

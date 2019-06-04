@@ -1,11 +1,12 @@
 @startuml FUDGE-Core
+'page 2x2
+'skinparam pageBorderColor black
 skinparam monochrome true
 skinparam componentStyle uml2
 skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam handwritten false
 
-'page 2x2
 left to right direction
 'top to bottom direction
 
@@ -63,9 +64,7 @@ package Fudge <<Rectangle>> {
     class Material {
       - name: string
       - shaderClass: typeof Shader
-      - color: Color
-      - textureEnabled: boolean
-      - textureSource: string
+      - coat: Coat
     }
     class Viewport extends EventTarget {
       + name: string
@@ -143,6 +142,18 @@ package Fudge <<Rectangle>> {
     class RenderOperator {
       # {static} crc3: WebGL2RenderingContext
       - {static} rectViewport: Rectangle
+    }
+
+
+    interface CoatExtension {
+      typeof Coat,
+      shaderInfo: ShaderInfo
+    }
+
+    class RenderExtender {
+      - {static} coatExtensions
+      + {static} decorateCoat(_constructor: Function): void
+      - {static} extendCoatColored(this: Coat, _shaderInfo: ShaderInfo): void
     }
   }
 
@@ -280,6 +291,18 @@ package Fudge <<Rectangle>> {
     }
   }
 
+  package "Coat" << Folder>> {
+    class Coat extends Mutable {
+      + name: string
+      + params: ShaderParameters
+
+      + setRenderData(_shaderInfo: ShaderInfo): void
+    }
+
+    '@decorateCoatWithRenderExtension
+    class CoatColored extends Coat
+  }
+
   'Interface consumption
   Mesh --() Serializable
   Component --() Serializable
@@ -298,29 +321,32 @@ package Fudge <<Rectangle>> {
   ComponentMesh "n" --> "1" Mesh : refers >
   ComponentPivot -->"1" Matrix4x4
   ComponentTransform -->"1" Matrix4x4
-  ComponentMaterial "n" --> "1" Shader : refers >
+  ComponentMaterial "n" --> "1" Material : refers >
 
-  Shader "n"-->"1" Material : uses >
-  
+  Material "n"--->"1" Shader : references >
+  Material "n"--->"1" Coat : references >
+
   Viewport -->"1 root" Node : displays >
   Viewport -->"1 camera" ComponentCamera : look through >
   Viewport "n" --> "1" CanvasRenderingContext2D : renders >
   Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
   Viewport "1" -> "4" Framing : uses >
-  
+
   RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
   RenderManager "1" o--> "n" NodeReferences : keeps >
   RenderManager "1" o--> "n" Reference : keeps >
-  
+  RenderExtender -(0- CoatExtension : provides >
+  RenderExtender --- Coat : decorates >
+
   Reference "1" --> "1" ShaderInfo : shader uses >
   Reference "1" --> "1" BufferInfo : mesh uses >
   Reference "1" --> "1" MaterialInfo : material uses >
-  
+
   BufferInfo --> BufferSpecification : provides >
-  
+
   Framing -0)- Rectangle
   FramingComplex "1" -0)- "2" Border
-  
+
   Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
   MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
 

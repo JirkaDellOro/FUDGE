@@ -60,7 +60,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    function decorateCoatWithRenderExtension(_constructor: Function): void;
+    class RenderExtender {
+        private static coatExtensions;
+        static decorateCoat(_constructor: Function): void;
+        private static extendCoatColored;
+    }
 }
 declare namespace Fudge {
     interface ShaderParameters {

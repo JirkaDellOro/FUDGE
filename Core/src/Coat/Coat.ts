@@ -1,5 +1,5 @@
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtensions.ts"/>
+/// <reference path="../Render/RenderExtender.ts"/>
 namespace Fudge {
     interface ShaderParameters {
         [key: string]: number | Color;
@@ -17,7 +17,7 @@ namespace Fudge {
     }
 
 
-    @decorateCoatWithRenderExtension
+    @RenderExtender.decorateCoat
     export class CoatColored extends Coat {
         public params: ShaderParameters = {
             color: new Color(0.5, 0.5, 0.5, 1)
