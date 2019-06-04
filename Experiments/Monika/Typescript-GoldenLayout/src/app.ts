@@ -15,8 +15,8 @@ namespace GoldenLayoutTest {
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'Hierarchy',
-                title: "Hierarchy",
+                componentName: 'Scene Explorer',
+                title: "Scene Explorer",
                 componentState: { label: 'A' }
             },
             {
@@ -59,7 +59,7 @@ namespace GoldenLayoutTest {
     // console.log(s);
     myLayout.on('stateChanged', stateupdate);
     myLayout.registerComponent('Viewport', createPersistentComponent);
-    myLayout.registerComponent('Hierarchy', create);
+    myLayout.registerComponent('Scene Explorer', create);
     myLayout.registerComponent('Inspector', createSimpleComponent);
     myLayout.registerComponent('Menubar', createSimpleComponent);
     myLayout.init();
