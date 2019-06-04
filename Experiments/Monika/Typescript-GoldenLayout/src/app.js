@@ -3,7 +3,6 @@ var GoldenLayoutTest;
     // class SimpleComponent {
     function create(container, state) {
         let element = document.createElement("span");
-        element.innerHTML = "<h2>hamanamahanahama</h2>";
         container.getElement().html(element);
     }
     // }
@@ -15,8 +14,8 @@ var GoldenLayoutTest;
                 type: 'row',
                 content: [{
                         type: 'component',
-                        componentName: 'Hierarchy',
-                        title: "Hierarchy",
+                        componentName: 'Scene Explorer',
+                        title: "Scene Explorer",
                         componentState: { label: 'A' }
                     },
                     {
@@ -37,7 +36,15 @@ var GoldenLayoutTest;
                                 type: 'component',
                                 componentName: 'Menubar',
                                 title: "Menubar",
+                                settings:{hasHeaders:false},
                                 componentState: { label: 'C' }
+                            },
+                            {
+                                type: 'component',
+                                componentName: 'Toolbar',
+                                title: "Toolbar",
+                                settings:{hasHeaders:false},
+                                componentState: { label: 'D' }
                             }]
                     }]
             }]
@@ -56,27 +63,24 @@ var GoldenLayoutTest;
     // console.log(s);
     myLayout.on('stateChanged', stateupdate);
     myLayout.registerComponent('Viewport', createPersistentComponent);
-    myLayout.registerComponent('Hierarchy', create);
+    myLayout.registerComponent('Scene Explorer', create);
     myLayout.registerComponent('Inspector', createSimpleComponent);
     myLayout.registerComponent('Menubar', createSimpleComponent);
+    myLayout.registerComponent('Toolbar', createSimpleComponent);
     myLayout.init();
     function stateupdate() {
         let state = JSON.stringify(myLayout.toConfig());
         localStorage.setItem('savedState', state);
     }
     function createSimpleComponent(container, state) {
-        let element = document.createElement("span");
-        element.innerHTML = "<h2>hamanamahanahama</h2>";
-        container.getElement().html(element);
     }
     function createPersistentComponent(container, state) {
         if (!typeof window.localStorage) {
-            container.getElement().append('<h2 class="err">Your browser doesn\'t support localStorage.</h2>');
+            container.getElement().append('<h2 class="err">.</h2>');
             return;
         }
         // Create the input
         let input = $('<input type="text" />');
-        container.getElement().append('<h2>I\'ll be saved to localStorage</h2>', input);
         // Set the initial / saved state
         if (state.label) {
             input.val(state.label);
