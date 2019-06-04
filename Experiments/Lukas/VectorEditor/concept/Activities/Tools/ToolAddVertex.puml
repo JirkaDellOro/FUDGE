@@ -1,0 +1,23 @@
+@startuml ToolAddVertex
+skinparam monochrome true
+
+title ToolAddVertex
+
+partition mousedown {
+	:_event: MouseEvent]
+	:find out on which curve
+	the user clicked;
+	note: this is the hard part
+	:index: number = the following vertex index]
+	:Editor.selectedPath.addVertexAtPosition(
+		new SketchVertex(clientX, clientY), index);
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	:Editor.selectedPath.legth = 1]
+	detach
+}
+
+@enduml

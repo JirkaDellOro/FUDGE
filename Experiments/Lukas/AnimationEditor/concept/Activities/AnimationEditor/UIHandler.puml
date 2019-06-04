@@ -1,0 +1,40 @@
+@startuml UIHandler
+skinparam monochrome true
+
+title UIHandler
+
+partition createUI {
+	:use editor.selectedAnimation to create
+	list of animated sequences;
+	:add Eventlisteners to various buttons;
+	:set values saved in Animation such as
+	SPS, FPS, name, playmode;
+	:updateUI();
+	stop
+}
+
+partition updateUI {
+	:draw timeline according to selectedView.scale;
+	:add Labels and Events underneath timeline;
+	:selectedView.updateView();
+	stop
+}
+
+partition switchView {
+	:index: number = views.indexOf(typeof selectedView)]
+	:index++;
+	if() then ([index <= views.length])
+		:index = 0;
+	endif
+	:selectedView = new views[index]();
+	:selectedView.updateView();
+	stop
+}
+
+partition registerView {
+	:_view: typeof EditorView]
+	:views.push(_view);
+	stop
+}
+
+@enduml

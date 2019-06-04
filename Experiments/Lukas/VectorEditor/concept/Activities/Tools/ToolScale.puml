@@ -1,0 +1,53 @@
+@startuml ToolScale
+skinparam monochrome true
+
+title ToolScale
+
+partition mousedown {
+	:_event: MouseEvent]
+	:previousPosition = (clientX, clientY);
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([no buttons pressed])
+		stop
+	endif
+	' TODO: keep ratio
+	:currentPosition: Vector2 = _event.clientX, _event.clientY
+	delta: Vector2 = previousPosition - currentPosition]
+	:scale: Vector2 = (currentPosition - referencePoint) 
+	/ (previousPosition - referencePoint)]
+	while () is ([point of Editor.selectedPoints])
+		if() then ([mode = "x" || "xy"])
+			:point.x = referencePoint.x + (point.x - referencePoint.x) * scale;
+		endif
+		if() then ([mode = "y" || "xy"])
+			:point.y = referencePoint.y + (point.y - referencePoint.y) * scale;
+		endif
+	endwhile
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	if() then([selectedPoints.length > 1])
+		:true]
+		detach
+	endif
+	:false]
+	detach
+}
+
+partition setMode {
+	:_mode: string]
+	if() then ([_mode = "x" || "y" || "xy"])
+		:,mode = _mode;
+	else
+		:Error: invalid Argument;
+	endif
+	stop
+}
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml SketchVertex
+skinparam monochrome true
+
+title SketchVertex
+
+partition draw {
+	:_context: CanvasRenderingContext
+	_selected: boolean = false
+	_showTangents = false]
+	:super.draw(_context, _selected) ₼;
+	:context.stroke(path);
+	if() then ([_showTangents && active])
+		:tangentIn.draw(_context)
+		tangentOut.draw(_context);
+
+		:draw lines from this point
+		to the two tangents;
+	endif
+	stop 
+}
+
+partition move {
+	:_delta: Vector2
+	_moveTangents: boolean = true]
+	:super.move(_delta);
+	if() then ([_moveTangents])
+		:tangentIn.move(_delta);
+		:tangentOut.move(_delta);
+	endif
+	stop
+}
+
+partition activate{
+	start
+	if() then (activated)
+		stop
+	endif
+	:move tangents to the third of the way
+	of the neighboring vertices;
+	:activated = true;
+	stop
+}
+@enduml

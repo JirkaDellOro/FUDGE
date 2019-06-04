@@ -6,8 +6,8 @@ title Editor
 partition mousedown {
 	:_event: MouseEvent]
 	:_event.preventDefault();
-	if() then ([selectedAction])
-		:selectedAction.mousedown(_event) ₼;
+	if() then ([selectedTool])
+		:selectedTool.mousedown(_event) ₼;
 	endif
 	:redrawAll ₼;
 	stop 
@@ -17,8 +17,8 @@ break
 partition mousemove {
 	:_event: MouseEvent]
 	:_event.preventDefault();
-	if() then ([selectedAction])
-		:selectedAction.mousemove(_event) ₼;
+	if() then ([selectedTool])
+		:selectedTool.mousemove(_event) ₼;
 	endif
 	:redrawAll ₼;
 	stop 
@@ -27,8 +27,8 @@ break
 partition mouseup {
 	:_event: MouseEvent]
 	:_event.preventDefault();
-	if() then ([selectedAction])
-		:selectedAction.mouseup(_event) ₼;
+	if() then ([selectedTool])
+		:selectedTool.mouseup(_event) ₼;
 	endif
 	:redrawAll ₼;
 	stop 

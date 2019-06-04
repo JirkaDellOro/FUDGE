@@ -1,29 +1,5 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
-    type General = any;
-    interface Serialization {
-        [type: string]: General;
-    }
-    interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-    class Serializer {
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object: Serializable): Serialization;
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -84,6 +60,49 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    function decorateCoatWithRenderExtension(_constructor: Function): void;
+}
+declare namespace Fudge {
+    interface ShaderParameters {
+        [key: string]: number | Color;
+    }
+    class Coat extends Mutable {
+        name: string;
+        params: ShaderParameters;
+        mutate(_mutator: Mutator): void;
+        setRenderData(_shaderInfo: ShaderInfo): void;
+        reduceMutator(): void;
+    }
+    class CoatColored extends Coat {
+        params: ShaderParameters;
+        reduceMutator(): void;
+    }
+}
+declare namespace Fudge {
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -120,24 +139,30 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum FOV_DIRECTION {
+    enum FIELD_OF_VIEW {
         HORIZONTAL = 0,
         VERTICAL = 1,
         DIAGONAL = 2
+    }
+    enum PROJECTION {
+        CENTRAL = "central",
+        ORTHOGRAPHIC = "orthographic",
+        DIMETRIC = "dimetric",
+        STEREO = "stereo"
     }
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
-        private orthographic;
         private projection;
+        private transform;
         private fieldOfView;
         private aspectRatio;
-        private fovDirection;
+        private direction;
         private backgroundColor;
         private backgroundEnabled;
-        readonly isOrthographic: boolean;
+        getProjection(): PROJECTION;
         getBackgoundColor(): Color;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
@@ -152,7 +177,7 @@ declare namespace Fudge {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FOV_DIRECTION): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -164,6 +189,8 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        mutate(_mutator: Mutator): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -174,7 +201,7 @@ declare namespace Fudge {
     class ComponentMaterial extends Component {
         private material;
         initialize(_material: Material): void;
-        readonly Material: Material;
+        getMaterial(): Material;
     }
 }
 declare namespace Fudge {
@@ -298,6 +325,119 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    enum DEBUG_FILTER {
+        NONE = 0,
+        INFO = 1,
+        LOG = 2,
+        WARN = 4,
+        ERROR = 8,
+        ALL = 15
+    }
+    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    interface MapDebugFilterToDelegate {
+        [filter: number]: Function;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
+    abstract class DebugTarget {
+        delegates: MapDebugFilterToDelegate;
+        static mergeArguments(_message: Object, ..._args: Object[]): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to the alert box
+     */
+    class DebugAlert extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+        static createDelegate(_headline: string): Function;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+    }
+}
+declare namespace Fudge {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
+    class Debug {
+        /**
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         */
+        private static delegates;
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
+        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
+        static info(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
+        static log(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static warn(_message: Object, ..._args: Object[]): void;
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static error(_message: Object, ..._args: Object[]): void;
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
+        private static delegate;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Routing to a HTMLDialogElement
+     */
+    class DebugDialog extends DebugTarget {
+    }
+}
+declare namespace Fudge {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
+    class DebugTextArea extends DebugTarget {
+        static textArea: HTMLTextAreaElement;
+        static delegates: MapDebugFilterToDelegate;
+        static createDelegate(_headline: string): Function;
+    }
+}
+declare namespace Fudge {
     class Color {
         r: number;
         g: number;
@@ -405,17 +545,15 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
-        private name;
-        private shaderClass;
-        private color;
-        private textureEnabled;
-        private textureSource;
-        constructor(_name: string, _color: Vector3, _shader: typeof Shader);
-        readonly Shader: typeof Shader;
-        readonly Name: string;
-        Color: Vector3;
-        readonly TextureEnabled: boolean;
-        readonly TextureSource: string;
+        name: string;
+        private shaderType;
+        private coat;
+        constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        createCoatMatchingShader(): Coat;
+        setCoat(_coat: Coat): void;
+        getCoat(): Coat;
+        setShader(_shaderType: typeof Shader): void;
+        getShader(): typeof Shader;
     }
 }
 declare namespace Fudge {
@@ -470,12 +608,12 @@ declare namespace Fudge {
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
          */
-        getComponents(_class: typeof Component): Component[];
+        getComponents<T extends Component>(_class: typeof Component): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        getComponent(_class: typeof Component): Component;
+        getComponent<T extends Component>(_class: typeof Component): T;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
@@ -523,7 +661,7 @@ declare namespace Fudge {
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * through a series of [[Framing]] objects. The stages involved are in order of rendering
      * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -548,8 +686,17 @@ declare namespace Fudge {
          * @param _camera
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
         getContext(): CanvasRenderingContext2D;
+        /**
+         * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
+         */
         getCanvasRectangle(): Rectangle;
+        /**
+         * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
+         */
         getClientRectangle(): Rectangle;
         /**
          * Logs this viewports scenegraph to the console.
@@ -559,18 +706,69 @@ declare namespace Fudge {
          * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
          */
         draw(): void;
+        /**
+         * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
+         */
         adjustFrames(): void;
+        /**
+         * Adjust the camera parameters to fit the rendering into the render vieport
+         */
         adjustCamera(): void;
+        /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
         readonly hasFocus: boolean;
+        /**
+         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+         *
+         * @param _on
+         */
         setFocus(_on: boolean): void;
+        /**
+         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        /**
+         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        /**
+         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
+        /**
+         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        /**
+         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
+         */
         private hndDragDropEvent;
+        /**
+         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
+         * @param event
+         */
         private addCanvasPosition;
+        /**
+         * Handle pointer events and dispatch to viewport as FUDGE-Event
+         */
         private hndPointerEvent;
+        /**
+         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
+         */
         private hndKeyboardEvent;
+        /**
+         * Handle wheel event and dispatch to viewport as FUDGE-Event
+         */
         private hndWheelEvent;
         private activateEvent;
         /**
@@ -601,10 +799,11 @@ declare namespace Fudge {
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    abstract class Framing {
+    abstract class Framing extends Mutable {
         abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
         abstract getRect(_rectFrame: Rectangle): Rectangle;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
@@ -640,6 +839,7 @@ declare namespace Fudge {
         getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
         getPointInverse(_point: Point, _rect: Rectangle): Point;
         getRect(_rectFrame: Rectangle): Rectangle;
+        getMutator(): Mutator;
     }
 }
 declare namespace Fudge {
@@ -704,7 +904,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FOV_DIRECTION): Matrix4x4;
+        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
@@ -903,9 +1103,9 @@ declare namespace Fudge {
         specification: BufferSpecification;
         vertexCount: number;
     }
-    interface MaterialInfo {
+    interface CoatInfo {
         vao: WebGLVertexArrayObject;
-        color: Vector3;
+        coat: Coat;
     }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
@@ -929,6 +1129,10 @@ declare namespace Fudge {
          */
         static getCanvas(): HTMLCanvasElement;
         /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext(): WebGL2RenderingContext;
+        /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         static getCanvasRect(): Rectangle;
@@ -947,21 +1151,21 @@ declare namespace Fudge {
         static getViewportRectangle(): Rectangle;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
          * @param _projection
          */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
+        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
         protected static useProgram(_shaderInfo: ShaderInfo): void;
         protected static deleteProgram(_program: ShaderInfo): void;
         protected static createBuffer(_mesh: Mesh): BufferInfo;
         protected static useBuffer(_bufferInfo: BufferInfo): void;
         protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_material: Material): MaterialInfo;
-        protected static useParameter(_materialInfo: MaterialInfo): void;
-        protected static deleteParameter(_materialInfo: MaterialInfo): void;
+        protected static createParameter(_coat: Coat): CoatInfo;
+        protected static useParameter(_coatInfo: CoatInfo): void;
+        protected static deleteParameter(_coatInfo: CoatInfo): void;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
@@ -973,13 +1177,13 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static programs;
-        /** Stores references to the vertex array objects and makes them available via the references to materials */
+        /** Stores references to the vertex array objects and makes them available via the references to coats */
         private static parameters;
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
         private static buffers;
@@ -1005,7 +1209,7 @@ declare namespace Fudge {
          */
         static removeBranch(_node: Node): void;
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node: Node): void;
@@ -1058,8 +1262,9 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -1068,8 +1273,9 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderBasic extends Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {

@@ -17,6 +17,7 @@ request.onload = function() {
         audioContext.decodeAudioData(
             request.response,
             function(buffer) {
+                // Connect Buffer Output to 
                 source.buffer = buffer;
                 // Connect the audio to source (multiple audio buffers can be connected!)
                 source.connect(audioContext.destination);

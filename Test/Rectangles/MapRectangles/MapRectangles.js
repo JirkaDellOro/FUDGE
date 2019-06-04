@@ -8,7 +8,7 @@ var RenderManagerRendering;
     window.addEventListener("load", init);
     function init() {
         let menu = document.getElementsByTagName("div")[0];
-        uiMap = new UI.MapRectangle();
+        uiMap = new UI.FramingComplex();
         menu.appendChild(uiMap);
         uiMap.addEventListener("input", hndChange);
         uiMap.set({ Anchor: map.margin, Border: map.padding });

@@ -102,6 +102,15 @@
 		},
 		{
 			"path": "EventPassing"
+		},
+		{
+			"path": "Audio"
+		},
+		{
+			"path": "DeconstructMixin"
+		},
+		{
+			"path": "InjectMethod"
 		}
 	],
 	"settings": {}

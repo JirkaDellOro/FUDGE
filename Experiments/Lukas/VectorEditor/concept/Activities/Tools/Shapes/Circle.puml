@@ -1,0 +1,32 @@
+@startuml Circle
+skinparam monochrome true
+
+title Circle (Shape)
+
+
+partition createSketchPath {
+	:pos1, pos2: Vector2]
+	:amountOfVertices: number]
+	note
+	set in UI
+	min 2
+	end note
+	:p: SketchPath = new SketchPath()]
+	:p settings as set in UIHandler properties window;
+	:i: number = 0]
+	while () is ([i < amountOfVertices])
+		:do complicated Math to
+		calculate the correct positions
+		depending on all the variables;
+		note 
+		or just use a standard of 4. 
+		that's way easier and can
+		be hardcoded.
+		end note
+		' see https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves
+		:p.addVertextToEnd();
+	endwhile
+	:p]
+}
+
+@enduml

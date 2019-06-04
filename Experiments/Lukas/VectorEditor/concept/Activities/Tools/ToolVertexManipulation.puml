@@ -1,0 +1,34 @@
+@startuml ToolVertexManipulation
+skinparam monochrome true
+
+title ToolVertexManipulation
+
+' partition mousedown {
+' 	:_event: MouseEvent]
+' 	if() then ([selectedSubTool])
+' 		:selectedSubTool.mousedown(_event);
+' 	endif
+' 	stop
+' }
+
+' partition mousemove {
+' 	:_event: MouseEvent]
+' 	stop
+' }
+
+' partition mouseup {
+' 	:_event: MouseEvent]
+' 	stop
+' }
+
+' partition additionalDisplay {
+' 	:_crc: CanvasRenderingContext2D]
+' 	stop
+' }
+
+' partition addAdditionalSubMenuOptions {
+' 	start
+' 	stop
+' }
+
+@enduml

@@ -17,7 +17,7 @@ namespace EventPassing {
         let canvasList: HTMLCollectionOf<HTMLCanvasElement> = document.getElementsByTagName("canvas");
         for (let i: number = 0; i < canvasList.length; i++) {
             let camera: ƒ.Node = Scenes.createCamera(posCameras[i]);
-            let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
             let viewPort: ƒ.Viewport = new ƒ.Viewport();
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);

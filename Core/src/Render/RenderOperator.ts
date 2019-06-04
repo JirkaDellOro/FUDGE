@@ -19,9 +19,10 @@ namespace Fudge {
         vertexCount: number;
     }
 
-    export interface MaterialInfo {
+    export interface CoatInfo {
+        //TODO: examine, if it makes sense to store a vao for each Coat, even though e.g. color won't be stored anyway...
         vao: WebGLVertexArrayObject;
-        color: Vector3;
+        coat: Coat;
     }
 
     /**
@@ -65,6 +66,12 @@ namespace Fudge {
             return RenderOperator.crc3.canvas;
         }
         /**
+         * Return a reference to the rendering context
+         */
+        public static getRenderingContext(): WebGL2RenderingContext {
+            return RenderOperator.crc3;
+        }
+        /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         public static getCanvasRect(): Rectangle {
@@ -95,37 +102,33 @@ namespace Fudge {
 
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo 
-         * @param bufferInfo 
-         * @param materialInfo 
+         * @param _shaderInfo 
+         * @param _bufferInfo 
+         * @param _coatInfo 
          * @param _projection 
          */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void {
-            RenderOperator.useBuffer(bufferInfo);
-            RenderOperator.useParameter(materialInfo);
-            RenderOperator.useProgram(shaderInfo);
-            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void {
+            RenderOperator.useBuffer(_bufferInfo);
+            RenderOperator.useParameter(_coatInfo);
+            RenderOperator.useProgram(_shaderInfo);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
 
             // Supply matrixdata to shader. 
-            let matrixLocation: WebGLUniformLocation = shaderInfo.uniforms["u_matrix"];
+            let matrixLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-
-            // Supply color
-            let colorUniformLocation: WebGLUniformLocation = shaderInfo.uniforms["u_color"];
-            let vec: Vector3 = materialInfo.color;
-            let color: Float32Array = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
+            
+            _coatInfo.coat.setRenderData(_shaderInfo);
 
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
         }
 
         // #region Shaderprogram 
         protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
             let crc3: WebGL2RenderingContext = RenderOperator.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
@@ -217,21 +220,22 @@ namespace Fudge {
         // #endregion
 
         // #region MaterialParameters
-        protected static createParameter(_material: Material): MaterialInfo {
+        protected static createParameter(_coat: Coat): CoatInfo {
             let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
-            let materialInfo: MaterialInfo = {
+            let coatInfo: CoatInfo = {
                 vao: vao,
-                color: _material.Color
+                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
+                coat: _coat
             };
-            return materialInfo;
+            return coatInfo;
         }
-        protected static useParameter(_materialInfo: MaterialInfo): void {
-            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
+        protected static useParameter(_coatInfo: CoatInfo): void {
+            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
-        protected static deleteParameter(_materialInfo: MaterialInfo): void {
-            if (_materialInfo) {
+        protected static deleteParameter(_coatInfo: CoatInfo): void {
+            if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
+                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
         // #endregion

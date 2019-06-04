@@ -1,0 +1,11 @@
+@startuml ToolManager
+skinparam monochrome true
+
+title ToolManager
+
+partition registerTool {
+	:_tool: typeof Tool]
+	:ToolManager.tools.push(_tool)]
+}
+
+@enduml

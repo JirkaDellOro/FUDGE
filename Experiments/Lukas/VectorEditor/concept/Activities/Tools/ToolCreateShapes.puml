@@ -1,0 +1,55 @@
+@startuml ToolCreateShapes
+skinparam monochrome true
+
+title ToolCreateShapes
+
+partition mousedown {
+	:_event: MouseEvent]
+	:startPosition = (_event.clientX, _event.clientY);
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	:currentPosition = (_event.clientX, _event.clientY);
+	if() then ([Editor.isShortcutPressed(Editor.quadraticShapesShortcut)])
+		:deltaX: currentPosition.x - startPosition.x
+		deltaY: currentPosition.y - startPosition.y]
+		:smallerDelta: number = 
+			min(abs(deltaX),abs(deltaY)]
+		:currentPosition.x = startPosition + smallerDelta * sign(deltaX)
+		currentPosition.y = startPosition + smallerDelta * sign(deltaY);
+	endif
+	stop
+}
+
+partition mouseup {
+	:_event: MouseEvent]
+	:newPath: SketchPath = selectedShape.createSketchPath(
+		startPosition, currentPosition)]
+	stop
+}
+
+partition additionalDisplay {
+	:_crc: CanvasRenderingContext2D]
+	:electedShape.createSketchPath(
+		startPosition, currentPosition)
+		.draw(_crc);
+	stop
+}
+
+partition addAdditionalSubMenuOptions {
+	:add dropdown for different Shapes;
+	while() is ([s in selectedShape.additionalParameters])
+		:switch(typeof sS.aP[s])
+		-> create a HTML Input Element accordingly;
+	endwhile
+	stop
+}
+
+partition registerShape {
+	:_shape: typeof Shape]
+	:ToolCreateShapes.shapes.push(_shape)]
+}
+
+@enduml

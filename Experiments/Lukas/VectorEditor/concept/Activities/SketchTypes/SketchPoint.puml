@@ -1,0 +1,42 @@
+@startuml SketchPoint
+skinparam monochrome true
+
+title SketchPoint
+
+partition draw {
+	:_context: CanvasRenderingContext
+	_selected: boolean = false]
+	:generatePath2D() ₼;
+	:set _context options:
+	fillColor, strokeColor, lineWidth;
+	if() then ([_selected])
+		:context.fill(path);
+	endif
+	:context.stroke(path);
+	stop 
+}
+
+partition generatePath2D {
+	start
+	:_radius: number = 10]
+	:path2d = new Path2D();
+	:add arc around the position
+	with the _radius;
+	:close path;
+	stop
+}
+
+partition move {
+	:_delta: Vector2 = 0]
+	:x += _delta.x;
+	:y += _delta.y;
+	stop
+}
+
+partition moveTo {
+	:_newPos: Vector2]
+	:x = _newPos.x
+	y = _newPos.y;
+	stop
+}
+@enduml

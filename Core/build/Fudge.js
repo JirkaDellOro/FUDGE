@@ -1,42 +1,10 @@
 "use strict";
-var Fudge;
-(function (Fudge) {
-    class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object) {
-            let serialization = {};
-            serialization[_object.constructor.name] = _object.serialize();
-            return serialization;
-        }
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-    }
-    Fudge.Serializer = Serializer;
-})(Fudge || (Fudge = {}));
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var Fudge;
 (function (Fudge) {
     /**
@@ -122,6 +90,101 @@ var Fudge;
     }
     Fudge.Mutable = Mutable;
 })(Fudge || (Fudge = {}));
+///<reference path="../Coat/Coat.ts"/>
+var Fudge;
+///<reference path="../Coat/Coat.ts"/>
+(function (Fudge) {
+    let coatExtensions = {
+        "CoatColored": extendCoatColored
+    };
+    function decorateCoatWithRenderExtension(_constructor) {
+        let coatExtension = coatExtensions[_constructor.name];
+        if (!coatExtension) {
+            Fudge.Debug.error("No extension decorator defined for " + _constructor.name);
+        }
+        Object.defineProperty(_constructor.prototype, "setRenderData", {
+            value: coatExtension
+        });
+    }
+    Fudge.decorateCoatWithRenderExtension = decorateCoatWithRenderExtension;
+    function extendCoatColored(_shaderInfo) {
+        let colorUniformLocation = _shaderInfo.uniforms["u_color"];
+        let c = this.params.color;
+        let color = new Float32Array([c.r, c.g, c.b, c.a]);
+        Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+    }
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderExtensions.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderExtensions.ts"/>
+(function (Fudge) {
+    class Coat extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.name = "Coat";
+            this.params = {};
+        }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        setRenderData(_shaderInfo) { }
+        reduceMutator() { }
+    }
+    Fudge.Coat = Coat;
+    let CoatColored = class CoatColored extends Coat {
+        constructor() {
+            super(...arguments);
+            this.params = {
+                color: new Fudge.Color(0.5, 0.5, 0.5, 1)
+            };
+        }
+        reduceMutator() { }
+    };
+    CoatColored = __decorate([
+        Fudge.decorateCoatWithRenderExtension
+    ], CoatColored);
+    Fudge.CoatColored = CoatColored;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class Serializer {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object) {
+            let serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
+        }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    Fudge.Serializer = Serializer;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 var Fudge;
@@ -204,12 +267,20 @@ var Fudge;
 var Fudge;
 /// <reference path="Component.ts"/>
 (function (Fudge) {
-    let FOV_DIRECTION;
-    (function (FOV_DIRECTION) {
-        FOV_DIRECTION[FOV_DIRECTION["HORIZONTAL"] = 0] = "HORIZONTAL";
-        FOV_DIRECTION[FOV_DIRECTION["VERTICAL"] = 1] = "VERTICAL";
-        FOV_DIRECTION[FOV_DIRECTION["DIAGONAL"] = 2] = "DIAGONAL";
-    })(FOV_DIRECTION = Fudge.FOV_DIRECTION || (Fudge.FOV_DIRECTION = {}));
+    let FIELD_OF_VIEW;
+    (function (FIELD_OF_VIEW) {
+        FIELD_OF_VIEW[FIELD_OF_VIEW["HORIZONTAL"] = 0] = "HORIZONTAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
+        FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
+    })(FIELD_OF_VIEW = Fudge.FIELD_OF_VIEW || (Fudge.FIELD_OF_VIEW = {}));
+    // string-enum for testing ui-features. TODO: change back to number enum if strings not needed
+    let PROJECTION;
+    (function (PROJECTION) {
+        PROJECTION["CENTRAL"] = "central";
+        PROJECTION["ORTHOGRAPHIC"] = "orthographic";
+        PROJECTION["DIMETRIC"] = "dimetric";
+        PROJECTION["STEREO"] = "stereo";
+    })(PROJECTION = Fudge.PROJECTION || (Fudge.PROJECTION = {}));
     /**
      * The camera component holds the projection-matrix and other data needed to render a scene from the perspective of the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -218,17 +289,18 @@ var Fudge;
         constructor() {
             super(...arguments);
             // TODO: a ComponentPivot might be interesting to ease behaviour scripting
-            this.orthographic = false; // Determines whether the image will be rendered with perspective or orthographic projection.
-            this.projection = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+            //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = new Fudge.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
             this.fieldOfView = 45; // The camera's sensorangle.
             this.aspectRatio = 1.0;
-            this.fovDirection = FOV_DIRECTION.DIAGONAL;
+            this.direction = FIELD_OF_VIEW.DIAGONAL;
             this.backgroundColor = new Fudge.Color(0, 0, 0, 1); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
-        get isOrthographic() {
-            return this.orthographic;
+        getProjection() {
+            return this.projection;
         }
         getBackgoundColor() {
             return this.backgroundColor;
@@ -250,10 +322,10 @@ var Fudge;
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
                 let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Fudge.Matrix4x4.multiply(this.projection, viewMatrix);
+                return Fudge.Matrix4x4.multiply(this.transform, viewMatrix);
             }
             catch {
-                return this.projection;
+                return this.transform;
             }
         }
         /**
@@ -261,12 +333,12 @@ var Fudge;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          */
-        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.fovDirection) {
+        projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction) {
             this.aspectRatio = _aspect;
             this.fieldOfView = _fieldOfView;
-            this.fovDirection = _direction;
-            this.orthographic = false;
-            this.projection = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.fovDirection); // TODO: remove magic numbers
+            this.direction = _direction;
+            this.projection = PROJECTION.CENTRAL;
+            this.transform = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -276,16 +348,16 @@ var Fudge;
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left = 0, _right = Fudge.RenderManager.getCanvas().clientWidth, _bottom = Fudge.RenderManager.getCanvas().clientHeight, _top = 0) {
-            this.orthographic = true;
-            this.projection = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.projection = PROJECTION.ORTHOGRAPHIC;
+            this.transform = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
         serialize() {
             let serialization = {
                 backgroundColor: this.backgroundColor,
                 backgroundEnabled: this.backgroundEnabled,
-                orthographic: this.orthographic,
+                projection: this.projection,
                 fieldOfView: this.fieldOfView,
-                fovDirection: this.fovDirection,
+                direction: this.direction,
                 aspect: this.aspectRatio,
                 [super.constructor.name]: super.serialize()
             };
@@ -294,22 +366,35 @@ var Fudge;
         deserialize(_serialization) {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
-            this.orthographic = _serialization.orthographic;
+            this.projection = _serialization.projection;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
-            this.fovDirection = _serialization.fovDirection;
+            this.direction = _serialization.direction;
             super.deserialize(_serialization[super.constructor.name]);
-            if (this.isOrthographic)
-                this.projectOrthographic(); // TODO: serialize and deserialize parameters
-            else
-                this.projectCentral();
+            switch (this.projection) {
+                case PROJECTION.ORTHOGRAPHIC:
+                    this.projectOrthographic(); // TODO: serialize and deserialize parameters
+                    break;
+                case PROJECTION.CENTRAL:
+                    this.projectCentral();
+                    break;
+            }
             return this;
         }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
-            if (types.fovDirection)
-                types.fovDirection = FOV_DIRECTION;
+            if (types.direction)
+                types.direction = FIELD_OF_VIEW;
+            if (types.projection)
+                types.projection = PROJECTION;
             return types;
+        }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.transform;
+            super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
@@ -325,7 +410,7 @@ var Fudge;
         initialize(_material) {
             this.material = _material;
         }
-        get Material() {
+        getMaterial() {
             return this.material;
         }
     }
@@ -627,6 +712,204 @@ var Fudge;
     }
     Fudge.ComponentTransform = ComponentTransform;
 })(Fudge || (Fudge = {}));
+// <reference path="DebugAlert.ts"/>
+var Fudge;
+// <reference path="DebugAlert.ts"/>
+(function (Fudge) {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    let DEBUG_FILTER;
+    (function (DEBUG_FILTER) {
+        DEBUG_FILTER[DEBUG_FILTER["NONE"] = 0] = "NONE";
+        DEBUG_FILTER[DEBUG_FILTER["INFO"] = 1] = "INFO";
+        DEBUG_FILTER[DEBUG_FILTER["LOG"] = 2] = "LOG";
+        DEBUG_FILTER[DEBUG_FILTER["WARN"] = 4] = "WARN";
+        DEBUG_FILTER[DEBUG_FILTER["ERROR"] = 8] = "ERROR";
+        DEBUG_FILTER[DEBUG_FILTER["ALL"] = 15] = "ALL";
+    })(DEBUG_FILTER = Fudge.DEBUG_FILTER || (Fudge.DEBUG_FILTER = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class for the different DebugTargets, mainly for technical purpose of inheritance
+     */
+    class DebugTarget {
+        static mergeArguments(_message, ..._args) {
+            let out = JSON.stringify(_message);
+            for (let arg of _args)
+                out += "\n" + JSON.stringify(arg, null, 2);
+            return out;
+        }
+    }
+    Fudge.DebugTarget = DebugTarget;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to the alert box
+     */
+    class DebugAlert extends Fudge.DebugTarget {
+        static createDelegate(_headline) {
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, ..._args);
+                alert(out);
+            };
+            return delegate;
+        }
+    }
+    DebugAlert.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: DebugAlert.createDelegate("Info"),
+        [Fudge.DEBUG_FILTER.LOG]: DebugAlert.createDelegate("Log"),
+        [Fudge.DEBUG_FILTER.WARN]: DebugAlert.createDelegate("Warn"),
+        [Fudge.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate("Error")
+    };
+    Fudge.DebugAlert = DebugAlert;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends Fudge.DebugTarget {
+    }
+    DebugConsole.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: console.info,
+        [Fudge.DEBUG_FILTER.LOG]: console.log,
+        [Fudge.DEBUG_FILTER.WARN]: console.warn,
+        [Fudge.DEBUG_FILTER.ERROR]: console.error
+    };
+    Fudge.DebugConsole = DebugConsole;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+var Fudge;
+/// <reference path="DebugInterfaces.ts"/>
+/// <reference path="DebugAlert.ts"/>
+/// <reference path="DebugConsole.ts"/>
+(function (Fudge) {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     */
+    class Debug {
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         * @param _target
+         * @param _filter
+         */
+        static setFilter(_target, _filter) {
+            for (let filter in Debug.delegates)
+                Debug.delegates[filter].delete(_target);
+            for (let filter in Fudge.DEBUG_FILTER) {
+                let parsed = parseInt(filter);
+                if (parsed == Fudge.DEBUG_FILTER.ALL)
+                    break;
+                if (_filter & parsed)
+                    Debug.delegates[parsed].set(_target, _target.delegates[parsed]);
+            }
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * info(...) displays additional information with low priority
+         * @param _message
+         * @param _args
+         */
+        static info(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.INFO, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * log(...) displays information with medium priority
+         * @param _message
+         * @param _args
+         */
+        static log(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.LOG, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static warn(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.WARN, _message, _args);
+        }
+        /**
+         * Debug function to be implemented by the DebugTarget.
+         * error(...) displays critical information about failures, which is emphasized e.g. by color
+         * @param _message
+         * @param _args
+         */
+        static error(_message, ..._args) {
+            Debug.delegate(Fudge.DEBUG_FILTER.ERROR, _message, _args);
+        }
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         * @param _filter
+         * @param _message
+         * @param _args
+         */
+        static delegate(_filter, _message, _args) {
+            let delegates = Debug.delegates[_filter];
+            for (let delegate of delegates.values())
+                if (_args.length > 0)
+                    delegate(_message, ..._args);
+                else
+                    delegate(_message);
+        }
+    }
+    /**
+     * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+     */
+    // TODO: implement anonymous function setting up all filters
+    Debug.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.INFO]]]),
+        [Fudge.DEBUG_FILTER.LOG]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.LOG]]]),
+        [Fudge.DEBUG_FILTER.WARN]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.WARN]]]),
+        [Fudge.DEBUG_FILTER.ERROR]: new Map([[Fudge.DebugConsole, Fudge.DebugConsole.delegates[Fudge.DEBUG_FILTER.ERROR]]])
+    };
+    Fudge.Debug = Debug;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Routing to a HTMLDialogElement
+     */
+    class DebugDialog extends Fudge.DebugTarget {
+    }
+    Fudge.DebugDialog = DebugDialog;
+})(Fudge || (Fudge = {}));
+/// <reference path="DebugTarget.ts"/>
+var Fudge;
+/// <reference path="DebugTarget.ts"/>
+(function (Fudge) {
+    /**
+     * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
+     */
+    class DebugTextArea extends Fudge.DebugTarget {
+        static createDelegate(_headline) {
+            let delegate = function (_message, ..._args) {
+                let out = _headline + "\n\n" + Fudge.DebugTarget.mergeArguments(_message, _args);
+                DebugTextArea.textArea.textContent += out;
+            };
+            return delegate;
+        }
+    }
+    DebugTextArea.textArea = document.createElement("textarea");
+    DebugTextArea.delegates = {
+        [Fudge.DEBUG_FILTER.INFO]: Fudge.DebugAlert.createDelegate("Info")
+    };
+    Fudge.DebugTextArea = DebugTextArea;
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class Color {
@@ -726,33 +1009,43 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
+        // private color: Color;
+        // private textureEnabled: boolean;
+        // private textureSource: string;
         // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
-        constructor(_name, _color, _shader) {
+        constructor(_name, _shader, _coat) {
             this.name = _name;
-            this.shaderClass = _shader;
-            this.color = _color;
+            this.shaderType = _shader;
+            if (_shader) {
+                if (_coat)
+                    this.setCoat(_coat);
+                else
+                    this.setCoat(this.createCoatMatchingShader());
+            }
             // this.textureBufferSpecification = { size: 2, dataType: gl2.FLOAT, normalize: true, stride: 0, offset: 0 };
-            this.textureEnabled = false;
-            this.textureSource = "";
+            //this.textureEnabled = false;
+            //this.textureSource = "";
+        }
+        createCoatMatchingShader() {
+            let coat = new (this.shaderType.getCoat())();
+            return coat;
+        }
+        setCoat(_coat) {
+            if (_coat.constructor != this.shaderType.getCoat())
+                throw (new Error("Shader and coat don't match"));
+            this.coat = _coat;
+        }
+        getCoat() {
+            return this.coat;
+        }
+        setShader(_shaderType) {
+            this.shaderType = _shaderType;
+            let coat = this.createCoatMatchingShader();
+            coat.mutate(this.coat.getMutator());
         }
         // Get methods. ######################################################################################
-        get Shader() {
-            return this.shaderClass;
-        }
-        get Name() {
-            return this.name;
-        }
-        get Color() {
-            return this.color;
-        }
-        set Color(_color) {
-            this.color = _color;
-        }
-        get TextureEnabled() {
-            return this.textureEnabled;
-        }
-        get TextureSource() {
-            return this.textureSource;
+        getShader() {
+            return this.shaderType;
         }
     }
     Fudge.Material = Material;
@@ -1047,7 +1340,7 @@ var Fudge;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-     * through a series of [[MapRectangle]] objects. The stages involved are in order of rendering
+     * through a series of [[Framing]] objects. The stages involved are in order of rendering
      * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -1068,6 +1361,9 @@ var Fudge;
             this.adjustingCamera = true;
             this.crc2 = null;
             this.canvas = null;
+            /**
+             * Handle drag-drop events and dispatch to viewport as FUDGE-Event
+             */
             this.hndDragDropEvent = (_event) => {
                 let _dragevent = _event;
                 switch (_dragevent.type) {
@@ -1077,6 +1373,7 @@ var Fudge;
                         _dragevent.dataTransfer.effectAllowed = "none";
                         break;
                     case "dragstart":
+                        // just dummy data,  valid data should be set in handler registered by the user
                         _dragevent.dataTransfer.setData("text", "Hallo");
                         // TODO: check if there is a better solution to hide the ghost image of the draggable object
                         _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
@@ -1086,17 +1383,26 @@ var Fudge;
                 this.addCanvasPosition(event);
                 this.dispatchEvent(event);
             };
+            /**
+             * Handle pointer events and dispatch to viewport as FUDGE-Event
+             */
             this.hndPointerEvent = (_event) => {
                 let event = new Fudge.PointerEventƒ("ƒ" + _event.type, _event);
                 this.addCanvasPosition(event);
                 this.dispatchEvent(event);
             };
+            /**
+             * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
+             */
             this.hndKeyboardEvent = (_event) => {
                 if (!this.hasFocus)
                     return;
                 let event = new Fudge.KeyboardEventƒ("ƒ" + _event.type, _event);
                 this.dispatchEvent(event);
             };
+            /**
+             * Handle wheel event and dispatch to viewport as FUDGE-Event
+             */
             this.hndWheelEvent = (_event) => {
                 let event = new Fudge.WheelEventƒ("ƒ" + _event.type, _event);
                 this.dispatchEvent(event);
@@ -1142,12 +1448,21 @@ var Fudge;
             this.rectSource = Fudge.RenderManager.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
         }
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
         getContext() {
             return this.crc2;
         }
+        /**
+         * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
+         */
         getCanvasRectangle() {
             return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
         }
+        /**
+         * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
+         */
         getClientRectangle() {
             return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
@@ -1179,6 +1494,9 @@ var Fudge;
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
         }
+        /**
+         * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
+         */
         adjustFrames() {
             // get the rectangle of the canvas area as displayed (consider css)
             let rectClient = this.getClientRectangle();
@@ -1198,15 +1516,27 @@ var Fudge;
             // no more transformation after this for now, offscreen canvas and render-viewport have the same size
             Fudge.RenderManager.setCanvasSize(rectRender.width, rectRender.height);
         }
+        /**
+         * Adjust the camera parameters to fit the rendering into the render vieport
+         */
         adjustCamera() {
             let rect = Fudge.RenderManager.getViewportRectangle();
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
         }
         // #endregion
         // #region Events (passing from canvas to viewport and from there into branch)
+        /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
         get hasFocus() {
             return (Viewport.focus == this);
         }
+        /**
+         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+         *
+         * @param _on
+         */
         setFocus(_on) {
             if (_on) {
                 if (Viewport.focus == this)
@@ -1223,20 +1553,44 @@ var Fudge;
                 Viewport.focus = null;
             }
         }
+        /**
+         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activatePointerEvent(_type, _on) {
             this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
         }
+        /**
+         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateKeyboardEvent(_type, _on) {
             this.activateEvent(this.canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
         }
+        /**
+         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateDragDropEvent(_type, _on) {
             if (_type == "\u0192dragstart" /* START */)
                 this.canvas.draggable = _on;
             this.activateEvent(this.canvas, _type, this.hndDragDropEvent, _on);
         }
+        /**
+         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+         * @param _type
+         * @param _on
+         */
         activateWheelEvent(_type, _on) {
             this.activateEvent(this.canvas, _type, this.hndWheelEvent, _on);
         }
+        /**
+         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
+         * @param event
+         */
         addCanvasPosition(event) {
             event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
             event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
@@ -1281,7 +1635,8 @@ var Fudge;
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
-    class Framing {
+    class Framing extends Fudge.Mutable {
+        reduceMutator(_mutator) { }
     }
     Fudge.Framing = Framing;
     /**
@@ -1383,6 +1738,9 @@ var Fudge;
             let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
             let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
             return rect;
+        }
+        getMutator() {
+            return { margin: this.margin, padding: this.padding };
         }
     }
     Fudge.FramingComplex = FramingComplex;
@@ -1709,12 +2067,12 @@ var Fudge;
                 0, 0, (_near + _far) * rangeInv, -1,
                 0, 0, _near * _far * rangeInv * 2, 0
             ]);
-            if (_direction == Fudge.FOV_DIRECTION.DIAGONAL) {
+            if (_direction == Fudge.FIELD_OF_VIEW.DIAGONAL) {
                 _aspect = Math.sqrt(_aspect);
                 matrix.data[0] = f / _aspect;
                 matrix.data[5] = f * _aspect;
             }
-            else if (_direction == Fudge.FOV_DIRECTION.VERTICAL)
+            else if (_direction == Fudge.FIELD_OF_VIEW.VERTICAL)
                 matrix.data[0] = f / _aspect;
             else //FOV_DIRECTION.HORIZONTAL
                 matrix.data[5] = f * _aspect;
@@ -2137,6 +2495,12 @@ var Fudge;
             return RenderOperator.crc3.canvas;
         }
         /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext() {
+            return RenderOperator.crc3;
+        }
+        /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         static getCanvasRect() {
@@ -2166,33 +2530,29 @@ var Fudge;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
+         * @param _shaderInfo
+         * @param _bufferInfo
+         * @param _coatInfo
          * @param _projection
          */
-        static draw(shaderInfo, bufferInfo, materialInfo, _projection) {
-            RenderOperator.useBuffer(bufferInfo);
-            RenderOperator.useParameter(materialInfo);
-            RenderOperator.useProgram(shaderInfo);
-            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+        static draw(_shaderInfo, _bufferInfo, _coatInfo, _projection) {
+            RenderOperator.useBuffer(_bufferInfo);
+            RenderOperator.useParameter(_coatInfo);
+            RenderOperator.useProgram(_shaderInfo);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
             // Supply matrixdata to shader. 
-            let matrixLocation = shaderInfo.uniforms["u_matrix"];
+            let matrixLocation = _shaderInfo.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            // Supply color
-            let colorUniformLocation = shaderInfo.uniforms["u_color"];
-            let vec = materialInfo.color;
-            let color = new Float32Array([vec.x, vec.y, vec.z, 1.0]);
-            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
+            _coatInfo.coat.setRenderData(_shaderInfo);
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
         }
         // #region Shaderprogram 
         static createProgram(_shaderClass) {
             let crc3 = RenderOperator.crc3;
             let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
@@ -2280,21 +2640,22 @@ var Fudge;
         }
         // #endregion
         // #region MaterialParameters
-        static createParameter(_material) {
+        static createParameter(_coat) {
             let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
-            let materialInfo = {
+            let coatInfo = {
                 vao: vao,
-                color: _material.Color
+                // TODO: use mutator to create materialInfo or rethink materialInfo... below is a bad hack!
+                coat: _coat
             };
-            return materialInfo;
+            return coatInfo;
         }
-        static useParameter(_materialInfo) {
-            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
+        static useParameter(_coatInfo) {
+            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
-        static deleteParameter(_materialInfo) {
-            if (_materialInfo) {
+        static deleteParameter(_coatInfo) {
+            if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
+                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
         // #endregion
@@ -2316,7 +2677,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * This class manages the references to render data used by nodes.
-     * Multiple nodes may refer to the same data via their references to shader, material and mesh
+     * Multiple nodes may refer to the same data via their references to shader, coat and mesh
      */
     class Reference {
         constructor(_reference) {
@@ -2339,7 +2700,7 @@ var Fudge;
     }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends Fudge.RenderOperator {
@@ -2351,13 +2712,16 @@ var Fudge;
         static addNode(_node) {
             if (this.nodes.get(_node))
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            if (!cmpMaterial)
+                return;
+            let shader = cmpMaterial.getMaterial().getShader();
             this.createReference(this.programs, shader, this.createProgram);
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            this.createReference(this.parameters, material, this.createParameter);
+            let coat = cmpMaterial.getMaterial().getCoat();
+            this.createReference(this.parameters, coat, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             this.createReference(this.buffers, mesh, this.createBuffer);
-            let nodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
         /**
@@ -2371,7 +2735,7 @@ var Fudge;
                     this.addNode(node);
                 }
                 catch (_e) {
-                    //console.log(_e);
+                    console.log(_e);
                 }
         }
         // #endregion
@@ -2385,7 +2749,7 @@ var Fudge;
             if (!nodeReferences)
                 return;
             this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
+            this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
             this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
             this.nodes.delete(_node);
         }
@@ -2400,24 +2764,25 @@ var Fudge;
         // #endregion
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node) {
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            let shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
                 this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
                 this.createReference(this.programs, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            if (material !== nodeReferences.material) {
-                this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
-                this.createReference(this.parameters, material, this.createParameter);
-                nodeReferences.material = material;
+            let coat = cmpMaterial.getMaterial().getCoat();
+            if (coat !== nodeReferences.coat) {
+                this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
+                this.createReference(this.parameters, coat, this.createParameter);
+                nodeReferences.coat = coat;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
@@ -2509,9 +2874,9 @@ var Fudge;
             if (!references)
                 return; // TODO: deal with partial references
             let bufferInfo = this.buffers.get(references.mesh).getReference();
-            let materialInfo = this.parameters.get(references.material).getReference();
+            let coatInfo = this.parameters.get(references.coat).getReference();
             let shaderInfo = this.programs.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -2569,22 +2934,26 @@ var Fudge;
     }
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.programs = new Map();
-    /** Stores references to the vertex array objects and makes them available via the references to materials */
+    /** Stores references to the vertex array objects and makes them available via the references to coats */
     RenderManager.parameters = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
     RenderManager.buffers = new Map();
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
+/// <reference path="../Coat/Coat.ts"/>
 var Fudge;
+/// <reference path="../Coat/Coat.ts"/>
 (function (Fudge) {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
-        static loadVertexShaderSource() { return null; }
-        static loadFragmentShaderSource() { return null; }
+        // The type of coat that can be used with this shader to create a material
+        static getCoat() { return null; }
+        static getVertexShaderSource() { return null; }
+        static getFragmentShaderSource() { return null; }
     }
     Fudge.Shader = Shader;
 })(Fudge || (Fudge = {}));
@@ -2595,7 +2964,10 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderBasic extends Fudge.Shader {
-        static loadVertexShaderSource() {
+        static getCoat() {
+            return Fudge.CoatColored;
+        }
+        static getVertexShaderSource() {
             return `#version 300 es
                     // an attribute is an input (in) to a vertex shader.
                     // It will receive data from a buffer
@@ -2620,7 +2992,7 @@ var Fudge;
                         v_color = u_color;
                     }`;
         }
-        static loadFragmentShaderSource() {
+        static getFragmentShaderSource() {
             return `#version 300 es
                     // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;

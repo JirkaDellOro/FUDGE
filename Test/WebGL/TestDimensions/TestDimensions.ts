@@ -20,7 +20,7 @@ namespace RenderManagerRendering {
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
 
@@ -126,7 +126,7 @@ namespace RenderManagerRendering {
 
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
 
@@ -139,7 +139,7 @@ namespace RenderManagerRendering {
         let client: ClientRect = canvas.getBoundingClientRect();
         uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });
 
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

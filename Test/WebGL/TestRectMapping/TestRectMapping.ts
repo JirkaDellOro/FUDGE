@@ -1,7 +1,7 @@
 namespace RenderManagerRendering {
     import ƒ = Fudge;
     window.addEventListener("load", init);
-    let uiMaps: { [name: string]: { ui: UI.MapRectangle, map: ƒ.FramingComplex } } = {};
+    let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
     let uiClient: UI.Rectangle;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
@@ -21,21 +21,17 @@ namespace RenderManagerRendering {
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
-        menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and mappings";
+        menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
-        // tslint:disable: no-any 
-        viewPort.frameDestinationToSource = <any>new ƒ.FramingComplex();
-        viewPort.frameClientToCanvas = <any>new ƒ.FramingComplex();
 
-        appendUIMap(menu, "DestinationToSource", <any>viewPort.frameDestinationToSource);
-        appendUIMap(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
-        appendUIMap(menu, "ClientToCanvas", <any>viewPort.frameClientToCanvas);
-        // tslint:enable: no-any 
+        appendUIScale(menu, "DestinationToSource", viewPort.frameDestinationToSource);
+        appendUIComplex(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
+        appendUIScale(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
 
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
@@ -45,6 +41,11 @@ namespace RenderManagerRendering {
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
         viewPort.adjustingFrames = true;
+
+        logMutatorInfo("Camera", cmpCamera);
+        for (let name in uiMaps) {
+            logMutatorInfo(name, uiMaps[name].framing);
+        }
 
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
@@ -59,18 +60,36 @@ namespace RenderManagerRendering {
 
     }
 
-    function appendUIMap(_parent: HTMLElement, _name: string, _map: ƒ.FramingComplex): void {
-        let uiMap: UI.MapRectangle = new UI.MapRectangle(_name);
-        uiMap.addEventListener("input", hndChangeOnMap);
+    function logMutatorInfo(_title: string, _mutable: ƒ.Mutable): void {
+        let mutator: ƒ.Mutator = _mutable.getMutator();
+        let types: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+        console.group(_title);
+        console.log("Types: ", types);
+        console.log("Mutator: ", mutator);
+        console.groupEnd();
+    }
+
+    function appendUIComplex(_parent: HTMLElement, _name: string, _framing: ƒ.FramingComplex): void {
+        let uiMap: UI.FramingComplex = new UI.FramingComplex(_name);
+        uiMap.addEventListener("input", hndChangeOnComplex);
         _parent.appendChild(uiMap);
-        uiMaps[_name] = { ui: uiMap, map: _map };
+        uiMaps[_name] = { ui: uiMap, framing: _framing };
+    }
+    function appendUIScale(_parent: HTMLElement, _name: string, _framing: ƒ.FramingScaled): void {
+        let uiMap: UI.FramingScaled = new UI.FramingScaled(_name);
+        uiMap.addEventListener("input", hndChangeOnScale);
+        _parent.appendChild(uiMap);
+        uiMaps[_name] = { ui: uiMap, framing: _framing };
     }
 
-    function hndChangeOnMap(_event: Event): void {
-        let target: UI.MapRectangle = <UI.MapRectangle>_event.currentTarget;
-        setRect(target);
+    function hndChangeOnComplex(_event: Event): void {
+        let target: UI.FramingComplex = <UI.FramingComplex>_event.currentTarget;
+        setRectComplex(target);
     }
-
+    function hndChangeOnScale(_event: Event): void {
+        let target: UI.FramingScaled = <UI.FramingScaled>_event.currentTarget;
+        setRectScale(target);
+    }
     function hndChangeOnCamera(_event: Event): void {
         //let target: UI.Rectangle = <UI.Rectangle>_event.currentTarget;
         setCamera();
@@ -81,16 +100,16 @@ namespace RenderManagerRendering {
         setClient(target);
     }
 
-    function setRect(_uiMap: UI.MapRectangle): void {
+    function setRectComplex(_uiMap: UI.FramingComplex): void {
         let value: {} = _uiMap.get();
-        let map: ƒ.FramingComplex = uiMaps[_uiMap.name].map;
+        let framing: ƒ.FramingComplex = <ƒ.FramingComplex>uiMaps[_uiMap.name].framing;
         for (let key in value) {
             switch (key) {
-                case "Anchor":
-                    map.margin = <ƒ.Border>value[key];
+                case "Margin":
+                    framing.margin = <ƒ.Border>value[key];
                     break;
-                case "Border":
-                    map.padding = <ƒ.Border>value[key];
+                case "Padding":
+                    framing.padding = <ƒ.Border>value[key];
                     break;
                 case "Result":
                     break;
@@ -100,9 +119,15 @@ namespace RenderManagerRendering {
         }
     }
 
+    function setRectScale(_uiMap: UI.FramingScaled): void {
+        let value: { normWidth: number, normHeight: number } = <{ normWidth: number, normHeight: number }>_uiMap.get();
+        let framing: ƒ.FramingScaled = <ƒ.FramingScaled>uiMaps[_uiMap.name].framing;
+        framing.setScale(value.normWidth, value.normHeight);
+    }
+
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
 
@@ -116,25 +141,33 @@ namespace RenderManagerRendering {
 
     function update(): void {
         for (let name in uiMaps) {
-            let uiMap: { ui: UI.MapRectangle, map: ƒ.FramingComplex } = uiMaps[name];
-            uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
+            // uiMap.ui.set({ Margin: uiMap.map.margin, Padding: uiMap.map.padding });
 
             switch (name) {
-                case "ClientToCanvas":
+                case "ClientToCanvas": {
+                    let uiMap: { ui: UI.FieldSet<UI.FramingScaled>, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
+                    uiMap.ui.set(uiMap.framing);
                     uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
                     break;
-                case "CanvasToDestination":
-                    uiMap.ui.set({ Result: viewPort.rectDestination});
+                }
+                case "CanvasToDestination": {
+                    let uiMap: { ui: UI.FieldSet<null>, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet<null>, framing: ƒ.FramingComplex }>uiMaps[name];
+                    uiMap.ui.set({ Margin: uiMap.framing.margin, Padding: uiMap.framing.padding });
+                    uiMap.ui.set({ Result: viewPort.rectDestination });
                     break;
-                case "DestinationToSource":
-                    uiMap.ui.set({ Result: viewPort.rectSource});
+                }
+                case "DestinationToSource": {
+                    let uiMap: { ui: UI.FramingScaled, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
+                    uiMap.ui.set(uiMap.framing);
+                    uiMap.ui.set({ Result: viewPort.rectSource });
                     break;
+                }
             }
         }
         let clientRect: ClientRect = canvas.getBoundingClientRect();
         uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
 
-        let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

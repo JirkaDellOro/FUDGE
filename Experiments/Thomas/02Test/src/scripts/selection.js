@@ -13,7 +13,7 @@ function PlaySong() {
     }
 
 
-    // Create AudioContext instance
+    // Create AudioContext instance, check Browser
     audioContext = new(window.AudioContext || window.webkitAudioContext)();
     // Create a buffer for the incoming sound content
     var source = audioContext.createBufferSource();
@@ -57,7 +57,8 @@ function SetSong() {
     var ele = document.getElementById("songs");
     var selected = ele.options[ele.selectedIndex].value;
     var song = document.getElementById("songSelection");
-    song.innerHTML = selected;
+
+    song.innerHTML = ele.options[ele.selectedIndex].innerHTML;
 
     switch (selected) {
         case 'songone':
@@ -75,6 +76,7 @@ function SetSong() {
 }
 
 function SetVolume(vol) {
+    // Set Volume for next Sound
     volume = vol;
     document.getElementById('output').innerHTML = volume;
     console.log(volume);

@@ -1,0 +1,38 @@
+@startuml Key
+skinparam monochrome true
+
+title Key
+
+partition setSlopeIn {
+	:_slope: number];
+	:slopeIn = _slope;
+	:functionIn.calculate();
+	stop
+}
+
+partition setSlopeOut {
+	:_slope: number];
+	:slopeOut = _slope;
+	:functionOut.calculate();
+	stop
+}
+
+partition sort {
+	:a: Key
+	b: Key]
+	:a.time - b.time]
+	detach
+}
+
+partition generatePath2D {
+	:_y: number = NaN]
+	if() then ([!_y])
+		:_y = value;
+	endif
+	:path2d = new Path2D();
+	:draw diamond shape in path2d
+	at x = time and y=_y;
+	stop
+}
+
+@enduml

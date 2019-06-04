@@ -6,20 +6,27 @@ namespace Scenes {
     export let viewPort: ƒ.Viewport;
 
     export function createAxisCross(): ƒ.Node {
-        let clrRed: ƒ.Vector3 = new ƒ.Vector3(1, 0, 0);
-        let clrGreen: ƒ.Vector3 = new ƒ.Vector3(0, 1, 0);
-        let clrBlue: ƒ.Vector3 = new ƒ.Vector3(0, 0, 1);
-        
-        let mtrRed: ƒ.Material = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
-        let mtrGreen: ƒ.Material = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
-        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
-        
+        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 0.5);
+        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 0.5);
+        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 0.5);
+
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored();
+        coatRed.params.color = clrRed; 
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored();
+        coatGreen.params.color = clrGreen; 
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored();
+        coatBlue.params.color = clrBlue; 
+
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
+
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube(1, 1, 1);
-        
+
         let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
-        
+
         cubeRed.cmpTransform.scaleX(2);
         cubeGreen.cmpTransform.scaleY(2);
         // cubeBlue.cmpTransform.scaleZ(2);
@@ -28,7 +35,7 @@ namespace Scenes {
         pivot.scaleZ(2);
         cubeBlue.addComponent(pivot);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
-        
+
         // create branch
         let branch: ƒ.Node = new ƒ.Node("AxisCross");
         branch.appendChild(cubeRed);
@@ -44,7 +51,7 @@ namespace Scenes {
         let child: ƒ.Node = node.getChildren()[0];
 
         let grandchild: ƒ.Node;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Vector3(0, 255, 0), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(3, 3, 3));
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
@@ -52,7 +59,7 @@ namespace Scenes {
     export function createMiniScene(): void {
         ƒ.RenderManager.initialize();
 
-        node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Vector3(255, 0, 0), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
+        node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(5, 2, 5));
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.scaleX(2);
 
@@ -68,7 +75,7 @@ namespace Scenes {
             document.body.appendChild(_canvas);
         }
         viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", node, <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera), _canvas);
+        viewPort.initialize("TestViewport", node, camera.getComponent(ƒ.ComponentMaterial), _canvas);
         // viewPort.drawScene();
         viewPort.showSceneGraph();
     }
@@ -80,7 +87,7 @@ namespace Scenes {
         cmpTransform.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-        cmpCamera.projectCentral(1, 45, ƒ.FOV_DIRECTION.DIAGONAL);
+        cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
         camera.addComponent(cmpCamera);
         return camera;
     }

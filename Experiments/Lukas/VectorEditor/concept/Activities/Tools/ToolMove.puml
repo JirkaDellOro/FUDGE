@@ -1,0 +1,54 @@
+@startuml ToolMove
+skinparam monochrome true
+
+title ToolMove
+
+partition mousedown {
+	:_event: MouseEvent]
+	:previousPosition = (_event.clientX, _event.clientY);
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([no buttons pressed])
+		stop
+	endif
+	' TODO: if only one tangent is selected, make its opposite move accordingly
+	:delta: Vector2 = new Vector2(
+	previousPosition.x - _event.clientX,
+	previousPosition.y - _event.clientY)]
+	if() then ([left mouse button pressed])
+		if() then ([Editor.selectedPoints.length > 0])
+			while() is ([point of Editor.selectedPoints])
+				:point.move(delta);
+			endwhile
+		elseif () then ([Editor.selectedPaths.length > 0])
+			while() is ([path of Editor.selectedPaths])
+				:path.move(delta);
+			endwhile
+		endif
+	else
+		:Editor.transformationPoint += delta;
+	endif
+	:previousPosition = (_event.clientX, _event.clientY);
+	stop
+}
+
+partition mouseup {
+	:_event: MouseEvent]
+	stop
+}
+
+
+partition prequisitesFulfilled {
+	start
+	if() then([selectedPaths.length > 0 || selectedPoints.length > 0])
+		:true]
+		detach
+	endif
+	:false]
+	detach
+}
+
+@enduml

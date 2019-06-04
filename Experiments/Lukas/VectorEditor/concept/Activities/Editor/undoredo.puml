@@ -1,0 +1,36 @@
+@startuml UndoRedo
+skinparam monochrome true
+
+title Editor
+
+partition saveToChangeHistoy {
+	start
+	:changeHistory.push(sketch);
+	:redoHistory = [];
+	stop
+}
+
+partition redo {
+	start
+	if() then (redoHistory.length = 0)
+		stop
+	endif 
+	:changeHistory.push(sketch);
+	:sketch = redoHistory.pop();
+	:redrawAll();
+	stop 
+}
+
+partition undo {
+	start
+	if() then (undoHistory.length = 0)
+		stop
+	endif 
+	:redoHistory.push(sketch);
+	:sketch = changeHistory.pop();
+	:redrawAll();
+	stop
+}
+
+@enduml
+

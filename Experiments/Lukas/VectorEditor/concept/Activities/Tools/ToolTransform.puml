@@ -1,0 +1,87 @@
+@startuml ToolTransform
+skinparam monochrome true
+
+title ToolTransform
+
+partition mousedown {
+	:_event: MouseEvent]
+	:point: SketchPoint = Editor.getPathOrPointTheMouseIsOver()]
+	:rect: TransformRect = calculateTransformationRect()]
+	if () then ([point])
+		:selectedSubTool = scale;
+		:selectedScalePoint = point;
+		:switch(point)
+		-> set scale.mode accordingly
+		-> set scale.referencePoint accordingly;
+	elseif () then ([mouse inside rect])
+		:selectedSubTool = move;
+	else
+		:selectedSubTool = rotate;
+	endif
+	:selectedSubTool.mousedown(_event);
+	stop
+}
+
+' partition mousemove {
+' 	:_event: MouseEvent]
+' 	stop
+' }
+
+partition mouseup {
+	:_event: MouseEvent]
+	:selectedSubTool = null;
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	if() then([selectedPoints.length > 1])
+		:true]
+		detach
+	endif
+	:false]
+	detach
+}
+
+
+partition additionalDisplay {
+	:_crc: CanvasRenderingContext2D]
+	:rect: TransformRect = calculateScalePoints()]
+	:transformPath: Path2D]
+	:draw rect on transformPath
+	set stroke options
+	_crc.stroke (transformPath);
+	while() is ([s of scalePoints])
+		:s.draw(_crc, point == selectedScalePoint);
+	endwhile
+	stop
+}
+
+partition calculateScalePoints {
+	:rect: TransformRect = calculateTransformationRect()]
+	:scaleUp = (rect.minX+rect.maxX) / 2, rect.minY
+	scaleDown = (rect.minX+rect.maxX) / 2, rect.maxY
+	scaleLeft = rect.minX, (rect.minY + rect.maxY) / 2
+	scaleRight = rect.maxX, (rect.minY + rect.maxY) / 2
+	scaleTopLeft = rect.minX, rect.minY
+	scaleTopRight = rect.maxX, rect.minY
+	scaleBottomLeft = rect.minX, rect.maxY
+	scaleBottomRight = rect.maxX, rect.maxY;
+	:rect]
+	detach
+}
+
+partition calculateTransformationRect {
+	start
+	:minX, minY: number = Infinity 
+	maxX, maxY: number = -Infinity]
+	while() is ([point in Editor.selectedPoints])
+		:minX = min(minX, point.x)
+		minY = min(minY, point.y)
+		maxX = max(maxX, point.x)
+		maxY = max(maxY, point.y);
+	endwhile
+	:{minX, minY, maxX, maxY} ]
+}
+
+@enduml
