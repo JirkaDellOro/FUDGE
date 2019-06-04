@@ -56,7 +56,7 @@ var Scenes;
             document.body.appendChild(_canvas);
         }
         Scenes.viewPort = new ƒ.Viewport();
-        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentMaterial), _canvas);
+        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), _canvas);
         // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }
