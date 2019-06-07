@@ -32,9 +32,10 @@ namespace Fudge {
         }
     }
 
-    // @RenderExtender.decorateCoat
+    @RenderExtender.decorateCoat
     export class CoatTextured extends Coat {
-        private textureSource: string;
+        public texture: TextureImage = null;
+        // private textureSource: string;
         //     this.textureSource = _textureSource;
     }
 
@@ -64,9 +65,9 @@ namespace Fudge {
      * @param _mesh The node's meshcomponent.
      */
     // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-    //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-    //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-    //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
+        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
+        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
     //     _meshComponent.setTextureCoordinates();
     //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
     //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);

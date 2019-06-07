@@ -1,10 +1,15 @@
 namespace Fudge {
     export abstract class Mesh implements Serializable {
         protected vertices: Float32Array;
+        protected textureUVs: Float32Array;
 
         public getVertices(): Float32Array {
             return this.vertices;
-        };
+        }
+
+        public getTextureUVs(): Float32Array {
+            return this.textureUVs;
+        }
 
         public getVertexCount(): number {
             return this.vertices.length / this.getBufferSpecification().size;

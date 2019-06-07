@@ -17,6 +17,7 @@ namespace Fudge {
         target: number;
         specification: BufferSpecification;
         vertexCount: number;
+        textureUVs: WebGLBuffer;
     }
 
     export interface CoatInfo {
@@ -100,6 +101,16 @@ namespace Fudge {
             return RenderOperator.rectViewport;
         }
 
+        // #region Utilities
+        /** TODO: back to private
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        public static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
+
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param _shaderInfo 
@@ -116,7 +127,7 @@ namespace Fudge {
             // Supply matrixdata to shader. 
             let matrixLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            
+
             _coatInfo.coat.setRenderData(_shaderInfo);
 
             // Draw call
@@ -198,13 +209,19 @@ namespace Fudge {
         // #region Meshbuffer
         protected static createBuffer(_mesh: Mesh): BufferInfo {
             let buffer: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, buffer);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.getVertices(), WebGL2RenderingContext.STATIC_DRAW);
+
+            let textureCoordinateBuffer: WebGLBuffer = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+
             let bufferInfo: BufferInfo = {
                 buffer: buffer,
                 target: RenderOperator.crc3.ARRAY_BUFFER,
                 specification: _mesh.getBufferSpecification(),
-                vertexCount: _mesh.getVertexCount()
+                vertexCount: _mesh.getVertexCount(),
+                textureUVs: textureCoordinateBuffer
             };
             return bufferInfo;
         }
@@ -238,16 +255,6 @@ namespace Fudge {
             }
         }
         // #endregion
-
-        // #region Utilities
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        private static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
-        }
 
 
         /*/*

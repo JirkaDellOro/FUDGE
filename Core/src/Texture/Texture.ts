@@ -11,6 +11,7 @@ namespace Fudge {
      * Texture created from an existing image
      */
     export class TextureImage extends Texture {
+        public image: HTMLImageElement = null;
     }
     /**
      * Texture created from a canvas

@@ -104,20 +104,33 @@ var Fudge;
                 value: coatExtension
             });
         }
-        static extendCoatColored(_shaderInfo) {
+        static setRenderDataForCoatColored(_shaderInfo) {
             let colorUniformLocation = _shaderInfo.uniforms["u_color"];
             let { r, g, b, a } = this.color;
             let color = new Float32Array([r, g, b, a]);
             Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
-        static extendCoatTextured(_shaderInfo) {
+        static setRenderDataForCoatTextured(_shaderInfo) {
+            let crc3 = Fudge.RenderOperator.getRenderingContext();
             let textureBufferSpecification = { size: 2, dataType: WebGLRenderingContext.FLOAT, normalize: true, stride: 0, offset: 0 };
-            let textureCoordinateAtributeLocation = Fudge.RenderManager.assert(_shaderInfo.attributes["a_textureCoordinate"]);
+            let textureCoordinateAttributeLocation = Fudge.RenderManager.assert(_shaderInfo.attributes["a_textureCoordinate"]);
+            crc3.enableVertexAttribArray(textureCoordinateAttributeLocation);
+            Fudge.RenderOperator.attributePointer(textureCoordinateAttributeLocation, textureBufferSpecification);
+            let texture = Fudge.RenderManager.assert(crc3.createTexture());
+            crc3.bindTexture(crc3.TEXTURE_2D, texture);
+            try {
+                crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texture.image);
+            }
+            catch (_e) {
+                Fudge.Debug.error(_e);
+            }
+            crc3.generateMipmap(crc3.TEXTURE_2D);
+            Object.defineProperty(this, "txtBuffer", { value: texture });
         }
     }
     RenderExtender.coatExtensions = {
-        "CoatColored": RenderExtender.extendCoatColored,
-        "CoatTextured": RenderExtender.extendCoatTextured
+        "CoatColored": RenderExtender.setRenderDataForCoatColored,
+        "CoatTextured": RenderExtender.setRenderDataForCoatTextured
     };
     Fudge.RenderExtender = RenderExtender;
 })(Fudge || (Fudge = {}));
@@ -189,6 +202,15 @@ var Fudge;
          */
         static getViewportRectangle() {
             return RenderOperator.rectViewport;
+        }
+        // #region Utilities
+        /** TODO: back to private
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static attributePointer(_attributeLocation, _bufferSpecification) {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -281,13 +303,17 @@ var Fudge;
         // #region Meshbuffer
         static createBuffer(_mesh) {
             let buffer = RenderOperator.assert(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, buffer);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.getVertices(), WebGL2RenderingContext.STATIC_DRAW);
+            let textureCoordinateBuffer = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
             let bufferInfo = {
                 buffer: buffer,
                 target: RenderOperator.crc3.ARRAY_BUFFER,
                 specification: _mesh.getBufferSpecification(),
-                vertexCount: _mesh.getVertexCount()
+                vertexCount: _mesh.getVertexCount(),
+                textureUVs: textureCoordinateBuffer
             };
             return bufferInfo;
         }
@@ -318,16 +344,6 @@ var Fudge;
                 RenderOperator.crc3.bindVertexArray(null);
                 RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
-        }
-        // #endregion
-        // #region Utilities
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
     }
     Fudge.RenderOperator = RenderOperator;
@@ -366,9 +382,17 @@ var Fudge;
         Fudge.RenderExtender.decorateCoat
     ], CoatColored);
     Fudge.CoatColored = CoatColored;
-    // @RenderExtender.decorateCoat
-    class CoatTextured extends Coat {
-    }
+    let CoatTextured = class CoatTextured extends Coat {
+        constructor() {
+            super(...arguments);
+            this.texture = null;
+            // private textureSource: string;
+            //     this.textureSource = _textureSource;
+        }
+    };
+    CoatTextured = __decorate([
+        Fudge.RenderExtender.decorateCoat
+    ], CoatTextured);
     Fudge.CoatTextured = CoatTextured;
     /**
      * Adds and enables a Texture passed to this material.
@@ -2611,7 +2635,9 @@ var Fudge;
         getVertices() {
             return this.vertices;
         }
-        ;
+        getTextureUVs() {
+            return this.textureUVs;
+        }
         getVertexCount() {
             return this.vertices.length / this.getBufferSpecification().size;
         }
@@ -2676,6 +2702,43 @@ var Fudge;
         }
     }
     Fudge.MeshCube = MeshCube;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshQuad extends Fudge.Mesh {
+        constructor() {
+            super();
+            this.create();
+        }
+        create() {
+            this.vertices = new Float32Array([
+                -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1
+            ]);
+            for (let iVertex = 0; iVertex < this.vertices.length; iVertex += 3) {
+                this.vertices[iVertex] *= 1 / 2;
+                this.vertices[iVertex + 1] *= 1 / 2;
+                this.vertices[iVertex + 2] *= 1 / 2;
+            }
+        }
+        setTextureCoordinates() {
+            let textureCoordinates = [];
+            textureCoordinates.push(0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0);
+        }
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
+        }
+    }
+    Fudge.MeshQuad = MeshQuad;
 })(Fudge || (Fudge = {}));
 /// <reference path="RenderOperator.ts"/>
 var Fudge;
@@ -2875,6 +2938,7 @@ var Fudge;
                 this.drawBranch(childNode, _cmpCamera, world);
             }
         }
+        // TODO switch back to private
         static drawNode(_node, _projection) {
             let references = this.nodes.get(_node);
             if (!references)
@@ -3023,61 +3087,83 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Fudge.Shader {
-        loadVertexShaderSource() {
-            return `#version 300 es
- 
-                    // an attribute is an input (in) to a vertex shader.
-                    // It will receive data from a buffer
-                    in vec4 a_position;
-                    in vec4 a_color;
-                    in vec2 a_textureCoordinate;
-                
-                    // The Matrix to transform the positions by.
-                    uniform mat4 u_matrix;
-                
-                
-                    // Varying color in the fragmentshader.
-                    out vec4 v_color;
-                    // Varying texture in the fragmentshader.
-                    out vec2 v_textureCoordinate;
-                
-                
-                    // all shaders have a main function.
-                    void main() {  
-                        // Multiply all positions by the matrix.   
-                        vec4 position = u_matrix * a_position;
-                
-                
-                        gl_Position = u_matrix * a_position;
-                
-                        // Pass color to fragmentshader.
-                        v_color = a_color;
-                        v_textureCoordinate = a_textureCoordinate;
-                    }`;
+        static getCoat() {
+            return Fudge.CoatTextured;
         }
-        loadFragmentShaderSource() {
+        static getVertexShaderSource() {
             return `#version 300 es
+                in vec4 a_position;
+                in vec2 a_textureCoordinate;
+
+                uniform mat4 u_matrix;
+                uniform vec4 u_color;
+                
+                // out vec4 v_color;
+                out vec2 v_textureCoordinate;
+
+                void main() {  
+
+                vec4 position = u_matrix * a_position;
+                    
+                    gl_Position = u_matrix * a_position;
+                    // v_color = u_color;
+                    v_textureCoordinate = a_textureCoordinate;
+            }`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+                precision mediump float;
+                
+                in vec2 v_textureCoordinate;
             
-                    // fragment shaders don't have a default precision so we need
-                    // to pick one. mediump is a good default. It means "medium precision"
-                    precision mediump float;
-                    
-                    // Color passed from vertexshader.
-                    in vec4 v_color;
-                    // Texture passed from vertexshader.
-                    in vec2 v_textureCoordinate;
+                uniform sampler2D u_texture;
+
+                out vec4 outColor;
                 
-                
-                    uniform sampler2D u_texture;
-                    // we need to declare an output for the fragment shader
-                    out vec4 outColor;
-                    
-                    void main() {
-                    outColor = v_color;
-                    outColor = texture(u_texture, v_textureCoordinate) * v_color;
+                void main() {
+                    outColor = texture(u_texture, v_textureCoordinate);// * v_color;
             }`;
         }
     }
     Fudge.ShaderTexture = ShaderTexture;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Baseclass for different kinds of textures.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Texture extends Fudge.Mutable {
+        reduceMutator() { }
+    }
+    Fudge.Texture = Texture;
+    /**
+     * Texture created from an existing image
+     */
+    class TextureImage extends Texture {
+        constructor() {
+            super(...arguments);
+            this.image = null;
+        }
+    }
+    Fudge.TextureImage = TextureImage;
+    /**
+     * Texture created from a canvas
+     */
+    class TextureCanvas extends Texture {
+    }
+    Fudge.TextureCanvas = TextureCanvas;
+    /**
+     * Texture created from a FUDGE-Sketch
+     */
+    class TextureSketch extends TextureCanvas {
+    }
+    Fudge.TextureSketch = TextureSketch;
+    /**
+     * Texture created from an HTML-page
+     */
+    class TextureHTML extends TextureCanvas {
+    }
+    Fudge.TextureHTML = TextureHTML;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

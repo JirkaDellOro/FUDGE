@@ -63,8 +63,8 @@ declare namespace Fudge {
     class RenderExtender {
         private static coatExtensions;
         static decorateCoat(_constructor: Function): void;
-        private static extendCoatColored;
-        private static extendCoatTextured;
+        private static setRenderDataForCoatColored;
+        private static setRenderDataForCoatTextured;
     }
 }
 declare namespace Fudge {
@@ -89,6 +89,7 @@ declare namespace Fudge {
         target: number;
         specification: BufferSpecification;
         vertexCount: number;
+        textureUVs: WebGLBuffer;
     }
     interface CoatInfo {
         vao: WebGLVertexArrayObject;
@@ -136,6 +137,12 @@ declare namespace Fudge {
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
         static getViewportRectangle(): Rectangle;
+        /** TODO: back to private
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param _shaderInfo
@@ -153,12 +160,6 @@ declare namespace Fudge {
         protected static createParameter(_coat: Coat): CoatInfo;
         protected static useParameter(_coatInfo: CoatInfo): void;
         protected static deleteParameter(_coatInfo: CoatInfo): void;
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        private static attributePointer;
     }
 }
 declare namespace Fudge {
@@ -173,7 +174,7 @@ declare namespace Fudge {
         constructor(_color?: Color);
     }
     class CoatTextured extends Coat {
-        private textureSource;
+        texture: TextureImage;
     }
     /**
      * Adds and enables a Texture passed to this material.
@@ -1163,7 +1164,9 @@ declare namespace Fudge {
 declare namespace Fudge {
     abstract class Mesh implements Serializable {
         protected vertices: Float32Array;
+        protected textureUVs: Float32Array;
         getVertices(): Float32Array;
+        getTextureUVs(): Float32Array;
         getVertexCount(): number;
         getBufferSpecification(): BufferSpecification;
         abstract serialize(): Serialization;
@@ -1181,6 +1184,19 @@ declare namespace Fudge {
         depth: number;
         constructor(_width: number, _height: number, _depth: number);
         create(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Simple class to compute the vertexpositions for a box.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshQuad extends Mesh {
+        constructor();
+        create(): void;
+        setTextureCoordinates(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -1243,7 +1259,7 @@ declare namespace Fudge {
          * @param _world
          */
         static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
-        private static drawNode;
+        static drawNode(_node: Node, _projection: Matrix4x4): void;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
@@ -1295,7 +1311,38 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Shader {
-        loadVertexShaderSource(): string;
-        loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Baseclass for different kinds of textures.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Texture extends Mutable {
+        protected reduceMutator(): void;
+    }
+    /**
+     * Texture created from an existing image
+     */
+    class TextureImage extends Texture {
+        image: HTMLImageElement;
+    }
+    /**
+     * Texture created from a canvas
+     */
+    class TextureCanvas extends Texture {
+    }
+    /**
+     * Texture created from a FUDGE-Sketch
+     */
+    class TextureSketch extends TextureCanvas {
+    }
+    /**
+     * Texture created from an HTML-page
+     */
+    class TextureHTML extends TextureCanvas {
     }
 }

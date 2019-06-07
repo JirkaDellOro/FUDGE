@@ -111,6 +111,9 @@
 		},
 		{
 			"path": "InjectMethod"
+		},
+		{
+			"path": "WebGLTest2"
 		}
 	],
 	"settings": {}

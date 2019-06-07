@@ -241,7 +241,8 @@ namespace Fudge {
             }
         }
 
-        private static drawNode(_node: Node, _projection: Matrix4x4): void {
+        // TODO switch back to private
+        public static drawNode(_node: Node, _projection: Matrix4x4): void {
             let references: NodeReferences = this.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
