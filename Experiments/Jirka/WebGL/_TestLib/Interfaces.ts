@@ -8,6 +8,7 @@ namespace TestLib {
     export interface Mesh {
         vertices: number[];
         indices: number[];
+        getTextureUVs: () => number[];
     }
 
     export interface RenderInfo {
@@ -15,5 +16,6 @@ namespace TestLib {
         vao: WebGLVertexArrayObject;
         nIndices: number;
         material: TestLib.Material;
+        textureBuffer?: WebGLBuffer;
     }
 }

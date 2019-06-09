@@ -127,7 +127,7 @@ namespace TestColor {
             gl.useProgram(renderInfo.shaderInfo.program);
 
             if (renderInfo.material)
-                renderInfo.material.setRenderData(gl, renderInfo.shaderInfo);
+                renderInfo.material.useRenderData(gl, renderInfo.shaderInfo);
 
             gl.bindVertexArray(renderInfo.vao);
             gl.drawElements(gl.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);

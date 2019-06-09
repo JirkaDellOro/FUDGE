@@ -1,6 +1,6 @@
 "use strict";
-var TestColor;
-(function (TestColor) {
+var TestTextured;
+(function (TestTextured) {
     var tl = TestLib;
     let gl;
     let renderInfos = [];
@@ -15,10 +15,12 @@ var TestColor;
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
         addProgram(tl.shader.vertexColor, tl.shader.fragmentColor);
+        addProgram(tl.shader.vertexTexture, tl.shader.fragmentTexure);
         createRenderInfo(tl.square, shaderInfos[0], null); //, new tl.MaterialColor(1, 1, 0, 1));
         createRenderInfo(tl.triangle, shaderInfos[1], null); // new tl.MaterialColor(1, 0, 0, 1));
         createRenderInfo(tl.penta, shaderInfos[2], new tl.MaterialColor(1, 0, 1, 1));
-        createRenderInfo(tl.hexa, shaderInfos[2], new tl.MaterialColor(0, 0, 1, 1));
+        let image = document.querySelector("img");
+        createRenderInfo(tl.hexa, shaderInfos[3], new tl.MaterialTexture(image));
         draw();
     }
     function addProgram(_vertex, _fragment) {
@@ -87,11 +89,20 @@ var TestColor;
         let indexBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(_mesh.indices), gl.STATIC_DRAW);
+        let textureUVs = null;
+        // Setting up texture buffer
+        if (_material && _material.constructor.name == "MaterialTexture") {
+            textureUVs = gl.createBuffer();
+            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+            gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexTextureUVs"]);
+            gl.vertexAttribPointer(_shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0);
+        }
         // Clean
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material };
+        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material, textureBuffer: textureUVs };
         renderInfos.push(renderInfo);
     }
     // We call draw to render to our canvas
@@ -103,11 +114,13 @@ var TestColor;
             gl.useProgram(renderInfo.shaderInfo.program);
             if (renderInfo.material)
                 renderInfo.material.useRenderData(gl, renderInfo.shaderInfo);
+            if (renderInfo.textureBuffer)
+                gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderInfo.textureBuffer);
             gl.bindVertexArray(renderInfo.vao);
-            gl.drawElements(gl.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(WebGL2RenderingContext.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
         }
         // Clean
         gl.bindVertexArray(null);
     }
-})(TestColor || (TestColor = {}));
+})(TestTextured || (TestTextured = {}));
 //# sourceMappingURL=Main.js.map
