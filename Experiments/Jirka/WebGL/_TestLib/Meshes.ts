@@ -1,4 +1,4 @@
-namespace TestShader {
+namespace TestLib {
     export let square: Mesh = {
         vertices: [
             -0.9, 0.9, 0,

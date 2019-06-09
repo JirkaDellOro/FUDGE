@@ -1,6 +1,7 @@
 "use strict";
 var TestShader;
 (function (TestShader) {
+    var tl = TestLib;
     let gl;
     let renderInfos = [];
     let shaderInfos = [];
@@ -11,10 +12,10 @@ var TestShader;
         canvas.height = window.innerHeight;
         gl = utils.getGLContext(canvas);
         gl.clearColor(0, 0, 0, 1);
-        addProgram(TestShader.shader.vertexSimple, TestShader.shader.fragmentYellow);
-        addProgram(TestShader.shader.vertexSimple, TestShader.shader.fragmentRed);
-        initVAO(TestShader.square, shaderInfos[0]);
-        initVAO(TestShader.triangle, shaderInfos[1]);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
+        initVAO(tl.square, shaderInfos[0]);
+        initVAO(tl.triangle, shaderInfos[1]);
         draw();
     }
     function addProgram(_vertex, _fragment) {
@@ -65,7 +66,7 @@ var TestShader;
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length };
+        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: null };
         renderInfos.push(renderInfo);
     }
     // We call draw to render to our canvas

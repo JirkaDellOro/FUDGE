@@ -1,5 +1,7 @@
-namespace TestVAO {
-    export let square: Mesh = {
+"use strict";
+var TestLib;
+(function (TestLib) {
+    TestLib.square = {
         vertices: [
             -0.9, 0.9, 0,
             -0.9, 0.1, 0,
@@ -8,7 +10,7 @@ namespace TestVAO {
         ],
         indices: [0, 1, 2, 0, 2, 3]
     };
-    export let triangle: Mesh = {
+    TestLib.triangle = {
         vertices: [
             0.1, 0.1, 0,
             0.5, 0.9, 0,
@@ -16,4 +18,5 @@ namespace TestVAO {
         ],
         indices: [0, 1, 2]
     };
-}
+})(TestLib || (TestLib = {}));
+//# sourceMappingURL=Meshes.js.map

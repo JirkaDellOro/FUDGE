@@ -33,8 +33,8 @@ namespace TestVAO {
         gl.clearColor(0, 0, 0, 1);
 
         initProgram();
-        initVAO(square);
-        initVAO(triangle);
+        initVAO(TestLib.square);
+        initVAO(TestLib.triangle);
         draw();
     }
 

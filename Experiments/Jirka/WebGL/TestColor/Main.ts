@@ -1,28 +1,11 @@
 namespace TestColor {
     // tslint:disable-next-line: no-any
     declare const utils: any;
-
-    export interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: { [name: string]: number };
-        uniforms: { [name: string]: WebGLUniformLocation };
-    }
-
-    export interface Mesh {
-        vertices: number[];
-        indices: number[];
-    }
-
-    export interface RenderInfo {
-        shaderInfo: ShaderInfo;
-        vao: WebGLVertexArrayObject;
-        nIndices: number;
-        material: Material;
-    }
+    import tl = TestLib;
 
     let gl: WebGL2RenderingContext;
-    let renderInfos: RenderInfo[] = [];
-    let shaderInfos: ShaderInfo[] = [];
+    let renderInfos: tl.RenderInfo[] = [];
+    let shaderInfos: tl.ShaderInfo[] = [];
 
     window.addEventListener("load", init);
 
@@ -34,11 +17,11 @@ namespace TestColor {
         gl = utils.getGLContext(canvas);
         gl.clearColor(0, 0, 0, 1);
 
-        addProgram(shader.vertexSimple, shader.fragmentYellow);
-        addProgram(shader.vertexSimple, shader.fragmentRed);
-        addProgram(shader.vertexColor, shader.fragmentColor);
-        createRenderInfo(square, shaderInfos[2], new MaterialColor(1, 1, 0, 1));
-        createRenderInfo(triangle, shaderInfos[2], new MaterialColor(1, 0, 0, 1));
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
+        addProgram(tl.shader.vertexColor, tl.shader.fragmentColor);
+        createRenderInfo(tl.square, shaderInfos[2], new tl.MaterialColor(1, 1, 0, 1));
+        createRenderInfo(tl.triangle, shaderInfos[2], new tl.MaterialColor(1, 0, 0, 1));
         draw();
     }
 
@@ -55,7 +38,7 @@ namespace TestColor {
             console.error("Could not initialize shaders");
         }
 
-        let shaderInfo: ShaderInfo = {
+        let shaderInfo: tl.ShaderInfo = {
             program: program,
             attributes: detectAttributes(program),
             uniforms: detectUniforms(program)
@@ -106,7 +89,7 @@ namespace TestColor {
     }
 
 
-    function createRenderInfo(_mesh: Mesh, _shaderInfo: ShaderInfo, _material: Material): void {
+    function createRenderInfo(_mesh: tl.Mesh, _shaderInfo: tl.ShaderInfo, _material: tl.Material): void {
         let vao: WebGLVertexArrayObject = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
@@ -128,7 +111,7 @@ namespace TestColor {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        let renderInfo: RenderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material };
+        let renderInfo: tl.RenderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material };
         renderInfos.push(renderInfo);
     }
 

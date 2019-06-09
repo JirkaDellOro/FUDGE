@@ -1,8 +1,6 @@
-"use strict";
-var TestColor;
-(function (TestColor) {
+namespace TestLib {
     // tslint:disable-next-line: typedef
-    TestColor.shader = {
+    export let shader = {
         vertexSimple: `#version 300 es
             precision mediump float;
             in vec3 aVertexPosition;
@@ -38,5 +36,4 @@ var TestColor;
                     fragColor = vColor;
                 }`
     };
-})(TestColor || (TestColor = {}));
-//# sourceMappingURL=Shaders.js.map
+}

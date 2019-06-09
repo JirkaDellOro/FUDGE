@@ -1,9 +1,9 @@
 "use strict";
-var TestColor;
-(function (TestColor) {
+var TestLib;
+(function (TestLib) {
     class Material {
     }
-    TestColor.Material = Material;
+    TestLib.Material = Material;
     class MaterialColor extends Material {
         constructor(_r, _g, _b, _a) {
             super();
@@ -14,6 +14,6 @@ var TestColor;
             _gl.uniform4fv(uLoc, this.color);
         }
     }
-    TestColor.MaterialColor = MaterialColor;
-})(TestColor || (TestColor = {}));
+    TestLib.MaterialColor = MaterialColor;
+})(TestLib || (TestLib = {}));
 //# sourceMappingURL=Material.js.map

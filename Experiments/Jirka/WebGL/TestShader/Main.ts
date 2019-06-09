@@ -1,27 +1,11 @@
 namespace TestShader {
     // tslint:disable-next-line: no-any
     declare const utils: any;
-
-    export interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: { [name: string]: number };
-        uniforms: { [name: string]: WebGLUniformLocation };
-    }
-
-    export interface Mesh {
-        vertices: number[];
-        indices: number[];
-    }
-
-    export interface RenderInfo {
-        shaderInfo: ShaderInfo;
-        vao: WebGLVertexArrayObject;
-        nIndices: number;
-    }
+    import tl = TestLib;
 
     let gl: WebGL2RenderingContext;
-    let renderInfos: RenderInfo[] = [];
-    let shaderInfos: ShaderInfo[] = [];
+    let renderInfos: tl.RenderInfo[] = [];
+    let shaderInfos: tl.ShaderInfo[] = [];
 
     window.addEventListener("load", init);
 
@@ -33,10 +17,10 @@ namespace TestShader {
         gl = utils.getGLContext(canvas);
         gl.clearColor(0, 0, 0, 1);
 
-        addProgram(shader.vertexSimple, shader.fragmentYellow);
-        addProgram(shader.vertexSimple, shader.fragmentRed);
-        initVAO(square, shaderInfos[0]);
-        initVAO(triangle, shaderInfos[1]);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
+        initVAO(tl.square, shaderInfos[0]);
+        initVAO(tl.triangle, shaderInfos[1]);
         draw();
     }
 
@@ -53,7 +37,7 @@ namespace TestShader {
             console.error("Could not initialize shaders");
         }
 
-        let shaderInfo: ShaderInfo = {
+        let shaderInfo: tl.ShaderInfo = {
             program: program,
             attributes: {
                 "aVertexPosition": gl.getAttribLocation(program, "aVertexPosition")
@@ -80,7 +64,7 @@ namespace TestShader {
     }
 
 
-    function initVAO(_mesh: Mesh, _shaderInfo: ShaderInfo): void {
+    function initVAO(_mesh: tl.Mesh, _shaderInfo: tl.ShaderInfo): void {
         let vao: WebGLVertexArrayObject = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
@@ -102,7 +86,7 @@ namespace TestShader {
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-        let renderInfo: RenderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length };
+        let renderInfo: tl.RenderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: null };
         renderInfos.push(renderInfo);
     }
 

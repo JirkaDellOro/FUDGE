@@ -12,8 +12,8 @@ var TestVAO;
         gl = utils.getGLContext(canvas);
         gl.clearColor(0, 0, 0, 1);
         initProgram();
-        initVAO(TestVAO.square);
-        initVAO(TestVAO.triangle);
+        initVAO(TestLib.square);
+        initVAO(TestLib.triangle);
         draw();
     }
     function initProgram() {

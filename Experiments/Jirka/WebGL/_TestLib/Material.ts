@@ -1,6 +1,6 @@
-namespace TestColor {
+namespace TestLib {
     export abstract class Material {
-        public abstract setRenderData(_gl: WebGL2RenderingContext, _shaderInfo: ShaderInfo): void;
+        public abstract setRenderData(_gl: WebGL2RenderingContext, _shaderInfo: TestLib.ShaderInfo): void;
     }
     
     export class MaterialColor extends Material {

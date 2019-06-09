@@ -1,6 +1,7 @@
 "use strict";
 var TestColor;
 (function (TestColor) {
+    var tl = TestLib;
     let gl;
     let renderInfos = [];
     let shaderInfos = [];
@@ -11,11 +12,11 @@ var TestColor;
         canvas.height = window.innerHeight;
         gl = utils.getGLContext(canvas);
         gl.clearColor(0, 0, 0, 1);
-        addProgram(TestColor.shader.vertexSimple, TestColor.shader.fragmentYellow);
-        addProgram(TestColor.shader.vertexSimple, TestColor.shader.fragmentRed);
-        addProgram(TestColor.shader.vertexColor, TestColor.shader.fragmentColor);
-        createRenderInfo(TestColor.square, shaderInfos[2], new TestColor.MaterialColor(1, 1, 0, 1));
-        createRenderInfo(TestColor.triangle, shaderInfos[2], new TestColor.MaterialColor(1, 0, 0, 1));
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
+        addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
+        addProgram(tl.shader.vertexColor, tl.shader.fragmentColor);
+        createRenderInfo(tl.square, shaderInfos[2], new tl.MaterialColor(1, 1, 0, 1));
+        createRenderInfo(tl.triangle, shaderInfos[2], new tl.MaterialColor(1, 0, 0, 1));
         draw();
     }
     function addProgram(_vertex, _fragment) {
