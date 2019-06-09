@@ -20,8 +20,10 @@ namespace TestColor {
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
         addProgram(tl.shader.vertexColor, tl.shader.fragmentColor);
-        createRenderInfo(tl.square, shaderInfos[2], new tl.MaterialColor(1, 1, 0, 1));
-        createRenderInfo(tl.triangle, shaderInfos[2], new tl.MaterialColor(1, 0, 0, 1));
+        createRenderInfo(tl.square, shaderInfos[0], null); //, new tl.MaterialColor(1, 1, 0, 1));
+        createRenderInfo(tl.triangle, shaderInfos[1], null); // new tl.MaterialColor(1, 0, 0, 1));
+        createRenderInfo(tl.penta, shaderInfos[2], new tl.MaterialColor(1, 0, 1, 1));
+        createRenderInfo(tl.hexa, shaderInfos[2], new tl.MaterialColor(0, 0, 1, 1));
         draw();
     }
 
@@ -124,7 +126,8 @@ namespace TestColor {
         for (let renderInfo of renderInfos) {
             gl.useProgram(renderInfo.shaderInfo.program);
 
-            renderInfo.material.setRenderData(gl, renderInfo.shaderInfo);
+            if (renderInfo.material)
+                renderInfo.material.setRenderData(gl, renderInfo.shaderInfo);
 
             gl.bindVertexArray(renderInfo.vao);
             gl.drawElements(gl.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
