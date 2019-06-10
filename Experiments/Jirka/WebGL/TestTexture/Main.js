@@ -16,11 +16,11 @@ var TestTextured;
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentRed);
         addProgram(tl.shader.vertexColor, tl.shader.fragmentColor);
         addProgram(tl.shader.vertexTexture, tl.shader.fragmentTexure);
-        createRenderInfo(tl.square, shaderInfos[0], null); //, new tl.MaterialColor(1, 1, 0, 1));
-        createRenderInfo(tl.triangle, shaderInfos[1], null); // new tl.MaterialColor(1, 0, 0, 1));
-        createRenderInfo(tl.penta, shaderInfos[2], new tl.MaterialColor(1, 0, 1, 1));
-        let image = document.querySelector("img");
-        createRenderInfo(tl.hexa, shaderInfos[3], new tl.MaterialTexture(image));
+        let images = document.querySelectorAll("img");
+        createRenderInfo(tl.square, shaderInfos[3], new tl.MaterialTexture(images[0]));
+        createRenderInfo(tl.triangle, shaderInfos[3], new tl.MaterialTexture(images[1]));
+        createRenderInfo(tl.penta, shaderInfos[3], new tl.MaterialTexture(images[2]));
+        createRenderInfo(tl.hexa, shaderInfos[3], new tl.MaterialTexture(images[3]));
         draw();
     }
     function addProgram(_vertex, _fragment) {
