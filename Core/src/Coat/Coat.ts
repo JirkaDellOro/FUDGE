@@ -35,6 +35,10 @@ namespace Fudge {
     @RenderExtender.decorateCoat
     export class CoatTextured extends Coat {
         public texture: TextureImage = null;
+        // just ideas so far
+        public tilingX: number;
+        public tilingY: number;
+        public repetition: boolean;
         // private textureSource: string;
         //     this.textureSource = _textureSource;
     }
