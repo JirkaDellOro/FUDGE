@@ -1220,8 +1220,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Mesh {
         constructor();
@@ -1229,6 +1228,9 @@ declare namespace Fudge {
         setTextureCoordinates(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
     }
 }
 declare namespace Fudge {

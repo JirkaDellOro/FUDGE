@@ -39,8 +39,8 @@ namespace Fudge {
             ]);
 
             // scale down to a length of 1 for all edges
-            for (let iVertex: number = 0; iVertex < this.vertices.length; iVertex++) {
-                this.vertices[iVertex] *= 1 / 2;
+            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
+                vertices[iVertex] *= 1 / 2;
             }
             return vertices;
         }

@@ -6,8 +6,8 @@ namespace Fudge {
         /*
                     4
                    /\
-                 3/__\2
-                0/____\1             
+                 3/__\_\ 2
+                0/____\/1             
         */
         public constructor() {
             super();
@@ -35,12 +35,12 @@ namespace Fudge {
                 // floor
                 /*0*/ -1, 0, -1, /*1*/ 1, 0, -1,  /*2*/ 1, 0, 1, /*3*/ -1, 0, 1,
                 // tip
-                /*4*/ 0, -2, 0
+                /*4*/ 0, -2, 0  // double height will be scaled down
             ]);
 
             // scale down to a length of 1 for bottom edges and height
-            for (let iVertex: number = 0; iVertex < this.vertices.length; iVertex++) {
-                this.vertices[iVertex] *= 1 / 2;
+            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
+                vertices[iVertex] *= 1 / 2;
             }
             return vertices;
         }
