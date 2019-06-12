@@ -29,7 +29,7 @@ namespace TextureTest {
         ƒ.RenderManager.recalculateAllNodeTransforms();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 0, 0), node.cmpTransform.position)
+        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 0, 0), node.cmpTransform.position);
         viewport.initialize("Viewport", node, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
 
         viewport.draw();
