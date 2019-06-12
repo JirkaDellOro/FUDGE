@@ -69,7 +69,7 @@ namespace Fudge {
             this.createReference<Coat, RenderCoat>(this.parameters, coat, this.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
-            this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffer);
+            this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffers);
 
             let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
@@ -102,7 +102,7 @@ namespace Fudge {
 
             this.removeReference<typeof Shader, RenderShader>(this.programs, nodeReferences.shader, this.deleteProgram);
             this.removeReference<Coat, RenderCoat>(this.parameters, nodeReferences.coat, this.deleteParameter);
-            this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffers);
 
             this.nodes.delete(_node);
         }
@@ -145,8 +145,8 @@ namespace Fudge {
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffer);
+                this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }

@@ -15,8 +15,8 @@ namespace Fudge {
 
         public create(): void {
             this.vertices = this.createVertices();
-            // this.indices = this.createIndices();
-            // this.textureUVs = this.createTextureUVs();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
         }
 
         public setTextureCoordinates(): void {

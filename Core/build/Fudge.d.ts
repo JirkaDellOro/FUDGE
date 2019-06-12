@@ -60,11 +60,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class RenderExtender {
-        private static coatExtensions;
+    class RenderInjector {
+        private static coatInjections;
         static decorateCoat(_constructor: Function): void;
-        private static setRenderDataForCoatColored;
-        private static setRenderDataForCoatTextured;
+        private static injectRenderDataForCoatColored;
+        private static injectRenderDataForCoatTextured;
     }
 }
 declare namespace Fudge {
@@ -86,7 +86,8 @@ declare namespace Fudge {
     }
     interface RenderBuffers {
         vertices: WebGLBuffer;
-        vertexCount: number;
+        indices: WebGLBuffer;
+        nIndices: number;
         textureUVs: WebGLBuffer;
     }
     interface RenderCoat {
@@ -143,18 +144,18 @@ declare namespace Fudge {
         static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _shaderInfo
-         * @param _bufferInfo
-         * @param _coatInfo
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _renderCoat
          * @param _projection
          */
-        protected static draw(_shaderInfo: RenderShader, _bufferInfo: RenderBuffers, _coatInfo: RenderCoat, _projection: Matrix4x4): void;
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
-        protected static createBuffer(_mesh: Mesh): RenderBuffers;
-        protected static useBuffer(_bufferInfo: RenderBuffers): void;
-        protected static deleteBuffer(_bufferInfo: RenderBuffers): void;
+        protected static createBuffers(_mesh: Mesh): RenderBuffers;
+        protected static useBuffers(_renderBuffers: RenderBuffers): void;
+        protected static deleteBuffers(_bufferInfo: RenderBuffers): void;
         protected static createParameter(_coat: Coat): RenderCoat;
         protected static useParameter(_coatInfo: RenderCoat): void;
         protected static deleteParameter(_coatInfo: RenderCoat): void;
@@ -163,8 +164,11 @@ declare namespace Fudge {
 declare namespace Fudge {
     class Coat extends Mutable {
         name: string;
+        protected renderData: {
+            [key: string]: unknown;
+        };
         mutate(_mutator: Mutator): void;
-        setRenderData(_shaderInfo: RenderShader): void;
+        useRenderData(_renderShader: RenderShader): void;
         protected reduceMutator(): void;
     }
     class CoatColored extends Coat {
@@ -1164,15 +1168,18 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class Mesh implements Serializable {
-        protected vertices: Float32Array;
-        protected indices: Uint16Array;
-        protected textureUVs: Float32Array;
+        vertices: Float32Array;
+        indices: Uint16Array;
+        textureUVs: Float32Array;
         static getBufferSpecification(): BufferSpecification;
-        getVertices(): Float32Array;
-        getTextureUVs(): Float32Array;
         getVertexCount(): number;
+        getIndexCount(): number;
         abstract serialize(): Serialization;
         abstract deserialize(_serialization: Serialization): Serializable;
+        abstract create(): void;
+        protected abstract createVertices(): Float32Array;
+        protected abstract createTextureUVs(): Float32Array;
+        protected abstract createIndices(): Uint16Array;
     }
 }
 declare namespace Fudge {
@@ -1188,6 +1195,9 @@ declare namespace Fudge {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        createVertices(): Float32Array;
+        createTextureUVs(): Float32Array;
+        createIndices(): Uint16Array;
     }
 }
 declare namespace Fudge {

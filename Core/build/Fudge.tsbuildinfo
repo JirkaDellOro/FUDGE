@@ -3,7 +3,7 @@
     "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/",
     "sourceFiles": [
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Transfer/Mutable.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderExtender.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderInjector.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderOperator.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Coat/Coat.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Transfer/Serializer.ts",
@@ -58,7 +58,7 @@
         },
         {
           "pos": 593,
-          "end": 141874,
+          "end": 143909,
           "kind": "text"
         }
       ],
@@ -95,7 +95,7 @@
         },
         {
           "pos": 34,
-          "end": 56620,
+          "end": 57021,
           "kind": "text"
         }
       ]

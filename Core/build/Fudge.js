@@ -94,45 +94,56 @@ var Fudge;
 var Fudge;
 ///<reference path="../Coat/Coat.ts"/>
 (function (Fudge) {
-    class RenderExtender {
+    class RenderInjector {
         static decorateCoat(_constructor) {
-            let coatExtension = RenderExtender.coatExtensions[_constructor.name];
+            let coatExtension = RenderInjector.coatInjections[_constructor.name];
             if (!coatExtension) {
-                Fudge.Debug.error("No extension decorator defined for " + _constructor.name);
+                Fudge.Debug.error("No injection decorator defined for " + _constructor.name);
             }
-            Object.defineProperty(_constructor.prototype, "setRenderData", {
+            Object.defineProperty(_constructor.prototype, "useRenderData", {
                 value: coatExtension
             });
         }
-        static setRenderDataForCoatColored(_shaderInfo) {
+        static injectRenderDataForCoatColored(_shaderInfo) {
             let colorUniformLocation = _shaderInfo.uniforms["u_color"];
             let { r, g, b, a } = this.color;
             let color = new Float32Array([r, g, b, a]);
             Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
-        static setRenderDataForCoatTextured(_shaderInfo) {
+        static injectRenderDataForCoatTextured(_shaderInfo) {
             let crc3 = Fudge.RenderOperator.getRenderingContext();
-            let textureBufferSpecification = { size: 2, dataType: WebGLRenderingContext.FLOAT, normalize: true, stride: 0, offset: 0 };
-            let textureCoordinateAttributeLocation = Fudge.RenderManager.assert(_shaderInfo.attributes["a_textureCoordinate"]);
-            crc3.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            Fudge.RenderOperator.attributePointer(textureCoordinateAttributeLocation, textureBufferSpecification);
-            let texture = Fudge.RenderManager.assert(crc3.createTexture());
-            crc3.bindTexture(crc3.TEXTURE_2D, texture);
-            try {
-                crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texture.image);
+            if (this.renderData) {
+                // buffers exist
+                crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
+                crc3.uniform1i(_shaderInfo.uniforms["u_texture"], 0);
             }
-            catch (_e) {
-                Fudge.Debug.error(_e);
+            else {
+                this.renderData = {};
+                // TODO: check if all WebGL-Creations are asserted
+                const texture = Fudge.RenderManager.assert(crc3.createTexture());
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+                try {
+                    crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texture.image);
+                    crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, this.texture.image);
+                }
+                catch (_e) {
+                    Fudge.Debug.error(_e);
+                }
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.generateMipmap(crc3.TEXTURE_2D);
+                this.renderData["texture0"] = texture;
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+                this.useRenderData(_shaderInfo);
             }
-            crc3.generateMipmap(crc3.TEXTURE_2D);
-            Object.defineProperty(this, "txtBuffer", { value: texture });
         }
     }
-    RenderExtender.coatExtensions = {
-        "CoatColored": RenderExtender.setRenderDataForCoatColored,
-        "CoatTextured": RenderExtender.setRenderDataForCoatTextured
+    RenderInjector.coatInjections = {
+        "CoatColored": RenderInjector.injectRenderDataForCoatColored,
+        "CoatTextured": RenderInjector.injectRenderDataForCoatTextured
     };
-    Fudge.RenderExtender = RenderExtender;
+    Fudge.RenderInjector = RenderInjector;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -214,22 +225,27 @@ var Fudge;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _shaderInfo
-         * @param _bufferInfo
-         * @param _coatInfo
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _renderCoat
          * @param _projection
          */
-        static draw(_shaderInfo, _bufferInfo, _coatInfo, _projection) {
-            RenderOperator.useBuffer(_bufferInfo);
-            RenderOperator.useParameter(_coatInfo);
-            RenderOperator.useProgram(_shaderInfo);
-            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
+        static draw(_renderShader, _renderBuffers, _renderCoat, _projection) {
+            RenderOperator.useBuffers(_renderBuffers);
+            RenderOperator.useParameter(_renderCoat);
+            RenderOperator.useProgram(_renderShader);
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
+            RenderOperator.attributePointer(_renderShader.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["aVertexTextureUVs"]); // enable the buffer
+            RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["aVertexTextureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
             // Supply matrixdata to shader. 
-            let matrixLocation = _shaderInfo.uniforms["u_matrix"];
+            let matrixLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            _coatInfo.coat.setRenderData(_shaderInfo);
+            _renderCoat.coat.useRenderData(_renderShader);
             // Draw call
-            RenderOperator.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, Fudge.Mesh.getBufferSpecification().offset, _bufferInfo.vertexCount);
+            // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
+            RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
         // #region Shaderprogram 
         static createProgram(_shaderClass) {
@@ -301,57 +317,66 @@ var Fudge;
         }
         // #endregion
         // #region Meshbuffer
-        static createBuffer(_mesh) {
-            let buffer = RenderOperator.assert(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.getVertices(), WebGL2RenderingContext.STATIC_DRAW);
-            let textureCoordinateBuffer = RenderOperator.crc3.createBuffer();
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
-            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+        static createBuffers(_mesh) {
+            let vertices = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
+            let indices = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
+            let textureUVs = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
             let bufferInfo = {
-                vertices: buffer,
-                vertexCount: _mesh.getVertexCount(),
-                textureUVs: textureCoordinateBuffer
+                vertices: vertices,
+                indices: indices,
+                nIndices: _mesh.getIndexCount(),
+                textureUVs: textureUVs
             };
             return bufferInfo;
         }
-        static useBuffer(_bufferInfo) {
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _bufferInfo.vertices);
+        static useBuffers(_renderBuffers) {
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
         }
-        static deleteBuffer(_bufferInfo) {
+        static deleteBuffers(_bufferInfo) {
             if (_bufferInfo) {
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
                 RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.textureUVs);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.indices);
             }
         }
         // #endregion
         // #region MaterialParameters
         static createParameter(_coat) {
-            let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
+            // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let coatInfo = {
-                vao: vao,
+                vao: null,
                 coat: _coat
             };
             return coatInfo;
         }
         static useParameter(_coatInfo) {
-            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
+            // RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
         static deleteParameter(_coatInfo) {
             if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
+                // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
     }
     Fudge.RenderOperator = RenderOperator;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtender.ts"/>
+/// <reference path="../Render/RenderInjector.ts"/>
 /// <reference path="../Render/RenderOperator.ts"/>
 var Fudge;
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtender.ts"/>
+/// <reference path="../Render/RenderInjector.ts"/>
 /// <reference path="../Render/RenderOperator.ts"/>
 (function (Fudge) {
     // interface ShaderParameters {
@@ -362,11 +387,10 @@ var Fudge;
             super(...arguments);
             this.name = "Coat";
         }
-        // public params: ShaderParameters = {};
         mutate(_mutator) {
             super.mutate(_mutator);
         }
-        setRenderData(_shaderInfo) { }
+        useRenderData(_renderShader) { }
         reduceMutator() { }
     }
     Fudge.Coat = Coat;
@@ -377,7 +401,7 @@ var Fudge;
         }
     };
     CoatColored = __decorate([
-        Fudge.RenderExtender.decorateCoat
+        Fudge.RenderInjector.decorateCoat
     ], CoatColored);
     Fudge.CoatColored = CoatColored;
     let CoatTextured = class CoatTextured extends Coat {
@@ -389,7 +413,7 @@ var Fudge;
         }
     };
     CoatTextured = __decorate([
-        Fudge.RenderExtender.decorateCoat
+        Fudge.RenderInjector.decorateCoat
     ], CoatTextured);
     Fudge.CoatTextured = CoatTextured;
     /**
@@ -2631,22 +2655,13 @@ var Fudge;
 (function (Fudge) {
     class Mesh {
         static getBufferSpecification() {
-            return {
-                size: 3,
-                dataType: WebGL2RenderingContext.FLOAT,
-                normalize: false,
-                stride: 0,
-                offset: 0
-            };
-        }
-        getVertices() {
-            return this.vertices;
-        }
-        getTextureUVs() {
-            return this.textureUVs;
+            return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
         }
         getVertexCount() {
             return this.vertices.length / Mesh.getBufferSpecification().size;
+        }
+        getIndexCount() {
+            return this.indices.length;
         }
     }
     Fudge.Mesh = Mesh;
@@ -2698,6 +2713,9 @@ var Fudge;
             this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
         }
+        createVertices() { return null; }
+        createTextureUVs() { return null; }
+        createIndices() { return null; }
     }
     Fudge.MeshCube = MeshCube;
 })(Fudge || (Fudge = {}));
@@ -2861,8 +2879,8 @@ var Fudge;
         }
         create() {
             this.vertices = this.createVertices();
-            // this.indices = this.createIndices();
-            // this.textureUVs = this.createTextureUVs();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
         }
         setTextureCoordinates() {
             let textureCoordinates = [];
@@ -2963,7 +2981,7 @@ var Fudge;
             let coat = cmpMaterial.getMaterial().getCoat();
             this.createReference(this.parameters, coat, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
-            this.createReference(this.buffers, mesh, this.createBuffer);
+            this.createReference(this.buffers, mesh, this.createBuffers);
             let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
@@ -2993,7 +3011,7 @@ var Fudge;
                 return;
             this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
             this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
-            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffers);
             this.nodes.delete(_node);
         }
         /**
@@ -3029,8 +3047,8 @@ var Fudge;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference(this.buffers, mesh, this.createBuffer);
+                this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference(this.buffers, mesh, this.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -3267,13 +3285,13 @@ var Fudge;
         static getVertexShaderSource() {
             return `#version 300 es
                 in vec4 a_position;
-                in vec2 a_textureCoordinate;
+                in vec2 a_textureUVs;
 
                 uniform mat4 u_matrix;
                 uniform vec4 u_color;
                 
                 // out vec4 v_color;
-                out vec2 v_textureCoordinate;
+                out vec2 v_textureUVs;
 
                 void main() {  
 
@@ -3281,21 +3299,21 @@ var Fudge;
                     
                     gl_Position = u_matrix * a_position;
                     // v_color = u_color;
-                    v_textureCoordinate = a_textureCoordinate;
+                    v_textureUVs = a_textureUVs;
             }`;
         }
         static getFragmentShaderSource() {
             return `#version 300 es
                 precision mediump float;
                 
-                in vec2 v_textureCoordinate;
+                in vec2 v_textureUVs;
             
                 uniform sampler2D u_texture;
 
                 out vec4 outColor;
                 
                 void main() {
-                    outColor = texture(u_texture, v_textureCoordinate);// * v_color;
+                    outColor = texture(u_texture, v_textureUVs);// * v_color;
             }`;
         }
     }

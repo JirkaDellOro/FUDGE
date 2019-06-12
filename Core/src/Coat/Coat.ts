@@ -1,5 +1,5 @@
 /// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderExtender.ts"/>
+/// <reference path="../Render/RenderInjector.ts"/>
 /// <reference path="../Render/RenderOperator.ts"/>
 namespace Fudge {
     // interface ShaderParameters {
@@ -8,22 +8,19 @@ namespace Fudge {
 
     export class Coat extends Mutable {
         public name: string = "Coat";
-        // public params: ShaderParameters = {};
+        protected renderData: {[key: string]: unknown};
+
         public mutate(_mutator: Mutator): void {
             super.mutate(_mutator);
         }
 
-        public setRenderData(_shaderInfo: RenderShader): void {/**/ }
+        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderExtender*/ }
         protected reduceMutator(): void { /**/ }
     }
 
 
-    @RenderExtender.decorateCoat
+    @RenderInjector.decorateCoat
     export class CoatColored extends Coat {
-        // public params: ShaderParameters = {
-        //     color: new Color(0.5, 0.5, 0.5, 1)
-        // };
-
         public color: Color;
 
         constructor(_color?: Color) {
@@ -32,7 +29,7 @@ namespace Fudge {
         }
     }
 
-    @RenderExtender.decorateCoat
+    @RenderInjector.decorateCoat
     export class CoatTextured extends Coat {
         public texture: TextureImage = null;
         // just ideas so far
@@ -69,9 +66,9 @@ namespace Fudge {
      * @param _mesh The node's meshcomponent.
      */
     // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
+    //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
+    //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
+    //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
     //     _meshComponent.setTextureCoordinates();
     //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
     //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);

@@ -51,5 +51,9 @@ namespace Fudge {
             this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
         }
+
+        public createVertices(): Float32Array { return null; }
+        public createTextureUVs(): Float32Array { return null; }
+        public createIndices(): Uint16Array { return null; }
     }
 }

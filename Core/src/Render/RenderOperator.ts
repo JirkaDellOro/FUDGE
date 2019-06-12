@@ -14,9 +14,8 @@ namespace Fudge {
 
     export interface RenderBuffers {
         vertices: WebGLBuffer;
-        // target: number;
-        // specification: BufferSpecification;
-        vertexCount: number;
+        indices: WebGLBuffer;
+        nIndices: number;
         textureUVs: WebGLBuffer;
     }
 
@@ -113,25 +112,31 @@ namespace Fudge {
 
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _shaderInfo 
-         * @param _bufferInfo 
-         * @param _coatInfo 
+         * @param _renderShader 
+         * @param _renderBuffers 
+         * @param _renderCoat 
          * @param _projection 
          */
-        protected static draw(_shaderInfo: RenderShader, _bufferInfo: RenderBuffers, _coatInfo: RenderCoat, _projection: Matrix4x4): void {
-            RenderOperator.useBuffer(_bufferInfo);
-            RenderOperator.useParameter(_coatInfo);
-            RenderOperator.useProgram(_shaderInfo);
-            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], Mesh.getBufferSpecification());
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _projection: Matrix4x4): void {
+            RenderOperator.useBuffers(_renderBuffers);
+            RenderOperator.useParameter(_renderCoat);
+            RenderOperator.useProgram(_renderShader);
+
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
+            RenderOperator.attributePointer(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["aVertexTextureUVs"]); // enable the buffer
+            RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["aVertexTextureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
 
             // Supply matrixdata to shader. 
-            let matrixLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_matrix"];
+            let matrixLocation: WebGLUniformLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
 
-            _coatInfo.coat.setRenderData(_shaderInfo);
+            _renderCoat.coat.useRenderData(_renderShader);
 
             // Draw call
-            RenderOperator.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _bufferInfo.vertexCount);
+            // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
+            RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
 
         // #region Shaderprogram 
@@ -207,49 +212,60 @@ namespace Fudge {
         // #endregion
 
         // #region Meshbuffer
-        protected static createBuffer(_mesh: Mesh): RenderBuffers {
-            let buffer: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.getVertices(), WebGL2RenderingContext.STATIC_DRAW);
+        protected static createBuffers(_mesh: Mesh): RenderBuffers {
+            let vertices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
 
-            let textureCoordinateBuffer: WebGLBuffer = RenderOperator.crc3.createBuffer();
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
-            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+            let indices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
+
+            let textureUVs: WebGLBuffer = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
 
             let bufferInfo: RenderBuffers = {
-                vertices: buffer,
-                vertexCount: _mesh.getVertexCount(),
-                textureUVs: textureCoordinateBuffer
+                vertices: vertices,
+                indices: indices,
+                nIndices: _mesh.getIndexCount(),
+                textureUVs: textureUVs
             };
             return bufferInfo;
         }
-        protected static useBuffer(_bufferInfo: RenderBuffers): void {
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _bufferInfo.vertices);
+        protected static useBuffers(_renderBuffers: RenderBuffers): void {
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+            
         }
-        protected static deleteBuffer(_bufferInfo: RenderBuffers): void {
+        protected static deleteBuffers(_bufferInfo: RenderBuffers): void {
             if (_bufferInfo) {
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
                 RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.textureUVs);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.indices);
             }
         }
         // #endregion
 
         // #region MaterialParameters
         protected static createParameter(_coat: Coat): RenderCoat {
-            let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
+            // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let coatInfo: RenderCoat = {
-                vao: vao,
+                vao: null,
                 coat: _coat
             };
             return coatInfo;
         }
         protected static useParameter(_coatInfo: RenderCoat): void {
-            RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
+            // RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
         protected static deleteParameter(_coatInfo: RenderCoat): void {
             if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
+                // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
         // #endregion

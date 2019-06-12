@@ -86,21 +86,21 @@ var TestTextured;
         let vertexBuffer = gl.createBuffer();
         gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.vertices), gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexPosition"]);
-        gl.vertexAttribPointer(_shaderInfo.attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+        // gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexPosition"]);
+        // gl.vertexAttribPointer(_shaderInfo.attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
+        // gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
         // Setting up texture buffer
         let textureUVs = null;
-        if (_shaderInfo.attributes["aVertexTextureUVs"]) {
-            // if (_material && _material.constructor.name == "MaterialTexture") {
-            textureUVs = gl.createBuffer();
-            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
-            gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
-            gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexTextureUVs"]); // enable the buffer
-            gl.vertexAttribPointer(_shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0); // set bufferspecs
-            // }
-            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-        }
+        // if (_shaderInfo.attributes["aVertexTextureUVs"]) {
+        // if (_material && _material.constructor.name == "MaterialTexture") {
+        textureUVs = gl.createBuffer();
+        gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+        gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+        // gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexTextureUVs"]); // enable the buffer
+        // gl.vertexAttribPointer(_shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0); // set bufferspecs
+        // }
+        gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+        // }
         // Setting up the IBO
         let indexBuffer = gl.createBuffer();
         gl.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);

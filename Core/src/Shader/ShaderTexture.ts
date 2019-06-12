@@ -11,13 +11,13 @@ namespace Fudge {
         public static getVertexShaderSource(): string {
             return `#version 300 es
                 in vec4 a_position;
-                in vec2 a_textureCoordinate;
+                in vec2 a_textureUVs;
 
                 uniform mat4 u_matrix;
                 uniform vec4 u_color;
                 
                 // out vec4 v_color;
-                out vec2 v_textureCoordinate;
+                out vec2 v_textureUVs;
 
                 void main() {  
 
@@ -25,21 +25,21 @@ namespace Fudge {
                     
                     gl_Position = u_matrix * a_position;
                     // v_color = u_color;
-                    v_textureCoordinate = a_textureCoordinate;
+                    v_textureUVs = a_textureUVs;
             }`;
         }
         public static getFragmentShaderSource(): string {
             return `#version 300 es
                 precision mediump float;
                 
-                in vec2 v_textureCoordinate;
+                in vec2 v_textureUVs;
             
                 uniform sampler2D u_texture;
 
                 out vec4 outColor;
                 
                 void main() {
-                    outColor = texture(u_texture, v_textureCoordinate);// * v_color;
+                    outColor = texture(u_texture, v_textureUVs);// * v_color;
             }`;
         }
     }
