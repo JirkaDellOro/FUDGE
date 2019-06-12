@@ -1235,7 +1235,6 @@ declare namespace Fudge {
     class MeshQuad extends Mesh {
         constructor();
         create(): void;
-        setTextureCoordinates(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;

@@ -18,7 +18,7 @@ namespace Scenes {
         let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
         let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
 
-        let meshCube: ƒ.MeshCube = new ƒ.MeshCube(1, 1, 1);
+        let meshCube: ƒ.MeshCubeNew = new ƒ.MeshCubeNew();
 
         let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);

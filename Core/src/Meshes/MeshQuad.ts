@@ -19,19 +19,6 @@ namespace Fudge {
             this.textureUVs = this.createTextureUVs();
         }
 
-        public setTextureCoordinates(): void {
-            let textureCoordinates: number[] = [];
-            textureCoordinates.push(
-                0, 1,
-                1, 1,
-                0, 0,
-                0, 0,
-                1, 1,
-                1, 0
-            );
-        }
-
-
         public serialize(): Serialization {
             let serialization: Serialization = {};
             serialization[this.constructor.name] = this;
@@ -44,7 +31,7 @@ namespace Fudge {
 
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
-                /*0*/ -1, -1, 0, /*1*/ 1, -1, 0,  /*2*/ -1, 1, 0, /*3*/ -1, 1, 0, /**/ 1, -1, 0, /**/ 1, 1, 0
+                /*0*/ -1, -1, 0, /*1*/ -1, 1, 0,  /*2*/ 1, 1, 0, /*3*/ 1, -1, 0
             ]);
 
             for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
@@ -54,16 +41,7 @@ namespace Fudge {
         }
         protected createIndices(): Uint16Array {
             let indices: Uint16Array = new Uint16Array([
-                // front
-                4, 0, 1,
-                // right
-                4, 1, 2,
-                // back
-                4, 2, 3,
-                // left
-                4, 3, 0,
-                // bottom
-                0, 3, 1, 3, 1, 2
+                0, 1, 2, 0, 2, 3
             ]);
             return indices;
         }
@@ -72,9 +50,7 @@ namespace Fudge {
             // TODO: calculate using trigonometry
             let textureUVs: Float32Array = new Float32Array([
                 // front
-                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
-                // back
-                /*4*/ 3, 0
+                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0
             ]);
             return textureUVs;
         }

@@ -118,16 +118,21 @@ namespace Fudge {
          * @param _projection 
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _projection: Matrix4x4): void {
-            RenderOperator.useBuffers(_renderBuffers);
-            RenderOperator.useParameter(_renderCoat);
             RenderOperator.useProgram(_renderShader);
+            // RenderOperator.useBuffers(_renderBuffers);
+            // RenderOperator.useParameter(_renderCoat);
 
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
             RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
             RenderOperator.attributePointer(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["aVertexTextureUVs"]); // enable the buffer
-            RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["aVertexTextureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
 
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+
+            if (_renderShader.attributes["a_textureUVs"]) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
+                RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            }
             // Supply matrixdata to shader. 
             let matrixLocation: WebGLUniformLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
@@ -237,7 +242,7 @@ namespace Fudge {
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
-            
+
         }
         protected static deleteBuffers(_bufferInfo: RenderBuffers): void {
             if (_bufferInfo) {

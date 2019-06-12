@@ -231,14 +231,18 @@ var Fudge;
          * @param _projection
          */
         static draw(_renderShader, _renderBuffers, _renderCoat, _projection) {
-            RenderOperator.useBuffers(_renderBuffers);
-            RenderOperator.useParameter(_renderCoat);
             RenderOperator.useProgram(_renderShader);
+            // RenderOperator.useBuffers(_renderBuffers);
+            // RenderOperator.useParameter(_renderCoat);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
             RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
             RenderOperator.attributePointer(_renderShader.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["aVertexTextureUVs"]); // enable the buffer
-            RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["aVertexTextureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            if (_renderShader.attributes["a_textureUVs"]) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
+                RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            }
             // Supply matrixdata to shader. 
             let matrixLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
@@ -2882,10 +2886,6 @@ var Fudge;
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
         }
-        setTextureCoordinates() {
-            let textureCoordinates = [];
-            textureCoordinates.push(0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0);
-        }
         serialize() {
             let serialization = {};
             serialization[this.constructor.name] = this;
@@ -2897,7 +2897,7 @@ var Fudge;
         }
         createVertices() {
             let vertices = new Float32Array([
-                /*0*/ -1, -1, 0, /*1*/ 1, -1, 0, /*2*/ -1, 1, 0, /*3*/ -1, 1, 0, /**/ 1, -1, 0, /**/ 1, 1, 0
+                /*0*/ -1, -1, 0, /*1*/ -1, 1, 0, /*2*/ 1, 1, 0, /*3*/ 1, -1, 0
             ]);
             for (let iVertex = 0; iVertex < vertices.length; iVertex++) {
                 vertices[iVertex] *= 1 / 2;
@@ -2906,16 +2906,7 @@ var Fudge;
         }
         createIndices() {
             let indices = new Uint16Array([
-                // front
-                4, 0, 1,
-                // right
-                4, 1, 2,
-                // back
-                4, 2, 3,
-                // left
-                4, 3, 0,
-                // bottom
-                0, 3, 1, 3, 1, 2
+                0, 1, 2, 0, 2, 3
             ]);
             return indices;
         }
@@ -2923,9 +2914,7 @@ var Fudge;
             // TODO: calculate using trigonometry
             let textureUVs = new Float32Array([
                 // front
-                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
-                // back
-                /*4*/ 3, 0
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0
             ]);
             return textureUVs;
         }

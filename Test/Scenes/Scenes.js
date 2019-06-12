@@ -11,7 +11,7 @@ var Scenes;
         let mtrRed = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
         let mtrGreen = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
         let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
-        let meshCube = new ƒ.MeshCube(1, 1, 1);
+        let meshCube = new ƒ.MeshCubeNew();
         let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
