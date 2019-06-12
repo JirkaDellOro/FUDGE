@@ -91,8 +91,10 @@ var TestColor;
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material };
+        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, material: _material };
         renderInfos.push(renderInfo);
+        let renderMesh = { vertices: vertexBuffer, indices: indexBuffer, textureUVs: null, nIndices: _mesh.indices.length };
+        renderInfo.renderMesh = renderMesh;
     }
     // We call draw to render to our canvas
     function draw() {
@@ -104,7 +106,7 @@ var TestColor;
             if (renderInfo.material)
                 renderInfo.material.useRenderData(gl, renderInfo.shaderInfo);
             gl.bindVertexArray(renderInfo.vao);
-            gl.drawElements(gl.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(gl.TRIANGLES, renderInfo.renderMesh.nIndices, gl.UNSIGNED_SHORT, 0);
         }
         // Clean
         gl.bindVertexArray(null);

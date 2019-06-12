@@ -114,12 +114,12 @@ package Fudge <<Rectangle>> {
       stride: number
       offset: number
     }
-    interface ShaderInfo {
+    interface RenderShader {
       program: WebGLProgram
       attributes: MapNameToValue
       uniforms: MapNameToUniformLocation
     }
-    interface BufferInfo {
+    interface RenderBuffers {
       buffer: WebGLBuffer
       target: number
       specification: BufferSpecification
@@ -134,9 +134,9 @@ package Fudge <<Rectangle>> {
       - count: number = 0
     }
     class RenderManager extends RenderOperator {
-      - {static} programs: Map<typeof Shader, Reference<ShaderInfo>>
+      - {static} programs: Map<typeof Shader, Reference<RenderShader>>
       - {static} parameters: Map<Material, Reference<MaterialInfo>>
-      - {static} buffers: Map<Mesh, Reference<BufferInfo>>
+      - {static} buffers: Map<Mesh, Reference<RenderBuffers>>
       - {static} nodes: MapNodeToNodeReferences
     }
     class RenderOperator {
@@ -147,13 +147,13 @@ package Fudge <<Rectangle>> {
 
     interface CoatExtension {
       typeof Coat,
-      shaderInfo: ShaderInfo
+      renderShader: RenderShader
     }
 
     class RenderExtender {
       - {static} coatExtensions
       + {static} decorateCoat(_constructor: Function): void
-      - {static} extendCoatColored(this: Coat, _shaderInfo: ShaderInfo): void
+      - {static} extendCoatColored(this: Coat, _renderShader: RenderShader): void
     }
   }
 
@@ -296,7 +296,7 @@ package Fudge <<Rectangle>> {
       + name: string
       + params: ShaderParameters
 
-      + setRenderData(_shaderInfo: ShaderInfo): void
+      + setRenderData(_renderShader: RenderShader): void
     }
 
     '@decorateCoatWithRenderExtension
@@ -338,11 +338,11 @@ package Fudge <<Rectangle>> {
   RenderExtender -(0- CoatExtension : provides >
   RenderExtender --- Coat : decorates >
 
-  Reference "1" --> "1" ShaderInfo : shader uses >
-  Reference "1" --> "1" BufferInfo : mesh uses >
+  Reference "1" --> "1" RenderShader : shader uses >
+  Reference "1" --> "1" RenderBuffers : mesh uses >
   Reference "1" --> "1" MaterialInfo : material uses >
 
-  BufferInfo --> BufferSpecification : provides >
+  Mesh --> BufferSpecification : provides >
 
   Framing -0)- Rectangle
   FramingComplex "1" -0)- "2" Border

@@ -1,6 +1,6 @@
 ///<reference path="../Coat/Coat.ts"/>
 namespace Fudge {
-    type CoatExtension = (this: Coat, _shaderInfo: ShaderInfo) => void;
+    type CoatExtension = (this: Coat, _shaderInfo: RenderShader) => void;
     export class RenderExtender {
         private static coatExtensions: { [className: string]: CoatExtension } = {
             "CoatColored": RenderExtender.setRenderDataForCoatColored,
@@ -17,14 +17,14 @@ namespace Fudge {
             });
         }
 
-        private static setRenderDataForCoatColored(this: Coat, _shaderInfo: ShaderInfo): void {
+        private static setRenderDataForCoatColored(this: Coat, _shaderInfo: RenderShader): void {
             let colorUniformLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_color"];
             let { r, g, b, a } = (<CoatColored>this).color;
             let color: Float32Array = new Float32Array([r, g, b, a]);
             RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
 
-        private static setRenderDataForCoatTextured(this: Coat, _shaderInfo: ShaderInfo): void {
+        private static setRenderDataForCoatTextured(this: Coat, _shaderInfo: RenderShader): void {
             let crc3: WebGLRenderingContext = RenderOperator.getRenderingContext();
             let textureBufferSpecification: BufferSpecification = { size: 2, dataType: WebGLRenderingContext.FLOAT, normalize: true, stride: 0, offset: 0 };
             let textureCoordinateAttributeLocation: number = RenderManager.assert<number>(_shaderInfo.attributes["a_textureCoordinate"]);

@@ -33,6 +33,8 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Math/Vector3.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/Mesh.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshCube.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshCubeNew.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshPyramid.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshQuad.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderManager.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/Shader.ts",
@@ -56,7 +58,7 @@
         },
         {
           "pos": 593,
-          "end": 136431,
+          "end": 141008,
           "kind": "text"
         }
       ],
@@ -93,7 +95,7 @@
         },
         {
           "pos": 34,
-          "end": 55561,
+          "end": 56558,
           "kind": "text"
         }
       ]

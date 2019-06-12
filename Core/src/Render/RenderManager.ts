@@ -42,11 +42,11 @@ namespace Fudge {
      */
     export class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs: Map<typeof Shader, Reference<ShaderInfo>> = new Map();
+        private static programs: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */
-        private static parameters: Map<Coat, Reference<CoatInfo>> = new Map();
+        private static parameters: Map<Coat, Reference<RenderCoat>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers: Map<Mesh, Reference<BufferInfo>> = new Map();
+        private static buffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
 
         // #region Adding
@@ -63,13 +63,13 @@ namespace Fudge {
                 return;
 
             let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
-            this.createReference<typeof Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+            this.createReference<typeof Shader, RenderShader>(this.programs, shader, this.createProgram);
 
             let coat: Coat = cmpMaterial.getMaterial().getCoat();
-            this.createReference<Coat, CoatInfo>(this.parameters, coat, this.createParameter);
+            this.createReference<Coat, RenderCoat>(this.parameters, coat, this.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
-            this.createReference<Mesh, BufferInfo>(this.buffers, mesh, this.createBuffer);
+            this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffer);
 
             let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
@@ -100,9 +100,9 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            this.removeReference<typeof Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference<Coat, CoatInfo>(this.parameters, nodeReferences.coat, this.deleteParameter);
-            this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference<typeof Shader, RenderShader>(this.programs, nodeReferences.shader, this.deleteProgram);
+            this.removeReference<Coat, RenderCoat>(this.parameters, nodeReferences.coat, this.deleteParameter);
+            this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
 
             this.nodes.delete(_node);
         }
@@ -131,22 +131,22 @@ namespace Fudge {
 
             let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
-                this.removeReference<typeof Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference<typeof Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+                this.removeReference<typeof Shader, RenderShader>(this.programs, nodeReferences.shader, this.deleteProgram);
+                this.createReference<typeof Shader, RenderShader>(this.programs, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
 
             let coat: Coat = cmpMaterial.getMaterial().getCoat();
             if (coat !== nodeReferences.coat) {
-                this.removeReference<Coat, CoatInfo>(this.parameters, nodeReferences.coat, this.deleteParameter);
-                this.createReference<Coat, CoatInfo>(this.parameters, coat, this.createParameter);
+                this.removeReference<Coat, RenderCoat>(this.parameters, nodeReferences.coat, this.deleteParameter);
+                this.createReference<Coat, RenderCoat>(this.parameters, coat, this.createParameter);
                 nodeReferences.coat = coat;
             }
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference<Mesh, BufferInfo>(this.buffers, mesh, this.createBuffer);
+                this.removeReference<Mesh, RenderBuffers>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+                this.createReference<Mesh, RenderBuffers>(this.buffers, mesh, this.createBuffer);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -206,7 +206,7 @@ namespace Fudge {
 
         public static clear(_color: Color = null): void {
             this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
         }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
@@ -247,9 +247,9 @@ namespace Fudge {
             if (!references)
                 return; // TODO: deal with partial references
 
-            let bufferInfo: BufferInfo = this.buffers.get(references.mesh).getReference();
-            let coatInfo: CoatInfo = this.parameters.get(references.coat).getReference();
-            let shaderInfo: ShaderInfo = this.programs.get(references.shader).getReference();
+            let bufferInfo: RenderBuffers = this.buffers.get(references.mesh).getReference();
+            let coatInfo: RenderCoat = this.parameters.get(references.coat).getReference();
+            let shaderInfo: RenderShader = this.programs.get(references.shader).getReference();
             this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
         }
 

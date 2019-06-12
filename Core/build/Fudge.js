@@ -159,8 +159,8 @@ var Fudge;
             let canvas = document.createElement("canvas");
             RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
             // Enable backface- and zBuffer-culling.
-            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
-            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
         /**
@@ -223,20 +223,20 @@ var Fudge;
             RenderOperator.useBuffer(_bufferInfo);
             RenderOperator.useParameter(_coatInfo);
             RenderOperator.useProgram(_shaderInfo);
-            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
             // Supply matrixdata to shader. 
             let matrixLocation = _shaderInfo.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
             _coatInfo.coat.setRenderData(_shaderInfo);
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, Fudge.Mesh.getBufferSpecification().offset, _bufferInfo.vertexCount);
         }
         // #region Shaderprogram 
         static createProgram(_shaderClass) {
             let crc3 = RenderOperator.crc3;
             let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
@@ -257,7 +257,7 @@ var Fudge;
                     throw new Error("Error compiling shader: " + error);
                 }
                 // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
                     alert(crc3.getShaderInfoLog(webGLShader));
                     return null;
                 }
@@ -265,7 +265,7 @@ var Fudge;
             }
             function detectAttributes() {
                 let detectedAttributes = {};
-                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                let attributeCount = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
                 for (let i = 0; i < attributeCount; i++) {
                     let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(shaderProgram, i));
                     if (!attributeInfo) {
@@ -277,7 +277,7 @@ var Fudge;
             }
             function detectUniforms() {
                 let detectedUniforms = {};
-                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                let uniformCount = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_UNIFORMS);
                 for (let i = 0; i < uniformCount; i++) {
                     let info = RenderOperator.assert(crc3.getActiveUniform(shaderProgram, i));
                     if (!info) {
@@ -309,21 +309,19 @@ var Fudge;
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
             RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
             let bufferInfo = {
-                buffer: buffer,
-                target: RenderOperator.crc3.ARRAY_BUFFER,
-                specification: _mesh.getBufferSpecification(),
+                vertices: buffer,
                 vertexCount: _mesh.getVertexCount(),
                 textureUVs: textureCoordinateBuffer
             };
             return bufferInfo;
         }
         static useBuffer(_bufferInfo) {
-            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _bufferInfo.vertices);
         }
         static deleteBuffer(_bufferInfo) {
             if (_bufferInfo) {
-                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
             }
         }
         // #endregion
@@ -2632,16 +2630,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class Mesh {
-        getVertices() {
-            return this.vertices;
-        }
-        getTextureUVs() {
-            return this.textureUVs;
-        }
-        getVertexCount() {
-            return this.vertices.length / this.getBufferSpecification().size;
-        }
-        getBufferSpecification() {
+        static getBufferSpecification() {
             return {
                 size: 3,
                 dataType: WebGL2RenderingContext.FLOAT,
@@ -2649,6 +2638,15 @@ var Fudge;
                 stride: 0,
                 offset: 0
             };
+        }
+        getVertices() {
+            return this.vertices;
+        }
+        getTextureUVs() {
+            return this.textureUVs;
+        }
+        getVertexCount() {
+            return this.vertices.length / Mesh.getBufferSpecification().size;
         }
     }
     Fudge.Mesh = Mesh;
@@ -2702,6 +2700,149 @@ var Fudge;
         }
     }
     Fudge.MeshCube = MeshCube;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshCubeNew extends Fudge.Mesh {
+        /*
+                 4____7
+                0/__3/|
+                 ||5_||6
+                1|/_2|/
+        */
+        constructor() {
+            super();
+            this.create();
+        }
+        create() {
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+        }
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
+        }
+        createVertices() {
+            let vertices = new Float32Array([
+                // front
+                /*0*/ -1, -1, -1, /*1*/ -1, 1, -1, /*2*/ 1, 1, -1, /*3*/ 1, -1, -1,
+                // back
+                /*4*/ -1, -1, 1, /* 5*/ -1, 1, 1, /* 6*/ 1, 1, 1, /* 7*/ 1, -1, 1
+            ]);
+            // scale down to a length of 1 for all edges
+            for (let iVertex = 0; iVertex < this.vertices.length; iVertex++) {
+                this.vertices[iVertex] *= 1 / 2;
+            }
+            return vertices;
+        }
+        createIndices() {
+            let indices = new Uint16Array([
+                // front
+                0, 1, 2, 0, 2, 3,
+                // right
+                3, 2, 6, 3, 6, 7,
+                // back
+                7, 6, 5, 7, 5, 4,
+                // left
+                4, 5, 1, 4, 1, 0,
+                // top
+                4, 0, 3, 4, 3, 7,
+                // bottom
+                1, 5, 6, 1, 6, 2
+            ]);
+            return indices;
+        }
+        createTextureUVs() {
+            let textureUVs = new Float32Array([
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0, /*5*/ 3, 1, /*6*/ 2, 1, /*7*/ 2, 0
+            ]);
+            return textureUVs;
+        }
+    }
+    Fudge.MeshCubeNew = MeshCubeNew;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshPyramid extends Fudge.Mesh {
+        /*
+                    4
+                   /\
+                 3/__\2
+                0/____\1
+        */
+        constructor() {
+            super();
+            this.create();
+        }
+        create() {
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+        }
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
+        }
+        createVertices() {
+            let vertices = new Float32Array([
+                // floor
+                /*0*/ -1, 0, -1, /*1*/ 1, 0, -1, /*2*/ 1, 0, 1, /*3*/ -1, 0, 1,
+                // tip
+                /*4*/ 0, -2, 0
+            ]);
+            // scale down to a length of 1 for bottom edges and height
+            for (let iVertex = 0; iVertex < this.vertices.length; iVertex++) {
+                this.vertices[iVertex] *= 1 / 2;
+            }
+            return vertices;
+        }
+        createIndices() {
+            let indices = new Uint16Array([
+                // front
+                4, 0, 1,
+                // right
+                4, 1, 2,
+                // back
+                4, 2, 3,
+                // left
+                4, 3, 0,
+                // bottom
+                0, 3, 1, 3, 1, 2
+            ]);
+            return indices;
+        }
+        createTextureUVs() {
+            // TODO: calculate using trigonometry
+            let textureUVs = new Float32Array([
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0
+            ]);
+            return textureUVs;
+        }
+    }
+    Fudge.MeshPyramid = MeshPyramid;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2908,7 +3049,7 @@ var Fudge;
         }
         static clear(_color = null) {
             this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
         }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.

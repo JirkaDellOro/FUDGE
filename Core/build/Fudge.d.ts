@@ -75,7 +75,7 @@ declare namespace Fudge {
         stride: number;
         offset: number;
     }
-    interface ShaderInfo {
+    interface RenderShader {
         program: WebGLProgram;
         attributes: {
             [name: string]: number;
@@ -84,14 +84,12 @@ declare namespace Fudge {
             [name: string]: WebGLUniformLocation;
         };
     }
-    interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
+    interface RenderBuffers {
+        vertices: WebGLBuffer;
         vertexCount: number;
         textureUVs: WebGLBuffer;
     }
-    interface CoatInfo {
+    interface RenderCoat {
         vao: WebGLVertexArrayObject;
         coat: Coat;
     }
@@ -150,23 +148,23 @@ declare namespace Fudge {
          * @param _coatInfo
          * @param _projection
          */
-        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void;
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
-        protected static useProgram(_shaderInfo: ShaderInfo): void;
-        protected static deleteProgram(_program: ShaderInfo): void;
-        protected static createBuffer(_mesh: Mesh): BufferInfo;
-        protected static useBuffer(_bufferInfo: BufferInfo): void;
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_coat: Coat): CoatInfo;
-        protected static useParameter(_coatInfo: CoatInfo): void;
-        protected static deleteParameter(_coatInfo: CoatInfo): void;
+        protected static draw(_shaderInfo: RenderShader, _bufferInfo: RenderBuffers, _coatInfo: RenderCoat, _projection: Matrix4x4): void;
+        protected static createProgram(_shaderClass: typeof Shader): RenderShader;
+        protected static useProgram(_shaderInfo: RenderShader): void;
+        protected static deleteProgram(_program: RenderShader): void;
+        protected static createBuffer(_mesh: Mesh): RenderBuffers;
+        protected static useBuffer(_bufferInfo: RenderBuffers): void;
+        protected static deleteBuffer(_bufferInfo: RenderBuffers): void;
+        protected static createParameter(_coat: Coat): RenderCoat;
+        protected static useParameter(_coatInfo: RenderCoat): void;
+        protected static deleteParameter(_coatInfo: RenderCoat): void;
     }
 }
 declare namespace Fudge {
     class Coat extends Mutable {
         name: string;
         mutate(_mutator: Mutator): void;
-        setRenderData(_shaderInfo: ShaderInfo): void;
+        setRenderData(_shaderInfo: RenderShader): void;
         protected reduceMutator(): void;
     }
     class CoatColored extends Coat {
@@ -175,6 +173,9 @@ declare namespace Fudge {
     }
     class CoatTextured extends Coat {
         texture: TextureImage;
+        tilingX: number;
+        tilingY: number;
+        repetition: boolean;
     }
     /**
      * Adds and enables a Texture passed to this material.
@@ -1164,11 +1165,12 @@ declare namespace Fudge {
 declare namespace Fudge {
     abstract class Mesh implements Serializable {
         protected vertices: Float32Array;
+        protected indices: Uint16Array;
         protected textureUVs: Float32Array;
+        static getBufferSpecification(): BufferSpecification;
         getVertices(): Float32Array;
         getTextureUVs(): Float32Array;
         getVertexCount(): number;
-        getBufferSpecification(): BufferSpecification;
         abstract serialize(): Serialization;
         abstract deserialize(_serialization: Serialization): Serializable;
     }
@@ -1186,6 +1188,34 @@ declare namespace Fudge {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
+    /**
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshCubeNew extends Mesh {
+        constructor();
+        create(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+    }
+}
+declare namespace Fudge {
+    /**
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshPyramid extends Mesh {
+        constructor();
+        create(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
     }
 }
 declare namespace Fudge {

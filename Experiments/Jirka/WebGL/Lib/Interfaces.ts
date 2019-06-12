@@ -14,8 +14,14 @@ namespace TestLib {
     export interface RenderInfo {
         shaderInfo: ShaderInfo;
         vao: WebGLVertexArrayObject;
-        nIndices: number;
         material: TestLib.Material;
-        textureBuffer?: WebGLBuffer;
+        renderMesh?: RenderMesh;
+    }
+
+    export interface RenderMesh {
+        vertices: WebGLBuffer;
+        indices: WebGLBuffer;
+        nIndices: number;
+        textureUVs: WebGLBuffer;
     }
 }

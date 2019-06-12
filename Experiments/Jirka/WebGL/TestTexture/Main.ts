@@ -23,10 +23,14 @@ namespace TestTextured {
         addProgram(tl.shader.vertexTexture, tl.shader.fragmentTexure);
 
         let images: NodeListOf<HTMLImageElement> = document.querySelectorAll("img");
-        createRenderInfo(tl.square, shaderInfos[3], new tl.MaterialTexture(images[0]));
-        createRenderInfo(tl.triangle, shaderInfos[3], new tl.MaterialTexture(images[1]));
-        createRenderInfo(tl.penta, shaderInfos[3], new tl.MaterialTexture(images[2]));
-        createRenderInfo(tl.hexa, shaderInfos[3], new tl.MaterialTexture(images[3]));
+        let mtrTexture: tl.MaterialTexture[] = [];
+        for (let image of images)
+            mtrTexture.push(new tl.MaterialTexture(image));
+
+        createRenderInfo(tl.square, shaderInfos[0], null);
+        createRenderInfo(tl.triangle, shaderInfos[3], mtrTexture[1]);
+        createRenderInfo(tl.penta, shaderInfos[3], mtrTexture[2]);
+        createRenderInfo(tl.hexa, shaderInfos[3], mtrTexture[0]);
 
         draw();
     }
@@ -85,7 +89,7 @@ namespace TestTextured {
         gl.shaderSource(shader, _source);
         gl.compileShader(shader);
 
-        // TODO: inculde validation in FUDGE
+        // TODO: include validation in FUDGE
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
             console.error(gl.getShaderInfoLog(shader));
             return null;
@@ -96,39 +100,45 @@ namespace TestTextured {
 
 
     function createRenderInfo(_mesh: tl.Mesh, _shaderInfo: tl.ShaderInfo, _material: tl.Material): void {
+
         let vao: WebGLVertexArrayObject = gl.createVertexArray();
         gl.bindVertexArray(vao);
 
         // Setting up the VBO
         let vertexBuffer: WebGLBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_mesh.vertices), gl.STATIC_DRAW);
-
+        gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.vertices), gl.STATIC_DRAW);
         gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexPosition"]);
         gl.vertexAttribPointer(_shaderInfo.attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
 
+        // Setting up texture buffer
+        let textureUVs: WebGLBuffer = null;
+        if (_shaderInfo.attributes["aVertexTextureUVs"]) {
+            // if (_material && _material.constructor.name == "MaterialTexture") {
+            textureUVs = gl.createBuffer();
+            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
+            gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexTextureUVs"]); // enable the buffer
+            gl.vertexAttribPointer(_shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0); // set bufferspecs
+            // }
+            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+        }
         // Setting up the IBO
         let indexBuffer: WebGLBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(_mesh.indices), gl.STATIC_DRAW);
+        gl.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, new Uint16Array(_mesh.indices), gl.STATIC_DRAW);
 
-        let textureUVs: WebGLBuffer = null;
-        // Setting up texture buffer
-        if (_material && _material.constructor.name == "MaterialTexture") {
-                textureUVs = gl.createBuffer();
-                gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
-                gl.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
-                gl.enableVertexAttribArray(_shaderInfo.attributes["aVertexTextureUVs"]);
-                gl.vertexAttribPointer(_shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0);
-        }
-        
+
         // Clean
         gl.bindVertexArray(null);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        gl.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
 
-        let renderInfo: tl.RenderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: _material, textureBuffer: textureUVs };
+        let renderInfo: tl.RenderInfo = { shaderInfo: _shaderInfo, vao: vao, material: _material };
         renderInfos.push(renderInfo);
+
+        let renderMesh: tl.RenderMesh = { vertices: vertexBuffer, indices: indexBuffer, textureUVs: textureUVs, nIndices: _mesh.indices.length };
+        renderInfo.renderMesh = renderMesh;
     }
 
     // We call draw to render to our canvas
@@ -139,15 +149,25 @@ namespace TestTextured {
 
         for (let renderInfo of renderInfos) {
             gl.useProgram(renderInfo.shaderInfo.program);
+            // gl.bindVertexArray(renderInfo.vao);
+
+            // bind vertices
+            gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderInfo.renderMesh.vertices);
+            gl.enableVertexAttribArray(renderInfo.shaderInfo.attributes["aVertexPosition"]);
+            gl.vertexAttribPointer(renderInfo.shaderInfo.attributes["aVertexPosition"], 3, gl.FLOAT, false, 0, 0);
+            // bind indices
+            gl.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, renderInfo.renderMesh.indices);
+            // bind UVs
+            if (renderInfo.shaderInfo.attributes["aVertexTextureUVs"]) {
+                gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderInfo.renderMesh.textureUVs);
+                gl.enableVertexAttribArray(renderInfo.shaderInfo.attributes["aVertexTextureUVs"]); // enable the buffer
+                gl.vertexAttribPointer(renderInfo.shaderInfo.attributes["aVertexTextureUVs"], 2, gl.FLOAT, false, 0, 0); // set bufferspecs
+            }
 
             if (renderInfo.material)
                 renderInfo.material.useRenderData(gl, renderInfo.shaderInfo);
 
-            if (renderInfo.textureBuffer)
-                gl.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderInfo.textureBuffer);
-
-            gl.bindVertexArray(renderInfo.vao);
-            gl.drawElements(WebGL2RenderingContext.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(WebGL2RenderingContext.TRIANGLES, renderInfo.renderMesh.nIndices, gl.UNSIGNED_SHORT, 0);
         }
         // Clean
         gl.bindVertexArray(null);

@@ -13,7 +13,7 @@ namespace Fudge {
             super.mutate(_mutator);
         }
 
-        public setRenderData(_shaderInfo: ShaderInfo): void {/**/ }
+        public setRenderData(_shaderInfo: RenderShader): void {/**/ }
         protected reduceMutator(): void { /**/ }
     }
 

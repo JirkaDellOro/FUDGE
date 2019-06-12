@@ -1,7 +1,18 @@
 namespace Fudge {
     export abstract class Mesh implements Serializable {
         protected vertices: Float32Array;
+        protected indices: Uint16Array;
         protected textureUVs: Float32Array;
+
+        public static getBufferSpecification(): BufferSpecification {
+            return {
+                size: 3,
+                dataType: WebGL2RenderingContext.FLOAT,
+                normalize: false,
+                stride: 0,
+                offset: 0
+            };
+        }
 
         public getVertices(): Float32Array {
             return this.vertices;
@@ -12,18 +23,9 @@ namespace Fudge {
         }
 
         public getVertexCount(): number {
-            return this.vertices.length / this.getBufferSpecification().size;
+            return this.vertices.length / Mesh.getBufferSpecification().size;
         }
 
-        public getBufferSpecification(): BufferSpecification {
-            return {
-                size: 3,
-                dataType: WebGL2RenderingContext.FLOAT,
-                normalize: false,
-                stride: 0,
-                offset: 0
-            };
-        }
 
         public abstract serialize(): Serialization;
         public abstract deserialize(_serialization: Serialization): Serializable;

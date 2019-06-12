@@ -6,21 +6,21 @@ namespace Fudge {
         stride: number; // Number of indices that will be skipped each iteration.
         offset: number; // Index of the element to begin with.
     }
-    export interface ShaderInfo {
+    export interface RenderShader {
         program: WebGLProgram;
         attributes: { [name: string]: number };
         uniforms: { [name: string]: WebGLUniformLocation };
     }
 
-    export interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
+    export interface RenderBuffers {
+        vertices: WebGLBuffer;
+        // target: number;
+        // specification: BufferSpecification;
         vertexCount: number;
         textureUVs: WebGLBuffer;
     }
 
-    export interface CoatInfo {
+    export interface RenderCoat {
         //TODO: examine, if it makes sense to store a vao for each Coat, even though e.g. color won't be stored anyway...
         vao: WebGLVertexArrayObject;
         coat: Coat;
@@ -55,8 +55,8 @@ namespace Fudge {
                 "WebGL-context couldn't be created"
             );
             // Enable backface- and zBuffer-culling.
-            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
-            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
 
@@ -118,11 +118,11 @@ namespace Fudge {
          * @param _coatInfo 
          * @param _projection 
          */
-        protected static draw(_shaderInfo: ShaderInfo, _bufferInfo: BufferInfo, _coatInfo: CoatInfo, _projection: Matrix4x4): void {
+        protected static draw(_shaderInfo: RenderShader, _bufferInfo: RenderBuffers, _coatInfo: RenderCoat, _projection: Matrix4x4): void {
             RenderOperator.useBuffer(_bufferInfo);
             RenderOperator.useParameter(_coatInfo);
             RenderOperator.useProgram(_shaderInfo);
-            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], _bufferInfo.specification);
+            RenderOperator.attributePointer(_shaderInfo.attributes["a_position"], Mesh.getBufferSpecification());
 
             // Supply matrixdata to shader. 
             let matrixLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_matrix"];
@@ -131,21 +131,21 @@ namespace Fudge {
             _coatInfo.coat.setRenderData(_shaderInfo);
 
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, _bufferInfo.specification.offset, _bufferInfo.vertexCount);
+            RenderOperator.crc3.drawArrays(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _bufferInfo.vertexCount);
         }
 
         // #region Shaderprogram 
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
+        protected static createProgram(_shaderClass: typeof Shader): RenderShader {
             let crc3: WebGL2RenderingContext = RenderOperator.crc3;
             let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
             crc3.linkProgram(shaderProgram);
             let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
             if (error !== "") {
                 throw new Error("Error linking Shader: " + error);
             }
-            let program: ShaderInfo = {
+            let program: RenderShader = {
                 program: shaderProgram,
                 attributes: detectAttributes(),
                 uniforms: detectUniforms()
@@ -162,7 +162,7 @@ namespace Fudge {
                     throw new Error("Error compiling shader: " + error);
                 }
                 // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
                     alert(crc3.getShaderInfoLog(webGLShader));
                     return null;
                 }
@@ -170,7 +170,7 @@ namespace Fudge {
             }
             function detectAttributes(): { [name: string]: number } {
                 let detectedAttributes: { [name: string]: number } = {};
-                let attributeCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                let attributeCount: number = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
                 for (let i: number = 0; i < attributeCount; i++) {
                     let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
                     if (!attributeInfo) {
@@ -182,7 +182,7 @@ namespace Fudge {
             }
             function detectUniforms(): { [name: string]: WebGLUniformLocation } {
                 let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
-                let uniformCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                let uniformCount: number = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_UNIFORMS);
                 for (let i: number = 0; i < uniformCount; i++) {
                     let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
                     if (!info) {
@@ -193,11 +193,11 @@ namespace Fudge {
                 return detectedUniforms;
             }
         }
-        protected static useProgram(_shaderInfo: ShaderInfo): void {
+        protected static useProgram(_shaderInfo: RenderShader): void {
             RenderOperator.crc3.useProgram(_shaderInfo.program);
             RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
         }
-        protected static deleteProgram(_program: ShaderInfo): void {
+        protected static deleteProgram(_program: RenderShader): void {
             if (_program) {
                 RenderOperator.crc3.deleteProgram(_program.program);
                 delete _program.attributes;
@@ -207,7 +207,7 @@ namespace Fudge {
         // #endregion
 
         // #region Meshbuffer
-        protected static createBuffer(_mesh: Mesh): BufferInfo {
+        protected static createBuffer(_mesh: Mesh): RenderBuffers {
             let buffer: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, buffer);
             RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.getVertices(), WebGL2RenderingContext.STATIC_DRAW);
@@ -216,39 +216,37 @@ namespace Fudge {
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureCoordinateBuffer);
             RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, new Float32Array(_mesh.getTextureUVs()), WebGL2RenderingContext.STATIC_DRAW);
 
-            let bufferInfo: BufferInfo = {
-                buffer: buffer,
-                target: RenderOperator.crc3.ARRAY_BUFFER,
-                specification: _mesh.getBufferSpecification(),
+            let bufferInfo: RenderBuffers = {
+                vertices: buffer,
                 vertexCount: _mesh.getVertexCount(),
                 textureUVs: textureCoordinateBuffer
             };
             return bufferInfo;
         }
-        protected static useBuffer(_bufferInfo: BufferInfo): void {
-            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+        protected static useBuffer(_bufferInfo: RenderBuffers): void {
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _bufferInfo.vertices);
         }
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void {
+        protected static deleteBuffer(_bufferInfo: RenderBuffers): void {
             if (_bufferInfo) {
-                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
             }
         }
         // #endregion
 
         // #region MaterialParameters
-        protected static createParameter(_coat: Coat): CoatInfo {
+        protected static createParameter(_coat: Coat): RenderCoat {
             let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
-            let coatInfo: CoatInfo = {
+            let coatInfo: RenderCoat = {
                 vao: vao,
                 coat: _coat
             };
             return coatInfo;
         }
-        protected static useParameter(_coatInfo: CoatInfo): void {
+        protected static useParameter(_coatInfo: RenderCoat): void {
             RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
-        protected static deleteParameter(_coatInfo: CoatInfo): void {
+        protected static deleteParameter(_coatInfo: RenderCoat): void {
             if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
                 RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);

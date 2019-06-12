@@ -66,8 +66,10 @@ var TestShader;
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, nIndices: _mesh.indices.length, material: null };
+        let renderInfo = { shaderInfo: _shaderInfo, vao: vao, material: null };
         renderInfos.push(renderInfo);
+        let renderMesh = { vertices: vertexBuffer, indices: indexBuffer, textureUVs: null, nIndices: _mesh.indices.length };
+        renderInfo.renderMesh = renderMesh;
     }
     // We call draw to render to our canvas
     function draw() {
@@ -77,7 +79,7 @@ var TestShader;
         for (let renderInfo of renderInfos) {
             gl.useProgram(renderInfo.shaderInfo.program);
             gl.bindVertexArray(renderInfo.vao);
-            gl.drawElements(gl.TRIANGLES, renderInfo.nIndices, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(gl.TRIANGLES, renderInfo.renderMesh.nIndices, gl.UNSIGNED_SHORT, 0);
         }
         // Clean
         gl.bindVertexArray(null);
