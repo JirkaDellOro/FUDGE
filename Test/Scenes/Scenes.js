@@ -11,7 +11,7 @@ var Scenes;
         let mtrRed = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
         let mtrGreen = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
         let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
-        let meshCube = new ƒ.MeshCubeNew();
+        let meshCube = new ƒ.MeshCube();
         let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
@@ -35,14 +35,14 @@ var Scenes;
         createMiniScene();
         let child = Scenes.node.getChildren()[0];
         let grandchild;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
         ƒ.RenderManager.initialize();
-        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(5, 2, 5));
+        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
         Scenes.camera = createCamera();

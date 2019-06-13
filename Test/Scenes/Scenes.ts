@@ -18,7 +18,7 @@ namespace Scenes {
         let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
         let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
 
-        let meshCube: ƒ.MeshCubeNew = new ƒ.MeshCubeNew();
+        let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
         let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
@@ -48,7 +48,7 @@ namespace Scenes {
         let child: ƒ.Node = node.getChildren()[0];
 
         let grandchild: ƒ.Node;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
@@ -56,7 +56,7 @@ namespace Scenes {
     export function createMiniScene(): void {
         ƒ.RenderManager.initialize();
 
-        node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube(5, 2, 5));
+        node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.scaleX(2);
 

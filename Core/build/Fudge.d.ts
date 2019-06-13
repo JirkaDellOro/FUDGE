@@ -1167,6 +1167,12 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Abstract base class for all meshes.
+     * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     abstract class Mesh implements Serializable {
         vertices: Float32Array;
         indices: Uint16Array;
@@ -1184,27 +1190,16 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class MeshCube extends Mesh {
-        width: number;
-        height: number;
-        depth: number;
-        constructor(_width: number, _height: number, _depth: number);
-        create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        createVertices(): Float32Array;
-        createTextureUVs(): Float32Array;
-        createIndices(): Uint16Array;
-    }
-}
-declare namespace Fudge {
-    /**
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     *
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshCubeNew extends Mesh {
+    class MeshCube extends Mesh {
         constructor();
         create(): void;
         serialize(): Serialization;
@@ -1216,6 +1211,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
+     *
+     *               4
+     *              /\`.
+     *            3/__\_\ 2
+     *           0/____\/1
+     *
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshPyramid extends Mesh {
@@ -1230,6 +1233,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Generate a simple quad with edges of length 1, the face consisting of two trigons
+     *
+     *        0 __ 3
+     *         |__|
+     *        1    2
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Mesh {

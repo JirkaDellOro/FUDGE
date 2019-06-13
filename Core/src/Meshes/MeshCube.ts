@@ -1,42 +1,24 @@
 namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     *
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/             
+     * 
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class MeshCube extends Mesh {
-        public width: number;
-        public height: number;
-        public depth: number;
-
-        public constructor(_width: number, _height: number, _depth: number) {
+        public constructor() {
             super();
-            this.width = _width;
-            this.height = _height;
-            this.depth = _depth;
             this.create();
         }
 
         public create(): void {
-            this.vertices = new Float32Array([
-                //front
-                -1, -1, 1, /**/ 1, -1, 1,  /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
-                //back
-                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
-                //left
-                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
-                //right
-                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
-                //top
-                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
-                //bottom
-                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
-            ]);
-
-            for (let iVertex: number = 0; iVertex < this.vertices.length; iVertex += 3) {
-                this.vertices[iVertex] *= this.width / 2;
-                this.vertices[iVertex + 1] *= this.height / 2;
-                this.vertices[iVertex + 2] *= this.depth / 2;
-            }
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
         }
 
         public serialize(): Serialization {
@@ -45,15 +27,51 @@ namespace Fudge {
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.width = _serialization.width;
-            this.height = _serialization.height;
-            this.depth = _serialization.depth;
             this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
         }
 
-        public createVertices(): Float32Array { return null; }
-        public createTextureUVs(): Float32Array { return null; }
-        public createIndices(): Uint16Array { return null; }
+        protected createVertices(): Float32Array {
+            let vertices: Float32Array = new Float32Array([
+                // front
+                /*0*/ -1, -1, -1, /*1*/ -1, 1, -1,  /*2*/ 1, 1, -1, /*3*/ 1, -1, -1,
+                // back
+                /*4*/ -1, -1, 1, /* 5*/ -1, 1, 1,  /* 6*/ 1, 1, 1, /* 7*/ 1, -1, 1
+            ]);
+
+            // scale down to a length of 1 for all edges
+            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
+                vertices[iVertex] *= 1 / 2;
+            }
+            return vertices;
+        }
+
+        protected createIndices(): Uint16Array {
+            let indices: Uint16Array = new Uint16Array([
+                // front
+                0, 1, 2, 0, 2, 3,
+                // right
+                3, 2, 6, 3, 6, 7,
+                // back
+                7, 6, 5, 7, 5, 4,
+                // left
+                4, 5, 1, 4, 1, 0,
+                // top
+                4, 0, 3, 4, 3, 7,
+                // bottom
+                1, 5, 6, 1, 6, 2
+            ]);
+            return indices;
+        }
+
+        protected createTextureUVs(): Float32Array {
+            let textureUVs: Float32Array = new Float32Array([
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0, /*5*/ 3, 1,  /*6*/ 2, 1, /*7*/ 2, 0
+            ]);
+            return textureUVs;
+        }
     }
 }

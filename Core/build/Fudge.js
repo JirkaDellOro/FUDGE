@@ -2657,6 +2657,12 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Abstract base class for all meshes.
+     * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Mesh {
         static getBufferSpecification() {
             return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
@@ -2673,68 +2679,16 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class MeshCube extends Fudge.Mesh {
-        constructor(_width, _height, _depth) {
-            super();
-            this.width = _width;
-            this.height = _height;
-            this.depth = _depth;
-            this.create();
-        }
-        create() {
-            this.vertices = new Float32Array([
-                //front
-                -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
-                //back
-                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
-                //left
-                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
-                //right
-                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
-                //top
-                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
-                //bottom
-                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
-            ]);
-            for (let iVertex = 0; iVertex < this.vertices.length; iVertex += 3) {
-                this.vertices[iVertex] *= this.width / 2;
-                this.vertices[iVertex + 1] *= this.height / 2;
-                this.vertices[iVertex + 2] *= this.depth / 2;
-            }
-        }
-        serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = this;
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.width = _serialization.width;
-            this.height = _serialization.height;
-            this.depth = _serialization.depth;
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
-        }
-        createVertices() { return null; }
-        createTextureUVs() { return null; }
-        createIndices() { return null; }
-    }
-    Fudge.MeshCube = MeshCube;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     *
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class MeshCubeNew extends Fudge.Mesh {
-        /*
-                 4____7
-                0/__3/|
-                 ||5_||6
-                1|/_2|/
-        */
+    class MeshCube extends Fudge.Mesh {
         constructor() {
             super();
             this.create();
@@ -2793,20 +2747,22 @@ var Fudge;
             return textureUVs;
         }
     }
-    Fudge.MeshCubeNew = MeshCubeNew;
+    Fudge.MeshCube = MeshCube;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
+     * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
+     *
+     *               4
+     *              /\`.
+     *            3/__\_\ 2
+     *           0/____\/1
+     *
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshPyramid extends Fudge.Mesh {
-        /*
-                    4
-                   /\
-                 3/__\_\ 2
-                0/____\/1
-        */
         constructor() {
             super();
             this.create();
@@ -2869,14 +2825,15 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Generate a simple quad with edges of length 1, the face consisting of two trigons
+     *
+     *        0 __ 3
+     *         |__|
+     *        1    2
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Fudge.Mesh {
-        /*
-             0 __ 3
-              |__|
-             1    2
-        */
         constructor() {
             super();
             this.create();
@@ -2911,7 +2868,6 @@ var Fudge;
             return indices;
         }
         createTextureUVs() {
-            // TODO: calculate using trigonometry
             let textureUVs = new Float32Array([
                 // front
                 /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0

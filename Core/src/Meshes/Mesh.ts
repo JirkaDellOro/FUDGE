@@ -1,4 +1,10 @@
 namespace Fudge {
+    /**
+     * Abstract base class for all meshes. 
+     * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
+     * 
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     export abstract class Mesh implements Serializable {
         // TODO: check if these arrays must be cached like this or if calling the methods is better.
         public vertices: Float32Array;
