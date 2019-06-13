@@ -5,7 +5,7 @@ namespace Fudge {
      *            4____7
      *           0/__3/|
      *            ||5_||6
-     *           1|/_2|/             
+     *           1|/_2|/ 
      * 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -34,15 +34,14 @@ namespace Fudge {
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
                 // front
-                /*0*/ -1, -1, -1, /*1*/ -1, 1, -1,  /*2*/ 1, 1, -1, /*3*/ 1, -1, -1,
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1,  /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
                 // back
-                /*4*/ -1, -1, 1, /* 5*/ -1, 1, 1,  /* 6*/ 1, 1, 1, /* 7*/ 1, -1, 1
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1,  /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1
             ]);
 
             // scale down to a length of 1 for all edges
-            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
+            
             return vertices;
         }
 
@@ -69,7 +68,7 @@ namespace Fudge {
                 // front
                 /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
                 // back
-                /*4*/ 3, 0, /*5*/ 3, 1,  /*6*/ 2, 1, /*7*/ 2, 0
+                /*4*/ 1, 0, /*5*/ 1, 1,  /*6*/ 0, 1, /*7*/ 0, 0
             ]);
             return textureUVs;
         }

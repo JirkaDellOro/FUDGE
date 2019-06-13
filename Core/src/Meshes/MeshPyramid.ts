@@ -4,8 +4,8 @@ namespace Fudge {
      * 
      *               4
      *              /\`.
-     *            3/__\_\ 2  
-     *           0/____\/1             
+     *            3/__\_\ 2
+     *           0/____\/1
      * 
      * 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -35,15 +35,13 @@ namespace Fudge {
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
                 // floor
-                /*0*/ -1, 0, -1, /*1*/ 1, 0, -1,  /*2*/ 1, 0, 1, /*3*/ -1, 0, 1,
+                /*0*/ -1, 0, 1, /*1*/ 1, 0, 1,  /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,
                 // tip
-                /*4*/ 0, -2, 0  // double height will be scaled down
+                /*4*/ 0, 2, 0  // double height will be scaled down
             ]);
 
             // scale down to a length of 1 for bottom edges and height
-            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
             return vertices;
         }
 
@@ -58,18 +56,17 @@ namespace Fudge {
                 // left
                 4, 3, 0,
                 // bottom
-                0, 3, 1, 3, 1, 2
+                0, 2, 1, 0, 3, 2
             ]);
             return indices;
         }
 
         protected createTextureUVs(): Float32Array {
-            // TODO: calculate using trigonometry
             let textureUVs: Float32Array = new Float32Array([
                 // front
-                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
+                /*0*/ 0, 1, /*1*/ 0.25, 1,  /*2*/ 0.5, 1, /*3*/ 0.75, 1,
                 // back
-                /*4*/ 3, 0
+                /*4*/ 0.5, 0
             ]);
             return textureUVs;
         }

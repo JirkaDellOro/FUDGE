@@ -32,12 +32,11 @@ namespace Fudge {
 
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
-                /*0*/ -1, -1, 0, /*1*/ -1, 1, 0,  /*2*/ 1, 1, 0, /*3*/ 1, -1, 0
+                /*0*/ -1, 1, 0, /*1*/ -1, -1, 0,  /*2*/ 1, -1, 0, /*3*/ 1, 1, 0
             ]);
 
-            for (let iVertex: number = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
+            
             return vertices;
         }
         protected createIndices(): Uint16Array {

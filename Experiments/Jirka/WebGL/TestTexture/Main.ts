@@ -15,6 +15,8 @@ namespace TestTextured {
         canvas.height = window.innerHeight;
 
         gl = utils.getGLContext(canvas);
+        // gl.enable(WebGL2RenderingContext.CULL_FACE);
+        // gl.frontFace(WebGL2RenderingContext.CW);
         gl.clearColor(0, 0, 0, 1);
 
         addProgram(tl.shader.vertexSimple, tl.shader.fragmentYellow);

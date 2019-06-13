@@ -9,31 +9,40 @@ namespace TextureTest {
         txtImage.image = img;
         let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
         coatTextured.texture = txtImage;
-        let coatColored: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-
-        let node: ƒ.Node = new ƒ.Node("Node");
-        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
+        // let coatColored: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
         let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
-        // let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderBasic, coatColored);
-        cmpMaterial.initialize(material);
-        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.setMesh(new ƒ.MeshQuad());
 
-        node.addComponent(cmpMaterial);
-        node.addComponent(cmpMesh);
-        node.addComponent(new ƒ.ComponentTransform());
-        node.cmpTransform.translateZ(2);
+        let quad: ƒ.Node = Scenes.createCompleteMeshNode("Quad", material, new ƒ.MeshQuad());
+        let cube: ƒ.Node = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
+        let pyramid: ƒ.Node = Scenes.createCompleteMeshNode("Pyramid", material, new ƒ.MeshPyramid());
+
+        cube.cmpTransform.translate(1, 0, 0);
+        // cube.cmpTransform.rotateX(-45);
+        cube.cmpTransform.rotateY(-45);
+
+        pyramid.cmpTransform.translate(-1, 0, 0);
+
+        let branch: ƒ.Node = new ƒ.Node("Branch");
+        branch.appendChild(quad);
+        branch.appendChild(cube);
+        branch.appendChild(pyramid);
 
         ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(node);
+        ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.recalculateAllNodeTransforms();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 0, 0), node.cmpTransform.position);
-        viewport.initialize("Viewport", node, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
 
         viewport.draw();
 
-        console.dir(node);
+        window.setInterval(function (): void {
+            pyramid.cmpTransform.rotateY(1);
+            cube.cmpTransform.rotateY(-1);
+            quad.cmpTransform.rotateZ(1);
+            ƒ.RenderManager.recalculateAllNodeTransforms();
+            viewport.draw(); 
+        },                 20);
     }
 }

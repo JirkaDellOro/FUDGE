@@ -172,6 +172,7 @@ var Fudge;
             // Enable backface- and zBuffer-culling.
             RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
             RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+            // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
         /**
@@ -2710,14 +2711,12 @@ var Fudge;
         createVertices() {
             let vertices = new Float32Array([
                 // front
-                /*0*/ -1, -1, -1, /*1*/ -1, 1, -1, /*2*/ 1, 1, -1, /*3*/ 1, -1, -1,
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1, /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
                 // back
-                /*4*/ -1, -1, 1, /* 5*/ -1, 1, 1, /* 6*/ 1, 1, 1, /* 7*/ 1, -1, 1
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1, /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1
             ]);
             // scale down to a length of 1 for all edges
-            for (let iVertex = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
             return vertices;
         }
         createIndices() {
@@ -2742,7 +2741,7 @@ var Fudge;
                 // front
                 /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
                 // back
-                /*4*/ 3, 0, /*5*/ 3, 1, /*6*/ 2, 1, /*7*/ 2, 0
+                /*4*/ 1, 0, /*5*/ 1, 1, /*6*/ 0, 1, /*7*/ 0, 0
             ]);
             return textureUVs;
         }
@@ -2784,14 +2783,12 @@ var Fudge;
         createVertices() {
             let vertices = new Float32Array([
                 // floor
-                /*0*/ -1, 0, -1, /*1*/ 1, 0, -1, /*2*/ 1, 0, 1, /*3*/ -1, 0, 1,
+                /*0*/ -1, 0, 1, /*1*/ 1, 0, 1, /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,
                 // tip
-                /*4*/ 0, -2, 0 // double height will be scaled down
+                /*4*/ 0, 2, 0 // double height will be scaled down
             ]);
             // scale down to a length of 1 for bottom edges and height
-            for (let iVertex = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
             return vertices;
         }
         createIndices() {
@@ -2805,17 +2802,16 @@ var Fudge;
                 // left
                 4, 3, 0,
                 // bottom
-                0, 3, 1, 3, 1, 2
+                0, 2, 1, 0, 3, 2
             ]);
             return indices;
         }
         createTextureUVs() {
-            // TODO: calculate using trigonometry
             let textureUVs = new Float32Array([
                 // front
-                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
+                /*0*/ 0, 1, /*1*/ 0.25, 1, /*2*/ 0.5, 1, /*3*/ 0.75, 1,
                 // back
-                /*4*/ 3, 0
+                /*4*/ 0.5, 0
             ]);
             return textureUVs;
         }
@@ -2854,11 +2850,9 @@ var Fudge;
         }
         createVertices() {
             let vertices = new Float32Array([
-                /*0*/ -1, -1, 0, /*1*/ -1, 1, 0, /*2*/ 1, 1, 0, /*3*/ 1, -1, 0
+                /*0*/ -1, 1, 0, /*1*/ -1, -1, 0, /*2*/ 1, -1, 0, /*3*/ 1, 1, 0
             ]);
-            for (let iVertex = 0; iVertex < vertices.length; iVertex++) {
-                vertices[iVertex] *= 1 / 2;
-            }
+            vertices = vertices.map(_value => _value / 2);
             return vertices;
         }
         createIndices() {
