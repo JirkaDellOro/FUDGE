@@ -7,12 +7,14 @@ namespace Fudge {
         offset: number; // Index of the element to begin with.
     }
     export interface RenderShader {
+        // TODO: examine, if this should be injected in shader class via RenderInjector, as done with Coat
         program: WebGLProgram;
         attributes: { [name: string]: number };
         uniforms: { [name: string]: WebGLUniformLocation };
     }
 
     export interface RenderBuffers {
+        // TODO: examine, if this should be injected in mesh class via RenderInjector, as done with Coat
         vertices: WebGLBuffer;
         indices: WebGLBuffer;
         nIndices: number;
@@ -138,6 +140,7 @@ namespace Fudge {
             let matrixLocation: WebGLUniformLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
 
+            // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
 
             // Draw call
@@ -240,18 +243,19 @@ namespace Fudge {
             return bufferInfo;
         }
         protected static useBuffers(_renderBuffers: RenderBuffers): void {
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+            // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
 
         }
-        protected static deleteBuffers(_bufferInfo: RenderBuffers): void {
-            if (_bufferInfo) {
+        protected static deleteBuffers(_renderBuffers: RenderBuffers): void {
+            if (_renderBuffers) {
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.textureUVs);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.vertices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.textureUVs);
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.indices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.indices);
             }
         }
         // #endregion
@@ -274,29 +278,6 @@ namespace Fudge {
                 // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
-        // #endregion
-
-
-        /*/*
-         * Wrapperclass that binds and initializes a texture.
-         * @param _textureSource A string containing the path to the texture.
-         */
-        // public static createTexture(_textureSource: string): void {
-        //     let texture: WebGLTexture = GLUtil.assert<WebGLTexture>(gl2.createTexture());
-        //     gl2.bindTexture(gl2.TEXTURE_2D, texture);
-        //     // Fill the texture with a 1x1 blue pixel.
-        //     gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, 1, 1, 0, gl2.RGBA, gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
-        //     // Asynchronously load an image
-        //     let image: HTMLImageElement = new Image();
-        //     image.crossOrigin = "anonymous";
-        //     image.src = _textureSource;
-        //     image.onload = function (): void {
-        //         gl2.bindTexture(gl2.TEXTURE_2D, texture);
-        //         gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, gl2.RGBA, gl2.UNSIGNED_BYTE, image);
-        //         gl2.generateMipmap(gl2.TEXTURE_2D);
-        //     };
-        // }
-
         // #endregion
     }
 }

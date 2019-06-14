@@ -4,5 +4,6 @@
     "name": "Fudge Core",
     "readme": "none",
     "excludePrivate": "true",
-    "excludeProtected": "true"
+    "excludeProtected": "true",
+    "ignoreCompilerErrors": "true"
 }

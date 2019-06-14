@@ -17,20 +17,20 @@ namespace Fudge {
             });
         }
 
-        private static injectRenderDataForCoatColored(this: Coat, _shaderInfo: RenderShader): void {
-            let colorUniformLocation: WebGLUniformLocation = _shaderInfo.uniforms["u_color"];
+        private static injectRenderDataForCoatColored(this: Coat, _renderShader: RenderShader): void {
+            let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_color"];
             let { r, g, b, a } = (<CoatColored>this).color;
             let color: Float32Array = new Float32Array([r, g, b, a]);
             RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
 
-        private static injectRenderDataForCoatTextured(this: Coat, _shaderInfo: RenderShader): void {
+        private static injectRenderDataForCoatTextured(this: Coat, _renderShader: RenderShader): void {
             let crc3: WebGLRenderingContext = RenderOperator.getRenderingContext();
             if (this.renderData) {
                 // buffers exist
                 crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
-                crc3.uniform1i(_shaderInfo.uniforms["u_texture"], 0);
+                crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
             }
             else {
                 this.renderData = {};
@@ -53,7 +53,7 @@ namespace Fudge {
                 this.renderData["texture0"] = texture;
 
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-                this.useRenderData(_shaderInfo);
+                this.useRenderData(_renderShader);
             }
         }
     }

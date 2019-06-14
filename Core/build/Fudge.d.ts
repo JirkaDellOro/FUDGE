@@ -155,7 +155,7 @@ declare namespace Fudge {
         protected static deleteProgram(_program: RenderShader): void;
         protected static createBuffers(_mesh: Mesh): RenderBuffers;
         protected static useBuffers(_renderBuffers: RenderBuffers): void;
-        protected static deleteBuffers(_bufferInfo: RenderBuffers): void;
+        protected static deleteBuffers(_renderBuffers: RenderBuffers): void;
         protected static createParameter(_coat: Coat): RenderCoat;
         protected static useParameter(_coatInfo: RenderCoat): void;
         protected static deleteParameter(_coatInfo: RenderCoat): void;
@@ -1259,11 +1259,11 @@ declare namespace Fudge {
      */
     class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs;
+        private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
-        private static parameters;
+        private static renderCoats;
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers;
+        private static renderBuffers;
         private static nodes;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary

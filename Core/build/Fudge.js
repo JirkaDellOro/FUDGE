@@ -104,19 +104,19 @@ var Fudge;
                 value: coatExtension
             });
         }
-        static injectRenderDataForCoatColored(_shaderInfo) {
-            let colorUniformLocation = _shaderInfo.uniforms["u_color"];
+        static injectRenderDataForCoatColored(_renderShader) {
+            let colorUniformLocation = _renderShader.uniforms["u_color"];
             let { r, g, b, a } = this.color;
             let color = new Float32Array([r, g, b, a]);
             Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
-        static injectRenderDataForCoatTextured(_shaderInfo) {
+        static injectRenderDataForCoatTextured(_renderShader) {
             let crc3 = Fudge.RenderOperator.getRenderingContext();
             if (this.renderData) {
                 // buffers exist
                 crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
-                crc3.uniform1i(_shaderInfo.uniforms["u_texture"], 0);
+                crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
             }
             else {
                 this.renderData = {};
@@ -135,7 +135,7 @@ var Fudge;
                 crc3.generateMipmap(crc3.TEXTURE_2D);
                 this.renderData["texture0"] = texture;
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-                this.useRenderData(_shaderInfo);
+                this.useRenderData(_renderShader);
             }
         }
     }
@@ -247,6 +247,7 @@ var Fudge;
             // Supply matrixdata to shader. 
             let matrixLocation = _renderShader.uniforms["u_matrix"];
             RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
             // Draw call
             // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
@@ -341,17 +342,18 @@ var Fudge;
             return bufferInfo;
         }
         static useBuffers(_renderBuffers) {
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+            // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
         }
-        static deleteBuffers(_bufferInfo) {
-            if (_bufferInfo) {
+        static deleteBuffers(_renderBuffers) {
+            if (_renderBuffers) {
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.vertices);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.textureUVs);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.vertices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.textureUVs);
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.indices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.indices);
             }
         }
         // #endregion
@@ -2916,11 +2918,11 @@ var Fudge;
             if (!cmpMaterial)
                 return;
             let shader = cmpMaterial.getMaterial().getShader();
-            this.createReference(this.programs, shader, this.createProgram);
+            this.createReference(this.renderShaders, shader, this.createProgram);
             let coat = cmpMaterial.getMaterial().getCoat();
-            this.createReference(this.parameters, coat, this.createParameter);
+            this.createReference(this.renderCoats, coat, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
-            this.createReference(this.buffers, mesh, this.createBuffers);
+            this.createReference(this.renderBuffers, mesh, this.createBuffers);
             let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
@@ -2948,9 +2950,9 @@ var Fudge;
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
-            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffers);
+            this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+            this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+            this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
             this.nodes.delete(_node);
         }
         /**
@@ -2974,20 +2976,20 @@ var Fudge;
             let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
             let shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
-                this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference(this.programs, shader, this.createProgram);
+                this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+                this.createReference(this.renderShaders, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
             let coat = cmpMaterial.getMaterial().getCoat();
             if (coat !== nodeReferences.coat) {
-                this.removeReference(this.parameters, nodeReferences.coat, this.deleteParameter);
-                this.createReference(this.parameters, coat, this.createParameter);
+                this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+                this.createReference(this.renderCoats, coat, this.createParameter);
                 nodeReferences.coat = coat;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffers);
-                this.createReference(this.buffers, mesh, this.createBuffers);
+                this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference(this.renderBuffers, mesh, this.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -3074,9 +3076,9 @@ var Fudge;
             let references = this.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
-            let bufferInfo = this.buffers.get(references.mesh).getReference();
-            let coatInfo = this.parameters.get(references.coat).getReference();
-            let shaderInfo = this.programs.get(references.shader).getReference();
+            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo = this.renderShaders.get(references.shader).getReference();
             this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
         }
         /**
@@ -3134,11 +3136,11 @@ var Fudge;
         }
     }
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-    RenderManager.programs = new Map();
+    RenderManager.renderShaders = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
-    RenderManager.parameters = new Map();
+    RenderManager.renderCoats = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
-    RenderManager.buffers = new Map();
+    RenderManager.renderBuffers = new Map();
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));

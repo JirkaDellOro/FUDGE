@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>MaterialInfo | Fudge Core</title>
+	<title>RenderBuffers | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.materialinfo.html">MaterialInfo</a>
+					<a href="fudge.renderbuffers.html">RenderBuffers</a>
 				</li>
 			</ul>
-			<h1>Interface MaterialInfo</h1>
+			<h1>Interface RenderBuffers</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">MaterialInfo</span>
+						<span class="target">RenderBuffers</span>
 					</li>
 				</ul>
 			</section>
@@ -84,8 +84,10 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.materialinfo.html#color" class="tsd-kind-icon">color</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.materialinfo.html#vao" class="tsd-kind-icon">vao</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.renderbuffers.html#indices" class="tsd-kind-icon">indices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.renderbuffers.html#nindices" class="tsd-kind-icon">n<wbr>Indices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.renderbuffers.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.renderbuffers.html#vertices" class="tsd-kind-icon">vertices</a></li>
 							</ul>
 						</section>
 					</div>
@@ -94,22 +96,42 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="color" class="tsd-anchor"></a>
-					<h3>color</h3>
-					<div class="tsd-signature tsd-kind-icon">color<span class="tsd-signature-symbol">:</span> <a href="../classes/fudge.color.html" class="tsd-signature-type">Color</a></div>
+					<a name="indices" class="tsd-anchor"></a>
+					<h3>indices</h3>
+					<div class="tsd-signature tsd-kind-icon">indices<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLBuffer</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6cc4d39/Core/src/Render/RenderOperator.ts#L24">Render/RenderOperator.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/195cdfe/Core/src/Render/RenderOperator.ts#L19">Render/RenderOperator.ts:19</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="vao" class="tsd-anchor"></a>
-					<h3>vao</h3>
-					<div class="tsd-signature tsd-kind-icon">vao<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLVertexArrayObject</span></div>
+					<a name="nindices" class="tsd-anchor"></a>
+					<h3>n<wbr>Indices</h3>
+					<div class="tsd-signature tsd-kind-icon">n<wbr>Indices<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6cc4d39/Core/src/Render/RenderOperator.ts#L23">Render/RenderOperator.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/195cdfe/Core/src/Render/RenderOperator.ts#L20">Render/RenderOperator.ts:20</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="textureuvs" class="tsd-anchor"></a>
+					<h3>textureUVs</h3>
+					<div class="tsd-signature tsd-kind-icon">textureUVs<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLBuffer</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/195cdfe/Core/src/Render/RenderOperator.ts#L21">Render/RenderOperator.ts:21</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="vertices" class="tsd-anchor"></a>
+					<h3>vertices</h3>
+					<div class="tsd-signature tsd-kind-icon">vertices<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLBuffer</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/195cdfe/Core/src/Render/RenderOperator.ts#L18">Render/RenderOperator.ts:18</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -131,13 +153,19 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudge.materialinfo.html" class="tsd-kind-icon">Material<wbr>Info</a>
+						<a href="fudge.renderbuffers.html" class="tsd-kind-icon">Render<wbr>Buffers</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="fudge.materialinfo.html#color" class="tsd-kind-icon">color</a>
+								<a href="fudge.renderbuffers.html#indices" class="tsd-kind-icon">indices</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="fudge.materialinfo.html#vao" class="tsd-kind-icon">vao</a>
+								<a href="fudge.renderbuffers.html#nindices" class="tsd-kind-icon">n<wbr>Indices</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="fudge.renderbuffers.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="fudge.renderbuffers.html#vertices" class="tsd-kind-icon">vertices</a>
 							</li>
 						</ul>
 					</li>
