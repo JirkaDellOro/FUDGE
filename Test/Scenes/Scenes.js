@@ -8,9 +8,9 @@ var Scenes;
         let coatRed = new ƒ.CoatColored(clrRed);
         let coatGreen = new ƒ.CoatColored(clrGreen);
         let coatBlue = new ƒ.CoatColored(clrBlue);
-        let mtrRed = new ƒ.Material("Red", ƒ.ShaderBasic, coatRed);
-        let mtrGreen = new ƒ.Material("Green", ƒ.ShaderBasic, coatGreen);
-        let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderBasic, coatBlue);
+        let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+        let mtrGreen = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
+        let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
         let meshCube = new ƒ.MeshCube();
         let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
@@ -35,14 +35,14 @@ var Scenes;
         createMiniScene();
         let child = Scenes.node.getChildren()[0];
         let grandchild;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
         ƒ.RenderManager.initialize();
-        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderBasic, new ƒ.CoatColored()), new ƒ.MeshCube());
+        Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.scaleX(2);
         Scenes.camera = createCamera();
@@ -61,7 +61,7 @@ var Scenes;
         Scenes.viewPort.showSceneGraph();
     }
     Scenes.createViewport = createViewport;
-    function createCamera(_translation = new ƒ.Vector3(10, 10, 50), _lookAt = new ƒ.Vector3()) {
+    function createCamera(_translation = new ƒ.Vector3(1, 1, 10), _lookAt = new ƒ.Vector3()) {
         let camera = new ƒ.Node("Camera");
         let cmpTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(_translation.x, _translation.y, _translation.z);

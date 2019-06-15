@@ -64,7 +64,7 @@ namespace Fudge {
         protected createTextureUVs(): Float32Array {
             let textureUVs: Float32Array = new Float32Array([
                 // front
-                /*0*/ 0, 1, /*1*/ 0.25, 1,  /*2*/ 0.5, 1, /*3*/ 0.75, 1,
+                /*0*/ 0, 1, /*1*/ 0.5, 1,  /*2*/ 1, 1, /*3*/ 0.5, 1,
                 // back
                 /*4*/ 0.5, 0
             ]);

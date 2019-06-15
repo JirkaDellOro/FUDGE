@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!-- Ported from the OpenGL Samples Pack: https://github.com/g-truc/ogl-samples/blob/master/tests/gl-330-query-occlusion.cpp -->
+<html lang="en">
+
+<head>
+    <title>WebGL 2 Samples - query_occlusion</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="info">WebGL 2 Samples - query_occlusion</div>
+    <p>&nbsp;</p>
+    <div id="samplesPassed"></div>
+
+    <script id="vs" type="x-shader/x-vertex">
+        #version 300 es
+        #define POSITION_LOCATION 0
+        
+        precision highp float;
+        precision highp int;
+
+        layout(location = POSITION_LOCATION) in vec3 pos;
+
+        void main()
+        {
+            gl_Position = vec4(pos, 1.0);
+        }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        #version 300 es
+        precision highp float;
+        precision highp int;
+
+        out vec4 color;
+
+        void main()
+        {
+            color = vec4(1.0, 0.5, 0.0, 1.0);
+        }
+    </script>
+
+    <script src="utility.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // -- Init Canvas
+        var canvas = document.createElement('canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        document.body.appendChild(canvas);
+
+        // -- Init WebGL Context
+        var gl = canvas.getContext('webgl2', { antialias: false });
+        var isWebGL2 = !!gl;
+        if(!isWebGL2) {
+            document.getElementById('info').innerHTML = 'WebGL 2 is not available.  See <a href="https://www.khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">How to get a WebGL 2 implementation</a>';
+            return;
+        }
+
+        // -- Init Program
+        var program = createProgram(gl, getShaderSource('vs'), getShaderSource('fs'));
+        gl.useProgram(program);
+        gl.enable(gl.DEPTH_TEST);
+
+        // -- Init Buffer
+        var vertices = new Float32Array([
+            -0.3, -0.5, 0.0,
+             0.3, -0.5, 0.0,
+             0.0,  0.5, 0.0,
+
+             -0.3, -0.5, 0.5,
+             0.3, -0.5, 0.5,
+             0.0,  0.5, 0.5
+        ]);
+        var vertexPosBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        // -- Init Vertex Array
+        var vertexArray = gl.createVertexArray();
+        gl.bindVertexArray(vertexArray);
+
+        var vertexPosLocation = 0; // set with GLSL layout qualifier
+        gl.enableVertexAttribArray(vertexPosLocation);
+        gl.vertexAttribPointer(vertexPosLocation, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindVertexArray(null);
+
+        // -- Init Query
+        var query = gl.createQuery();
+
+        // -- Render
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BITS);
+
+        gl.bindVertexArray(vertexArray);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        gl.beginQuery(gl.ANY_SAMPLES_PASSED, query);
+        gl.drawArrays(gl.TRIANGLES, 3, 3);
+        gl.endQuery(gl.ANY_SAMPLES_PASSED);
+
+        (function tick() {
+            if (!gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE)) {
+                // A query's result is never available in the same frame
+                // the query was issued.  Try in the next frame.
+                requestAnimationFrame(tick);
+                return;
+            }
+
+            var samplesPassed = gl.getQueryParameter(query, gl.QUERY_RESULT);
+            document.getElementById('samplesPassed').innerHTML = 'Any samples passed: ' + Number(samplesPassed);
+            gl.deleteQuery(query);
+        })();
+
+        // -- Delete WebGL resources
+        gl.deleteBuffer(vertexPosBuffer);
+        gl.deleteProgram(program);
+        gl.deleteVertexArray(vertexArray);
+    })();
+    </script>
+    <div id="highlightedLines"  style="display: none">#L94-L119</div>
+</body>
+</html>

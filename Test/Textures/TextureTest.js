@@ -29,7 +29,7 @@ var TextureTest;
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         viewport.draw();
         window.setInterval(function () {
-            pyramid.cmpTransform.rotateY(1);
+            pyramid.cmpTransform.rotateX(1);
             cube.cmpTransform.rotateY(-1);
             quad.cmpTransform.rotateZ(1);
             ƒ.RenderManager.recalculateAllNodeTransforms();

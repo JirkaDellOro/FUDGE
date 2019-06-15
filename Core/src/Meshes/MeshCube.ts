@@ -33,6 +33,12 @@ namespace Fudge {
 
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
+                // First wrap
+                // front
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1,  /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
+                // back
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1,  /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1,
+                // Second wrap
                 // front
                 /*0*/ -1, 1, 1, /*1*/ -1, -1, 1,  /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
                 // back
@@ -41,34 +47,53 @@ namespace Fudge {
 
             // scale down to a length of 1 for all edges
             vertices = vertices.map(_value => _value / 2);
-            
+
             return vertices;
         }
 
         protected createIndices(): Uint16Array {
             let indices: Uint16Array = new Uint16Array([
+                // First wrap
                 // front
                 0, 1, 2, 0, 2, 3,
                 // right
                 3, 2, 6, 3, 6, 7,
                 // back
                 7, 6, 5, 7, 5, 4,
+
+                // Second wrap
+                // left
+                4 + 8, 5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8,
+                // top
+                4 + 8, 0 + 8, 3 + 8, 4 + 8, 3 + 8, 7 + 8,
+                // bottom
+                1 + 8, 5 + 8, 6 + 8, 1 + 8, 6 + 8, 2 + 8
+
+                /*,
                 // left
                 4, 5, 1, 4, 1, 0,
                 // top
                 4, 0, 3, 4, 3, 7,
                 // bottom
                 1, 5, 6, 1, 6, 2
+                */
             ]);
             return indices;
         }
 
         protected createTextureUVs(): Float32Array {
             let textureUVs: Float32Array = new Float32Array([
+                // First wrap
                 // front
                 /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
                 // back
-                /*4*/ 1, 0, /*5*/ 1, 1,  /*6*/ 0, 1, /*7*/ 0, 0
+                /*4*/ 3, 0, /*5*/ 3, 1,  /*6*/ 2, 1, /*7*/ 2, 0,
+
+                // Second wrap
+                // front
+                /*0*/ 1, 0, /*1*/ 1, 1,  /*2*/ 1, 2, /*3*/ 1, -1,
+                // back
+                /*4*/ 0, 0, /*5*/ 0, 1,  /*6*/ 0, 2, /*7*/ 0, -1
             ]);
             return textureUVs;
         }

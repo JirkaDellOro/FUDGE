@@ -1346,10 +1346,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Single color shading
+     * Textured shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderBasic extends Shader {
+    class ShaderTexture extends Shader {
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -1357,10 +1357,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Textured shading
+     * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderTexture extends Shader {
+    class ShaderUniColor extends Shader {
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

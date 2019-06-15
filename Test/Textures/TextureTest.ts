@@ -38,7 +38,7 @@ namespace TextureTest {
         viewport.draw();
 
         window.setInterval(function (): void {
-            pyramid.cmpTransform.rotateY(1);
+            pyramid.cmpTransform.rotateX(1);
             cube.cmpTransform.rotateY(-1);
             quad.cmpTransform.rotateZ(1);
             ƒ.RenderManager.recalculateAllNodeTransforms();
