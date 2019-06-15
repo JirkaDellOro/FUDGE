@@ -23,10 +23,10 @@ namespace Fudge {
                     precision mediump float;
                     
                     uniform vec4 u_color;
-                    out vec4 outColor;
+                    out vec4 frag;
                     
                     void main() {
-                       outColor = u_color;
+                       frag = u_color;
                     }`;
         }
     }

@@ -28,10 +28,10 @@ namespace Fudge {
                 
                 in vec2 v_textureUVs;
                 uniform sampler2D u_texture;
-                out vec4 outColor;
+                out vec4 frag;
                 
                 void main() {
-                    outColor = texture(u_texture, v_textureUVs);// * v_color;
+                    frag = texture(u_texture, v_textureUVs);
             }`;
         }
     }

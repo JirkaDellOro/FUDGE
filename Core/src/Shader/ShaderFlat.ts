@@ -15,27 +15,26 @@ namespace Fudge {
                     in vec3 a_normal;
                     uniform mat4 u_world;
                     uniform mat4 u_projection;
-                    flat out vec3 v_normal;
+                    flat out vec4 v_color;
                     
                     void main() {   
                         gl_Position = u_projection * vec4(a_position, 1.0);
-                       // u_world;
-                        v_normal = mat3(u_world) * a_normal;
+                        vec3 normal = mat3(u_world) * a_normal;
+
+                        vec3 light = vec3(0,1,0);
+                        float illumination = dot(normal, light);
+                        v_color = illumination * vec4(1,1,1,1);
                     }`;
         }
         public static getFragmentShaderSource(): string {
             return `#version 300 es
                     precision mediump float;
 
-                    flat in vec3 v_normal;
-                    uniform vec4 u_color;
-                    out vec4 outColor;
+                    flat in vec4 v_color;
+                    out vec4 frag;
                     
                     void main() {
-                        vec3 light = vec3(0,1,0);
-                        vec3 normal = normalize(v_normal);
-                        float illumination = dot(normal, light);
-                        outColor = illumination * vec4(1,1,1,1);
+                        frag = v_color;
                     }`;
         }
     }
