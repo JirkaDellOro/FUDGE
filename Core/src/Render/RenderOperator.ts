@@ -19,6 +19,7 @@ namespace Fudge {
         indices: WebGLBuffer;
         nIndices: number;
         textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
     }
 
     export interface RenderCoat {
@@ -120,7 +121,7 @@ namespace Fudge {
          * @param _renderCoat 
          * @param _projection 
          */
-        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _projection: Matrix4x4): void {
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void {
             RenderOperator.useProgram(_renderShader);
             // RenderOperator.useBuffers(_renderBuffers);
             // RenderOperator.useParameter(_renderCoat);
@@ -137,9 +138,17 @@ namespace Fudge {
                 RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
             }
             // Supply matrixdata to shader. 
-            let matrixLocation: WebGLUniformLocation = _renderShader.uniforms["u_matrix"];
-            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            let uProjection: WebGLUniformLocation = _renderShader.uniforms["u_projection"];
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
 
+            if (_renderShader.uniforms["u_world"]) {
+                let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
+                RenderOperator.attributePointer(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
+            }
             // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
 
@@ -151,20 +160,26 @@ namespace Fudge {
         // #region Shaderprogram 
         protected static createProgram(_shaderClass: typeof Shader): RenderShader {
             let crc3: WebGL2RenderingContext = RenderOperator.crc3;
-            let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
+            let program: WebGLProgram = crc3.createProgram();
+            let renderShader: RenderShader;
+            try {
+                crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+                crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+                crc3.linkProgram(program);
+                let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(program));
+                if (error !== "") {
+                    throw new Error("Error linking Shader: " + error);
+                }
+                renderShader = {
+                    program: program,
+                    attributes: detectAttributes(),
+                    uniforms: detectUniforms()
+                };
+            } catch (_error) {
+                Debug.error(_error);
+                debugger;
             }
-            let program: RenderShader = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
+            return renderShader;
 
 
             function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
@@ -184,25 +199,25 @@ namespace Fudge {
             }
             function detectAttributes(): { [name: string]: number } {
                 let detectedAttributes: { [name: string]: number } = {};
-                let attributeCount: number = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
+                let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
                 for (let i: number = 0; i < attributeCount; i++) {
-                    let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
                     if (!attributeInfo) {
                         break;
                     }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
                 }
                 return detectedAttributes;
             }
             function detectUniforms(): { [name: string]: WebGLUniformLocation } {
                 let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
-                let uniformCount: number = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+                let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
                 for (let i: number = 0; i < uniformCount; i++) {
-                    let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
+                    let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
                 }
                 return detectedUniforms;
             }
@@ -234,11 +249,16 @@ namespace Fudge {
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
             RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
 
+            let normalsFace: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
+
             let bufferInfo: RenderBuffers = {
                 vertices: vertices,
                 indices: indices,
                 nIndices: _mesh.getIndexCount(),
-                textureUVs: textureUVs
+                textureUVs: textureUVs,
+                normalsFace: normalsFace
             };
             return bufferInfo;
         }

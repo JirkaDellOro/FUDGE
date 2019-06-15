@@ -89,6 +89,7 @@ declare namespace Fudge {
         indices: WebGLBuffer;
         nIndices: number;
         textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
     }
     interface RenderCoat {
         vao: WebGLVertexArrayObject;
@@ -149,7 +150,7 @@ declare namespace Fudge {
          * @param _renderCoat
          * @param _projection
          */
-        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _projection: Matrix4x4): void;
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -1177,6 +1178,7 @@ declare namespace Fudge {
         vertices: Float32Array;
         indices: Uint16Array;
         textureUVs: Float32Array;
+        normalsFace: Float32Array;
         static getBufferSpecification(): BufferSpecification;
         getVertexCount(): number;
         getIndexCount(): number;
@@ -1186,6 +1188,7 @@ declare namespace Fudge {
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
+        protected abstract createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -1207,6 +1210,7 @@ declare namespace Fudge {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -1229,6 +1233,7 @@ declare namespace Fudge {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -1249,6 +1254,7 @@ declare namespace Fudge {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -1309,7 +1315,7 @@ declare namespace Fudge {
          * @param _world
          */
         static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
-        static drawNode(_node: Node, _projection: Matrix4x4): void;
+        static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
@@ -1339,6 +1345,17 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Single color shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderFlat extends Shader {
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

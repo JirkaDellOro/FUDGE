@@ -233,7 +233,7 @@ namespace Fudge {
             // multiply camera matrix
             let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
-            this.drawNode(_node, projection);
+            this.drawNode(_node, finalTransform, projection);
 
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
@@ -242,7 +242,7 @@ namespace Fudge {
         }
 
         // TODO switch back to private
-        public static drawNode(_node: Node, _projection: Matrix4x4): void {
+        public static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
             let references: NodeReferences = this.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
@@ -250,7 +250,7 @@ namespace Fudge {
             let bufferInfo: RenderBuffers = this.renderBuffers.get(references.mesh).getReference();
             let coatInfo: RenderCoat = this.renderCoats.get(references.coat).getReference();
             let shaderInfo: RenderShader = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
 
         /**

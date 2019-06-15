@@ -54,5 +54,6 @@ namespace Fudge {
             return textureUVs;
         }
 
+        protected createFaceNormals(): Float32Array { return null; }
     }
 }

@@ -231,7 +231,7 @@ var Fudge;
          * @param _renderCoat
          * @param _projection
          */
-        static draw(_renderShader, _renderBuffers, _renderCoat, _projection) {
+        static draw(_renderShader, _renderBuffers, _renderCoat, _world, _projection) {
             RenderOperator.useProgram(_renderShader);
             // RenderOperator.useBuffers(_renderBuffers);
             // RenderOperator.useParameter(_renderCoat);
@@ -245,8 +245,15 @@ var Fudge;
                 RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
             }
             // Supply matrixdata to shader. 
-            let matrixLocation = _renderShader.uniforms["u_matrix"];
-            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            let uProjection = _renderShader.uniforms["u_projection"];
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
+            if (_renderShader.uniforms["u_world"]) {
+                let uWorld = _renderShader.uniforms["u_world"];
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
+                RenderOperator.attributePointer(_renderShader.attributes["a_normal"], Fudge.Mesh.getBufferSpecification());
+            }
             // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
             // Draw call
@@ -256,20 +263,27 @@ var Fudge;
         // #region Shaderprogram 
         static createProgram(_shaderClass) {
             let crc3 = RenderOperator.crc3;
-            let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
+            let program = crc3.createProgram();
+            let renderShader;
+            try {
+                crc3.attachShader(program, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+                crc3.attachShader(program, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+                crc3.linkProgram(program);
+                let error = RenderOperator.assert(crc3.getProgramInfoLog(program));
+                if (error !== "") {
+                    throw new Error("Error linking Shader: " + error);
+                }
+                renderShader = {
+                    program: program,
+                    attributes: detectAttributes(),
+                    uniforms: detectUniforms()
+                };
             }
-            let program = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
+            catch (_error) {
+                Fudge.Debug.error(_error);
+                debugger;
+            }
+            return renderShader;
             function compileShader(_shaderCode, _shaderType) {
                 let webGLShader = crc3.createShader(_shaderType);
                 crc3.shaderSource(webGLShader, _shaderCode);
@@ -287,25 +301,25 @@ var Fudge;
             }
             function detectAttributes() {
                 let detectedAttributes = {};
-                let attributeCount = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
+                let attributeCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
                 for (let i = 0; i < attributeCount; i++) {
-                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(program, i));
                     if (!attributeInfo) {
                         break;
                     }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
                 }
                 return detectedAttributes;
             }
             function detectUniforms() {
                 let detectedUniforms = {};
-                let uniformCount = crc3.getProgramParameter(shaderProgram, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+                let uniformCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
                 for (let i = 0; i < uniformCount; i++) {
-                    let info = RenderOperator.assert(crc3.getActiveUniform(shaderProgram, i));
+                    let info = RenderOperator.assert(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(program, info.name));
                 }
                 return detectedUniforms;
             }
@@ -333,11 +347,15 @@ var Fudge;
             let textureUVs = RenderOperator.crc3.createBuffer();
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
             RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
+            let normalsFace = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
             let bufferInfo = {
                 vertices: vertices,
                 indices: indices,
                 nIndices: _mesh.getIndexCount(),
-                textureUVs: textureUVs
+                textureUVs: textureUVs,
+                normalsFace: normalsFace
             };
             return bufferInfo;
         }
@@ -2700,6 +2718,7 @@ var Fudge;
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
         serialize() {
             let serialization = {};
@@ -2731,18 +2750,18 @@ var Fudge;
             let indices = new Uint16Array([
                 // First wrap
                 // front
-                0, 1, 2, 0, 2, 3,
+                1, 2, 0, 2, 3, 0,
                 // right
-                3, 2, 6, 3, 6, 7,
+                2, 6, 3, 6, 7, 3,
                 // back
-                7, 6, 5, 7, 5, 4,
+                6, 5, 7, 5, 4, 7,
                 // Second wrap
                 // left
-                4 + 8, 5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8,
+                5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8, 4 + 8,
                 // top
-                4 + 8, 0 + 8, 3 + 8, 4 + 8, 3 + 8, 7 + 8,
+                4 + 8, 0 + 8, 3 + 8, 7 + 8, 4 + 8, 3 + 8,
                 // bottom
-                1 + 8, 5 + 8, 6 + 8, 1 + 8, 6 + 8, 2 + 8
+                5 + 8, 6 + 8, 1 + 8, 6 + 8, 2 + 8, 1 + 8
                 /*,
                 // left
                 4, 5, 1, 4, 1, 0,
@@ -2768,6 +2787,23 @@ var Fudge;
                 /*4*/ 0, 0, /*5*/ 0, 1, /*6*/ 0, 2, /*7*/ 0, -1
             ]);
             return textureUVs;
+        }
+        createFaceNormals() {
+            let normals = new Float32Array([
+                // for each triangle, the last vertex of the three defining refers to the normalvector when using flat shading
+                // First wrap
+                // front
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 1, 0, 0,
+                // back
+                /*4*/ 0, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, -1,
+                // Second wrap
+                // front
+                /*0*/ 0, 0, 0, /*1*/ 0, -1, 0, /*2*/ 0, 0, 0, /*3*/ 0, 1, 0,
+                // back
+                /*4*/ -1, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, 0
+            ]);
+            //normals = this.createVertices();
+            return normals;
         }
     }
     Fudge.MeshCube = MeshCube;
@@ -2839,6 +2875,7 @@ var Fudge;
             ]);
             return textureUVs;
         }
+        createFaceNormals() { return null; }
     }
     Fudge.MeshPyramid = MeshPyramid;
 })(Fudge || (Fudge = {}));
@@ -2892,6 +2929,7 @@ var Fudge;
             ]);
             return textureUVs;
         }
+        createFaceNormals() { return null; }
     }
     Fudge.MeshQuad = MeshQuad;
 })(Fudge || (Fudge = {}));
@@ -3087,21 +3125,21 @@ var Fudge;
                 finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
             // multiply camera matrix
             let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
-            this.drawNode(_node, projection);
+            this.drawNode(_node, finalTransform, projection);
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera, world);
             }
         }
         // TODO switch back to private
-        static drawNode(_node, _projection) {
+        static drawNode(_node, _finalTransform, _projection) {
             let references = this.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
             let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
             let coatInfo = this.renderCoats.get(references.coat).getReference();
             let shaderInfo = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _projection);
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -3174,6 +3212,7 @@ var Fudge;
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    // TODO: define attribute/uniforms as layout and use those consistently in shaders
     class Shader {
         // The type of coat that can be used with this shader to create a material
         static getCoat() { return null; }
@@ -3181,6 +3220,49 @@ var Fudge;
         static getFragmentShaderSource() { return null; }
     }
     Fudge.Shader = Shader;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Single color shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderFlat extends Fudge.Shader {
+        static getCoat() {
+            return Fudge.CoatColored;
+        }
+        static getVertexShaderSource() {
+            return `#version 300 es
+
+                    in vec3 a_position;
+                    in vec3 a_normal;
+                    uniform mat4 u_world;
+                    uniform mat4 u_projection;
+                    flat out vec3 v_normal;
+                    
+                    void main() {   
+                        gl_Position = u_projection * vec4(a_position, 1.0);
+                       // u_world;
+                        v_normal = mat3(u_world) * a_normal;
+                    }`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+                    precision mediump float;
+
+                    flat in vec3 v_normal;
+                    uniform vec4 u_color;
+                    out vec4 outColor;
+                    
+                    void main() {
+                        vec3 light = vec3(0,1,0);
+                        vec3 normal = normalize(v_normal);
+                        float illumination = dot(normal, light);
+                        outColor = illumination * vec4(1,1,1,1);
+                    }`;
+        }
+    }
+    Fudge.ShaderFlat = ShaderFlat;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -3194,32 +3276,24 @@ var Fudge;
         }
         static getVertexShaderSource() {
             return `#version 300 es
-                in vec4 a_position;
-                in vec2 a_textureUVs;
 
-                uniform mat4 u_matrix;
+                in vec3 a_position;
+                in vec2 a_textureUVs;
+                uniform mat4 u_projection;
                 uniform vec4 u_color;
-                
-                // out vec4 v_color;
                 out vec2 v_textureUVs;
 
                 void main() {  
-
-                vec4 position = u_matrix * a_position;
-                    
-                    gl_Position = u_matrix * a_position;
-                    // v_color = u_color;
+                    gl_Position = u_projection * vec4(a_position, 1.0);
                     v_textureUVs = a_textureUVs;
-            }`;
+                }`;
         }
         static getFragmentShaderSource() {
             return `#version 300 es
                 precision mediump float;
                 
                 in vec2 v_textureUVs;
-            
                 uniform sampler2D u_texture;
-
                 out vec4 outColor;
                 
                 void main() {
@@ -3241,13 +3315,12 @@ var Fudge;
         }
         static getVertexShaderSource() {
             return `#version 300 es
-                    in vec4 a_position;
-                    
-                    uniform mat4 u_matrix;
+
+                    in vec3 a_position;
+                    uniform mat4 u_projection;
                     
                     void main() {   
-                        vec4 position = u_matrix * a_position;
-                        gl_Position = u_matrix * a_position;
+                        gl_Position = u_projection * vec4(a_position, 1.0);
                     }`;
         }
         static getFragmentShaderSource() {
@@ -3255,7 +3328,6 @@ var Fudge;
                     precision mediump float;
                     
                     uniform vec4 u_color;
-                    
                     out vec4 outColor;
                     
                     void main() {

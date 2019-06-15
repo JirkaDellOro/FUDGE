@@ -37,6 +37,7 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshQuad.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderManager.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/Shader.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderFlat.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderTexture.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderUniColor.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Texture/Texture.ts"
@@ -57,7 +58,7 @@
         },
         {
           "pos": 593,
-          "end": 142098,
+          "end": 145514,
           "kind": "text"
         }
       ],
@@ -94,7 +95,7 @@
         },
         {
           "pos": 34,
-          "end": 57261,
+          "end": 57945,
           "kind": "text"
         }
       ]

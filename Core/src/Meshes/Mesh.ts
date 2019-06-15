@@ -10,6 +10,7 @@ namespace Fudge {
         public vertices: Float32Array;
         public indices: Uint16Array;
         public textureUVs: Float32Array;
+        public normalsFace: Float32Array;
 
         public static getBufferSpecification(): BufferSpecification {
             return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
@@ -28,6 +29,6 @@ namespace Fudge {
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
-
+        protected abstract createFaceNormals(): Float32Array;
     }
 }
