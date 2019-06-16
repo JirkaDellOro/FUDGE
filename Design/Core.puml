@@ -322,6 +322,18 @@ package Fudge <<Rectangle>> {
     }
   }
 
+  package "Lights" << Folder>> {
+    abstract class Light extends Mutable {
+      + color: Color
+    }
+    class LightAmbient extends Light {
+    }
+    class LightDirectional extends Light {
+    }
+    class LightPoint extends Light {
+    }
+  }
+
   'Interface consumption
   Mesh --() Serializable
   Component --() Serializable
@@ -332,55 +344,44 @@ package Fudge <<Rectangle>> {
   Mutable -(0- Mutator
   Mutable -(0- MutatorAttributeTypes
   Node "1" -0)- "2" MapEventTypeToListener
+  Framing -0)- Rectangle
+  FramingComplex "1" -0)- "2" Border
+  Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
+  MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
 
   'Associations, Compositions, Aggregations
-  Node "0..1 parent" o-left- "n children" Node
+  Node "0..1 parent" o-- "n children" Node
   Node "1 container" o-- "n components" Component
 
-  ComponentMesh "n" --> "1" Mesh : refers >
-  ComponentPivot -->"1" Matrix4x4
-  ComponentTransform -->"1" Matrix4x4
-  ComponentMaterial "n" --> "1" Material : refers >
+  ComponentMesh "n" ---> "1" Mesh : refers >
+  ComponentPivot --->"1" Matrix4x4
+  ComponentTransform --->"1" Matrix4x4
+  ComponentMaterial "n" ---> "1" Material : refers >
 
   Material "n"--->"1" Shader : references >
   Material "n"--->"1" Coat : references >
   Shader "n"--->"1" Coat : references >
+  CoatTextured "n" ---> Texture : references >
 
-  Viewport -->"1 root" Node : displays >
-  Viewport -->"1 camera" ComponentCamera : look through >
-  Viewport "n" --> "1" CanvasRenderingContext2D : renders >
-  Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
-  Viewport "1" -> "4" Framing : uses >
+  Viewport --->"1 root" Node : displays >
+  Viewport --->"1 camera" ComponentCamera : look through >
+  Viewport "n" ---> "1" CanvasRenderingContext2D : renders >
+  Viewport "n" ---> "1" RenderManager : feeds data and retrieves image >
+  Viewport "1" ---> "4" Framing : uses >
 
-  RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
+  RenderManager "1" ---> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
   RenderManager "1" o--> "n" NodeReferences : keeps >
   RenderManager "1" o--> "n" Reference : keeps >
   RenderInjector -(0- CoatInjection : provides >
   RenderInjector --- Coat : decorates >
 
-  Reference "1" --> "1" RenderShader : shader uses >
-  Reference "1" --> "1" RenderBuffers : mesh uses >
-  Reference "1" --> "1" RenderCoat : material uses >
+  Reference "1" ---> "1" RenderShader : shader uses >
+  Reference "1" ---> "1" RenderBuffers : mesh uses >
+  Reference "1" ---> "1" RenderCoat : material uses >
 
-  Mesh --> BufferSpecification : provides >
-
-  Framing -0)- Rectangle
-  FramingComplex "1" -0)- "2" Border
-
-  Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
-  MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
+  Mesh ---> BufferSpecification : provides >
 
   'improve layout
   Node -[hidden]right- Component
-  'Node -[hidden]up- Mutable
-  'Node -[hidden]- Serializable
-  'Component -[hidden]- Serializable
-  'Serializer --[hidden]-- Mutable
-  'Mutable --[hidden]-- Component
-  'Viewport -[hidden]- ComponentCamera
-  'Engine -[hidden]- Meshes
-  'Engine -[hidden]- Browser
-  'Loop -[hidden]- Material
-  'Meshes --[hidden]up-- Shader
-  'EventTarget -[hidden] EventTargetStatic
+  CoatTextured "n" -[hidden]up-> Texture
   @enduml
