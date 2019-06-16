@@ -1,4 +1,4 @@
-///<reference path="../Coat/Coat.ts"/>
+//<reference path="../Coats/Coat.ts"/>
 namespace Fudge {
     type CoatInjection = (this: Coat, _shaderInfo: RenderShader) => void;
     export class RenderInjector {

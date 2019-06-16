@@ -5,7 +5,7 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Transfer/Mutable.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderInjector.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderOperator.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Coat/Coat.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Coats/Coat.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Transfer/Serializer.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/Component.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentCamera.ts",
@@ -36,11 +36,11 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshPyramid.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Meshes/MeshQuad.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Render/RenderManager.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/Shader.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderFlat.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderTexture.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shader/ShaderUniColor.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Texture/Texture.ts"
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shaders/Shader.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shaders/ShaderFlat.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shaders/ShaderTexture.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Shaders/ShaderUniColor.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Textures/Texture.ts"
     ],
     "js": {
       "sections": [
@@ -58,7 +58,7 @@
         },
         {
           "pos": 593,
-          "end": 145385,
+          "end": 145387,
           "kind": "text"
         }
       ],

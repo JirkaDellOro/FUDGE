@@ -90,9 +90,9 @@ var Fudge;
     }
     Fudge.Mutable = Mutable;
 })(Fudge || (Fudge = {}));
-///<reference path="../Coat/Coat.ts"/>
+//<reference path="../Coats/Coat.ts"/>
 var Fudge;
-///<reference path="../Coat/Coat.ts"/>
+//<reference path="../Coats/Coat.ts"/>
 (function (Fudge) {
     class RenderInjector {
         static decorateCoat(_constructor) {
@@ -3204,9 +3204,9 @@ var Fudge;
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
-/// <reference path="../Coat/Coat.ts"/>
+/// <reference path="../Coats/Coat.ts"/>
 var Fudge;
-/// <reference path="../Coat/Coat.ts"/>
+/// <reference path="../Coats/Coat.ts"/>
 (function (Fudge) {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
