@@ -24,6 +24,11 @@ declare namespace Fudge {
      */
     abstract class Mutable extends EventTarget {
         /**
+         * Retrieves the type of this mutable subclass as the name of the runtime class
+         * @returns The type of the mutable
+         */
+        readonly type: string;
+        /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
         getMutator(): Mutator;
@@ -181,13 +186,6 @@ declare namespace Fudge {
         tilingY: number;
         repetition: boolean;
     }
-    /**
-     * Adds and enables a Texture passed to this material.
-     * @param _textureSource A string holding the path to the location of the texture.
-     */
-    /**
-     * Removes and disables a texture that was added to this material.
-     */
 }
 declare namespace Fudge {
     type General = any;
@@ -224,11 +222,6 @@ declare namespace Fudge {
         private active;
         activate(_on: boolean): void;
         readonly isActive: boolean;
-        /**
-         * Retrieves the type of this components subclass as the name of the runtime class
-         * @returns The type of the component
-         */
-        readonly type: string;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
@@ -302,6 +295,17 @@ declare namespace Fudge {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Attaches a light to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentLight extends Component {
+        private light;
+        constructor(_light?: Light);
+        getLight(): Light;
     }
 }
 declare namespace Fudge {
@@ -770,6 +774,58 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Light extends Mutable {
+        color: Color;
+        protected reduceMutator(): void;
+    }
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```text
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+    }
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```text
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        direction: Vector3;
+    }
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```text
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        range: number;
+    }
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```text
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+}
+declare namespace Fudge {
+    type MapLightTypeToLightList = Map<string, ComponentLight[]>;
+    /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of [[Framing]] objects. The stages involved are in order of rendering
@@ -780,7 +836,6 @@ declare namespace Fudge {
         private static focus;
         name: string;
         camera: ComponentCamera;
-        branch: Node;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -789,6 +844,8 @@ declare namespace Fudge {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
+        lights: MapLightTypeToLightList;
+        private branch;
         private crc2;
         private canvas;
         /**
@@ -809,6 +866,10 @@ declare namespace Fudge {
          * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
          */
         getClientRectangle(): Rectangle;
+        /**
+         * Set the branch to be drawn in the viewport.
+         */
+        setBranch(_branch: Node): void;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -882,62 +943,12 @@ declare namespace Fudge {
          */
         private hndWheelEvent;
         private activateEvent;
+        private hndComponentEvent;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Baseclass for different kinds of lights.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class Light extends Mutable {
-        color: Color;
-        protected reduceMutator(): void;
-    }
-    /**
-     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```text
-     * ~ ~ ~
-     *  ~ ~ ~
-     * ```
-     */
-    class LightAmbient extends Light {
-    }
-    /**
-     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```text
-     * --->
-     * --->
-     * --->
-     * ```
-     */
-    class LightDirectional extends Light {
-        direction: Vector3;
-    }
-    /**
-     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```text
-     *         .\|/.
-     *        -- o --
-     *         ´/|\`
-     * ```
-     */
-    class LightPoint extends Light {
-        range: number;
-    }
-    /**
-     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```text
-     *          o
-     *         /|\
-     *        / | \
-     * ```
-     */
-    class LightSpot extends Light {
     }
 }
 declare namespace Fudge {

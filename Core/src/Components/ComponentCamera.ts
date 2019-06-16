@@ -92,7 +92,7 @@ namespace Fudge {
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
@@ -104,7 +104,7 @@ namespace Fudge {
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters

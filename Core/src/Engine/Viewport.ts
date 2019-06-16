@@ -1,4 +1,7 @@
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
 namespace Fudge {
+    type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -11,7 +14,6 @@ namespace Fudge {
 
         public name: string = "Viewport"; // The name to call this viewport by.
         public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
-        public branch: Node = null; // The first node in the tree(branch) that will be rendered.
 
         public rectSource: Rectangle;
         public rectDestination: Rectangle;
@@ -27,10 +29,11 @@ namespace Fudge {
         public adjustingFrames: boolean = true;
         public adjustingCamera: boolean = true;
 
+        public lights: MapLightTypeToLightList = null;
+
+        private branch: Node = null; // The first node in the tree(branch) that will be rendered.
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
-
-
 
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
@@ -39,13 +42,14 @@ namespace Fudge {
          */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
-            this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
 
             this.rectSource = RenderManager.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
+
+            this.setBranch(_branch);
         }
         /**
          * Retrieve the 2D-context attached to the destination canvas
@@ -64,6 +68,35 @@ namespace Fudge {
          */
         public getClientRectangle(): Rectangle {
             return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
+        }
+
+        /**
+         * Set the branch to be drawn in the viewport.
+         */
+        public setBranch(_branch: Node): void {
+            if (this.branch) {
+                this.branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+                this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+            }
+            this.branch = _branch;
+            // collect lights
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type: string = cmpLight.getLight().type;
+                    let lightsOfType: ComponentLight[] = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+
+                }
+            }
+            this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+            this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+            Debug.log(this.lights);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -250,13 +283,17 @@ namespace Fudge {
             let event: WheelEventƒ = new WheelEventƒ("ƒ" + _event.type, <WheelEventƒ>_event);
             this.dispatchEvent(event);
         }
-        
+
         private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
             _type = _type.slice(1); // chip the ƒlorentin
             if (_on)
                 _target.addEventListener(_type, _handler);
             else
                 _target.removeEventListener(_type, _handler);
+        }
+
+        private hndComponentEvent(_event: Event): void {
+            Debug.log(_event);
         }
         // #endregion
 

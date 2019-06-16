@@ -13,6 +13,13 @@ var Fudge;
      */
     class Mutable extends EventTarget {
         /**
+         * Retrieves the type of this mutable subclass as the name of the runtime class
+         * @returns The type of the mutable
+         */
+        get type() {
+            return this.constructor.name;
+        }
+        /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
         getMutator() {
@@ -433,42 +440,12 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.texture = null;
-            // private textureSource: string;
-            //     this.textureSource = _textureSource;
         }
     };
     CoatTextured = __decorate([
         Fudge.RenderInjector.decorateCoat
     ], CoatTextured);
     Fudge.CoatTextured = CoatTextured;
-    /**
-     * Adds and enables a Texture passed to this material.
-     * @param _textureSource A string holding the path to the location of the texture.
-     */
-    // public addTexture(_textureSource: string): void {
-    //     this.textureEnabled = true;
-    // }
-    /**
-     * Removes and disables a texture that was added to this material.
-     */
-    // public removeTexture(): void {
-    //     this.textureEnabled = false;
-    //     this.textureSource = "";
-    // }
-    /*/*
-     * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-     * @param _material The node's materialcomponent.
-     * @param _mesh The node's meshcomponent.
-     */
-    // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-    //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-    //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-    //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-    //     _meshComponent.setTextureCoordinates();
-    //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-    //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-    //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-    // }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -530,13 +507,6 @@ var Fudge;
         }
         get isActive() {
             return this.active;
-        }
-        /**
-         * Retrieves the type of this components subclass as the name of the runtime class
-         * @returns The type of the component
-         */
-        get type() {
-            return this.constructor.name;
         }
         /**
          * Is true, when only one instance of the component class can be attached to a node
@@ -682,7 +652,7 @@ var Fudge;
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
@@ -693,7 +663,7 @@ var Fudge;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -725,6 +695,24 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Attaches a light to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentLight extends Fudge.Component {
+        constructor(_light = null) {
+            super();
+            this.singleton = false;
+            this.light = _light;
+        }
+        getLight() {
+            return this.light;
+        }
+    }
+    Fudge.ComponentLight = ComponentLight;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
      * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -749,100 +737,24 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.mesh = null;
-            // /**
-            //  * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
-            //  */
-            // private computeNormals(): Float32Array {
-            //     let normals: number[] = [];
-            //     let normal: Vector3 = new Vector3;
-            //     let p: Float32Array = this.vertices;
-            //     for (let i: number = 0; i < p.length; i += 9) {
-            //         let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
-            //         let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
-            //         normal = Vector3.normalize(Vector3.cross(vector1, vector2));
-            //         normals.push(normal.x, normal.y, normal.z);
-            //         normals.push(normal.x, normal.y, normal.z);
-            //         normals.push(normal.x, normal.y, normal.z);
-            //     }
-            //     return new Float32Array(normals);
-            // }
-            // private initialize(_size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false): void {
-            //     this.vertices = this.mesh.getVertices();
-            //     this.bufferSpecification = {
-            //         size: _size,
-            //         dataType: _dataType,
-            //         normalize: _normalize,
-            //         stride: 0,
-            //         offset: 0
-            //     };
-            //     this.vertexCount = this.vertices.length / this.bufferSpecification.size;
-            //     if ((this.vertexCount % this.bufferSpecification.size) != 0) {
-            //         console.log(this.vertexCount);
-            //         throw new Error("Number of entries in positions[] and size do not match.");
-            //     }
-            //     this.normals = this.computeNormals();
-            // }
         }
-        // private vertices: Float32Array; // The Mesh's vertexpositions.
-        // private vertexCount: number; // The amount of Vertices that need to be drawn.
-        // private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
-        // private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
         setMesh(_mesh) {
             this.mesh = _mesh;
-            // this.initialize();
         }
         getMesh() {
             return this.mesh;
         }
-        // public getBufferSpecification(): BufferSpecification {
-        //     return this.bufferSpecification;
-        // }
-        // public getVertexCount(): number {
-        //     return this.vertexCount;
-        // }
-        // public getNormals(): Float32Array {
-        //     return this.normals;
-        // }
-        // /**
-        //  * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
-        //  * @param _materialComponent The materialcomponent attached to the same node.
-        //  */
-        // public applyColor(_materialComponent: ComponentMaterial): void {
-        //     let colorPerPosition: number[] = [];
-        //     for (let i: number = 0; i < this.vertexCount; i++) {
-        //         colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
-        //     }
-        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
-        // }
-        // /**
-        //  * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
-        //  */
-        // public setTextureCoordinates(): void {
-        //     let textureCoordinates: number[] = [];
-        //     let quadCount: number = this.vertexCount / 6;
-        //     for (let i: number = 0; i < quadCount; i++) {
-        //         textureCoordinates.push(
-        //             0, 1,
-        //             1, 1,
-        //             0, 0,
-        //             0, 0,
-        //             1, 1,
-        //             1, 0
-        //         );
-        //     }
-        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
-        // }
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.setMesh(mesh);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
     }
@@ -972,13 +884,13 @@ var Fudge;
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
                 local: this.local.serialize(),
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             this.local.deserialize(_serialization.local);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
     }
@@ -1016,13 +928,13 @@ var Fudge;
         serialize() {
             let serialization = {
                 // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             // this.worldMatrix.deserialize(_serialization.worldMatrix);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
         mutate(_mutator) {
@@ -1653,6 +1565,76 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Light extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.color = new Fudge.Color(0.1, 0.1, 0.1, 1);
+        }
+        reduceMutator() { }
+    }
+    Fudge.Light = Light;
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```text
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+    }
+    Fudge.LightAmbient = LightAmbient;
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```text
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        constructor() {
+            super(...arguments);
+            this.direction = new Fudge.Vector3(1, -1, -1);
+        }
+    }
+    Fudge.LightDirectional = LightDirectional;
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```text
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        constructor() {
+            super(...arguments);
+            this.range = 10;
+        }
+    }
+    Fudge.LightPoint = LightPoint;
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```text
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+    Fudge.LightSpot = LightSpot;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
+var Fudge;
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
+(function (Fudge) {
+    /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of [[Framing]] objects. The stages involved are in order of rendering
@@ -1664,7 +1646,6 @@ var Fudge;
             super(...arguments);
             this.name = "Viewport"; // The name to call this viewport by.
             this.camera = null; // The camera representing the view parameters to render the branch.
-            this.branch = null; // The first node in the tree(branch) that will be rendered.
             // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
             // Multiple viewports using the same canvas shouldn't differ here...
             // different framing methods can be used, this is the default
@@ -1674,6 +1655,8 @@ var Fudge;
             this.frameSourceToRender = new Fudge.FramingScaled();
             this.adjustingFrames = true;
             this.adjustingCamera = true;
+            this.lights = null;
+            this.branch = null; // The first node in the tree(branch) that will be rendered.
             this.crc2 = null;
             this.canvas = null;
             /**
@@ -1730,12 +1713,12 @@ var Fudge;
          */
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
-            this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
             this.rectSource = Fudge.RenderManager.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
+            this.setBranch(_branch);
         }
         /**
          * Retrieve the 2D-context attached to the destination canvas
@@ -1754,6 +1737,33 @@ var Fudge;
          */
         getClientRectangle() {
             return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
+        }
+        /**
+         * Set the branch to be drawn in the viewport.
+         */
+        setBranch(_branch) {
+            if (this.branch) {
+                this.branch.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
+                this.branch.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
+            }
+            this.branch = _branch;
+            // collect lights
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights = node.getComponents(Fudge.ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type = cmpLight.getLight().type;
+                    let lightsOfType = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+                }
+            }
+            this.branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
+            this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
+            Fudge.Debug.log(this.lights);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -1891,6 +1901,9 @@ var Fudge;
             else
                 _target.removeEventListener(_type, _handler);
         }
+        hndComponentEvent(_event) {
+            Fudge.Debug.log(_event);
+        }
         // #endregion
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
@@ -1917,72 +1930,6 @@ var Fudge;
         }
     }
     Fudge.Viewport = Viewport;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Baseclass for different kinds of lights.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Light extends Fudge.Mutable {
-        constructor() {
-            super(...arguments);
-            this.color = new Fudge.Color(0.1, 0.1, 0.1, 1);
-        }
-        reduceMutator() { }
-    }
-    Fudge.Light = Light;
-    /**
-     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```text
-     * ~ ~ ~
-     *  ~ ~ ~
-     * ```
-     */
-    class LightAmbient extends Light {
-    }
-    Fudge.LightAmbient = LightAmbient;
-    /**
-     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```text
-     * --->
-     * --->
-     * --->
-     * ```
-     */
-    class LightDirectional extends Light {
-        constructor() {
-            super(...arguments);
-            this.direction = new Fudge.Vector3(1, -1, -1);
-        }
-    }
-    Fudge.LightDirectional = LightDirectional;
-    /**
-     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```text
-     *         .\|/.
-     *        -- o --
-     *         ´/|\`
-     * ```
-     */
-    class LightPoint extends Light {
-        constructor() {
-            super(...arguments);
-            this.range = 10;
-        }
-    }
-    Fudge.LightPoint = LightPoint;
-    /**
-     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```text
-     *          o
-     *         /|\
-     *        / | \
-     * ```
-     */
-    class LightSpot extends Light {
-    }
-    Fudge.LightSpot = LightSpot;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

@@ -66,20 +66,27 @@ package Fudge <<Rectangle>> {
       - shaderType: typeof Shader
       - coat: Coat
     }
-    class Viewport extends EventTarget {
-      + name: string
-      + camera: ComponentCamera
-      + branch: Node
-      + rectSource: Rectangle
-      + rectDestination: Rectangle
-      + frameClientToCanvas: Framing
-      + frameCanvasToDestination: Framing
-      + frameDestinationToSource: Framing
-      + frameSourceToRender: Framing
-      + mappingRects: boolean
-      + adjustingCamera: boolean
-      - canvas: HTMLCanvasElement
-      - crc2: CanvasRenderingContext2D
+
+    file "Viewport" {
+      interface MapLightTypeToLightList {
+        [type: typeof Light]: ComponentLight[]
+      }
+      class Viewport extends EventTarget {
+        + name: string
+        + camera: ComponentCamera
+        + branch: Node
+        + rectSource: Rectangle
+        + rectDestination: Rectangle
+        + frameClientToCanvas: Framing
+        + frameCanvasToDestination: Framing
+        + frameDestinationToSource: Framing
+        + frameSourceToRender: Framing
+        + mappingRects: boolean
+        + adjustingCamera: boolean
+        + lights: MapLightTypeToComponentLight
+        - canvas: HTMLCanvasElement
+        - crc2: CanvasRenderingContext2D
+      }
     }
 
     file "Event"{
@@ -331,6 +338,10 @@ package Fudge <<Rectangle>> {
     class LightDirectional extends Light {
     }
     class LightPoint extends Light {
+      + range: number
+    }
+    class LightSpot extends LightPoint {
+      + angle: number
     }
   }
 

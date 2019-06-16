@@ -18,13 +18,6 @@ namespace Fudge {
         }
 
         /**
-         * Retrieves the type of this components subclass as the name of the runtime class
-         * @returns The type of the component
-         */
-        public get type(): string {
-            return this.constructor.name;
-        }
-        /**
          * Is true, when only one instance of the component class can be attached to a node
          */
         public get isSingleton(): boolean {

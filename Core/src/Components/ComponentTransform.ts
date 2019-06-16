@@ -19,13 +19,13 @@ namespace Fudge {
         public serialize(): Serialization {
             let serialization: Serialization = {
                 // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
             // this.worldMatrix.deserialize(_serialization.worldMatrix);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
 
