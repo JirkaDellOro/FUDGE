@@ -6,7 +6,7 @@
         "alwaysStrict": true,
         //"diagnostics": true,
         "strict": true,
-        //"outFile": "Test.js"
+        "outFile": "Test.js"
     },
     "exclude": [
         "node_modules"

@@ -1,6 +1,5 @@
 /// <reference path="ClassB.ts"/>;
-module ModuleTest {
-    //import * as ClassB from "ClassB";
+namespace ModuleTest {
     export class ClassA extends ClassB {
         private x: number = 10;
         static sayHello(): void {
