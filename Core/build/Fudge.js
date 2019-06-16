@@ -96,12 +96,12 @@ var Fudge;
 (function (Fudge) {
     class RenderInjector {
         static decorateCoat(_constructor) {
-            let coatExtension = RenderInjector.coatInjections[_constructor.name];
-            if (!coatExtension) {
+            let coatInjection = RenderInjector.coatInjections[_constructor.name];
+            if (!coatInjection) {
                 Fudge.Debug.error("No injection decorator defined for " + _constructor.name);
             }
             Object.defineProperty(_constructor.prototype, "useRenderData", {
-                value: coatExtension
+                value: coatInjection
             });
         }
         static injectRenderDataForCoatColored(_renderShader) {
@@ -379,7 +379,7 @@ var Fudge;
         static createParameter(_coat) {
             // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let coatInfo = {
-                vao: null,
+                //vao: null,
                 coat: _coat
             };
             return coatInfo;

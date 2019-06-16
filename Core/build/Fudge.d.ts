@@ -92,7 +92,6 @@ declare namespace Fudge {
         normalsFace: WebGLBuffer;
     }
     interface RenderCoat {
-        vao: WebGLVertexArrayObject;
         coat: Coat;
     }
     /**

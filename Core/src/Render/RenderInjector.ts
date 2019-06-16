@@ -1,6 +1,6 @@
 //<reference path="../Coats/Coat.ts"/>
 namespace Fudge {
-    type CoatInjection = (this: Coat, _shaderInfo: RenderShader) => void;
+    type CoatInjection = (this: Coat, _renderShader: RenderShader) => void;
     export class RenderInjector {
         private static coatInjections: { [className: string]: CoatInjection } = {
             "CoatColored": RenderInjector.injectRenderDataForCoatColored,
@@ -8,12 +8,12 @@ namespace Fudge {
         };
 
         public static decorateCoat(_constructor: Function): void {
-            let coatExtension: CoatInjection = RenderInjector.coatInjections[_constructor.name];
-            if (!coatExtension) {
+            let coatInjection: CoatInjection = RenderInjector.coatInjections[_constructor.name];
+            if (!coatInjection) {
                 Debug.error("No injection decorator defined for " + _constructor.name);
             }
             Object.defineProperty(_constructor.prototype, "useRenderData", {
-                value: coatExtension
+                value: coatInjection
             });
         }
 

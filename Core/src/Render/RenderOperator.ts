@@ -24,7 +24,7 @@ namespace Fudge {
 
     export interface RenderCoat {
         //TODO: examine, if it makes sense to store a vao for each Coat, even though e.g. color won't be stored anyway...
-        vao: WebGLVertexArrayObject;
+        //vao: WebGLVertexArrayObject;
         coat: Coat;
     }
 
@@ -284,7 +284,7 @@ namespace Fudge {
         protected static createParameter(_coat: Coat): RenderCoat {
             // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
             let coatInfo: RenderCoat = {
-                vao: null,
+                //vao: null,
                 coat: _coat
             };
             return coatInfo;

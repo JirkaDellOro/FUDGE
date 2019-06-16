@@ -62,8 +62,8 @@ package Fudge <<Rectangle>> {
       + a: number
     }
     class Material {
-      - name: string
-      - shaderClass: typeof Shader
+      + name: string
+      - shaderType: typeof Shader
       - coat: Coat
     }
     class Viewport extends EventTarget {
@@ -102,10 +102,10 @@ package Fudge <<Rectangle>> {
 
   package "Render" <<Folder>> {
     interface NodeReferences {
-      shader: typeof Shader
-      material: Material
-      mesh: Mesh
-      doneTransformToWorld: boolean
+      shader: typeof Shader;
+      coat: Coat;
+      mesh: Mesh;
+      doneTransformToWorld: boolean;
     }
     interface BufferSpecification {
       size: number
@@ -116,27 +116,27 @@ package Fudge <<Rectangle>> {
     }
     interface RenderShader {
       program: WebGLProgram
-      attributes: MapNameToValue
+      attributes: MapNameToAttributeLocation
       uniforms: MapNameToUniformLocation
     }
     interface RenderBuffers {
-      buffer: WebGLBuffer
-      target: number
-      specification: BufferSpecification
-      vertexCount: number
+      vertices: WebGLBuffer;
+      indices: WebGLBuffer;
+      nIndices: number;
+      textureUVs: WebGLBuffer;
+      normalsFace: WebGLBuffer;
     }
-    interface MaterialInfo {
-      vao: RenderManagerVertexArrayObject
-      color: Vector3
+    interface RenderCoat {
+      coat: Coat;
     }
     class Reference<T> {
       - reference: T
       - count: number = 0
     }
     class RenderManager extends RenderOperator {
-      - {static} programs: Map<typeof Shader, Reference<RenderShader>>
-      - {static} parameters: Map<Material, Reference<MaterialInfo>>
-      - {static} buffers: Map<Mesh, Reference<RenderBuffers>>
+      - {static} renderShaders: Map<typeof Shader, Reference<RenderShader>>
+      - {static} renderCoats: Map<Material, Reference<RenderCoat>>
+      - {static} renderBuffers: Map<Mesh, Reference<RenderBuffers>>
       - {static} nodes: MapNodeToNodeReferences
     }
     class RenderOperator {
@@ -145,15 +145,14 @@ package Fudge <<Rectangle>> {
     }
 
 
-    interface CoatExtension {
+    interface CoatInjection {
       typeof Coat,
       renderShader: RenderShader
     }
 
-    class RenderExtender {
-      - {static} coatExtensions
+    class RenderInjector {
+      - {static} coatInjections
       + {static} decorateCoat(_constructor: Function): void
-      - {static} extendCoatColored(this: Coat, _renderShader: RenderShader): void
     }
   }
 
@@ -227,12 +226,16 @@ package Fudge <<Rectangle>> {
 
   package "Meshes" <<Folder>> {
     class Mesh {
-      # vertices: Float32Array
+      + vertices: Float32Array;
+      + indices: Uint16Array;
+      + textureUVs: Float32Array;
+      + normalsFace: Float32Array;
+    }
+    class MeshQuad extends Mesh {
     }
     class MeshCube extends Mesh {
-      + width: number
-      + height: number
-      + depth: number
+    }
+    class MeshPyramid extends Mesh {
     }
   }
 
@@ -280,27 +283,43 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Shader" << Folder>> {
+  package "Shaders" << Folder>> {
     class Shader {
+      + {static} getCoat(): typeof Coat
       + {static} loadVertexShaderSource(): string
       + {static} loadFragmentShaderSource(): string
     }
-    class ShaderBasic extends Shader {
+    class ShaderUniColor extends Shader {
     }
     class ShaderTexture extends Shader {
     }
+    class ShaderFlat extends Shader {
+    }
   }
 
-  package "Coat" << Folder>> {
+  package "Coats" << Folder>> {
     class Coat extends Mutable {
       + name: string
-      + params: ShaderParameters
-
-      + setRenderData(_renderShader: RenderShader): void
+      # renderData: MapAttributeToUnknown
+      + useRenderData(_renderShader: RenderShader): void
     }
-
     '@decorateCoatWithRenderExtension
     class CoatColored extends Coat
+    class CoatTextured extends Coat
+  }
+
+  package "Textures" << Folder>> {
+    abstract class Texture extends Mutable {
+    }
+    class TextureImage extends Texture {
+      + image: HTMLImageElement;
+    }
+    class TextureCanvas extends Texture {
+    }
+    class TextureSketch extends TextureCanvas {
+    }
+    class TextureHTML extends TextureCanvas {
+    }
   }
 
   'Interface consumption
@@ -325,6 +344,7 @@ package Fudge <<Rectangle>> {
 
   Material "n"--->"1" Shader : references >
   Material "n"--->"1" Coat : references >
+  Shader "n"--->"1" Coat : references >
 
   Viewport -->"1 root" Node : displays >
   Viewport -->"1 camera" ComponentCamera : look through >
@@ -335,12 +355,12 @@ package Fudge <<Rectangle>> {
   RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
   RenderManager "1" o--> "n" NodeReferences : keeps >
   RenderManager "1" o--> "n" Reference : keeps >
-  RenderExtender -(0- CoatExtension : provides >
-  RenderExtender --- Coat : decorates >
+  RenderInjector -(0- CoatInjection : provides >
+  RenderInjector --- Coat : decorates >
 
   Reference "1" --> "1" RenderShader : shader uses >
   Reference "1" --> "1" RenderBuffers : mesh uses >
-  Reference "1" --> "1" MaterialInfo : material uses >
+  Reference "1" --> "1" RenderCoat : material uses >
 
   Mesh --> BufferSpecification : provides >
 
