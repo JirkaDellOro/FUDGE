@@ -1,13 +1,12 @@
 namespace Fudge {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
-     * 
+     * ```text
      *               4
      *              /\`.
      *            3/__\_\ 2
      *           0/____\/1
-     * 
-     * 
+     * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class MeshPyramid extends Mesh {

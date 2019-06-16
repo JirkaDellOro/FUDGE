@@ -1921,6 +1921,72 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Light extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.color = new Fudge.Color(0.1, 0.1, 0.1, 1);
+        }
+        reduceMutator() { }
+    }
+    Fudge.Light = Light;
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```text
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+    }
+    Fudge.LightAmbient = LightAmbient;
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```text
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        constructor() {
+            super(...arguments);
+            this.direction = new Fudge.Vector3(1, -1, -1);
+        }
+    }
+    Fudge.LightDirectional = LightDirectional;
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```text
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        constructor() {
+            super(...arguments);
+            this.range = 10;
+        }
+    }
+    Fudge.LightPoint = LightPoint;
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```text
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+    Fudge.LightSpot = LightSpot;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
      */
@@ -2701,12 +2767,12 @@ var Fudge;
 (function (Fudge) {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
-     *
+     * ```text
      *            4____7
      *           0/__3/|
      *            ||5_||6
      *           1|/_2|/
-     *
+     * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Fudge.Mesh {
@@ -2812,13 +2878,12 @@ var Fudge;
 (function (Fudge) {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
-     *
+     * ```text
      *               4
      *              /\`.
      *            3/__\_\ 2
      *           0/____\/1
-     *
-     *
+     * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshPyramid extends Fudge.Mesh {
@@ -2883,11 +2948,11 @@ var Fudge;
 (function (Fudge) {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
-     *
+     * ```text
      *        0 __ 3
      *         |__|
      *        1    2
-     *
+     * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Fudge.Mesh {

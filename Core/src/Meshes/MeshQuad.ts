@@ -1,11 +1,11 @@
 namespace Fudge {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
-     * 
+     * ```text
      *        0 __ 3
      *         |__|
      *        1    2             
-     *  
+     * ``` 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class MeshQuad extends Mesh {
