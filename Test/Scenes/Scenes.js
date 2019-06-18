@@ -31,6 +31,28 @@ var Scenes;
         return branch;
     }
     Scenes.createAxisCross = createAxisCross;
+    function createCoordinates() {
+        let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
+        let coatGreen = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
+        let coatBlue = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
+        let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+        let mtrGreen = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
+        let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+        let meshCube = new ƒ.MeshCube();
+        let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
+        let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
+        let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+        cubeRed.cmpTransform.scale(1, 0.1, 0.1);
+        cubeGreen.cmpTransform.scale(0.1, 1, 0.1);
+        cubeBlue.cmpTransform.scale(0.1, 0.1, 1);
+        // create branch
+        let branch = new ƒ.Node("AxisCross");
+        branch.appendChild(cubeRed);
+        branch.appendChild(cubeGreen);
+        branch.appendChild(cubeBlue);
+        return branch;
+    }
+    Scenes.createCoordinates = createCoordinates;
     function createThreeLevelNodeHierarchy() {
         createMiniScene();
         let child = Scenes.node.getChildren()[0];

@@ -19,6 +19,7 @@ namespace Fudge {
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
 
         public serialize(): Serialization {
@@ -36,7 +37,9 @@ namespace Fudge {
                 // floor
                 /*0*/ -1, 0, 1, /*1*/ 1, 0, 1,  /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,
                 // tip
-                /*4*/ 0, 2, 0  // double height will be scaled down
+                /*4*/ 0, 2, 0,  // double height will be scaled down
+                // floor again for texturing and normals
+                /*5*/ -1, 0, 1, /*6*/ 1, 0, 1,  /*7*/ 1, 0, -1, /*8*/ -1, 0, -1
             ]);
 
             // scale down to a length of 1 for bottom edges and height
@@ -55,7 +58,7 @@ namespace Fudge {
                 // left
                 4, 3, 0,
                 // bottom
-                0, 2, 1, 0, 3, 2
+                5 + 0, 5 + 2, 5 + 1, 5 + 0, 5 + 3, 5 + 2
             ]);
             return indices;
         }
@@ -65,11 +68,33 @@ namespace Fudge {
                 // front
                 /*0*/ 0, 1, /*1*/ 0.5, 1,  /*2*/ 1, 1, /*3*/ 0.5, 1,
                 // back
-                /*4*/ 0.5, 0
+                /*4*/ 0.5, 0,
+                /*5*/ 0, 0, /*6*/ 1, 0,  /*7*/ 1, 1, /*8*/ 0, 1
             ]);
             return textureUVs;
         }
 
-        protected createFaceNormals(): Float32Array { return null; }
+        protected createFaceNormals(): Float32Array {
+            let normals: number[] = [];
+            let vertices: Vector3[] = [];
+
+            for (let v: number = 0; v < this.vertices.length; v += 3)
+                vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
+
+            for (let i: number = 0; i < this.indices.length; i += 3) {
+                let vertex: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+                let v0: Vector3 = Vector3.subtract(vertices[vertex[0]], vertices[vertex[1]]);
+                let v1: Vector3 = Vector3.subtract(vertices[vertex[0]], vertices[vertex[2]]);
+                let normal: Vector3 = Vector3.normalize(Vector3.cross(v1, v0));
+                let index: number = vertex[2] * 3;
+                normals[index] = normal.x;
+                normals[index + 1] = normal.y;
+                normals[index + 2] = normal.z;
+            }
+            normals.push(0, 0, 0);
+            Debug.log(vertices);
+            Debug.log(normals);
+            return new Float32Array(normals);
+        }
     }
 }

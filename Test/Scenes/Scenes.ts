@@ -42,6 +42,34 @@ namespace Scenes {
         return branch;
     }
 
+    export function createCoordinates(): ƒ.Node {
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
+
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+
+        let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+
+        let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
+        let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
+        let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+
+        cubeRed.cmpTransform.scale(1, 0.1, 0.1);
+        cubeGreen.cmpTransform.scale(0.1, 1, 0.1);
+        cubeBlue.cmpTransform.scale(0.1, 0.1, 1);
+
+        // create branch
+        let branch: ƒ.Node = new ƒ.Node("AxisCross");
+        branch.appendChild(cubeRed);
+        branch.appendChild(cubeGreen);
+        branch.appendChild(cubeBlue);
+
+        return branch;
+    }
+
     export function createThreeLevelNodeHierarchy(): void {
         createMiniScene();
 
