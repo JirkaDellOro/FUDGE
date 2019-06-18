@@ -28,6 +28,10 @@ namespace Fudge {
         coat: Coat;
     }
 
+    export interface RenderLights {
+        [type: string]: Float32Array;
+    }
+
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
@@ -104,14 +108,70 @@ namespace Fudge {
             return RenderOperator.rectViewport;
         }
 
-        // #region Utilities
-        /** TODO: back to private
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+        /**
+         * Convert light data to flat arrays
          */
-        public static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights {
+            let renderLights: RenderLights = {};
+            for (let entry of _lights) {
+                switch (entry[0]) {
+                    case LightAmbient.name:
+                        let ambient: number[] = [];
+                        for (let light of entry[1]) {
+                            let c: Color = light.getLight().color;
+                            ambient.push(c.r, c.g, c.b, c.a);
+                        }
+                        renderLights["u_ambient"] = new Float32Array(ambient);
+                        break;
+                    case LightDirectional.name:
+                        let directional: number[] = [];
+                        for (let light of entry[1]) {
+                            let c: Color = light.getLight().color;
+                            let d: Vector3 = (<LightDirectional>light.getLight()).direction;
+                            directional.push(c.r, c.g, c.b, c.a, d.x, d.y, d.z);
+                        }
+                        renderLights["u_directional"] = new Float32Array(directional);
+                        break;
+                    default:
+                        Debug.warn("Shaderstructure undefined for", entry[0]);
+                }
+            }
+            return renderLights;
+        }
+
+        /**
+         * Set light data in shaders
+         */
+        protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void {
+            RenderOperator.useProgram(_renderShader);
+            let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
+
+            let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+            if (ambient) {
+                let cmpLights: ComponentLight[] = _lights.get("LightAmbient");
+                if (cmpLights) {
+                    // TODO: add up ambient lights to a single color
+                    // let result: Color = new Color(0, 0, 0, 1);
+                    for (let cmpLight of cmpLights)
+                        // for now, only the last is relevant
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                }
+            }
+
+            let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
+            if (nDirectional) {
+                let cmpLights: ComponentLight[] = _lights.get("LightDirectional");
+                if (cmpLights) {
+                    let n: number = cmpLights.length;
+                    RenderOperator.crc3.uniform1ui(nDirectional, n);
+                    for (let i: number = 0; i < n; i++) {
+                        let light: LightDirectional = <LightDirectional>cmpLights[i].getLight();
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
+                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.getArray());
+                    }
+                }
+            }
+            // debugger;
         }
 
         /**
@@ -128,7 +188,7 @@ namespace Fudge {
 
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
             RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
-            RenderOperator.attributePointer(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
+            RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
 
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
 
@@ -147,7 +207,7 @@ namespace Fudge {
 
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
                 RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
-                RenderOperator.attributePointer(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
+                RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
             }
             // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
@@ -299,5 +359,14 @@ namespace Fudge {
             }
         }
         // #endregion
+
+        /** 
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        private static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
     }
 }

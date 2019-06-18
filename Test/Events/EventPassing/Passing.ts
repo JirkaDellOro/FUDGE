@@ -11,7 +11,7 @@ namespace EventPassing {
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
 
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList: HTMLCollectionOf<HTMLCanvasElement> = document.getElementsByTagName("canvas");

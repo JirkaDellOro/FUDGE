@@ -4,7 +4,11 @@ namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export abstract class Light extends Mutable {
-        public color: Color = new Color(0.1, 0.1, 0.1, 1);
+        public color: Color;
+        constructor(_color: Color = new Color(1, 1, 1, 1)) {
+            super();
+            this.color = _color;
+        }
         protected reduceMutator(): void {/**/ }
     }
 
@@ -16,6 +20,9 @@ namespace Fudge {
      * ```
      */
     export class LightAmbient extends Light {
+        constructor(_color: Color = new Color(1, 1, 1, 1)) {
+            super(_color);
+        }
     }
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)  
@@ -26,7 +33,11 @@ namespace Fudge {
      * ```
      */
     export class LightDirectional extends Light {
-        public direction: Vector3 = new Vector3(1, -1, -1);
+        public direction: Vector3 = new Vector3(0, -1, 0);
+        constructor(_color: Color = new Color(1, 1, 1, 1), _direction: Vector3 = new Vector3(0, -1, 0)) {
+            super(_color);
+            this.direction = _direction;
+        }
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)  

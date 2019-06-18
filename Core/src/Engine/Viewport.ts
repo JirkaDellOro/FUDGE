@@ -1,7 +1,7 @@
 /// <reference path="../Lights/Light.ts"/>
 /// <reference path="../Components/ComponentLight.ts"/>
 namespace Fudge {
-    type MapLightTypeToLightList = Map<string, ComponentLight[]>;
+    export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -79,7 +79,16 @@ namespace Fudge {
                 this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
             }
             this.branch = _branch;
-            // collect lights
+            this.collectLights();
+            this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+            this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+            Debug.log(this.lights);
+        }
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        public collectLights(): void {
+            // TODO: make private
             this.lights = new Map();
             for (let node of this.branch.branch) {
                 let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
@@ -91,12 +100,8 @@ namespace Fudge {
                         this.lights.set(type, lightsOfType);
                     }
                     lightsOfType.push(cmpLight);
-
                 }
             }
-            this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-            this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
-            Debug.log(this.lights);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -111,7 +116,7 @@ namespace Fudge {
 
         // #region Drawing
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         public draw(): void {
             if (!this.camera.isActive)
@@ -124,6 +129,7 @@ namespace Fudge {
             // HACK! no need to addBranch and recalc for each viewport and frame
             RenderManager.clear(this.camera.getBackgoundColor());
             RenderManager.addBranch(this.branch);
+            RenderManager.setLights(this.lights);
             RenderManager.drawBranch(this.branch, this.camera);
 
             this.crc2.imageSmoothingEnabled = false;

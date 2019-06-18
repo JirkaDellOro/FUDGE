@@ -23,7 +23,7 @@ var TextureTest;
         branch.appendChild(pyramid);
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let camera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
@@ -32,7 +32,7 @@ var TextureTest;
             pyramid.cmpTransform.rotateX(1);
             cube.cmpTransform.rotateY(-1);
             quad.cmpTransform.rotateZ(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
     }

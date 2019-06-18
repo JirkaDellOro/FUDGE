@@ -32,7 +32,7 @@ var RenderManagerManagement;
     }
     function recalculateNode(_event) {
         dumpRenderManager("Recalculate nodes");
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         delegate = removeFirstNode;
     }
     function removeFirstNode(_event) {

@@ -161,11 +161,82 @@ namespace Fudge {
         }
         // #endregion
 
+        // #region Lights
+        public static setLights(_lights: MapLightTypeToLightList): void {
+            // let renderLights: RenderLights = this.createRenderLights(_lights);
+            for (let entry of this.renderShaders) {
+                let renderShader: RenderShader = entry[1].getReference();
+                this.setLightsInShader(renderShader, _lights);
+            }
+            // debugger;
+        }
+        // #endregion
+
         // #region Transformation & Rendering
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        public static update(): void {
+            this.recalculateAllNodeTransforms();
+        }
+
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color 
+         */
+        public static clear(_color: Color = null): void {
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+        }
+
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node 
+         * @param _cameraMatrix 
+         * @param _world 
+         */
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
+            let cmpTransform: ComponentTransform = _node.cmpTransform;
+            let world: Matrix4x4 = _world;
+            if (cmpTransform)
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Matrix4x4.identity;
+
+            let finalTransform: Matrix4x4 = world;
+            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
+            if (cmpPivot)
+                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
+
+            // multiply camera matrix
+            let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+
+            this.drawNode(_node, finalTransform, projection);
+
+            for (let name in _node.getChildren()) {
+                let childNode: Node = _node.getChildren()[name];
+                this.drawBranch(childNode, _cmpCamera, world);
+            }
+        }
+
+        private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
+            let references: NodeReferences = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+
+            let bufferInfo: RenderBuffers = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo: RenderCoat = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo: RenderShader = this.renderShaders.get(references.shader).getReference();
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+        }
+
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
-        public static recalculateAllNodeTransforms(): void {
+        private static recalculateAllNodeTransforms(): void {
             // inner function to be called in a for each node at the bottom of this function
             function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
                 _nodeReferences.doneTransformToWorld = false;
@@ -202,55 +273,6 @@ namespace Fudge {
             // call the functions above for each registered node
             this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
-        }
-
-        public static clear(_color: Color = null): void {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
-        }
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
-         * @param _node 
-         * @param _cameraMatrix 
-         * @param _world 
-         */
-        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
-            let cmpTransform: ComponentTransform = _node.cmpTransform;
-            let world: Matrix4x4 = _world;
-            if (cmpTransform)
-                world = cmpTransform.world;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Matrix4x4.identity;
-
-            let finalTransform: Matrix4x4 = world;
-            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
-            if (cmpPivot)
-                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
-
-            // multiply camera matrix
-            let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
-            this.drawNode(_node, finalTransform, projection);
-
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
-            }
-        }
-
-        // TODO switch back to private
-        public static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
-            let references: NodeReferences = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: deal with partial references
-
-            let bufferInfo: RenderBuffers = this.renderBuffers.get(references.mesh).getReference();
-            let coatInfo: RenderCoat = this.renderCoats.get(references.coat).getReference();
-            let shaderInfo: RenderShader = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
 
         /**
@@ -308,5 +330,6 @@ namespace Fudge {
                 _in.set(_key, reference);
             }
         }
+        // #endregion
     }
 }

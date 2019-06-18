@@ -8,7 +8,7 @@ var RenderManagerRendering;
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         // initialize viewport
         let camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);

@@ -11,7 +11,7 @@ var TextureTest;
         branch.appendChild(cube);
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let camera = Scenes.createCamera(new ƒ.Vector3(0, 3, 3), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
@@ -19,7 +19,7 @@ var TextureTest;
         window.setInterval(function () {
             cube.cmpTransform.rotateY(-1);
             cube.cmpTransform.rotateX(-2);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
     }

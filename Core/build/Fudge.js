@@ -222,14 +222,67 @@ var Fudge;
         static getViewportRectangle() {
             return RenderOperator.rectViewport;
         }
-        // #region Utilities
-        /** TODO: back to private
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+        /**
+         * Convert light data to flat arrays
          */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        static createRenderLights(_lights) {
+            let renderLights = {};
+            for (let entry of _lights) {
+                switch (entry[0]) {
+                    case Fudge.LightAmbient.name:
+                        let ambient = [];
+                        for (let light of entry[1]) {
+                            let c = light.getLight().color;
+                            ambient.push(c.r, c.g, c.b, c.a);
+                        }
+                        renderLights["u_ambient"] = new Float32Array(ambient);
+                        break;
+                    case Fudge.LightDirectional.name:
+                        let directional = [];
+                        for (let light of entry[1]) {
+                            let c = light.getLight().color;
+                            let d = light.getLight().direction;
+                            directional.push(c.r, c.g, c.b, c.a, d.x, d.y, d.z);
+                        }
+                        renderLights["u_directional"] = new Float32Array(directional);
+                        break;
+                    default:
+                        Fudge.Debug.warn("Shaderstructure undefined for", entry[0]);
+                }
+            }
+            return renderLights;
+        }
+        /**
+         * Set light data in shaders
+         */
+        static setLightsInShader(_renderShader, _lights) {
+            RenderOperator.useProgram(_renderShader);
+            let uni = _renderShader.uniforms;
+            let ambient = uni["u_ambient.color"];
+            if (ambient) {
+                let cmpLights = _lights.get("LightAmbient");
+                if (cmpLights) {
+                    // TODO: add up ambient lights to a single color
+                    // let result: Color = new Color(0, 0, 0, 1);
+                    for (let cmpLight of cmpLights)
+                        // for now, only the last is relevant
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                }
+            }
+            let nDirectional = uni["u_nLightsDirectional"];
+            if (nDirectional) {
+                let cmpLights = _lights.get("LightDirectional");
+                if (cmpLights) {
+                    let n = cmpLights.length;
+                    RenderOperator.crc3.uniform1ui(nDirectional, n);
+                    for (let i = 0; i < n; i++) {
+                        let light = cmpLights[i].getLight();
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
+                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.getArray());
+                    }
+                }
+            }
+            // debugger;
         }
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -244,7 +297,7 @@ var Fudge;
             // RenderOperator.useParameter(_renderCoat);
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
             RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
-            RenderOperator.attributePointer(_renderShader.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
+            RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
             if (_renderShader.attributes["a_textureUVs"]) {
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
@@ -259,7 +312,7 @@ var Fudge;
                 RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
                 RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
-                RenderOperator.attributePointer(_renderShader.attributes["a_normal"], Fudge.Mesh.getBufferSpecification());
+                RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Fudge.Mesh.getBufferSpecification());
             }
             // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
             _renderCoat.coat.useRenderData(_renderShader);
@@ -399,6 +452,15 @@ var Fudge;
                 RenderOperator.crc3.bindVertexArray(null);
                 // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
+        }
+        // #endregion
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static setAttributeStructure(_attributeLocation, _bufferSpecification) {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
     }
     Fudge.RenderOperator = RenderOperator;
@@ -1154,6 +1216,9 @@ var Fudge;
             this.b = _b;
             this.a = _a;
         }
+        getArray() {
+            return new Float32Array([this.r, this.g, this.b, this.a]);
+        }
     }
     Fudge.Color = Color;
 })(Fudge || (Fudge = {}));
@@ -1569,9 +1634,9 @@ var Fudge;
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Light extends Fudge.Mutable {
-        constructor() {
-            super(...arguments);
-            this.color = new Fudge.Color(0.1, 0.1, 0.1, 1);
+        constructor(_color = new Fudge.Color(1, 1, 1, 1)) {
+            super();
+            this.color = _color;
         }
         reduceMutator() { }
     }
@@ -1584,6 +1649,9 @@ var Fudge;
      * ```
      */
     class LightAmbient extends Light {
+        constructor(_color = new Fudge.Color(1, 1, 1, 1)) {
+            super(_color);
+        }
     }
     Fudge.LightAmbient = LightAmbient;
     /**
@@ -1595,9 +1663,10 @@ var Fudge;
      * ```
      */
     class LightDirectional extends Light {
-        constructor() {
-            super(...arguments);
-            this.direction = new Fudge.Vector3(1, -1, -1);
+        constructor(_color = new Fudge.Color(1, 1, 1, 1), _direction = new Fudge.Vector3(0, -1, 0)) {
+            super(_color);
+            this.direction = new Fudge.Vector3(0, -1, 0);
+            this.direction = _direction;
         }
     }
     Fudge.LightDirectional = LightDirectional;
@@ -1747,7 +1816,16 @@ var Fudge;
                 this.branch.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
             }
             this.branch = _branch;
-            // collect lights
+            this.collectLights();
+            this.branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
+            this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
+            Fudge.Debug.log(this.lights);
+        }
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        collectLights() {
+            // TODO: make private
             this.lights = new Map();
             for (let node of this.branch.branch) {
                 let cmpLights = node.getComponents(Fudge.ComponentLight);
@@ -1761,9 +1839,6 @@ var Fudge;
                     lightsOfType.push(cmpLight);
                 }
             }
-            this.branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
-            this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
-            Fudge.Debug.log(this.lights);
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -1777,7 +1852,7 @@ var Fudge;
         }
         // #region Drawing
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         draw() {
             if (!this.camera.isActive)
@@ -1789,6 +1864,7 @@ var Fudge;
             // HACK! no need to addBranch and recalc for each viewport and frame
             Fudge.RenderManager.clear(this.camera.getBackgoundColor());
             Fudge.RenderManager.addBranch(this.branch);
+            Fudge.RenderManager.setLights(this.lights);
             Fudge.RenderManager.drawBranch(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
@@ -2617,8 +2693,7 @@ var Fudge;
          * @returns A new vector representing the sum of the given vectors
          */
         static add(_a, _b) {
-            let vector = new Vector3;
-            vector.data = [_a.x + _b.x, _a.y + _b.y, _a.z + _b.z];
+            let vector = new Vector3(_a.x + _b.x, _a.y + _b.y, _a.z + _b.z);
             return vector;
         }
         /**
@@ -2685,6 +2760,12 @@ var Fudge;
                 vector.data = [0, 0, 0];
             }
             return vector;
+        }
+        /**
+         * Retrieve the vector as an array with three elements
+         */
+        getArray() {
+            return new Float32Array(this.data);
         }
     }
     Fudge.Vector3 = Vector3;
@@ -3074,7 +3155,68 @@ var Fudge;
                 this.updateNode(node);
         }
         // #endregion
+        // #region Lights
+        static setLights(_lights) {
+            // let renderLights: RenderLights = this.createRenderLights(_lights);
+            for (let entry of this.renderShaders) {
+                let renderShader = entry[1].getReference();
+                this.setLightsInShader(renderShader, _lights);
+            }
+            // debugger;
+        }
+        // #endregion
         // #region Transformation & Rendering
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        static update() {
+            this.recalculateAllNodeTransforms();
+        }
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
+        static clear(_color = null) {
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+        }
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node
+         * @param _cameraMatrix
+         * @param _world
+         */
+        static drawBranch(_node, _cmpCamera, _world) {
+            let cmpTransform = _node.cmpTransform;
+            let world = _world;
+            if (cmpTransform)
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Fudge.Matrix4x4.identity;
+            let finalTransform = world;
+            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
+            if (cmpPivot)
+                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
+            // multiply camera matrix
+            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            this.drawNode(_node, finalTransform, projection);
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
+                this.drawBranch(childNode, _cmpCamera, world);
+            }
+        }
+        static drawNode(_node, _finalTransform, _projection) {
+            let references = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo = this.renderShaders.get(references.shader).getReference();
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+        }
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -3110,48 +3252,6 @@ var Fudge;
             // call the functions above for each registered node
             this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
-        }
-        static clear(_color = null) {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
-        }
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
-         * @param _node
-         * @param _cameraMatrix
-         * @param _world
-         */
-        static drawBranch(_node, _cmpCamera, _world) {
-            let cmpTransform = _node.cmpTransform;
-            let world = _world;
-            if (cmpTransform)
-                world = cmpTransform.world;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Fudge.Matrix4x4.identity;
-            let finalTransform = world;
-            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
-            if (cmpPivot)
-                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
-            // multiply camera matrix
-            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
-            this.drawNode(_node, finalTransform, projection);
-            for (let name in _node.getChildren()) {
-                let childNode = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
-            }
-        }
-        // TODO switch back to private
-        static drawNode(_node, _finalTransform, _projection) {
-            let references = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: deal with partial references
-            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
-            let coatInfo = this.renderCoats.get(references.coat).getReference();
-            let shaderInfo = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -3246,19 +3346,37 @@ var Fudge;
         static getVertexShaderSource() {
             return `#version 300 es
 
+                    struct LightAmbient {
+                        vec4 color;
+                    };
+                    struct LightDirectional {
+                        vec4 color;
+                        vec3 direction;
+                    };
+
+                    const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+
                     in vec3 a_position;
                     in vec3 a_normal;
                     uniform mat4 u_world;
                     uniform mat4 u_projection;
+
+                    uniform LightAmbient u_ambient;
+                    uniform uint u_nLightsDirectional;
+                    uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
                     flat out vec4 v_color;
                     
                     void main() {   
                         gl_Position = u_projection * vec4(a_position, 1.0);
                         vec3 normal = mat3(u_world) * a_normal;
 
-                        vec3 light = vec3(0,1,0);
-                        float illumination = dot(normal, light);
-                        v_color = illumination * vec4(1,1,1,1);
+                        v_color = vec4(0,0,0,0);
+                        for (uint i = 0u; i < u_nLightsDirectional; i++) {
+                            float illumination = -dot(normal, u_directional[i].direction);
+                            v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
+                        }
+                        u_ambient;
+                        u_directional[0];
                     }`;
         }
         static getFragmentShaderSource() {

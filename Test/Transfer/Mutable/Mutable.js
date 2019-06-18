@@ -31,7 +31,7 @@ var Mutable;
         mutator.local.data[12] = 5 * Math.sin(angle);
         mutator.local.data[5] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         Scenes.viewPort.draw();
     }
 })(Mutable || (Mutable = {}));

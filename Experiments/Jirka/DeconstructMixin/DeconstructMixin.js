@@ -61,6 +61,14 @@ var DeconstructMixin;
             console.log(this);
         }
     }
+    class Simple {
+        constructor() {
+            this.t = "Hallo";
+            this.n = 10;
+            this.b = true;
+            this.length = 3;
+        }
+    }
     console.log("Create test1");
     let test1 = new Test1();
     console.log("Result", test1);
@@ -75,5 +83,8 @@ var DeconstructMixin;
     console.log("Result", mixGeneric);
     let mix = { a: 10, x: 1, y: 2, z: 3 };
     console.log(mix);
+    let simple = new Simple();
+    let a = Array.from(simple);
+    console.log(a);
 })(DeconstructMixin || (DeconstructMixin = {}));
 //# sourceMappingURL=DeconstructMixin.js.map

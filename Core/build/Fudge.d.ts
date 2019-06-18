@@ -99,6 +99,9 @@ declare namespace Fudge {
     interface RenderCoat {
         coat: Coat;
     }
+    interface RenderLights {
+        [type: string]: Float32Array;
+    }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
@@ -141,12 +144,14 @@ declare namespace Fudge {
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
         static getViewportRectangle(): Rectangle;
-        /** TODO: back to private
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+        /**
+         * Convert light data to flat arrays
          */
-        static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
+        protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
+        /**
+         * Set light data in shaders
+         */
+        protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param _renderShader
@@ -164,6 +169,12 @@ declare namespace Fudge {
         protected static createParameter(_coat: Coat): RenderCoat;
         protected static useParameter(_coatInfo: RenderCoat): void;
         protected static deleteParameter(_coatInfo: RenderCoat): void;
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        private static setAttributeStructure;
     }
 }
 declare namespace Fudge {
@@ -559,6 +570,7 @@ declare namespace Fudge {
         b: number;
         a: number;
         constructor(_r: number, _g: number, _b: number, _a: number);
+        getArray(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -779,6 +791,7 @@ declare namespace Fudge {
      */
     abstract class Light extends Mutable {
         color: Color;
+        constructor(_color?: Color);
         protected reduceMutator(): void;
     }
     /**
@@ -789,6 +802,7 @@ declare namespace Fudge {
      * ```
      */
     class LightAmbient extends Light {
+        constructor(_color?: Color);
     }
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
@@ -800,6 +814,7 @@ declare namespace Fudge {
      */
     class LightDirectional extends Light {
         direction: Vector3;
+        constructor(_color?: Color, _direction?: Vector3);
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
@@ -871,11 +886,15 @@ declare namespace Fudge {
          */
         setBranch(_branch: Node): void;
         /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        collectLights(): void;
+        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph(): void;
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         draw(): void;
         /**
@@ -1226,6 +1245,10 @@ declare namespace Fudge {
          * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector: Vector3): Vector3;
+        /**
+         * Retrieve the vector as an array with three elements
+         */
+        getArray(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -1361,10 +1384,15 @@ declare namespace Fudge {
          * @param _node
          */
         static updateBranch(_node: Node): void;
+        static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
          */
-        static recalculateAllNodeTransforms(): void;
+        static update(): void;
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
         static clear(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
@@ -1375,7 +1403,11 @@ declare namespace Fudge {
          * @param _world
          */
         static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
-        static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void;
+        private static drawNode;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        private static recalculateAllNodeTransforms;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix

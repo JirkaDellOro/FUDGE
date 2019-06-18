@@ -76,6 +76,14 @@ namespace DeconstructMixin {
         }
     }
 
+    class Simple implements ArrayLike<any> {
+        t: string = "Hallo";
+        n: number = 10;
+        b: boolean = true;
+        length: number = 3;
+        [key: string]: any;
+    }
+
     console.log("Create test1");
     let test1: Test1 = new Test1();
     console.log("Result", test1);
@@ -91,4 +99,8 @@ namespace DeconstructMixin {
 
     let mix: IMix = { a: 10, x: 1, y: 2, z: 3 };
     console.log(mix);
+
+    let simple: Simple = new Simple();
+    let a = Array.from(simple);
+    console.log(a);
 }

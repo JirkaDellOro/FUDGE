@@ -29,7 +29,7 @@ namespace TextureTest {
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
@@ -41,7 +41,7 @@ namespace TextureTest {
             pyramid.cmpTransform.rotateX(1);
             cube.cmpTransform.rotateY(-1);
             quad.cmpTransform.rotateZ(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            ƒ.RenderManager.update();
             viewport.draw(); 
         },                 20);
     }

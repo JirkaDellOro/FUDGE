@@ -1,6 +1,9 @@
 namespace StaticClass {
 
     class Base {
+        get type(): string {
+            return this.constructor.name;
+        }
         static classRegister: typeof Base[] = [];
 
         static addClass(_class: typeof Base): number {
@@ -26,13 +29,13 @@ namespace StaticClass {
     }
 
     for (let type of Base.classRegister)
-        console.log(type.name);
+        console.log(type);
 
-    for (let i: 0; i < 10; i++) {
+    for (let i: number = 0; i < 10; i++) {
         let choice: number = Math.round(Math.random());
         let typeChosen: typeof Base = Base.classRegister[choice];
-        console.log(typeChosen);
+        // console.log(typeChosen);
         let instance: Base = new typeChosen();
-        console.log(instance);
+        console.log(instance.type);
     }
-}
+}   

@@ -16,7 +16,7 @@ namespace RenderManagerRendering {
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
@@ -52,7 +52,7 @@ namespace RenderManagerRendering {
         function animate(_event: Event): void {
             update();
             branch.cmpTransform.rotateY(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();
             viewPort.draw();
