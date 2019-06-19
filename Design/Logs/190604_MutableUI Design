@@ -1,0 +1,5 @@
+UI Components, die ein Mutable verwenden um ihren Inhalt upzudaten sollten eine abstrakte Oberklasse implementieren.
+Diese Oberklasse "MutableUI" implementiert Eventlistener, die auf Input Events und Zeit-Events horchen.
+Alle ~100ms soll ein neuer Mutator aus dem Mutable gezogen werden, um im Anschluss aktuellere Werte auf dem User Interface anzuzeigen.
+Mit Input-Events sollen den Mutable mutieren lassen mit den neuen Werten, die aus den UI-Elementen gezogen werden. Darauf hin soll
+ebenfalls ein neuer, aktuellisierter Mutator generiert werden und damit das UI gefüllt werden.
