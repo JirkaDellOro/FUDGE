@@ -28,6 +28,6 @@ namespace TextureTest {
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();
-        }, 20);
+        },                 20);
     }
 }
