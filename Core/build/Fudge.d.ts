@@ -56,7 +56,7 @@ declare namespace Fudge {
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
          * @param _mutator
          */
-        protected mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): void;
         /**
          * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
          * @param _mutator

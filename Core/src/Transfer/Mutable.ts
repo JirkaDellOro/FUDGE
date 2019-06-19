@@ -103,7 +103,7 @@ namespace Fudge {
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
          * @param _mutator
          */
-        protected mutate(_mutator: Mutator): void {
+        public mutate(_mutator: Mutator): void {
             // for (let attribute in _mutator)
             //     (<General>this)[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties

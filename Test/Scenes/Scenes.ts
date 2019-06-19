@@ -42,7 +42,7 @@ namespace Scenes {
         return branch;
     }
 
-    export function createCoordinates(): ƒ.Node {
+    export function createCoordinateSystem(): ƒ.Node {
         let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
         let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
         let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
@@ -52,20 +52,37 @@ namespace Scenes {
         let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
 
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+        let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
 
         let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
 
-        cubeRed.cmpTransform.scale(1, 0.1, 0.1);
-        cubeGreen.cmpTransform.scale(0.1, 1, 0.1);
-        cubeBlue.cmpTransform.scale(0.1, 0.1, 1);
+        let pyramidRed: ƒ.Node = Scenes.createCompleteMeshNode("RedTip", mtrRed, meshPyramid);
+        let pyramidGreen: ƒ.Node = Scenes.createCompleteMeshNode("GreenTip", mtrGreen, meshPyramid);
+        let pyramidBlue: ƒ.Node = Scenes.createCompleteMeshNode("BlueTip", mtrBlue, meshPyramid);
+
+        cubeRed.cmpTransform.scale(1, 0.01, 0.01);
+        cubeGreen.cmpTransform.scale(0.01, 1, 0.01);
+        cubeBlue.cmpTransform.scale(0.01, 0.01, 1);
+
+        pyramidRed.cmpTransform.translateX(0.5);
+        pyramidRed.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidRed.cmpTransform.rotateZ(-90);
+        pyramidGreen.cmpTransform.translateY(0.5);
+        pyramidGreen.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidBlue.cmpTransform.translateZ(0.5);
+        pyramidBlue.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidBlue.cmpTransform.rotateX(90);
 
         // create branch
-        let branch: ƒ.Node = new ƒ.Node("AxisCross");
+        let branch: ƒ.Node = new ƒ.Node("CoordinateSystem");
         branch.appendChild(cubeRed);
         branch.appendChild(cubeGreen);
         branch.appendChild(cubeBlue);
+        branch.appendChild(pyramidRed);
+        branch.appendChild(pyramidGreen);
+        branch.appendChild(pyramidBlue);
 
         return branch;
     }
