@@ -16,23 +16,25 @@ var UI;
                 let value = _obj[key].toString();
                 if (type instanceof Object) {
                     //Type is Enum
-                    UIGenerator.createLabelElement(key, key, _parent);
+                    UIGenerator.createLabelElement(key, _parent);
                     UIGenerator.createDropdown(type, value, _parent);
                 }
                 else {
                     switch (type) {
                         case "Number":
-                            UIGenerator.createLabelElement(key, key, _parent);
-                            UIGenerator.createTextElement(key, value, _parent);
+                            UIGenerator.createLabelElement(key, _parent, { _value: key });
+                            // UIGenerator.createTextElement(key, _parent, { _value: value })
+                            let num_value = parseInt(value);
+                            UIGenerator.createStepperElement(key, _parent, { _value: num_value });
                             break;
                         case "Boolean":
-                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createLabelElement(key, _parent, { _value: key });
                             let enabled = value == "true" ? true : false;
                             UIGenerator.createCheckboxElement(key, enabled, _parent);
                             break;
                         case "String":
-                            UIGenerator.createLabelElement(key, key, _parent);
-                            UIGenerator.createTextElement(key, value, _parent);
+                            UIGenerator.createLabelElement(key, _parent, { _value: key });
+                            UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
                         default:
                             break;
@@ -40,7 +42,7 @@ var UI;
                 }
             }
         }
-        static createDropdown(_content, _value, _parent, _class) {
+        static createDropdown(_content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
             for (let value in _content) {
                 let entry = document.createElement("option");
@@ -54,7 +56,7 @@ var UI;
             _parent.appendChild(dropdown);
             return dropdown;
         }
-        static createFieldset(_legend, _parent, _class) {
+        static createFieldset(_legend, _parent, _cssClass) {
             let fieldset = document.createElement("fieldset");
             let legend = document.createElement("legend");
             legend.innerHTML = _legend;
@@ -64,34 +66,49 @@ var UI;
             legend.appendChild(toggleButton);
             fieldset.appendChild(legend);
             legend.classList.add("unfoldable");
-            fieldset.classList.add(_class);
+            if (!_cssClass == undefined) {
+                fieldset.classList.add(_cssClass);
+            }
             _parent.appendChild(fieldset);
             return fieldset;
         }
-        static createLabelElement(_id, _value, _parent, _class) {
+        static createLabelElement(_id, _parent, params = {}) {
             let label = document.createElement("label");
-            label.innerHTML = _value;
-            label.classList.add(_class);
+            if (params._value == undefined)
+                params._value = _id;
+            label.innerText = params._value;
+            if (!params._cssClass == undefined)
+                label.classList.add(params._cssClass);
             label.id = _id;
             _parent.appendChild(label);
             return label;
         }
-        static createTextElement(_id, _value, _parent, _class) {
+        static createTextElement(_id, _parent, params = {}) {
             let valueInput = document.createElement("input");
-            valueInput.value = _value;
-            valueInput.classList.add(_class);
+            if (params._value == undefined)
+                params._value = "";
+            if (!params._cssClass == undefined)
+                valueInput.classList.add(params._cssClass);
+            valueInput.id = _id;
+            valueInput.value = params._value;
+            _parent.appendChild(valueInput);
+            return valueInput;
+        }
+        static createCheckboxElement(_id, _value, _parent, _cssClass) {
+            let valueInput = document.createElement("input");
+            valueInput.type = "checkbox";
+            valueInput.checked = _value;
+            valueInput.classList.add(_cssClass);
             valueInput.id = _id;
             _parent.appendChild(valueInput);
             return valueInput;
         }
-        static createCheckboxElement(_id, _value, _parent, _class) {
-            let valueInput = document.createElement("input");
-            valueInput.type = "checkbox";
-            valueInput.checked = _value;
-            valueInput.classList.add(_class);
-            valueInput.id = _id;
-            _parent.appendChild(valueInput);
-            return valueInput;
+        static createStepperElement(_id, _parent, params = {}) {
+            if (params._value == undefined)
+                params._value = 0;
+            let stepper = new UI.Stepper(_id, { value: params._value });
+            _parent.append(stepper);
+            return stepper;
         }
         static toggleFoldElement(_event) {
             _event.preventDefault();
@@ -105,8 +122,9 @@ var UI;
             foldToggle == true ? foldTarget.classList.add("fieldset_folded") : foldTarget.classList.remove("fieldset_folded");
             foldToggle == true ? target.innerHTML = ">" : target.innerHTML = "v";
             let children = foldTarget.children;
-            for (let i = 0; i < children.length; i++) {
-                let child = children[i];
+            // for (let i = 0; i < children.length; i++) {
+            for (let child of children) {
+                // let child: HTMLElement = <HTMLElement>children[i];
                 if (!child.classList.contains("unfoldable")) {
                     foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
                 }
