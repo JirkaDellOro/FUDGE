@@ -1,4 +1,7 @@
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
 namespace Fudge {
+    export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -11,7 +14,6 @@ namespace Fudge {
 
         public name: string = "Viewport"; // The name to call this viewport by.
         public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
-        public branch: Node = null; // The first node in the tree(branch) that will be rendered.
 
         public rectSource: Rectangle;
         public rectDestination: Rectangle;
@@ -27,10 +29,11 @@ namespace Fudge {
         public adjustingFrames: boolean = true;
         public adjustingCamera: boolean = true;
 
+        public lights: MapLightTypeToLightList = null;
+
+        private branch: Node = null; // The first node in the tree(branch) that will be rendered.
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
-
-
 
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
@@ -39,13 +42,14 @@ namespace Fudge {
          */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
-            this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
 
             this.rectSource = RenderManager.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
+
+            this.setBranch(_branch);
         }
         /**
          * Retrieve the 2D-context attached to the destination canvas
@@ -65,6 +69,40 @@ namespace Fudge {
         public getClientRectangle(): Rectangle {
             return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
+
+        /**
+         * Set the branch to be drawn in the viewport.
+         */
+        public setBranch(_branch: Node): void {
+            if (this.branch) {
+                this.branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+                this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+            }
+            this.branch = _branch;
+            this.collectLights();
+            this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+            this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+            Debug.log(this.lights);
+        }
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        public collectLights(): void {
+            // TODO: make private
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type: string = cmpLight.getLight().type;
+                    let lightsOfType: ComponentLight[] = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+                }
+            }
+        }
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -78,7 +116,7 @@ namespace Fudge {
 
         // #region Drawing
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         public draw(): void {
             if (!this.camera.isActive)
@@ -91,6 +129,7 @@ namespace Fudge {
             // HACK! no need to addBranch and recalc for each viewport and frame
             RenderManager.clear(this.camera.getBackgoundColor());
             RenderManager.addBranch(this.branch);
+            RenderManager.setLights(this.lights);
             RenderManager.drawBranch(this.branch, this.camera);
 
             this.crc2.imageSmoothingEnabled = false;
@@ -250,13 +289,17 @@ namespace Fudge {
             let event: WheelEventƒ = new WheelEventƒ("ƒ" + _event.type, <WheelEventƒ>_event);
             this.dispatchEvent(event);
         }
-        
+
         private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
             _type = _type.slice(1); // chip the ƒlorentin
             if (_on)
                 _target.addEventListener(_type, _handler);
             else
                 _target.removeEventListener(_type, _handler);
+        }
+
+        private hndComponentEvent(_event: Event): void {
+            Debug.log(_event);
         }
         // #endregion
 
@@ -284,33 +327,5 @@ namespace Fudge {
             }
             return output;
         }
-
-        /*/*
-         * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-        //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-        //     // _meshComponent.applyColor(_materialComponent);
-        //     //gl2.enableVertexAttribArray(colorUniformLocation);
-        //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
-        // }
-
-        /*/*
-         * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-         * @param _material The node's materialcomponent.
-         * @param _mesh The node's meshcomponent.
-         */
-        // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-        //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-        //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-        //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-        //     _meshComponent.setTextureCoordinates();
-        //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-        //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-        //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-        // }
     }
 }

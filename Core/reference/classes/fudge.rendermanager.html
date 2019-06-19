@@ -73,7 +73,7 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>Manages the handling of the ressources that are going to be rendered by <a href="fudge.renderoperator.html">RenderOperator</a>.
-							Stores the references to the shader, the material and the mesh used for each node registered.
+							Stores the references to the shader, the coat and the mesh used for each node registered.
 						With these references, the already buffered data is retrieved when rendering.</p>
 					</div>
 				</div>
@@ -105,13 +105,15 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#drawbranch" class="tsd-kind-icon">draw<wbr>Branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#initialize" class="tsd-kind-icon">initialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#recalculateallnodetransforms" class="tsd-kind-icon">recalculate<wbr>All<wbr>Node<wbr>Transforms</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#removebranch" class="tsd-kind-icon">remove<wbr>Branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#removenode" class="tsd-kind-icon">remove<wbr>Node</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#setlights" class="tsd-kind-icon">set<wbr>Lights</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.rendermanager.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#update" class="tsd-kind-icon">update</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#updatebranch" class="tsd-kind-icon">update<wbr>Branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.rendermanager.html#updatenode" class="tsd-kind-icon">update<wbr>Node</a></li>
 							</ul>
@@ -131,7 +133,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L78">Render/RenderManager.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L82">Render/RenderManager.ts:82</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -161,7 +163,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L57">Render/RenderManager.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L57">Render/RenderManager.ts:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -192,7 +194,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#assert">assert</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L40">Render/RenderOperator.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L48">Render/RenderOperator.ts:48</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -235,13 +237,20 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L201">Render/RenderManager.ts:201</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L187">Render/RenderManager.ts:187</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clear the offscreen renderbuffer with the given <a href="fudge.color.html">Color</a></p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudge.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> =&nbsp;null</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -258,7 +267,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L213">Render/RenderManager.ts:213</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L200">Render/RenderManager.ts:200</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -297,7 +306,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getcanvas">getCanvas</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L64">Render/RenderOperator.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L73">Render/RenderOperator.ts:73</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -320,7 +329,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getcanvasrect">getCanvasRect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L70">Render/RenderOperator.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L85">Render/RenderOperator.ts:85</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -329,6 +338,29 @@
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="getrenderingcontext" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Rendering<wbr>Context</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Rendering<wbr>Context<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WebGL2RenderingContext</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getrenderingcontext">getRenderingContext</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L79">Render/RenderOperator.ts:79</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a reference to the rendering context</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">WebGL2RenderingContext</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -343,7 +375,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#getviewportrectangle">getViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L92">Render/RenderOperator.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L107">Render/RenderOperator.ts:107</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -366,34 +398,12 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#initialize">initialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L48">Render/RenderOperator.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L56">Render/RenderOperator.ts:56</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Initializes offscreen-canvas, renderingcontext and hardware viewport.</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="recalculateallnodetransforms" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> recalculate<wbr>All<wbr>Node<wbr>Transforms</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">recalculate<wbr>All<wbr>Node<wbr>Transforms<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L162">Render/RenderManager.ts:162</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Recalculate the world matrix of all registered nodes respecting their hierarchical relation.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -410,7 +420,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L110">Render/RenderManager.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L114">Render/RenderManager.ts:114</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -440,7 +450,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L94">Render/RenderManager.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L98">Render/RenderManager.ts:98</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -471,7 +481,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#setcanvassize">setCanvasSize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L77">Render/RenderOperator.ts:77</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L92">Render/RenderOperator.ts:92</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -492,6 +502,29 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="setlights" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Lights</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Lights<span class="tsd-signature-symbol">(</span>_lights<span class="tsd-signature-symbol">: </span><a href="../modules/fudge.html#maplighttypetolightlist" class="tsd-signature-type">MapLightTypeToLightList</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L165">Render/RenderManager.ts:165</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_lights: <a href="../modules/fudge.html#maplighttypetolightlist" class="tsd-signature-type">MapLightTypeToLightList</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="setviewportrectangle" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Viewport<wbr>Rectangle</h3>
@@ -503,7 +536,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.renderoperator.html">RenderOperator</a>.<a href="fudge.renderoperator.html#setviewportrectangle">setViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderOperator.ts#L85">Render/RenderOperator.ts:85</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderOperator.ts#L100">Render/RenderOperator.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -524,6 +557,28 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="update" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> update</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">update<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L179">Render/RenderManager.ts:179</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="updatebranch" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> update<wbr>Branch</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -533,7 +588,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L152">Render/RenderManager.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L158">Render/RenderManager.ts:158</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -563,12 +618,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Render/RenderManager.ts#L121">Render/RenderManager.ts:121</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Render/RenderManager.ts#L125">Render/RenderManager.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references</p>
+									<p>Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -625,13 +680,13 @@
 								<a href="fudge.rendermanager.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudge.rendermanager.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudge.rendermanager.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudge.rendermanager.html#initialize" class="tsd-kind-icon">initialize</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudge.rendermanager.html#recalculateallnodetransforms" class="tsd-kind-icon">recalculate<wbr>All<wbr>Node<wbr>Transforms</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.rendermanager.html#removebranch" class="tsd-kind-icon">remove<wbr>Branch</a>
@@ -642,8 +697,14 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudge.rendermanager.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.rendermanager.html#setlights" class="tsd-kind-icon">set<wbr>Lights</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudge.rendermanager.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.rendermanager.html#update" class="tsd-kind-icon">update</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.rendermanager.html#updatebranch" class="tsd-kind-icon">update<wbr>Branch</a>

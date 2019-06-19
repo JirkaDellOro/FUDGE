@@ -37,7 +37,7 @@ namespace RenderManagerManagement {
     }
     function recalculateNode(_event: Event): void {
         dumpRenderManager("Recalculate nodes");
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         delegate = removeFirstNode;
     }
     function removeFirstNode(_event: Event): void {

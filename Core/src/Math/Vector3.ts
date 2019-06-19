@@ -77,8 +77,7 @@ namespace Fudge {
          * @returns A new vector representing the sum of the given vectors
          */
         public static add(_a: Vector3, _b: Vector3): Vector3 {
-            let vector: Vector3 = new Vector3;
-            vector.data = [_a.x + _b.x, _a.y + _b.y, _a.z + _b.z];
+            let vector: Vector3 = new Vector3(_a.x + _b.x, _a.y + _b.y, _a.z + _b.z);
             return vector;
         }
         /**
@@ -143,6 +142,13 @@ namespace Fudge {
                 vector.data = [0, 0, 0];
             }
             return vector;
+        }
+
+        /**
+         * Retrieve the vector as an array with three elements
+         */
+        public getArray(): Float32Array {
+            return new Float32Array(this.data);
         }
     }
 }

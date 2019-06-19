@@ -2,12 +2,15 @@ Ziel
 #Generating and Closing AudioContext
 #Adding SoundSources
 #Adding Effects to existing SoundSources
-#
+#Usage of fetch() API
 
 
 
 TODO
-#TS Version
+#
 
 Probleme
 #
+
+Tipps
+#https://www.youtube.com/watch?v=3NgVlAscdcA

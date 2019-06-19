@@ -24,6 +24,13 @@ namespace Fudge {
      */
     export abstract class Mutable extends EventTarget {
         /**
+         * Retrieves the type of this mutable subclass as the name of the runtime class
+         * @returns The type of the mutable
+         */
+        public get type(): string {
+            return this.constructor.name;
+        }
+        /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
         public getMutator(): Mutator {
@@ -96,7 +103,7 @@ namespace Fudge {
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
          * @param _mutator
          */
-        protected mutate(_mutator: Mutator): void {
+        public mutate(_mutator: Mutator): void {
             // for (let attribute in _mutator)
             //     (<General>this)[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties

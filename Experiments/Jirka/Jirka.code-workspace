@@ -17,10 +17,6 @@
 			"path": "JSONTest"
 		},
 		{
-			"name": "WebGLTest1",
-			"path": "WebGLTest1"
-		},
-		{
 			"name": "Shapes",
 			"path": "Shapes"
 		},
@@ -101,13 +97,24 @@
 			"path": "EventSystem"
 		},
 		{
+			"name": "EventPassing",
 			"path": "EventPassing"
 		},
 		{
+			"name": "Audio",
 			"path": "Audio"
 		},
 		{
+			"name": "DeconstructMixin",
 			"path": "DeconstructMixin"
+		},
+		{
+			"name": "InjectMethod",
+			"path": "InjectMethod"
+		},
+		{
+			"name": "WebGL",
+			"path": "WebGL"
 		}
 	],
 	"settings": {}

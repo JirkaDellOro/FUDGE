@@ -1,0 +1,22 @@
+@startuml Rectangle
+skinparam monochrome true
+
+title Rectangle (Shape)
+
+
+partition createSketchPath {
+	:pos1, pos2: Vector2]
+	:p: SketchPath = new SketchPath()]
+	:p settings as set in UIHandler properties window;
+	:v1: SketchVertex = (pos1,false)
+	v2: SketchVertex = ({pos1.x,pos2.y},false)
+	v3: SketchVertex = (pos2,false)
+	v4: SketchVertex = ({pos2.x,pos1.y},false);
+	:p.addVertexToEnd(v1)
+	p.addVertexToEnd(v2)
+	p.addVertexToEnd(v3)
+	p.addVertexToEnd(v4);
+	:p]
+}
+
+@enduml

@@ -92,10 +92,11 @@ namespace Fudge {
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
+        
         public deserialize(_serialization: Serialization): Serializable {
             this.backgroundColor = _serialization.backgroundColor;
             this.backgroundEnabled = _serialization.backgroundEnabled;
@@ -103,7 +104,7 @@ namespace Fudge {
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -123,7 +124,11 @@ namespace Fudge {
                 types.projection = PROJECTION;
             return types;
         }
-
+        
+        public mutate(_mutator: Mutator): void {
+            super.mutate(_mutator);
+        }
+        
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.transform;
             super.reduceMutator(_mutator);

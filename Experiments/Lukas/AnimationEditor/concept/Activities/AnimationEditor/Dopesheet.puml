@@ -1,0 +1,28 @@
+@startuml Dopesheet
+skinparam monochrome true
+
+title Dopesheet
+
+partition moveKeyTo {
+	:_k: Key 
+	_pos: Vector 2]
+	:set _k.time to _pos.x, according to scale;
+	stop
+}
+
+partition updateView {
+	:get all Keys that should be visible;
+	:draw the Keys according to scale;
+	if() then (editor.selectedKey)
+		:draw the selectedKey in bold;
+	endif
+}
+
+partition scroll {
+	:change: Vector2]
+	:if scroll is a zoom, increase/decrease scale of x;
+	:updateView();
+	stop
+}
+
+@enduml

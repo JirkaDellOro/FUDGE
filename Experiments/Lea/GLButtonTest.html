@@ -9,8 +9,8 @@
             type: 'row',
             content: [{
                 type: 'component',
-                componentName: 'Scene Explorer',
-                title: "Scene Explorer", 
+                componentName: 'Scene explorer',
+                title: "Scene explorer", 
                 componentState: { label: 'A' }
             },
             {
@@ -65,7 +65,7 @@ var barComponent = function( container, state ){
 }
 //clickable dropdown menu
 function dropdown() {
-  document.getElementById("testbutton").classList.toggle("show");
+  document.getElementById("file").classList.toggle("show");
 }
 
 // Close the dropdown if the user clicks outside of it
@@ -107,9 +107,9 @@ var persistentComponent = function( container, state ){
   // Append it to the DOM
   container.getElement().append(  '<h2>I\'ll be saved to localStorage</h2>', input );
 };
-myLayout.registerComponent( 'Scene Explorer', persistentComponent );
+myLayout.registerComponent( 'Hierarchy', persistentComponent );
 myLayout.registerComponent( 'Viewport', persistentComponent );
-myLayout.registerComponent( 'Inspector', barComponent );
+myLayout.registerComponent( 'Inspector', persistentComponent );
 myLayout.registerComponent( 'Menubar', barComponent );
 myLayout.init();
 </script>

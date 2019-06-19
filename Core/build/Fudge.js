@@ -1,42 +1,10 @@
 "use strict";
-var Fudge;
-(function (Fudge) {
-    class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object) {
-            let serialization = {};
-            serialization[_object.constructor.name] = _object.serialize();
-            return serialization;
-        }
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-    }
-    Fudge.Serializer = Serializer;
-})(Fudge || (Fudge = {}));
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var Fudge;
 (function (Fudge) {
     /**
@@ -44,6 +12,13 @@ var Fudge;
      * thus providing and using interfaces created at runtime
      */
     class Mutable extends EventTarget {
+        /**
+         * Retrieves the type of this mutable subclass as the name of the runtime class
+         * @returns The type of the mutable
+         */
+        get type() {
+            return this.constructor.name;
+        }
         /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
@@ -122,6 +97,456 @@ var Fudge;
     }
     Fudge.Mutable = Mutable;
 })(Fudge || (Fudge = {}));
+//<reference path="../Coats/Coat.ts"/>
+var Fudge;
+//<reference path="../Coats/Coat.ts"/>
+(function (Fudge) {
+    class RenderInjector {
+        static decorateCoat(_constructor) {
+            let coatInjection = RenderInjector.coatInjections[_constructor.name];
+            if (!coatInjection) {
+                Fudge.Debug.error("No injection decorator defined for " + _constructor.name);
+            }
+            Object.defineProperty(_constructor.prototype, "useRenderData", {
+                value: coatInjection
+            });
+        }
+        static injectRenderDataForCoatColored(_renderShader) {
+            let colorUniformLocation = _renderShader.uniforms["u_color"];
+            let { r, g, b, a } = this.color;
+            let color = new Float32Array([r, g, b, a]);
+            Fudge.RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+        }
+        static injectRenderDataForCoatTextured(_renderShader) {
+            let crc3 = Fudge.RenderOperator.getRenderingContext();
+            if (this.renderData) {
+                // buffers exist
+                crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
+                crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
+            }
+            else {
+                this.renderData = {};
+                // TODO: check if all WebGL-Creations are asserted
+                const texture = Fudge.RenderManager.assert(crc3.createTexture());
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+                try {
+                    crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texture.image);
+                    crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, this.texture.image);
+                }
+                catch (_e) {
+                    Fudge.Debug.error(_e);
+                }
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.generateMipmap(crc3.TEXTURE_2D);
+                this.renderData["texture0"] = texture;
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+                this.useRenderData(_renderShader);
+            }
+        }
+    }
+    RenderInjector.coatInjections = {
+        "CoatColored": RenderInjector.injectRenderDataForCoatColored,
+        "CoatTextured": RenderInjector.injectRenderDataForCoatTextured
+    };
+    Fudge.RenderInjector = RenderInjector;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
+    class RenderOperator {
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert(_value, _message = "") {
+            if (_value === null)
+                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
+            return _value;
+        }
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         */
+        static initialize() {
+            let contextAttributes = { alpha: false, antialias: false };
+            let canvas = document.createElement("canvas");
+            RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
+            // Enable backface- and zBuffer-culling.
+            RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+            // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
+            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+        }
+        /**
+         * Return a reference to the offscreen-canvas
+         */
+        static getCanvas() {
+            return RenderOperator.crc3.canvas;
+        }
+        /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext() {
+            return RenderOperator.crc3;
+        }
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
+        static getCanvasRect() {
+            let canvas = RenderOperator.crc3.canvas;
+            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
+        }
+        /**
+         * Set the size of the offscreen-canvas.
+         */
+        static setCanvasSize(_width, _height) {
+            RenderOperator.crc3.canvas.width = _width;
+            RenderOperator.crc3.canvas.height = _height;
+        }
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
+        static setViewportRectangle(_rect) {
+            Object.assign(RenderOperator.rectViewport, _rect);
+            RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
+        static getViewportRectangle() {
+            return RenderOperator.rectViewport;
+        }
+        /**
+         * Convert light data to flat arrays
+         */
+        static createRenderLights(_lights) {
+            let renderLights = {};
+            for (let entry of _lights) {
+                switch (entry[0]) {
+                    case Fudge.LightAmbient.name:
+                        let ambient = [];
+                        for (let light of entry[1]) {
+                            let c = light.getLight().color;
+                            ambient.push(c.r, c.g, c.b, c.a);
+                        }
+                        renderLights["u_ambient"] = new Float32Array(ambient);
+                        break;
+                    case Fudge.LightDirectional.name:
+                        let directional = [];
+                        for (let light of entry[1]) {
+                            let c = light.getLight().color;
+                            let d = light.getLight().direction;
+                            directional.push(c.r, c.g, c.b, c.a, d.x, d.y, d.z);
+                        }
+                        renderLights["u_directional"] = new Float32Array(directional);
+                        break;
+                    default:
+                        Fudge.Debug.warn("Shaderstructure undefined for", entry[0]);
+                }
+            }
+            return renderLights;
+        }
+        /**
+         * Set light data in shaders
+         */
+        static setLightsInShader(_renderShader, _lights) {
+            RenderOperator.useProgram(_renderShader);
+            let uni = _renderShader.uniforms;
+            let ambient = uni["u_ambient.color"];
+            if (ambient) {
+                let cmpLights = _lights.get("LightAmbient");
+                if (cmpLights) {
+                    // TODO: add up ambient lights to a single color
+                    // let result: Color = new Color(0, 0, 0, 1);
+                    for (let cmpLight of cmpLights)
+                        // for now, only the last is relevant
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                }
+            }
+            let nDirectional = uni["u_nLightsDirectional"];
+            if (nDirectional) {
+                let cmpLights = _lights.get("LightDirectional");
+                if (cmpLights) {
+                    let n = cmpLights.length;
+                    RenderOperator.crc3.uniform1ui(nDirectional, n);
+                    for (let i = 0; i < n; i++) {
+                        let light = cmpLights[i].getLight();
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
+                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.getArray());
+                    }
+                }
+            }
+            // debugger;
+        }
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _renderCoat
+         * @param _projection
+         */
+        static draw(_renderShader, _renderBuffers, _renderCoat, _world, _projection) {
+            RenderOperator.useProgram(_renderShader);
+            // RenderOperator.useBuffers(_renderBuffers);
+            // RenderOperator.useParameter(_renderCoat);
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
+            RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Fudge.Mesh.getBufferSpecification());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            if (_renderShader.attributes["a_textureUVs"]) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
+                RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            }
+            // Supply matrixdata to shader. 
+            let uProjection = _renderShader.uniforms["u_projection"];
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
+            if (_renderShader.uniforms["u_world"]) {
+                let uWorld = _renderShader.uniforms["u_world"];
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
+                RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Fudge.Mesh.getBufferSpecification());
+            }
+            // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
+            _renderCoat.coat.useRenderData(_renderShader);
+            // Draw call
+            // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
+            RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        }
+        // #region Shaderprogram 
+        static createProgram(_shaderClass) {
+            let crc3 = RenderOperator.crc3;
+            let program = crc3.createProgram();
+            let renderShader;
+            try {
+                crc3.attachShader(program, RenderOperator.assert(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+                crc3.attachShader(program, RenderOperator.assert(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+                crc3.linkProgram(program);
+                let error = RenderOperator.assert(crc3.getProgramInfoLog(program));
+                if (error !== "") {
+                    throw new Error("Error linking Shader: " + error);
+                }
+                renderShader = {
+                    program: program,
+                    attributes: detectAttributes(),
+                    uniforms: detectUniforms()
+                };
+            }
+            catch (_error) {
+                Fudge.Debug.error(_error);
+                debugger;
+            }
+            return renderShader;
+            function compileShader(_shaderCode, _shaderType) {
+                let webGLShader = crc3.createShader(_shaderType);
+                crc3.shaderSource(webGLShader, _shaderCode);
+                crc3.compileShader(webGLShader);
+                let error = RenderOperator.assert(crc3.getShaderInfoLog(webGLShader));
+                if (error !== "") {
+                    throw new Error("Error compiling shader: " + error);
+                }
+                // Check for any compilation errors.
+                if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
+                    alert(crc3.getShaderInfoLog(webGLShader));
+                    return null;
+                }
+                return webGLShader;
+            }
+            function detectAttributes() {
+                let detectedAttributes = {};
+                let attributeCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
+                for (let i = 0; i < attributeCount; i++) {
+                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(program, i));
+                    if (!attributeInfo) {
+                        break;
+                    }
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
+                }
+                return detectedAttributes;
+            }
+            function detectUniforms() {
+                let detectedUniforms = {};
+                let uniformCount = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+                for (let i = 0; i < uniformCount; i++) {
+                    let info = RenderOperator.assert(crc3.getActiveUniform(program, i));
+                    if (!info) {
+                        break;
+                    }
+                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(program, info.name));
+                }
+                return detectedUniforms;
+            }
+        }
+        static useProgram(_shaderInfo) {
+            RenderOperator.crc3.useProgram(_shaderInfo.program);
+            RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
+        }
+        static deleteProgram(_program) {
+            if (_program) {
+                RenderOperator.crc3.deleteProgram(_program.program);
+                delete _program.attributes;
+                delete _program.uniforms;
+            }
+        }
+        // #endregion
+        // #region Meshbuffer
+        static createBuffers(_mesh) {
+            let vertices = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
+            let indices = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
+            let textureUVs = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
+            let normalsFace = RenderOperator.assert(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
+            let bufferInfo = {
+                vertices: vertices,
+                indices: indices,
+                nIndices: _mesh.getIndexCount(),
+                textureUVs: textureUVs,
+                normalsFace: normalsFace
+            };
+            return bufferInfo;
+        }
+        static useBuffers(_renderBuffers) {
+            // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+        }
+        static deleteBuffers(_renderBuffers) {
+            if (_renderBuffers) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.vertices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.textureUVs);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.indices);
+            }
+        }
+        // #endregion
+        // #region MaterialParameters
+        static createParameter(_coat) {
+            // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
+            let coatInfo = {
+                //vao: null,
+                coat: _coat
+            };
+            return coatInfo;
+        }
+        static useParameter(_coatInfo) {
+            // RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
+        }
+        static deleteParameter(_coatInfo) {
+            if (_coatInfo) {
+                RenderOperator.crc3.bindVertexArray(null);
+                // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
+            }
+        }
+        // #endregion
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static setAttributeStructure(_attributeLocation, _bufferSpecification) {
+            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+        }
+    }
+    Fudge.RenderOperator = RenderOperator;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderInjector.ts"/>
+/// <reference path="../Render/RenderOperator.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Render/RenderInjector.ts"/>
+/// <reference path="../Render/RenderOperator.ts"/>
+(function (Fudge) {
+    // interface ShaderParameters {
+    //     [key: string]: number | Color;
+    // }
+    class Coat extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.name = "Coat";
+        }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
+        useRenderData(_renderShader) { }
+        reduceMutator() { }
+    }
+    Fudge.Coat = Coat;
+    let CoatColored = class CoatColored extends Coat {
+        constructor(_color) {
+            super();
+            this.color = _color || new Fudge.Color(0.5, 0.5, 0.5, 1);
+        }
+    };
+    CoatColored = __decorate([
+        Fudge.RenderInjector.decorateCoat
+    ], CoatColored);
+    Fudge.CoatColored = CoatColored;
+    let CoatTextured = class CoatTextured extends Coat {
+        constructor() {
+            super(...arguments);
+            this.texture = null;
+        }
+    };
+    CoatTextured = __decorate([
+        Fudge.RenderInjector.decorateCoat
+    ], CoatTextured);
+    Fudge.CoatTextured = CoatTextured;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class Serializer {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object) {
+            let serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
+        }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    Fudge.Serializer = Serializer;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 var Fudge;
@@ -144,13 +569,6 @@ var Fudge;
         }
         get isActive() {
             return this.active;
-        }
-        /**
-         * Retrieves the type of this components subclass as the name of the runtime class
-         * @returns The type of the component
-         */
-        get type() {
-            return this.constructor.name;
         }
         /**
          * Is true, when only one instance of the component class can be attached to a node
@@ -296,7 +714,7 @@ var Fudge;
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
@@ -307,7 +725,7 @@ var Fudge;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -326,12 +744,33 @@ var Fudge;
                 types.projection = PROJECTION;
             return types;
         }
+        mutate(_mutator) {
+            super.mutate(_mutator);
+        }
         reduceMutator(_mutator) {
             delete _mutator.transform;
             super.reduceMutator(_mutator);
         }
     }
     Fudge.ComponentCamera = ComponentCamera;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Attaches a light to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentLight extends Fudge.Component {
+        constructor(_light = null) {
+            super();
+            this.singleton = false;
+            this.light = _light;
+        }
+        getLight() {
+            return this.light;
+        }
+    }
+    Fudge.ComponentLight = ComponentLight;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -344,7 +783,7 @@ var Fudge;
         initialize(_material) {
             this.material = _material;
         }
-        get Material() {
+        getMaterial() {
             return this.material;
         }
     }
@@ -360,100 +799,24 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.mesh = null;
-            // /**
-            //  * Computes the normal for each triangle of this mesh and applies it to each of the triangles vertices.
-            //  */
-            // private computeNormals(): Float32Array {
-            //     let normals: number[] = [];
-            //     let normal: Vector3 = new Vector3;
-            //     let p: Float32Array = this.vertices;
-            //     for (let i: number = 0; i < p.length; i += 9) {
-            //         let vector1: Vector3 = new Vector3(p[i + 3] - p[i], p[i + 4] - p[i + 1], p[i + 5] - p[i + 2]);
-            //         let vector2: Vector3 = new Vector3(p[i + 6] - p[i], p[i + 7] - p[i + 1], p[i + 8] - p[i + 2]);
-            //         normal = Vector3.normalize(Vector3.cross(vector1, vector2));
-            //         normals.push(normal.x, normal.y, normal.z);
-            //         normals.push(normal.x, normal.y, normal.z);
-            //         normals.push(normal.x, normal.y, normal.z);
-            //     }
-            //     return new Float32Array(normals);
-            // }
-            // private initialize(_size: number = 3, _dataType: number = gl2.FLOAT, _normalize: boolean = false): void {
-            //     this.vertices = this.mesh.getVertices();
-            //     this.bufferSpecification = {
-            //         size: _size,
-            //         dataType: _dataType,
-            //         normalize: _normalize,
-            //         stride: 0,
-            //         offset: 0
-            //     };
-            //     this.vertexCount = this.vertices.length / this.bufferSpecification.size;
-            //     if ((this.vertexCount % this.bufferSpecification.size) != 0) {
-            //         console.log(this.vertexCount);
-            //         throw new Error("Number of entries in positions[] and size do not match.");
-            //     }
-            //     this.normals = this.computeNormals();
-            // }
         }
-        // private vertices: Float32Array; // The Mesh's vertexpositions.
-        // private vertexCount: number; // The amount of Vertices that need to be drawn.
-        // private bufferSpecification: BufferSpecification; // The dataspecifications for the vertexbuffer.
-        // private normals: Float32Array; // The normals for each vertex. (As of yet, they are not used, but they are necessary for shading with a lightsource)
         setMesh(_mesh) {
             this.mesh = _mesh;
-            // this.initialize();
         }
         getMesh() {
             return this.mesh;
         }
-        // public getBufferSpecification(): BufferSpecification {
-        //     return this.bufferSpecification;
-        // }
-        // public getVertexCount(): number {
-        //     return this.vertexCount;
-        // }
-        // public getNormals(): Float32Array {
-        //     return this.normals;
-        // }
-        // /**
-        //  * Sets the color for each vertex to the referenced material's color and supplies the data to the colorbuffer.
-        //  * @param _materialComponent The materialcomponent attached to the same node.
-        //  */
-        // public applyColor(_materialComponent: ComponentMaterial): void {
-        //     let colorPerPosition: number[] = [];
-        //     for (let i: number = 0; i < this.vertexCount; i++) {
-        //         colorPerPosition.push(_materialComponent.Material.Color.x, _materialComponent.Material.Color.y, _materialComponent.Material.Color.z);
-        //     }
-        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Uint8Array(colorPerPosition), gl2.STATIC_DRAW);
-        // }
-        // /**
-        //  * Generates UV coordinates for the texture based on the vertices of the mesh the texture was added to.
-        //  */
-        // public setTextureCoordinates(): void {
-        //     let textureCoordinates: number[] = [];
-        //     let quadCount: number = this.vertexCount / 6;
-        //     for (let i: number = 0; i < quadCount; i++) {
-        //         textureCoordinates.push(
-        //             0, 1,
-        //             1, 1,
-        //             0, 0,
-        //             0, 0,
-        //             1, 1,
-        //             1, 0
-        //         );
-        //     }
-        //     gl2.bufferData(gl2.ARRAY_BUFFER, new Float32Array(textureCoordinates), gl2.STATIC_DRAW);
-        // }
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.setMesh(mesh);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
     }
@@ -583,13 +946,13 @@ var Fudge;
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization = {
                 local: this.local.serialize(),
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             this.local.deserialize(_serialization.local);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
     }
@@ -627,13 +990,13 @@ var Fudge;
         serialize() {
             let serialization = {
                 // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             // this.worldMatrix.deserialize(_serialization.worldMatrix);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
         mutate(_mutator) {
@@ -853,6 +1216,9 @@ var Fudge;
             this.b = _b;
             this.a = _a;
         }
+        getArray() {
+            return new Float32Array([this.r, this.g, this.b, this.a]);
+        }
     }
     Fudge.Color = Color;
 })(Fudge || (Fudge = {}));
@@ -939,37 +1305,39 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
-        // TODO: verify the connection of shader and material. The shader actually defines the properties of the material
-        constructor(_name, _color, _shader) {
+        constructor(_name, _shader, _coat) {
             this.name = _name;
-            this.shaderClass = _shader;
-            this.color = _color;
-            // this.textureBufferSpecification = { size: 2, dataType: gl2.FLOAT, normalize: true, stride: 0, offset: 0 };
-            this.textureEnabled = false;
-            this.textureSource = "";
+            this.shaderType = _shader;
+            if (_shader) {
+                if (_coat)
+                    this.setCoat(_coat);
+                else
+                    this.setCoat(this.createCoatMatchingShader());
+            }
         }
-        // Get methods. ######################################################################################
-        get Shader() {
-            return this.shaderClass;
+        createCoatMatchingShader() {
+            let coat = new (this.shaderType.getCoat())();
+            return coat;
         }
-        get Name() {
-            return this.name;
+        setCoat(_coat) {
+            if (_coat.constructor != this.shaderType.getCoat())
+                throw (new Error("Shader and coat don't match"));
+            this.coat = _coat;
         }
-        get Color() {
-            return this.color;
+        getCoat() {
+            return this.coat;
         }
-        set Color(_color) {
-            this.color = _color;
+        setShader(_shaderType) {
+            this.shaderType = _shaderType;
+            let coat = this.createCoatMatchingShader();
+            coat.mutate(this.coat.getMutator());
         }
-        get TextureEnabled() {
-            return this.textureEnabled;
-        }
-        get TextureSource() {
-            return this.textureSource;
+        getShader() {
+            return this.shaderType;
         }
     }
     Fudge.Material = Material;
@@ -1262,6 +1630,80 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Light extends Fudge.Mutable {
+        constructor(_color = new Fudge.Color(1, 1, 1, 1)) {
+            super();
+            this.color = _color;
+        }
+        reduceMutator() { }
+    }
+    Fudge.Light = Light;
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```text
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+        constructor(_color = new Fudge.Color(1, 1, 1, 1)) {
+            super(_color);
+        }
+    }
+    Fudge.LightAmbient = LightAmbient;
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```text
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        constructor(_color = new Fudge.Color(1, 1, 1, 1), _direction = new Fudge.Vector3(0, -1, 0)) {
+            super(_color);
+            this.direction = new Fudge.Vector3(0, -1, 0);
+            this.direction = _direction;
+        }
+    }
+    Fudge.LightDirectional = LightDirectional;
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```text
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        constructor() {
+            super(...arguments);
+            this.range = 10;
+        }
+    }
+    Fudge.LightPoint = LightPoint;
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```text
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+    Fudge.LightSpot = LightSpot;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
+var Fudge;
+/// <reference path="../Lights/Light.ts"/>
+/// <reference path="../Components/ComponentLight.ts"/>
+(function (Fudge) {
+    /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of [[Framing]] objects. The stages involved are in order of rendering
@@ -1273,7 +1715,6 @@ var Fudge;
             super(...arguments);
             this.name = "Viewport"; // The name to call this viewport by.
             this.camera = null; // The camera representing the view parameters to render the branch.
-            this.branch = null; // The first node in the tree(branch) that will be rendered.
             // TODO: verify if client to canvas should be in Viewport or somewhere else (Window, Container?)
             // Multiple viewports using the same canvas shouldn't differ here...
             // different framing methods can be used, this is the default
@@ -1283,6 +1724,8 @@ var Fudge;
             this.frameSourceToRender = new Fudge.FramingScaled();
             this.adjustingFrames = true;
             this.adjustingCamera = true;
+            this.lights = null;
+            this.branch = null; // The first node in the tree(branch) that will be rendered.
             this.crc2 = null;
             this.canvas = null;
             /**
@@ -1331,32 +1774,6 @@ var Fudge;
                 let event = new Fudge.WheelEventƒ("ƒ" + _event.type, _event);
                 this.dispatchEvent(event);
             };
-            /*/*
-             * Initializes the colorbuffer for a node depending on its mesh- and materialcomponent.
-             * @param _material The node's materialcomponent.
-             * @param _mesh The node's meshcomponent.
-             */
-            // private initializeNodeMaterial(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            //     // let colorBuffer: WebGLBuffer = GLUtil.assert<WebGLBuffer>(gl2.createBuffer());
-            //     // gl2.bindBuffer(gl2.ARRAY_BUFFER, colorBuffer);
-            //     // _meshComponent.applyColor(_materialComponent);
-            //     //gl2.enableVertexAttribArray(colorUniformLocation);
-            //     // GLUtil.attributePointer(colorUniformLocation, _materialComponent.Material.ColorBufferSpecification);
-            // }
-            /*/*
-             * Initializes the texturebuffer for a node, depending on its mesh- and materialcomponent.
-             * @param _material The node's materialcomponent.
-             * @param _mesh The node's meshcomponent.
-             */
-            // private initializeNodeTexture(_materialComponent: ComponentMaterial, _meshComponent: ComponentMesh): void {
-            //     let textureCoordinateAttributeLocation: number = _materialComponent.Material.TextureCoordinateLocation;
-            //     let textureCoordinateBuffer: WebGLBuffer = gl2.createBuffer();
-            //     gl2.bindBuffer(gl2.ARRAY_BUFFER, textureCoordinateBuffer);
-            //     _meshComponent.setTextureCoordinates();
-            //     gl2.enableVertexAttribArray(textureCoordinateAttributeLocation);
-            //     GLUtil.attributePointer(textureCoordinateAttributeLocation, _materialComponent.Material.TextureBufferSpecification);
-            //     GLUtil.createTexture(_materialComponent.Material.TextureSource);
-            // }
         }
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
@@ -1365,12 +1782,12 @@ var Fudge;
          */
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
-            this.branch = _branch;
             this.camera = _camera;
             this.canvas = _canvas;
             this.crc2 = _canvas.getContext("2d");
             this.rectSource = Fudge.RenderManager.getCanvasRect();
             this.rectDestination = this.getClientRectangle();
+            this.setBranch(_branch);
         }
         /**
          * Retrieve the 2D-context attached to the destination canvas
@@ -1391,6 +1808,39 @@ var Fudge;
             return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
         }
         /**
+         * Set the branch to be drawn in the viewport.
+         */
+        setBranch(_branch) {
+            if (this.branch) {
+                this.branch.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
+                this.branch.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
+            }
+            this.branch = _branch;
+            this.collectLights();
+            this.branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
+            this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
+            Fudge.Debug.log(this.lights);
+        }
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        collectLights() {
+            // TODO: make private
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights = node.getComponents(Fudge.ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type = cmpLight.getLight().type;
+                    let lightsOfType = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+                }
+            }
+        }
+        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph() {
@@ -1402,7 +1852,7 @@ var Fudge;
         }
         // #region Drawing
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         draw() {
             if (!this.camera.isActive)
@@ -1414,6 +1864,7 @@ var Fudge;
             // HACK! no need to addBranch and recalc for each viewport and frame
             Fudge.RenderManager.clear(this.camera.getBackgoundColor());
             Fudge.RenderManager.addBranch(this.branch);
+            Fudge.RenderManager.setLights(this.lights);
             Fudge.RenderManager.drawBranch(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(Fudge.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
@@ -1525,6 +1976,9 @@ var Fudge;
                 _target.addEventListener(_type, _handler);
             else
                 _target.removeEventListener(_type, _handler);
+        }
+        hndComponentEvent(_event) {
+            Fudge.Debug.log(_event);
         }
         // #endregion
         /**
@@ -2239,8 +2693,7 @@ var Fudge;
          * @returns A new vector representing the sum of the given vectors
          */
         static add(_a, _b) {
-            let vector = new Vector3;
-            vector.data = [_a.x + _b.x, _a.y + _b.y, _a.z + _b.z];
+            let vector = new Vector3(_a.x + _b.x, _a.y + _b.y, _a.z + _b.z);
             return vector;
         }
         /**
@@ -2308,27 +2761,32 @@ var Fudge;
             }
             return vector;
         }
+        /**
+         * Retrieve the vector as an array with three elements
+         */
+        getArray() {
+            return new Float32Array(this.data);
+        }
     }
     Fudge.Vector3 = Vector3;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Abstract base class for all meshes.
+     * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Mesh {
-        getVertices() {
-            return this.vertices;
+        static getBufferSpecification() {
+            return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
         }
-        ;
         getVertexCount() {
-            return this.vertices.length / this.getBufferSpecification().size;
+            return this.vertices.length / Mesh.getBufferSpecification().size;
         }
-        getBufferSpecification() {
-            return {
-                size: 3,
-                dataType: WebGL2RenderingContext.FLOAT,
-                normalize: false,
-                stride: 0,
-                offset: 0
-            };
+        getIndexCount() {
+            return this.indices.length;
         }
     }
     Fudge.Mesh = Mesh;
@@ -2336,37 +2794,25 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * ```text
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Fudge.Mesh {
-        constructor(_width, _height, _depth) {
+        constructor() {
             super();
-            this.width = _width;
-            this.height = _height;
-            this.depth = _depth;
             this.create();
         }
         create() {
-            this.vertices = new Float32Array([
-                //front
-                -1, -1, 1, /**/ 1, -1, 1, /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
-                //back
-                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
-                //left
-                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
-                //right
-                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
-                //top
-                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
-                //bottom
-                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
-            ]);
-            for (let iVertex = 0; iVertex < this.vertices.length; iVertex += 3) {
-                this.vertices[iVertex] *= this.width / 2;
-                this.vertices[iVertex + 1] *= this.height / 2;
-                this.vertices[iVertex + 2] *= this.depth / 2;
-            }
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
         serialize() {
             let serialization = {};
@@ -2374,11 +2820,84 @@ var Fudge;
             return serialization;
         }
         deserialize(_serialization) {
-            this.width = _serialization.width;
-            this.height = _serialization.height;
-            this.depth = _serialization.depth;
             this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
+        }
+        createVertices() {
+            let vertices = new Float32Array([
+                // First wrap
+                // front
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1, /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
+                // back
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1, /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1,
+                // Second wrap
+                // front
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1, /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
+                // back
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1, /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1
+            ]);
+            // scale down to a length of 1 for all edges
+            vertices = vertices.map(_value => _value / 2);
+            return vertices;
+        }
+        createIndices() {
+            let indices = new Uint16Array([
+                // First wrap
+                // front
+                1, 2, 0, 2, 3, 0,
+                // right
+                2, 6, 3, 6, 7, 3,
+                // back
+                6, 5, 7, 5, 4, 7,
+                // Second wrap
+                // left
+                5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8, 4 + 8,
+                // top
+                4 + 8, 0 + 8, 3 + 8, 7 + 8, 4 + 8, 3 + 8,
+                // bottom
+                5 + 8, 6 + 8, 1 + 8, 6 + 8, 2 + 8, 1 + 8
+                /*,
+                // left
+                4, 5, 1, 4, 1, 0,
+                // top
+                4, 0, 3, 4, 3, 7,
+                // bottom
+                1, 5, 6, 1, 6, 2
+                */
+            ]);
+            return indices;
+        }
+        createTextureUVs() {
+            let textureUVs = new Float32Array([
+                // First wrap
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0, /*5*/ 3, 1, /*6*/ 2, 1, /*7*/ 2, 0,
+                // Second wrap
+                // front
+                /*0*/ 1, 0, /*1*/ 1, 1, /*2*/ 1, 2, /*3*/ 1, -1,
+                // back
+                /*4*/ 0, 0, /*5*/ 0, 1, /*6*/ 0, 2, /*7*/ 0, -1
+            ]);
+            return textureUVs;
+        }
+        createFaceNormals() {
+            let normals = new Float32Array([
+                // for each triangle, the last vertex of the three defining refers to the normalvector when using flat shading
+                // First wrap
+                // front
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 1, 0, 0,
+                // back
+                /*4*/ 0, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, -1,
+                // Second wrap
+                // front
+                /*0*/ 0, 0, 0, /*1*/ 0, -1, 0, /*2*/ 0, 0, 0, /*3*/ 0, 1, 0,
+                // back
+                /*4*/ -1, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, 0
+            ]);
+            //normals = this.createVertices();
+            return normals;
         }
     }
     Fudge.MeshCube = MeshCube;
@@ -2386,211 +2905,149 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
+     * ```text
+     *               4
+     *              /\`.
+     *            3/__\_\ 2
+     *           0/____\/1
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class RenderOperator {
-        /**
-        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
-        */
-        static assert(_value, _message = "") {
-            if (_value === null)
-                throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
-            return _value;
+    class MeshPyramid extends Fudge.Mesh {
+        constructor() {
+            super();
+            this.create();
         }
-        /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
-         */
-        static initialize() {
-            let contextAttributes = { alpha: false, antialias: false };
-            let canvas = document.createElement("canvas");
-            RenderOperator.crc3 = RenderOperator.assert(canvas.getContext("webgl2", contextAttributes), "WebGL-context couldn't be created");
-            // Enable backface- and zBuffer-culling.
-            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
-            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
-            RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+        create() {
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
-        /**
-         * Return a reference to the offscreen-canvas
-         */
-        static getCanvas() {
-            return RenderOperator.crc3.canvas;
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
         }
-        /**
-         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
-         */
-        static getCanvasRect() {
-            let canvas = RenderOperator.crc3.canvas;
-            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
         }
-        /**
-         * Set the size of the offscreen-canvas.
-         */
-        static setCanvasSize(_width, _height) {
-            RenderOperator.crc3.canvas.width = _width;
-            RenderOperator.crc3.canvas.height = _height;
+        createVertices() {
+            let vertices = new Float32Array([
+                // floor
+                /*0*/ -1, 0, 1, /*1*/ 1, 0, 1, /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,
+                // tip
+                /*4*/ 0, 2, 0,
+                // floor again for texturing and normals
+                /*5*/ -1, 0, 1, /*6*/ 1, 0, 1, /*7*/ 1, 0, -1, /*8*/ -1, 0, -1
+            ]);
+            // scale down to a length of 1 for bottom edges and height
+            vertices = vertices.map(_value => _value / 2);
+            return vertices;
         }
-        /**
-         * Set the area on the offscreen-canvas to render the camera image to.
-         * @param _rect
-         */
-        static setViewportRectangle(_rect) {
-            Object.assign(RenderOperator.rectViewport, _rect);
-            RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+        createIndices() {
+            let indices = new Uint16Array([
+                // front
+                4, 0, 1,
+                // right
+                4, 1, 2,
+                // back
+                4, 2, 3,
+                // left
+                4, 3, 0,
+                // bottom
+                5 + 0, 5 + 2, 5 + 1, 5 + 0, 5 + 3, 5 + 2
+            ]);
+            return indices;
         }
-        /**
-         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
-         */
-        static getViewportRectangle() {
-            return RenderOperator.rectViewport;
+        createTextureUVs() {
+            let textureUVs = new Float32Array([
+                // front
+                /*0*/ 0, 1, /*1*/ 0.5, 1, /*2*/ 1, 1, /*3*/ 0.5, 1,
+                // back
+                /*4*/ 0.5, 0,
+                /*5*/ 0, 0, /*6*/ 1, 0, /*7*/ 1, 1, /*8*/ 0, 1
+            ]);
+            return textureUVs;
         }
-        /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
-         * @param _projection
-         */
-        static draw(shaderInfo, bufferInfo, materialInfo, _projection) {
-            RenderOperator.useBuffer(bufferInfo);
-            RenderOperator.useParameter(materialInfo);
-            RenderOperator.useProgram(shaderInfo);
-            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
-            // Supply matrixdata to shader. 
-            let matrixLocation = shaderInfo.uniforms["u_matrix"];
-            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
-            // Supply color
-            let colorUniformLocation = shaderInfo.uniforms["u_color"];
-            let c = materialInfo.color;
-            let color = new Float32Array([c.r, c.g, c.b, 1.0]);
-            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
-            // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
-        }
-        // #region Shaderprogram 
-        static createProgram(_shaderClass) {
-            let crc3 = RenderOperator.crc3;
-            let shaderProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error = RenderOperator.assert(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
+        createFaceNormals() {
+            let normals = [];
+            let vertices = [];
+            for (let v = 0; v < this.vertices.length; v += 3)
+                vertices.push(new Fudge.Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
+            for (let i = 0; i < this.indices.length; i += 3) {
+                let vertex = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+                let v0 = Fudge.Vector3.subtract(vertices[vertex[0]], vertices[vertex[1]]);
+                let v1 = Fudge.Vector3.subtract(vertices[vertex[0]], vertices[vertex[2]]);
+                let normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(v1, v0));
+                let index = vertex[2] * 3;
+                normals[index] = normal.x;
+                normals[index + 1] = normal.y;
+                normals[index + 2] = normal.z;
             }
-            let program = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
-            function compileShader(_shaderCode, _shaderType) {
-                let webGLShader = crc3.createShader(_shaderType);
-                crc3.shaderSource(webGLShader, _shaderCode);
-                crc3.compileShader(webGLShader);
-                let error = RenderOperator.assert(crc3.getShaderInfoLog(webGLShader));
-                if (error !== "") {
-                    throw new Error("Error compiling shader: " + error);
-                }
-                // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
-                    alert(crc3.getShaderInfoLog(webGLShader));
-                    return null;
-                }
-                return webGLShader;
-            }
-            function detectAttributes() {
-                let detectedAttributes = {};
-                let attributeCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
-                for (let i = 0; i < attributeCount; i++) {
-                    let attributeInfo = RenderOperator.assert(crc3.getActiveAttrib(shaderProgram, i));
-                    if (!attributeInfo) {
-                        break;
-                    }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
-                }
-                return detectedAttributes;
-            }
-            function detectUniforms() {
-                let detectedUniforms = {};
-                let uniformCount = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
-                for (let i = 0; i < uniformCount; i++) {
-                    let info = RenderOperator.assert(crc3.getActiveUniform(shaderProgram, i));
-                    if (!info) {
-                        break;
-                    }
-                    detectedUniforms[info.name] = RenderOperator.assert(crc3.getUniformLocation(shaderProgram, info.name));
-                }
-                return detectedUniforms;
-            }
-        }
-        static useProgram(_shaderInfo) {
-            RenderOperator.crc3.useProgram(_shaderInfo.program);
-            RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
-        }
-        static deleteProgram(_program) {
-            if (_program) {
-                RenderOperator.crc3.deleteProgram(_program.program);
-                delete _program.attributes;
-                delete _program.uniforms;
-            }
-        }
-        // #endregion
-        // #region Meshbuffer
-        static createBuffer(_mesh) {
-            let buffer = RenderOperator.assert(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
-            let bufferInfo = {
-                buffer: buffer,
-                target: RenderOperator.crc3.ARRAY_BUFFER,
-                specification: _mesh.getBufferSpecification(),
-                vertexCount: _mesh.getVertexCount()
-            };
-            return bufferInfo;
-        }
-        static useBuffer(_bufferInfo) {
-            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
-        }
-        static deleteBuffer(_bufferInfo) {
-            if (_bufferInfo) {
-                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
-            }
-        }
-        // #endregion
-        // #region MaterialParameters
-        static createParameter(_material) {
-            let vao = RenderOperator.assert(RenderOperator.crc3.createVertexArray());
-            let materialInfo = {
-                vao: vao,
-                color: _material.Color
-            };
-            return materialInfo;
-        }
-        static useParameter(_materialInfo) {
-            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
-        }
-        static deleteParameter(_materialInfo) {
-            if (_materialInfo) {
-                RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
-            }
-        }
-        // #endregion
-        // #region Utilities
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        static attributePointer(_attributeLocation, _bufferSpecification) {
-            RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+            normals.push(0, 0, 0);
+            Fudge.Debug.log(vertices);
+            Fudge.Debug.log(normals);
+            return new Float32Array(normals);
         }
     }
-    Fudge.RenderOperator = RenderOperator;
+    Fudge.MeshPyramid = MeshPyramid;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Generate a simple quad with edges of length 1, the face consisting of two trigons
+     * ```text
+     *        0 __ 3
+     *         |__|
+     *        1    2
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshQuad extends Fudge.Mesh {
+        constructor() {
+            super();
+            this.create();
+        }
+        create() {
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+        }
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
+        }
+        createVertices() {
+            let vertices = new Float32Array([
+                /*0*/ -1, 1, 0, /*1*/ -1, -1, 0, /*2*/ 1, -1, 0, /*3*/ 1, 1, 0
+            ]);
+            vertices = vertices.map(_value => _value / 2);
+            return vertices;
+        }
+        createIndices() {
+            let indices = new Uint16Array([
+                0, 1, 2, 0, 2, 3
+            ]);
+            return indices;
+        }
+        createTextureUVs() {
+            let textureUVs = new Float32Array([
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0
+            ]);
+            return textureUVs;
+        }
+        createFaceNormals() { return null; }
+    }
+    Fudge.MeshQuad = MeshQuad;
 })(Fudge || (Fudge = {}));
 /// <reference path="RenderOperator.ts"/>
 var Fudge;
@@ -2598,7 +3055,7 @@ var Fudge;
 (function (Fudge) {
     /**
      * This class manages the references to render data used by nodes.
-     * Multiple nodes may refer to the same data via their references to shader, material and mesh
+     * Multiple nodes may refer to the same data via their references to shader, coat and mesh
      */
     class Reference {
         constructor(_reference) {
@@ -2621,7 +3078,7 @@ var Fudge;
     }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends Fudge.RenderOperator {
@@ -2633,13 +3090,16 @@ var Fudge;
         static addNode(_node) {
             if (this.nodes.get(_node))
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
-            this.createReference(this.programs, shader, this.createProgram);
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            this.createReference(this.parameters, material, this.createParameter);
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            if (!cmpMaterial)
+                return;
+            let shader = cmpMaterial.getMaterial().getShader();
+            this.createReference(this.renderShaders, shader, this.createProgram);
+            let coat = cmpMaterial.getMaterial().getCoat();
+            this.createReference(this.renderCoats, coat, this.createParameter);
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
-            this.createReference(this.buffers, mesh, this.createBuffer);
-            let nodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
+            this.createReference(this.renderBuffers, mesh, this.createBuffers);
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
         /**
@@ -2653,7 +3113,7 @@ var Fudge;
                     this.addNode(node);
                 }
                 catch (_e) {
-                    //console.log(_e);
+                    console.log(_e);
                 }
         }
         // #endregion
@@ -2666,9 +3126,9 @@ var Fudge;
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
-            this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+            this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+            this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
             this.nodes.delete(_node);
         }
         /**
@@ -2682,29 +3142,30 @@ var Fudge;
         // #endregion
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node) {
             let nodeReferences = this.nodes.get(_node);
             if (!nodeReferences)
                 return;
-            let shader = (_node.getComponent(Fudge.ComponentMaterial)).Material.Shader;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            let shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
-                this.removeReference(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference(this.programs, shader, this.createProgram);
+                this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+                this.createReference(this.renderShaders, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
-            let material = (_node.getComponent(Fudge.ComponentMaterial)).Material;
-            if (material !== nodeReferences.material) {
-                this.removeReference(this.parameters, nodeReferences.material, this.deleteParameter);
-                this.createReference(this.parameters, material, this.createParameter);
-                nodeReferences.material = material;
+            let coat = cmpMaterial.getMaterial().getCoat();
+            if (coat !== nodeReferences.coat) {
+                this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+                this.createReference(this.renderCoats, coat, this.createParameter);
+                nodeReferences.coat = coat;
             }
             let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference(this.buffers, mesh, this.createBuffer);
+                this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference(this.renderBuffers, mesh, this.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -2717,7 +3178,68 @@ var Fudge;
                 this.updateNode(node);
         }
         // #endregion
+        // #region Lights
+        static setLights(_lights) {
+            // let renderLights: RenderLights = this.createRenderLights(_lights);
+            for (let entry of this.renderShaders) {
+                let renderShader = entry[1].getReference();
+                this.setLightsInShader(renderShader, _lights);
+            }
+            // debugger;
+        }
+        // #endregion
         // #region Transformation & Rendering
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        static update() {
+            this.recalculateAllNodeTransforms();
+        }
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
+        static clear(_color = null) {
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+        }
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node
+         * @param _cameraMatrix
+         * @param _world
+         */
+        static drawBranch(_node, _cmpCamera, _world) {
+            let cmpTransform = _node.cmpTransform;
+            let world = _world;
+            if (cmpTransform)
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Fudge.Matrix4x4.identity;
+            let finalTransform = world;
+            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
+            if (cmpPivot)
+                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
+            // multiply camera matrix
+            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            this.drawNode(_node, finalTransform, projection);
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
+                this.drawBranch(childNode, _cmpCamera, world);
+            }
+        }
+        static drawNode(_node, _finalTransform, _projection) {
+            let references = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo = this.renderShaders.get(references.shader).getReference();
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+        }
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -2753,47 +3275,6 @@ var Fudge;
             // call the functions above for each registered node
             this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
-        }
-        static clear(_color = null) {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
-        }
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
-         * @param _node
-         * @param _cameraMatrix
-         * @param _world
-         */
-        static drawBranch(_node, _cmpCamera, _world) {
-            let cmpTransform = _node.cmpTransform;
-            let world = _world;
-            if (cmpTransform)
-                world = cmpTransform.world;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Fudge.Matrix4x4.identity;
-            let finalTransform = world;
-            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
-            if (cmpPivot)
-                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
-            // multiply camera matrix
-            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
-            this.drawNode(_node, projection);
-            for (let name in _node.getChildren()) {
-                let childNode = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
-            }
-        }
-        static drawNode(_node, _projection) {
-            let references = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: deal with partial references
-            let bufferInfo = this.buffers.get(references.mesh).getReference();
-            let materialInfo = this.parameters.get(references.material).getReference();
-            let shaderInfo = this.programs.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
         }
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
@@ -2850,23 +3331,28 @@ var Fudge;
         }
     }
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-    RenderManager.programs = new Map();
-    /** Stores references to the vertex array objects and makes them available via the references to materials */
-    RenderManager.parameters = new Map();
+    RenderManager.renderShaders = new Map();
+    /** Stores references to the vertex array objects and makes them available via the references to coats */
+    RenderManager.renderCoats = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
-    RenderManager.buffers = new Map();
+    RenderManager.renderBuffers = new Map();
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
+/// <reference path="../Coats/Coat.ts"/>
 var Fudge;
+/// <reference path="../Coats/Coat.ts"/>
 (function (Fudge) {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    // TODO: define attribute/uniforms as layout and use those consistently in shaders
     class Shader {
-        static loadVertexShaderSource() { return null; }
-        static loadFragmentShaderSource() { return null; }
+        // The type of coat that can be used with this shader to create a material
+        static getCoat() { return null; }
+        static getVertexShaderSource() { return null; }
+        static getFragmentShaderSource() { return null; }
     }
     Fudge.Shader = Shader;
 })(Fudge || (Fudge = {}));
@@ -2876,49 +3362,59 @@ var Fudge;
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderBasic extends Fudge.Shader {
-        static loadVertexShaderSource() {
+    class ShaderFlat extends Fudge.Shader {
+        static getCoat() {
+            return Fudge.CoatColored;
+        }
+        static getVertexShaderSource() {
             return `#version 300 es
-                    // an attribute is an input (in) to a vertex shader.
-                    // It will receive data from a buffer
-                    in vec4 a_position;
-                    //in vec4 a_color;
-                
-                    // The Matrix to transform the positions by.
-                    uniform mat4 u_matrix;
-                    uniform vec4 u_color;
-                
-                    // Varying color in the fragmentshader.
-                    out vec4 v_color;
-                
-                    // all shaders have a main function.
-                    void main() {  
-                        // Multiply all positions by the matrix.   
-                        vec4 position = u_matrix * a_position;
-                        
-                        gl_Position = u_matrix * a_position;
-                
-                        // Pass color to fragmentshader.
-                        v_color = u_color;
+
+                    struct LightAmbient {
+                        vec4 color;
+                    };
+                    struct LightDirectional {
+                        vec4 color;
+                        vec3 direction;
+                    };
+
+                    const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+
+                    in vec3 a_position;
+                    in vec3 a_normal;
+                    uniform mat4 u_world;
+                    uniform mat4 u_projection;
+
+                    uniform LightAmbient u_ambient;
+                    uniform uint u_nLightsDirectional;
+                    uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
+                    flat out vec4 v_color;
+                    
+                    void main() {   
+                        gl_Position = u_projection * vec4(a_position, 1.0);
+                        vec3 normal = mat3(u_world) * a_normal;
+
+                        v_color = vec4(0,0,0,0);
+                        for (uint i = 0u; i < u_nLightsDirectional; i++) {
+                            float illumination = -dot(normal, u_directional[i].direction);
+                            v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
+                        }
+                        u_ambient;
+                        u_directional[0];
                     }`;
         }
-        static loadFragmentShaderSource() {
+        static getFragmentShaderSource() {
             return `#version 300 es
-                    // fragment shaders don't have a default precision so we need to pick one. mediump is a good default. It means "medium precision"
                     precision mediump float;
-                    
-                    // Color passed from vertexshader.
-                    in vec4 v_color;
-                
-                    // we need to declare an output for the fragment shader
-                    out vec4 outColor;
+
+                    flat in vec4 v_color;
+                    out vec4 frag;
                     
                     void main() {
-                       outColor = v_color;
+                        frag = v_color;
                     }`;
         }
     }
-    Fudge.ShaderBasic = ShaderBasic;
+    Fudge.ShaderFlat = ShaderFlat;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2927,61 +3423,109 @@ var Fudge;
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Fudge.Shader {
-        loadVertexShaderSource() {
-            return `#version 300 es
- 
-                    // an attribute is an input (in) to a vertex shader.
-                    // It will receive data from a buffer
-                    in vec4 a_position;
-                    in vec4 a_color;
-                    in vec2 a_textureCoordinate;
-                
-                    // The Matrix to transform the positions by.
-                    uniform mat4 u_matrix;
-                
-                
-                    // Varying color in the fragmentshader.
-                    out vec4 v_color;
-                    // Varying texture in the fragmentshader.
-                    out vec2 v_textureCoordinate;
-                
-                
-                    // all shaders have a main function.
-                    void main() {  
-                        // Multiply all positions by the matrix.   
-                        vec4 position = u_matrix * a_position;
-                
-                
-                        gl_Position = u_matrix * a_position;
-                
-                        // Pass color to fragmentshader.
-                        v_color = a_color;
-                        v_textureCoordinate = a_textureCoordinate;
-                    }`;
+        static getCoat() {
+            return Fudge.CoatTextured;
         }
-        loadFragmentShaderSource() {
+        static getVertexShaderSource() {
             return `#version 300 es
-            
-                    // fragment shaders don't have a default precision so we need
-                    // to pick one. mediump is a good default. It means "medium precision"
-                    precision mediump float;
-                    
-                    // Color passed from vertexshader.
-                    in vec4 v_color;
-                    // Texture passed from vertexshader.
-                    in vec2 v_textureCoordinate;
+
+                in vec3 a_position;
+                in vec2 a_textureUVs;
+                uniform mat4 u_projection;
+                uniform vec4 u_color;
+                out vec2 v_textureUVs;
+
+                void main() {  
+                    gl_Position = u_projection * vec4(a_position, 1.0);
+                    v_textureUVs = a_textureUVs;
+                }`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+                precision mediump float;
                 
+                in vec2 v_textureUVs;
+                uniform sampler2D u_texture;
+                out vec4 frag;
                 
-                    uniform sampler2D u_texture;
-                    // we need to declare an output for the fragment shader
-                    out vec4 outColor;
-                    
-                    void main() {
-                    outColor = v_color;
-                    outColor = texture(u_texture, v_textureCoordinate) * v_color;
+                void main() {
+                    frag = texture(u_texture, v_textureUVs);
             }`;
         }
     }
     Fudge.ShaderTexture = ShaderTexture;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Single color shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderUniColor extends Fudge.Shader {
+        static getCoat() {
+            return Fudge.CoatColored;
+        }
+        static getVertexShaderSource() {
+            return `#version 300 es
+
+                    in vec3 a_position;
+                    uniform mat4 u_projection;
+                    
+                    void main() {   
+                        gl_Position = u_projection * vec4(a_position, 1.0);
+                    }`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+                    precision mediump float;
+                    
+                    uniform vec4 u_color;
+                    out vec4 frag;
+                    
+                    void main() {
+                       frag = u_color;
+                    }`;
+        }
+    }
+    Fudge.ShaderUniColor = ShaderUniColor;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Baseclass for different kinds of textures.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Texture extends Fudge.Mutable {
+        reduceMutator() { }
+    }
+    Fudge.Texture = Texture;
+    /**
+     * Texture created from an existing image
+     */
+    class TextureImage extends Texture {
+        constructor() {
+            super(...arguments);
+            this.image = null;
+        }
+    }
+    Fudge.TextureImage = TextureImage;
+    /**
+     * Texture created from a canvas
+     */
+    class TextureCanvas extends Texture {
+    }
+    Fudge.TextureCanvas = TextureCanvas;
+    /**
+     * Texture created from a FUDGE-Sketch
+     */
+    class TextureSketch extends TextureCanvas {
+    }
+    Fudge.TextureSketch = TextureSketch;
+    /**
+     * Texture created from an HTML-page
+     */
+    class TextureHTML extends TextureCanvas {
+    }
+    Fudge.TextureHTML = TextureHTML;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

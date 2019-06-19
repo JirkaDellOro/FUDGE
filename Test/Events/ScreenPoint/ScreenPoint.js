@@ -9,7 +9,7 @@ var ScreenPoint;
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         let posCamera = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
         let camera = Scenes.createCamera(posCamera);

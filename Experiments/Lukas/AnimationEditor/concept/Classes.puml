@@ -1,0 +1,185 @@
+@startuml Animation Editor Class Diagram
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+' title Animation Editor Class Diagram
+
+' left to right direction
+package FUDGE <<Rectangle>> {
+	package Transfer {
+		package Mutable <<Rectangle>>{
+			class Mutable {
+
+			}
+		}
+	}
+	package Components <<Rectangle>> {
+		abstract Component {
+
+		}
+		class ComponentAnimator extends Component{
+			+ speed: number;
+			+ currentAnimation: Animation
+			+ nextAnimation: Animation
+			+ syncChildrenSpeed: boolean
+			- parentSpeed: number
+			# setTime(time: number)
+			+ play(name: string)
+		}
+	}
+
+	package UI {
+		package UI {
+		interface UIElement{
+			name: string
+			hover: string
+			help: string
+			extendedHelp: string
+			' element: HTMLElement
+		}
+		class UIButton extends DOM.HTMLButtonElement implements UIElement {
+			functionToCall: function
+		}
+
+		class UIGenerator {
+			createButton(...): FudgeButton
+			createUIElementFromMutator(mutator: Mutator): HTMLElement
+		}
+	}
+
+	package Animation <<Rectangle>> {
+
+		class Animation {
+			+ name: string
+			+ animatedObject: MutatorForAnimation
+			+ sequences: {[property: string]: Sequence}
+			+ startTime: number
+			+ totaltime: number
+			+ events: Event[]
+			+ labels: Label[]
+			+ playMode: PLAYMODE
+			+ fps: number
+			+ sps: number
+			- previousTime: number
+			- ranOnce: boolean
+			+ update()
+			+ gotoLabel(l: Label)
+			- checkEvents()
+		}
+
+		class Sequence extends Mutable {
+			+ keys: Key[]
+			+ evaluate(_time: number): number
+			+ addKey(_key:Key)
+			+ removeKey(_key:Key)
+		}
+
+		class Key extends Mutable {
+			+ time: number
+			+ value: number
+			- slopeIn: number
+			- slopeOut: number
+			+ functionIn: Function
+			+ functionOut: Function
+			- broken: boolean
+			+ path2d: Path2D
+			+ setSlopeIn(_slope:number)
+			+ setSlopeOut(_slope:number)
+			+ generatePath2D()
+			{static} + sort(a: Key, b: Key)
+		}
+
+		class Function {
+			- a: number
+			- b: number
+			- c: number
+			- d: number
+			- keyOut: Key
+			- keyIn: Key
+			+ evaluate(_time: number): number
+			- calculate()
+			- setKeyIn(_key)
+			- setKeyOut(_key)
+		}
+
+		enum PLAYMODE{
+			INHERIT
+			LOOP
+			PINGPONG
+			PLAYONCE
+			PLAYONCESTOPAFTER
+			REVERSELOOP
+			STOP
+		}
+
+		class Label {
+			time: number
+			name: string
+		}
+
+		class AnimationEvent {
+			name: string
+			time: number
+		}
+
+		' Associations
+		ComponentAnimator "1" -up- "n" Animation
+		Animation -- "n" Sequence : stores
+		Animation --|> Mutable
+		Sequence -- "n" Key : manages
+		Key "2" -- "2" Function
+		Animation -- "n" AnimationEvent : stores and executes
+		Animation -- "n" Label : stores
+		Animation -left- PLAYMODE
+	}
+	package AnimationEditor <<Rectangle>> {
+		class Editor {
+			animations: Animation[]
+			cursorPosition: number
+			crc: CanvasRenderingContext2D
+			selectedAnimation: Animation
+			{static} pressedKeys: string[]
+			selectedKey: Key
+			selectedSlope: "left" | "right"
+			mousedown()
+			mousemove()
+			mouseup()
+			keydown()
+			keyup()
+			scroll()
+		}
+
+		class UIHandler {
+			{static} views: typeof EditorView[]
+			selectedView: EditorView
+			
+			createUI()
+			updateUI()
+			switchView()
+			{static} registerView()
+		}
+
+		interface EditorView{
+			scale: Vector2
+			moveKeyTo(k: Key, pos: Vector2)
+			updateView()
+			scroll()
+		}
+		class Dopesheet implements EditorView {
+		
+		}
+		 
+		class CurveView implements EditorView {
+		
+		}
+		
+		' Associations
+		Editor -right- "n" Animation.Animation
+		Editor "1" -- "1" UIHandler
+		UIHandler -left- EditorView: uses
+	}
+}
+@enduml

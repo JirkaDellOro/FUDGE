@@ -10,7 +10,7 @@ var EventPassing;
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         let posCameras = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList = document.getElementsByTagName("canvas");
         for (let i = 0; i < canvasList.length; i++) {

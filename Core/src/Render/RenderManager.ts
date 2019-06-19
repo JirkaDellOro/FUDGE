@@ -2,7 +2,7 @@
 namespace Fudge {
     interface NodeReferences {
         shader: typeof Shader;
-        material: Material;
+        coat: Coat;
         mesh: Mesh;
         doneTransformToWorld: boolean;
     }
@@ -10,7 +10,7 @@ namespace Fudge {
 
     /**
      * This class manages the references to render data used by nodes.
-     * Multiple nodes may refer to the same data via their references to shader, material and mesh 
+     * Multiple nodes may refer to the same data via their references to shader, coat and mesh 
      */
     class Reference<T> {
         private reference: T;
@@ -37,16 +37,16 @@ namespace Fudge {
 
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered. 
+     * Stores the references to the shader, the coat and the mesh used for each node registered. 
      * With these references, the already buffered data is retrieved when rendering.
      */
     export class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs: Map<typeof Shader, Reference<ShaderInfo>> = new Map();
-        /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private static parameters: Map<Material, Reference<MaterialInfo>> = new Map();
+        private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
+        /** Stores references to the vertex array objects and makes them available via the references to coats */
+        private static renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers: Map<Mesh, Reference<BufferInfo>> = new Map();
+        private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
 
         // #region Adding
@@ -58,16 +58,20 @@ namespace Fudge {
             if (this.nodes.get(_node))
                 return;
 
-            let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
-            this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+            let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+            if (!cmpMaterial)
+                return;
 
-            let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
-            this.createReference<Material, MaterialInfo>(this.parameters, material, this.createParameter);
+            let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
+            this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
+
+            let coat: Coat = cmpMaterial.getMaterial().getCoat();
+            this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
-            this.createReference<Mesh, BufferInfo>(this.buffers, mesh, this.createBuffer);
+            this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
 
-            let nodeReferences: NodeReferences = { shader: shader, material: material, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
 
@@ -81,7 +85,7 @@ namespace Fudge {
                     // may fail when some components are missing. TODO: cleanup
                     this.addNode(node);
                 } catch (_e) {
-                    //console.log(_e);
+                    console.log(_e);
                 }
         }
         // #endregion
@@ -96,9 +100,9 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
-            this.removeReference<Material, MaterialInfo>(this.parameters, nodeReferences.material, this.deleteParameter);
-            this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
+            this.removeReference<typeof Shader, RenderShader>(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+            this.removeReference<Coat, RenderCoat>(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+            this.removeReference<Mesh, RenderBuffers>(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
 
             this.nodes.delete(_node);
         }
@@ -115,7 +119,7 @@ namespace Fudge {
 
         // #region Updating
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         public static updateNode(_node: Node): void {
@@ -123,24 +127,26 @@ namespace Fudge {
             if (!nodeReferences)
                 return;
 
-            let shader: typeof Shader = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material.Shader;
+            let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+
+            let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
             if (shader !== nodeReferences.shader) {
-                this.removeReference<Shader, ShaderInfo>(this.programs, nodeReferences.shader, this.deleteProgram);
-                this.createReference<Shader, ShaderInfo>(this.programs, shader, this.createProgram);
+                this.removeReference<typeof Shader, RenderShader>(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+                this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
 
-            let material: Material = (<ComponentMaterial>(_node.getComponent(ComponentMaterial))).Material;
-            if (material !== nodeReferences.material) {
-                this.removeReference<Material, MaterialInfo>(this.parameters, nodeReferences.material, this.deleteParameter);
-                this.createReference<Material, MaterialInfo>(this.parameters, material, this.createParameter);
-                nodeReferences.material = material;
+            let coat: Coat = cmpMaterial.getMaterial().getCoat();
+            if (coat !== nodeReferences.coat) {
+                this.removeReference<Coat, RenderCoat>(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+                this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
+                nodeReferences.coat = coat;
             }
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference<Mesh, BufferInfo>(this.buffers, nodeReferences.mesh, this.deleteBuffer);
-                this.createReference<Mesh, BufferInfo>(this.buffers, mesh, this.createBuffer);
+                this.removeReference<Mesh, RenderBuffers>(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -155,11 +161,82 @@ namespace Fudge {
         }
         // #endregion
 
+        // #region Lights
+        public static setLights(_lights: MapLightTypeToLightList): void {
+            // let renderLights: RenderLights = this.createRenderLights(_lights);
+            for (let entry of this.renderShaders) {
+                let renderShader: RenderShader = entry[1].getReference();
+                this.setLightsInShader(renderShader, _lights);
+            }
+            // debugger;
+        }
+        // #endregion
+
         // #region Transformation & Rendering
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        public static update(): void {
+            this.recalculateAllNodeTransforms();
+        }
+
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color 
+         */
+        public static clear(_color: Color = null): void {
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+        }
+
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
+         * or the identity matrix, if _matrix is null.
+         * @param _node 
+         * @param _cameraMatrix 
+         * @param _world 
+         */
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
+            let cmpTransform: ComponentTransform = _node.cmpTransform;
+            let world: Matrix4x4 = _world;
+            if (cmpTransform)
+                world = cmpTransform.world;
+            if (!world)
+                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                world = Matrix4x4.identity;
+
+            let finalTransform: Matrix4x4 = world;
+            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
+            if (cmpPivot)
+                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
+
+            // multiply camera matrix
+            let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+
+            this.drawNode(_node, finalTransform, projection);
+
+            for (let name in _node.getChildren()) {
+                let childNode: Node = _node.getChildren()[name];
+                this.drawBranch(childNode, _cmpCamera, world);
+            }
+        }
+
+        private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
+            let references: NodeReferences = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+
+            let bufferInfo: RenderBuffers = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo: RenderCoat = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo: RenderShader = this.renderShaders.get(references.shader).getReference();
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+        }
+
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
-        public static recalculateAllNodeTransforms(): void {
+        private static recalculateAllNodeTransforms(): void {
             // inner function to be called in a for each node at the bottom of this function
             function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
                 _nodeReferences.doneTransformToWorld = false;
@@ -196,54 +273,6 @@ namespace Fudge {
             // call the functions above for each registered node
             this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
-        }
-
-        public static clear(_color: Color = null): void {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(this.crc3.COLOR_BUFFER_BIT | this.crc3.DEPTH_BUFFER_BIT);
-        }
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
-         * @param _node 
-         * @param _cameraMatrix 
-         * @param _world 
-         */
-        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
-            let cmpTransform: ComponentTransform = _node.cmpTransform;
-            let world: Matrix4x4 = _world;
-            if (cmpTransform)
-                world = cmpTransform.world;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Matrix4x4.identity;
-
-            let finalTransform: Matrix4x4 = world;
-            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
-            if (cmpPivot)
-                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
-
-            // multiply camera matrix
-            let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
-            this.drawNode(_node, projection);
-
-            for (let name in _node.getChildren()) {
-                let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
-            }
-        }
-
-        private static drawNode(_node: Node, _projection: Matrix4x4): void {
-            let references: NodeReferences = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: deal with partial references
-
-            let bufferInfo: BufferInfo = this.buffers.get(references.mesh).getReference();
-            let materialInfo: MaterialInfo = this.parameters.get(references.material).getReference();
-            let shaderInfo: ShaderInfo = this.programs.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, materialInfo, _projection);
         }
 
         /**
@@ -301,5 +330,6 @@ namespace Fudge {
                 _in.set(_key, reference);
             }
         }
+        // #endregion
     }
 }

@@ -1,0 +1,93 @@
+@startuml ToolSelect
+' !include VectorEditor/concept/Activities/Design.iuml
+skinparam monochrome true
+
+title ToolSelect
+
+partition mousedown {
+	:_event: MouseEvent]
+	:selectedObject: SketchPoint | SketchPath = 
+	Editor.getPathOrPointTheMouseIsOver()]
+	if() then ([selectedObject])
+		if() then ([Editor.isShortcutPressed(multiSelectShortcut)])
+			if() then (selectedObject selected)
+				:deselect selectedObject;
+			else
+				:select selectedObject;
+			endif
+		else
+			:deselect everything else;
+			:select selectedObject;
+		endif
+	else
+		:boxSelect = true;
+		:startPosition = {_event.clientX, _event.ClientY};
+	endif
+	stop
+}
+
+' TODO: doubleclick on SketchVertex to move
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([boxSelect])
+		:currentPosition = {_event.clientX, _event.ClientY};
+		:Editor.redrawAll();
+	else 
+		:move.mousemove(_event);
+	endif
+	stop
+}
+
+partition mouseup {
+	:_event: MouseEvent]
+	if() then ([!boxSelect])
+		stop
+	endif
+	:boxPath: Path2D]
+	:boxPath = rectangle from
+	startPosition to currentPosition;
+
+	while () is ([path of Editor.selectedPaths])
+		note left: previously selected paths select points
+		while () is([point of path.points])
+			if() then ([isPointInPath(boxPath, point.x, point.y)])
+				:add point to selectedPoints;
+			endif
+			if() then ([Editor.tangentsActive])
+				if() then ([isPointInPath(boxPath, point.tangentIn.x, point.tangentIn.y)])
+					:add point.tangentIn to selectedPoints;
+				endif
+				if() then ([isPointInPath(boxPath, point.tangentOut.x, point.tangentOut.y)])
+					:add point.tangentOut to selectedPoints;
+				endif
+			endif
+		endwhile
+	endwhile
+
+	while () is ([path of Editor.paths])
+		note left: path fully covered
+		:pathFullySelected: boolean = true]
+		while() is ([point of path.points])
+			if() then ([!isPointInPath(boxPath, point.x, point.y)])
+				:pathFullySelected = false;
+				break
+			endif
+		endwhile
+		if() then ([pathFullySelected])
+			:add path to Editor.selectedPaths
+			add all points in path to Editor.selectedPoints;
+		endif
+	endwhile
+
+	:boxSelect = false;
+	stop
+}
+
+partition additionalDisplay {
+	:_crc: CanvasRenderingContext2D]
+	:draw Rectangle from 
+	startPosition to currentPosition;
+}
+
+@enduml

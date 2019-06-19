@@ -1,29 +1,5 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
-    type General = any;
-    interface Serialization {
-        [type: string]: General;
-    }
-    interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-    class Serializer {
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object: Serializable): Serialization;
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -47,6 +23,11 @@ declare namespace Fudge {
      * thus providing and using interfaces created at runtime
      */
     abstract class Mutable extends EventTarget {
+        /**
+         * Retrieves the type of this mutable subclass as the name of the runtime class
+         * @returns The type of the mutable
+         */
+        readonly type: string;
         /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
@@ -75,12 +56,170 @@ declare namespace Fudge {
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
          * @param _mutator
          */
-        protected mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): void;
         /**
          * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
          * @param _mutator
          */
         protected abstract reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    class RenderInjector {
+        private static coatInjections;
+        static decorateCoat(_constructor: Function): void;
+        private static injectRenderDataForCoatColored;
+        private static injectRenderDataForCoatTextured;
+    }
+}
+declare namespace Fudge {
+    interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
+    }
+    interface RenderShader {
+        program: WebGLProgram;
+        attributes: {
+            [name: string]: number;
+        };
+        uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
+    }
+    interface RenderBuffers {
+        vertices: WebGLBuffer;
+        indices: WebGLBuffer;
+        nIndices: number;
+        textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
+    }
+    interface RenderCoat {
+        coat: Coat;
+    }
+    interface RenderLights {
+        [type: string]: Float32Array;
+    }
+    /**
+     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
+     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     */
+    class RenderOperator {
+        protected static crc3: WebGL2RenderingContext;
+        private static rectViewport;
+        /**
+        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
+        * @param _value // value to check against null
+        * @param _message // optional, additional message for the exception
+        */
+        static assert<T>(_value: T | null, _message?: string): T;
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         */
+        static initialize(): void;
+        /**
+         * Return a reference to the offscreen-canvas
+         */
+        static getCanvas(): HTMLCanvasElement;
+        /**
+         * Return a reference to the rendering context
+         */
+        static getRenderingContext(): WebGL2RenderingContext;
+        /**
+         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
+         */
+        static getCanvasRect(): Rectangle;
+        /**
+         * Set the size of the offscreen-canvas.
+         */
+        static setCanvasSize(_width: number, _height: number): void;
+        /**
+         * Set the area on the offscreen-canvas to render the camera image to.
+         * @param _rect
+         */
+        static setViewportRectangle(_rect: Rectangle): void;
+        /**
+         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
+         */
+        static getViewportRectangle(): Rectangle;
+        /**
+         * Convert light data to flat arrays
+         */
+        protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
+        /**
+         * Set light data in shaders
+         */
+        protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void;
+        /**
+         * Draw a mesh buffer using the given infos and the complete projection matrix
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _renderCoat
+         * @param _projection
+         */
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static createProgram(_shaderClass: typeof Shader): RenderShader;
+        protected static useProgram(_shaderInfo: RenderShader): void;
+        protected static deleteProgram(_program: RenderShader): void;
+        protected static createBuffers(_mesh: Mesh): RenderBuffers;
+        protected static useBuffers(_renderBuffers: RenderBuffers): void;
+        protected static deleteBuffers(_renderBuffers: RenderBuffers): void;
+        protected static createParameter(_coat: Coat): RenderCoat;
+        protected static useParameter(_coatInfo: RenderCoat): void;
+        protected static deleteParameter(_coatInfo: RenderCoat): void;
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        private static setAttributeStructure;
+    }
+}
+declare namespace Fudge {
+    class Coat extends Mutable {
+        name: string;
+        protected renderData: {
+            [key: string]: unknown;
+        };
+        mutate(_mutator: Mutator): void;
+        useRenderData(_renderShader: RenderShader): void;
+        protected reduceMutator(): void;
+    }
+    class CoatColored extends Coat {
+        color: Color;
+        constructor(_color?: Color);
+    }
+    class CoatTextured extends Coat {
+        texture: TextureImage;
+        tilingX: number;
+        tilingY: number;
+        repetition: boolean;
+    }
+}
+declare namespace Fudge {
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -94,11 +233,6 @@ declare namespace Fudge {
         private active;
         activate(_on: boolean): void;
         readonly isActive: boolean;
-        /**
-         * Retrieves the type of this components subclass as the name of the runtime class
-         * @returns The type of the component
-         */
-        readonly type: string;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
@@ -170,7 +304,19 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Attaches a light to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentLight extends Component {
+        private light;
+        constructor(_light?: Light);
+        getLight(): Light;
     }
 }
 declare namespace Fudge {
@@ -181,7 +327,7 @@ declare namespace Fudge {
     class ComponentMaterial extends Component {
         private material;
         initialize(_material: Material): void;
-        readonly Material: Material;
+        getMaterial(): Material;
     }
 }
 declare namespace Fudge {
@@ -424,6 +570,7 @@ declare namespace Fudge {
         b: number;
         a: number;
         constructor(_r: number, _g: number, _b: number, _a: number);
+        getArray(): Float32Array;
     }
 }
 declare namespace Fudge {
@@ -521,21 +668,19 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Baseclass for materials. Sets up attribute- and uniform locations to supply data to a shaderprogramm.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
-        private name;
-        private shaderClass;
-        private color;
-        private textureEnabled;
-        private textureSource;
-        constructor(_name: string, _color: Color, _shader: typeof Shader);
-        readonly Shader: typeof Shader;
-        readonly Name: string;
-        Color: Color;
-        readonly TextureEnabled: boolean;
-        readonly TextureSource: string;
+        name: string;
+        private shaderType;
+        private coat;
+        constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        createCoatMatchingShader(): Coat;
+        setCoat(_coat: Coat): void;
+        getCoat(): Coat;
+        setShader(_shaderType: typeof Shader): void;
+        getShader(): typeof Shader;
     }
 }
 declare namespace Fudge {
@@ -641,6 +786,61 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Light extends Mutable {
+        color: Color;
+        constructor(_color?: Color);
+        protected reduceMutator(): void;
+    }
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```text
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```text
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        direction: Vector3;
+        constructor(_color?: Color, _direction?: Vector3);
+    }
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```text
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        range: number;
+    }
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```text
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+}
+declare namespace Fudge {
+    type MapLightTypeToLightList = Map<string, ComponentLight[]>;
+    /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of [[Framing]] objects. The stages involved are in order of rendering
@@ -651,7 +851,6 @@ declare namespace Fudge {
         private static focus;
         name: string;
         camera: ComponentCamera;
-        branch: Node;
         rectSource: Rectangle;
         rectDestination: Rectangle;
         frameClientToCanvas: FramingScaled;
@@ -660,6 +859,8 @@ declare namespace Fudge {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
+        lights: MapLightTypeToLightList;
+        private branch;
         private crc2;
         private canvas;
         /**
@@ -681,11 +882,19 @@ declare namespace Fudge {
          */
         getClientRectangle(): Rectangle;
         /**
+         * Set the branch to be drawn in the viewport.
+         */
+        setBranch(_branch: Node): void;
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        collectLights(): void;
+        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph(): void;
         /**
-         * Prepares canvas for new draw, updates the worldmatrices of all nodes and calls drawObjects().
+         * Draw this viewport
          */
         draw(): void;
         /**
@@ -753,6 +962,7 @@ declare namespace Fudge {
          */
         private hndWheelEvent;
         private activateEvent;
+        private hndComponentEvent;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
@@ -1035,136 +1245,114 @@ declare namespace Fudge {
          * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector: Vector3): Vector3;
-    }
-}
-declare namespace Fudge {
-    abstract class Mesh implements Serializable {
-        protected vertices: Float32Array;
-        getVertices(): Float32Array;
-        getVertexCount(): number;
-        getBufferSpecification(): BufferSpecification;
-        abstract serialize(): Serialization;
-        abstract deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Retrieve the vector as an array with three elements
+         */
+        getArray(): Float32Array;
     }
 }
 declare namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Abstract base class for all meshes.
+     * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Mesh implements Serializable {
+        vertices: Float32Array;
+        indices: Uint16Array;
+        textureUVs: Float32Array;
+        normalsFace: Float32Array;
+        static getBufferSpecification(): BufferSpecification;
+        getVertexCount(): number;
+        getIndexCount(): number;
+        abstract serialize(): Serialization;
+        abstract deserialize(_serialization: Serialization): Serializable;
+        abstract create(): void;
+        protected abstract createVertices(): Float32Array;
+        protected abstract createTextureUVs(): Float32Array;
+        protected abstract createIndices(): Uint16Array;
+        protected abstract createFaceNormals(): Float32Array;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * ```text
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Mesh {
-        width: number;
-        height: number;
-        depth: number;
-        constructor(_width: number, _height: number, _depth: number);
+        constructor();
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
-    interface BufferSpecification {
-        size: number;
-        dataType: number;
-        normalize: boolean;
-        stride: number;
-        offset: number;
-    }
-    interface ShaderInfo {
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
-    }
-    interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
-        vertexCount: number;
-    }
-    interface MaterialInfo {
-        vao: WebGLVertexArrayObject;
-        color: Color;
-    }
     /**
-     * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
+     * ```text
+     *               4
+     *              /\`.
+     *            3/__\_\ 2
+     *           0/____\/1
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class RenderOperator {
-        protected static crc3: WebGL2RenderingContext;
-        private static rectViewport;
-        /**
-        * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
-        */
-        static assert<T>(_value: T | null, _message?: string): T;
-        /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
-         */
-        static initialize(): void;
-        /**
-         * Return a reference to the offscreen-canvas
-         */
-        static getCanvas(): HTMLCanvasElement;
-        /**
-         * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
-         */
-        static getCanvasRect(): Rectangle;
-        /**
-         * Set the size of the offscreen-canvas.
-         */
-        static setCanvasSize(_width: number, _height: number): void;
-        /**
-         * Set the area on the offscreen-canvas to render the camera image to.
-         * @param _rect
-         */
-        static setViewportRectangle(_rect: Rectangle): void;
-        /**
-         * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
-         */
-        static getViewportRectangle(): Rectangle;
-        /**
-         * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo
-         * @param bufferInfo
-         * @param materialInfo
-         * @param _projection
-         */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void;
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo;
-        protected static useProgram(_shaderInfo: ShaderInfo): void;
-        protected static deleteProgram(_program: ShaderInfo): void;
-        protected static createBuffer(_mesh: Mesh): BufferInfo;
-        protected static useBuffer(_bufferInfo: BufferInfo): void;
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void;
-        protected static createParameter(_material: Material): MaterialInfo;
-        protected static useParameter(_materialInfo: MaterialInfo): void;
-        protected static deleteParameter(_materialInfo: MaterialInfo): void;
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        private static attributePointer;
+    class MeshPyramid extends Mesh {
+        constructor();
+        create(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Generate a simple quad with edges of length 1, the face consisting of two trigons
+     * ```text
+     *        0 __ 3
+     *         |__|
+     *        1    2
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class MeshQuad extends Mesh {
+        constructor();
+        create(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace Fudge {
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the material and the mesh used for each node registered.
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static programs;
-        /** Stores references to the vertex array objects and makes them available via the references to materials */
-        private static parameters;
+        private static renderShaders;
+        /** Stores references to the vertex array objects and makes them available via the references to coats */
+        private static renderCoats;
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static buffers;
+        private static renderBuffers;
         private static nodes;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
@@ -1187,7 +1375,7 @@ declare namespace Fudge {
          */
         static removeBranch(_node: Node): void;
         /**
-         * Reflect changes in the node concerning shader, material and mesh, manage the render-data references accordingly and update the node references
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
          * @param _node
          */
         static updateNode(_node: Node): void;
@@ -1196,10 +1384,15 @@ declare namespace Fudge {
          * @param _node
          */
         static updateBranch(_node: Node): void;
+        static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
          */
-        static recalculateAllNodeTransforms(): void;
+        static update(): void;
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
         static clear(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
@@ -1211,6 +1404,10 @@ declare namespace Fudge {
          */
         static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
         private static drawNode;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        private static recalculateAllNodeTransforms;
         /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
@@ -1240,8 +1437,9 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -1249,9 +1447,10 @@ declare namespace Fudge {
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderBasic extends Shader {
-        static loadVertexShaderSource(): string;
-        static loadFragmentShaderSource(): string;
+    class ShaderFlat extends Shader {
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
     }
 }
 declare namespace Fudge {
@@ -1260,7 +1459,49 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Shader {
-        loadVertexShaderSource(): string;
-        loadFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Single color shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderUniColor extends Shader {
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Baseclass for different kinds of textures.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Texture extends Mutable {
+        protected reduceMutator(): void;
+    }
+    /**
+     * Texture created from an existing image
+     */
+    class TextureImage extends Texture {
+        image: HTMLImageElement;
+    }
+    /**
+     * Texture created from a canvas
+     */
+    class TextureCanvas extends Texture {
+    }
+    /**
+     * Texture created from a FUDGE-Sketch
+     */
+    class TextureSketch extends TextureCanvas {
+    }
+    /**
+     * Texture created from an HTML-page
+     */
+    class TextureHTML extends TextureCanvas {
     }
 }

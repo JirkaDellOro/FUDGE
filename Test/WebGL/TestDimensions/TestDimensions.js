@@ -14,7 +14,7 @@ var RenderManagerRendering;
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -41,7 +41,7 @@ var RenderManagerRendering;
         function animate(_event) {
             update();
             branch.cmpTransform.rotateY(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();
             viewPort.draw();

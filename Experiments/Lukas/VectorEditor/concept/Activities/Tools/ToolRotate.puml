@@ -1,0 +1,43 @@
+@startuml ToolRotate
+skinparam monochrome true
+
+title ToolRotate
+
+partition mousedown {
+	:_event: MouseEvent]
+	:previousPosition = (clientX, clientY); 
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([no buttons pressed])
+	stop
+	endif
+	:currentPosition = _event.clientX, _event.clientY]
+	:center: Vector2 = (minX + maxX) / 2, (minY + maxY) / 2]
+	:a: number = (previousPosition - currentPosition).magnitude()
+	b: number = (previousPosition - center).magnitude()
+	c: number = (currentPosition - center).magnitude()]
+	:angle: number = Math.acos( (a²-b²-c²) / (-2bc) )]
+	while () is ([point of Editor.selectedPoints])
+		:point.x = cos(angle) * (point.x - center.x)
+		- sin(angle) * (point.y - center.y) + center.x;
+		:point.y = sin(angle) * (point.x - center.x)
+		+ cos(angle) * (point.y - center.y) + center.y;
+	endwhile
+	stop
+}
+
+
+partition prequisitesFulfilled {
+	start
+	if() then([selectedPoints.length > 1])
+		:true]
+		detach
+	endif
+	:false]
+	detach
+}
+
+@enduml

@@ -3,7 +3,7 @@ skinparam monochrome true
 title Editor
 partition getPathOrPointTheMouseIsOver {
 	:_clientPos: Vector2]
-	:found: DrawPath | DrawPoint = null]
+	:found: SketchPath | SketchPoint = null]
 
 	:found = getPointAtPositionInGroup(selectedPoints);
 	note right: cgeck selected Points first
@@ -43,7 +43,7 @@ partition getPathOrPointTheMouseIsOver {
 }
 
 partition getPointAtPositionInGroup {
-	:_points: DrawPoint[] .
+	:_points: SketchPoint[] .
 	_clientPos: Vector2 ]
 	while() is ([point in _points])
 		if() then ([crc.isPointInPath(point.path2d, _clientPos.x, _clientPos.y)])

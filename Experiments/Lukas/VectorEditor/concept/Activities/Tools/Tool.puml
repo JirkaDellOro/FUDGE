@@ -1,0 +1,54 @@
+@startuml Tool
+skinparam monochrome true
+
+title Tool
+
+partition mousedown {
+	:_event: MouseEvent]
+	if() then ([selectedSubTool])
+		:selectedSubTool.mousedown(_event);
+	endif
+	stop
+}
+
+partition mousemove {
+	:_event: MouseEvent]
+	if() then ([selectedSubTool])
+		:selectedSubTool.mousemove(_event);
+	endif
+	stop
+}
+
+partition mouseup {
+	:_event: MouseEvent]
+	if() then ([selectedSubTool])
+		:selectedSubTool.mouseup(_event);
+	endif
+	stop
+}
+
+partition prequisitesFulfilled {
+	start
+	:true]
+	detach
+}
+
+partition additionalDisplay {
+	:_crc: CanvasRenderingContext2D]
+	stop
+}
+
+partition addAdditionalSubMenuOptions {
+	start
+	stop
+}
+
+partition exit {
+	start
+	if() then ([selectedSubTool])
+		:selectedSubTool.exit();
+	endif
+	stop
+}
+
+@enduml

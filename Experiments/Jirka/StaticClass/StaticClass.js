@@ -2,6 +2,9 @@
 var StaticClass;
 (function (StaticClass) {
     class Base {
+        get type() {
+            return this.constructor.name;
+        }
         static addClass(_class) {
             return Base.classRegister.push(_class);
         }
@@ -24,13 +27,13 @@ var StaticClass;
     Sub2.iRegister = Base.addClass(Sub2);
     StaticClass.Sub2 = Sub2;
     for (let type of Base.classRegister)
-        console.log(type.name);
-    for (let i; i < 10; i++) {
+        console.log(type);
+    for (let i = 0; i < 10; i++) {
         let choice = Math.round(Math.random());
         let typeChosen = Base.classRegister[choice];
-        console.log(typeChosen);
+        // console.log(typeChosen);
         let instance = new typeChosen();
-        console.log(instance);
+        console.log(instance.type);
     }
 })(StaticClass || (StaticClass = {}));
 //# sourceMappingURL=StaticClass.js.map

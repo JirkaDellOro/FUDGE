@@ -1,0 +1,47 @@
+@startuml Function
+skinparam monochrome true
+
+title Function
+
+partition evaluate {
+	:_time: number]
+	if() then ([keyIn])
+		:_time = _time - keyIn.time;
+	endif
+	:a*_time^3+b*_time^2+c*_time+d]
+	detach
+}
+
+partition calculate {
+	if() then ([!keyIn || !keyOut])
+		:a = 0
+		b = 0
+		c = 0;
+		:d = keyIn ? keyIn.value : keyOut.value;
+		detach
+	endif
+	:x1: number = keyOut.time - keyIn.time;
+	:a = ((-x1)*(keyIn.slopeOut + keyOut.slopeIn)
+		-2*keyIn.value+2*keyOut.value) / (-x1)^3;
+	:b = (keyOut.slopeIn - keyIn.slopeOut - 3 * a * x1^2)
+		/ 2 * x1;
+	:c = keyIn.slopeOut;
+	:d = keyIn.value;
+	detach
+}
+
+partition setKeyIn {
+	:_key: Key]
+	:keyIn = _key;
+	:calculate(); 
+	stop
+}
+
+partition setKeyOut {
+	:_key: Key]
+	:keyOut = _key;
+	:calculate();
+	stop 
+}
+
+@endpuml

@@ -11,5 +11,9 @@ namespace Fudge {
             this.b = _b;
             this.a = _a;
         }
+
+        public getArray(): Float32Array {
+            return new Float32Array([this.r, this.g, this.b, this.a]);
+        }
     }
 }

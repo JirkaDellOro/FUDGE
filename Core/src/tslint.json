@@ -20,7 +20,7 @@
 		"no-console": [false, "debug", "info", "time", "timeEnd", "trace"],
 		"no-construct": true,
 		"no-constructor-vars": true,
-		"no-debugger": true,
+		"no-debugger": false,
 		"no-duplicate-key": true,
 		"no-duplicate-variable": true,
 		"no-empty": true,

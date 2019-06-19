@@ -3,7 +3,7 @@
 
 <head>
     <title>Web Audio API Test 2</title>
-    <script src="scripts/selection.js"></script>
+    <script src="scripts/Selector.js"></script>
 </head>
 
 <body>
@@ -15,14 +15,14 @@
         <p>Suche dir einen Song aus!</p>
     </div>
     <div>
-        <select id="songs">
-            <option value="songone" selected>Mario</option>
-            <option value="songtwo">Hypnotic</option>
-            <option value="songthree">Trancyvenia</option>
+        <select id="soundOptions">
+            <option value="mario" selected>Mario</option>
+            <option value="hypnotic">Hypnotic</option>
+            <option value="trancyvenia">Trancyvenia</option>
         </select>
         <br><br>
-        <button onclick="PlaySong()">Play</button>
-        <p id="songSelection"></p>
+        <button>Play</button>
+        <p id="soundSelectionField"></p>
     </div>
     <br><br>
     <br><br>
@@ -31,9 +31,9 @@
     </div>
     <br><br>
     <div id="volume">
-        <input type="range" min="0" max="100" value="50" step="5" id="volumeSlider" oninput="SetVolume(this.value)">
+        <input type="range" min="0" max="1" value="0.5" step="0.1" id="volumeSlider">
         <br>
-        <p id="output"></p>
+        <p id="volumeOutput"></p>
     </div>
 </body>
 

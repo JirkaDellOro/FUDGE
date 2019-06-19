@@ -1,0 +1,16 @@
+@startuml SketchTangentPoint
+skinparam monochrome true
+
+title SketchTangentPoint
+
+partition generatePath2D {
+	start
+	:_sideLength: number = 10]
+	:path2d = new Path2D();
+	:add rect around the position
+	with the _sideLength;
+	:close path;
+	stop
+}
+
+@enduml

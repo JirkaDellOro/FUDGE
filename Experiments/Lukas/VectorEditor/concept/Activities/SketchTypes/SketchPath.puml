@@ -1,0 +1,73 @@
+@startuml SketchPath
+skinparam monochrome true
+
+title SketchPath
+
+partition addVertexAtPos {
+	:_vertex: SketchVertex
+	_index: number = -1;
+	if() then ([_index < 0])
+		:_index = points.length + _index;
+	endif
+	if() then([_index < 0 || points.length - 1 < _index])
+		:Error: out of bounds]
+		stop
+	endif
+	:tmp: SketchPoint[] = points.splice(_index,points.length-_index)]
+	:points.push(_vertex);
+	:points = points + tmp;
+	stop
+}
+
+partition draw {
+	:_context: CanvasRenderingContext
+	_selected: boolean = false]
+	:generatePath2D() ₼;
+	:set _context options:
+	fillColor, strokeColor, lineWidth;
+	:_context.fill(path)
+	_context.stroke(path);
+	if() then ([_selected])
+		while() is ([v of points])
+			:v.draw(_context);
+		endwhile
+		' :transformationPoint.draw(_context);
+	endif
+	stop 
+}
+
+partition generatePath2D {
+	start
+	:path2d = new Path2D();
+	if() then([points.length < 2])
+		stop
+	endif
+	:moveTo(points[0]);
+	:i: number = 1]
+	while () is ([i < points.length])
+		:path2d.bezierCurveTo(
+			points[i - 1].tangentOut,
+			points[i].tangentIn,
+			points[i]);
+		:i++;
+	endwhile
+	if () then ([closed]) 
+		:path2d.bezierCurveTo(
+			lastpoint.tangentOut
+			points[0].tangentIn
+			points[0]);
+		:close path2d;
+	endif
+	stop
+}
+
+partition move {
+	:_delta:Vector2]
+	while () is ([p in points]) 
+		:p.move(_delta);
+	endwhile
+	' :transformationPoint += _delta;
+	stop
+}
+
+@enduml

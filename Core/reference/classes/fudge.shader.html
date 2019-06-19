@@ -88,10 +88,13 @@
 						<span class="target">Shader</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<a href="fudge.shaderbasic.html" class="tsd-signature-type">ShaderBasic</a>
+								<a href="fudge.shaderflat.html" class="tsd-signature-type">ShaderFlat</a>
 							</li>
 							<li>
 								<a href="fudge.shadertexture.html" class="tsd-signature-type">ShaderTexture</a>
+							</li>
+							<li>
+								<a href="fudge.shaderunicolor.html" class="tsd-signature-type">ShaderUniColor</a>
 							</li>
 						</ul>
 					</li>
@@ -104,8 +107,9 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.shader.html#loadfragmentshadersource" class="tsd-kind-icon">load<wbr>Fragment<wbr>Shader<wbr>Source</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.shader.html#loadvertexshadersource" class="tsd-kind-icon">load<wbr>Vertex<wbr>Shader<wbr>Source</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.shader.html#getcoat" class="tsd-kind-icon">get<wbr>Coat</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.shader.html#getfragmentshadersource" class="tsd-kind-icon">get<wbr>Fragment<wbr>Shader<wbr>Source</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.shader.html#getvertexshadersource" class="tsd-kind-icon">get<wbr>Vertex<wbr>Shader<wbr>Source</a></li>
 							</ul>
 						</section>
 					</div>
@@ -114,16 +118,33 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="loadfragmentshadersource" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> load<wbr>Fragment<wbr>Shader<wbr>Source</h3>
+					<a name="getcoat" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Coat</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">load<wbr>Fragment<wbr>Shader<wbr>Source<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Coat<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.coat.html" class="tsd-signature-type">Coat</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Shader/Shader.ts#L8">Shader/Shader.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Shaders/Shader.ts#L12">Shaders/Shader.ts:12</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudge.coat.html" class="tsd-signature-type">Coat</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getfragmentshadersource" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Fragment<wbr>Shader<wbr>Source</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Fragment<wbr>Shader<wbr>Source<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Shaders/Shader.ts#L14">Shaders/Shader.ts:14</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -131,16 +152,16 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="loadvertexshadersource" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> load<wbr>Vertex<wbr>Shader<wbr>Source</h3>
+					<a name="getvertexshadersource" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Vertex<wbr>Shader<wbr>Source</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">load<wbr>Vertex<wbr>Shader<wbr>Source<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Vertex<wbr>Shader<wbr>Source<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/dcb786a/Core/src/Shader/Shader.ts#L7">Shader/Shader.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6fab97b/Core/src/Shaders/Shader.ts#L13">Shaders/Shader.ts:13</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -168,10 +189,13 @@
 						<a href="fudge.shader.html" class="tsd-kind-icon">Shader</a>
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudge.shader.html#loadfragmentshadersource" class="tsd-kind-icon">load<wbr>Fragment<wbr>Shader<wbr>Source</a>
+								<a href="fudge.shader.html#getcoat" class="tsd-kind-icon">get<wbr>Coat</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudge.shader.html#loadvertexshadersource" class="tsd-kind-icon">load<wbr>Vertex<wbr>Shader<wbr>Source</a>
+								<a href="fudge.shader.html#getfragmentshadersource" class="tsd-kind-icon">get<wbr>Fragment<wbr>Shader<wbr>Source</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.shader.html#getvertexshadersource" class="tsd-kind-icon">get<wbr>Vertex<wbr>Shader<wbr>Source</a>
 							</li>
 						</ul>
 					</li>

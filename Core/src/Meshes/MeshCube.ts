@@ -1,42 +1,25 @@
 namespace Fudge {
     /**
-     * Simple class to compute the vertexpositions for a box.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * ```text
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/ 
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class MeshCube extends Mesh {
-        public width: number;
-        public height: number;
-        public depth: number;
-
-        public constructor(_width: number, _height: number, _depth: number) {
+        public constructor() {
             super();
-            this.width = _width;
-            this.height = _height;
-            this.depth = _depth;
             this.create();
         }
 
         public create(): void {
-            this.vertices = new Float32Array([
-                //front
-                -1, -1, 1, /**/ 1, -1, 1,  /**/ -1, 1, 1, /**/ -1, 1, 1, /**/ 1, -1, 1, /**/ 1, 1, 1,
-                //back
-                1, -1, -1, /**/ -1, -1, -1, /**/ 1, 1, -1, /**/ 1, 1, -1, /**/ -1, -1, -1, /**/ -1, 1, -1,
-                //left
-                -1, -1, -1, /**/ -1, -1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ -1, -1, 1, /**/ -1, 1, 1,
-                //right
-                1, -1, 1, /**/ 1, -1, -1, /**/ 1, 1, 1, /**/ 1, 1, 1, /**/ 1, -1, -1, /**/ 1, 1, -1,
-                //top
-                -1, 1, 1, /**/ 1, 1, 1, /**/ -1, 1, -1, /**/ -1, 1, -1, /**/ 1, 1, 1, /**/ 1, 1, -1,
-                //bottom
-                -1, -1, -1, /**/ 1, -1, -1, /**/ -1, -1, 1, /**/ -1, -1, 1, /**/ 1, -1, -1, /**/ 1, -1, 1
-            ]);
-
-            for (let iVertex: number = 0; iVertex < this.vertices.length; iVertex += 3) {
-                this.vertices[iVertex] *= this.width / 2;
-                this.vertices[iVertex + 1] *= this.height / 2;
-                this.vertices[iVertex + 2] *= this.depth / 2;
-            }
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
 
         public serialize(): Serialization {
@@ -45,11 +28,96 @@ namespace Fudge {
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.width = _serialization.width;
-            this.height = _serialization.height;
-            this.depth = _serialization.depth;
             this.create(); // TODO: must not be created, if an identical mesh already exists
             return this;
+        }
+
+        protected createVertices(): Float32Array {
+            let vertices: Float32Array = new Float32Array([
+                // First wrap
+                // front
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1,  /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
+                // back
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1,  /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1,
+                // Second wrap
+                // front
+                /*0*/ -1, 1, 1, /*1*/ -1, -1, 1,  /*2*/ 1, -1, 1, /*3*/ 1, 1, 1,
+                // back
+                /*4*/ -1, 1, -1, /* 5*/ -1, -1, -1,  /* 6*/ 1, -1, -1, /* 7*/ 1, 1, -1
+            ]);
+
+            // scale down to a length of 1 for all edges
+            vertices = vertices.map(_value => _value / 2);
+
+            return vertices;
+        }
+
+        protected createIndices(): Uint16Array {
+            let indices: Uint16Array = new Uint16Array([
+                // First wrap
+                // front
+                1, 2, 0, 2, 3, 0, 
+                // right
+                2, 6, 3, 6, 7, 3,
+                // back
+                6, 5, 7, 5, 4, 7,
+
+                // Second wrap
+                // left
+                5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8, 4 + 8,
+                // top
+                4 + 8, 0 + 8, 3 + 8, 7 + 8, 4 + 8, 3 + 8,
+                // bottom
+                5 + 8, 6 + 8, 1 + 8, 6 + 8, 2 + 8, 1 + 8
+
+                /*,
+                // left
+                4, 5, 1, 4, 1, 0,
+                // top
+                4, 0, 3, 4, 3, 7,
+                // bottom
+                1, 5, 6, 1, 6, 2
+                */
+            ]);
+            return indices;
+        }
+
+        protected createTextureUVs(): Float32Array {
+            let textureUVs: Float32Array = new Float32Array([
+                // First wrap
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0, /*5*/ 3, 1,  /*6*/ 2, 1, /*7*/ 2, 0,
+
+                // Second wrap
+                // front
+                /*0*/ 1, 0, /*1*/ 1, 1,  /*2*/ 1, 2, /*3*/ 1, -1,
+                // back
+                /*4*/ 0, 0, /*5*/ 0, 1,  /*6*/ 0, 2, /*7*/ 0, -1
+            ]);
+            return textureUVs;
+        }
+
+        protected createFaceNormals(): Float32Array {
+            let normals: Float32Array = new Float32Array([
+                // for each triangle, the last vertex of the three defining refers to the normalvector when using flat shading
+                // First wrap
+                // front
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 1, 0, 0,
+                // back
+                /*4*/ 0, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, -1,
+
+                // Second wrap
+                // front
+                /*0*/ 0, 0, 0, /*1*/ 0, -1, 0, /*2*/ 0, 0, 0, /*3*/ 0, 1, 0,
+                // back
+                /*4*/ -1, 0, 0, /*5*/ 0, 0, 0, /*6*/ 0, 0, 0, /*7*/ 0, 0, 0
+            ]);
+
+            //normals = this.createVertices();
+
+            return normals;
         }
     }
 }

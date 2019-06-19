@@ -6,22 +6,30 @@ namespace Fudge {
         stride: number; // Number of indices that will be skipped each iteration.
         offset: number; // Index of the element to begin with.
     }
-    export interface ShaderInfo {
+    export interface RenderShader {
+        // TODO: examine, if this should be injected in shader class via RenderInjector, as done with Coat
         program: WebGLProgram;
         attributes: { [name: string]: number };
         uniforms: { [name: string]: WebGLUniformLocation };
     }
 
-    export interface BufferInfo {
-        buffer: WebGLBuffer;
-        target: number;
-        specification: BufferSpecification;
-        vertexCount: number;
+    export interface RenderBuffers {
+        // TODO: examine, if this should be injected in mesh class via RenderInjector, as done with Coat
+        vertices: WebGLBuffer;
+        indices: WebGLBuffer;
+        nIndices: number;
+        textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
     }
 
-    export interface MaterialInfo {
-        vao: WebGLVertexArrayObject;
-        color: Color;
+    export interface RenderCoat {
+        //TODO: examine, if it makes sense to store a vao for each Coat, even though e.g. color won't be stored anyway...
+        //vao: WebGLVertexArrayObject;
+        coat: Coat;
+    }
+
+    export interface RenderLights {
+        [type: string]: Float32Array;
     }
 
     /**
@@ -53,8 +61,9 @@ namespace Fudge {
                 "WebGL-context couldn't be created"
             );
             // Enable backface- and zBuffer-culling.
-            RenderOperator.crc3.enable(RenderOperator.crc3.CULL_FACE);
-            RenderOperator.crc3.enable(RenderOperator.crc3.DEPTH_TEST);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+            // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
         }
 
@@ -63,6 +72,12 @@ namespace Fudge {
          */
         public static getCanvas(): HTMLCanvasElement {
             return RenderOperator.crc3.canvas;
+        }
+        /**
+         * Return a reference to the rendering context
+         */
+        public static getRenderingContext(): WebGL2RenderingContext {
+            return RenderOperator.crc3;
         }
         /**
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
@@ -94,49 +109,137 @@ namespace Fudge {
         }
 
         /**
+         * Convert light data to flat arrays
+         */
+        protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights {
+            let renderLights: RenderLights = {};
+            for (let entry of _lights) {
+                switch (entry[0]) {
+                    case LightAmbient.name:
+                        let ambient: number[] = [];
+                        for (let light of entry[1]) {
+                            let c: Color = light.getLight().color;
+                            ambient.push(c.r, c.g, c.b, c.a);
+                        }
+                        renderLights["u_ambient"] = new Float32Array(ambient);
+                        break;
+                    case LightDirectional.name:
+                        let directional: number[] = [];
+                        for (let light of entry[1]) {
+                            let c: Color = light.getLight().color;
+                            let d: Vector3 = (<LightDirectional>light.getLight()).direction;
+                            directional.push(c.r, c.g, c.b, c.a, d.x, d.y, d.z);
+                        }
+                        renderLights["u_directional"] = new Float32Array(directional);
+                        break;
+                    default:
+                        Debug.warn("Shaderstructure undefined for", entry[0]);
+                }
+            }
+            return renderLights;
+        }
+
+        /**
+         * Set light data in shaders
+         */
+        protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void {
+            RenderOperator.useProgram(_renderShader);
+            let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
+
+            let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+            if (ambient) {
+                let cmpLights: ComponentLight[] = _lights.get("LightAmbient");
+                if (cmpLights) {
+                    // TODO: add up ambient lights to a single color
+                    // let result: Color = new Color(0, 0, 0, 1);
+                    for (let cmpLight of cmpLights)
+                        // for now, only the last is relevant
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                }
+            }
+
+            let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
+            if (nDirectional) {
+                let cmpLights: ComponentLight[] = _lights.get("LightDirectional");
+                if (cmpLights) {
+                    let n: number = cmpLights.length;
+                    RenderOperator.crc3.uniform1ui(nDirectional, n);
+                    for (let i: number = 0; i < n; i++) {
+                        let light: LightDirectional = <LightDirectional>cmpLights[i].getLight();
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
+                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.getArray());
+                    }
+                }
+            }
+            // debugger;
+        }
+
+        /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param shaderInfo 
-         * @param bufferInfo 
-         * @param materialInfo 
+         * @param _renderShader 
+         * @param _renderBuffers 
+         * @param _renderCoat 
          * @param _projection 
          */
-        protected static draw(shaderInfo: ShaderInfo, bufferInfo: BufferInfo, materialInfo: MaterialInfo, _projection: Matrix4x4): void {
-            RenderOperator.useBuffer(bufferInfo);
-            RenderOperator.useParameter(materialInfo);
-            RenderOperator.useProgram(shaderInfo);
-            RenderOperator.attributePointer(shaderInfo.attributes["a_position"], bufferInfo.specification);
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void {
+            RenderOperator.useProgram(_renderShader);
+            // RenderOperator.useBuffers(_renderBuffers);
+            // RenderOperator.useParameter(_renderCoat);
 
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
+            RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
+
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+
+            if (_renderShader.attributes["a_textureUVs"]) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
+                RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+            }
             // Supply matrixdata to shader. 
-            let matrixLocation: WebGLUniformLocation = shaderInfo.uniforms["u_matrix"];
-            RenderOperator.crc3.uniformMatrix4fv(matrixLocation, false, _projection.data);
+            let uProjection: WebGLUniformLocation = _renderShader.uniforms["u_projection"];
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
 
-            // Supply color
-            let colorUniformLocation: WebGLUniformLocation = shaderInfo.uniforms["u_color"];
-            let c: Color = materialInfo.color;
-            let color: Float32Array = new Float32Array([c.r, c.g, c.b, 1.0]);
-            RenderOperator.crc3.uniform4fv(colorUniformLocation, color);
+            if (_renderShader.uniforms["u_world"]) {
+                let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
+                RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
+                RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
+            }
+            // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
+            _renderCoat.coat.useRenderData(_renderShader);
 
             // Draw call
-            RenderOperator.crc3.drawArrays(RenderOperator.crc3.TRIANGLES, bufferInfo.specification.offset, bufferInfo.vertexCount);
+            // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
+            RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
 
         // #region Shaderprogram 
-        protected static createProgram(_shaderClass: typeof Shader): ShaderInfo {
+        protected static createProgram(_shaderClass: typeof Shader): RenderShader {
             let crc3: WebGL2RenderingContext = RenderOperator.crc3;
-            let shaderProgram: WebGLProgram = crc3.createProgram();
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadVertexShaderSource(), crc3.VERTEX_SHADER)));
-            crc3.attachShader(shaderProgram, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.loadFragmentShaderSource(), crc3.FRAGMENT_SHADER)));
-            crc3.linkProgram(shaderProgram);
-            let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(shaderProgram));
-            if (error !== "") {
-                throw new Error("Error linking Shader: " + error);
+            let program: WebGLProgram = crc3.createProgram();
+            let renderShader: RenderShader;
+            try {
+                crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+                crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+                crc3.linkProgram(program);
+                let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(program));
+                if (error !== "") {
+                    throw new Error("Error linking Shader: " + error);
+                }
+                renderShader = {
+                    program: program,
+                    attributes: detectAttributes(),
+                    uniforms: detectUniforms()
+                };
+            } catch (_error) {
+                Debug.error(_error);
+                debugger;
             }
-            let program: ShaderInfo = {
-                program: shaderProgram,
-                attributes: detectAttributes(),
-                uniforms: detectUniforms()
-            };
-            return program;
+            return renderShader;
 
 
             function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
@@ -148,7 +251,7 @@ namespace Fudge {
                     throw new Error("Error compiling shader: " + error);
                 }
                 // Check for any compilation errors.
-                if (!crc3.getShaderParameter(webGLShader, crc3.COMPILE_STATUS)) {
+                if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
                     alert(crc3.getShaderInfoLog(webGLShader));
                     return null;
                 }
@@ -156,34 +259,34 @@ namespace Fudge {
             }
             function detectAttributes(): { [name: string]: number } {
                 let detectedAttributes: { [name: string]: number } = {};
-                let attributeCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_ATTRIBUTES);
+                let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
                 for (let i: number = 0; i < attributeCount; i++) {
-                    let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(shaderProgram, i));
+                    let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
                     if (!attributeInfo) {
                         break;
                     }
-                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(shaderProgram, attributeInfo.name);
+                    detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
                 }
                 return detectedAttributes;
             }
             function detectUniforms(): { [name: string]: WebGLUniformLocation } {
                 let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
-                let uniformCount: number = crc3.getProgramParameter(shaderProgram, crc3.ACTIVE_UNIFORMS);
+                let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
                 for (let i: number = 0; i < uniformCount; i++) {
-                    let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(shaderProgram, i));
+                    let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
                     if (!info) {
                         break;
                     }
-                    detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(shaderProgram, info.name));
+                    detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
                 }
                 return detectedUniforms;
             }
         }
-        protected static useProgram(_shaderInfo: ShaderInfo): void {
+        protected static useProgram(_shaderInfo: RenderShader): void {
             RenderOperator.crc3.useProgram(_shaderInfo.program);
             RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
         }
-        protected static deleteProgram(_program: ShaderInfo): void {
+        protected static deleteProgram(_program: RenderShader): void {
             if (_program) {
                 RenderOperator.crc3.deleteProgram(_program.program);
                 delete _program.attributes;
@@ -193,80 +296,77 @@ namespace Fudge {
         // #endregion
 
         // #region Meshbuffer
-        protected static createBuffer(_mesh: Mesh): BufferInfo {
-            let buffer: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-            RenderOperator.crc3.bindBuffer(RenderOperator.crc3.ARRAY_BUFFER, buffer);
-            RenderOperator.crc3.bufferData(RenderOperator.crc3.ARRAY_BUFFER, _mesh.getVertices(), RenderOperator.crc3.STATIC_DRAW);
-            let bufferInfo: BufferInfo = {
-                buffer: buffer,
-                target: RenderOperator.crc3.ARRAY_BUFFER,
-                specification: _mesh.getBufferSpecification(),
-                vertexCount: _mesh.getVertexCount()
+        protected static createBuffers(_mesh: Mesh): RenderBuffers {
+            let vertices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
+
+            let indices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
+
+            let textureUVs: WebGLBuffer = RenderOperator.crc3.createBuffer();
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
+
+            let normalsFace: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
+            RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
+
+            let bufferInfo: RenderBuffers = {
+                vertices: vertices,
+                indices: indices,
+                nIndices: _mesh.getIndexCount(),
+                textureUVs: textureUVs,
+                normalsFace: normalsFace
             };
             return bufferInfo;
         }
-        protected static useBuffer(_bufferInfo: BufferInfo): void {
-            RenderOperator.crc3.bindBuffer(_bufferInfo.target, _bufferInfo.buffer);
+        protected static useBuffers(_renderBuffers: RenderBuffers): void {
+            // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+            // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
+
         }
-        protected static deleteBuffer(_bufferInfo: BufferInfo): void {
-            if (_bufferInfo) {
-                RenderOperator.crc3.bindBuffer(_bufferInfo.target, null);
-                RenderOperator.crc3.deleteBuffer(_bufferInfo.buffer);
+        protected static deleteBuffers(_renderBuffers: RenderBuffers): void {
+            if (_renderBuffers) {
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.vertices);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.textureUVs);
+                RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
+                RenderOperator.crc3.deleteBuffer(_renderBuffers.indices);
             }
         }
         // #endregion
 
         // #region MaterialParameters
-        protected static createParameter(_material: Material): MaterialInfo {
-            let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
-            let materialInfo: MaterialInfo = {
-                vao: vao,
-                color: _material.Color
+        protected static createParameter(_coat: Coat): RenderCoat {
+            // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
+            let coatInfo: RenderCoat = {
+                //vao: null,
+                coat: _coat
             };
-            return materialInfo;
+            return coatInfo;
         }
-        protected static useParameter(_materialInfo: MaterialInfo): void {
-            RenderOperator.crc3.bindVertexArray(_materialInfo.vao);
+        protected static useParameter(_coatInfo: RenderCoat): void {
+            // RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
         }
-        protected static deleteParameter(_materialInfo: MaterialInfo): void {
-            if (_materialInfo) {
+        protected static deleteParameter(_coatInfo: RenderCoat): void {
+            if (_coatInfo) {
                 RenderOperator.crc3.bindVertexArray(null);
-                RenderOperator.crc3.deleteVertexArray(_materialInfo.vao);
+                // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
             }
         }
         // #endregion
 
-        // #region Utilities
-        /**
+        /** 
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
          * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
          */
-        private static attributePointer(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
+        private static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
             RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
         }
-
-
-        /*/*
-         * Wrapperclass that binds and initializes a texture.
-         * @param _textureSource A string containing the path to the texture.
-         */
-        // public static createTexture(_textureSource: string): void {
-        //     let texture: WebGLTexture = GLUtil.assert<WebGLTexture>(gl2.createTexture());
-        //     gl2.bindTexture(gl2.TEXTURE_2D, texture);
-        //     // Fill the texture with a 1x1 blue pixel.
-        //     gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, 1, 1, 0, gl2.RGBA, gl2.UNSIGNED_BYTE, new Uint8Array([170, 170, 255, 255]));
-        //     // Asynchronously load an image
-        //     let image: HTMLImageElement = new Image();
-        //     image.crossOrigin = "anonymous";
-        //     image.src = _textureSource;
-        //     image.onload = function (): void {
-        //         gl2.bindTexture(gl2.TEXTURE_2D, texture);
-        //         gl2.texImage2D(gl2.TEXTURE_2D, 0, gl2.RGBA, gl2.RGBA, gl2.UNSIGNED_BYTE, image);
-        //         gl2.generateMipmap(gl2.TEXTURE_2D);
-        //     };
-        // }
-
-        // #endregion
     }
 }

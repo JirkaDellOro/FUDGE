@@ -1,0 +1,40 @@
+@startuml ToolNewPath
+skinparam monochrome true
+
+title ToolNewPath
+
+partition mousedown {
+	:_event: MouseEvent]
+	if() then ([isPointInPath(newPath.points[0].path2d, clientX, clientY)])
+		:newPath.close();
+		:Editor.paths.push(newPath);
+		:newPath = new SketchPath();
+		stop
+	endif
+	:newPath.addVertexToPos(new SketchVertex (clientX, clientY),-1);
+	stop
+}
+
+' partition mousemove {
+' 	:_event: MouseEvent]
+' 	if() then ([selectedSubTool])
+' 		:selectedSubTool.mousemove(_event);
+' 	endif
+' 	stop
+' }
+
+' partition mouseup {
+' 	:_event: MouseEvent]
+' 	if() then ([selectedSubTool])
+' 		:selectedSubTool.mouseup(_event);
+' 	endif
+' 	stop
+' }
+
+partition exit {
+	start
+	:Editor.paths.push(newPath);
+	stop
+}
+
+@enduml

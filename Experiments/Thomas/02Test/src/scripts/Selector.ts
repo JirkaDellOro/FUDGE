@@ -1,76 +1,114 @@
-let audioContext:AudioContext = null;
-let volume:number = 50;
-let url:string;
+namespace AudioSelector {
+    let bufferSource: AudioBufferSourceNode;
+    let audioContext: AudioContext;
+    let masterGain: GainNode;
+    let audio: AudioBuffer;
+    let volume: number = 0.5;
+    let url: string;
+    window.addEventListener("load", init);
 
-
-function PlaySong():void {
-
-    SetSong();
-
-    //Close AC if already openend
-    if (audioContext != null) {
-        audioContext.close();
+    function init(_event: Event): void {
+        document.querySelector("button").addEventListener("click", playSong);
+        document.querySelector("input").addEventListener("input", setVolume);
     }
 
-
-    // Create AudioContext instance
-    audioContext = new (window["AudioContext"] || window["webkitAudioContext"])();
-    // Create a buffer for the incoming sound content
-    const source:AudioBufferSourceNode = audioContext.createBufferSource();
-
-    // Create XHR to get the audio contents
-    const request:XMLHttpRequest = new XMLHttpRequest();
-
-    // Set the audio file src here
-    request.open('GET', url, true);
-    // Setting the responseType to arraybuffer sets up audio decoding
-    request.responseType = 'arraybuffer';
-    request.onload = function():void {
-            // Decode the audio once the require is complete
-            audioContext.decodeAudioData(
-                request.response,
-                function(buffer:AudioBuffer):void {
-                    source.buffer = buffer;
-                    // Connect the audio to source (multiple audio buffers can be connected!)
-                    source.connect(audioContext.destination);
-                    // Simple setting for the buffer
-                    source.loop = true;
-                    // Play the sound!
-                    source.start(0);
-                },
-                function(e:Error) {
-                    console.log('Audio error', e);
-                });
+    function playSong(): void {
+        if (audioContext != null) {
+            audioContext.close();
         }
-        // Send the request which kicks off 
-    request.send();
-}
+        setSong();
 
+        audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: 44100 });
+        bufferSource = audioContext.createBufferSource();
+        masterGain = audioContext.createGain();
 
-function SetSong():void {
-    const ele:HTMLElement = document.getElementById("songs");
-    const song:HTMLElement = document.getElementById("songSelection");
-    let selected:string = ele.options[ele.selectedIndex].value;
-    
-    song.innerHTML = ele.options[ele.selectedIndex].innerHTML;
+        //useXHR();
 
-    switch (selected) {
-        case 'songone':
-            url = 'sounds/mario_piano.mp3'
-            break;
-        case 'songtwo':
-            url = 'sounds/mario_piano.mp3'
-            break;
-        case 'songthree':
-            url = 'sounds/mario_piano.mp3'
-            break;
-        default:
-            console.log('error')
+       fetchAudio(audioContext);
     }
-}
 
-function SetVolume(vol:number):void {
-    volume = vol;
-    document.getElementById('output').innerHTML = volume;
-    console.log(volume);
+    function fetchAudio(_audioContext: AudioContext){
+        // let requiredHeader = new Headers();
+        // let initObject = {
+        //     method: 'GET',
+        //     headers: requiredHeader,
+        // };
+
+        console.log("fetching Audio");
+        window.fetch(url)
+            .then(data => data.arrayBuffer())
+            .then(arrayBuffer => _audioContext.decodeAudioData(arrayBuffer))
+            .then(decodedAudio => {
+                audio = decodedAudio;
+            })
+            .then(playBuffer)
+            .catch(logError)
+    }
+
+    // # https://gist.github.com/revolunet/e620e2c532b7144c62768a36b8b96da2
+
+
+    // function useXHR(){
+    //     const request: XMLHttpRequest = new XMLHttpRequest();
+    //     request.open("GET", url, true);
+    //     request.responseType = "arraybuffer";
+    //     request.addEventListener("load", decode);
+    //     request.send();
+    // }
+
+    // function decode(_event: Event): void {
+    //     let xhr: XMLHttpRequest = <XMLHttpRequest>event.target;
+    //     console.log("decode");
+    //     audioContext.decodeAudioData(xhr.response, playBuffer, logError);
+    // }
+
+
+    function playBuffer(): void {
+        console.log("playBuffer");
+        bufferSource.buffer = audio;
+        bufferSource.connect(audioContext.destination);
+        // bufferSource.loop = true;
+        console.log(volume);
+        // 0.0 oder anderer Wert sonst Fehler
+        masterGain.gain.value = 0.0 + volume;
+        masterGain.connect(audioContext.destination);
+        bufferSource.connect(masterGain);
+        bufferSource.start(0);
+    }
+
+    function logError(e: Error): void {
+        console.log("Audio error", e);
+    }
+
+    function setSong(): void {
+        const soundOptions: HTMLSelectElement = <HTMLSelectElement>document.getElementById("soundOptions");
+        const soundSelection: HTMLElement = document.getElementById("soundSelectionField");
+        let selectedSound: string = soundOptions.value;
+        // console.log(soundOptions);
+        soundSelection.innerHTML = soundOptions.options[soundOptions.selectedIndex].innerHTML;
+
+        switch (selectedSound) {
+            case "mario":
+                console.log("mario selected");
+                url = "sounds/mario_piano.mp3";
+                break;
+            case "hypnotic":
+                console.log("hypnoticc selected");
+                url = "sounds/hypnotic.mp3";
+                break;
+            case "trancyvenia":
+                console.log("trancyvania selected");
+                url = "sounds/trancyvania.mp3";
+                break;
+            default:
+                console.log("error");
+        }
+    }
+
+    function setVolume(_event: Event): void {
+        let input: HTMLInputElement = <HTMLInputElement>event.target;
+        document.getElementById("volumeOutput").innerHTML = input.value;
+        volume = input.valueAsNumber;
+        console.log(volume);
+    }
 }

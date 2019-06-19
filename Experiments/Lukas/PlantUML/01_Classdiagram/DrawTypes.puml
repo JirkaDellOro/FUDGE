@@ -8,38 +8,38 @@ skinparam handwritten false
 'page 2x2
 left to right direction
 package FUDGE <<Rectangle>> {
-	package DrawTypes <<Rectangle>>{
-		class DrawObject {
+	package SketchTypes <<Rectangle>>{
+		class SketchObject {
 			+ color: string | CanvasGradient | CanvasPattern
 			+ name: String
 			+ order: number
 			+ lineWidth: number
-			{static} sort(a: DrawObject, b: DrawObject): number
+			{static} sort(a: SketchObject, b: SketchObject): number
 		}
 
-		class DrawPath extends DrawObject {
+		class SketchPath extends SketchObject {
 			- closed: boolean
 			- path2d: Path2D
-			+ points: Vertex[]
+			+ points: SketchVertex[]
 			+ fillColor: string | CanvasGradient | CanvasPattern
 			draw(context: CanvasRenderingContext2D, selected: boolean = false)
 			generatePath2D()
-			addVertexToEnd(bcp1: Vertex)
+			addVertexToEnd(bcp1: SketchVertex)
 			getPath2D(): Path2D
 			move(d: Vector2): Path2D
 			move(dx: number, dy: number): Path2D
 		}
 
-		' class DrawLine {
+		' class SketchLine {
 			' 	+ startPoint: Vector2
 			' 	+ endPoint: Vector2
 			' 	+ startBezierPoint: Vector2
 			' 	+ endBezierPoint: Vector2
-			' 	+ parent: DrawPath
+			' 	+ parent: SketchPath
 			'
 		' }
 
-		class DrawPoint {
+		class SketchPoint {
 			# path: Path2D
 			+ x: number
 			+ y: number
@@ -50,22 +50,22 @@ package FUDGE <<Rectangle>> {
 			moveTo(x: number, y: number): Path2D
 		}
 
-		class Vertex extends DrawPoint {
-			tangentIn: TangentPoint
-			tangentOut: TangentPoint
-			+ parent: DrawPath
+		class SketchVertex extends SketchPoint {
+			tangentIn: SketchTangentPoint
+			tangentOut: SketchTangentPoint
+			+ parent: SketchPath
 			draw(context: CanvasRenderingContext2D, selected: boolean = false, showTangents: boolean = false)
 			move(dx: number, dy: number): Path2D
 		}
 
-		class TangentPoint extends DrawPoint {
-			+ parent: Vertex
+		class SketchTangentPoint extends SketchPoint {
+			+ parent: SketchVertex
 			generatePath2D(): Path2D
 		}
 
 		' Associations
-		DrawPath "1" -- "n" Vertex
-		Vertex "1" -- "2" TangentPoint
+		SketchPath "1" -- "n" SketchVertex
+		Vertex "1" -- "2" SketchTangentPoint
 	}
 }
 @enduml

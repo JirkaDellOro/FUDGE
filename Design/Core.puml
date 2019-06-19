@@ -1,11 +1,12 @@
 @startuml FUDGE-Core
+'page 2x2
+'skinparam pageBorderColor black
 skinparam monochrome true
 skinparam componentStyle uml2
 skinparam classAttributeIconSize 0
 skinparam shadowing false
 skinparam handwritten false
 
-'page 2x2
 left to right direction
 'top to bottom direction
 
@@ -61,26 +62,31 @@ package Fudge <<Rectangle>> {
       + a: number
     }
     class Material {
-      - name: string
-      - shaderClass: typeof Shader
-      - color: Color
-      - textureEnabled: boolean
-      - textureSource: string
-    }
-    class Viewport extends EventTarget {
       + name: string
-      + camera: ComponentCamera
-      + branch: Node
-      + rectSource: Rectangle
-      + rectDestination: Rectangle
-      + frameClientToCanvas: Framing
-      + frameCanvasToDestination: Framing
-      + frameDestinationToSource: Framing
-      + frameSourceToRender: Framing
-      + mappingRects: boolean
-      + adjustingCamera: boolean
-      - canvas: HTMLCanvasElement
-      - crc2: CanvasRenderingContext2D
+      - shaderType: typeof Shader
+      - coat: Coat
+    }
+
+    file "Viewport" {
+      interface MapLightTypeToLightList {
+        [type: typeof Light]: ComponentLight[]
+      }
+      class Viewport extends EventTarget {
+        + name: string
+        + camera: ComponentCamera
+        + branch: Node
+        + rectSource: Rectangle
+        + rectDestination: Rectangle
+        + frameClientToCanvas: Framing
+        + frameCanvasToDestination: Framing
+        + frameDestinationToSource: Framing
+        + frameSourceToRender: Framing
+        + mappingRects: boolean
+        + adjustingCamera: boolean
+        + lights: MapLightTypeToComponentLight
+        - canvas: HTMLCanvasElement
+        - crc2: CanvasRenderingContext2D
+      }
     }
 
     file "Event"{
@@ -103,10 +109,10 @@ package Fudge <<Rectangle>> {
 
   package "Render" <<Folder>> {
     interface NodeReferences {
-      shader: typeof Shader
-      material: Material
-      mesh: Mesh
-      doneTransformToWorld: boolean
+      shader: typeof Shader;
+      coat: Coat;
+      mesh: Mesh;
+      doneTransformToWorld: boolean;
     }
     interface BufferSpecification {
       size: number
@@ -115,34 +121,45 @@ package Fudge <<Rectangle>> {
       stride: number
       offset: number
     }
-    interface ShaderInfo {
+    interface RenderShader {
       program: WebGLProgram
-      attributes: MapNameToValue
+      attributes: MapNameToAttributeLocation
       uniforms: MapNameToUniformLocation
     }
-    interface BufferInfo {
-      buffer: WebGLBuffer
-      target: number
-      specification: BufferSpecification
-      vertexCount: number
+    interface RenderBuffers {
+      vertices: WebGLBuffer;
+      indices: WebGLBuffer;
+      nIndices: number;
+      textureUVs: WebGLBuffer;
+      normalsFace: WebGLBuffer;
     }
-    interface MaterialInfo {
-      vao: RenderManagerVertexArrayObject
-      color: Vector3
+    interface RenderCoat {
+      coat: Coat;
     }
     class Reference<T> {
       - reference: T
       - count: number = 0
     }
     class RenderManager extends RenderOperator {
-      - {static} programs: Map<typeof Shader, Reference<ShaderInfo>>
-      - {static} parameters: Map<Material, Reference<MaterialInfo>>
-      - {static} buffers: Map<Mesh, Reference<BufferInfo>>
+      - {static} renderShaders: Map<typeof Shader, Reference<RenderShader>>
+      - {static} renderCoats: Map<Material, Reference<RenderCoat>>
+      - {static} renderBuffers: Map<Mesh, Reference<RenderBuffers>>
       - {static} nodes: MapNodeToNodeReferences
     }
     class RenderOperator {
       # {static} crc3: WebGL2RenderingContext
       - {static} rectViewport: Rectangle
+    }
+
+
+    interface CoatInjection {
+      typeof Coat,
+      renderShader: RenderShader
+    }
+
+    class RenderInjector {
+      - {static} coatInjections
+      + {static} decorateCoat(_constructor: Function): void
     }
   }
 
@@ -216,12 +233,16 @@ package Fudge <<Rectangle>> {
 
   package "Meshes" <<Folder>> {
     class Mesh {
-      # vertices: Float32Array
+      + vertices: Float32Array;
+      + indices: Uint16Array;
+      + textureUVs: Float32Array;
+      + normalsFace: Float32Array;
+    }
+    class MeshQuad extends Mesh {
     }
     class MeshCube extends Mesh {
-      + width: number
-      + height: number
-      + depth: number
+    }
+    class MeshPyramid extends Mesh {
     }
   }
 
@@ -269,14 +290,58 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Shader" << Folder>> {
+  package "Shaders" << Folder>> {
     class Shader {
+      + {static} getCoat(): typeof Coat
       + {static} loadVertexShaderSource(): string
       + {static} loadFragmentShaderSource(): string
     }
-    class ShaderBasic extends Shader {
+    class ShaderUniColor extends Shader {
     }
     class ShaderTexture extends Shader {
+    }
+    class ShaderFlat extends Shader {
+    }
+  }
+
+  package "Coats" << Folder>> {
+    class Coat extends Mutable {
+      + name: string
+      # renderData: MapAttributeToUnknown
+      + useRenderData(_renderShader: RenderShader): void
+    }
+    '@decorateCoatWithRenderExtension
+    class CoatColored extends Coat
+    class CoatTextured extends Coat
+  }
+
+  package "Textures" << Folder>> {
+    abstract class Texture extends Mutable {
+    }
+    class TextureImage extends Texture {
+      + image: HTMLImageElement;
+    }
+    class TextureCanvas extends Texture {
+    }
+    class TextureSketch extends TextureCanvas {
+    }
+    class TextureHTML extends TextureCanvas {
+    }
+  }
+
+  package "Lights" << Folder>> {
+    abstract class Light extends Mutable {
+      + color: Color
+    }
+    class LightAmbient extends Light {
+    }
+    class LightDirectional extends Light {
+    }
+    class LightPoint extends Light {
+      + range: number
+    }
+    class LightSpot extends LightPoint {
+      + angle: number
     }
   }
 
@@ -290,51 +355,44 @@ package Fudge <<Rectangle>> {
   Mutable -(0- Mutator
   Mutable -(0- MutatorAttributeTypes
   Node "1" -0)- "2" MapEventTypeToListener
-
-  'Associations, Compositions, Aggregations
-  Node "0..1 parent" o-left- "n children" Node
-  Node "1 container" o-- "n components" Component
-
-  ComponentMesh "n" --> "1" Mesh : refers >
-  ComponentPivot -->"1" Matrix4x4
-  ComponentTransform -->"1" Matrix4x4
-  ComponentMaterial "n" --> "1" Shader : refers >
-
-  Shader "n"-->"1" Material : uses >
-  
-  Viewport -->"1 root" Node : displays >
-  Viewport -->"1 camera" ComponentCamera : look through >
-  Viewport "n" --> "1" CanvasRenderingContext2D : renders >
-  Viewport "n" -> "1" RenderManager : feeds data and retrieves image >
-  Viewport "1" -> "4" Framing : uses >
-  
-  RenderManager "1" -> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
-  RenderManager "1" o--> "n" NodeReferences : keeps >
-  RenderManager "1" o--> "n" Reference : keeps >
-  
-  Reference "1" --> "1" ShaderInfo : shader uses >
-  Reference "1" --> "1" BufferInfo : mesh uses >
-  Reference "1" --> "1" MaterialInfo : material uses >
-  
-  BufferInfo --> BufferSpecification : provides >
-  
   Framing -0)- Rectangle
   FramingComplex "1" -0)- "2" Border
-  
   Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
   MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
 
+  'Associations, Compositions, Aggregations
+  Node "0..1 parent" o-- "n children" Node
+  Node "1 container" o-- "n components" Component
+
+  ComponentMesh "n" ---> "1" Mesh : refers >
+  ComponentPivot --->"1" Matrix4x4
+  ComponentTransform --->"1" Matrix4x4
+  ComponentMaterial "n" ---> "1" Material : refers >
+
+  Material "n"--->"1" Shader : references >
+  Material "n"--->"1" Coat : references >
+  Shader "n"--->"1" Coat : references >
+  CoatTextured "n" ---> Texture : references >
+
+  Viewport --->"1 root" Node : displays >
+  Viewport --->"1 camera" ComponentCamera : look through >
+  Viewport "n" ---> "1" CanvasRenderingContext2D : renders >
+  Viewport "n" ---> "1" RenderManager : feeds data and retrieves image >
+  Viewport "1" ---> "4" Framing : uses >
+
+  RenderManager "1" ---> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
+  RenderManager "1" o--> "n" NodeReferences : keeps >
+  RenderManager "1" o--> "n" Reference : keeps >
+  RenderInjector -(0- CoatInjection : provides >
+  RenderInjector --- Coat : decorates >
+
+  Reference "1" ---> "1" RenderShader : shader uses >
+  Reference "1" ---> "1" RenderBuffers : mesh uses >
+  Reference "1" ---> "1" RenderCoat : material uses >
+
+  Mesh ---> BufferSpecification : provides >
+
   'improve layout
   Node -[hidden]right- Component
-  'Node -[hidden]up- Mutable
-  'Node -[hidden]- Serializable
-  'Component -[hidden]- Serializable
-  'Serializer --[hidden]-- Mutable
-  'Mutable --[hidden]-- Component
-  'Viewport -[hidden]- ComponentCamera
-  'Engine -[hidden]- Meshes
-  'Engine -[hidden]- Browser
-  'Loop -[hidden]- Material
-  'Meshes --[hidden]up-- Shader
-  'EventTarget -[hidden] EventTargetStatic
+  CoatTextured "n" -[hidden]up-> Texture
   @enduml

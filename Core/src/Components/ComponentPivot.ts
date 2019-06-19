@@ -123,13 +123,13 @@ namespace Fudge {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
             let serialization: Serialization = {
                 local: this.local.serialize(),
-                [super.constructor.name]: super.serialize()
+                [super.type]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
             this.local.deserialize(_serialization.local);
-            super.deserialize(_serialization[super.constructor.name]);
+            super.deserialize(_serialization[super.type]);
             return this;
         }
         // #endregion

@@ -14,9 +14,9 @@ partition keydown {
 		:redrawAll ₼;
 	endif
 
-	while () is ([a in actions])
+	while () is ([a in tools])
 		if() then ([isShortcutPressed(a.shortcut)])
-			:selectedAction = a;
+			:selectedTool = a;
 			:uiHandler.updateUI();
 		endif
 	endwhile

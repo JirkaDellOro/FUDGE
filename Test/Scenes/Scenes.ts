@@ -6,15 +6,19 @@ namespace Scenes {
     export let viewPort: ƒ.Viewport;
 
     export function createAxisCross(): ƒ.Node {
-        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
-        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 1);
-        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 1);
+        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 0.5);
+        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 0.5);
+        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 0.5);
 
-        let mtrRed: ƒ.Material = new ƒ.Material("Red", clrRed, ƒ.ShaderBasic);
-        let mtrGreen: ƒ.Material = new ƒ.Material("Green", clrGreen, ƒ.ShaderBasic);
-        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", clrBlue, ƒ.ShaderBasic);
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(clrGreen);
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(clrBlue);
 
-        let meshCube: ƒ.MeshCube = new ƒ.MeshCube(1, 1, 1);
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+
+        let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
         let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
@@ -38,13 +42,58 @@ namespace Scenes {
         return branch;
     }
 
+    export function createCoordinateSystem(): ƒ.Node {
+        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
+        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
+        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
+
+        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
+        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+
+        let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+        let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
+
+        let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
+        let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
+        let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+
+        let pyramidRed: ƒ.Node = Scenes.createCompleteMeshNode("RedTip", mtrRed, meshPyramid);
+        let pyramidGreen: ƒ.Node = Scenes.createCompleteMeshNode("GreenTip", mtrGreen, meshPyramid);
+        let pyramidBlue: ƒ.Node = Scenes.createCompleteMeshNode("BlueTip", mtrBlue, meshPyramid);
+
+        cubeRed.cmpTransform.scale(1, 0.01, 0.01);
+        cubeGreen.cmpTransform.scale(0.01, 1, 0.01);
+        cubeBlue.cmpTransform.scale(0.01, 0.01, 1);
+
+        pyramidRed.cmpTransform.translateX(0.5);
+        pyramidRed.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidRed.cmpTransform.rotateZ(-90);
+        pyramidGreen.cmpTransform.translateY(0.5);
+        pyramidGreen.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidBlue.cmpTransform.translateZ(0.5);
+        pyramidBlue.cmpTransform.scale(0.1, 0.1, 0.1);
+        pyramidBlue.cmpTransform.rotateX(90);
+
+        // create branch
+        let branch: ƒ.Node = new ƒ.Node("CoordinateSystem");
+        branch.appendChild(cubeRed);
+        branch.appendChild(cubeGreen);
+        branch.appendChild(cubeBlue);
+        branch.appendChild(pyramidRed);
+        branch.appendChild(pyramidGreen);
+        branch.appendChild(pyramidBlue);
+
+        return branch;
+    }
+
     export function createThreeLevelNodeHierarchy(): void {
         createMiniScene();
 
         let child: ƒ.Node = node.getChildren()[0];
 
         let grandchild: ƒ.Node;
-        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", new ƒ.Color(0, 1, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(3, 3, 3));
+        grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.translateX(2);
         child.appendChild(grandchild);
     }
@@ -52,7 +101,7 @@ namespace Scenes {
     export function createMiniScene(): void {
         ƒ.RenderManager.initialize();
 
-        node = createCompleteMeshNode("Node", new ƒ.Material("Red", new ƒ.Color(1, 0, 0, 1), ƒ.ShaderBasic), new ƒ.MeshCube(5, 2, 5));
+        node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.scaleX(2);
 
@@ -73,7 +122,7 @@ namespace Scenes {
         viewPort.showSceneGraph();
     }
 
-    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(10, 10, 50), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.Node {
+    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(1, 1, 10), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.Node {
         let camera: ƒ.Node = new ƒ.Node("Camera");
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         cmpTransform.translate(_translation.x, _translation.y, _translation.z);
