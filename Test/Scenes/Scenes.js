@@ -31,41 +31,33 @@ var Scenes;
         return branch;
     }
     Scenes.createAxisCross = createAxisCross;
-    function createCoordinateSystem() {
-        let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-        let coatGreen = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
-        let coatBlue = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
-        let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-        let mtrGreen = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
-        let mtrBlue = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+    function createArrow(_name, _color) {
+        let arrow = new ƒ.Node(_name);
+        let coat = new ƒ.CoatColored(_color);
+        let material = new ƒ.Material("Red", ƒ.ShaderUniColor, coat);
         let meshCube = new ƒ.MeshCube();
         let meshPyramid = new ƒ.MeshPyramid();
-        let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
-        let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
-        let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
-        let pyramidRed = Scenes.createCompleteMeshNode("RedTip", mtrRed, meshPyramid);
-        let pyramidGreen = Scenes.createCompleteMeshNode("GreenTip", mtrGreen, meshPyramid);
-        let pyramidBlue = Scenes.createCompleteMeshNode("BlueTip", mtrBlue, meshPyramid);
-        cubeRed.cmpTransform.scale(1, 0.01, 0.01);
-        cubeGreen.cmpTransform.scale(0.01, 1, 0.01);
-        cubeBlue.cmpTransform.scale(0.01, 0.01, 1);
-        pyramidRed.cmpTransform.translateX(0.5);
-        pyramidRed.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidRed.cmpTransform.rotateZ(-90);
-        pyramidGreen.cmpTransform.translateY(0.5);
-        pyramidGreen.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidBlue.cmpTransform.translateZ(0.5);
-        pyramidBlue.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidBlue.cmpTransform.rotateX(90);
-        // create branch
-        let branch = new ƒ.Node("CoordinateSystem");
-        branch.appendChild(cubeRed);
-        branch.appendChild(cubeGreen);
-        branch.appendChild(cubeBlue);
-        branch.appendChild(pyramidRed);
-        branch.appendChild(pyramidGreen);
-        branch.appendChild(pyramidBlue);
-        return branch;
+        let shaft = Scenes.createCompleteMeshNode("Shaft", material, meshCube);
+        let head = Scenes.createCompleteMeshNode("Head", material, meshPyramid);
+        shaft.cmpTransform.scale(0.01, 1, 0.01);
+        head.cmpTransform.translateY(0.5);
+        head.cmpTransform.scale(0.05, 0.1, 0.05);
+        arrow.appendChild(shaft);
+        arrow.appendChild(head);
+        arrow.addComponent(new ƒ.ComponentTransform());
+        return arrow;
+    }
+    function createCoordinateSystem() {
+        let arrowRed = createArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
+        let arrowGreen = createArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
+        let arrowBlue = createArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
+        arrowRed.cmpTransform.rotateZ(-90);
+        arrowBlue.cmpTransform.rotateX(90);
+        let coordinates = new ƒ.Node("CoordinateSystem");
+        coordinates.appendChild(arrowRed);
+        coordinates.appendChild(arrowGreen);
+        coordinates.appendChild(arrowBlue);
+        return coordinates;
     }
     Scenes.createCoordinateSystem = createCoordinateSystem;
     function createThreeLevelNodeHierarchy() {
