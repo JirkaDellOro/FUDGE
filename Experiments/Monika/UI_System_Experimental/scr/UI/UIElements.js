@@ -33,10 +33,10 @@ var UI;
     class Stepper extends HTMLSpanElement {
         constructor(_label, params = {}) {
             super();
-            this.textContent = _label + " ";
             let stepper = document.createElement("input");
             stepper.name = _label;
             stepper.type = "number";
+            stepper.value = params.value.toString();
             stepper.id = _label;
             stepper.step = String(params.step) || "1";
             this.appendChild(stepper);
