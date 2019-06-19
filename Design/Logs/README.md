@@ -1,6 +1,10 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
+# May 23rd 2019
+Discussion about creation of a prototype for usertests (tool: Adobe XD?, methods: A/B tests, navigation)
+
+
 # May 14th 2019
 Discussion over the structure of the UI System.
 
