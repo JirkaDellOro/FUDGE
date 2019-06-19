@@ -82,7 +82,6 @@ namespace Fudge {
             this.collectLights();
             this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
             this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
-            Debug.log(this.lights);
         }
         /**
          * Collect all lights in the branch to pass to shaders

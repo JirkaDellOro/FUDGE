@@ -92,8 +92,6 @@ namespace Fudge {
                 normals[index + 2] = normal.z;
             }
             normals.push(0, 0, 0);
-            Debug.log(vertices);
-            Debug.log(normals);
             return new Float32Array(normals);
         }
     }

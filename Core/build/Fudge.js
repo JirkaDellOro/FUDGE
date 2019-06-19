@@ -1819,7 +1819,6 @@ var Fudge;
             this.collectLights();
             this.branch.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentEvent);
             this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
-            Fudge.Debug.log(this.lights);
         }
         /**
          * Collect all lights in the branch to pass to shaders
@@ -2988,8 +2987,6 @@ var Fudge;
                 normals[index + 2] = normal.z;
             }
             normals.push(0, 0, 0);
-            Fudge.Debug.log(vertices);
-            Fudge.Debug.log(normals);
             return new Float32Array(normals);
         }
     }
