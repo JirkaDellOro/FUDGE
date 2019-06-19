@@ -109,15 +109,15 @@ namespace Fudge {
          * Returns a clone of the list of components of the given class attached this node. 
          * @param _class The class of the components to be found.
          */
-        public getComponents(_class: typeof Component): Component[] {
-            return (this.components[_class.name] || []).slice(0);
+        public getComponents<T extends Component>(_class: typeof Component): T[] {
+            return <T[]>(this.components[_class.name] || []).slice(0);
         }
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        public getComponent(_class: typeof Component): Component {
-            let list: Component[] = this.components[_class.name];
+        public getComponent<T extends Component>(_class: typeof Component): T {
+            let list: T[] = <T[]>this.components[_class.name];
             if (list)
                 return list[0];
             return null;
