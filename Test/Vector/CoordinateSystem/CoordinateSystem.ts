@@ -5,14 +5,14 @@ namespace TextureTest {
 
     function init(_event: Event): void {
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        coSys.addComponent(new ƒ.ComponentTransform());
+        // coSys.addComponent(new ƒ.ComponentTransform());
 
-        let object: ƒ.Node = Scenes.createCompleteMeshNode(
-            "Quad",
-            new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1))),
-            new ƒ.MeshQuad()
-        );
-        coSys.appendChild(object);
+        // let object: ƒ.Node = Scenes.createCompleteMeshNode(
+        //     "Quad",
+        //     new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1))),
+        //     new ƒ.MeshQuad()
+        // );
+        // coSys.appendChild(object);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(coSys);

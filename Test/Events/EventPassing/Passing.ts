@@ -60,12 +60,12 @@ namespace EventPassing {
         let viewPort: ƒ.Viewport = getViewport(_event);
         let cmpCameraTransform: ƒ.ComponentTransform = viewPort.camera.getContainer().cmpTransform;
         cmpCameraTransform.translateY(0.1 *
-            (_event.code == "ArrowUp" || _event.code == "KeyW" ? 1 :
-                _event.code == "ArrowDown" || _event.code == "KeyS" ? -1 :
+            (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
+                _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
                     0));
         cmpCameraTransform.translateX(0.1 *
-            (_event.code == "ArrowLeft" || _event.code == "KeyA" ? 1 :
-                _event.code == "ArrowRight" || _event.code == "KeyD" ? -1 :
+            (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
+                _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
                     0));
         cmpCameraTransform.lookAt(new ƒ.Vector3());
 

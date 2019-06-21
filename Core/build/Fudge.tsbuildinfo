@@ -23,12 +23,13 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Debug/DebugDialog.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Debug/DebugTextArea.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Color.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Event.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Events/Event.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Loop.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Material.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Node.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Lights/Light.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Engine/Viewport.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Events/EventKeyboard.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Math/Framing.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Math/Matrix3x3.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Math/Matrix4x4.ts",
@@ -60,7 +61,7 @@
         },
         {
           "pos": 593,
-          "end": 149759,
+          "end": 158328,
           "kind": "text"
         }
       ],
@@ -97,7 +98,7 @@
         },
         {
           "pos": 34,
-          "end": 60707,
+          "end": 65623,
           "kind": "text"
         }
       ]

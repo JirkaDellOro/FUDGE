@@ -25,13 +25,6 @@ namespace Fudge {
         FOCUS_OUT = "focusout"
     }
 
-    /**
-     * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
-     */
-    export const enum EVENT_KEYBOARD {
-        UP = "ƒkeyup",
-        DOWN = "ƒkeydown"
-    }
     export const enum EVENT_POINTER {
         UP = "ƒpointerup",
         DOWN = "ƒpointerdown"
