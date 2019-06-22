@@ -278,7 +278,7 @@ var Fudge;
                     for (let i = 0; i < n; i++) {
                         let light = cmpLights[i].getLight();
                         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
-                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.getArray());
+                        RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], light.direction.get());
                     }
                 }
             }
@@ -837,6 +837,9 @@ var Fudge;
         }
         get position() {
             return new Fudge.Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
+        }
+        set position(_position) {
+            this.local.data.set(_position.get(), 12);
         }
         // #region Transformation
         /**
@@ -2596,13 +2599,13 @@ var Fudge;
             zAxis = Fudge.Vector3.normalize(zAxis);
             let xAxis;
             let yAxis;
-            if (zAxis.Data != Fudge.Vector3.up.Data) { // TODO: verify intention - this is the comparison of references...
-                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.up, zAxis));
+            if (zAxis.get() != Fudge.Vector3.Y().get()) { // TODO: verify intention - this is the comparison of references...
+                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Y(), zAxis));
                 yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(zAxis, xAxis));
             }
             else {
                 xAxis = Fudge.Vector3.normalize(Fudge.Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.forward, xAxis));
+                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Z(), xAxis));
                 zAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(xAxis, yAxis));
             }
             matrix.data = new Float32Array([
@@ -2817,13 +2820,9 @@ var Fudge;
      */
     class Vector3 {
         constructor(_x = 0, _y = 0, _z = 0) {
-            this.data = [_x, _y, _z];
+            this.data = new Float32Array([_x, _y, _z]);
         }
         // TODO: implement equals-functions
-        // Get methods.######################################################################################
-        get Data() {
-            return this.data;
-        }
         get x() {
             return this.data[0];
         }
@@ -2833,46 +2832,29 @@ var Fudge;
         get z() {
             return this.data[2];
         }
-        /**
-         * The up-Vector (0, 1, 0)
-         */
-        static get up() {
-            let vector = new Vector3(0, 1, 0);
+        set x(_x) {
+            this.data[0] = _x;
+        }
+        set y(_y) {
+            this.data[1] = _y;
+        }
+        set z(_z) {
+            this.data[2] = _z;
+        }
+        static X(_scale = 1) {
+            const vector = new Vector3(_scale, 0, 0);
             return vector;
         }
-        /**
-         * The down-Vector (0, -1, 0)
-         */
-        static get down() {
-            let vector = new Vector3(0, -1, 0);
+        static Y(_scale = 1) {
+            const vector = new Vector3(0, _scale, 0);
             return vector;
         }
-        /**
-         * The forward-Vector (0, 0, 1)
-         */
-        static get forward() {
-            let vector = new Vector3(0, 0, 1);
+        static Z(_scale = 1) {
+            const vector = new Vector3(0, 0, _scale);
             return vector;
         }
-        /**
-         * The backward-Vector (0, 0, -1)
-         */
-        static get backward() {
-            let vector = new Vector3(0, 0, -1);
-            return vector;
-        }
-        /**
-         * The right-Vector (1, 0, 0)
-         */
-        static get right() {
-            let vector = new Vector3(1, 0, 0);
-            return vector;
-        }
-        /**
-         * The left-Vector (-1, 0, 0)
-         */
-        static get left() {
-            let vector = new Vector3(-1, 0, 0);
+        static get ZERO() {
+            const vector = new Vector3(0, 0, 0);
             return vector;
         }
         // Vectormath methods.######################################################################################
@@ -2895,7 +2877,7 @@ var Fudge;
         static sum(..._vectors) {
             let result = new Vector3();
             for (let vector of _vectors)
-                result.data = [result.x + vector.x, result.y + vector.y, result.z + vector.z];
+                result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
             return result;
         }
         /**
@@ -2906,7 +2888,7 @@ var Fudge;
          */
         static subtract(_a, _b) {
             let vector = new Vector3;
-            vector.data = [_a.x - _b.x, _a.y - _b.y, _a.z - _b.z];
+            vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y, _a.z - _b.z]);
             return vector;
         }
         /**
@@ -2917,11 +2899,11 @@ var Fudge;
          */
         static cross(_a, _b) {
             let vector = new Vector3;
-            vector.data = [
+            vector.data = new Float32Array([
                 _a.y * _b.z - _a.z * _b.y,
                 _a.z * _b.x - _a.x * _b.z,
                 _a.x * _b.y - _a.y * _b.x
-            ];
+            ]);
             return vector;
         }
         /**
@@ -2944,17 +2926,20 @@ var Fudge;
             let vector = new Vector3;
             // make sure we don't divide by 0. TODO: see if it's appropriate to use try/catch here
             if (length > 0.00001) {
-                vector.data = [_vector.x / length, _vector.y / length, _vector.z / length];
+                vector.data = new Float32Array([_vector.x / length, _vector.y / length, _vector.z / length]);
             }
             else {
-                vector.data = [0, 0, 0];
+                vector.data = new Float32Array([0, 0, 0]);
             }
             return vector;
+        }
+        set(_x = 0, _y = 0, _z = 0) {
+            this.data = new Float32Array([_x, _y, _z]);
         }
         /**
          * Retrieve the vector as an array with three elements
          */
-        getArray() {
+        get() {
             return new Float32Array(this.data);
         }
     }

@@ -10,11 +10,11 @@ var TextureTest;
         body.cmpTransform.scale(0.8, 0.8, 0.8);
         let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
         body.addComponent(cmpLightAmbient);
-        let cmpLightDirectionalRed = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0, 0)));
+        let cmpLightDirectionalRed = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0.2, 0)));
         body.addComponent(cmpLightDirectionalRed);
-        let cmpLightDirectionalGreen = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(0, 1, 0)));
+        let cmpLightDirectionalGreen = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(-1, 0.2, -1)));
         body.addComponent(cmpLightDirectionalGreen);
-        let cmpLightDirectionalBlue = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0, 1)));
+        let cmpLightDirectionalBlue = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0.2, 1)));
         body.addComponent(cmpLightDirectionalBlue);
         let branch = new ƒ.Node("Branch");
         branch.appendChild(body);
@@ -53,7 +53,7 @@ var TextureTest;
                         0));
             cmpCameraTransform.lookAt(new ƒ.Vector3());
             _viewport.draw();
-            ƒ.Debug.log(cmpCameraTransform.position.getArray().toString());
+            ƒ.Debug.log(cmpCameraTransform.position.get().toString());
         }
     }
 })(TextureTest || (TextureTest = {}));

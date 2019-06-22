@@ -10,6 +10,10 @@ namespace Fudge {
         public get position(): Vector3 {
             return new Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
         }
+        public set position(_position: Vector3)  {
+            this.local.data.set(_position.get(), 12);
+        }
+        
 
         // #region Transformation
         /**

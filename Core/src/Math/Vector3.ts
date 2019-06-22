@@ -4,18 +4,13 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Vector3 {
-        private data: number[]; // TODO: check why this shouldn't be x,y,z as numbers...
+        private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
         public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
-            this.data = [_x, _y, _z];
+            this.data = new Float32Array([_x, _y, _z]);
         }
 
         // TODO: implement equals-functions
-
-        // Get methods.######################################################################################
-        get Data(): number[] {
-            return this.data;
-        }
         get x(): number {
             return this.data[0];
         }
@@ -25,49 +20,36 @@ namespace Fudge {
         get z(): number {
             return this.data[2];
         }
-        /**
-         * The up-Vector (0, 1, 0)
-         */
-        public static get up(): Vector3 {
-            let vector: Vector3 = new Vector3(0, 1, 0);
-            return vector;
+
+        set x(_x: number) {
+            this.data[0] = _x;
         }
-        /**
-         * The down-Vector (0, -1, 0)
-         */
-        public static get down(): Vector3 {
-            let vector: Vector3 = new Vector3(0, -1, 0);
-            return vector;
+        set y(_y: number) {
+            this.data[1] = _y;
         }
-        /**
-         * The forward-Vector (0, 0, 1)
-         */
-        public static get forward(): Vector3 {
-            let vector: Vector3 = new Vector3(0, 0, 1);
-            return vector;
+        set z(_z: number) {
+            this.data[2] = _z;
         }
-        /**
-         * The backward-Vector (0, 0, -1)
-         */
-        public static get backward(): Vector3 {
-            let vector: Vector3 = new Vector3(0, 0, -1);
-            return vector;
-        }
-        /**
-         * The right-Vector (1, 0, 0)
-         */
-        public static get right(): Vector3 {
-            let vector: Vector3 = new Vector3(1, 0, 0);
-            return vector;
-        }
-        /**
-         * The left-Vector (-1, 0, 0)
-         */
-        public static get left(): Vector3 {
-            let vector: Vector3 = new Vector3(-1, 0, 0);
+
+        public static X(_scale: number = 1): Vector3 {
+            const vector: Vector3 = new Vector3(_scale, 0, 0);
             return vector;
         }
 
+        public static Y(_scale: number = 1): Vector3 {
+            const vector: Vector3 = new Vector3(0, _scale, 0);
+            return vector;
+        }
+
+        public static Z(_scale: number = 1): Vector3 {
+            const vector: Vector3 = new Vector3(0, 0, _scale);
+            return vector;
+        }
+
+        public static get ZERO(): Vector3 {
+            const vector: Vector3 = new Vector3(0, 0, 0);
+            return vector;
+        }
 
         // Vectormath methods.######################################################################################
         /**
@@ -89,7 +71,7 @@ namespace Fudge {
         public static sum(..._vectors: Vector3[]): Vector3 {
             let result: Vector3 = new Vector3();
             for (let vector of _vectors)
-                result.data = [result.x + vector.x, result.y + vector.y, result.z + vector.z];
+                result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
             return result;
         }
         /**
@@ -100,7 +82,7 @@ namespace Fudge {
          */
         public static subtract(_a: Vector3, _b: Vector3): Vector3 {
             let vector: Vector3 = new Vector3;
-            vector.data = [_a.x - _b.x, _a.y - _b.y, _a.z - _b.z];
+            vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y, _a.z - _b.z]);
             return vector;
         }
         /**
@@ -111,10 +93,10 @@ namespace Fudge {
          */
         public static cross(_a: Vector3, _b: Vector3): Vector3 {
             let vector: Vector3 = new Vector3;
-            vector.data = [
+            vector.data = new Float32Array([
                 _a.y * _b.z - _a.z * _b.y,
                 _a.z * _b.x - _a.x * _b.z,
-                _a.x * _b.y - _a.y * _b.x];
+                _a.x * _b.y - _a.y * _b.x]);
             return vector;
         }
         /**
@@ -137,17 +119,20 @@ namespace Fudge {
             let vector: Vector3 = new Vector3;
             // make sure we don't divide by 0. TODO: see if it's appropriate to use try/catch here
             if (length > 0.00001) {
-                vector.data = [_vector.x / length, _vector.y / length, _vector.z / length];
+                vector.data = new Float32Array([_vector.x / length, _vector.y / length, _vector.z / length]);
             } else {
-                vector.data = [0, 0, 0];
+                vector.data = new Float32Array([0, 0, 0]);
             }
             return vector;
         }
 
+        public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
+            this.data = new Float32Array([_x, _y, _z]);
+        }
         /**
          * Retrieve the vector as an array with three elements
          */
-        public getArray(): Float32Array {
+        public get(): Float32Array {
             return new Float32Array(this.data);
         }
     }

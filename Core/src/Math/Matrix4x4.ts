@@ -185,13 +185,13 @@ namespace Fudge {
             zAxis = Vector3.normalize(zAxis);
             let xAxis: Vector3;
             let yAxis: Vector3;
-            if (zAxis.Data != Vector3.up.Data) { // TODO: verify intention - this is the comparison of references...
-                xAxis = Vector3.normalize(Vector3.cross(Vector3.up, zAxis));
+            if (zAxis.get() != Vector3.Y().get()) { // TODO: verify intention - this is the comparison of references...
+                xAxis = Vector3.normalize(Vector3.cross(Vector3.Y(), zAxis));
                 yAxis = Vector3.normalize(Vector3.cross(zAxis, xAxis));
             }
             else {
                 xAxis = Vector3.normalize(Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Vector3.normalize(Vector3.cross(Vector3.forward, xAxis));
+                yAxis = Vector3.normalize(Vector3.cross(Vector3.Z(), xAxis));
                 zAxis = Vector3.normalize(Vector3.cross(xAxis, yAxis));
             }
             matrix.data = new Float32Array(

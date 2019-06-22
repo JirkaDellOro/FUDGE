@@ -351,7 +351,7 @@ declare namespace Fudge {
      */
     class ComponentPivot extends Component {
         local: Matrix4x4;
-        readonly position: Vector3;
+        position: Vector3;
         /**
          * Resets this.matrix to idenity Matrix.
          */
@@ -1345,34 +1345,13 @@ declare namespace Fudge {
     class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        readonly Data: number[];
-        readonly x: number;
-        readonly y: number;
-        readonly z: number;
-        /**
-         * The up-Vector (0, 1, 0)
-         */
-        static readonly up: Vector3;
-        /**
-         * The down-Vector (0, -1, 0)
-         */
-        static readonly down: Vector3;
-        /**
-         * The forward-Vector (0, 0, 1)
-         */
-        static readonly forward: Vector3;
-        /**
-         * The backward-Vector (0, 0, -1)
-         */
-        static readonly backward: Vector3;
-        /**
-         * The right-Vector (1, 0, 0)
-         */
-        static readonly right: Vector3;
-        /**
-         * The left-Vector (-1, 0, 0)
-         */
-        static readonly left: Vector3;
+        x: number;
+        y: number;
+        z: number;
+        static X(_scale?: number): Vector3;
+        static Y(_scale?: number): Vector3;
+        static Z(_scale?: number): Vector3;
+        static readonly ZERO: Vector3;
         /**
          * Adds two vectors.
          * @param _a The first vector to add
@@ -1414,10 +1393,11 @@ declare namespace Fudge {
          * @returns A new vector representing the given vector scaled to the length of 1
          */
         static normalize(_vector: Vector3): Vector3;
+        set(_x?: number, _y?: number, _z?: number): void;
         /**
          * Retrieve the vector as an array with three elements
          */
-        getArray(): Float32Array;
+        get(): Float32Array;
     }
 }
 declare namespace Fudge {
