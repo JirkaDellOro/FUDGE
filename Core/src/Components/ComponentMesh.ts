@@ -4,6 +4,7 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentMesh extends Component {
+        public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
         private mesh: Mesh = null;
 
         public setMesh(_mesh: Mesh): void {

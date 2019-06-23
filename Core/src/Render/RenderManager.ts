@@ -206,18 +206,19 @@ namespace Fudge {
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             let world: Matrix4x4 = _world;
             if (cmpTransform)
-                world = cmpTransform.world;
+                world = cmpTransform.matrix;
             if (!world)
                 // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Matrix4x4.identity;
+                world = Matrix4x4.IDENTITY;
 
             let finalTransform: Matrix4x4 = world;
+            /* Pivot becomes a property of ComponentMesh und must be respected there
             let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (cmpPivot)
-                finalTransform = Matrix4x4.multiply(world, cmpPivot.local);
-
+                finalTransform = Matrix4x4.MULTIPLICATION(world, cmpPivot.local);
+            */
             // multiply camera matrix
-            let projection: Matrix4x4 = Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
             this.drawNode(_node, finalTransform, projection);
 
@@ -267,9 +268,9 @@ namespace Fudge {
                 }
 
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
-                let matrix: Matrix4x4 = Matrix4x4.identity;
+                let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
                 if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.world;
+                    matrix = parent.cmpTransform.matrix;
 
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
@@ -286,13 +287,13 @@ namespace Fudge {
          * @param _node 
          * @param _matrix 
          */
-        private static recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.identity): void {
+        private static recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.IDENTITY): void {
             let worldMatrix: Matrix4x4 = _matrix;
-            let transform: ComponentTransform = _node.cmpTransform;
-            if (transform) {
-                worldMatrix = Matrix4x4.multiply(_matrix, transform.local);
-                transform.world = worldMatrix;
-            }
+            let cmpTransform: ComponentTransform = _node.cmpTransform;
+            if (cmpTransform)
+                worldMatrix = Matrix4x4.MULTIPLICATION(_matrix, cmpTransform.matrix);
+            _node.world = worldMatrix;
+
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
             }

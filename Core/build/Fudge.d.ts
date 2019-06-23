@@ -336,91 +336,10 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
+        pivot: Matrix4x4;
         private mesh;
         setMesh(_mesh: Mesh): void;
         getMesh(): Mesh;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Class to hold the transformation-data of the mesh that is attached to the same node.
-     * The pivot-transformation does not affect the transformation of the node itself or its children.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ComponentPivot extends Component {
-        local: Matrix4x4;
-        position: Vector3;
-        /**
-         * Resets this.matrix to idenity Matrix.
-         */
-        reset(): void;
-        /**
-         * Translate the transformation along the x-, y- and z-axis.
-         * @param _x The x-value of the translation.
-         * @param _y The y-value of the translation.
-         * @param _z The z-value of the translation.
-         */
-        translate(_x: number, _y: number, _z: number): void;
-        /**
-         * Translate the transformation along the x-axis.
-         * @param _x The value of the translation.
-         */
-        translateX(_x: number): void;
-        /**
-         * Translate the transformation along the y-axis.
-         * @param _y The value of the translation.
-         */
-        translateY(_y: number): void;
-        /**
-         * Translate the transformation along the z-axis.
-         * @param _z The value of the translation.
-         */
-        translateZ(_z: number): void;
-        /**
-         * Rotate the transformation along the around its x-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateX(_angle: number): void;
-        /**
-         * Rotate the transformation along the around its y-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateY(_angle: number): void;
-        /**
-         * Rotate the transformation along the around its z-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateZ(_zAngle: number): void;
-        /**
-         * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: Use world transformations! Does it make sense in Pivot?
-         * @param _target The target to look at.
-         */
-        lookAt(_target: Vector3): void;
-        /**
-         * Scale the transformation along the x-, y- and z-axis.
-         * @param _xScale The value to scale x by.
-         * @param _yScale The value to scale y by.
-         * @param _zScale The value to scale z by.
-         */
-        scale(_xScale: number, _yScale: number, _zScale: number): void;
-        /**
-         * Scale the transformation along the x-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleX(_scale: number): void;
-        /**
-         * Scale the transformation along the y-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleY(_scale: number): void;
-        /**
-         * Scale the transformation along the z-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleZ(_scale: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -440,8 +359,8 @@ declare namespace Fudge {
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ComponentTransform extends ComponentPivot {
-        world: Matrix4x4;
+    class ComponentTransform extends Component {
+        matrix: Matrix4x4;
         constructor();
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
@@ -686,6 +605,7 @@ declare namespace Fudge {
      */
     class Node extends EventTarget implements Serializable {
         name: string;
+        world: Matrix4x4;
         private parent;
         private children;
         private components;
@@ -879,10 +799,6 @@ declare namespace Fudge {
          */
         setBranch(_branch: Node): void;
         /**
-         * Collect all lights in the branch to pass to shaders
-         */
-        collectLights(): void;
-        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph(): void;
@@ -956,6 +872,10 @@ declare namespace Fudge {
         private hndWheelEvent;
         private activateEvent;
         private hndComponentEvent;
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        private collectLights;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
@@ -1232,33 +1152,25 @@ declare namespace Fudge {
     class Matrix4x4 extends Mutable implements Serializable {
         data: Float32Array;
         constructor();
-        static readonly identity: Matrix4x4;
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
-        static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
-        static transform(_matrix: Matrix4x4, _vector: Vector3): Vector3;
+        translation: Vector3;
+        static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
          * @param _b The matrix to multiply by.
          */
-        static multiply(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
+        static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix Tha matrix to compute the inverse of.
          */
-        static inverse(_matrix: Matrix4x4): Matrix4x4;
+        static INVERSION(_matrix: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static lookAt(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4;
+        static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4;
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1266,7 +1178,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
+        static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
@@ -1276,62 +1188,71 @@ declare namespace Fudge {
          * @param _near The positionvalue of the projectionspace's near border.
          * @param _far The positionvalue of the projectionspace's far border
          */
-        static orthographicProjection(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
+        static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-        * @param _matrix The matrix to multiply.
-        * @param _xTranslation The x-value of the translation.
-        * @param _yTranslation The y-value of the translation.
-        * @param _zTranslation The z-value of the translation.
-        */
-        static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4;
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * @param _translate
+         */
+        private static TRANSLATION;
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static ROTATION_X;
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static ROTATION_Y;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        private static ROTATION_Z;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * @param _scalar
+         */
+        private static SCALING;
         /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
         * @param _angleInDegrees The angle to rotate by.
         */
-        static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateX(_angleInDegrees: number): void;
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateY(_angleInDegrees: number): void;
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateZ(_angleInDegrees: number): void;
+        translate(_by: Vector3): Matrix4x4;
         /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
+         * Translate the transformation along the x-axis.
+         * @param _x The value of the translation.
          */
-        private static translation;
+        translateX(_x: number): void;
         /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
+         * Translate the transformation along the y-axis.
+         * @param _y The value of the translation.
          */
-        private static xRotation;
+        translateY(_y: number): void;
         /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
+         * Translate the transformation along the z-axis.
+         * @param _z The value of the translation.
          */
-        private static yRotation;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static zRotation;
-        /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
-         */
-        private static scaling;
+        translateZ(_z: number): void;
+        scale(_by: Vector3): void;
+        scaleX(_by: number): void;
+        scaleY(_by: number): void;
+        scaleZ(_by: number): void;
+        lookAt(_target: Vector3): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -1399,6 +1320,7 @@ declare namespace Fudge {
          * Retrieve the vector as an array with three elements
          */
         get(): Float32Array;
+        transform(_matrix: Matrix4x4): void;
     }
 }
 declare namespace Fudge {

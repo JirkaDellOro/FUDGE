@@ -25,7 +25,7 @@ var RenderManagerRendering;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
-            branch.cmpTransform.rotateY(1);
+            branch.cmpTransform.matrix.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
             for (let viewPort of viewPorts) {

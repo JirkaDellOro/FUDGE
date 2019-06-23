@@ -46,7 +46,7 @@ namespace RenderManagerRendering {
         ƒ.Loop.start();
         function animate(_event: Event): void {
             update();
-            branch.cmpTransform.rotateY(1);
+            branch.cmpTransform.matrix.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();

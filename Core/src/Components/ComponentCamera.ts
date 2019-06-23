@@ -53,8 +53,8 @@ namespace Fudge {
         public get ViewProjectionMatrix(): Matrix4x4 {
             try {
                 let cmpTransform: ComponentTransform = this.getContainer().cmpTransform;
-                let viewMatrix: Matrix4x4 = Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Matrix4x4.multiply(this.transform, viewMatrix);
+                let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(cmpTransform.matrix); // TODO: WorldMatrix-> Camera must be calculated
+                return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
             } catch {
                 return this.transform;
             }
@@ -70,7 +70,7 @@ namespace Fudge {
             this.fieldOfView = _fieldOfView;
             this.direction = _direction;
             this.projection = PROJECTION.CENTRAL;
-            this.transform = Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
+            this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -81,7 +81,7 @@ namespace Fudge {
          */
         public projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void {
             this.projection = PROJECTION.ORTHOGRAPHIC;
-            this.transform = Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
 
         public serialize(): Serialization {

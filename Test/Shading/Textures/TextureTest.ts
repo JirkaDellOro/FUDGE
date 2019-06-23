@@ -16,11 +16,11 @@ namespace TextureTest {
         let cube: ƒ.Node = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
         let pyramid: ƒ.Node = Scenes.createCompleteMeshNode("Pyramid", material, new ƒ.MeshPyramid());
 
-        cube.cmpTransform.translate(1, 0, 0);
+        cube.cmpTransform.matrix.translateX(1);
         // cube.cmpTransform.rotateX(-45);
-        cube.cmpTransform.rotateY(-45);
+        cube.cmpTransform.matrix.rotateY(-45);
 
-        pyramid.cmpTransform.translate(-1, 0, 0);
+        pyramid.cmpTransform.matrix.translateX(-1);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
         branch.appendChild(quad);
@@ -38,9 +38,9 @@ namespace TextureTest {
         viewport.draw();
 
         window.setInterval(function (): void {
-            pyramid.cmpTransform.rotateX(1);
-            cube.cmpTransform.rotateY(-1);
-            quad.cmpTransform.rotateZ(1);
+            pyramid.cmpTransform.matrix.rotateX(1);
+            cube.cmpTransform.matrix.rotateY(-1);
+            quad.cmpTransform.matrix.rotateZ(1);
             ƒ.RenderManager.update();
             viewport.draw(); 
         },                 20);

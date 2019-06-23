@@ -9,6 +9,7 @@ namespace Fudge {
      */
     export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
+        public world: Matrix4x4 = Matrix4x4.IDENTITY;
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};
@@ -310,11 +311,11 @@ namespace Fudge {
         private setParent(_parent: Node | null): void {
             this.parent = _parent;
         }
-        
+
         private *getBranchGenerator(): IterableIterator<Node> {
             yield this;
             for (let child of this.children)
-            yield* child.branch;
-        }        
+                yield* child.branch;
+        }
     }
 }

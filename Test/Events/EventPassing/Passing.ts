@@ -58,16 +58,16 @@ namespace EventPassing {
 
     function rotate(_event: ƒ.KeyboardEventƒ): void {
         let viewPort: ƒ.Viewport = getViewport(_event);
-        let cmpCameraTransform: ƒ.ComponentTransform = viewPort.camera.getContainer().cmpTransform;
-        cmpCameraTransform.translateY(0.1 *
+        let mtxCamera: ƒ.Matrix4x4 = viewPort.camera.getContainer().cmpTransform.matrix;
+        mtxCamera.translateY(0.1 *
             (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
                 _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
                     0));
-        cmpCameraTransform.translateX(0.1 *
+        mtxCamera.translateX(0.1 *
             (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
                 _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
                     0));
-        cmpCameraTransform.lookAt(new ƒ.Vector3());
+        mtxCamera.lookAt(new ƒ.Vector3());
 
         viewPort.draw();
     }

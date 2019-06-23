@@ -278,7 +278,8 @@ var Fudge;
                     for (let i = 0; i < n; i++) {
                         let light = cmpLights[i].getLight();
                         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
-                        let direction = Fudge.Matrix4x4.transform(cmpLights[i].getContainer().cmpTransform.world, light.direction);
+                        let direction = light.direction; // TODO: careful... working on reference? must be copy
+                        direction.transform(cmpLights[i].getContainer().world);
                         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }
                 }
@@ -677,8 +678,8 @@ var Fudge;
         get ViewProjectionMatrix() {
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
-                let viewMatrix = Fudge.Matrix4x4.inverse(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Fudge.Matrix4x4.multiply(this.transform, viewMatrix);
+                let viewMatrix = Fudge.Matrix4x4.INVERSION(cmpTransform.matrix); // TODO: WorldMatrix-> Camera must be calculated
+                return Fudge.Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
             }
             catch {
                 return this.transform;
@@ -694,7 +695,7 @@ var Fudge;
             this.fieldOfView = _fieldOfView;
             this.direction = _direction;
             this.projection = PROJECTION.CENTRAL;
-            this.transform = Fudge.Matrix4x4.centralProjection(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
+            this.transform = Fudge.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
@@ -705,7 +706,7 @@ var Fudge;
          */
         projectOrthographic(_left = 0, _right = Fudge.RenderManager.getCanvas().clientWidth, _bottom = Fudge.RenderManager.getCanvas().clientHeight, _top = 0) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
-            this.transform = Fudge.Matrix4x4.orthographicProjection(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+            this.transform = Fudge.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
         serialize() {
             let serialization = {
@@ -799,6 +800,7 @@ var Fudge;
     class ComponentMesh extends Fudge.Component {
         constructor() {
             super(...arguments);
+            this.pivot = Fudge.Matrix4x4.IDENTITY;
             this.mesh = null;
         }
         setMesh(_mesh) {
@@ -826,145 +828,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold the transformation-data of the mesh that is attached to the same node.
-     * The pivot-transformation does not affect the transformation of the node itself or its children.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ComponentPivot extends Fudge.Component {
-        constructor() {
-            super(...arguments);
-            this.local = Fudge.Matrix4x4.identity; // The matrix to transform the mesh by.
-            // #endregion
-        }
-        get position() {
-            return new Fudge.Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
-        }
-        set position(_position) {
-            this.local.data.set(_position.get(), 12);
-        }
-        // #region Transformation
-        /**
-         * Resets this.matrix to idenity Matrix.
-         */
-        reset() {
-            this.local = Fudge.Matrix4x4.identity;
-        }
-        // #endregion
-        // #region Translation
-        /**
-         * Translate the transformation along the x-, y- and z-axis.
-         * @param _x The x-value of the translation.
-         * @param _y The y-value of the translation.
-         * @param _z The z-value of the translation.
-         */
-        translate(_x, _y, _z) {
-            this.local = Fudge.Matrix4x4.translate(this.local, _x, _y, _z);
-        }
-        /**
-         * Translate the transformation along the x-axis.
-         * @param _x The value of the translation.
-         */
-        translateX(_x) {
-            this.local = Fudge.Matrix4x4.translate(this.local, _x, 0, 0);
-        }
-        /**
-         * Translate the transformation along the y-axis.
-         * @param _y The value of the translation.
-         */
-        translateY(_y) {
-            this.local = Fudge.Matrix4x4.translate(this.local, 0, _y, 0);
-        }
-        /**
-         * Translate the transformation along the z-axis.
-         * @param _z The value of the translation.
-         */
-        translateZ(_z) {
-            this.local = Fudge.Matrix4x4.translate(this.local, 0, 0, _z);
-        }
-        // #endregion
-        // #region Rotation
-        /**
-         * Rotate the transformation along the around its x-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateX(_angle) {
-            this.local = Fudge.Matrix4x4.rotateX(this.local, _angle);
-        }
-        /**
-         * Rotate the transformation along the around its y-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateY(_angle) {
-            this.local = Fudge.Matrix4x4.rotateY(this.local, _angle);
-        }
-        /**
-         * Rotate the transformation along the around its z-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateZ(_zAngle) {
-            this.local = Fudge.Matrix4x4.rotateZ(this.local, _zAngle);
-        }
-        /**
-         * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: Use world transformations! Does it make sense in Pivot?
-         * @param _target The target to look at.
-         */
-        lookAt(_target) {
-            this.local = Fudge.Matrix4x4.lookAt(this.position, _target); // TODO: Handle rotation around z-axis
-        }
-        // #endregion
-        // #region Scaling
-        /**
-         * Scale the transformation along the x-, y- and z-axis.
-         * @param _xScale The value to scale x by.
-         * @param _yScale The value to scale y by.
-         * @param _zScale The value to scale z by.
-         */
-        scale(_xScale, _yScale, _zScale) {
-            this.local = Fudge.Matrix4x4.scale(this.local, _xScale, _yScale, _zScale);
-        }
-        /**
-         * Scale the transformation along the x-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleX(_scale) {
-            this.local = Fudge.Matrix4x4.scale(this.local, _scale, 1, 1);
-        }
-        /**
-         * Scale the transformation along the y-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleY(_scale) {
-            this.local = Fudge.Matrix4x4.scale(this.local, 1, _scale, 1);
-        }
-        /**
-         * Scale the transformation along the z-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleZ(_scale) {
-            this.local = Fudge.Matrix4x4.scale(this.local, 1, 1, _scale);
-        }
-        // #endregion
-        // #region Serialization
-        serialize() {
-            // TODO: save translation, rotation and scale as vectors for readability and manipulation
-            let serialization = {
-                local: this.local.serialize(),
-                [super.type]: super.serialize()
-            };
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.local.deserialize(_serialization.local);
-            super.deserialize(_serialization[super.type]);
-            return this;
-        }
-    }
-    Fudge.ComponentPivot = ComponentPivot;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
      * Base class for scripts the user writes
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -983,13 +846,13 @@ var Fudge;
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ComponentTransform extends Fudge.ComponentPivot {
+    class ComponentTransform extends Fudge.Component {
         constructor() {
             super();
-            this.world = Fudge.Matrix4x4.identity;
+            this.matrix = Fudge.Matrix4x4.IDENTITY;
         }
         get WorldPosition() {
-            return new Fudge.Vector3(this.world.data[12], this.world.data[13], this.world.data[14]);
+            return new Fudge.Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
         serialize() {
             let serialization = {
@@ -1361,6 +1224,7 @@ var Fudge;
          */
         constructor(_name) {
             super();
+            this.world = Fudge.Matrix4x4.IDENTITY;
             this.parent = null; // The parent of this node.
             this.children = []; // array of child nodes appended to this node.
             this.components = {};
@@ -1827,25 +1691,6 @@ var Fudge;
             this.branch.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
         }
         /**
-         * Collect all lights in the branch to pass to shaders
-         */
-        collectLights() {
-            // TODO: make private
-            this.lights = new Map();
-            for (let node of this.branch.branch) {
-                let cmpLights = node.getComponents(Fudge.ComponentLight);
-                for (let cmpLight of cmpLights) {
-                    let type = cmpLight.getLight().type;
-                    let lightsOfType = this.lights.get(type);
-                    if (!lightsOfType) {
-                        lightsOfType = [];
-                        this.lights.set(type, lightsOfType);
-                    }
-                    lightsOfType.push(cmpLight);
-                }
-            }
-        }
-        /**
          * Logs this viewports scenegraph to the console.
          */
         showSceneGraph() {
@@ -1986,6 +1831,25 @@ var Fudge;
             Fudge.Debug.log(_event);
         }
         // #endregion
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        collectLights() {
+            // TODO: make private
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights = node.getComponents(Fudge.ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type = cmpLight.getLight().type;
+                    let lightsOfType = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+                }
+            }
+        }
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
@@ -2439,27 +2303,14 @@ var Fudge;
                 0, 0, 0, 1
             ]);
         }
-        // Transformation methods.######################################################################################
-        static get identity() {
-            return new Matrix4x4;
+        get translation() {
+            return new Fudge.Vector3(this.data[12], this.data[13], this.data[14]);
         }
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
-        static scale(_matrix, _x, _y, _z) {
-            return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
+        set translation(_translation) {
+            this.data.set(_translation.get(), 12);
         }
-        static transform(_matrix, _vector) {
-            let result = new Fudge.Vector3();
-            let m = _matrix.data;
-            let [x, y, z] = _vector.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
-            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
-            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
+        static get IDENTITY() {
+            const result = new Matrix4x4();
             return result;
         }
         /**
@@ -2467,7 +2318,7 @@ var Fudge;
          * @param _a The matrix to multiply.
          * @param _b The matrix to multiply by.
          */
-        static multiply(_a, _b) {
+        static MULTIPLICATION(_a, _b) {
             let a = _a.data;
             let b = _b.data;
             let matrix = new Matrix4x4();
@@ -2527,7 +2378,7 @@ var Fudge;
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix Tha matrix to compute the inverse of.
          */
-        static inverse(_matrix) {
+        static INVERSION(_matrix) {
             let m = _matrix.data;
             let m00 = m[0 * 4 + 0];
             let m01 = m[0 * 4 + 1];
@@ -2604,8 +2455,8 @@ var Fudge;
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static lookAt(_transformPosition, _targetPosition) {
-            let matrix = new Matrix4x4;
+        static LOOK_AT(_transformPosition, _targetPosition) {
+            const matrix = new Matrix4x4;
             let transformPosition = new Fudge.Vector3(_transformPosition.x, _transformPosition.y, _transformPosition.z);
             let targetPosition = new Fudge.Vector3(_targetPosition.x, _targetPosition.y, _targetPosition.z);
             let zAxis = Fudge.Vector3.subtract(transformPosition, targetPosition);
@@ -2640,7 +2491,7 @@ var Fudge;
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
+        static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
             let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
@@ -2671,7 +2522,7 @@ var Fudge;
          * @param _near The positionvalue of the projectionspace's near border.
          * @param _far The positionvalue of the projectionspace's far border
          */
-        static orthographicProjection(_left, _right, _bottom, _top, _near = -400, _far = 400) {
+        static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
             let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 2 / (_right - _left), 0, 0, 0,
@@ -2684,54 +2535,18 @@ var Fudge;
             ]);
             return matrix;
         }
-        /**
-        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-        * @param _matrix The matrix to multiply.
-        * @param _xTranslation The x-value of the translation.
-        * @param _yTranslation The y-value of the translation.
-        * @param _zTranslation The z-value of the translation.
-        */
-        static translate(_matrix, _xTranslation, _yTranslation, _zTranslation) {
-            return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
-        }
-        /**
-        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-        * @param _matrix The matrix to multiply.
-        * @param _angleInDegrees The angle to rotate by.
-        */
-        static rotateX(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateY(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
-        }
-        /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
-         */
-        static rotateZ(_matrix, _angleInDegrees) {
-            return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
-        }
         // Translation methods.######################################################################################
         /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * @param _translate
          */
-        static translation(_xTranslation, _yTranslation, _zTranslation) {
+        static TRANSLATION(_translate) {
             let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
-                _xTranslation, _yTranslation, _zTranslation, 1
+                _translate.x, _translate.y, _translate.z, 1
             ]);
             return matrix;
         }
@@ -2740,8 +2555,8 @@ var Fudge;
          * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
          */
-        static xRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
+        static ROTATION_X(_angleInDegrees) {
+            const matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2757,8 +2572,8 @@ var Fudge;
          * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
          */
-        static yRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
+        static ROTATION_Y(_angleInDegrees) {
+            const matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2774,8 +2589,8 @@ var Fudge;
          * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
          */
-        static zRotation(_angleInDegrees) {
-            let matrix = new Matrix4x4;
+        static ROTATION_Z(_angleInDegrees) {
+            const matrix = new Matrix4x4;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2789,20 +2604,81 @@ var Fudge;
         }
         // Scaling methods.######################################################################################
         /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * @param _scalar
          */
-        static scaling(_x, _y, _z) {
+        static SCALING(_scalar) {
             let matrix = new Matrix4x4;
             matrix.data = new Float32Array([
-                _x, 0, 0, 0,
-                0, _y, 0, 0,
-                0, 0, _z, 0,
+                _scalar.x, 0, 0, 0,
+                0, _scalar.y, 0, 0,
+                0, 0, _scalar.z, 0,
                 0, 0, 0, 1
             ]);
             return matrix;
+        }
+        /**
+        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
+        * @param _matrix The matrix to multiply.
+        * @param _angleInDegrees The angle to rotate by.
+        */
+        rotateX(_angleInDegrees) {
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)).data;
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        rotateY(_angleInDegrees) {
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)).data;
+        }
+        /**
+         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
+         * @param _matrix The matrix to multiply.
+         * @param _angleInDegrees The angle to rotate by.
+         */
+        rotateZ(_angleInDegrees) {
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
+        }
+        translate(_by) {
+            return Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+        }
+        /**
+         * Translate the transformation along the x-axis.
+         * @param _x The value of the translation.
+         */
+        translateX(_x) {
+            this.data[12] += _x;
+        }
+        /**
+         * Translate the transformation along the y-axis.
+         * @param _y The value of the translation.
+         */
+        translateY(_y) {
+            this.data[13] += _y;
+        }
+        /**
+         * Translate the transformation along the z-axis.
+         * @param _z The value of the translation.
+         */
+        translateZ(_z) {
+            this.data[14] += _z;
+        }
+        scale(_by) {
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by)).data;
+        }
+        scaleX(_by) {
+            this.scale(new Fudge.Vector3(_by, 1, 1));
+        }
+        scaleY(_by) {
+            this.scale(new Fudge.Vector3(1, _by, 1));
+        }
+        scaleZ(_by) {
+            this.scale(new Fudge.Vector3(1, 1, _by));
+        }
+        lookAt(_target) {
+            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
         }
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
@@ -2955,6 +2831,15 @@ var Fudge;
          */
         get() {
             return new Float32Array(this.data);
+        }
+        transform(_matrix) {
+            let result = new Vector3();
+            let m = _matrix.data;
+            let [x, y, z] = this.get();
+            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
+            this.data = result.data;
         }
     }
     Fudge.Vector3 = Vector3;
@@ -3407,16 +3292,18 @@ var Fudge;
             let cmpTransform = _node.cmpTransform;
             let world = _world;
             if (cmpTransform)
-                world = cmpTransform.world;
+                world = cmpTransform.matrix;
             if (!world)
                 // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Fudge.Matrix4x4.identity;
+                world = Fudge.Matrix4x4.IDENTITY;
             let finalTransform = world;
-            let cmpPivot = _node.getComponent(Fudge.ComponentPivot);
+            /* Pivot becomes a property of ComponentMesh und must be respected there
+            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (cmpPivot)
-                finalTransform = Fudge.Matrix4x4.multiply(world, cmpPivot.local);
+                finalTransform = Matrix4x4.MULTIPLICATION(world, cmpPivot.local);
+            */
             // multiply camera matrix
-            let projection = Fudge.Matrix4x4.multiply(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            let projection = Fudge.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
             this.drawNode(_node, finalTransform, projection);
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
@@ -3458,9 +3345,9 @@ var Fudge;
                     ancestor = parent;
                 }
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
-                let matrix = Fudge.Matrix4x4.identity;
+                let matrix = Fudge.Matrix4x4.IDENTITY;
                 if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.world;
+                    matrix = parent.cmpTransform.matrix;
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
@@ -3474,13 +3361,12 @@ var Fudge;
          * @param _node
          * @param _matrix
          */
-        static recalculateTransformsOfNodeAndChildren(_node, _matrix = Fudge.Matrix4x4.identity) {
+        static recalculateTransformsOfNodeAndChildren(_node, _matrix = Fudge.Matrix4x4.IDENTITY) {
             let worldMatrix = _matrix;
-            let transform = _node.cmpTransform;
-            if (transform) {
-                worldMatrix = Fudge.Matrix4x4.multiply(_matrix, transform.local);
-                transform.world = worldMatrix;
-            }
+            let cmpTransform = _node.cmpTransform;
+            if (cmpTransform)
+                worldMatrix = Fudge.Matrix4x4.MULTIPLICATION(_matrix, cmpTransform.matrix);
+            _node.world = worldMatrix;
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
             }

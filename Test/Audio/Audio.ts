@@ -45,14 +45,14 @@ namespace AudioTest {
 
         function update(_event: Event): void {
             let time: number = performance.now() / 1000;
-            let position: ƒ.Vector3 = body.cmpTransform.position;
+            let position: ƒ.Vector3 = body.cmpTransform.matrix.translation;
 
             if (parameter.xAmplitude)
                 position.x = parameter.xAmplitude * Math.sin(parameter.frequency * time);
             if (parameter.zAmplitude)
                 position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
 
-            body.cmpTransform.position = position;
+            body.cmpTransform.matrix.translation = position;
 
             ƒ.RenderManager.update();
             viewport.draw();
@@ -61,8 +61,8 @@ namespace AudioTest {
     }
 
     function printInfo(_body: ƒ.Node, _camera: ƒ.Node): void {
-        let posBody: ƒ.Vector3 = _body.cmpTransform.position;
-        let posCamera: ƒ.Vector3 = _camera.cmpTransform.position;
+        let posBody: ƒ.Vector3 = _body.cmpTransform.matrix.translation;
+        let posCamera: ƒ.Vector3 = _camera.cmpTransform.matrix.translation;
         let info: string = "<fieldset><legend>Info</legend>";
         info += `camera [${posCamera.x.toFixed(2)} |${posCamera.y.toFixed(2)} |${posCamera.z.toFixed(2)}] `;
         info += ` body [${posBody.x.toFixed(2)} |${posBody.y.toFixed(2)} |${posBody.z.toFixed(2)}]`;
@@ -81,39 +81,39 @@ namespace AudioTest {
         function move(_event: ƒ.KeyboardEventƒ): void {
             let cmpTransform: ƒ.ComponentTransform = _body.cmpTransform;
             let cmpCameraTransform: ƒ.ComponentTransform = _viewport.camera.getContainer().cmpTransform;
-            cmpTransform.translateZ(0.1 *
+            cmpTransform.matrix.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? 1 :
                         0));
-            cmpTransform.translateX(0.1 *
+            cmpTransform.matrix.translateX(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? 1 :
                         0));
 
             switch (_event.code) {
                 case ƒ.KEYBOARD_CODE.SPACE:
-                    cmpTransform.reset();
+                    cmpTransform.matrix = ƒ.Matrix4x4.IDENTITY;
                     parameter.xAmplitude = parameter.zAmplitude = 0;
                     break;
                 case ƒ.KEYBOARD_CODE.X:
                     if (parameter.xAmplitude)
                         parameter.xAmplitude = 0;
                     else {
-                        parameter.xAmplitude = cmpTransform.position.x;
+                        parameter.xAmplitude = cmpTransform.matrix.translation.x;
                     }
                     break;
                 case ƒ.KEYBOARD_CODE.Y:
                     if (parameter.zAmplitude)
                         parameter.zAmplitude = 0;
                     else {
-                        parameter.zAmplitude = cmpTransform.position.z;
+                        parameter.zAmplitude = cmpTransform.matrix.translation.z;
                     }
                     break;
                 case ƒ.KEYBOARD_CODE.PAGE_UP:
-                    cmpCameraTransform.position = ƒ.Vector3.add(cmpCameraTransform.position, ƒ.Vector3.Y(0.2));
+                    cmpCameraTransform.matrix.translation = ƒ.Vector3.add(cmpCameraTransform.matrix.translation, ƒ.Vector3.Y(0.2));
                     break;
                 case ƒ.KEYBOARD_CODE.PAGE_DOWN:
-                    cmpCameraTransform.position = ƒ.Vector3.add(cmpCameraTransform.position, ƒ.Vector3.Y(-0.2));
+                    cmpCameraTransform.matrix.translation = ƒ.Vector3.add(cmpCameraTransform.matrix.translation, ƒ.Vector3.Y(-0.2));
                     break;
                 case ƒ.KEYBOARD_CODE.Q:
                     parameter.frequency *= 0.8;

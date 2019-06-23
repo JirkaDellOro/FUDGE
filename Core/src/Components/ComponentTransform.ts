@@ -4,16 +4,16 @@ namespace Fudge {
      * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class ComponentTransform extends ComponentPivot {
-        public world: Matrix4x4;
+    export class ComponentTransform extends Component {
+        public matrix: Matrix4x4;
 
         public constructor() {
             super();
-            this.world = Matrix4x4.identity;
+            this.matrix = Matrix4x4.IDENTITY;
         }
 
         public get WorldPosition(): Vector3 {
-            return new Vector3(this.world.data[12], this.world.data[13], this.world.data[14]);
+            return new Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
         }
 
         public serialize(): Serialization {
