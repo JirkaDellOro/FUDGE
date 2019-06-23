@@ -3,6 +3,7 @@ var Cube;
     var ƒ = Fudge;
     window.addEventListener("load", init);
     function init(_event) {
+        ƒ.Debug.log("Refactored Cube");
         let material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         let body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
         body.cmpTransform.matrix.translateZ(-4);

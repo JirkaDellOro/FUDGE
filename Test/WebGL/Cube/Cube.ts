@@ -4,6 +4,7 @@ namespace Cube {
     window.addEventListener("load", init);
 
     function init(_event: Event): void {
+        ƒ.Debug.log("Refactored Cube");
 
         let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
