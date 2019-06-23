@@ -162,6 +162,11 @@ namespace Fudge {
         // #endregion
 
         // #region Lights
+        /**
+         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.  
+         * RenderManager passes it on to all shaders used that can process light
+         * @param _lights
+         */
         public static setLights(_lights: MapLightTypeToLightList): void {
             // let renderLights: RenderLights = this.createRenderLights(_lights);
             for (let entry of this.renderShaders) {

@@ -11,21 +11,25 @@ namespace TextureTest {
         body.cmpTransform.translate(0, 0, 0);
         body.cmpTransform.scale(0.8, 0.8, 0.8);
 
+        let lights: ƒ.Node = new ƒ.Node("Lights");
+        lights.addComponent(new ƒ.ComponentTransform())
+
         let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
-        body.addComponent(cmpLightAmbient);
+        lights.addComponent(cmpLightAmbient);
 
         let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0.2, 0)));
-        body.addComponent(cmpLightDirectionalRed);
+        lights.addComponent(cmpLightDirectionalRed);
 
         let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(-1, 0.2, -1)));
-        body.addComponent(cmpLightDirectionalGreen);
+        lights.addComponent(cmpLightDirectionalGreen);
 
         let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0.2, 1)));
-        body.addComponent(cmpLightDirectionalBlue);
+        lights.addComponent(cmpLightDirectionalBlue);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
         branch.appendChild(body);
         branch.appendChild(Scenes.createCoordinateSystem());
+        branch.appendChild(lights);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
@@ -42,7 +46,7 @@ namespace TextureTest {
         //*/
         window.setInterval(function (): void {
             // body.cmpTransform.rotateY(-1.1);
-            body.cmpTransform.rotateY(-1);
+            lights.cmpTransform.rotateY(-1);
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();

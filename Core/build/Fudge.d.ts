@@ -1241,6 +1241,7 @@ declare namespace Fudge {
          * @param _z The scaling multiplier for the z-Axis.
          */
         static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
+        static transform(_matrix: Matrix4x4, _vector: Vector3): Vector3;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
@@ -1533,6 +1534,11 @@ declare namespace Fudge {
          * @param _node
          */
         static updateBranch(_node: Node): void;
+        /**
+         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
+         * RenderManager passes it on to all shaders used that can process light
+         * @param _lights
+         */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
          * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times

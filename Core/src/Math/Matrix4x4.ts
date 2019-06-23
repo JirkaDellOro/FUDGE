@@ -28,49 +28,61 @@ namespace Fudge {
          * @param _y The scaling multiplier for the y-Axis.
          * @param _z The scaling multiplier for the z-Axis.
          */
-
         public static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.scaling(_x, _y, _z));
         }
+
+        public static transform(_matrix: Matrix4x4, _vector: Vector3): Vector3 {
+            let result: Vector3 = new Vector3();
+            let m: Float32Array = _matrix.data;
+            let [x, y, z] = _vector.get();
+            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
+            return result;
+        }
+
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
          * @param _b The matrix to multiply by.
          */
         public static multiply(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4 {
+            let a: Float32Array = _a.data;
+            let b: Float32Array = _b.data;
             let matrix: Matrix4x4 = new Matrix4x4();
-            let a00: number = _a.data[0 * 4 + 0];
-            let a01: number = _a.data[0 * 4 + 1];
-            let a02: number = _a.data[0 * 4 + 2];
-            let a03: number = _a.data[0 * 4 + 3];
-            let a10: number = _a.data[1 * 4 + 0];
-            let a11: number = _a.data[1 * 4 + 1];
-            let a12: number = _a.data[1 * 4 + 2];
-            let a13: number = _a.data[1 * 4 + 3];
-            let a20: number = _a.data[2 * 4 + 0];
-            let a21: number = _a.data[2 * 4 + 1];
-            let a22: number = _a.data[2 * 4 + 2];
-            let a23: number = _a.data[2 * 4 + 3];
-            let a30: number = _a.data[3 * 4 + 0];
-            let a31: number = _a.data[3 * 4 + 1];
-            let a32: number = _a.data[3 * 4 + 2];
-            let a33: number = _a.data[3 * 4 + 3];
-            let b00: number = _b.data[0 * 4 + 0];
-            let b01: number = _b.data[0 * 4 + 1];
-            let b02: number = _b.data[0 * 4 + 2];
-            let b03: number = _b.data[0 * 4 + 3];
-            let b10: number = _b.data[1 * 4 + 0];
-            let b11: number = _b.data[1 * 4 + 1];
-            let b12: number = _b.data[1 * 4 + 2];
-            let b13: number = _b.data[1 * 4 + 3];
-            let b20: number = _b.data[2 * 4 + 0];
-            let b21: number = _b.data[2 * 4 + 1];
-            let b22: number = _b.data[2 * 4 + 2];
-            let b23: number = _b.data[2 * 4 + 3];
-            let b30: number = _b.data[3 * 4 + 0];
-            let b31: number = _b.data[3 * 4 + 1];
-            let b32: number = _b.data[3 * 4 + 2];
-            let b33: number = _b.data[3 * 4 + 3];
+            let a00: number = a[0 * 4 + 0];
+            let a01: number = a[0 * 4 + 1];
+            let a02: number = a[0 * 4 + 2];
+            let a03: number = a[0 * 4 + 3];
+            let a10: number = a[1 * 4 + 0];
+            let a11: number = a[1 * 4 + 1];
+            let a12: number = a[1 * 4 + 2];
+            let a13: number = a[1 * 4 + 3];
+            let a20: number = a[2 * 4 + 0];
+            let a21: number = a[2 * 4 + 1];
+            let a22: number = a[2 * 4 + 2];
+            let a23: number = a[2 * 4 + 3];
+            let a30: number = a[3 * 4 + 0];
+            let a31: number = a[3 * 4 + 1];
+            let a32: number = a[3 * 4 + 2];
+            let a33: number = a[3 * 4 + 3];
+            let b00: number = b[0 * 4 + 0];
+            let b01: number = b[0 * 4 + 1];
+            let b02: number = b[0 * 4 + 2];
+            let b03: number = b[0 * 4 + 3];
+            let b10: number = b[1 * 4 + 0];
+            let b11: number = b[1 * 4 + 1];
+            let b12: number = b[1 * 4 + 2];
+            let b13: number = b[1 * 4 + 3];
+            let b20: number = b[2 * 4 + 0];
+            let b21: number = b[2 * 4 + 1];
+            let b22: number = b[2 * 4 + 2];
+            let b23: number = b[2 * 4 + 3];
+            let b30: number = b[3 * 4 + 0];
+            let b31: number = b[3 * 4 + 1];
+            let b32: number = b[3 * 4 + 2];
+            let b33: number = b[3 * 4 + 3];
             matrix.data = new Float32Array(
                 [
                     b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
@@ -92,28 +104,29 @@ namespace Fudge {
                 ]);
             return matrix;
         }
+
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix Tha matrix to compute the inverse of.
          */
         public static inverse(_matrix: Matrix4x4): Matrix4x4 {
-
-            let m00: number = _matrix.data[0 * 4 + 0];
-            let m01: number = _matrix.data[0 * 4 + 1];
-            let m02: number = _matrix.data[0 * 4 + 2];
-            let m03: number = _matrix.data[0 * 4 + 3];
-            let m10: number = _matrix.data[1 * 4 + 0];
-            let m11: number = _matrix.data[1 * 4 + 1];
-            let m12: number = _matrix.data[1 * 4 + 2];
-            let m13: number = _matrix.data[1 * 4 + 3];
-            let m20: number = _matrix.data[2 * 4 + 0];
-            let m21: number = _matrix.data[2 * 4 + 1];
-            let m22: number = _matrix.data[2 * 4 + 2];
-            let m23: number = _matrix.data[2 * 4 + 3];
-            let m30: number = _matrix.data[3 * 4 + 0];
-            let m31: number = _matrix.data[3 * 4 + 1];
-            let m32: number = _matrix.data[3 * 4 + 2];
-            let m33: number = _matrix.data[3 * 4 + 3];
+            let m: Float32Array = _matrix.data;
+            let m00: number = m[0 * 4 + 0];
+            let m01: number = m[0 * 4 + 1];
+            let m02: number = m[0 * 4 + 2];
+            let m03: number = m[0 * 4 + 3];
+            let m10: number = m[1 * 4 + 0];
+            let m11: number = m[1 * 4 + 1];
+            let m12: number = m[1 * 4 + 2];
+            let m13: number = m[1 * 4 + 3];
+            let m20: number = m[2 * 4 + 0];
+            let m21: number = m[2 * 4 + 1];
+            let m22: number = m[2 * 4 + 2];
+            let m23: number = m[2 * 4 + 3];
+            let m30: number = m[3 * 4 + 0];
+            let m31: number = m[3 * 4 + 1];
+            let m32: number = m[3 * 4 + 2];
+            let m33: number = m[3 * 4 + 3];
             let tmp0: number = m22 * m33;
             let tmp1: number = m32 * m23;
             let tmp2: number = m12 * m33;
@@ -172,6 +185,7 @@ namespace Fudge {
             ]);
             return matrix;
         }
+
         /**
          * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
@@ -239,6 +253,7 @@ namespace Fudge {
 
             return matrix;
         }
+
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
@@ -261,6 +276,7 @@ namespace Fudge {
             ]);
             return matrix;
         }
+
         /**
         * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
         * @param _matrix The matrix to multiply.
@@ -271,6 +287,7 @@ namespace Fudge {
         public static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.translation(_xTranslation, _yTranslation, _zTranslation));
         }
+
         /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
@@ -279,6 +296,7 @@ namespace Fudge {
         public static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.xRotation(_angleInDegrees));
         }
+
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
          * @param _matrix The matrix to multiply.
@@ -287,6 +305,7 @@ namespace Fudge {
         public static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.yRotation(_angleInDegrees));
         }
+
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
          * @param _matrix The matrix to multiply.
@@ -295,6 +314,7 @@ namespace Fudge {
         public static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4 {
             return Matrix4x4.multiply(_matrix, this.zRotation(_angleInDegrees));
         }
+
         // Translation methods.######################################################################################
         /**
          * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
@@ -331,6 +351,7 @@ namespace Fudge {
             ]);
             return matrix;
         }
+
         /**
          * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
@@ -348,6 +369,7 @@ namespace Fudge {
             ]);
             return matrix;
         }
+
         /**
          * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.

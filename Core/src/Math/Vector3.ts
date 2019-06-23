@@ -115,7 +115,8 @@ namespace Fudge {
          * @returns A new vector representing the given vector scaled to the length of 1
          */
         public static normalize(_vector: Vector3): Vector3 {
-            let length: number = Math.sqrt(_vector.x * _vector.x + _vector.y * _vector.y + _vector.z * _vector.z);
+            let [x, y, z] = _vector.data;
+            let length: number = Math.hypot(x, y, z);
             let vector: Vector3 = new Vector3;
             // make sure we don't divide by 0. TODO: see if it's appropriate to use try/catch here
             if (length > 0.00001) {
