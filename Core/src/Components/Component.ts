@@ -43,7 +43,8 @@ namespace Fudge {
                 if (previousContainer)
                     previousContainer.removeComponent(this);
                 this.container = _container;
-                this.container.addComponent(this);
+                if (this.container)
+                    this.container.addComponent(this);
             } catch {
                 this.container = previousContainer;
             }
@@ -59,7 +60,7 @@ namespace Fudge {
             this.active = _serialization.active;
             return this;
         }
-        
+
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.singleton;
         }

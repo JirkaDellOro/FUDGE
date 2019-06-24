@@ -167,7 +167,7 @@ namespace Fudge {
                     for (let i: number = 0; i < n; i++) {
                         let light: LightDirectional = <LightDirectional>cmpLights[i].getLight();
                         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
-                        let direction: Vector3 = light.direction; // TODO: careful... working on reference? must be copy
+                        let direction: Vector3 = light.direction.copy;
                         direction.transform(cmpLights[i].getContainer().world);
                         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }

@@ -130,11 +130,13 @@ namespace Fudge {
         public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
             this.data = new Float32Array([_x, _y, _z]);
         }
-        /**
-         * Retrieve the vector as an array with three elements
-         */
+        
         public get(): Float32Array {
             return new Float32Array(this.data);
+        }
+
+        public get copy(): Vector3 {
+           return new Vector3(this.x, this.y, this.z);
         }
 
         public transform(_matrix: Matrix4x4): void {

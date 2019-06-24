@@ -18,7 +18,7 @@ var TextureTest;
         viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         window.setInterval(function () {
             // body.cmpTransform.rotateY(-1.1);
-            coSys.cmpTransform.local.rotateY(45);
+            coSys.cmpTransform.local.rotateY(1);
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();

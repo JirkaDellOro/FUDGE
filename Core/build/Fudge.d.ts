@@ -1316,10 +1316,8 @@ declare namespace Fudge {
          */
         static normalize(_vector: Vector3): Vector3;
         set(_x?: number, _y?: number, _z?: number): void;
-        /**
-         * Retrieve the vector as an array with three elements
-         */
         get(): Float32Array;
+        readonly copy: Vector3;
         transform(_matrix: Matrix4x4): void;
     }
 }

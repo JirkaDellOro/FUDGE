@@ -278,7 +278,7 @@ var Fudge;
                     for (let i = 0; i < n; i++) {
                         let light = cmpLights[i].getLight();
                         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
-                        let direction = light.direction; // TODO: careful... working on reference? must be copy
+                        let direction = light.direction.copy;
                         direction.transform(cmpLights[i].getContainer().world);
                         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }
@@ -598,7 +598,8 @@ var Fudge;
                 if (previousContainer)
                     previousContainer.removeComponent(this);
                 this.container = _container;
-                this.container.addComponent(this);
+                if (this.container)
+                    this.container.addComponent(this);
             }
             catch {
                 this.container = previousContainer;
@@ -2828,11 +2829,11 @@ var Fudge;
         set(_x = 0, _y = 0, _z = 0) {
             this.data = new Float32Array([_x, _y, _z]);
         }
-        /**
-         * Retrieve the vector as an array with three elements
-         */
         get() {
             return new Float32Array(this.data);
+        }
+        get copy() {
+            return new Vector3(this.x, this.y, this.z);
         }
         transform(_matrix) {
             let result = new Vector3();

@@ -24,7 +24,7 @@ namespace TextureTest {
 
         window.setInterval(function (): void {
             // body.cmpTransform.rotateY(-1.1);
-            coSys.cmpTransform.local.rotateY(45);
+            coSys.cmpTransform.local.rotateY(1);
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();
