@@ -1170,7 +1170,32 @@ declare namespace Fudge {
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4;
+        static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up?: Vector3): Matrix4x4;
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * @param _translate
+         */
+        static TRANSLATION(_translate: Vector3): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_X(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_Y(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * @param _scalar
+         */
+        static SCALING(_scalar: Vector3): Matrix4x4;
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1190,31 +1215,6 @@ declare namespace Fudge {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-         * @param _translate
-         */
-        private static TRANSLATION;
-        /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_X;
-        /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_Y;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_Z;
-        /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         * @param _scalar
-         */
-        private static SCALING;
-        /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
         * @param _angleInDegrees The angle to rotate by.
@@ -1232,6 +1232,7 @@ declare namespace Fudge {
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateZ(_angleInDegrees: number): void;
+        lookAt(_target: Vector3, _up?: Vector3): void;
         translate(_by: Vector3): void;
         /**
          * Translate the transformation along the x-axis.
@@ -1252,7 +1253,8 @@ declare namespace Fudge {
         scaleX(_by: number): void;
         scaleY(_by: number): void;
         scaleZ(_by: number): void;
-        lookAt(_target: Vector3): void;
+        set(_to: Matrix4x4): void;
+        get(): Float32Array;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -1274,47 +1276,39 @@ declare namespace Fudge {
         static Y(_scale?: number): Vector3;
         static Z(_scale?: number): Vector3;
         static readonly ZERO: Vector3;
+        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
+        static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
-         * Adds two vectors.
-         * @param _a The first vector to add
-         * @param _b The second vector to add
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
          * @returns A new vector representing the sum of the given vectors
          */
-        static add(_a: Vector3, _b: Vector3): Vector3;
-        /**
-        * Sums up multiple vectors.
-        * @param _a The first vector to add
-        * @param _b The second vector to add
-        * @returns A new vector representing the sum of the given vectors
-        */
-        static sum(..._vectors: Vector3[]): Vector3;
+        static SUM(..._vectors: Vector3[]): Vector3;
         /**
          * Subtracts two vectors.
          * @param _a The vector to subtract from.
          * @param _b The vector to subtract.
          * @returns A new vector representing the difference of the given vectors
          */
-        static subtract(_a: Vector3, _b: Vector3): Vector3;
+        static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          * @returns A new vector representing the crossproduct of the given vectors
          */
-        static cross(_a: Vector3, _b: Vector3): Vector3;
+        static CROSS(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the dotproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          * @returns A new vector representing the dotproduct of the given vectors
          */
-        static dot(_a: Vector3, _b: Vector3): number;
-        /**
-         * Normalizes a vector.
-         * @param _vector The vector to normalize.
-         * @returns A new vector representing the given vector scaled to the length of 1
-         */
-        static normalize(_vector: Vector3): Vector3;
+        static DOT(_a: Vector3, _b: Vector3): number;
+        add(_addend: Vector3): void;
+        subtract(_subtrahend: Vector3): void;
+        scale(_scale: number): void;
+        normalize(_length?: number): void;
         set(_x?: number, _y?: number, _z?: number): void;
         get(): Float32Array;
         readonly copy: Vector3;

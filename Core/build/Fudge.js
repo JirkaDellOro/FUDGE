@@ -66,7 +66,10 @@ var Fudge;
         getMutatorAttributeTypes(_mutator) {
             let types = {};
             for (let attribute in _mutator) {
-                types[attribute] = _mutator[attribute].constructor.name;
+                let type = null;
+                if (_mutator[attribute])
+                    type = _mutator[attribute].constructor.name;
+                types[attribute] = type;
             }
             return types;
         }
@@ -2312,6 +2315,7 @@ var Fudge;
         set translation(_translation) {
             this.data.set(_translation.get(), 12);
         }
+        //#region STATICS
         static get IDENTITY() {
             const result = new Matrix4x4();
             return result;
@@ -2458,87 +2462,23 @@ var Fudge;
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static LOOK_AT(_transformPosition, _targetPosition) {
+        static LOOK_AT(_transformPosition, _targetPosition, _up = Fudge.Vector3.Y()) {
             const matrix = new Matrix4x4;
-            let transformPosition = new Fudge.Vector3(_transformPosition.x, _transformPosition.y, _transformPosition.z);
-            let targetPosition = new Fudge.Vector3(_targetPosition.x, _targetPosition.y, _targetPosition.z);
-            let zAxis = Fudge.Vector3.subtract(transformPosition, targetPosition);
-            zAxis = Fudge.Vector3.normalize(zAxis);
-            let xAxis;
-            let yAxis;
-            if (zAxis.get() != Fudge.Vector3.Y().get()) { // TODO: verify intention - this is the comparison of references...
-                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Y(), zAxis));
-                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(zAxis, xAxis));
-            }
-            else {
-                xAxis = Fudge.Vector3.normalize(Fudge.Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(Fudge.Vector3.Z(), xAxis));
-                zAxis = Fudge.Vector3.normalize(Fudge.Vector3.cross(xAxis, yAxis));
-            }
+            let zAxis = Fudge.Vector3.DIFFERENCE(_transformPosition, _targetPosition);
+            zAxis.normalize();
+            let xAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(_up, zAxis));
+            let yAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(zAxis, xAxis));
             matrix.data = new Float32Array([
                 xAxis.x, xAxis.y, xAxis.z, 0,
                 yAxis.x, yAxis.y, yAxis.z, 0,
                 zAxis.x, zAxis.y, zAxis.z, 0,
-                transformPosition.x,
-                transformPosition.y,
-                transformPosition.z,
+                _transformPosition.x,
+                _transformPosition.y,
+                _transformPosition.z,
                 1
             ]);
             return matrix;
         }
-        // Projection methods.######################################################################################
-        /**
-         * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
-         * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
-         * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
-         * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
-         */
-        static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
-            let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
-            let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
-            let rangeInv = 1.0 / (_near - _far);
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                f, 0, 0, 0,
-                0, f, 0, 0,
-                0, 0, (_near + _far) * rangeInv, -1,
-                0, 0, _near * _far * rangeInv * 2, 0
-            ]);
-            if (_direction == Fudge.FIELD_OF_VIEW.DIAGONAL) {
-                _aspect = Math.sqrt(_aspect);
-                matrix.data[0] = f / _aspect;
-                matrix.data[5] = f * _aspect;
-            }
-            else if (_direction == Fudge.FIELD_OF_VIEW.VERTICAL)
-                matrix.data[0] = f / _aspect;
-            else //FOV_DIRECTION.HORIZONTAL
-                matrix.data[5] = f * _aspect;
-            return matrix;
-        }
-        /**
-         * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
-         * @param _left The positionvalue of the projectionspace's left border.
-         * @param _right The positionvalue of the projectionspace's right border.
-         * @param _bottom The positionvalue of the projectionspace's bottom border.
-         * @param _top The positionvalue of the projectionspace's top border.
-         * @param _near The positionvalue of the projectionspace's near border.
-         * @param _far The positionvalue of the projectionspace's far border
-         */
-        static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
-            let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
-                2 / (_right - _left), 0, 0, 0,
-                0, 2 / (_top - _bottom), 0, 0,
-                0, 0, 2 / (_near - _far), 0,
-                (_left + _right) / (_left - _right),
-                (_bottom + _top) / (_bottom - _top),
-                (_near + _far) / (_near - _far),
-                1
-            ]);
-            return matrix;
-        }
-        // Translation methods.######################################################################################
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
          * @param _translate
@@ -2553,7 +2493,6 @@ var Fudge;
             ]);
             return matrix;
         }
-        // Rotation methods.######################################################################################
         /**
          * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
          * @param _angleInDegrees The value of the rotation.
@@ -2605,7 +2544,6 @@ var Fudge;
             ]);
             return matrix;
         }
-        // Scaling methods.######################################################################################
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
          * @param _scalar
@@ -2620,6 +2558,61 @@ var Fudge;
             ]);
             return matrix;
         }
+        //#endregion
+        //#region PROJECTIONS
+        /**
+         * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
+         * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
+         * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
+         * @param _near The near clipspace border on the z-axis.
+         * @param _far The far clipspace borer on the z-axis.
+         */
+        static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
+            let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
+            let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
+            let rangeInv = 1.0 / (_near - _far);
+            let matrix = new Matrix4x4;
+            matrix.data = new Float32Array([
+                f, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (_near + _far) * rangeInv, -1,
+                0, 0, _near * _far * rangeInv * 2, 0
+            ]);
+            if (_direction == Fudge.FIELD_OF_VIEW.DIAGONAL) {
+                _aspect = Math.sqrt(_aspect);
+                matrix.data[0] = f / _aspect;
+                matrix.data[5] = f * _aspect;
+            }
+            else if (_direction == Fudge.FIELD_OF_VIEW.VERTICAL)
+                matrix.data[0] = f / _aspect;
+            else //FOV_DIRECTION.HORIZONTAL
+                matrix.data[5] = f * _aspect;
+            return matrix;
+        }
+        /**
+         * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
+         * @param _left The positionvalue of the projectionspace's left border.
+         * @param _right The positionvalue of the projectionspace's right border.
+         * @param _bottom The positionvalue of the projectionspace's bottom border.
+         * @param _top The positionvalue of the projectionspace's top border.
+         * @param _near The positionvalue of the projectionspace's near border.
+         * @param _far The positionvalue of the projectionspace's far border
+         */
+        static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
+            let matrix = new Matrix4x4;
+            matrix.data = new Float32Array([
+                2 / (_right - _left), 0, 0, 0,
+                0, 2 / (_top - _bottom), 0, 0,
+                0, 0, 2 / (_near - _far), 0,
+                (_left + _right) / (_left - _right),
+                (_bottom + _top) / (_bottom - _top),
+                (_near + _far) / (_near - _far),
+                1
+            ]);
+            return matrix;
+        }
+        //#endregion
+        //#region Rotation
         /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
@@ -2644,6 +2637,11 @@ var Fudge;
         rotateZ(_angleInDegrees) {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
         }
+        lookAt(_target, _up = Fudge.Vector3.Y()) {
+            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+        }
+        //#endregion
+        //#region Translation
         translate(_by) {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
         }
@@ -2668,6 +2666,8 @@ var Fudge;
         translateZ(_z) {
             this.data[14] += _z;
         }
+        //#endregion
+        //#region Scaling
         scale(_by) {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by)).data;
         }
@@ -2680,8 +2680,13 @@ var Fudge;
         scaleZ(_by) {
             this.scale(new Fudge.Vector3(1, 1, _by));
         }
-        lookAt(_target) {
-            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+        //#endregion
+        //#region Transfer
+        set(_to) {
+            this.data = _to.get();
+        }
+        get() {
+            return new Float32Array(this.data);
         }
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
@@ -2703,6 +2708,7 @@ var Fudge;
         reduceMutator(_mutator) { }
     }
     Fudge.Matrix4x4 = Matrix4x4;
+    //#endregion
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2749,24 +2755,33 @@ var Fudge;
             const vector = new Vector3(0, 0, 0);
             return vector;
         }
-        // Vectormath methods.######################################################################################
-        /**
-         * Adds two vectors.
-         * @param _a The first vector to add
-         * @param _b The second vector to add
-         * @returns A new vector representing the sum of the given vectors
-         */
-        static add(_a, _b) {
-            let vector = new Vector3(_a.x + _b.x, _a.y + _b.y, _a.z + _b.z);
+        static TRANSFORMATION(_vector, _matrix) {
+            let result = new Vector3();
+            let m = _matrix.data;
+            let [x, y, z] = _vector.get();
+            result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z; // + m[14];
+            return result;
+        }
+        static NORMALIZATION(_vector, _length = 1) {
+            let vector = Vector3.ZERO;
+            try {
+                let [x, y, z] = _vector.data;
+                let factor = _length / Math.hypot(x, y, z);
+                vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
+            }
+            catch (_e) {
+                Fudge.Debug.warn(_e);
+            }
             return vector;
         }
         /**
-        * Sums up multiple vectors.
-        * @param _a The first vector to add
-        * @param _b The second vector to add
-        * @returns A new vector representing the sum of the given vectors
-        */
-        static sum(..._vectors) {
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
+         * @returns A new vector representing the sum of the given vectors
+         */
+        static SUM(..._vectors) {
             let result = new Vector3();
             for (let vector of _vectors)
                 result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
@@ -2778,7 +2793,7 @@ var Fudge;
          * @param _b The vector to subtract.
          * @returns A new vector representing the difference of the given vectors
          */
-        static subtract(_a, _b) {
+        static DIFFERENCE(_a, _b) {
             let vector = new Vector3;
             vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y, _a.z - _b.z]);
             return vector;
@@ -2789,7 +2804,7 @@ var Fudge;
          * @param _b The vector to multiply by.
          * @returns A new vector representing the crossproduct of the given vectors
          */
-        static cross(_a, _b) {
+        static CROSS(_a, _b) {
             let vector = new Vector3;
             vector.data = new Float32Array([
                 _a.y * _b.z - _a.z * _b.y,
@@ -2804,27 +2819,21 @@ var Fudge;
          * @param _b The vector to multiply by.
          * @returns A new vector representing the dotproduct of the given vectors
          */
-        static dot(_a, _b) {
+        static DOT(_a, _b) {
             let scalarProduct = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
             return scalarProduct;
         }
-        /**
-         * Normalizes a vector.
-         * @param _vector The vector to normalize.
-         * @returns A new vector representing the given vector scaled to the length of 1
-         */
-        static normalize(_vector) {
-            let [x, y, z] = _vector.data;
-            let length = Math.hypot(x, y, z);
-            let vector = new Vector3;
-            // make sure we don't divide by 0. TODO: see if it's appropriate to use try/catch here
-            if (length > 0.00001) {
-                vector.data = new Float32Array([_vector.x / length, _vector.y / length, _vector.z / length]);
-            }
-            else {
-                vector.data = new Float32Array([0, 0, 0]);
-            }
-            return vector;
+        add(_addend) {
+            this.data = new Vector3(_addend.x + this.x, _addend.y + this.y, _addend.z + this.z).data;
+        }
+        subtract(_subtrahend) {
+            this.data = new Vector3(this.x - _subtrahend.x, this.y - _subtrahend.y, this.z - _subtrahend.z).data;
+        }
+        scale(_scale) {
+            this.data = new Vector3(_scale * this.x, _scale * this.y, _scale * this.z).data;
+        }
+        normalize(_length = 1) {
+            this.data = Vector3.NORMALIZATION(this, _length).data;
         }
         set(_x = 0, _y = 0, _z = 0) {
             this.data = new Float32Array([_x, _y, _z]);
@@ -2836,13 +2845,7 @@ var Fudge;
             return new Vector3(this.x, this.y, this.z);
         }
         transform(_matrix) {
-            let result = new Vector3();
-            let m = _matrix.data;
-            let [x, y, z] = this.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
-            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
-            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
-            this.data = result.data;
+            this.data = Vector3.TRANSFORMATION(this, _matrix).data;
         }
     }
     Fudge.Vector3 = Vector3;
@@ -3056,9 +3059,9 @@ var Fudge;
                 vertices.push(new Fudge.Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
             for (let i = 0; i < this.indices.length; i += 3) {
                 let vertex = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
-                let v0 = Fudge.Vector3.subtract(vertices[vertex[0]], vertices[vertex[1]]);
-                let v1 = Fudge.Vector3.subtract(vertices[vertex[0]], vertices[vertex[2]]);
-                let normal = Fudge.Vector3.normalize(Fudge.Vector3.cross(v0, v1));
+                let v0 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
+                let v1 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
+                let normal = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(v0, v1));
                 let index = vertex[2] * 3;
                 normals[index] = normal.x;
                 normals[index + 1] = normal.y;

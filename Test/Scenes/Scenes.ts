@@ -78,7 +78,7 @@ namespace Scenes {
         coordinates.appendChild(arrowRed);
         coordinates.appendChild(arrowGreen);
         coordinates.appendChild(arrowBlue);
-        
+
         return coordinates;
     }
 
@@ -149,5 +149,29 @@ namespace Scenes {
         canvas.width = _width;
         canvas.height = _height;
         return canvas;
+    }
+
+
+
+    export function dollyViewportCamera(_viewport: ƒ.Viewport): void {
+        _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
+        _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
+
+        function rotate(_event: ƒ.KeyboardEventƒ): void {
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+            let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO;
+            vctCamera.y = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
+                        0));
+            vctCamera.x = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
+                        0));
+
+            mtxCamera.translate(vctCamera);
+            mtxCamera.lookAt(ƒ.Vector3.ZERO, ƒ.Vector3.Y());
+            _viewport.draw();
+        }
     }
 }

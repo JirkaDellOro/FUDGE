@@ -83,9 +83,9 @@ namespace Fudge {
 
             for (let i: number = 0; i < this.indices.length; i += 3) {
                 let vertex: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
-                let v0: Vector3 = Vector3.subtract(vertices[vertex[0]], vertices[vertex[1]]);
-                let v1: Vector3 = Vector3.subtract(vertices[vertex[0]], vertices[vertex[2]]);
-                let normal: Vector3 = Vector3.normalize(Vector3.cross(v0, v1));
+                let v0: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
+                let v1: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
+                let normal: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
                 let index: number = vertex[2] * 3;
                 normals[index] = normal.x;
                 normals[index + 1] = normal.y;

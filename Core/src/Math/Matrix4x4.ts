@@ -17,14 +17,14 @@ namespace Fudge {
             ]);
         }
 
-
         public get translation(): Vector3 {
             return new Vector3(this.data[12], this.data[13], this.data[14]);
         }
         public set translation(_translation: Vector3) {
             this.data.set(_translation.get(), 12);
         }
-        
+
+        //#region STATICS
         public static get IDENTITY(): Matrix4x4 {
             const result: Matrix4x4 = new Matrix4x4();
             return result;
@@ -179,37 +179,111 @@ namespace Fudge {
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        public static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4 {
+        public static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
             const matrix: Matrix4x4 = new Matrix4x4;
-            let transformPosition: Vector3 = new Vector3(_transformPosition.x, _transformPosition.y, _transformPosition.z);
-            let targetPosition: Vector3 = new Vector3(_targetPosition.x, _targetPosition.y, _targetPosition.z);
-            let zAxis: Vector3 = Vector3.subtract(transformPosition, targetPosition);
-            zAxis = Vector3.normalize(zAxis);
-            let xAxis: Vector3;
-            let yAxis: Vector3;
-            if (zAxis.get() != Vector3.Y().get()) { // TODO: verify intention - this is the comparison of references...
-                xAxis = Vector3.normalize(Vector3.cross(Vector3.Y(), zAxis));
-                yAxis = Vector3.normalize(Vector3.cross(zAxis, xAxis));
-            }
-            else {
-                xAxis = Vector3.normalize(Vector3.subtract(transformPosition, targetPosition));
-                yAxis = Vector3.normalize(Vector3.cross(Vector3.Z(), xAxis));
-                zAxis = Vector3.normalize(Vector3.cross(xAxis, yAxis));
-            }
+            let zAxis: Vector3 = Vector3.DIFFERENCE(_transformPosition, _targetPosition);
+            zAxis.normalize();
+            let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+            let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
             matrix.data = new Float32Array(
                 [
                     xAxis.x, xAxis.y, xAxis.z, 0,
                     yAxis.x, yAxis.y, yAxis.z, 0,
                     zAxis.x, zAxis.y, zAxis.z, 0,
-                    transformPosition.x,
-                    transformPosition.y,
-                    transformPosition.z,
+                    _transformPosition.x,
+                    _transformPosition.y,
+                    _transformPosition.z,
                     1
                 ]);
             return matrix;
         }
 
-        // Projection methods.######################################################################################
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * @param _translate 
+         */
+        public static TRANSLATION(_translate: Vector3): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                _translate.x, _translate.y, _translate.z, 1
+            ]);
+            return matrix;
+        }
+
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        public static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
+            const matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                1, 0, 0, 0,
+                0, cos, sin, 0,
+                0, -sin, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        public static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
+            const matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, 0, -sin, 0,
+                0, 1, 0, 0,
+                sin, 0, cos, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        public static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
+            const matrix: Matrix4x4 = new Matrix4x4;
+            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+            let sin: number = Math.sin(angleInRadians);
+            let cos: number = Math.cos(angleInRadians);
+            matrix.data = new Float32Array([
+                cos, sin, 0, 0,
+                -sin, cos, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * @param _scalar 
+         */
+        public static SCALING(_scalar: Vector3): Matrix4x4 {
+            let matrix: Matrix4x4 = new Matrix4x4;
+            matrix.data = new Float32Array([
+                _scalar.x, 0, 0, 0,
+                0, _scalar.y, 0, 0,
+                0, 0, _scalar.z, 0,
+                0, 0, 0, 1
+            ]);
+            return matrix;
+        }
+        //#endregion
+
+        //#region PROJECTIONS
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -264,95 +338,9 @@ namespace Fudge {
             ]);
             return matrix;
         }
+        //#endregion
 
-
-        // Translation methods.######################################################################################
-        /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-         * @param _translate 
-         */
-        private static TRANSLATION(_translate: Vector3): Matrix4x4 {
-            let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                _translate.x, _translate.y, _translate.z, 1
-            ]);
-            return matrix;
-        }
-
-        // Rotation methods.######################################################################################
-        /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
-            const matrix: Matrix4x4 = new Matrix4x4;
-            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-            let sin: number = Math.sin(angleInRadians);
-            let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                1, 0, 0, 0,
-                0, cos, sin, 0,
-                0, -sin, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-
-        /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
-            const matrix: Matrix4x4 = new Matrix4x4;
-            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-            let sin: number = Math.sin(angleInRadians);
-            let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, 0, -sin, 0,
-                0, 1, 0, 0,
-                sin, 0, cos, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
-            const matrix: Matrix4x4 = new Matrix4x4;
-            let angleInRadians: number = _angleInDegrees * Math.PI / 180;
-            let sin: number = Math.sin(angleInRadians);
-            let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
-                cos, sin, 0, 0,
-                -sin, cos, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-
-        // Scaling methods.######################################################################################
-        /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         * @param _scalar 
-         */
-        private static SCALING(_scalar: Vector3): Matrix4x4 {
-            let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
-                _scalar.x, 0, 0, 0,
-                0, _scalar.y, 0, 0,
-                0, 0, _scalar.z, 0,
-                0, 0, 0, 1
-            ]);
-            return matrix;
-        }
-
+        //#region Rotation
         /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
@@ -380,6 +368,12 @@ namespace Fudge {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
         }
 
+        public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
+            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+        }
+        //#endregion
+
+        //#region Translation
         public translate(_by: Vector3): void {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
         }
@@ -405,7 +399,9 @@ namespace Fudge {
         public translateZ(_z: number): void {
             this.data[14] += _z;
         }
+        //#endregion
 
+        //#region Scaling
         public scale(_by: Vector3): void {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by)).data;
         }
@@ -418,11 +414,16 @@ namespace Fudge {
         public scaleZ(_by: number): void {
             this.scale(new Vector3(1, 1, _by));
         }
-        
-        public lookAt(_target: Vector3): void {
-            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+        //#endregion
+
+        //#region Transfer
+        public set(_to: Matrix4x4): void {
+            this.data = _to.get();
         }
 
+        public get(): Float32Array {
+            return new Float32Array(this.data);
+        }
 
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
@@ -444,4 +445,5 @@ namespace Fudge {
         }
         protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
+    //#endregion
 }

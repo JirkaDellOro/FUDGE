@@ -26,9 +26,9 @@ var TextureTest;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
-        let camera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
+        let camera = Scenes.createCamera(new ƒ.Vector3(1, 1, 2), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
-        dollyViewportCamera(viewport);
+        Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);
         viewport.draw();
         //*/
@@ -40,24 +40,6 @@ var TextureTest;
             viewport.draw();
         }, 20);
         //*/
-    }
-    function dollyViewportCamera(_viewport) {
-        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
-        _viewport.addEventListener("\u0192keydown" /* DOWN */, rotate);
-        function rotate(_event) {
-            let mtxCamera = _viewport.camera.getContainer().cmpTransform.local;
-            mtxCamera.translateY(0.1 *
-                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
-                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
-                        0));
-            mtxCamera.translateX(0.1 *
-                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
-                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
-                        0));
-            mtxCamera.lookAt(new ƒ.Vector3());
-            _viewport.draw();
-            ƒ.Debug.log(mtxCamera.translation.get().toString());
-        }
     }
 })(TextureTest || (TextureTest = {}));
 //# sourceMappingURL=LightMoving.js.map
