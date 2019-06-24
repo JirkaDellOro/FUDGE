@@ -8,8 +8,8 @@ namespace TextureTest {
         let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.matrix.translate(ƒ.Vector3.ZERO);
-        body.cmpTransform.matrix.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.cmpTransform.local.translate(ƒ.Vector3.ZERO);
+        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
         let lights: ƒ.Node = new ƒ.Node("Lights");
         lights.addComponent(new ƒ.ComponentTransform());
@@ -46,7 +46,7 @@ namespace TextureTest {
         //*/
         window.setInterval(function (): void {
             // body.cmpTransform.rotateY(-1.1);
-            lights.cmpTransform.matrix.rotateY(-1);
+            lights.cmpTransform.local.rotateY(-1);
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();
@@ -59,8 +59,8 @@ namespace TextureTest {
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
 
         function rotate(_event: ƒ.KeyboardEventƒ): void {
-            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.matrix;
-            mtxCamera.translateY(0.1 *
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+            mtxCamera.translateY(0.1 * 
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
                         0));

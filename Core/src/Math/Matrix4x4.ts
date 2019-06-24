@@ -380,8 +380,8 @@ namespace Fudge {
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
         }
 
-        public translate(_by: Vector3): Matrix4x4 {
-            return Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+        public translate(_by: Vector3): void {
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
         }
 
         /**

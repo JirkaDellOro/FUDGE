@@ -5,15 +5,15 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentTransform extends Component {
-        public matrix: Matrix4x4;
+        public local: Matrix4x4;
 
         public constructor() {
             super();
-            this.matrix = Matrix4x4.IDENTITY;
+            this.local = Matrix4x4.IDENTITY;
         }
 
         public get WorldPosition(): Vector3 {
-            return new Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
+            return new Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
         }
 
         public serialize(): Serialization {

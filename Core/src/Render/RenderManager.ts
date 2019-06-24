@@ -196,22 +196,19 @@ namespace Fudge {
 
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
          * @param _node 
          * @param _cameraMatrix 
-         * @param _world 
          */
-        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void {
-            let cmpTransform: ComponentTransform = _node.cmpTransform;
-            let world: Matrix4x4 = _world;
-            if (cmpTransform)
-                world = cmpTransform.matrix;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Matrix4x4.IDENTITY;
-
-            let finalTransform: Matrix4x4 = world;
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            /*  let cmpTransform: ComponentTransform = _node.cmpTransform;
+              let world: Matrix4x4 = _world;
+              if (cmpTransform)
+                  world = cmpTransform.local;
+              if (!world)
+                  // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                  world = Matrix4x4.IDENTITY;
+            */
+            let finalTransform: Matrix4x4 = _node.world;
             /* Pivot becomes a property of ComponentMesh und must be respected there
             let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (cmpPivot)
@@ -224,7 +221,7 @@ namespace Fudge {
 
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
+                this.drawBranch(childNode, _cmpCamera); //, world);
             }
         }
 
@@ -252,6 +249,7 @@ namespace Fudge {
             let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
                 if (_nodeReferences.doneTransformToWorld)
                     return;
+                //TODO: replace with update-timestamp -> no previous traversal required
                 _nodeReferences.doneTransformToWorld = true;
 
                 // find uppermost ancestor not recalculated yet
@@ -266,11 +264,13 @@ namespace Fudge {
                         break;
                     ancestor = parent;
                 }
+                // TODO: optimize so that also nodes without meshes are present as transformed (possible after world-matrix implemented in node). Register ALL nodes!
+                // Debug.log(`Search from node ${_node.name} to ancestor ${ancestor.name}`);
 
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
-                if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.matrix;
+                if (parent)
+                    matrix = parent.world;
 
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
@@ -285,17 +285,17 @@ namespace Fudge {
          * Recursive method receiving a childnode and its parents updated world transform.  
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
          * @param _node 
-         * @param _matrix 
+         * @param _world 
          */
-        private static recalculateTransformsOfNodeAndChildren(_node: Node, _matrix: Matrix4x4 = Matrix4x4.IDENTITY): void {
-            let worldMatrix: Matrix4x4 = _matrix;
+        private static recalculateTransformsOfNodeAndChildren(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY): void {
+            let world: Matrix4x4 = _world;
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             if (cmpTransform)
-                worldMatrix = Matrix4x4.MULTIPLICATION(_matrix, cmpTransform.matrix);
-            _node.world = worldMatrix;
+                world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+            _node.world = world;
 
             for (let child of _node.getChildren()) {
-                this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
+                this.recalculateTransformsOfNodeAndChildren(child, world);
             }
         }
         // #endregion

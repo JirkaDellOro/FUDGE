@@ -678,7 +678,7 @@ var Fudge;
         get ViewProjectionMatrix() {
             try {
                 let cmpTransform = this.getContainer().cmpTransform;
-                let viewMatrix = Fudge.Matrix4x4.INVERSION(cmpTransform.matrix); // TODO: WorldMatrix-> Camera must be calculated
+                let viewMatrix = Fudge.Matrix4x4.INVERSION(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
                 return Fudge.Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
             }
             catch {
@@ -849,10 +849,10 @@ var Fudge;
     class ComponentTransform extends Fudge.Component {
         constructor() {
             super();
-            this.matrix = Fudge.Matrix4x4.IDENTITY;
+            this.local = Fudge.Matrix4x4.IDENTITY;
         }
         get WorldPosition() {
-            return new Fudge.Vector3(this.matrix.data[12], this.matrix.data[13], this.matrix.data[14]);
+            return new Fudge.Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
         }
         serialize() {
             let serialization = {
@@ -1272,7 +1272,7 @@ var Fudge;
             if (this.children.includes(_node))
                 // _node is already a child of this
                 return;
-            let ancestor = this.parent;
+            let ancestor = this;
             while (ancestor) {
                 if (ancestor == _node)
                     throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
@@ -1345,12 +1345,14 @@ var Fudge;
             try {
                 let componentsOfType = this.components[_component.type];
                 let foundAt = componentsOfType.indexOf(_component);
+                if (foundAt < 0)
+                    return;
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
                 _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
             }
             catch {
-                throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
             }
         }
         // #endregion
@@ -2642,7 +2644,7 @@ var Fudge;
             this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
         }
         translate(_by) {
-            return Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
         }
         /**
          * Translate the transformation along the x-axis.
@@ -3282,21 +3284,19 @@ var Fudge;
         }
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
          * @param _node
          * @param _cameraMatrix
-         * @param _world
          */
-        static drawBranch(_node, _cmpCamera, _world) {
-            let cmpTransform = _node.cmpTransform;
-            let world = _world;
-            if (cmpTransform)
-                world = cmpTransform.matrix;
-            if (!world)
-                // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                world = Fudge.Matrix4x4.IDENTITY;
-            let finalTransform = world;
+        static drawBranch(_node, _cmpCamera) {
+            /*  let cmpTransform: ComponentTransform = _node.cmpTransform;
+              let world: Matrix4x4 = _world;
+              if (cmpTransform)
+                  world = cmpTransform.local;
+              if (!world)
+                  // neither ComponentTransform found nor world-transformation passed from parent -> use identity
+                  world = Matrix4x4.IDENTITY;
+            */
+            let finalTransform = _node.world;
             /* Pivot becomes a property of ComponentMesh und must be respected there
             let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
             if (cmpPivot)
@@ -3307,7 +3307,7 @@ var Fudge;
             this.drawNode(_node, finalTransform, projection);
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera, world);
+                this.drawBranch(childNode, _cmpCamera); //, world);
             }
         }
         static drawNode(_node, _finalTransform, _projection) {
@@ -3331,6 +3331,7 @@ var Fudge;
             let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
                 if (_nodeReferences.doneTransformToWorld)
                     return;
+                //TODO: replace with update-timestamp -> no previous traversal required
                 _nodeReferences.doneTransformToWorld = true;
                 // find uppermost ancestor not recalculated yet
                 let ancestor = _node;
@@ -3344,10 +3345,12 @@ var Fudge;
                         break;
                     ancestor = parent;
                 }
+                // TODO: optimize so that also nodes without meshes are present as transformed (possible after world-matrix implemented in node). Register ALL nodes!
+                // Debug.log(`Search from node ${_node.name} to ancestor ${ancestor.name}`);
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix = Fudge.Matrix4x4.IDENTITY;
-                if (parent && parent.cmpTransform)
-                    matrix = parent.cmpTransform.matrix;
+                if (parent)
+                    matrix = parent.world;
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
@@ -3359,16 +3362,16 @@ var Fudge;
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
          * @param _node
-         * @param _matrix
+         * @param _world
          */
-        static recalculateTransformsOfNodeAndChildren(_node, _matrix = Fudge.Matrix4x4.IDENTITY) {
-            let worldMatrix = _matrix;
+        static recalculateTransformsOfNodeAndChildren(_node, _world = Fudge.Matrix4x4.IDENTITY) {
+            let world = _world;
             let cmpTransform = _node.cmpTransform;
             if (cmpTransform)
-                worldMatrix = Fudge.Matrix4x4.MULTIPLICATION(_matrix, cmpTransform.matrix);
-            _node.world = worldMatrix;
+                world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+            _node.world = world;
             for (let child of _node.getChildren()) {
-                this.recalculateTransformsOfNodeAndChildren(child, worldMatrix);
+                this.recalculateTransformsOfNodeAndChildren(child, world);
             }
         }
         // #endregion

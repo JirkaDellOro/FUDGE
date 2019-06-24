@@ -48,7 +48,7 @@ var EventPassing;
     }
     function rotate(_event) {
         let viewPort = getViewport(_event);
-        let mtxCamera = viewPort.camera.getContainer().cmpTransform.matrix;
+        let mtxCamera = viewPort.camera.getContainer().cmpTransform.local;
         mtxCamera.translateY(0.1 *
             (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
                 _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :

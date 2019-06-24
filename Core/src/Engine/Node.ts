@@ -70,7 +70,7 @@ namespace Fudge {
                 // _node is already a child of this
                 return;
 
-            let ancestor: Node = this.parent;
+            let ancestor: Node = this;
             while (ancestor) {
                 if (ancestor == _node)
                     throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
@@ -151,11 +151,13 @@ namespace Fudge {
             try {
                 let componentsOfType: Component[] = this.components[_component.type];
                 let foundAt: number = componentsOfType.indexOf(_component);
+                if (foundAt < 0) 
+                    return;
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
                 _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
             } catch {
-                throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
             }
         }
         // #endregion

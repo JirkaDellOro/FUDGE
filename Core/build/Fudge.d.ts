@@ -360,7 +360,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Component {
-        matrix: Matrix4x4;
+        local: Matrix4x4;
         constructor();
         readonly WorldPosition: Vector3;
         serialize(): Serialization;
@@ -1232,7 +1232,7 @@ declare namespace Fudge {
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateZ(_angleInDegrees: number): void;
-        translate(_by: Vector3): Matrix4x4;
+        translate(_by: Vector3): void;
         /**
          * Translate the transformation along the x-axis.
          * @param _x The value of the translation.
@@ -1473,13 +1473,10 @@ declare namespace Fudge {
         static clear(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
          * @param _node
          * @param _cameraMatrix
-         * @param _world
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
         private static drawNode;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
@@ -1489,7 +1486,7 @@ declare namespace Fudge {
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
          * @param _node
-         * @param _matrix
+         * @param _world
          */
         private static recalculateTransformsOfNodeAndChildren;
         /**
