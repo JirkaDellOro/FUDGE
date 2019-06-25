@@ -1,7 +1,7 @@
 namespace Fudge {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
-     * ```text
+     * ```plaintext
      *            4____7
      *           0/__3/|
      *            ||5_||6
