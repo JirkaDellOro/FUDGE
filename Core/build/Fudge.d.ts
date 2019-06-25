@@ -1253,6 +1253,7 @@ declare namespace Fudge {
         scaleX(_by: number): void;
         scaleY(_by: number): void;
         scaleZ(_by: number): void;
+        multiply(_matrix: Matrix4x4): void;
         set(_to: Matrix4x4): void;
         get(): Float32Array;
         serialize(): Serialization;

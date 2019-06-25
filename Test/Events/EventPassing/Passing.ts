@@ -19,27 +19,25 @@ namespace EventPassing {
             let camera: ƒ.Node = Scenes.createCamera(posCameras[i]);
             let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
-            let viewPort: ƒ.Viewport = new ƒ.Viewport();
-            viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
-            viewPorts.push(viewPort);
-            viewPort.draw();
+            let viewport: ƒ.Viewport = new ƒ.Viewport();
+            viewport.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
+            viewPorts.push(viewport);
+            viewport.draw();
 
-            viewPort.addEventListener(ƒ.EVENT.FOCUS_IN, hndEvent);
-            viewPort.addEventListener(ƒ.EVENT.FOCUS_OUT, hndEvent);
+            viewport.addEventListener(ƒ.EVENT.FOCUS_IN, hndEvent);
+            viewport.addEventListener(ƒ.EVENT.FOCUS_OUT, hndEvent);
 
-            viewPort.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
-            viewPort.addEventListener(ƒ.EVENT_POINTER.UP, hndEvent);
+            viewport.activatePointerEvent(ƒ.EVENT_POINTER.UP, true);
+            viewport.addEventListener(ƒ.EVENT_POINTER.UP, hndEvent);
 
-            viewPort.activateDragDropEvent(ƒ.EVENT_DRAGDROP.START, true);
-            viewPort.addEventListener(ƒ.EVENT_DRAGDROP.START, hndEvent);
-            viewPort.activateDragDropEvent(ƒ.EVENT_DRAGDROP.DROP, true);
-            viewPort.addEventListener(ƒ.EVENT_DRAGDROP.DROP, hndEvent);
-            viewPort.activateDragDropEvent(ƒ.EVENT_DRAGDROP.OVER, true);
-            viewPort.addEventListener(ƒ.EVENT_DRAGDROP.OVER, hndEvent);
+            viewport.activateDragDropEvent(ƒ.EVENT_DRAGDROP.START, true);
+            viewport.addEventListener(ƒ.EVENT_DRAGDROP.START, hndEvent);
+            viewport.activateDragDropEvent(ƒ.EVENT_DRAGDROP.DROP, true);
+            viewport.addEventListener(ƒ.EVENT_DRAGDROP.DROP, hndEvent);
+            viewport.activateDragDropEvent(ƒ.EVENT_DRAGDROP.OVER, true);
+            viewport.addEventListener(ƒ.EVENT_DRAGDROP.OVER, hndEvent);
 
-            viewPort.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
-            // viewPort.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, hndEvent);
-            viewPort.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
+            Scenes.dollyViewportCamera(viewport);
         }
     }
 
@@ -73,7 +71,7 @@ namespace EventPassing {
     }
 
     function getViewport(_event: Event): ƒ.Viewport {
-        let viewPort: ƒ.Viewport = <ƒ.Viewport>_event.target;
-        return viewPort;
+        let viewport: ƒ.Viewport = <ƒ.Viewport>_event.target;
+        return viewport;
     }
 }

@@ -2681,6 +2681,11 @@ var Fudge;
             this.scale(new Fudge.Vector3(1, 1, _by));
         }
         //#endregion
+        //#region Transformation
+        multiply(_matrix) {
+            this.data = Matrix4x4.MULTIPLICATION(this, _matrix).data;
+        }
+        //#endregion
         //#region Transfer
         set(_to) {
             this.data = _to.get();
@@ -3292,20 +3297,12 @@ var Fudge;
          * @param _cameraMatrix
          */
         static drawBranch(_node, _cmpCamera) {
-            /*  let cmpTransform: ComponentTransform = _node.cmpTransform;
-              let world: Matrix4x4 = _world;
-              if (cmpTransform)
-                  world = cmpTransform.local;
-              if (!world)
-                  // neither ComponentTransform found nor world-transformation passed from parent -> use identity
-                  world = Matrix4x4.IDENTITY;
-            */
-            let finalTransform = _node.world;
-            /* Pivot becomes a property of ComponentMesh und must be respected there
-            let cmpPivot: ComponentPivot = <ComponentPivot>_node.getComponent(ComponentPivot);
-            if (cmpPivot)
-                finalTransform = Matrix4x4.MULTIPLICATION(world, cmpPivot.local);
-            */
+            let finalTransform;
+            let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
+            if (cmpMesh)
+                finalTransform = Fudge.Matrix4x4.MULTIPLICATION(_node.world, cmpMesh.pivot);
+            else
+                finalTransform = _node.world; // caution, this is a reference...
             // multiply camera matrix
             let projection = Fudge.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
             this.drawNode(_node, finalTransform, projection);

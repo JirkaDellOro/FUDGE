@@ -416,6 +416,12 @@ namespace Fudge {
         }
         //#endregion
 
+        //#region Transformation
+        public multiply(_matrix: Matrix4x4): void {
+            this.data = Matrix4x4.MULTIPLICATION(this, _matrix).data;
+        }
+        //#endregion
+
         //#region Transfer
         public set(_to: Matrix4x4): void {
             this.data = _to.get();
