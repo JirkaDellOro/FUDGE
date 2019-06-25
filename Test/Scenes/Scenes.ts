@@ -30,9 +30,6 @@ namespace Scenes {
         // using mesh pivot on blue node, just for testing...
         let cmpMesh: ƒ.ComponentMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
         cmpMesh.pivot.scaleZ(2);
-        // let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
-        // pivot.scaleZ(2);
-        // cubeBlue.addComponent(pivot);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 
         // create branch
@@ -132,10 +129,8 @@ namespace Scenes {
     export function createCompleteMeshNode(_name: string, _material: ƒ.Material, _mesh: ƒ.Mesh): ƒ.Node {
         let node: ƒ.Node = new ƒ.Node(_name);
 
-        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.setMesh(_mesh);
-        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(_material);
+        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(_mesh);
+        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(_material);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);

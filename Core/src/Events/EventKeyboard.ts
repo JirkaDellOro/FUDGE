@@ -7,6 +7,9 @@ namespace Fudge {
         DOWN = "ƒkeydown"
     }
 
+    /**
+     * The codes sent from a standard english keyboard layout
+     */
     export enum KEYBOARD_CODE {
         A = "KeyA",
         B = "KeyB",

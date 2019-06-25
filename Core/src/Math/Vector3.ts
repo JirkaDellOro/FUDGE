@@ -1,6 +1,12 @@
 namespace Fudge {
     /**
-     * Class storing and manipulating a threedimensional vector
+     * Stores and manipulates a threedimensional vector comprised of the components x, y and z
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     *            /
+     *          +z   
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Vector3 {

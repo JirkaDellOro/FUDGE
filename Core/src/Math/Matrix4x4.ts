@@ -1,7 +1,14 @@
 namespace Fudge {
 
     /**
-     * Simple class for 4x4 transformation matrix operations.
+     * Stores a 4x4 transformation matrix and provides operations for it.
+     * ```plaintext
+     * [ 0, 1, 2, 3 ] <- row vector x
+     * [ 4, 5, 6, 7 ] <- row vector y
+     * [ 8, 9,10,11 ] <- row vector z
+     * [12,13,14,15 ] <- translation
+     *            ^  homogeneous column
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 extends Mutable implements Serializable {

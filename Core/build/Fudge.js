@@ -282,7 +282,7 @@ var Fudge;
                         let light = cmpLights[i].getLight();
                         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
                         let direction = light.direction.copy;
-                        direction.transform(cmpLights[i].getContainer().world);
+                        direction.transform(cmpLights[i].getContainer().mtxWorld);
                         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }
                 }
@@ -478,9 +478,11 @@ var Fudge;
 /// <reference path="../Render/RenderInjector.ts"/>
 /// <reference path="../Render/RenderOperator.ts"/>
 (function (Fudge) {
-    // interface ShaderParameters {
-    //     [key: string]: number | Color;
-    // }
+    /**
+     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
+     * [[Material]]s reference [[Coat]] and [[Shader]].
+     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     */
     class Coat extends Fudge.Mutable {
         constructor() {
             super(...arguments);
@@ -493,6 +495,9 @@ var Fudge;
         reduceMutator() { }
     }
     Fudge.Coat = Coat;
+    /**
+     * The simplest [[Coat]] providing just a color
+     */
     let CoatColored = class CoatColored extends Coat {
         constructor(_color) {
             super();
@@ -503,7 +508,13 @@ var Fudge;
         Fudge.RenderInjector.decorateCoat
     ], CoatColored);
     Fudge.CoatColored = CoatColored;
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
     let CoatTextured = class CoatTextured extends Coat {
+        /**
+         * A [[Coat]] providing a texture and additional data for texturing
+         */
         constructor() {
             super(...arguments);
             this.texture = null;
@@ -568,6 +579,7 @@ var Fudge;
             this.singleton = true;
             this.container = null;
             this.active = true;
+            //#endregion
         }
         activate(_on) {
             this.active = _on;
@@ -591,7 +603,6 @@ var Fudge;
         /**
          * Tries to add the component to the given node, removing it from the previous container if applicable
          * @param _container The node to attach this component to
-         * TODO: write tests to prove consistency and correct exception handling
          */
         setContainer(_container) {
             if (this.container == _container)
@@ -608,6 +619,7 @@ var Fudge;
                 this.container = previousContainer;
             }
         }
+        //#region Transfer
         serialize() {
             let serialization = {
                 active: this.active
@@ -634,7 +646,10 @@ var Fudge;
         FIELD_OF_VIEW[FIELD_OF_VIEW["VERTICAL"] = 1] = "VERTICAL";
         FIELD_OF_VIEW[FIELD_OF_VIEW["DIAGONAL"] = 2] = "DIAGONAL";
     })(FIELD_OF_VIEW = Fudge.FIELD_OF_VIEW || (Fudge.FIELD_OF_VIEW = {}));
-    // string-enum for testing ui-features. TODO: change back to number enum if strings not needed
+    /**
+     * Defines identifiers for the various projections a camera can provide.
+     * TODO: change back to number enum if strings not needed
+     */
     let PROJECTION;
     (function (PROJECTION) {
         PROJECTION["CENTRAL"] = "central";
@@ -658,6 +673,7 @@ var Fudge;
             this.direction = FIELD_OF_VIEW.DIAGONAL;
             this.backgroundColor = new Fudge.Color(0, 0, 0, 1); // The color of the background the camera will render.
             this.backgroundEnabled = true; // Determines whether or not the background of this camera will be rendered.
+            //#endregion
         }
         // TODO: examine, if background should be an attribute of Camera or Viewport
         getProjection() {
@@ -702,7 +718,7 @@ var Fudge;
             this.transform = Fudge.Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
         }
         /**
-         * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
+         * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
          * @param _right The positionvalue of the projectionspace's right border. (Default = canvas.clientWidth)
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
@@ -712,6 +728,7 @@ var Fudge;
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = Fudge.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
+        //#region Transfer
         serialize() {
             let serialization = {
                 backgroundColor: this.backgroundColor,
@@ -763,7 +780,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Attaches a light to the node
+     * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentLight extends Fudge.Component {
@@ -781,16 +798,13 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Material]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMaterial extends Fudge.Component {
-        // TODO: Shader defines material-parameter. Can then the material be independent of the shader? Different structure needed
-        initialize(_material) {
+        constructor(_material = null) {
+            super();
             this.material = _material;
-        }
-        getMaterial() {
-            return this.material;
         }
     }
     Fudge.ComponentMaterial = ComponentMaterial;
@@ -798,21 +812,17 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Mesh]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Fudge.Component {
-        constructor() {
-            super(...arguments);
+        constructor(_mesh = null) {
+            super();
             this.pivot = Fudge.Matrix4x4.IDENTITY;
             this.mesh = null;
-        }
-        setMesh(_mesh) {
             this.mesh = _mesh;
         }
-        getMesh() {
-            return this.mesh;
-        }
+        //#region Transfer
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
@@ -822,7 +832,7 @@ var Fudge;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
-            this.setMesh(mesh);
+            this.mesh = mesh;
             super.deserialize(_serialization[super.type]);
             return this;
         }
@@ -846,27 +856,22 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Fudge.Component {
-        constructor() {
+        constructor(_matrix = Fudge.Matrix4x4.IDENTITY) {
             super();
-            this.local = Fudge.Matrix4x4.IDENTITY;
+            this.local = _matrix;
         }
-        get WorldPosition() {
-            return new Fudge.Vector3(this.local.data[12], this.local.data[13], this.local.data[14]);
-        }
+        //#region Transfer
         serialize() {
             let serialization = {
-                // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
                 [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            // this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.type]);
             return this;
         }
@@ -1080,6 +1085,9 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
+     */
     class Color {
         constructor(_r, _g, _b, _a) {
             this.r = _r;
@@ -1192,23 +1200,41 @@ var Fudge;
                     this.setCoat(this.createCoatMatchingShader());
             }
         }
+        /**
+         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         */
         createCoatMatchingShader() {
             let coat = new (this.shaderType.getCoat())();
             return coat;
         }
+        /**
+         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * @param _coat
+         */
         setCoat(_coat) {
             if (_coat.constructor != this.shaderType.getCoat())
                 throw (new Error("Shader and coat don't match"));
             this.coat = _coat;
         }
+        /**
+         * Returns the currently referenced [[Coat]] instance
+         */
         getCoat() {
             return this.coat;
         }
+        /**
+         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
+         * and mutates the new coat to preserve matching properties.
+         * @param _shaderType
+         */
         setShader(_shaderType) {
             this.shaderType = _shaderType;
             let coat = this.createCoatMatchingShader();
             coat.mutate(this.coat.getMutator());
         }
+        /**
+         * Returns the [[Shader]] referenced by this material
+         */
         getShader() {
             return this.shaderType;
         }
@@ -1228,7 +1254,7 @@ var Fudge;
          */
         constructor(_name) {
             super();
-            this.world = Fudge.Matrix4x4.IDENTITY;
+            this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
             this.parent = null; // The parent of this node.
             this.children = []; // array of child nodes appended to this node.
             this.components = {};
@@ -1238,17 +1264,40 @@ var Fudge;
             this.captures = {};
             this.name = _name;
         }
+        /**
+         * Returns a reference to this nodes parent node
+         */
         getParent() {
             return this.parent;
         }
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
         getAncestor() {
             let ancestor = this;
             while (ancestor.getParent())
-                ancestor.getParent();
+                ancestor = ancestor.getParent();
             return ancestor;
         }
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
         get cmpTransform() {
             return this.getComponents(Fudge.ComponentTransform)[0];
+        }
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        get mtxLocal() {
+            let result = null;
+            try {
+                result = this.cmpTransform.local;
+            }
+            catch (_e) {
+                Fudge.Debug.info(_e);
+            }
+            return result;
         }
         // #region Scenetree
         /**
@@ -1884,6 +1933,9 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * The codes sent from a standard english keyboard layout
+     */
     let KEYBOARD_CODE;
     (function (KEYBOARD_CODE) {
         KEYBOARD_CODE["A"] = "KeyA";
@@ -3176,11 +3228,11 @@ var Fudge;
             let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
             if (!cmpMaterial)
                 return;
-            let shader = cmpMaterial.getMaterial().getShader();
+            let shader = cmpMaterial.material.getShader();
             this.createReference(this.renderShaders, shader, this.createProgram);
-            let coat = cmpMaterial.getMaterial().getCoat();
+            let coat = cmpMaterial.material.getCoat();
             this.createReference(this.renderCoats, coat, this.createParameter);
-            let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
+            let mesh = _node.getComponent(Fudge.ComponentMesh).mesh;
             this.createReference(this.renderBuffers, mesh, this.createBuffers);
             let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
@@ -3233,19 +3285,19 @@ var Fudge;
             if (!nodeReferences)
                 return;
             let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
-            let shader = cmpMaterial.getMaterial().getShader();
+            let shader = cmpMaterial.material.getShader();
             if (shader !== nodeReferences.shader) {
                 this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
                 this.createReference(this.renderShaders, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
-            let coat = cmpMaterial.getMaterial().getCoat();
+            let coat = cmpMaterial.material.getCoat();
             if (coat !== nodeReferences.coat) {
                 this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
                 this.createReference(this.renderCoats, coat, this.createParameter);
                 nodeReferences.coat = coat;
             }
-            let mesh = (_node.getComponent(Fudge.ComponentMesh)).getMesh();
+            let mesh = (_node.getComponent(Fudge.ComponentMesh)).mesh;
             if (mesh !== nodeReferences.mesh) {
                 this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
                 this.createReference(this.renderBuffers, mesh, this.createBuffers);
@@ -3300,9 +3352,9 @@ var Fudge;
             let finalTransform;
             let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
             if (cmpMesh)
-                finalTransform = Fudge.Matrix4x4.MULTIPLICATION(_node.world, cmpMesh.pivot);
+                finalTransform = Fudge.Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
             else
-                finalTransform = _node.world; // caution, this is a reference...
+                finalTransform = _node.mtxWorld; // caution, this is a reference...
             // multiply camera matrix
             let projection = Fudge.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
             this.drawNode(_node, finalTransform, projection);
@@ -3351,7 +3403,7 @@ var Fudge;
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix = Fudge.Matrix4x4.IDENTITY;
                 if (parent)
-                    matrix = parent.world;
+                    matrix = parent.mtxWorld;
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
@@ -3370,7 +3422,7 @@ var Fudge;
             let cmpTransform = _node.cmpTransform;
             if (cmpTransform)
                 world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
-            _node.world = world;
+            _node.mtxWorld = world;
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, world);
             }
@@ -3431,7 +3483,7 @@ var Fudge;
      */
     // TODO: define attribute/uniforms as layout and use those consistently in shaders
     class Shader {
-        // The type of coat that can be used with this shader to create a material
+        /** The type of coat that can be used with this shader to create a material */
         static getCoat() { return null; }
         static getVertexShaderSource() { return null; }
         static getFragmentShaderSource() { return null; }

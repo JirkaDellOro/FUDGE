@@ -178,6 +178,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
+     * [[Material]]s reference [[Coat]] and [[Shader]].
+     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     */
     class Coat extends Mutable {
         name: string;
         protected renderData: {
@@ -187,10 +192,16 @@ declare namespace Fudge {
         useRenderData(_renderShader: RenderShader): void;
         protected reduceMutator(): void;
     }
+    /**
+     * The simplest [[Coat]] providing just a color
+     */
     class CoatColored extends Coat {
         color: Color;
         constructor(_color?: Color);
     }
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
     class CoatTextured extends Coat {
         texture: TextureImage;
         tilingX: number;
@@ -245,7 +256,6 @@ declare namespace Fudge {
         /**
          * Tries to add the component to the given node, removing it from the previous container if applicable
          * @param _container The node to attach this component to
-         * TODO: write tests to prove consistency and correct exception handling
          */
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
@@ -259,6 +269,10 @@ declare namespace Fudge {
         VERTICAL = 1,
         DIAGONAL = 2
     }
+    /**
+     * Defines identifiers for the various projections a camera can provide.
+     * TODO: change back to number enum if strings not needed
+     */
     enum PROJECTION {
         CENTRAL = "central",
         ORTHOGRAPHIC = "orthographic",
@@ -294,7 +308,7 @@ declare namespace Fudge {
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
-         * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
+         * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
          * @param _right The positionvalue of the projectionspace's right border. (Default = canvas.clientWidth)
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
@@ -310,7 +324,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Attaches a light to the node
+     * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentLight extends Component {
@@ -321,25 +335,23 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Material]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMaterial extends Component {
-        private material;
-        initialize(_material: Material): void;
-        getMaterial(): Material;
+        material: Material;
+        constructor(_material?: Material);
     }
 }
 declare namespace Fudge {
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Mesh]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
         pivot: Matrix4x4;
-        private mesh;
-        setMesh(_mesh: Mesh): void;
-        getMesh(): Mesh;
+        mesh: Mesh;
+        constructor(_mesh?: Mesh);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -355,14 +367,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Component {
         local: Matrix4x4;
-        constructor();
-        readonly WorldPosition: Vector3;
+        constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         mutate(_mutator: Mutator): void;
@@ -483,6 +493,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
+     */
     class Color {
         r: number;
         g: number;
@@ -584,14 +597,33 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
+        /** The name to call the Material by. */
         name: string;
         private shaderType;
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        /**
+         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         */
         createCoatMatchingShader(): Coat;
+        /**
+         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * @param _coat
+         */
         setCoat(_coat: Coat): void;
+        /**
+         * Returns the currently referenced [[Coat]] instance
+         */
         getCoat(): Coat;
+        /**
+         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
+         * and mutates the new coat to preserve matching properties.
+         * @param _shaderType
+         */
         setShader(_shaderType: typeof Shader): void;
+        /**
+         * Returns the [[Shader]] referenced by this material
+         */
         getShader(): typeof Shader;
     }
 }
@@ -605,7 +637,7 @@ declare namespace Fudge {
      */
     class Node extends EventTarget implements Serializable {
         name: string;
-        world: Matrix4x4;
+        mtxWorld: Matrix4x4;
         private parent;
         private children;
         private components;
@@ -616,9 +648,23 @@ declare namespace Fudge {
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
+        /**
+         * Returns a reference to this nodes parent node
+         */
         getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
         getAncestor(): Node | null;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
         readonly cmpTransform: ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        readonly mtxLocal: Matrix4x4;
         /**
          * Returns a clone of the list of children
          */
@@ -891,6 +937,9 @@ declare namespace Fudge {
         UP = "\u0192keyup",
         DOWN = "\u0192keydown"
     }
+    /**
+     * The codes sent from a standard english keyboard layout
+     */
     enum KEYBOARD_CODE {
         A = "KeyA",
         B = "KeyB",
@@ -1081,8 +1130,22 @@ declare namespace Fudge {
      * and how points in the frame correspond to points in the resulting rectangle
      */
     abstract class Framing extends Mutable {
+        /**
+         * Maps a point in the given frame according to this framing
+         * @param _pointInFrame The point in the frame given
+         * @param _rectFrame The frame the point is relative to
+         */
         abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        /**
+         * Maps a point in a given rectangle back to a calculated frame of origin
+         * @param _point The point in the rectangle
+         * @param _rect The rectangle the point is relative to
+         */
         abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        /**
+         * Takes a rectangle as the frame and creates a new rectangle according to the framing
+         * @param _rectFrame
+         */
         abstract getRect(_rectFrame: Rectangle): Rectangle;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -1504,6 +1567,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
+        /** The type of coat that can be used with this shader to create a material */
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

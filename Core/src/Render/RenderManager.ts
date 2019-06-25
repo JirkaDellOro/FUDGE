@@ -62,13 +62,13 @@ namespace Fudge {
             if (!cmpMaterial)
                 return;
 
-            let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
+            let shader: typeof Shader = cmpMaterial.material.getShader();
             this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
 
-            let coat: Coat = cmpMaterial.getMaterial().getCoat();
+            let coat: Coat = cmpMaterial.material.getCoat();
             this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
 
-            let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
+            let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
             this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
 
             let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
@@ -129,21 +129,21 @@ namespace Fudge {
 
             let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
 
-            let shader: typeof Shader = cmpMaterial.getMaterial().getShader();
+            let shader: typeof Shader = cmpMaterial.material.getShader();
             if (shader !== nodeReferences.shader) {
                 this.removeReference<typeof Shader, RenderShader>(this.renderShaders, nodeReferences.shader, this.deleteProgram);
                 this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
                 nodeReferences.shader = shader;
             }
 
-            let coat: Coat = cmpMaterial.getMaterial().getCoat();
+            let coat: Coat = cmpMaterial.material.getCoat();
             if (coat !== nodeReferences.coat) {
                 this.removeReference<Coat, RenderCoat>(this.renderCoats, nodeReferences.coat, this.deleteParameter);
                 this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
                 nodeReferences.coat = coat;
             }
 
-            let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).getMesh();
+            let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).mesh;
             if (mesh !== nodeReferences.mesh) {
                 this.removeReference<Mesh, RenderBuffers>(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
                 this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
@@ -204,9 +204,9 @@ namespace Fudge {
 
             let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
             if (cmpMesh)
-                finalTransform = Matrix4x4.MULTIPLICATION(_node.world, cmpMesh.pivot);
+                finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
             else
-                finalTransform = _node.world; // caution, this is a reference...
+                finalTransform = _node.mtxWorld; // caution, this is a reference...
 
             // multiply camera matrix
             let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
@@ -264,7 +264,7 @@ namespace Fudge {
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
                 if (parent)
-                    matrix = parent.world;
+                    matrix = parent.mtxWorld;
 
                 // start recursive recalculation of the whole branch starting from the ancestor found
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
@@ -286,7 +286,7 @@ namespace Fudge {
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             if (cmpTransform)
                 world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
-            _node.world = world;
+            _node.mtxWorld = world;
 
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, world);

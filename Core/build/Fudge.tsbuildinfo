@@ -12,7 +12,6 @@
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentLight.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentMaterial.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentMesh.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentPivot.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentScript.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Components/ComponentTransform.ts",
       "c:/Users/jirka/Documents/HFU/FUDGE/Core/src/Debug/DebugInterfaces.ts",
@@ -61,7 +60,7 @@
         },
         {
           "pos": 593,
-          "end": 152805,
+          "end": 154204,
           "kind": "text"
         }
       ],
@@ -98,7 +97,7 @@
         },
         {
           "pos": 34,
-          "end": 61501,
+          "end": 63848,
           "kind": "text"
         }
       ]

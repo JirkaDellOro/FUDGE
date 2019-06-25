@@ -1,19 +1,18 @@
 namespace Fudge {
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Mesh]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentMesh extends Component {
         public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
-        private mesh: Mesh = null;
+        public mesh: Mesh = null;
 
-        public setMesh(_mesh: Mesh): void {
+        public constructor(_mesh: Mesh = null) {
+            super();
             this.mesh = _mesh;
         }
-        public getMesh(): Mesh {
-            return this.mesh;
-        }
 
+        //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {
                 mesh: this.mesh.serialize(),
@@ -23,9 +22,10 @@ namespace Fudge {
         }
         public deserialize(_serialization: Serialization): Serializable {
             let mesh: Mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
-            this.setMesh(mesh);
+            this.mesh = mesh;
             super.deserialize(_serialization[super.type]);
             return this;
         }
+        //#endregion
     }
 }

@@ -21,9 +21,6 @@ var Scenes;
         // using mesh pivot on blue node, just for testing...
         let cmpMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
         cmpMesh.pivot.scaleZ(2);
-        // let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
-        // pivot.scaleZ(2);
-        // cubeBlue.addComponent(pivot);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
         // create branch
         let branch = new ƒ.Node("AxisCross");
@@ -109,9 +106,8 @@ var Scenes;
     function createCompleteMeshNode(_name, _material, _mesh) {
         let node = new ƒ.Node(_name);
         let cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.setMesh(_mesh);
-        let cmpMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(_material);
+        cmpMesh.mesh = _mesh;
+        let cmpMaterial = new ƒ.ComponentMaterial(_material);
         let cmpTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);

@@ -1,6 +1,6 @@
 namespace Fudge {
     /**
-     * Attaches a light to the node
+     * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentLight extends Component {
