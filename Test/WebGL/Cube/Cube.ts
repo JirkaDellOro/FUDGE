@@ -27,7 +27,7 @@ namespace Cube {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.world.translation);
+        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
 
         viewport.draw();

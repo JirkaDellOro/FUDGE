@@ -105,8 +105,7 @@ var Scenes;
     Scenes.createCamera = createCamera;
     function createCompleteMeshNode(_name, _material, _mesh) {
         let node = new ƒ.Node(_name);
-        let cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.mesh = _mesh;
+        let cmpMesh = new ƒ.ComponentMesh(_mesh);
         let cmpMaterial = new ƒ.ComponentMaterial(_material);
         let cmpTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);

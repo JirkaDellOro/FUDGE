@@ -1289,16 +1289,14 @@ var Fudge;
          * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
          * Returns null if no [[ComponentTransform]] is attached
          */
-        get mtxLocal() {
-            let result = null;
-            try {
-                result = this.cmpTransform.local;
-            }
-            catch (_e) {
-                Fudge.Debug.info(_e);
-            }
-            return result;
-        }
+        // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
+        // public get mtxLocal(): Matrix4x4 {
+        //     let cmpTransform: ComponentTransform = this.cmpTransform;
+        //     if (cmpTransform)
+        //         return cmpTransform.local;
+        //     else
+        //         return null;
+        // }
         // #region Scenetree
         /**
          * Returns a clone of the list of children
@@ -2348,7 +2346,14 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Simple class for 4x4 transformation matrix operations.
+     * Stores a 4x4 transformation matrix and provides operations for it.
+     * ```plaintext
+     * [ 0, 1, 2, 3 ] <- row vector x
+     * [ 4, 5, 6, 7 ] <- row vector y
+     * [ 8, 9,10,11 ] <- row vector z
+     * [12,13,14,15 ] <- translation
+     *            ^  homogeneous column
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 extends Fudge.Mutable {
@@ -2770,7 +2775,13 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     /**
-     * Class storing and manipulating a threedimensional vector
+     * Stores and manipulates a threedimensional vector comprised of the components x, y and z
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     *            /
+     *          +z
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Vector3 {
