@@ -1,13 +1,19 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
+# June 26th 2019
+Clearified details about the UX Usertest 
+->  What kind of Windows will FUDGE need? 
+-> Excercises people will have to do for the Usertest?
+
+Clarifying Structure of UI Components
+
 # June 19th 2019
 Presentation moodboard by Lea: Preferred are simple HTML elements, flat design (no dropshadows for buttons), icons are used for easily identifiable elements that won´t be extended, labeled buttons for elements that can´t be touched
 Principle: the users work needs to be in the spotlight, not the interface
 
 # May 23rd 2019
 Discussion about creation of a prototype for usertests (tool: Adobe XD?, methods: A/B tests, navigation)
-
 
 # May 14th 2019
 Discussion over the structure of the UI System.
