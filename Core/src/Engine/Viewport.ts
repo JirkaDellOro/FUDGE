@@ -82,26 +82,6 @@ namespace Fudge {
             this.collectLights();
             this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
             this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
-            Debug.log(this.lights);
-        }
-        /**
-         * Collect all lights in the branch to pass to shaders
-         */
-        public collectLights(): void {
-            // TODO: make private
-            this.lights = new Map();
-            for (let node of this.branch.branch) {
-                let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
-                for (let cmpLight of cmpLights) {
-                    let type: string = cmpLight.getLight().type;
-                    let lightsOfType: ComponentLight[] = this.lights.get(type);
-                    if (!lightsOfType) {
-                        lightsOfType = [];
-                        this.lights.set(type, lightsOfType);
-                    }
-                    lightsOfType.push(cmpLight);
-                }
-            }
         }
         /**
          * Logs this viewports scenegraph to the console.
@@ -303,6 +283,25 @@ namespace Fudge {
         }
         // #endregion
 
+        /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        private collectLights(): void {
+            // TODO: make private
+            this.lights = new Map();
+            for (let node of this.branch.branch) {
+                let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
+                for (let cmpLight of cmpLights) {
+                    let type: string = cmpLight.getLight().type;
+                    let lightsOfType: ComponentLight[] = this.lights.get(type);
+                    if (!lightsOfType) {
+                        lightsOfType = [];
+                        this.lights.set(type, lightsOfType);
+                    }
+                    lightsOfType.push(cmpLight);
+                }
+            }
+        }
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.

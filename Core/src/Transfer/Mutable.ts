@@ -82,7 +82,10 @@ namespace Fudge {
         public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
             let types: MutatorAttributeTypes = {};
             for (let attribute in _mutator) {
-                types[attribute] = _mutator[attribute].constructor.name;
+                let type: string = null;
+                if (_mutator[attribute])
+                    type = _mutator[attribute].constructor.name;
+                types[attribute] = type;
             }
             return types;
         }

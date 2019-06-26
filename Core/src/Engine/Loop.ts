@@ -1,3 +1,4 @@
+///<reference path="../Events/Event.ts"/>
 namespace Fudge {
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().

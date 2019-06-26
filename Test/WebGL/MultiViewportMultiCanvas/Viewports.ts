@@ -29,7 +29,7 @@ namespace RenderManagerRendering {
         ƒ.Loop.start();
 
         function animate(_event: Event): void {
-            branch.cmpTransform.rotateY(1);
+            branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
             for (let viewPort of viewPorts) {

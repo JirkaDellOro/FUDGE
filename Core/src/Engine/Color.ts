@@ -1,4 +1,7 @@
 namespace Fudge {
+    /**
+     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
+     */
     export class Color { //extends Mutable implements Serializable {
         public r: number;
         public g: number;

@@ -33,7 +33,6 @@ namespace Fudge {
         /**
          * Tries to add the component to the given node, removing it from the previous container if applicable
          * @param _container The node to attach this component to
-         * TODO: write tests to prove consistency and correct exception handling
          */
         public setContainer(_container: Node | null): void {
             if (this.container == _container)
@@ -43,12 +42,13 @@ namespace Fudge {
                 if (previousContainer)
                     previousContainer.removeComponent(this);
                 this.container = _container;
-                this.container.addComponent(this);
+                if (this.container)
+                    this.container.addComponent(this);
             } catch {
                 this.container = previousContainer;
             }
         }
-
+        //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {
                 active: this.active
@@ -59,9 +59,10 @@ namespace Fudge {
             this.active = _serialization.active;
             return this;
         }
-        
+
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.singleton;
         }
+        //#endregion
     }
 }

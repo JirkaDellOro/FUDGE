@@ -9,6 +9,7 @@ namespace Fudge {
      */
     export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
+        public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};
@@ -26,20 +27,41 @@ namespace Fudge {
             this.name = _name;
         }
 
+        /**
+         * Returns a reference to this nodes parent node
+         */
         public getParent(): Node | null {
             return this.parent;
         }
 
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
         public getAncestor(): Node | null {
             let ancestor: Node = this;
             while (ancestor.getParent())
-                ancestor.getParent();
+                ancestor = ancestor.getParent();
             return ancestor;
         }
 
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
         public get cmpTransform(): ComponentTransform {
             return <ComponentTransform>this.getComponents(ComponentTransform)[0];
         }
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
+        // public get mtxLocal(): Matrix4x4 {
+        //     let cmpTransform: ComponentTransform = this.cmpTransform;
+        //     if (cmpTransform)
+        //         return cmpTransform.local;
+        //     else
+        //         return null;
+        // }
 
         // #region Scenetree
         /**
@@ -69,7 +91,7 @@ namespace Fudge {
                 // _node is already a child of this
                 return;
 
-            let ancestor: Node = this.parent;
+            let ancestor: Node = this;
             while (ancestor) {
                 if (ancestor == _node)
                     throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
@@ -150,11 +172,13 @@ namespace Fudge {
             try {
                 let componentsOfType: Component[] = this.components[_component.type];
                 let foundAt: number = componentsOfType.indexOf(_component);
+                if (foundAt < 0)
+                    return;
                 componentsOfType.splice(foundAt, 1);
                 _component.setContainer(null);
                 _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
             } catch {
-                throw new Error(`Unable to find component '${_component}'in node named '${this.name}'`);
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
             }
         }
         // #endregion
@@ -310,11 +334,11 @@ namespace Fudge {
         private setParent(_parent: Node | null): void {
             this.parent = _parent;
         }
-        
+
         private *getBranchGenerator(): IterableIterator<Node> {
             yield this;
             for (let child of this.children)
-            yield* child.branch;
-        }        
+                yield* child.branch;
+        }
     }
 }

@@ -178,6 +178,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
+     * [[Material]]s reference [[Coat]] and [[Shader]].
+     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     */
     class Coat extends Mutable {
         name: string;
         protected renderData: {
@@ -187,10 +192,16 @@ declare namespace Fudge {
         useRenderData(_renderShader: RenderShader): void;
         protected reduceMutator(): void;
     }
+    /**
+     * The simplest [[Coat]] providing just a color
+     */
     class CoatColored extends Coat {
         color: Color;
         constructor(_color?: Color);
     }
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
     class CoatTextured extends Coat {
         texture: TextureImage;
         tilingX: number;
@@ -245,7 +256,6 @@ declare namespace Fudge {
         /**
          * Tries to add the component to the given node, removing it from the previous container if applicable
          * @param _container The node to attach this component to
-         * TODO: write tests to prove consistency and correct exception handling
          */
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
@@ -259,6 +269,10 @@ declare namespace Fudge {
         VERTICAL = 1,
         DIAGONAL = 2
     }
+    /**
+     * Defines identifiers for the various projections a camera can provide.
+     * TODO: change back to number enum if strings not needed
+     */
     enum PROJECTION {
         CENTRAL = "central",
         ORTHOGRAPHIC = "orthographic",
@@ -294,7 +308,7 @@ declare namespace Fudge {
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
-         * Set the camera to orthographic projection. The origin is in the top left corner of the canvaselement.
+         * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
          * @param _right The positionvalue of the projectionspace's right border. (Default = canvas.clientWidth)
          * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
@@ -310,7 +324,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Attaches a light to the node
+     * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentLight extends Component {
@@ -321,106 +335,23 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Class that holds all data concerning color and texture, to pass and apply to the node it is attached to.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Material]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMaterial extends Component {
-        private material;
-        initialize(_material: Material): void;
-        getMaterial(): Material;
+        material: Material;
+        constructor(_material?: Material);
     }
 }
 declare namespace Fudge {
     /**
-     * Class to hold all data needed by the WebGL vertexbuffer to draw the shape of an object.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a [[Mesh]] to the node
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
-        private mesh;
-        setMesh(_mesh: Mesh): void;
-        getMesh(): Mesh;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Class to hold the transformation-data of the mesh that is attached to the same node.
-     * The pivot-transformation does not affect the transformation of the node itself or its children.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class ComponentPivot extends Component {
-        local: Matrix4x4;
-        readonly position: Vector3;
-        /**
-         * Resets this.matrix to idenity Matrix.
-         */
-        reset(): void;
-        /**
-         * Translate the transformation along the x-, y- and z-axis.
-         * @param _x The x-value of the translation.
-         * @param _y The y-value of the translation.
-         * @param _z The z-value of the translation.
-         */
-        translate(_x: number, _y: number, _z: number): void;
-        /**
-         * Translate the transformation along the x-axis.
-         * @param _x The value of the translation.
-         */
-        translateX(_x: number): void;
-        /**
-         * Translate the transformation along the y-axis.
-         * @param _y The value of the translation.
-         */
-        translateY(_y: number): void;
-        /**
-         * Translate the transformation along the z-axis.
-         * @param _z The value of the translation.
-         */
-        translateZ(_z: number): void;
-        /**
-         * Rotate the transformation along the around its x-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateX(_angle: number): void;
-        /**
-         * Rotate the transformation along the around its y-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateY(_angle: number): void;
-        /**
-         * Rotate the transformation along the around its z-Axis.
-         * @param _angle The angle to rotate by.
-         */
-        rotateZ(_zAngle: number): void;
-        /**
-         * Wrapper function to rotate the transform so that its z-Axis is facing in the direction of the targets position.
-         * TODO: Use world transformations! Does it make sense in Pivot?
-         * @param _target The target to look at.
-         */
-        lookAt(_target: Vector3): void;
-        /**
-         * Scale the transformation along the x-, y- and z-axis.
-         * @param _xScale The value to scale x by.
-         * @param _yScale The value to scale y by.
-         * @param _zScale The value to scale z by.
-         */
-        scale(_xScale: number, _yScale: number, _zScale: number): void;
-        /**
-         * Scale the transformation along the x-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleX(_scale: number): void;
-        /**
-         * Scale the transformation along the y-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleY(_scale: number): void;
-        /**
-         * Scale the transformation along the z-axis.
-         * @param _scale The value to scale by.
-         */
-        scaleZ(_scale: number): void;
+        pivot: Matrix4x4;
+        mesh: Mesh;
+        constructor(_mesh?: Mesh);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -436,14 +367,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ComponentTransform extends ComponentPivot {
-        world: Matrix4x4;
-        constructor();
-        readonly WorldPosition: Vector3;
+    class ComponentTransform extends Component {
+        local: Matrix4x4;
+        constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         mutate(_mutator: Mutator): void;
@@ -564,6 +493,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
+     */
     class Color {
         r: number;
         g: number;
@@ -597,13 +529,6 @@ declare namespace Fudge {
         FOCUS_IN = "focusin",
         /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
         FOCUS_OUT = "focusout"
-    }
-    /**
-     * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
-     */
-    const enum EVENT_KEYBOARD {
-        UP = "\u0192keyup",
-        DOWN = "\u0192keydown"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -672,14 +597,33 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material {
+        /** The name to call the Material by. */
         name: string;
         private shaderType;
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        /**
+         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         */
         createCoatMatchingShader(): Coat;
+        /**
+         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * @param _coat
+         */
         setCoat(_coat: Coat): void;
+        /**
+         * Returns the currently referenced [[Coat]] instance
+         */
         getCoat(): Coat;
+        /**
+         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
+         * and mutates the new coat to preserve matching properties.
+         * @param _shaderType
+         */
         setShader(_shaderType: typeof Shader): void;
+        /**
+         * Returns the [[Shader]] referenced by this material
+         */
         getShader(): typeof Shader;
     }
 }
@@ -693,6 +637,7 @@ declare namespace Fudge {
      */
     class Node extends EventTarget implements Serializable {
         name: string;
+        mtxWorld: Matrix4x4;
         private parent;
         private children;
         private components;
@@ -703,9 +648,22 @@ declare namespace Fudge {
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
+        /**
+         * Returns a reference to this nodes parent node
+         */
         getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
         getAncestor(): Node | null;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
         readonly cmpTransform: ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
         /**
          * Returns a clone of the list of children
          */
@@ -796,7 +754,7 @@ declare namespace Fudge {
     }
     /**
      * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```text
+     * ```plaintext
      * ~ ~ ~
      *  ~ ~ ~
      * ```
@@ -806,7 +764,7 @@ declare namespace Fudge {
     }
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```text
+     * ```plaintext
      * --->
      * --->
      * --->
@@ -818,7 +776,7 @@ declare namespace Fudge {
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```text
+     * ```plaintext
      *         .\|/.
      *        -- o --
      *         ´/|\`
@@ -829,7 +787,7 @@ declare namespace Fudge {
     }
     /**
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```text
+     * ```plaintext
      *          o
      *         /|\
      *        / | \
@@ -885,10 +843,6 @@ declare namespace Fudge {
          * Set the branch to be drawn in the viewport.
          */
         setBranch(_branch: Node): void;
-        /**
-         * Collect all lights in the branch to pass to shaders
-         */
-        collectLights(): void;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -964,10 +918,193 @@ declare namespace Fudge {
         private activateEvent;
         private hndComponentEvent;
         /**
+         * Collect all lights in the branch to pass to shaders
+         */
+        private collectLights;
+        /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
+     */
+    const enum EVENT_KEYBOARD {
+        UP = "\u0192keyup",
+        DOWN = "\u0192keydown"
+    }
+    /**
+     * The codes sent from a standard english keyboard layout
+     */
+    enum KEYBOARD_CODE {
+        A = "KeyA",
+        B = "KeyB",
+        C = "KeyC",
+        D = "KeyD",
+        E = "KeyE",
+        F = "KeyF",
+        G = "KeyG",
+        H = "KeyH",
+        I = "KeyI",
+        J = "KeyJ",
+        K = "KeyK",
+        L = "KeyL",
+        M = "KeyM",
+        N = "KeyN",
+        O = "KeyO",
+        P = "KeyP",
+        Q = "KeyQ",
+        R = "KeyR",
+        S = "KeyS",
+        T = "KeyT",
+        U = "KeyU",
+        V = "KeyV",
+        W = "KeyW",
+        X = "KeyX",
+        Y = "KeyY",
+        Z = "KeyZ",
+        ESC = "Escape",
+        ZERO = "Digit0",
+        ONE = "Digit1",
+        TWO = "Digit2",
+        TRHEE = "Digit3",
+        FOUR = "Digit4",
+        FIVE = "Digit5",
+        SIX = "Digit6",
+        SEVEN = "Digit7",
+        EIGHT = "Digit8",
+        NINE = "Digit9",
+        MINUS = "Minus",
+        EQUAL = "Equal",
+        BACKSPACE = "Backspace",
+        TABULATOR = "Tab",
+        BRACKET_LEFT = "BracketLeft",
+        BRACKET_RIGHT = "BracketRight",
+        ENTER = "Enter",
+        CTRL_LEFT = "ControlLeft",
+        SEMICOLON = "Semicolon",
+        QUOTE = "Quote",
+        BACK_QUOTE = "Backquote",
+        SHIFT_LEFT = "ShiftLeft",
+        BACKSLASH = "Backslash",
+        COMMA = "Comma",
+        PERIOD = "Period",
+        SLASH = "Slash",
+        SHIFT_RIGHT = "ShiftRight",
+        NUMPAD_MULTIPLY = "NumpadMultiply",
+        ALT_LEFT = "AltLeft",
+        SPACE = "Space",
+        CAPS_LOCK = "CapsLock",
+        F1 = "F1",
+        F2 = "F2",
+        F3 = "F3",
+        F4 = "F4",
+        F5 = "F5",
+        F6 = "F6",
+        F7 = "F7",
+        F8 = "F8",
+        F9 = "F9",
+        F10 = "F10",
+        PAUSE = "Pause",
+        SCROLL_LOCK = "ScrollLock",
+        NUMPAD7 = "Numpad7",
+        NUMPAD8 = "Numpad8",
+        NUMPAD9 = "Numpad9",
+        NUMPAD_SUBTRACT = "NumpadSubtract",
+        NUMPAD4 = "Numpad4",
+        NUMPAD5 = "Numpad5",
+        NUMPAD6 = "Numpad6",
+        NUMPAD_ADD = "NumpadAdd",
+        NUMPAD1 = "Numpad1",
+        NUMPAD2 = "Numpad2",
+        NUMPAD3 = "Numpad3",
+        NUMPAD0 = "Numpad0",
+        NUMPAD_DECIMAL = "NumpadDecimal",
+        PRINT_SCREEN = "PrintScreen",
+        INTL_BACK_SLASH = "IntlBackSlash",
+        F11 = "F11",
+        F12 = "F12",
+        NUMPAD_EQUAL = "NumpadEqual",
+        F13 = "F13",
+        F14 = "F14",
+        F15 = "F15",
+        F16 = "F16",
+        F17 = "F17",
+        F18 = "F18",
+        F19 = "F19",
+        F20 = "F20",
+        F21 = "F21",
+        F22 = "F22",
+        F23 = "F23",
+        F24 = "F24",
+        KANA_MODE = "KanaMode",
+        LANG2 = "Lang2",
+        LANG1 = "Lang1",
+        INTL_RO = "IntlRo",
+        CONVERT = "Convert",
+        NON_CONVERT = "NonConvert",
+        INTL_YEN = "IntlYen",
+        NUMPAD_COMMA = "NumpadComma",
+        UNDO = "Undo",
+        PASTE = "Paste",
+        MEDIA_TRACK_PREVIOUS = "MediaTrackPrevious",
+        CUT = "Cut",
+        COPY = "Copy",
+        MEDIA_TRACK_NEXT = "MediaTrackNext",
+        NUMPAD_ENTER = "NumpadEnter",
+        CTRL_RIGHT = "ControlRight",
+        AUDIO_VOLUME_MUTE = "AudioVolumeMute",
+        LAUNCH_APP2 = "LaunchApp2",
+        MEDIA_PLAY_PAUSE = "MediaPlayPause",
+        MEDIA_STOP = "MediaStop",
+        EJECT = "Eject",
+        AUDIO_VOLUME_DOWN = "AudioVolumeDown",
+        VOLUME_DOWN = "VolumeDown",
+        AUDIO_VOLUME_UP = "AudioVolumeUp",
+        VOLUME_UP = "VolumeUp",
+        BROWSER_HOME = "BrowserHome",
+        NUMPAD_DIVIDE = "NumpadDivide",
+        ALT_RIGHT = "AltRight",
+        HELP = "Help",
+        NUM_LOCK = "NumLock",
+        HOME = "Home",
+        ARROW_UP = "ArrowUp",
+        ARROW_RIGHT = "ArrowRight",
+        ARROW_DOWN = "ArrowDown",
+        ARROW_LEFT = "ArrowLeft",
+        END = "End",
+        PAGE_UP = "PageUp",
+        PAGE_DOWN = "PageDown",
+        INSERT = "Insert",
+        DELETE = "Delete",
+        META_LEFT = "Meta_Left",
+        OS_LEFT = "OSLeft",
+        META_RIGHT = "MetaRight",
+        OS_RIGHT = "OSRight",
+        CONTEXT_MENU = "ContextMenu",
+        POWER = "Power",
+        BROWSER_SEARCH = "BrowserSearch",
+        BROWSER_FAVORITES = "BrowserFavorites",
+        BROWSER_REFRESH = "BrowserRefresh",
+        BROWSER_STOP = "BrowserStop",
+        BROWSER_FORWARD = "BrowserForward",
+        BROWSER_BACK = "BrowserBack",
+        LAUNCH_APP1 = "LaunchApp1",
+        LAUNCH_MAIL = "LaunchMail",
+        LAUNCH_MEDIA_PLAYER = "LaunchMediaPlayer",
+        FN = "Fn",
+        AGAIN = "Again",
+        PROPS = "Props",
+        SELECT = "Select",
+        OPEN = "Open",
+        FIND = "Find",
+        WAKE_UP = "WakeUp",
+        NUMPAD_PARENT_LEFT = "NumpadParentLeft",
+        NUMPAD_PARENT_RIGHT = "NumpadParentRight",
+        SLEEP = "Sleep"
     }
 }
 declare namespace Fudge {
@@ -992,8 +1129,22 @@ declare namespace Fudge {
      * and how points in the frame correspond to points in the resulting rectangle
      */
     abstract class Framing extends Mutable {
+        /**
+         * Maps a point in the given frame according to this framing
+         * @param _pointInFrame The point in the frame given
+         * @param _rectFrame The frame the point is relative to
+         */
         abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        /**
+         * Maps a point in a given rectangle back to a calculated frame of origin
+         * @param _point The point in the rectangle
+         * @param _rect The rectangle the point is relative to
+         */
         abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        /**
+         * Takes a rectangle as the frame and creates a new rectangle according to the framing
+         * @param _rectFrame
+         */
         abstract getRect(_rectFrame: Rectangle): Rectangle;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -1057,38 +1208,63 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Simple class for 4x4 transformation matrix operations.
+     * Stores a 4x4 transformation matrix and provides operations for it.
+     * ```plaintext
+     * [ 0, 1, 2, 3 ] <- row vector x
+     * [ 4, 5, 6, 7 ] <- row vector y
+     * [ 8, 9,10,11 ] <- row vector z
+     * [12,13,14,15 ] <- translation
+     *            ^  homogeneous column
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 extends Mutable implements Serializable {
         data: Float32Array;
         constructor();
-        static readonly identity: Matrix4x4;
-        /**
-         * Wrapper function that multiplies a passed matrix by a scalingmatrix with passed x-, y- and z-multipliers.
-         * @param _matrix The matrix to multiply.
-         * @param _x The scaling multiplier for the x-Axis.
-         * @param _y The scaling multiplier for the y-Axis.
-         * @param _z The scaling multiplier for the z-Axis.
-         */
-        static scale(_matrix: Matrix4x4, _x: number, _y: number, _z: number): Matrix4x4;
+        translation: Vector3;
+        static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
          * @param _b The matrix to multiply by.
          */
-        static multiply(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
+        static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix Tha matrix to compute the inverse of.
          */
-        static inverse(_matrix: Matrix4x4): Matrix4x4;
+        static INVERSION(_matrix: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
          * @param _transformPosition The x,y and z-coordinates of the object to rotate.
          * @param _targetPosition The position to look at.
          */
-        static lookAt(_transformPosition: Vector3, _targetPosition: Vector3): Matrix4x4;
+        static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up?: Vector3): Matrix4x4;
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * @param _translate
+         */
+        static TRANSLATION(_translate: Vector3): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_X(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_Y(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * @param _scalar
+         */
+        static SCALING(_scalar: Vector3): Matrix4x4;
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1096,7 +1272,7 @@ declare namespace Fudge {
          * @param _near The near clipspace border on the z-axis.
          * @param _far The far clipspace borer on the z-axis.
          */
-        static centralProjection(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
+        static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
          * @param _left The positionvalue of the projectionspace's left border.
@@ -1106,62 +1282,49 @@ declare namespace Fudge {
          * @param _near The positionvalue of the projectionspace's near border.
          * @param _far The positionvalue of the projectionspace's far border
          */
-        static orthographicProjection(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
-        /**
-        * Wrapper function that multiplies a passed matrix by a translationmatrix with passed x-, y- and z-values.
-        * @param _matrix The matrix to multiply.
-        * @param _xTranslation The x-value of the translation.
-        * @param _yTranslation The y-value of the translation.
-        * @param _zTranslation The z-value of the translation.
-        */
-        static translate(_matrix: Matrix4x4, _xTranslation: number, _yTranslation: number, _zTranslation: number): Matrix4x4;
+        static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
         * @param _matrix The matrix to multiply.
         * @param _angleInDegrees The angle to rotate by.
         */
-        static rotateX(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateX(_angleInDegrees: number): void;
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateY(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateY(_angleInDegrees: number): void;
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
          * @param _matrix The matrix to multiply.
          * @param _angleInDegrees The angle to rotate by.
          */
-        static rotateZ(_matrix: Matrix4x4, _angleInDegrees: number): Matrix4x4;
+        rotateZ(_angleInDegrees: number): void;
+        lookAt(_target: Vector3, _up?: Vector3): void;
+        translate(_by: Vector3): void;
         /**
-         * Returns a matrix that translates coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _xTranslation The x-value of the translation.
-         * @param _yTranslation The y-value of the translation.
-         * @param _zTranslation The z-value of the translation.
+         * Translate the transformation along the x-axis.
+         * @param _x The value of the translation.
          */
-        private static translation;
+        translateX(_x: number): void;
         /**
-         * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
+         * Translate the transformation along the y-axis.
+         * @param _y The value of the translation.
          */
-        private static xRotation;
+        translateY(_y: number): void;
         /**
-         * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
+         * Translate the transformation along the z-axis.
+         * @param _z The value of the translation.
          */
-        private static yRotation;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        private static zRotation;
-        /**
-         * Returns a matrix that scales coordinates on the x-, y- and z-axis when multiplied by.
-         * @param _x The scaling multiplier for the x-axis.
-         * @param _y The scaling multiplier for the y-axis.
-         * @param _z The scaling multiplier for the z-axis.
-         */
-        private static scaling;
+        translateZ(_z: number): void;
+        scale(_by: Vector3): void;
+        scaleX(_by: number): void;
+        scaleY(_by: number): void;
+        scaleZ(_by: number): void;
+        multiply(_matrix: Matrix4x4): void;
+        set(_to: Matrix4x4): void;
+        get(): Float32Array;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -1170,85 +1333,62 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Class storing and manipulating a threedimensional vector
+     * Stores and manipulates a threedimensional vector comprised of the components x, y and z
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     *            /
+     *          +z
+     * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Vector3 {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        readonly Data: number[];
-        readonly x: number;
-        readonly y: number;
-        readonly z: number;
+        x: number;
+        y: number;
+        z: number;
+        static X(_scale?: number): Vector3;
+        static Y(_scale?: number): Vector3;
+        static Z(_scale?: number): Vector3;
+        static readonly ZERO: Vector3;
+        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
+        static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
-         * The up-Vector (0, 1, 0)
-         */
-        static readonly up: Vector3;
-        /**
-         * The down-Vector (0, -1, 0)
-         */
-        static readonly down: Vector3;
-        /**
-         * The forward-Vector (0, 0, 1)
-         */
-        static readonly forward: Vector3;
-        /**
-         * The backward-Vector (0, 0, -1)
-         */
-        static readonly backward: Vector3;
-        /**
-         * The right-Vector (1, 0, 0)
-         */
-        static readonly right: Vector3;
-        /**
-         * The left-Vector (-1, 0, 0)
-         */
-        static readonly left: Vector3;
-        /**
-         * Adds two vectors.
-         * @param _a The first vector to add
-         * @param _b The second vector to add
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
          * @returns A new vector representing the sum of the given vectors
          */
-        static add(_a: Vector3, _b: Vector3): Vector3;
-        /**
-        * Sums up multiple vectors.
-        * @param _a The first vector to add
-        * @param _b The second vector to add
-        * @returns A new vector representing the sum of the given vectors
-        */
-        static sum(..._vectors: Vector3[]): Vector3;
+        static SUM(..._vectors: Vector3[]): Vector3;
         /**
          * Subtracts two vectors.
          * @param _a The vector to subtract from.
          * @param _b The vector to subtract.
          * @returns A new vector representing the difference of the given vectors
          */
-        static subtract(_a: Vector3, _b: Vector3): Vector3;
+        static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          * @returns A new vector representing the crossproduct of the given vectors
          */
-        static cross(_a: Vector3, _b: Vector3): Vector3;
+        static CROSS(_a: Vector3, _b: Vector3): Vector3;
         /**
          * Computes the dotproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
          * @returns A new vector representing the dotproduct of the given vectors
          */
-        static dot(_a: Vector3, _b: Vector3): number;
-        /**
-         * Normalizes a vector.
-         * @param _vector The vector to normalize.
-         * @returns A new vector representing the given vector scaled to the length of 1
-         */
-        static normalize(_vector: Vector3): Vector3;
-        /**
-         * Retrieve the vector as an array with three elements
-         */
-        getArray(): Float32Array;
+        static DOT(_a: Vector3, _b: Vector3): number;
+        add(_addend: Vector3): void;
+        subtract(_subtrahend: Vector3): void;
+        scale(_scale: number): void;
+        normalize(_length?: number): void;
+        set(_x?: number, _y?: number, _z?: number): void;
+        get(): Float32Array;
+        readonly copy: Vector3;
+        transform(_matrix: Matrix4x4): void;
     }
 }
 declare namespace Fudge {
@@ -1278,7 +1418,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
-     * ```text
+     * ```plaintext
      *            4____7
      *           0/__3/|
      *            ||5_||6
@@ -1300,7 +1440,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
-     * ```text
+     * ```plaintext
      *               4
      *              /\`.
      *            3/__\_\ 2
@@ -1322,7 +1462,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
-     * ```text
+     * ```plaintext
      *        0 __ 3
      *         |__|
      *        1    2
@@ -1384,6 +1524,11 @@ declare namespace Fudge {
          * @param _node
          */
         static updateBranch(_node: Node): void;
+        /**
+         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
+         * RenderManager passes it on to all shaders used that can process light
+         * @param _lights
+         */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
          * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
@@ -1396,13 +1541,10 @@ declare namespace Fudge {
         static clear(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * If the node lacks a [[ComponentTransform]], respectively a worldMatrix, the matrix given as _matrix will be used to transform the node
-         * or the identity matrix, if _matrix is null.
          * @param _node
          * @param _cameraMatrix
-         * @param _world
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _world?: Matrix4x4): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
         private static drawNode;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
@@ -1412,7 +1554,7 @@ declare namespace Fudge {
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
          * @param _node
-         * @param _matrix
+         * @param _world
          */
         private static recalculateTransformsOfNodeAndChildren;
         /**
@@ -1437,6 +1579,7 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
+        /** The type of coat that can be used with this shader to create a material */
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

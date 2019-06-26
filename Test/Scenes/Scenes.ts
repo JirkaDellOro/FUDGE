@@ -24,13 +24,12 @@ namespace Scenes {
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
 
-        cubeRed.cmpTransform.scaleX(2);
-        cubeGreen.cmpTransform.scaleY(2);
+        cubeRed.cmpTransform.local.scaleX(2);
+        cubeGreen.cmpTransform.local.scaleY(2);
         // cubeBlue.cmpTransform.scaleZ(2);
-        // using pivot on blue node, just for testing...
-        let pivot: ƒ.ComponentPivot = new ƒ.ComponentPivot();
-        pivot.scaleZ(2);
-        cubeBlue.addComponent(pivot);
+        // using mesh pivot on blue node, just for testing...
+        let cmpMesh: ƒ.ComponentMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
+        cmpMesh.pivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 
         // create branch
@@ -42,49 +41,42 @@ namespace Scenes {
         return branch;
     }
 
-    export function createCoordinateSystem(): ƒ.Node {
-        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-        let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 1, 0, 0.5));
-        let coatBlue: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(0, 0, 1, 0.5));
-
-        let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-        let mtrGreen: ƒ.Material = new ƒ.Material("Green", ƒ.ShaderUniColor, coatGreen);
-        let mtrBlue: ƒ.Material = new ƒ.Material("Blue", ƒ.ShaderUniColor, coatBlue);
+    function createArrow(_name: string, _color: ƒ.Color): ƒ.Node {
+        let arrow: ƒ.Node = new ƒ.Node(_name);
+        let coat: ƒ.CoatColored = new ƒ.CoatColored(_color);
+        let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coat);
 
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
         let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
+        let shaft: ƒ.Node = Scenes.createCompleteMeshNode("Shaft", material, meshCube);
+        let head: ƒ.Node = Scenes.createCompleteMeshNode("Head", material, meshPyramid);
+        let mtxShaft: ƒ.Matrix4x4 = shaft.cmpTransform.local;
+        let mtxHead: ƒ.Matrix4x4 = head.cmpTransform.local;
+        mtxShaft.scale(new ƒ.Vector3(0.01, 1, 0.01));
+        mtxHead.translateY(0.5);
+        mtxHead.scale(new ƒ.Vector3(0.05, 0.1, 0.05));
 
-        let cubeRed: ƒ.Node = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
-        let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
-        let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
+        arrow.appendChild(shaft);
+        arrow.appendChild(head);
+        arrow.addComponent(new ƒ.ComponentTransform());
 
-        let pyramidRed: ƒ.Node = Scenes.createCompleteMeshNode("RedTip", mtrRed, meshPyramid);
-        let pyramidGreen: ƒ.Node = Scenes.createCompleteMeshNode("GreenTip", mtrGreen, meshPyramid);
-        let pyramidBlue: ƒ.Node = Scenes.createCompleteMeshNode("BlueTip", mtrBlue, meshPyramid);
+        return arrow;
+    }
 
-        cubeRed.cmpTransform.scale(1, 0.01, 0.01);
-        cubeGreen.cmpTransform.scale(0.01, 1, 0.01);
-        cubeBlue.cmpTransform.scale(0.01, 0.01, 1);
+    export function createCoordinateSystem(): ƒ.Node {
+        let arrowRed: ƒ.Node = createArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
+        let arrowGreen: ƒ.Node = createArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
+        let arrowBlue: ƒ.Node = createArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
 
-        pyramidRed.cmpTransform.translateX(0.5);
-        pyramidRed.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidRed.cmpTransform.rotateZ(-90);
-        pyramidGreen.cmpTransform.translateY(0.5);
-        pyramidGreen.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidBlue.cmpTransform.translateZ(0.5);
-        pyramidBlue.cmpTransform.scale(0.1, 0.1, 0.1);
-        pyramidBlue.cmpTransform.rotateX(90);
+        arrowRed.cmpTransform.local.rotateZ(-90);
+        arrowBlue.cmpTransform.local.rotateX(90);
 
-        // create branch
-        let branch: ƒ.Node = new ƒ.Node("CoordinateSystem");
-        branch.appendChild(cubeRed);
-        branch.appendChild(cubeGreen);
-        branch.appendChild(cubeBlue);
-        branch.appendChild(pyramidRed);
-        branch.appendChild(pyramidGreen);
-        branch.appendChild(pyramidBlue);
+        let coordinates: ƒ.Node = new ƒ.Node("CoordinateSystem");
+        coordinates.appendChild(arrowRed);
+        coordinates.appendChild(arrowGreen);
+        coordinates.appendChild(arrowBlue);
 
-        return branch;
+        return coordinates;
     }
 
     export function createThreeLevelNodeHierarchy(): void {
@@ -94,7 +86,7 @@ namespace Scenes {
 
         let grandchild: ƒ.Node;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
-        grandchild.cmpTransform.translateX(2);
+        grandchild.cmpTransform.local.translateX(2);
         child.appendChild(grandchild);
     }
 
@@ -103,7 +95,7 @@ namespace Scenes {
 
         node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
-        cmpTransform.scaleX(2);
+        cmpTransform.local.scaleX(2);
 
         camera = createCamera();
 
@@ -125,8 +117,8 @@ namespace Scenes {
     export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(1, 1, 10), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.Node {
         let camera: ƒ.Node = new ƒ.Node("Camera");
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-        cmpTransform.translate(_translation.x, _translation.y, _translation.z);
-        cmpTransform.lookAt(_lookAt);
+        cmpTransform.local.translate(_translation);
+        cmpTransform.local.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
@@ -137,10 +129,8 @@ namespace Scenes {
     export function createCompleteMeshNode(_name: string, _material: ƒ.Material, _mesh: ƒ.Mesh): ƒ.Node {
         let node: ƒ.Node = new ƒ.Node(_name);
 
-        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh();
-        cmpMesh.setMesh(_mesh);
-        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(_material);
+        let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(_mesh);
+        let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(_material);
         let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);
@@ -154,5 +144,29 @@ namespace Scenes {
         canvas.width = _width;
         canvas.height = _height;
         return canvas;
+    }
+
+
+
+    export function dollyViewportCamera(_viewport: ƒ.Viewport): void {
+        _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
+        _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
+
+        function rotate(_event: ƒ.KeyboardEventƒ): void {
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+            let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO;
+            vctCamera.y = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
+                        0));
+            vctCamera.x = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
+                        0));
+
+            mtxCamera.translate(vctCamera);
+            mtxCamera.lookAt(ƒ.Vector3.ZERO, ƒ.Vector3.Y());
+            _viewport.draw();
+        }
     }
 }
