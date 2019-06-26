@@ -10,6 +10,8 @@ namespace Fudge {
     export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
         public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
+        public lastRenderUpdate: number = 0;
+        
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};

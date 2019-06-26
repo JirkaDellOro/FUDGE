@@ -4,7 +4,7 @@ namespace Fudge {
         shader: typeof Shader;
         coat: Coat;
         mesh: Mesh;
-        doneTransformToWorld: boolean;
+        // doneTransformToWorld: boolean;
     }
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
@@ -71,7 +71,7 @@ namespace Fudge {
             let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
             this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
 
-            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh}; //, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
 
@@ -235,16 +235,18 @@ namespace Fudge {
          */
         private static recalculateAllNodeTransforms(): void {
             // inner function to be called in a for each node at the bottom of this function
-            function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
-                _nodeReferences.doneTransformToWorld = false;
-            }
+            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+            //     _nodeReferences.doneTransformToWorld = false;
+            // }
 
             // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
-                if (_nodeReferences.doneTransformToWorld)
-                    return;
-                //TODO: replace with update-timestamp -> no previous traversal required
-                _nodeReferences.doneTransformToWorld = true;
+                // if (_nodeReferences.doneTransformToWorld)
+                //     return;
+                // //TODO: replace with update-timestamp -> no previous traversal required
+                // _nodeReferences.doneTransformToWorld = true;
+
+                _node.
 
                 // find uppermost ancestor not recalculated yet
                 let ancestor: Node = _node;
@@ -271,7 +273,7 @@ namespace Fudge {
             };
 
             // call the functions above for each registered node
-            this.nodes.forEach(markNodeToBeTransformed);
+            // this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
         }
 

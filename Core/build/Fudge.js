@@ -1255,6 +1255,7 @@ var Fudge;
         constructor(_name) {
             super();
             this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
+            this.lastRenderUpdate = 0;
             this.parent = null; // The parent of this node.
             this.children = []; // array of child nodes appended to this node.
             this.components = {};
@@ -3245,7 +3246,7 @@ var Fudge;
             this.createReference(this.renderCoats, coat, this.createParameter);
             let mesh = _node.getComponent(Fudge.ComponentMesh).mesh;
             this.createReference(this.renderBuffers, mesh, this.createBuffers);
-            let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
         /**
@@ -3388,15 +3389,17 @@ var Fudge;
          */
         static recalculateAllNodeTransforms() {
             // inner function to be called in a for each node at the bottom of this function
-            function markNodeToBeTransformed(_nodeReferences, _node, _map) {
-                _nodeReferences.doneTransformToWorld = false;
-            }
+            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+            //     _nodeReferences.doneTransformToWorld = false;
+            // }
             // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
-                if (_nodeReferences.doneTransformToWorld)
-                    return;
-                //TODO: replace with update-timestamp -> no previous traversal required
-                _nodeReferences.doneTransformToWorld = true;
+                // if (_nodeReferences.doneTransformToWorld)
+                //     return;
+                // //TODO: replace with update-timestamp -> no previous traversal required
+                // _nodeReferences.doneTransformToWorld = true;
+                _node.
+                ;
                 // find uppermost ancestor not recalculated yet
                 let ancestor = _node;
                 let parent;
@@ -3419,7 +3422,7 @@ var Fudge;
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
             // call the functions above for each registered node
-            this.nodes.forEach(markNodeToBeTransformed);
+            // this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
         }
         /**

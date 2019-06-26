@@ -638,6 +638,7 @@ declare namespace Fudge {
     class Node extends EventTarget implements Serializable {
         name: string;
         mtxWorld: Matrix4x4;
+        lastRenderUpdate: number;
         private parent;
         private children;
         private components;
