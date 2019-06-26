@@ -1,30 +1,24 @@
 namespace Fudge {
     /**
-     * The transformation-data of the node, extends ComponentPivot for fewer redundancies.
-     * Affects the origin of a node and its descendants. Use [[ComponentPivot]] to transform only the mesh attached
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class ComponentTransform extends ComponentPivot {
-        public world: Matrix4x4;
+    export class ComponentTransform extends Component {
+        public local: Matrix4x4;
 
-        public constructor() {
+        public constructor(_matrix: Matrix4x4 = Matrix4x4.IDENTITY) {
             super();
-            this.world = Matrix4x4.identity;
+            this.local = _matrix;
         }
 
-        public get WorldPosition(): Vector3 {
-            return new Vector3(this.world.data[12], this.world.data[13], this.world.data[14]);
-        }
-
+        //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = {
-                // worldMatrix: this.worldMatrix.serialize(),  // is transient, doesn't need to be serialized...     
+            let serialization: Serialization = {   
                 [super.type]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            // this.worldMatrix.deserialize(_serialization.worldMatrix);
             super.deserialize(_serialization[super.type]);
             return this;
         }
@@ -36,5 +30,6 @@ namespace Fudge {
             delete _mutator.world;
             super.reduceMutator(_mutator);
         }
+        //#endregion
     }
 }

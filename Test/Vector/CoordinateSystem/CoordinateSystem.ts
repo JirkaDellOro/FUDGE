@@ -5,7 +5,7 @@ namespace TextureTest {
 
     function init(_event: Event): void {
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        // coSys.addComponent(new ƒ.ComponentTransform());
+        coSys.addComponent(new ƒ.ComponentTransform());
 
         // let object: ƒ.Node = Scenes.createCompleteMeshNode(
         //     "Quad",
@@ -24,7 +24,7 @@ namespace TextureTest {
 
         window.setInterval(function (): void {
             // body.cmpTransform.rotateY(-1.1);
-            // coSys.cmpTransform.rotateY(-1);
+            coSys.cmpTransform.local.rotateY(1);
             // body.cmpTransform.rotateZ(-0.9);
             ƒ.RenderManager.update();
             viewport.draw();

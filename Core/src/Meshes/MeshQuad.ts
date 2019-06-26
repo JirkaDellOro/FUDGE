@@ -1,7 +1,7 @@
 namespace Fudge {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
-     * ```text
+     * ```plaintext
      *        0 __ 3
      *         |__|
      *        1    2             

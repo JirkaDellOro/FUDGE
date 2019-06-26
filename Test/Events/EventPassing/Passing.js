@@ -17,23 +17,21 @@ var EventPassing;
             let camera = Scenes.createCamera(posCameras[i]);
             let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
-            let viewPort = new ƒ.Viewport();
-            viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
-            viewPorts.push(viewPort);
-            viewPort.draw();
-            viewPort.addEventListener("focusin" /* FOCUS_IN */, hndEvent);
-            viewPort.addEventListener("focusout" /* FOCUS_OUT */, hndEvent);
-            viewPort.activatePointerEvent("\u0192pointerup" /* UP */, true);
-            viewPort.addEventListener("\u0192pointerup" /* UP */, hndEvent);
-            viewPort.activateDragDropEvent("\u0192dragstart" /* START */, true);
-            viewPort.addEventListener("\u0192dragstart" /* START */, hndEvent);
-            viewPort.activateDragDropEvent("\u0192drop" /* DROP */, true);
-            viewPort.addEventListener("\u0192drop" /* DROP */, hndEvent);
-            viewPort.activateDragDropEvent("\u0192dragover" /* OVER */, true);
-            viewPort.addEventListener("\u0192dragover" /* OVER */, hndEvent);
-            viewPort.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
-            // viewPort.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, hndEvent);
-            viewPort.addEventListener("\u0192keydown" /* DOWN */, rotate);
+            let viewport = new ƒ.Viewport();
+            viewport.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
+            viewPorts.push(viewport);
+            viewport.draw();
+            viewport.addEventListener("focusin" /* FOCUS_IN */, hndEvent);
+            viewport.addEventListener("focusout" /* FOCUS_OUT */, hndEvent);
+            viewport.activatePointerEvent("\u0192pointerup" /* UP */, true);
+            viewport.addEventListener("\u0192pointerup" /* UP */, hndEvent);
+            viewport.activateDragDropEvent("\u0192dragstart" /* START */, true);
+            viewport.addEventListener("\u0192dragstart" /* START */, hndEvent);
+            viewport.activateDragDropEvent("\u0192drop" /* DROP */, true);
+            viewport.addEventListener("\u0192drop" /* DROP */, hndEvent);
+            viewport.activateDragDropEvent("\u0192dragover" /* OVER */, true);
+            viewport.addEventListener("\u0192dragover" /* OVER */, hndEvent);
+            Scenes.dollyViewportCamera(viewport);
         }
     }
     function hndEvent(_event) {
@@ -48,21 +46,21 @@ var EventPassing;
     }
     function rotate(_event) {
         let viewPort = getViewport(_event);
-        let cmpCameraTransform = viewPort.camera.getContainer().cmpTransform;
-        cmpCameraTransform.translateY(0.1 *
+        let mtxCamera = viewPort.camera.getContainer().cmpTransform.local;
+        mtxCamera.translateY(0.1 *
             (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
                 _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
                     0));
-        cmpCameraTransform.translateX(0.1 *
+        mtxCamera.translateX(0.1 *
             (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
                 _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
                     0));
-        cmpCameraTransform.lookAt(new ƒ.Vector3());
+        mtxCamera.lookAt(new ƒ.Vector3());
         viewPort.draw();
     }
     function getViewport(_event) {
-        let viewPort = _event.target;
-        return viewPort;
+        let viewport = _event.target;
+        return viewport;
     }
 })(EventPassing || (EventPassing = {}));
 //# sourceMappingURL=Passing.js.map
