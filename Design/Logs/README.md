@@ -1,10 +1,15 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
+
 # June 26th 2019
-Clearified details about the UX Usertest 
-->  What kind of Windows will FUDGE need? 
--> Excercises people will have to do for the Usertest?
+Clarified details about the FUDGE UI
+-> The gizmos axis are color coded: red=y, green=z, blue=x 
+->  What kind of Windows will FUDGE need? Scene Editor, Animation Editor, Sketch Editor, Modelling Editor
+-> Sketch Editor outputs results in own data format and can be inserted in the "inspector" under the "material"* property as a sprite or    texture                             * properties right now are shader and coat, the latter includes color ant texture
+
+Clarified details about the UX Usertest
+-> Excercises people will have to do for the Usertest? - Creation of simple 2D/3D objects in scene editor -> animation editor ->            scripting
 
 Clarifying Structure of UI Components
 
