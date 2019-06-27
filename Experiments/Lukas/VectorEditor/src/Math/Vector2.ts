@@ -29,6 +29,7 @@ namespace Fudge {
     }
 
     /** 
+     * A shorthand for writing `new Vector2(0, 0)`.
      * @returns A new vector with the values (0, 0)
      */
     public static get ZERO(): Vector2 {
@@ -37,7 +38,7 @@ namespace Fudge {
     }
 
     /** 
-     * A shorthand for writing Vector2(0, 1).
+     * A shorthand for writing `new Vector2(0, 1)`.
      * @returns A new vector with the values (0, 1)
      */
     public static get UP(): Vector2 {
@@ -46,7 +47,7 @@ namespace Fudge {
     }
 
     /** 
-     * A shorthand for writing Vector2(0, -1).
+     * A shorthand for writing `new Vector2(0, -1)`.
      * @returns A new vector with the values (0, -1)
      */
     public static get DOWN(): Vector2 {
@@ -55,7 +56,7 @@ namespace Fudge {
     }
 
     /** 
-     * A shorthand for writing Vector2(1, 0).
+     * A shorthand for writing `new Vector2(1, 0)`.
      * @returns A new vector with the values (1, 0)
      */
     public static get RIGHT(): Vector2 {
@@ -64,7 +65,7 @@ namespace Fudge {
     }
 
     /** 
-     * A shorthand for writing Vector2(-1, 0).
+     * A shorthand for writing `new Vector2(-1, 0)`.
      * @returns A new vector with the values (-1, 0)
      */
     public static get LEFT(): Vector2 {
@@ -137,6 +138,27 @@ namespace Fudge {
     }
 
     /**
+     * Returns the magnitude of a given vector.
+     * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
+     * @param _vector The vector to get the magnitude of.
+     * @returns A number representing the magnitude of the given vector.
+     */
+    public static MAGNITUDE(_vector: Vector2): number {
+      let magnitude: number = Math.sqrt(Vector2.MAGNITUDESQR(_vector));
+      return magnitude;
+    }
+
+    /**
+     * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
+     * @param _vector The vector to get the squared magnitude of.
+     * @returns A number representing the squared magnitude of the given vector.
+     */
+    public static MAGNITUDESQR(_vector: Vector2): number {
+      let magnitude: number = Vector2.DOT(_vector, _vector);
+      return magnitude;
+    }
+
+    /**
      * Adds the given vector to the executing vector, changing the executor.
      * @param _addend The vector to add.
      */
@@ -178,14 +200,24 @@ namespace Fudge {
     }
 
     /**
-     * @returns The Array of the data of the vector
+     * Checks whether the given Vector is equal to the executed Vector.
+     * @param _vector The vector to comapre with.
+     * @returns true if the two vectors are equal, otherwise false
+     */
+    public equals(_vector: Vector2): boolean {
+      if (this.data[0] == _vector.data[0] && this.data[1] == _vector.data[1]) return true;
+      return false;
+    }
+
+    /**
+     * @returns An array of the data of the vector
      */
     public get(): Float32Array {
       return new Float32Array(this.data);
     }
 
     /**
-     * @returns An independent copy of the vector.
+     * @returns An deep copy of the vector.
      */
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);
