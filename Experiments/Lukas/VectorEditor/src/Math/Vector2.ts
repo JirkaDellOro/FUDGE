@@ -140,6 +140,7 @@ namespace Fudge {
     /**
      * Returns the magnitude of a given vector.
      * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
+     * @see Vector2.MAGNITUDESQR
      * @param _vector The vector to get the magnitude of.
      * @returns A number representing the magnitude of the given vector.
      */
@@ -156,6 +157,33 @@ namespace Fudge {
     public static MAGNITUDESQR(_vector: Vector2): number {
       let magnitude: number = Vector2.DOT(_vector, _vector);
       return magnitude;
+    }
+
+    /**
+     * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
+     * which implicitly is on the Z axis. It is also the signed magnitude of the result.
+     * @param _a Vector to compute the cross product on
+     * @param _b Vector to compute the cross product with
+     * @returns A number representing result of the cross product.
+     */
+    public static CROSSPRODUCT(_a: Vector2, _b: Vector2): number {
+      let crossProduct: number = _a.x * _b.y - _a.y * _b.x;
+      return crossProduct;
+    }
+
+    /**
+     * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
+     * ```plaintext
+     *    ^                |
+     *    |  =>  <--  =>   v  =>  -->
+     * ```
+     * @param _vector Vector to get the orthogonal equivalent of
+     * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
+     * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.  
+     */
+    public static ORTHOGONAL(_vector: Vector2, _clockwise: boolean = false): Vector2 {
+      if (_clockwise) return new Vector2(_vector.y, -_vector.x);
+      else return new Vector2(-_vector.y, _vector.x);
     }
 
     /**
