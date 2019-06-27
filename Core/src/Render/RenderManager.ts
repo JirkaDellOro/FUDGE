@@ -4,7 +4,7 @@ namespace Fudge {
         shader: typeof Shader;
         coat: Coat;
         mesh: Mesh;
-        doneTransformToWorld: boolean;
+        // doneTransformToWorld: boolean;
     }
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
@@ -48,6 +48,7 @@ namespace Fudge {
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
         private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
+        private static timestampUpdate: number;
 
         // #region Adding
         /**
@@ -71,15 +72,18 @@ namespace Fudge {
             let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
             this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
 
-            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh}; //, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
 
         /**
          * Register the node and its valid successors in the branch for rendering using [[addNode]]
          * @param _node 
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
-        public static addBranch(_node: Node): void {
+        public static addBranch(_node: Node): boolean {
+            if (_node.isUpdated(RenderManager.timestampUpdate))
+                return false;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
@@ -87,6 +91,7 @@ namespace Fudge {
                 } catch (_e) {
                     console.log(_e);
                 }
+            return true;
         }
         // #endregion
 
@@ -182,6 +187,7 @@ namespace Fudge {
          * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
          */
         public static update(): void {
+            RenderManager.timestampUpdate = performance.now();
             this.recalculateAllNodeTransforms();
         }
 
@@ -235,17 +241,12 @@ namespace Fudge {
          */
         private static recalculateAllNodeTransforms(): void {
             // inner function to be called in a for each node at the bottom of this function
-            function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
-                _nodeReferences.doneTransformToWorld = false;
-            }
+            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+            //     _nodeReferences.doneTransformToWorld = false;
+            // }
 
             // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
-                if (_nodeReferences.doneTransformToWorld)
-                    return;
-                //TODO: replace with update-timestamp -> no previous traversal required
-                _nodeReferences.doneTransformToWorld = true;
-
                 // find uppermost ancestor not recalculated yet
                 let ancestor: Node = _node;
                 let parent: Node;
@@ -253,13 +254,11 @@ namespace Fudge {
                     parent = ancestor.getParent();
                     if (!parent)
                         break;
-                    let parentReferences: NodeReferences = _map.get(parent);
-                    if (parentReferences && parentReferences.doneTransformToWorld)
+                    if (_node.isUpdated(RenderManager.timestampUpdate))
                         break;
                     ancestor = parent;
                 }
-                // TODO: optimize so that also nodes without meshes are present as transformed (possible after world-matrix implemented in node). Register ALL nodes!
-                // Debug.log(`Search from node ${_node.name} to ancestor ${ancestor.name}`);
+                // TODO: check if nodes without meshes must be registered
 
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
@@ -271,7 +270,7 @@ namespace Fudge {
             };
 
             // call the functions above for each registered node
-            this.nodes.forEach(markNodeToBeTransformed);
+            // this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
         }
 
@@ -286,7 +285,9 @@ namespace Fudge {
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             if (cmpTransform)
                 world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+
             _node.mtxWorld = world;
+            _node.timestampUpdate = RenderManager.timestampUpdate;
 
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, world);

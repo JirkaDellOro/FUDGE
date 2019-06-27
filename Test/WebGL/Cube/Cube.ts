@@ -23,13 +23,11 @@ namespace Cube {
         branch.appendChild(body);
 
         ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+        // ƒ.RenderManager.addBranch(branch);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
-
         viewport.draw();
     }
 }

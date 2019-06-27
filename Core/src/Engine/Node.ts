@@ -10,6 +10,8 @@ namespace Fudge {
     export class Node extends EventTarget implements Serializable {
         public name: string; // The name to call this node by.
         public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
+        public timestampUpdate: number = 0;
+        
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};
@@ -123,6 +125,10 @@ namespace Fudge {
          */
         public get branch(): IterableIterator<Node> {
             return this.getBranchGenerator();
+        }
+        
+        public isUpdated(_timestampUpdate: number): boolean {
+            return (this.timestampUpdate == _timestampUpdate);
         }
         // #endregion
 
@@ -239,7 +245,7 @@ namespace Fudge {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+        public addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
             if (_capture) {
                 if (!this.captures[_type])
                     this.captures[_type] = [];
@@ -257,7 +263,7 @@ namespace Fudge {
          * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
          * @param _event The event to dispatch
          */
-        dispatchEvent(_event: Event): boolean {
+        public dispatchEvent(_event: Event): boolean {
             let ancestors: Node[] = [];
             let upcoming: Node = this;
             // overwrite event target
@@ -302,7 +308,7 @@ namespace Fudge {
          * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
          * @param _event The event to broadcast
          */
-        broadcastEvent(_event: Event): void {
+        public broadcastEvent(_event: Event): void {
             // overwrite event target and phase
             Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
             Object.defineProperty(_event, "target", { writable: true, value: this });

@@ -1255,6 +1255,7 @@ var Fudge;
         constructor(_name) {
             super();
             this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
+            this.timestampUpdate = 0;
             this.parent = null; // The parent of this node.
             this.children = []; // array of child nodes appended to this node.
             this.components = {};
@@ -1351,6 +1352,9 @@ var Fudge;
          */
         get branch() {
             return this.getBranchGenerator();
+        }
+        isUpdated(_timestampUpdate) {
+            return (this.timestampUpdate == _timestampUpdate);
         }
         // #endregion
         // #region Components
@@ -1764,9 +1768,10 @@ var Fudge;
                 this.adjustFrames();
             if (this.adjustingCamera)
                 this.adjustCamera();
-            // HACK! no need to addBranch and recalc for each viewport and frame
             Fudge.RenderManager.clear(this.camera.getBackgoundColor());
-            Fudge.RenderManager.addBranch(this.branch);
+            if (Fudge.RenderManager.addBranch(this.branch))
+                // branch has not yet been processed fully by rendermanager -> update all registered nodes
+                Fudge.RenderManager.update();
             Fudge.RenderManager.setLights(this.lights);
             Fudge.RenderManager.drawBranch(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
@@ -3245,14 +3250,17 @@ var Fudge;
             this.createReference(this.renderCoats, coat, this.createParameter);
             let mesh = _node.getComponent(Fudge.ComponentMesh).mesh;
             this.createReference(this.renderBuffers, mesh, this.createBuffers);
-            let nodeReferences = { shader: shader, coat: coat, mesh: mesh, doneTransformToWorld: false };
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
         /**
          * Register the node and its valid successors in the branch for rendering using [[addNode]]
          * @param _node
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
         static addBranch(_node) {
+            if (_node.isUpdated(RenderManager.timestampUpdate))
+                return false;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
@@ -3261,6 +3269,7 @@ var Fudge;
                 catch (_e) {
                     console.log(_e);
                 }
+            return true;
         }
         // #endregion
         // #region Removing
@@ -3344,6 +3353,7 @@ var Fudge;
          * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update() {
+            RenderManager.timestampUpdate = performance.now();
             this.recalculateAllNodeTransforms();
         }
         /**
@@ -3388,15 +3398,11 @@ var Fudge;
          */
         static recalculateAllNodeTransforms() {
             // inner function to be called in a for each node at the bottom of this function
-            function markNodeToBeTransformed(_nodeReferences, _node, _map) {
-                _nodeReferences.doneTransformToWorld = false;
-            }
+            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+            //     _nodeReferences.doneTransformToWorld = false;
+            // }
             // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
-                if (_nodeReferences.doneTransformToWorld)
-                    return;
-                //TODO: replace with update-timestamp -> no previous traversal required
-                _nodeReferences.doneTransformToWorld = true;
                 // find uppermost ancestor not recalculated yet
                 let ancestor = _node;
                 let parent;
@@ -3404,13 +3410,11 @@ var Fudge;
                     parent = ancestor.getParent();
                     if (!parent)
                         break;
-                    let parentReferences = _map.get(parent);
-                    if (parentReferences && parentReferences.doneTransformToWorld)
+                    if (_node.isUpdated(RenderManager.timestampUpdate))
                         break;
                     ancestor = parent;
                 }
-                // TODO: optimize so that also nodes without meshes are present as transformed (possible after world-matrix implemented in node). Register ALL nodes!
-                // Debug.log(`Search from node ${_node.name} to ancestor ${ancestor.name}`);
+                // TODO: check if nodes without meshes must be registered
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix = Fudge.Matrix4x4.IDENTITY;
                 if (parent)
@@ -3419,7 +3423,7 @@ var Fudge;
                 this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
             // call the functions above for each registered node
-            this.nodes.forEach(markNodeToBeTransformed);
+            // this.nodes.forEach(markNodeToBeTransformed);
             this.nodes.forEach(recalculateBranchContainingNode);
         }
         /**
@@ -3434,6 +3438,7 @@ var Fudge;
             if (cmpTransform)
                 world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
             _node.mtxWorld = world;
+            _node.timestampUpdate = RenderManager.timestampUpdate;
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, world);
             }

@@ -7,10 +7,7 @@ namespace RenderManagerRendering {
         let branch: ƒ.Node = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
 
-        // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         // initialize viewports
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(0.1, 0, 5), new ƒ.Vector3(0.1, 5, 0), new ƒ.Vector3(5, 0.1, 0), new ƒ.Vector3(3, 3, 5)];
@@ -37,11 +34,5 @@ namespace RenderManagerRendering {
                 viewPort.draw();
             }
         }
-
-        // let table: {} = {
-        //     crc3: { width: ƒ.RenderManager.crc3.canvas.width, height: ƒ.RenderManager.crc3.canvas.height },
-        //     crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
-        // };
-        // console.table(table, ["width", "height"]);
     }
 }

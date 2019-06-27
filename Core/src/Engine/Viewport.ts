@@ -106,9 +106,10 @@ namespace Fudge {
             if (this.adjustingCamera)
                 this.adjustCamera();
 
-            // HACK! no need to addBranch and recalc for each viewport and frame
             RenderManager.clear(this.camera.getBackgoundColor());
-            RenderManager.addBranch(this.branch);
+            if (RenderManager.addBranch(this.branch))
+                // branch has not yet been processed fully by rendermanager -> update all registered nodes
+                RenderManager.update();
             RenderManager.setLights(this.lights);
             RenderManager.drawBranch(this.branch, this.camera);
 
