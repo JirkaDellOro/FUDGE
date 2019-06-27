@@ -79,10 +79,11 @@ namespace Fudge {
         /**
          * Register the node and its valid successors in the branch for rendering using [[addNode]]
          * @param _node 
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
-        public static addBranch(_node: Node): void {
+        public static addBranch(_node: Node): boolean {
             if (_node.isUpdated(RenderManager.timestampUpdate))
-                return;
+                return false;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
@@ -90,6 +91,7 @@ namespace Fudge {
                 } catch (_e) {
                     console.log(_e);
                 }
+            return true;
         }
         // #endregion
 

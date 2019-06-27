@@ -1505,8 +1505,9 @@ declare namespace Fudge {
         /**
          * Register the node and its valid successors in the branch for rendering using [[addNode]]
          * @param _node
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
-        static addBranch(_node: Node): void;
+        static addBranch(_node: Node): boolean;
         /**
          * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
          * @param _node

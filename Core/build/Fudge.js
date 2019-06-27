@@ -1768,9 +1768,10 @@ var Fudge;
                 this.adjustFrames();
             if (this.adjustingCamera)
                 this.adjustCamera();
-            // HACK! no need to addBranch and recalc for each viewport and frame
             Fudge.RenderManager.clear(this.camera.getBackgoundColor());
-            Fudge.RenderManager.addBranch(this.branch);
+            if (Fudge.RenderManager.addBranch(this.branch))
+                // branch has not yet been processed fully by rendermanager -> update all registered nodes
+                Fudge.RenderManager.update();
             Fudge.RenderManager.setLights(this.lights);
             Fudge.RenderManager.drawBranch(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
@@ -3255,10 +3256,11 @@ var Fudge;
         /**
          * Register the node and its valid successors in the branch for rendering using [[addNode]]
          * @param _node
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
         static addBranch(_node) {
             if (_node.isUpdated(RenderManager.timestampUpdate))
-                return;
+                return false;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
@@ -3267,6 +3269,7 @@ var Fudge;
                 catch (_e) {
                     console.log(_e);
                 }
+            return true;
         }
         // #endregion
         // #region Removing
