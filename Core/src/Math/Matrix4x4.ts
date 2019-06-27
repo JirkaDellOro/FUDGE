@@ -430,6 +430,45 @@ namespace Fudge {
         //#endregion
 
         //#region Transfer
+        getVectorRepresentation(): Vector3[] {
+            // extract translation vector
+            // let translation: Vector3 = this.translation;  // already defined
+            // extract scaling vector and divide matrix by
+            let scaling: Vector3 = new Vector3(
+                Math.hypot(this.data[0], this.data[1], this.data[2]),
+                Math.hypot(this.data[4], this.data[5], this.data[6]),
+                Math.hypot(this.data[8], this.data[9], this.data[10])
+            );
+
+            let sy: number = Math.hypot(this.data[0] / scaling.x, this.data[1] / scaling.x); // probably 2. param should be this.data[4] / scaling.y
+
+            let singular: boolean = sy < 1e-6; // If
+
+            let x: number, y: number, z: number;
+            if (!singular) {
+                x = Math.atan2(this.data[6] / scaling.y, this.data[10] / scaling.z);
+                y = Math.atan2(this.data[2] / scaling.x, sy);
+                z = Math.atan2(this.data[1] / scaling.x, this.data[0] / scaling.x);
+
+                // x = Math.atan2(R.at<double>(2, 1), R.at<double>(2, 2));
+                // y = Math.atan2(-R.at<double>(2, 0), sy);
+                // z = Math.atan2(R.at<double>(1, 0), R.at<double>(0, 0));
+            }
+            else {
+                x = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+                y = Math.atan2(-this.data[2] / scaling.x, sy);
+                z = 0;
+
+                // x = Math.atan2(-R.at<double>(1, 2), R.at<double>(1, 1));
+                // y = Math.atan2(-R.at<double>(2, 0), sy);
+                // z = 0;
+            }
+
+            let rotation: Vector3 = new Vector3(x, y, z);
+
+            return [this.translation, scaling, rotation];
+        }
+
         public set(_to: Matrix4x4): void {
             this.data = _to.get();
         }
