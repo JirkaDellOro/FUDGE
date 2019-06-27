@@ -8,6 +8,8 @@ Clarified details about the FUDGE UI
 ->  What kind of Windows will FUDGE need? Scene Editor, Animation Editor, Sketch Editor, Modelling Editor
 -> Sketch Editor outputs results in own data format and can be inserted in the "inspector" under the "material"* property as a sprite or    texture                             * properties right now are shader and coat, the latter includes color ant texture
 
+All editors (even if not existan yet) need rough guidelines so their look is unified
+
 Clarified details about the UX Usertest
 -> Excercises people will have to do for the Usertest? - Creation of simple 2D/3D objects in scene editor -> animation editor ->            scripting
 
