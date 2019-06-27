@@ -12,6 +12,7 @@ var MarixTest;
         let camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         update();
+        displayVectors(coSys.cmpTransform.local);
         // window.setInterval(
         //     function (): void {
         //         let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
@@ -28,7 +29,7 @@ var MarixTest;
         viewport.draw();
         let local = coSys.cmpTransform.local;
         displayMatrix(local);
-        displayVectors(local);
+        // displayVectors(local);
     }
     function createUI() {
         let fieldset;
@@ -49,23 +50,49 @@ var MarixTest;
         fieldset.addEventListener("input", hndInteraction);
     }
     function hndInteraction(_event) {
-        ƒ.Debug.log(_event);
         let input = _event.target;
         let stepped = parseFloat(input.value) - parseFloat(input.getAttribute("lastValue"));
         input.setAttribute("stepped", stepped.toString());
-        switch (input.id[0]) {
-            case "t":
-                translate(input);
-                break;
-            case "s":
-                scale(input);
-                break;
-            case "r":
-                rotate(input);
-                break;
-        }
+        let absolute = document.querySelector("#absolute").checked;
+        if (absolute)
+            interactAbsolute(input);
+        else
+            interactRelative(input);
         update();
         input.setAttribute("lastValue", input.value);
+    }
+    function interactAbsolute(_input) {
+        let vectors = [];
+        for (let transform of ["t", "s", "r"]) {
+            let vector = new ƒ.Vector3();
+            for (let dimension of ["x", "y", "z"]) {
+                let id = transform + dimension;
+                let input = document.querySelector("#" + id);
+                vector[dimension] = parseFloat(input.value);
+            }
+            vectors.push(vector);
+        }
+        let matrix = ƒ.Matrix4x4.IDENTITY;
+        matrix.rotateX(vectors[2].x);
+        matrix.rotateZ(vectors[2].z);
+        matrix.rotateY(vectors[2].y);
+        matrix.scale(vectors[1]);
+        matrix.translate(vectors[0]);
+        ƒ.Debug.log(matrix);
+        coSys.cmpTransform.local = matrix;
+    }
+    function interactRelative(_input) {
+        switch (_input.id[0]) {
+            case "t":
+                translate(_input);
+                break;
+            case "s":
+                scale(_input);
+                break;
+            case "r":
+                rotate(_input);
+                break;
+        }
     }
     function translate(_input) {
         let vector = calcInputVector(_input);

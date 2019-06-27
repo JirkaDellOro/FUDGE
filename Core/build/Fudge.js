@@ -2759,7 +2759,7 @@ var Fudge;
             let x, y, z;
             if (!singular) {
                 x = Math.atan2(this.data[6] / scaling.y, this.data[10] / scaling.z);
-                y = Math.atan2(this.data[2] / scaling.x, sy);
+                y = Math.atan2(-this.data[2] / scaling.x, sy);
                 z = Math.atan2(this.data[1] / scaling.x, this.data[0] / scaling.x);
                 // x = Math.atan2(R.at<double>(2, 1), R.at<double>(2, 2));
                 // y = Math.atan2(-R.at<double>(2, 0), sy);
