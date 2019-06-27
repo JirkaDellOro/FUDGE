@@ -638,7 +638,7 @@ declare namespace Fudge {
     class Node extends EventTarget implements Serializable {
         name: string;
         mtxWorld: Matrix4x4;
-        lastRenderUpdate: number;
+        timestampUpdate: number;
         private parent;
         private children;
         private components;
@@ -690,6 +690,7 @@ declare namespace Fudge {
          * Generator yielding the node and all successors in the branch below for iteration
          */
         readonly branch: IterableIterator<Node>;
+        isUpdated(_timestampUpdate: number): boolean;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
@@ -1495,6 +1496,7 @@ declare namespace Fudge {
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
         private static renderBuffers;
         private static nodes;
+        private static timestampUpdate;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node

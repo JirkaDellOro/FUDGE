@@ -1255,7 +1255,7 @@ var Fudge;
         constructor(_name) {
             super();
             this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
-            this.lastRenderUpdate = 0;
+            this.timestampUpdate = 0;
             this.parent = null; // The parent of this node.
             this.children = []; // array of child nodes appended to this node.
             this.components = {};
@@ -1352,6 +1352,9 @@ var Fudge;
          */
         get branch() {
             return this.getBranchGenerator();
+        }
+        isUpdated(_timestampUpdate) {
+            return (this.timestampUpdate == _timestampUpdate);
         }
         // #endregion
         // #region Components
@@ -3254,6 +3257,8 @@ var Fudge;
          * @param _node
          */
         static addBranch(_node) {
+            if (_node.isUpdated(RenderManager.timestampUpdate))
+                return;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
@@ -3345,6 +3350,7 @@ var Fudge;
          * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update() {
+            RenderManager.timestampUpdate = performance.now();
             this.recalculateAllNodeTransforms();
         }
         /**
@@ -3394,12 +3400,6 @@ var Fudge;
             // }
             // inner function to be called in a for each node at the bottom of this function
             let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
-                // if (_nodeReferences.doneTransformToWorld)
-                //     return;
-                // //TODO: replace with update-timestamp -> no previous traversal required
-                // _nodeReferences.doneTransformToWorld = true;
-                _node.
-                ;
                 // find uppermost ancestor not recalculated yet
                 let ancestor = _node;
                 let parent;
@@ -3407,13 +3407,11 @@ var Fudge;
                     parent = ancestor.getParent();
                     if (!parent)
                         break;
-                    let parentReferences = _map.get(parent);
-                    if (parentReferences && parentReferences.doneTransformToWorld)
+                    if (_node.isUpdated(RenderManager.timestampUpdate))
                         break;
                     ancestor = parent;
                 }
-                // TODO: optimize so that also nodes without meshes are present as transformed (possible after world-matrix implemented in node). Register ALL nodes!
-                // Debug.log(`Search from node ${_node.name} to ancestor ${ancestor.name}`);
+                // TODO: check if nodes without meshes must be registered
                 // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
                 let matrix = Fudge.Matrix4x4.IDENTITY;
                 if (parent)
@@ -3437,6 +3435,7 @@ var Fudge;
             if (cmpTransform)
                 world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
             _node.mtxWorld = world;
+            _node.timestampUpdate = RenderManager.timestampUpdate;
             for (let child of _node.getChildren()) {
                 this.recalculateTransformsOfNodeAndChildren(child, world);
             }
