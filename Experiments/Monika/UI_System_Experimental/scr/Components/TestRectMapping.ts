@@ -16,7 +16,7 @@ namespace UI {
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.recalculateAllNodeTransforms();
+        ƒ.RenderManager.update();
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
@@ -51,13 +51,12 @@ namespace UI {
         ƒ.Loop.start();
         function animate(_event: Event): void {
             update();
-            branch.cmpTransform.rotateY(1);
-            ƒ.RenderManager.recalculateAllNodeTransforms();
+            branch.cmpTransform.local.rotateY(1);
+            ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();
             viewPort.draw();
         }
-
     }
 
     function logMutatorInfo(_title: string, _mutable: ƒ.Mutable): void {

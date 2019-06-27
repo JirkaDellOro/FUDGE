@@ -1,0 +1,31 @@
+{
+    "authors": "Baruch Berger <https://github.com/bbss>, Kon <http://phyzkit.net/>, kubosho <https://github.com/kubosho>",
+    "definitionFilename": "index.d.ts",
+    "libraryDependencies": [],
+    "moduleDependencies": [],
+    "libraryMajorVersion": "0",
+    "libraryMinorVersion": "0",
+    "libraryName": "Web Audio API",
+    "typingsPackageName": "webaudioapi",
+    "projectName": "http://www.w3.org/TR/webaudio/",
+    "sourceRepoURL": "https://www.github.com/DefinitelyTyped/DefinitelyTyped",
+    "sourceBranch": "types-2.0",
+    "kind": "Global",
+    "globals": [
+        "BiquadFilterType",
+        "ChannelCountMode",
+        "ChannelInterpretation",
+        "DistanceModelType",
+        "OscillatorType",
+        "OverSampleType",
+        "PanningModelType",
+        "webkitAudioContext",
+        "webkitOfflineAudioContext"
+    ],
+    "declaredModules": [],
+    "files": [
+        "index.d.ts"
+    ],
+    "hasPackageJson": false,
+    "contentHash": "6a22108d47bfed2890e76fe870e2efb5a4e90461b8a5070a4b0b3f2ed41658f3"
+}
