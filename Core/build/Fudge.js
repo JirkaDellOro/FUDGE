@@ -2774,6 +2774,7 @@ var Fudge;
                 // z = 0;
             }
             let rotation = new Fudge.Vector3(x, y, z);
+            rotation.scale(180 / Math.PI);
             return [this.translation, scaling, rotation];
         }
         set(_to) {

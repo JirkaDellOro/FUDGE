@@ -465,6 +465,7 @@ namespace Fudge {
             }
 
             let rotation: Vector3 = new Vector3(x, y, z);
+            rotation.scale(180 / Math.PI);
 
             return [this.translation, scaling, rotation];
         }
