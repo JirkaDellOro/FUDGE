@@ -7,7 +7,6 @@ namespace Fudge {
       closed: boolean = true;
       vertices: SketchVertex[] = [];
       lineColor: string | CanvasGradient | CanvasPattern = "black";
-      selected: boolean = false;
 
       /**
        * (Re-)Generates the Path2D component of a point. 

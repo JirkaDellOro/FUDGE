@@ -38,7 +38,7 @@ namespace Fudge {
        */
       draw(_context: CanvasRenderingContext2D): void {
         super.draw(_context);
-        if (this.activated) {
+        if (this.activated && VectorEditor.vectorEditor.tangentsActive) {
           this.tangentIn.draw(_context);
           this.tangentOut.draw(_context);
         }

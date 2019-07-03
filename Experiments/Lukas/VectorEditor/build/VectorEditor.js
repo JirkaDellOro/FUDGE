@@ -238,6 +238,9 @@ var Fudge;
     let SketchTypes;
     (function (SketchTypes) {
         class Sketch {
+            constructor() {
+                this.objects = [];
+            }
         }
         SketchTypes.Sketch = Sketch;
     })(SketchTypes = Fudge.SketchTypes || (Fudge.SketchTypes = {}));
@@ -253,9 +256,13 @@ var Fudge;
             constructor() {
                 this.color = "black";
                 this.path2D = new Path2D;
+                this.selected = false;
             }
             static sort(_a, _b) {
                 return _a.order - _b.order;
+            }
+            draw(_crc) {
+                //;
             }
         }
         SketchTypes.SketchObject = SketchObject;
@@ -274,7 +281,6 @@ var Fudge;
                 this.closed = true;
                 this.vertices = [];
                 this.lineColor = "black";
-                this.selected = false;
             }
             /**
              * (Re-)Generates the Path2D component of a point.
@@ -447,7 +453,7 @@ var Fudge;
              */
             draw(_context) {
                 super.draw(_context);
-                if (this.activated) {
+                if (this.activated && Fudge.VectorEditor.vectorEditor.tangentsActive) {
                     this.tangentIn.draw(_context);
                     this.tangentOut.draw(_context);
                 }
@@ -471,9 +477,10 @@ var Fudge;
 var FUDGE;
 (function (FUDGE) {
     class UIButton extends HTMLButtonElement {
-        constructor(_functionToCall, _name, _hover, _help, _extendedHelp) {
+        constructor(_functionToCall, _name, _icon, _hover, _help, _extendedHelp) {
             super();
             this.name = _name;
+            this.icon = _icon;
             this.hover = _hover;
             this.help = _help;
             this.extendedHelp = _extendedHelp;
@@ -483,4 +490,410 @@ var FUDGE;
     }
     FUDGE.UIButton = UIButton;
 })(FUDGE || (FUDGE = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class Editor {
+            constructor(_sketch = null) {
+                this.selectedPaths = [];
+                this.selectedPoints = [];
+                this.scale = 1;
+                this.showTangentsShortcut = { keys: [Fudge.KEY.ALT_LEFT] };
+                this.quadraticShapesShortcut = { keys: [Fudge.KEY.SHIFT_LEFT] };
+                this.tangentsActive = false;
+                this.changeHistory = [];
+                this.mousedown = (_event) => {
+                    _event.preventDefault();
+                    if (this.selectedTool)
+                        this.selectedTool.mousedown(_event);
+                    this.redrawAll();
+                };
+                this.mouseup = (_event) => {
+                    _event.preventDefault();
+                    if (this.selectedTool)
+                        this.selectedTool.mousedown(_event);
+                    this.redrawAll();
+                };
+                this.mousemove = (_event) => {
+                    _event.preventDefault();
+                    if (this.selectedTool)
+                        this.selectedTool.mousedown(_event);
+                    if (_event.buttons > 0 || _event.button > 0)
+                        this.redrawAll();
+                };
+                this.keydown = (_event) => {
+                    // _event.preventDefault();
+                    let key = Fudge.stringToKey(_event.code);
+                    if (!Editor.isKeyPressed(key)) {
+                        Editor.pressedKeys.push(key);
+                    }
+                    if (!this.tangentsActive && Editor.isShortcutPressed(this.showTangentsShortcut)) {
+                        this.tangentsActive = true;
+                        this.redrawAll();
+                    }
+                    for (let t of this.toolManager.tools) {
+                        if (Editor.isShortcutPressed(t.shortcut)) {
+                            this.selectedTool = t;
+                            this.uiHandler.updateUI();
+                        }
+                    }
+                };
+                this.keyup = (_event) => {
+                    // _event.preventDefault();
+                    let key = Fudge.stringToKey(_event.code);
+                    if (Editor.isKeyPressed(key)) {
+                        Editor.pressedKeys.splice(Editor.pressedKeys.indexOf(key), 1);
+                    }
+                    if (this.tangentsActive && !Editor.isShortcutPressed(this.showTangentsShortcut)) {
+                        this.tangentsActive = false;
+                        //TODO: remove tangets from selected points
+                        this.redrawAll();
+                    }
+                };
+                if (_sketch)
+                    this.sketch = _sketch;
+                else
+                    this.sketch = new Fudge.SketchTypes.Sketch();
+                this.toolManager = new VectorEditor.ToolManager();
+                this.selectedTool = this.toolManager.tools[0];
+                this.uiHandler = new VectorEditor.UIHandler(this);
+                this.canvas = document.getElementsByTagName("canvas")[0];
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.crc = this.canvas.getContext("2d");
+                this.canvas.addEventListener("mousedown", this.mousedown);
+                this.canvas.addEventListener("mouseup", this.mouseup);
+                this.canvas.addEventListener("mousemove", this.mousemove);
+                window.addEventListener("keydown", this.keydown);
+                window.addEventListener("keyup", this.keyup);
+                this.transformationPoint = new Fudge.Vector2(this.canvas.width / 2, this.canvas.height / 2);
+                this.redrawAll();
+            }
+            static isKeyPressed(_key) {
+                return Editor.pressedKeys.indexOf(_key) > -1;
+            }
+            static isShortcutPressed(_shortcut) {
+                return false;
+            }
+            selectTool() {
+                //
+            }
+            redrawAll() {
+                console.log("redraw");
+                this.crc.resetTransform();
+                this.crc.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.crc.translate(this.transformationPoint.x, this.transformationPoint.y);
+                this.crc.scale(this.scale, this.scale);
+                this.sketch.objects.sort(Fudge.SketchTypes.SketchObject.sort);
+                for (let obj of this.sketch.objects) {
+                    this.crc.globalAlpha = 1;
+                    if (this.selectedPaths.length > 0 && !obj.selected) {
+                        this.crc.globalAlpha = 0.5;
+                    }
+                    obj.draw(this.crc);
+                }
+                let transformationPointPath = new Path2D();
+                let lineLength = 10;
+                transformationPointPath.moveTo(-lineLength / this.scale, 0);
+                transformationPointPath.lineTo(lineLength / this.scale, 0);
+                transformationPointPath.moveTo(0, -lineLength / this.scale);
+                transformationPointPath.lineTo(0, lineLength / this.scale);
+                this.crc.strokeStyle = "black";
+                this.crc.lineWidth = 2 / this.scale;
+                this.crc.stroke(transformationPointPath);
+            }
+        }
+        Editor.pressedKeys = [];
+        VectorEditor.Editor = Editor;
+        window.addEventListener("DOMContentLoaded", init);
+        function init() {
+            let sketch = new Fudge.SketchTypes.Sketch();
+            sketch.objects.push();
+            VectorEditor.vectorEditor = new Editor(sketch);
+        }
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let KEY;
+    (function (KEY) {
+        KEY["A"] = "KeyA";
+        KEY["B"] = "KeyB";
+        KEY["C"] = "KeyC";
+        KEY["D"] = "KeyD";
+        KEY["E"] = "KeyE";
+        KEY["F"] = "KeyF";
+        KEY["G"] = "KeyG";
+        KEY["H"] = "KeyH";
+        KEY["I"] = "KeyI";
+        KEY["J"] = "KeyJ";
+        KEY["K"] = "KeyK";
+        KEY["L"] = "KeyL";
+        KEY["M"] = "KeyM";
+        KEY["N"] = "KeyN";
+        KEY["O"] = "KeyO";
+        KEY["P"] = "KeyP";
+        KEY["Q"] = "KeyQ";
+        KEY["R"] = "KeyR";
+        KEY["S"] = "KeyS";
+        KEY["T"] = "KeyT";
+        KEY["U"] = "KeyU";
+        KEY["V"] = "KeyV";
+        KEY["W"] = "KeyW";
+        KEY["X"] = "KeyX";
+        KEY["Y"] = "KeyY";
+        KEY["Z"] = "KeyZ";
+        KEY["ESC"] = "Escape";
+        KEY["ZERO"] = "Digit0";
+        KEY["ONE"] = "Digit1";
+        KEY["TWO"] = "Digit2";
+        KEY["TRHEE"] = "Digit3";
+        KEY["FOUR"] = "Digit4";
+        KEY["FIVE"] = "Digit5";
+        KEY["SIX"] = "Digit6";
+        KEY["SEVEN"] = "Digit7";
+        KEY["EIGHT"] = "Digit8";
+        KEY["NINE"] = "Digit9";
+        KEY["MINUS"] = "Minus";
+        KEY["EQUAL"] = "Equal";
+        KEY["BACKSPACE"] = "Backspace";
+        KEY["TABULATOR"] = "Tab";
+        KEY["BRACKET_LEFT"] = "BracketLeft";
+        KEY["BRACKET_RIGHT"] = "BracketRight";
+        KEY["ENTER"] = "Enter";
+        KEY["CTRL_LEFT"] = "ControlLeft";
+        KEY["SEMICOLON"] = "Semicolon";
+        KEY["QUOTE"] = "Quote";
+        KEY["BACK_QUOTE"] = "Backquote";
+        KEY["SHIFT_LEFT"] = "ShiftLeft";
+        KEY["BACKSLASH"] = "Backslash";
+        KEY["COMMA"] = "Comma";
+        KEY["PERIOD"] = "Period";
+        KEY["SLASH"] = "Slash";
+        KEY["SHIFT_RIGHT"] = "ShiftRight";
+        KEY["NUMPAD_MULTIPLY"] = "NumpadMultiply";
+        KEY["ALT_LEFT"] = "AltLeft";
+        KEY["SPACE"] = "Space";
+        KEY["CAPS_LOCK"] = "CapsLock";
+        KEY["F1"] = "F1";
+        KEY["F2"] = "F2";
+        KEY["F3"] = "F3";
+        KEY["F4"] = "F4";
+        KEY["F5"] = "F5";
+        KEY["F6"] = "F6";
+        KEY["F7"] = "F7";
+        KEY["F8"] = "F8";
+        KEY["F9"] = "F9";
+        KEY["F10"] = "F10";
+        KEY["PAUSE"] = "Pause";
+        KEY["SCROLL_LOCK"] = "ScrollLock";
+        KEY["NUMPAD7"] = "Numpad7";
+        KEY["NUMPAD8"] = "Numpad8";
+        KEY["NUMPAD9"] = "Numpad9";
+        KEY["NUMPAD_SUBTRACT"] = "NumpadSubtract";
+        KEY["NUMPAD4"] = "Numpad4";
+        KEY["NUMPAD5"] = "Numpad5";
+        KEY["NUMPAD6"] = "Numpad6";
+        KEY["NUMPAD_ADD"] = "NumpadAdd";
+        KEY["NUMPAD1"] = "Numpad1";
+        KEY["NUMPAD2"] = "Numpad2";
+        KEY["NUMPAD3"] = "Numpad3";
+        KEY["NUMPAD0"] = "Numpad0";
+        KEY["NUMPAD_DECIMAL"] = "NumpadDecimal";
+        KEY["PRINT_SCREEN"] = "PrintScreen";
+        KEY["INTL_BACK_SLASH"] = "IntlBackSlash";
+        KEY["F11"] = "F11";
+        KEY["F12"] = "F12";
+        KEY["NUMPAD_EQUAL"] = "NumpadEqual";
+        KEY["F13"] = "F13";
+        KEY["F14"] = "F14";
+        KEY["F15"] = "F15";
+        KEY["F16"] = "F16";
+        KEY["F17"] = "F17";
+        KEY["F18"] = "F18";
+        KEY["F19"] = "F19";
+        KEY["F20"] = "F20";
+        KEY["F21"] = "F21";
+        KEY["F22"] = "F22";
+        KEY["F23"] = "F23";
+        KEY["F24"] = "F24";
+        KEY["KANA_MODE"] = "KanaMode";
+        KEY["LANG2"] = "Lang2";
+        KEY["LANG1"] = "Lang1";
+        KEY["INTL_RO"] = "IntlRo";
+        KEY["CONVERT"] = "Convert";
+        KEY["NON_CONVERT"] = "NonConvert";
+        KEY["INTL_YEN"] = "IntlYen";
+        KEY["NUMPAD_COMMA"] = "NumpadComma";
+        KEY["UNDO"] = "Undo";
+        KEY["PASTE"] = "Paste";
+        KEY["MEDIA_TRACK_PREVIOUS"] = "MediaTrackPrevious";
+        KEY["CUT"] = "Cut";
+        KEY["COPY"] = "Copy";
+        KEY["MEDIA_TRACK_NEXT"] = "MediaTrackNext";
+        KEY["NUMPAD_ENTER"] = "NumpadEnter";
+        KEY["CTRL_RIGHT"] = "ControlRight";
+        KEY["AUDIO_VOLUME_MUTE"] = "AudioVolumeMute";
+        KEY["LAUNCH_APP2"] = "LaunchApp2";
+        KEY["MEDIA_PLAY_PAUSE"] = "MediaPlayPause";
+        KEY["MEDIA_STOP"] = "MediaStop";
+        KEY["EJECT"] = "Eject";
+        KEY["AUDIO_VOLUME_DOWN"] = "AudioVolumeDown";
+        KEY["VOLUME_DOWN"] = "VolumeDown";
+        KEY["AUDIO_VOLUME_UP"] = "AudioVolumeUp";
+        KEY["VOLUME_UP"] = "VolumeUp";
+        KEY["BROWSER_HOME"] = "BrowserHome";
+        KEY["NUMPAD_DIVIDE"] = "NumpadDivide";
+        KEY["ALT_RIGHT"] = "AltRight";
+        KEY["HELP"] = "Help";
+        KEY["NUM_LOCK"] = "NumLock";
+        KEY["HOME"] = "Home";
+        KEY["ARROW_UP"] = "ArrowUp";
+        KEY["PAGE_UP"] = "PageUp";
+        KEY["ARROW_RIGHT"] = "ArrowRight";
+        KEY["END"] = "End";
+        KEY["ARROW_DOWN"] = "ArrowDown";
+        KEY["PAGE_DOWN"] = "PageDown";
+        KEY["INSERT"] = "Insert";
+        KEY["DELETE"] = "Delete";
+        KEY["META_LEFT"] = "Meta_Left";
+        KEY["OS_LEFT"] = "OSLeft";
+        KEY["META_RIGHT"] = "MetaRight";
+        KEY["OS_RIGHT"] = "OSRight";
+        KEY["CONTEXT_MENU"] = "ContextMenu";
+        KEY["POWER"] = "Power";
+        KEY["BROWSER_SEARCH"] = "BrowserSearch";
+        KEY["BROWSER_FAVORITES"] = "BrowserFavorites";
+        KEY["BROWSER_REFRESH"] = "BrowserRefresh";
+        KEY["BROWSER_STOP"] = "BrowserStop";
+        KEY["BROWSER_FORWARD"] = "BrowserForward";
+        KEY["BROWSER_BACK"] = "BrowserBack";
+        KEY["LAUNCH_APP1"] = "LaunchApp1";
+        KEY["LAUNCH_MAIL"] = "LaunchMail";
+        KEY["LAUNCH_MEDIA_PLAYER"] = "LaunchMediaPlayer";
+        //mac brings this buttton
+        KEY["FN"] = "Fn";
+        //Linux brings these
+        KEY["AGAIN"] = "Again";
+        KEY["PROPS"] = "Props";
+        KEY["SELECT"] = "Select";
+        KEY["OPEN"] = "Open";
+        KEY["FIND"] = "Find";
+        KEY["WAKE_UP"] = "WakeUp";
+        KEY["NUMPAD_PARENT_LEFT"] = "NumpadParentLeft";
+        KEY["NUMPAD_PARENT_RIGHT"] = "NumpadParentRight";
+        //android
+        KEY["SLEEP"] = "Sleep";
+    })(KEY = Fudge.KEY || (Fudge.KEY = {}));
+    function stringToKey(_s) {
+        // let typedKeyString: keyof typeof KEY = _s as keyof typeof KEY;
+        // return KEY[typedKeyString];
+        // @ts-ignore: implicit any
+        return KEY.S;
+    }
+    Fudge.stringToKey = stringToKey;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class UIHandler {
+            constructor(_editor) {
+                this.editor = _editor;
+            }
+            updateUI() {
+                //
+            }
+        }
+        VectorEditor.UIHandler = UIHandler;
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class Tool {
+            constructor(_name) {
+                this.name = _name;
+            }
+            mousedown(_event) {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.mousedown(_event);
+            }
+            mousemove(_event) {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.mousemove(_event);
+            }
+            mouseup(_event) {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.mouseup(_event);
+            }
+            mousescroll(_event) {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.mousescroll(_event);
+            }
+            prequisitesFulfilled() {
+                return true;
+            }
+            additionalDisplay(_crc) {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.additionalDisplay(_crc);
+            }
+            addAdditonalSubmenuOptions() {
+                return;
+            }
+            exit() {
+                if (this.selectedSubTool)
+                    this.selectedSubTool.exit();
+            }
+        }
+        VectorEditor.Tool = Tool;
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class ToolManager {
+            constructor() {
+                this.tools = [];
+                for (let t of ToolManager.toolTypes) {
+                    this.tools.push(new t(""));
+                }
+            }
+            static registerTool(_tool) {
+                return ToolManager.toolTypes.push(_tool);
+            }
+        }
+        ToolManager.toolTypes = [];
+        VectorEditor.ToolManager = ToolManager;
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class ToolMove extends VectorEditor.Tool {
+            constructor() {
+                super("Move");
+            }
+        }
+        ToolMove.iRegister = VectorEditor.ToolManager.registerTool(ToolMove);
+        VectorEditor.ToolMove = ToolMove;
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let VectorEditor;
+    (function (VectorEditor) {
+        class ToolSelect extends VectorEditor.Tool {
+            constructor() {
+                super("Select");
+            }
+        }
+        ToolSelect.iRegister = VectorEditor.ToolManager.registerTool(ToolSelect);
+        VectorEditor.ToolSelect = ToolSelect;
+    })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
+})(Fudge || (Fudge = {}));
 //# sourceMappingURL=VectorEditor.js.map
