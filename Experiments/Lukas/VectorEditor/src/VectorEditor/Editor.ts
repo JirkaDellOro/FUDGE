@@ -18,18 +18,22 @@ namespace Fudge {
       showTangentsShortcut: Shortcut = { keys: [KEY.ALT_LEFT] };
       quadraticShapesShortcut: Shortcut = { keys: [KEY.SHIFT_LEFT] };
       tangentsActive: boolean = false;
-      changeHistory: SketchTypes.Sketch[] = [];
+      changeHistory: string[] = [];
+      changeHistoryIndex: number = 0;
 
       constructor(_sketch: SketchTypes.Sketch = null) {
         if (_sketch) this.sketch = _sketch;
         else this.sketch = new SketchTypes.Sketch();
+        this.changeHistory.push(JSON.stringify(this.sketch));
         this.toolManager = new ToolManager();
         this.selectedTool = this.toolManager.tools[0];
         this.uiHandler = new UIHandler(this);
+
         this.canvas = document.getElementsByTagName("canvas")[0];
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.crc = this.canvas.getContext("2d");
+
         this.canvas.addEventListener("mousedown", this.mousedown);
         this.canvas.addEventListener("mouseup", this.mouseup);
         this.canvas.addEventListener("mousemove", this.mousemove);
@@ -98,6 +102,24 @@ namespace Fudge {
 
       selectTool(): void {
         //
+      }
+
+      undo(): void {
+        if (this.changeHistoryIndex <= 0) return;
+        this.changeHistoryIndex--;
+        this.sketch = JSON.parse(this.changeHistory[this.changeHistoryIndex]);
+      }
+
+      redo(): void {
+        this.changeHistoryIndex++;
+        if (this.changeHistoryIndex >= this.changeHistory.length) this.changeHistoryIndex = this.changeHistory.length - 1;
+        this.sketch = JSON.parse(this.changeHistory[this.changeHistoryIndex]);
+      }
+
+      saveToChangeHistory(): void {
+        this.changeHistoryIndex++;
+        if (this.changeHistoryIndex < this.changeHistory.length) this.changeHistory.splice(this.changeHistoryIndex);
+        this.changeHistory.push(JSON.stringify(this.sketch));
       }
 
 

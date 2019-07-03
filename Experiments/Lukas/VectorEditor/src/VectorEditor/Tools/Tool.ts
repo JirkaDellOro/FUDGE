@@ -7,6 +7,7 @@ namespace Fudge {
       selectedSubTool: Tool;
       subTools: Tool[];
       name: string;
+      icon: string;
 
       constructor(_name: string) {
         this.name = _name;

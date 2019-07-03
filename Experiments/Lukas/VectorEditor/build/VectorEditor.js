@@ -503,6 +503,7 @@ var Fudge;
                 this.quadraticShapesShortcut = { keys: [Fudge.KEY.SHIFT_LEFT] };
                 this.tangentsActive = false;
                 this.changeHistory = [];
+                this.changeHistoryIndex = 0;
                 this.mousedown = (_event) => {
                     _event.preventDefault();
                     if (this.selectedTool)
@@ -555,6 +556,7 @@ var Fudge;
                     this.sketch = _sketch;
                 else
                     this.sketch = new Fudge.SketchTypes.Sketch();
+                this.changeHistory.push(JSON.stringify(this.sketch));
                 this.toolManager = new VectorEditor.ToolManager();
                 this.selectedTool = this.toolManager.tools[0];
                 this.uiHandler = new VectorEditor.UIHandler(this);
@@ -578,6 +580,24 @@ var Fudge;
             }
             selectTool() {
                 //
+            }
+            undo() {
+                if (this.changeHistoryIndex <= 0)
+                    return;
+                this.changeHistoryIndex--;
+                this.sketch = JSON.parse(this.changeHistory[this.changeHistoryIndex]);
+            }
+            redo() {
+                this.changeHistoryIndex++;
+                if (this.changeHistoryIndex >= this.changeHistory.length)
+                    this.changeHistoryIndex = this.changeHistory.length - 1;
+                this.sketch = JSON.parse(this.changeHistory[this.changeHistoryIndex]);
+            }
+            saveToChangeHistory() {
+                this.changeHistoryIndex++;
+                if (this.changeHistoryIndex < this.changeHistory.length)
+                    this.changeHistory.splice(this.changeHistoryIndex);
+                this.changeHistory.push(JSON.stringify(this.sketch));
             }
             redrawAll() {
                 console.log("redraw");
@@ -801,8 +821,40 @@ var Fudge;
         class UIHandler {
             constructor(_editor) {
                 this.editor = _editor;
+                this.toolBar = document.getElementById("toolBar");
+                this.subToolBar = document.getElementById("subToolBar");
+                this.inspector = document.getElementById("inspector");
+                this.infoBar = document.getElementById("infoBar");
+                this.createUI();
             }
             updateUI() {
+                this.deselectAll();
+                let div = document.getElementById(this.editor.selectedTool.name);
+                div.classList.add("selected");
+            }
+            createUI() {
+                this.toolBar.innerHTML = "";
+                for (let tool of this.editor.toolManager.tools) {
+                    let div = document.createElement("div");
+                    div.classList.add("outline", "tool");
+                    div.id = tool.name;
+                    let icon = document.createElement("img");
+                    icon.src = tool.icon;
+                    div.appendChild(icon);
+                    this.toolBar.appendChild(div);
+                }
+                this.updateUI();
+            }
+            deselectAll() {
+                let divs = document.querySelectorAll(".selected");
+                for (let div of divs) {
+                    div.classList.remove("selected");
+                }
+            }
+            updateSelectedObjectUI() {
+                //
+            }
+            updateSelectedObject() {
                 //
             }
         }
@@ -877,6 +929,7 @@ var Fudge;
         class ToolMove extends VectorEditor.Tool {
             constructor() {
                 super("Move");
+                this.icon = "./images/move.svg";
             }
         }
         ToolMove.iRegister = VectorEditor.ToolManager.registerTool(ToolMove);
@@ -890,6 +943,7 @@ var Fudge;
         class ToolSelect extends VectorEditor.Tool {
             constructor() {
                 super("Select");
+                this.icon = "./images/cursor.svg";
             }
         }
         ToolSelect.iRegister = VectorEditor.ToolManager.registerTool(ToolSelect);

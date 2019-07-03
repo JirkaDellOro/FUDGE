@@ -7,6 +7,7 @@ namespace Fudge {
       
       constructor() {
         super("Move");
+        this.icon = "./images/move.svg";
       }
     }
   }

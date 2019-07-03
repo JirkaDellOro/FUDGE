@@ -320,7 +320,8 @@ declare namespace Fudge {
             showTangentsShortcut: Shortcut;
             quadraticShapesShortcut: Shortcut;
             tangentsActive: boolean;
-            changeHistory: SketchTypes.Sketch[];
+            changeHistory: string[];
+            changeHistoryIndex: number;
             constructor(_sketch?: SketchTypes.Sketch);
             static isKeyPressed(_key: KEY): boolean;
             static isShortcutPressed(_shortcut: Shortcut): boolean;
@@ -330,6 +331,9 @@ declare namespace Fudge {
             keydown: (_event: KeyboardEvent) => void;
             keyup: (_event: KeyboardEvent) => void;
             selectTool(): void;
+            undo(): void;
+            redo(): void;
+            saveToChangeHistory(): void;
             private redrawAll;
         }
         let vectorEditor: Editor;
@@ -513,8 +517,16 @@ declare namespace Fudge {
     namespace VectorEditor {
         class UIHandler {
             editor: Editor;
+            toolBar: HTMLDivElement;
+            subToolBar: HTMLDivElement;
+            inspector: HTMLDivElement;
+            infoBar: HTMLDivElement;
             constructor(_editor: Editor);
             updateUI(): void;
+            createUI(): void;
+            deselectAll(): void;
+            updateSelectedObjectUI(): void;
+            updateSelectedObject(): void;
         }
     }
 }
@@ -527,6 +539,7 @@ declare namespace Fudge {
             selectedSubTool: Tool;
             subTools: Tool[];
             name: string;
+            icon: string;
             constructor(_name: string);
             mousedown(_event: MouseEvent): void;
             mousemove(_event: MouseEvent): void;

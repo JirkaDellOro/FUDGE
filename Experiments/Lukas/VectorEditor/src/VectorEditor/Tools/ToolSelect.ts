@@ -11,6 +11,7 @@ namespace Fudge {
       
       constructor() {
         super("Select");
+        this.icon = "./images/cursor.svg";
       }
 
     }
