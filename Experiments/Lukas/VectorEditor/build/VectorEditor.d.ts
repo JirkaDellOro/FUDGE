@@ -316,7 +316,6 @@ declare namespace Fudge {
     namespace Utils {
         function RandomRange(_min: number, _max: number): number;
         function RandomColor(_includeAlpha?: boolean): string;
-        function getCircularReplacer(): any;
     }
 }
 declare namespace Fudge {
@@ -348,6 +347,8 @@ declare namespace Fudge {
             setScale(_scale: number, _event?: MouseEvent): void;
             keydown: (_event: KeyboardEvent) => void;
             keyup: (_event: KeyboardEvent) => void;
+            copy: (_e: ClipboardEvent) => void;
+            paste: (_event: ClipboardEvent) => void;
             selectTool(_name: string): void;
             undo(): void;
             redo(): void;

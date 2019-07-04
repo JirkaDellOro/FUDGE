@@ -524,19 +524,18 @@ var Fudge;
             return c;
         }
         Utils.RandomColor = RandomColor;
-        function getCircularReplacer() {
-            const seen = new WeakSet();
-            return (key, value) => {
-                if (typeof value === "object" && value !== null) {
-                    if (seen.has(value)) {
-                        return;
-                    }
-                    seen.add(value);
-                }
-                return value;
-            };
-        }
-        Utils.getCircularReplacer = getCircularReplacer;
+        // export function getCircularReplacer(): any {
+        //   const seen: WeakSet<any> = new WeakSet();
+        //   return (key: any, value: any) => {
+        //     if (typeof value === "object" && value !== null) {
+        //       if (seen.has(value)) {
+        //         return;
+        //       }
+        //       seen.add(value);
+        //     }
+        //     return value;
+        //   };
+        // }
     })(Utils = Fudge.Utils || (Fudge.Utils = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -615,6 +614,16 @@ var Fudge;
                         this.redrawAll();
                     }
                 };
+                this.copy = (_e) => {
+                    _e.clipboardData.setData("text/plain", JSON.stringify(this.sketch.objects));
+                    _e.preventDefault();
+                };
+                this.paste = (_event) => {
+                    //TODO: make this actually work
+                    let data = _event.clipboardData.getData("text/plain");
+                    console.log(data);
+                    this.redrawAll();
+                };
                 if (_sketch)
                     this.sketch = _sketch;
                 else
@@ -633,6 +642,8 @@ var Fudge;
                 window.addEventListener("keydown", this.keydown);
                 window.addEventListener("keyup", this.keyup);
                 window.addEventListener("wheel", this.scroll);
+                document.addEventListener("copy", this.copy);
+                document.addEventListener("paste", this.paste);
                 this.transformationPoint = new Fudge.Vector2(this.canvas.width / 2, this.canvas.height / 2);
                 this.redrawAll();
             }

@@ -40,6 +40,8 @@ namespace Fudge {
         window.addEventListener("keydown", this.keydown);
         window.addEventListener("keyup", this.keyup);
         window.addEventListener("wheel", this.scroll);
+        document.addEventListener("copy", this.copy);
+        document.addEventListener("paste", this.paste);
 
         this.transformationPoint = new Vector2(this.canvas.width / 2, this.canvas.height / 2);
         this.redrawAll();
@@ -122,6 +124,18 @@ namespace Fudge {
           //TODO: remove tangets from selected points
           this.redrawAll();
         }
+      }
+
+      copy = (_e: ClipboardEvent) => {
+        _e.clipboardData.setData("text/plain", JSON.stringify(this.sketch.objects));
+        _e.preventDefault();
+      }
+
+      paste = (_event: ClipboardEvent) => {
+        //TODO: make this actually work
+        let data: string = _event.clipboardData.getData("text/plain");
+        console.log(data);
+        this.redrawAll();
       }
 
       selectTool(_name: string): void {
