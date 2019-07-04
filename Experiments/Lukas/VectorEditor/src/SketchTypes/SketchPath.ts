@@ -2,11 +2,23 @@ namespace Fudge {
   export namespace SketchTypes {
     /**
      * The basic path object. Currently the thing that makes up all visual sketch objects
+     * @authors Lukas Scheuerle, HFU, 2019
      */
     export class SketchPath extends SketchObject {
       closed: boolean = true;
       vertices: SketchVertex[] = [];
       lineColor: string | CanvasGradient | CanvasPattern = "black";
+      lineWidth: number = 1;
+
+      constructor(_color: string | CanvasGradient | CanvasPattern, _lineColor: string | CanvasGradient | CanvasPattern, _lineWidth: number = 1, _name: string = "", _order: number = 0, _vertices: SketchVertex[] = []) {
+        super();
+        this.color = _color;
+        this.lineColor = _lineColor;
+        this.lineWidth = _lineWidth;
+        this.name = _name;
+        this.order = _order;
+        this.vertices = _vertices;
+      }
 
       /**
        * (Re-)Generates the Path2D component of a point. 
@@ -40,6 +52,7 @@ namespace Fudge {
         _context.fillStyle = this.color;
         _context.fill(this.path2D);
         _context.strokeStyle = this.lineColor;
+        _context.lineWidth = this.lineWidth;
         _context.stroke(this.path2D);
 
         if (this.selected) {
@@ -55,7 +68,7 @@ namespace Fudge {
        * @param _index The zero-based index at which to insert the vertex. Can be negative to indicate counting from the back. Defaults to -1.
        */
       addVertexAtPos(_vertex: SketchVertex, _index: number = -1): void {
-        _vertex.parent = this;
+        // _vertex.parent = this;
         if (_index < 0) {
           _index = this.vertices.length + _index;
         }

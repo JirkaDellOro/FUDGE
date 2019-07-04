@@ -2,16 +2,17 @@ namespace Fudge {
   export namespace SketchTypes {
     /**
      * Describes the corners of a SketchPath object.
+     * @authors Lukas Scheuerle, HFU, 2019
      */
     export class SketchVertex extends SketchPoint {
       public tangentIn: SketchTangentPoint;
       public tangentOut: SketchTangentPoint;
-      public parent: SketchPath;
+      // public parent: SketchPath;
       private activated: boolean = false;
 
-      constructor(_x: number, _y: number, _parent: SketchPath) {
+      constructor(_x: number, _y: number, _parent: SketchPath = null) {
         super(_x, _y);
-        this.parent = _parent;
+        // this.parent = _parent;
         this.tangentIn = new SketchTangentPoint(_x, _y);
         this.tangentOut = new SketchTangentPoint(_x, _y);
       }

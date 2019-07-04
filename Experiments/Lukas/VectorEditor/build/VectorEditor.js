@@ -237,6 +237,10 @@ var Fudge;
 (function (Fudge) {
     let SketchTypes;
     (function (SketchTypes) {
+        /**
+         * The main Sketch that holds all info related to a whole sketch.
+         * @authors Lukas Scheuerle, HFU, 2019
+         */
         class Sketch {
             constructor() {
                 this.objects = [];
@@ -251,6 +255,7 @@ var Fudge;
     (function (SketchTypes) {
         /**
          * The basic Sketch Object that all drawable objects are made of.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchObject {
             constructor() {
@@ -274,13 +279,21 @@ var Fudge;
     (function (SketchTypes) {
         /**
          * The basic path object. Currently the thing that makes up all visual sketch objects
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchPath extends SketchTypes.SketchObject {
-            constructor() {
-                super(...arguments);
+            constructor(_color, _lineColor, _lineWidth = 1, _name = "", _order = 0, _vertices = []) {
+                super();
                 this.closed = true;
                 this.vertices = [];
                 this.lineColor = "black";
+                this.lineWidth = 1;
+                this.color = _color;
+                this.lineColor = _lineColor;
+                this.lineWidth = _lineWidth;
+                this.name = _name;
+                this.order = _order;
+                this.vertices = _vertices;
             }
             /**
              * (Re-)Generates the Path2D component of a point.
@@ -307,6 +320,7 @@ var Fudge;
                 _context.fillStyle = this.color;
                 _context.fill(this.path2D);
                 _context.strokeStyle = this.lineColor;
+                _context.lineWidth = this.lineWidth;
                 _context.stroke(this.path2D);
                 if (this.selected) {
                     for (let point of this.vertices) {
@@ -320,7 +334,7 @@ var Fudge;
              * @param _index The zero-based index at which to insert the vertex. Can be negative to indicate counting from the back. Defaults to -1.
              */
             addVertexAtPos(_vertex, _index = -1) {
-                _vertex.parent = this;
+                // _vertex.parent = this;
                 if (_index < 0) {
                     _index = this.vertices.length + _index;
                 }
@@ -402,6 +416,7 @@ var Fudge;
     (function (SketchTypes) {
         /**
          * Describes the Tangent Point used to draw the Bezier Curve between two SketchVertices.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchTangentPoint extends SketchTypes.SketchPoint {
             /**
@@ -424,12 +439,14 @@ var Fudge;
     (function (SketchTypes) {
         /**
          * Describes the corners of a SketchPath object.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchVertex extends SketchTypes.SketchPoint {
-            constructor(_x, _y, _parent) {
+            constructor(_x, _y, _parent = null) {
                 super(_x, _y);
+                // public parent: SketchPath;
                 this.activated = false;
-                this.parent = _parent;
+                // this.parent = _parent;
                 this.tangentIn = new SketchTypes.SketchTangentPoint(_x, _y);
                 this.tangentOut = new SketchTypes.SketchTangentPoint(_x, _y);
             }
@@ -492,6 +509,38 @@ var FUDGE;
 })(FUDGE || (FUDGE = {}));
 var Fudge;
 (function (Fudge) {
+    let Utils;
+    (function (Utils) {
+        function RandomRange(_min, _max) {
+            return Math.floor((Math.random() * (_max - _min)) + _min);
+        }
+        Utils.RandomRange = RandomRange;
+        function RandomColor(_includeAlpha = false) {
+            let c = "rgba(";
+            c += RandomRange(0, 255) + ",";
+            c += RandomRange(0, 255) + ",";
+            c += RandomRange(0, 255) + ",";
+            c += _includeAlpha ? RandomRange(0, 255) + ")" : "1)";
+            return c;
+        }
+        Utils.RandomColor = RandomColor;
+        function getCircularReplacer() {
+            const seen = new WeakSet();
+            return (key, value) => {
+                if (typeof value === "object" && value !== null) {
+                    if (seen.has(value)) {
+                        return;
+                    }
+                    seen.add(value);
+                }
+                return value;
+            };
+        }
+        Utils.getCircularReplacer = getCircularReplacer;
+    })(Utils = Fudge.Utils || (Fudge.Utils = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     let VectorEditor;
     (function (VectorEditor) {
         class Editor {
@@ -520,8 +569,21 @@ var Fudge;
                     _event.preventDefault();
                     if (this.selectedTool)
                         this.selectedTool.mousedown(_event);
+                    this.uiHandler.updateMousePosition(_event.clientX - this.transformationPoint.x, _event.clientY - this.transformationPoint.y);
                     if (_event.buttons > 0 || _event.button > 0)
                         this.redrawAll();
+                };
+                this.scroll = (_event) => {
+                    let scaleMutiplier = 0.9;
+                    let newScale = this.scale;
+                    _event.preventDefault();
+                    if (_event.deltaY > 0) {
+                        newScale = this.scale * scaleMutiplier;
+                    }
+                    else if (_event.deltaY < 0) {
+                        newScale = this.scale / scaleMutiplier;
+                    }
+                    this.setScale(newScale, _event);
                 };
                 this.keydown = (_event) => {
                     // _event.preventDefault();
@@ -569,6 +631,7 @@ var Fudge;
                 this.canvas.addEventListener("mousemove", this.mousemove);
                 window.addEventListener("keydown", this.keydown);
                 window.addEventListener("keyup", this.keyup);
+                window.addEventListener("wheel", this.scroll);
                 this.transformationPoint = new Fudge.Vector2(this.canvas.width / 2, this.canvas.height / 2);
                 this.redrawAll();
             }
@@ -578,8 +641,23 @@ var Fudge;
             static isShortcutPressed(_shortcut) {
                 return false;
             }
-            selectTool() {
-                //
+            setScale(_scale, _event = null) {
+                let newScale = +Math.max(0.1, Math.min(_scale, 10)).toFixed(2);
+                if (_event) {
+                    this.transformationPoint = new Fudge.Vector2(_event.clientX - (_event.clientX - this.transformationPoint.x) * newScale / this.scale, _event.clientY - (_event.clientY - this.transformationPoint.y) * newScale / this.scale);
+                }
+                this.scale = newScale;
+                this.uiHandler.updateScale(this.scale);
+                this.redrawAll();
+            }
+            selectTool(_name) {
+                for (let t of this.toolManager.tools) {
+                    if (t.name == _name) {
+                        this.selectedTool = t;
+                        this.uiHandler.updateUI();
+                        return;
+                    }
+                }
             }
             undo() {
                 if (this.changeHistoryIndex <= 0)
@@ -628,9 +706,24 @@ var Fudge;
         VectorEditor.Editor = Editor;
         window.addEventListener("DOMContentLoaded", init);
         function init() {
-            let sketch = new Fudge.SketchTypes.Sketch();
+            let sketch = createTestSketch();
             sketch.objects.push();
             VectorEditor.vectorEditor = new Editor(sketch);
+        }
+        function createTestSketch() {
+            let sketch = new Fudge.SketchTypes.Sketch();
+            let amountObjects = 3;
+            let amountPoints = 3;
+            for (let i = 0; i < amountObjects; i++) {
+                let start = new Fudge.SketchTypes.SketchVertex(Fudge.Utils.RandomRange(-250, 250), Fudge.Utils.RandomRange(-250, 250));
+                let path = new Fudge.SketchTypes.SketchPath(Fudge.Utils.RandomColor(), "black", 1, "path" + i, i, [start]);
+                for (let k = 0; k < amountPoints - 1; k++) {
+                    let newPoint = new Fudge.SketchTypes.SketchVertex(Fudge.Utils.RandomRange(-250, 250), Fudge.Utils.RandomRange(-250, 250));
+                    path.addVertexAtPos(newPoint);
+                }
+                sketch.objects.push(path);
+            }
+            return sketch;
         }
     })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
 })(Fudge || (Fudge = {}));
@@ -820,6 +913,18 @@ var Fudge;
     (function (VectorEditor) {
         class UIHandler {
             constructor(_editor) {
+                this.setScale = () => {
+                    let scale = Number(this.scaleInput.value);
+                    this.editor.setScale(scale);
+                };
+                this.handleClickOnTool = (_event) => {
+                    if (_event.target == this.toolBar)
+                        return;
+                    if (_event.target.classList.contains("selected"))
+                        return;
+                    console.log(_event.currentTarget);
+                    this.editor.selectTool(_event.currentTarget.id);
+                };
                 this.editor = _editor;
                 this.toolBar = document.getElementById("toolBar");
                 this.subToolBar = document.getElementById("subToolBar");
@@ -828,11 +933,13 @@ var Fudge;
                 this.createUI();
             }
             updateUI() {
+                //selection
                 this.deselectAll();
                 let div = document.getElementById(this.editor.selectedTool.name);
                 div.classList.add("selected");
             }
             createUI() {
+                //toolbar
                 this.toolBar.innerHTML = "";
                 for (let tool of this.editor.toolManager.tools) {
                     let div = document.createElement("div");
@@ -841,8 +948,26 @@ var Fudge;
                     let icon = document.createElement("img");
                     icon.src = tool.icon;
                     div.appendChild(icon);
+                    div.addEventListener("click", this.handleClickOnTool);
                     this.toolBar.appendChild(div);
                 }
+                //infobar
+                this.infoBar.innerHTML = "";
+                let s = document.createElement("span");
+                s.innerText = "Mouseposition: ";
+                this.mousePositionSpan = document.createElement("span");
+                this.mousePositionSpan.id = "mousePositionSpan";
+                this.mousePositionSpan.innerText = "0 | 0";
+                this.infoBar.appendChild(s);
+                this.infoBar.appendChild(this.mousePositionSpan);
+                s = document.createElement("span");
+                s.innerText = ", Scale: ";
+                this.scaleInput = document.createElement("input");
+                this.scaleInput.id = "scaleInput";
+                this.scaleInput.value = this.editor.scale.toString();
+                this.infoBar.appendChild(s);
+                this.infoBar.appendChild(this.scaleInput);
+                this.scaleInput.addEventListener("change", this.setScale);
                 this.updateUI();
             }
             deselectAll() {
@@ -850,6 +975,12 @@ var Fudge;
                 for (let div of divs) {
                     div.classList.remove("selected");
                 }
+            }
+            updateMousePosition(_x = 0, _y = 0) {
+                this.mousePositionSpan.innerText = `${_x.toFixed(0)} | ${_y.toFixed(0)}`;
+            }
+            updateScale(_scale = 1) {
+                this.scaleInput.value = `${_scale}`;
             }
             updateSelectedObjectUI() {
                 //

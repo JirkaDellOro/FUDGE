@@ -2,6 +2,7 @@ namespace Fudge {
   export namespace SketchTypes {
     /**
      * The basic Sketch Object that all drawable objects are made of.
+     * @authors Lukas Scheuerle, HFU, 2019
      */
     export class SketchObject {
       order: number;

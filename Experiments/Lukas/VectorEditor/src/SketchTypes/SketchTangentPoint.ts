@@ -2,6 +2,7 @@ namespace Fudge {
   export namespace SketchTypes {
     /**
      * Describes the Tangent Point used to draw the Bezier Curve between two SketchVertices.
+     * @authors Lukas Scheuerle, HFU, 2019
      */
     export class SketchTangentPoint extends SketchPoint {
       public parent: SketchVertex;

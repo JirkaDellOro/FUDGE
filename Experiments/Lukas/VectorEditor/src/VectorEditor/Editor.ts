@@ -39,6 +39,7 @@ namespace Fudge {
         this.canvas.addEventListener("mousemove", this.mousemove);
         window.addEventListener("keydown", this.keydown);
         window.addEventListener("keyup", this.keyup);
+        window.addEventListener("wheel", this.scroll);
 
         this.transformationPoint = new Vector2(this.canvas.width / 2, this.canvas.height / 2);
         this.redrawAll();
@@ -65,7 +66,29 @@ namespace Fudge {
       mousemove = (_event: MouseEvent) => {
         _event.preventDefault();
         if (this.selectedTool) this.selectedTool.mousedown(_event);
+        this.uiHandler.updateMousePosition(_event.clientX - this.transformationPoint.x, _event.clientY - this.transformationPoint.y);
         if (_event.buttons > 0 || _event.button > 0) this.redrawAll();
+      }
+      scroll = (_event: MouseWheelEvent) => {
+        let scaleMutiplier: number = 0.9;
+        let newScale: number = this.scale;
+        _event.preventDefault();
+        if (_event.deltaY > 0) {
+          newScale = this.scale * scaleMutiplier;
+        } else if (_event.deltaY < 0) {
+          newScale = this.scale / scaleMutiplier;
+        }
+        this.setScale(newScale, _event);
+      }
+      setScale(_scale: number, _event: MouseEvent = null): void {
+        let newScale: number = +Math.max(0.1, Math.min(_scale, 10)).toFixed(2);
+
+        if (_event) {
+          this.transformationPoint = new Vector2(_event.clientX - (_event.clientX - this.transformationPoint.x) * newScale / this.scale, _event.clientY - (_event.clientY - this.transformationPoint.y) * newScale / this.scale);
+        }
+        this.scale = newScale;
+        this.uiHandler.updateScale(this.scale);
+        this.redrawAll();
       }
 
       keydown = (_event: KeyboardEvent) => {
@@ -100,8 +123,14 @@ namespace Fudge {
         }
       }
 
-      selectTool(): void {
-        //
+      selectTool(_name: string): void {
+        for (let t of this.toolManager.tools) {
+          if (t.name == _name) {
+            this.selectedTool = t;
+            this.uiHandler.updateUI();
+            return;
+          }
+        }
       }
 
       undo(): void {
@@ -155,10 +184,29 @@ namespace Fudge {
     window.addEventListener("DOMContentLoaded", init);
     export let vectorEditor: Editor;
     function init(): void {
-      let sketch: SketchTypes.Sketch = new SketchTypes.Sketch();
+      let sketch: SketchTypes.Sketch = createTestSketch();
 
       sketch.objects.push();
       vectorEditor = new Editor(sketch);
+    }
+
+    function createTestSketch(): SketchTypes.Sketch {
+      let sketch: SketchTypes.Sketch = new SketchTypes.Sketch();
+      let amountObjects: number = 3;
+      let amountPoints: number = 3;
+
+      for (let i: number = 0; i < amountObjects; i++) {
+        let start: SketchTypes.SketchVertex = new SketchTypes.SketchVertex(Utils.RandomRange(-250, 250), Utils.RandomRange(-250, 250));
+        let path: SketchTypes.SketchPath = new SketchTypes.SketchPath(Utils.RandomColor(), "black", 1, "path" + i, i, [start]);
+        for (let k: number = 0; k < amountPoints - 1; k++) {
+          let newPoint: SketchTypes.SketchVertex = new SketchTypes.SketchVertex(Utils.RandomRange(-250, 250), Utils.RandomRange(-250, 250));
+          path.addVertexAtPos(newPoint);
+        }
+
+        sketch.objects.push(path);
+      }
+
+      return sketch;
     }
   }
 }

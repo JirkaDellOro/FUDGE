@@ -148,6 +148,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     namespace SketchTypes {
+        /**
+         * The main Sketch that holds all info related to a whole sketch.
+         * @authors Lukas Scheuerle, HFU, 2019
+         */
         class Sketch {
             objects: SketchObject[];
         }
@@ -157,6 +161,7 @@ declare namespace Fudge {
     namespace SketchTypes {
         /**
          * The basic Sketch Object that all drawable objects are made of.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchObject {
             order: number;
@@ -173,11 +178,14 @@ declare namespace Fudge {
     namespace SketchTypes {
         /**
          * The basic path object. Currently the thing that makes up all visual sketch objects
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchPath extends SketchObject {
             closed: boolean;
             vertices: SketchVertex[];
             lineColor: string | CanvasGradient | CanvasPattern;
+            lineWidth: number;
+            constructor(_color: string | CanvasGradient | CanvasPattern, _lineColor: string | CanvasGradient | CanvasPattern, _lineWidth?: number, _name?: string, _order?: number, _vertices?: SketchVertex[]);
             /**
              * (Re-)Generates the Path2D component of a point.
              */
@@ -240,6 +248,7 @@ declare namespace Fudge {
     namespace SketchTypes {
         /**
          * Describes the Tangent Point used to draw the Bezier Curve between two SketchVertices.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchTangentPoint extends SketchPoint {
             parent: SketchVertex;
@@ -256,13 +265,13 @@ declare namespace Fudge {
     namespace SketchTypes {
         /**
          * Describes the corners of a SketchPath object.
+         * @authors Lukas Scheuerle, HFU, 2019
          */
         class SketchVertex extends SketchPoint {
             tangentIn: SketchTangentPoint;
             tangentOut: SketchTangentPoint;
-            parent: SketchPath;
             private activated;
-            constructor(_x: number, _y: number, _parent: SketchPath);
+            constructor(_x: number, _y: number, _parent?: SketchPath);
             /**
              * Activates the Vertex to add tangent points to allow for line manipulation.
              */
@@ -304,6 +313,13 @@ declare namespace FUDGE {
     }
 }
 declare namespace Fudge {
+    namespace Utils {
+        function RandomRange(_min: number, _max: number): number;
+        function RandomColor(_includeAlpha?: boolean): string;
+        function getCircularReplacer(): any;
+    }
+}
+declare namespace Fudge {
     namespace VectorEditor {
         class Editor {
             static pressedKeys: string[];
@@ -328,9 +344,11 @@ declare namespace Fudge {
             mousedown: (_event: MouseEvent) => void;
             mouseup: (_event: MouseEvent) => void;
             mousemove: (_event: MouseEvent) => void;
+            scroll: (_event: WheelEvent) => void;
+            setScale(_scale: number, _event?: MouseEvent): void;
             keydown: (_event: KeyboardEvent) => void;
             keyup: (_event: KeyboardEvent) => void;
-            selectTool(): void;
+            selectTool(_name: string): void;
             undo(): void;
             redo(): void;
             saveToChangeHistory(): void;
@@ -521,12 +539,18 @@ declare namespace Fudge {
             subToolBar: HTMLDivElement;
             inspector: HTMLDivElement;
             infoBar: HTMLDivElement;
+            mousePositionSpan: HTMLSpanElement;
+            scaleInput: HTMLInputElement;
             constructor(_editor: Editor);
             updateUI(): void;
             createUI(): void;
             deselectAll(): void;
+            updateMousePosition(_x?: number, _y?: number): void;
+            updateScale(_scale?: number): void;
+            setScale: () => void;
             updateSelectedObjectUI(): void;
             updateSelectedObject(): void;
+            handleClickOnTool: (_event: MouseEvent) => void;
         }
     }
 }

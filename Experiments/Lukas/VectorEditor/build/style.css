@@ -68,3 +68,7 @@
 .selected {
   background: #a84b02;
 }
+
+#scaleInput {
+  width: 3em;
+}
