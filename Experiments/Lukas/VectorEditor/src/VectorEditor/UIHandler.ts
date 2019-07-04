@@ -39,7 +39,7 @@ namespace Fudge {
           div.appendChild(icon);
           div.addEventListener("click", this.handleClickOnTool);
           this.toolBar.appendChild(div);
-        } 
+        }
 
         //infobar
         this.infoBar.innerHTML = "";
@@ -71,15 +71,16 @@ namespace Fudge {
         }
       }
 
-      updateMousePosition(_x: number = 0, _y: number = 0): void {
-        this.mousePositionSpan.innerText = `${_x.toFixed(0)} | ${_y.toFixed(0)}`;
+      updateMousePosition(_mousePos: Vector2): void {
+        this.mousePositionSpan.innerText = `${_mousePos.x.toFixed(0)} | ${_mousePos.y.toFixed(0)}`;
       }
       updateScale(_scale: number = 1): void {
         this.scaleInput.value = `${_scale}`;
       }
       setScale = () => {
         let scale: number = Number(this.scaleInput.value);
-        this.editor.setScale(scale);
+        if (scale) this.editor.setScale(scale);
+        else this.updateScale(this.editor.scale);
       }
 
       updateSelectedObjectUI(): void {

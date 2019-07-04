@@ -352,6 +352,7 @@ declare namespace Fudge {
             undo(): void;
             redo(): void;
             saveToChangeHistory(): void;
+            realPosToCanvasPos(_clientPos: Vector2): Vector2;
             private redrawAll;
         }
         let vectorEditor: Editor;
@@ -545,7 +546,7 @@ declare namespace Fudge {
             updateUI(): void;
             createUI(): void;
             deselectAll(): void;
-            updateMousePosition(_x?: number, _y?: number): void;
+            updateMousePosition(_mousePos: Vector2): void;
             updateScale(_scale?: number): void;
             setScale: () => void;
             updateSelectedObjectUI(): void;

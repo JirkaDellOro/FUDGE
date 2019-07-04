@@ -569,7 +569,7 @@ var Fudge;
                     _event.preventDefault();
                     if (this.selectedTool)
                         this.selectedTool.mousedown(_event);
-                    this.uiHandler.updateMousePosition(_event.clientX - this.transformationPoint.x, _event.clientY - this.transformationPoint.y);
+                    this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Fudge.Vector2(_event.clientX, _event.clientY)));
                     if (_event.buttons > 0 || _event.button > 0)
                         this.redrawAll();
                 };
@@ -584,6 +584,7 @@ var Fudge;
                         newScale = this.scale / scaleMutiplier;
                     }
                     this.setScale(newScale, _event);
+                    this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Fudge.Vector2(_event.clientX, _event.clientY)));
                 };
                 this.keydown = (_event) => {
                     // _event.preventDefault();
@@ -677,8 +678,11 @@ var Fudge;
                     this.changeHistory.splice(this.changeHistoryIndex);
                 this.changeHistory.push(JSON.stringify(this.sketch));
             }
+            realPosToCanvasPos(_clientPos) {
+                return new Fudge.Vector2((_clientPos.x - this.transformationPoint.x) / this.scale, (_clientPos.y - this.transformationPoint.y) / this.scale);
+            }
             redrawAll() {
-                console.log("redraw");
+                // console.log("redraw");
                 this.crc.resetTransform();
                 this.crc.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 this.crc.translate(this.transformationPoint.x, this.transformationPoint.y);
@@ -915,7 +919,10 @@ var Fudge;
             constructor(_editor) {
                 this.setScale = () => {
                     let scale = Number(this.scaleInput.value);
-                    this.editor.setScale(scale);
+                    if (scale)
+                        this.editor.setScale(scale);
+                    else
+                        this.updateScale(this.editor.scale);
                 };
                 this.handleClickOnTool = (_event) => {
                     if (_event.target == this.toolBar)
@@ -976,8 +983,8 @@ var Fudge;
                     div.classList.remove("selected");
                 }
             }
-            updateMousePosition(_x = 0, _y = 0) {
-                this.mousePositionSpan.innerText = `${_x.toFixed(0)} | ${_y.toFixed(0)}`;
+            updateMousePosition(_mousePos) {
+                this.mousePositionSpan.innerText = `${_mousePos.x.toFixed(0)} | ${_mousePos.y.toFixed(0)}`;
             }
             updateScale(_scale = 1) {
                 this.scaleInput.value = `${_scale}`;

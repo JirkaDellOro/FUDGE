@@ -66,7 +66,7 @@ namespace Fudge {
       mousemove = (_event: MouseEvent) => {
         _event.preventDefault();
         if (this.selectedTool) this.selectedTool.mousedown(_event);
-        this.uiHandler.updateMousePosition(_event.clientX - this.transformationPoint.x, _event.clientY - this.transformationPoint.y);
+        this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Vector2(_event.clientX, _event.clientY)));
         if (_event.buttons > 0 || _event.button > 0) this.redrawAll();
       }
       scroll = (_event: MouseWheelEvent) => {
@@ -79,6 +79,7 @@ namespace Fudge {
           newScale = this.scale / scaleMutiplier;
         }
         this.setScale(newScale, _event);
+        this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Vector2(_event.clientX, _event.clientY)));
       }
       setScale(_scale: number, _event: MouseEvent = null): void {
         let newScale: number = +Math.max(0.1, Math.min(_scale, 10)).toFixed(2);
@@ -151,9 +152,15 @@ namespace Fudge {
         this.changeHistory.push(JSON.stringify(this.sketch));
       }
 
+      realPosToCanvasPos(_clientPos: Vector2): Vector2 {
+        return new Vector2(
+          (_clientPos.x - this.transformationPoint.x) / this.scale,
+          (_clientPos.y - this.transformationPoint.y) / this.scale);
+      }
+
 
       private redrawAll(): void {
-        console.log("redraw");
+        // console.log("redraw");
         this.crc.resetTransform();
         this.crc.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.crc.translate(this.transformationPoint.x, this.transformationPoint.y);
