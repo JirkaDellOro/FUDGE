@@ -14,6 +14,7 @@ Clarified details about the UX Usertest
 -> Excercises people will have to do for the Usertest? - Creation of simple 2D/3D objects in scene editor -> animation editor ->            scripting
 
 Clarifying Structure of UI Components
+([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190626_Whiteboard_full.JPG))
 
 # June 19th 2019
 Presentation moodboard by Lea: Preferred are simple HTML elements, flat design (no dropshadows for buttons), icons are used for easily identifiable elements that won´t be extended, labeled buttons for elements that can´t be touched
