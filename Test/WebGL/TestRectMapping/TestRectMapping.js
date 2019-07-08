@@ -43,7 +43,7 @@ var RenderManagerRendering;
         ƒ.Loop.start();
         function animate(_event) {
             update();
-            branch.cmpTransform.rotateY(1);
+            branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();

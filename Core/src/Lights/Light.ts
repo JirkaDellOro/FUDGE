@@ -14,7 +14,7 @@ namespace Fudge {
 
     /**
      * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)  
-     * ```text
+     * ```plaintext
      * ~ ~ ~  
      *  ~ ~ ~  
      * ```
@@ -26,7 +26,7 @@ namespace Fudge {
     }
     /**
      * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)  
-     * ```text
+     * ```plaintext
      * --->  
      * --->  
      * --->  
@@ -41,7 +41,7 @@ namespace Fudge {
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)  
-     * ```text
+     * ```plaintext
      *         .\|/.
      *        -- o --
      *         ´/|\`
@@ -52,7 +52,7 @@ namespace Fudge {
     }
     /**
      * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color  
-     * ```text
+     * ```plaintext
      *          o  
      *         /|\  
      *        / | \ 

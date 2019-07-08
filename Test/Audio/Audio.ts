@@ -17,7 +17,8 @@ namespace AudioTest {
         out = document.querySelector("output");
 
         let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-        let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+        const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+        const mtxBody: ƒ.Matrix4x4 = body.cmpTransform.local;
 
         /* So sollte die Einbindung der Audio Componente aussehen
         let audioAsset: ƒ.AudioAsset = new ƒ.AudioAsset(filename); // <- wobei diese Zeile vollständig geraten ist, aber so ähnlich wird es wohl werden
@@ -45,24 +46,26 @@ namespace AudioTest {
 
         function update(_event: Event): void {
             let time: number = performance.now() / 1000;
-            let position: ƒ.Vector3 = body.cmpTransform.position;
+            let position: ƒ.Vector3 = mtxBody.translation;
 
             if (parameter.xAmplitude)
                 position.x = parameter.xAmplitude * Math.sin(parameter.frequency * time);
             if (parameter.zAmplitude)
                 position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
 
-            body.cmpTransform.position = position;
+            mtxBody.translation = position;
 
             ƒ.RenderManager.update();
+            // let ctxCamera: ƒ.Matrix4x4 = viewport.camera.getContainer().cmpTransform.local;
+            // ctxCamera.lookAt(position);
             viewport.draw();
             printInfo(body, viewport.camera.getContainer());
         }
     }
 
     function printInfo(_body: ƒ.Node, _camera: ƒ.Node): void {
-        let posBody: ƒ.Vector3 = _body.cmpTransform.position;
-        let posCamera: ƒ.Vector3 = _camera.cmpTransform.position;
+        let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;
+        let posCamera: ƒ.Vector3 = _camera.cmpTransform.local.translation;
         let info: string = "<fieldset><legend>Info</legend>";
         info += `camera [${posCamera.x.toFixed(2)} |${posCamera.y.toFixed(2)} |${posCamera.z.toFixed(2)}] `;
         info += ` body [${posBody.x.toFixed(2)} |${posBody.y.toFixed(2)} |${posBody.z.toFixed(2)}]`;
@@ -79,41 +82,42 @@ namespace AudioTest {
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, move);
 
         function move(_event: ƒ.KeyboardEventƒ): void {
-            let cmpTransform: ƒ.ComponentTransform = _body.cmpTransform;
-            let cmpCameraTransform: ƒ.ComponentTransform = _viewport.camera.getContainer().cmpTransform;
-            cmpTransform.translateZ(0.1 *
+            const mtxBody: ƒ.Matrix4x4 = _body.cmpTransform.local;
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+
+            mtxBody.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? 1 :
                         0));
-            cmpTransform.translateX(0.1 *
+            mtxBody.translateX(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? 1 :
                         0));
 
             switch (_event.code) {
                 case ƒ.KEYBOARD_CODE.SPACE:
-                    cmpTransform.reset();
+                    mtxBody.set(ƒ.Matrix4x4.IDENTITY);
                     parameter.xAmplitude = parameter.zAmplitude = 0;
                     break;
                 case ƒ.KEYBOARD_CODE.X:
                     if (parameter.xAmplitude)
                         parameter.xAmplitude = 0;
                     else {
-                        parameter.xAmplitude = cmpTransform.position.x;
+                        parameter.xAmplitude = mtxBody.translation.x;
                     }
                     break;
                 case ƒ.KEYBOARD_CODE.Y:
                     if (parameter.zAmplitude)
                         parameter.zAmplitude = 0;
                     else {
-                        parameter.zAmplitude = cmpTransform.position.z;
+                        parameter.zAmplitude = mtxBody.translation.z;
                     }
                     break;
                 case ƒ.KEYBOARD_CODE.PAGE_UP:
-                    cmpCameraTransform.position = ƒ.Vector3.add(cmpCameraTransform.position, ƒ.Vector3.Y(0.2));
+                    mtxCamera.translateY(0.2);
                     break;
                 case ƒ.KEYBOARD_CODE.PAGE_DOWN:
-                    cmpCameraTransform.position = ƒ.Vector3.add(cmpCameraTransform.position, ƒ.Vector3.Y(-0.2));
+                    mtxCamera.translateY(-0.2);
                     break;
                 case ƒ.KEYBOARD_CODE.Q:
                     parameter.frequency *= 0.8;

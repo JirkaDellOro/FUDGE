@@ -21,11 +21,28 @@ namespace Fudge {
      * and how points in the frame correspond to points in the resulting rectangle 
      */
     export abstract class Framing extends Mutable {
+        /**
+         * Maps a point in the given frame according to this framing
+         * @param _pointInFrame The point in the frame given
+         * @param _rectFrame The frame the point is relative to
+         */
         public abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+
+        /**
+         * Maps a point in a given rectangle back to a calculated frame of origin
+         * @param _point The point in the rectangle
+         * @param _rect The rectangle the point is relative to
+         */
         public abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+
+        /**
+         * Takes a rectangle as the frame and creates a new rectangle according to the framing
+         * @param _rectFrame
+         */
         public abstract getRect(_rectFrame: Rectangle): Rectangle;
         protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
+    
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
      * Points are scaled in the same ratio

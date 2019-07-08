@@ -2,10 +2,11 @@
 /// <reference path="../Render/RenderInjector.ts"/>
 /// <reference path="../Render/RenderOperator.ts"/>
 namespace Fudge {
-    // interface ShaderParameters {
-    //     [key: string]: number | Color;
-    // }
-
+    /**
+     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].  
+     * [[Material]]s reference [[Coat]] and [[Shader]].   
+     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     */
     export class Coat extends Mutable {
         public name: string = "Coat";
         protected renderData: {[key: string]: unknown};
@@ -18,7 +19,9 @@ namespace Fudge {
         protected reduceMutator(): void { /**/ }
     }
 
-
+    /**
+     * The simplest [[Coat]] providing just a color
+     */
     @RenderInjector.decorateCoat
     export class CoatColored extends Coat {
         public color: Color;
@@ -29,6 +32,9 @@ namespace Fudge {
         }
     }
 
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
     @RenderInjector.decorateCoat
     export class CoatTextured extends Coat {
         public texture: TextureImage = null;

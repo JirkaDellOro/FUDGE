@@ -15,13 +15,12 @@ var Scenes;
         let cubeRed = Scenes.createCompleteMeshNode("Red", mtrRed, meshCube);
         let cubeGreen = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
-        cubeRed.cmpTransform.scaleX(2);
-        cubeGreen.cmpTransform.scaleY(2);
+        cubeRed.cmpTransform.local.scaleX(2);
+        cubeGreen.cmpTransform.local.scaleY(2);
         // cubeBlue.cmpTransform.scaleZ(2);
-        // using pivot on blue node, just for testing...
-        let pivot = new ƒ.ComponentPivot();
-        pivot.scaleZ(2);
-        cubeBlue.addComponent(pivot);
+        // using mesh pivot on blue node, just for testing...
+        let cmpMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
+        cmpMesh.pivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
         // create branch
         let branch = new ƒ.Node("AxisCross");
@@ -39,9 +38,11 @@ var Scenes;
         let meshPyramid = new ƒ.MeshPyramid();
         let shaft = Scenes.createCompleteMeshNode("Shaft", material, meshCube);
         let head = Scenes.createCompleteMeshNode("Head", material, meshPyramid);
-        shaft.cmpTransform.scale(0.01, 1, 0.01);
-        head.cmpTransform.translateY(0.5);
-        head.cmpTransform.scale(0.05, 0.1, 0.05);
+        let mtxShaft = shaft.cmpTransform.local;
+        let mtxHead = head.cmpTransform.local;
+        mtxShaft.scale(new ƒ.Vector3(0.01, 1, 0.01));
+        mtxHead.translateY(0.5);
+        mtxHead.scale(new ƒ.Vector3(0.05, 0.1, 0.05));
         arrow.appendChild(shaft);
         arrow.appendChild(head);
         arrow.addComponent(new ƒ.ComponentTransform());
@@ -51,8 +52,8 @@ var Scenes;
         let arrowRed = createArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
         let arrowGreen = createArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
         let arrowBlue = createArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
-        arrowRed.cmpTransform.rotateZ(-90);
-        arrowBlue.cmpTransform.rotateX(90);
+        arrowRed.cmpTransform.local.rotateZ(-90);
+        arrowBlue.cmpTransform.local.rotateX(90);
         let coordinates = new ƒ.Node("CoordinateSystem");
         coordinates.appendChild(arrowRed);
         coordinates.appendChild(arrowGreen);
@@ -65,7 +66,7 @@ var Scenes;
         let child = Scenes.node.getChildren()[0];
         let grandchild;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
-        grandchild.cmpTransform.translateX(2);
+        grandchild.cmpTransform.local.translateX(2);
         child.appendChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
@@ -73,7 +74,7 @@ var Scenes;
         ƒ.RenderManager.initialize();
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
-        cmpTransform.scaleX(2);
+        cmpTransform.local.scaleX(2);
         Scenes.camera = createCamera();
         let child = new ƒ.Node("Child");
         Scenes.node.appendChild(child);
@@ -93,8 +94,8 @@ var Scenes;
     function createCamera(_translation = new ƒ.Vector3(1, 1, 10), _lookAt = new ƒ.Vector3()) {
         let camera = new ƒ.Node("Camera");
         let cmpTransform = new ƒ.ComponentTransform();
-        cmpTransform.translate(_translation.x, _translation.y, _translation.z);
-        cmpTransform.lookAt(_lookAt);
+        cmpTransform.local.translate(_translation);
+        cmpTransform.local.lookAt(_lookAt);
         camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
@@ -104,10 +105,8 @@ var Scenes;
     Scenes.createCamera = createCamera;
     function createCompleteMeshNode(_name, _material, _mesh) {
         let node = new ƒ.Node(_name);
-        let cmpMesh = new ƒ.ComponentMesh();
-        cmpMesh.setMesh(_mesh);
-        let cmpMaterial = new ƒ.ComponentMaterial();
-        cmpMaterial.initialize(_material);
+        let cmpMesh = new ƒ.ComponentMesh(_mesh);
+        let cmpMaterial = new ƒ.ComponentMaterial(_material);
         let cmpTransform = new ƒ.ComponentTransform();
         node.addComponent(cmpMesh);
         node.addComponent(cmpMaterial);
@@ -123,5 +122,25 @@ var Scenes;
         return canvas;
     }
     Scenes.createCanvas = createCanvas;
+    function dollyViewportCamera(_viewport) {
+        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
+        _viewport.addEventListener("\u0192keydown" /* DOWN */, rotate);
+        function rotate(_event) {
+            let mtxCamera = _viewport.camera.getContainer().cmpTransform.local;
+            let vctCamera = ƒ.Vector3.ZERO;
+            vctCamera.y = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
+                        0));
+            vctCamera.x = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
+                        0));
+            mtxCamera.translate(vctCamera);
+            mtxCamera.lookAt(ƒ.Vector3.ZERO, ƒ.Vector3.Y());
+            _viewport.draw();
+        }
+    }
+    Scenes.dollyViewportCamera = dollyViewportCamera;
 })(Scenes || (Scenes = {}));
 //# sourceMappingURL=Scenes.js.map

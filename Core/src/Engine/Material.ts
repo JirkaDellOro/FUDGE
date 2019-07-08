@@ -4,7 +4,8 @@ namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Material {
-        public name: string; // The name to call the Material by.
+        /** The name to call the Material by. */
+        public name: string; 
         private shaderType: typeof Shader; // The shader program used by this BaseMaterial
         private coat: Coat;
 
@@ -19,27 +20,45 @@ namespace Fudge {
             }
         }
 
+        /**
+         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         */
         public createCoatMatchingShader(): Coat {
             let coat: Coat = new (this.shaderType.getCoat())();
             return coat;
         }
 
+        /**
+         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * @param _coat 
+         */
         public setCoat(_coat: Coat): void {
             if (_coat.constructor != this.shaderType.getCoat())
                 throw (new Error("Shader and coat don't match"));
             this.coat = _coat;
         }
 
+        /**
+         * Returns the currently referenced [[Coat]] instance
+         */
         public getCoat(): Coat {
             return this.coat;
         }
 
+        /**
+         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance  
+         * and mutates the new coat to preserve matching properties.
+         * @param _shaderType 
+         */
         public setShader(_shaderType: typeof Shader): void {
             this.shaderType = _shaderType;
             let coat: Coat = this.createCoatMatchingShader();
             coat.mutate(this.coat.getMutator());
         }
 
+        /**
+         * Returns the [[Shader]] referenced by this material
+         */
         public getShader(): typeof Shader {
             return this.shaderType;
         }

@@ -1,0 +1,3 @@
+- Basiskomponenten UML vorgestellt
+- Aufbau für Client besprochen, benötigt ID und Connection
+- Übertragung von Nachrichtenobjekten statt neu erstellten Objekten im Code?
