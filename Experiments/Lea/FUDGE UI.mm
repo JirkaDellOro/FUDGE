@@ -9,15 +9,19 @@
 </node>
 <node CREATED="1562594186250" ID="ID_443641311" MODIFIED="1562594295524" TEXT="Edit: Undo, Redo, Copy, Paste, Select all, Deselect"/>
 <node CREATED="1562594297491" ID="ID_1555723413" MODIFIED="1562597085478" TEXT="Window: Zoom In, Zoom Out, Animation Editor, Sketch Editor"/>
-<node CREATED="1562594401763" ID="ID_1052766371" MODIFIED="1562594547719" TEXT="Tools: Objekt rotieren, skalieren, bewegen, ausw&#xe4;hlen, Ansicht bewegen"/>
+<node CREATED="1562594401763" ID="ID_1052766371" MODIFIED="1562668014681" TEXT="Tools: Neues Objekt, Objekt rotieren, skalieren, bewegen, ausw&#xe4;hlen, Ansicht bewegen"/>
 <node CREATED="1562594557380" ID="ID_1045180573" MODIFIED="1562594576358" TEXT="Help: About, Tutorials"/>
 </node>
 <node CREATED="1562593175545" HGAP="15" ID="ID_351410150" MODIFIED="1562594008499" TEXT="Toolbar: Objekt rotieren, skalieren, bewegen, ausw&#xe4;hlen, Ansicht bewegen" VSHIFT="37"/>
 <node CREATED="1562593528392" HGAP="5" ID="ID_1396702803" MODIFIED="1562593611606" TEXT="Scene Tree: Reihenfolge/Beziehung zwischen Objekten &#xe4;ndern, Neues Objekt erstellen, Objekt l&#xf6;schen" VSHIFT="35"/>
 <node CREATED="1562593622115" HGAP="-2" ID="ID_558906421" MODIFIED="1562593966948" TEXT="Viewport: Optische Anordnung der Elemente, Benutzung der Tools" VSHIFT="33"/>
 <node CREATED="1562593685258" HGAP="-6" ID="ID_69147282" MODIFIED="1562596360115" TEXT="Inspector: &#xc4;nderung der Objekteigenschaften, Materialien, Skripte, Audio, Rigidbodies" VSHIFT="19">
-<node CREATED="1562593805334" ID="ID_1579061459" MODIFIED="1562593820660" TEXT="Objekteigenschaften"/>
-<node CREATED="1562593820661" ID="ID_1655756880" MODIFIED="1562593829459" TEXT="Material"/>
+<node CREATED="1562593805334" ID="ID_1579061459" MODIFIED="1562668129537" TEXT="Objekteigenschaften">
+<node CREATED="1562668070624" ID="ID_1791293572" MODIFIED="1562668295919" TEXT="Position, Rotation, Scale"/>
+</node>
+<node CREATED="1562593820661" ID="ID_1655756880" MODIFIED="1562669058922" TEXT="Material">
+<node CREATED="1562668036990" ID="ID_1729369080" MODIFIED="1562669534604" TEXT="Open Sketch Editor, choose shader, coat(color, texture)"/>
+</node>
 <node CREATED="1562593857808" ID="ID_1527820368" MODIFIED="1562593866750" TEXT="Skript"/>
 <node CREATED="1562593867976" ID="ID_513509845" MODIFIED="1562593872688" TEXT="Audio"/>
 <node CREATED="1562593873853" ID="ID_1235108072" MODIFIED="1562593939276" TEXT="Rigidbody"/>
