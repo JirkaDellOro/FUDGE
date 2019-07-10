@@ -9,7 +9,7 @@
 </node>
 <node CREATED="1562594186250" ID="ID_443641311" MODIFIED="1562594295524" TEXT="Edit: Undo, Redo, Copy, Paste, Select all, Deselect"/>
 <node CREATED="1562594297491" ID="ID_1555723413" MODIFIED="1562597085478" TEXT="Window: Zoom In, Zoom Out, Animation Editor, Sketch Editor"/>
-<node CREATED="1562594401763" ID="ID_1052766371" MODIFIED="1562668014681" TEXT="Tools: Neues Objekt, Objekt rotieren, skalieren, bewegen, ausw&#xe4;hlen, Ansicht bewegen"/>
+<node CREATED="1562594401763" ID="ID_1052766371" MODIFIED="1562673265872" TEXT="Tools: Neues Objekt, Objekt rotieren, skalieren, bewegen, Objekt(e) ausw&#xe4;hlen, Ansicht bewegen"/>
 <node CREATED="1562594557380" ID="ID_1045180573" MODIFIED="1562594576358" TEXT="Help: About, Tutorials"/>
 </node>
 <node CREATED="1562593175545" HGAP="15" ID="ID_351410150" MODIFIED="1562594008499" TEXT="Toolbar: Objekt rotieren, skalieren, bewegen, ausw&#xe4;hlen, Ansicht bewegen" VSHIFT="37"/>
