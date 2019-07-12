@@ -1325,6 +1325,7 @@ declare namespace Fudge {
         scaleY(_by: number): void;
         scaleZ(_by: number): void;
         multiply(_matrix: Matrix4x4): void;
+        getVectorRepresentation(): Vector3[];
         set(_to: Matrix4x4): void;
         get(): Float32Array;
         serialize(): Serialization;
@@ -1344,7 +1345,7 @@ declare namespace Fudge {
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Vector3 {
+    class Vector3 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
         x: number;
@@ -1391,6 +1392,8 @@ declare namespace Fudge {
         get(): Float32Array;
         readonly copy: Vector3;
         transform(_matrix: Matrix4x4): void;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {

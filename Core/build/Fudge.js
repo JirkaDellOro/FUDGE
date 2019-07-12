@@ -2749,6 +2749,42 @@ var Fudge;
         }
         //#endregion
         //#region Transfer
+        getVectorRepresentation() {
+            // extract translation vector
+            // let translation: Vector3 = this.translation;  // already defined
+            // extract scaling vector and divide matrix by
+            let scaling = new Fudge.Vector3(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+            let s0 = this.data[0] / scaling.x;
+            let s1 = this.data[1] / scaling.x;
+            let s2 = this.data[2] / scaling.x;
+            let s6 = this.data[6] / scaling.y;
+            let s10 = this.data[10] / scaling.z;
+            let sy = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
+            let singular = sy < 1e-6; // If
+            let x1, y1, z1;
+            let x2, y2, z2;
+            if (!singular) {
+                x1 = Math.atan2(s6, s10);
+                y1 = Math.atan2(-s2, sy);
+                z1 = Math.atan2(s1, s0);
+                x2 = Math.atan2(-s6, -s10);
+                y2 = Math.atan2(-s2, -sy);
+                z2 = Math.atan2(-s1, -s0);
+                if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
+                    x1 = x2;
+                    y1 = y2;
+                    z1 = z2;
+                }
+            }
+            else {
+                x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+                y1 = Math.atan2(-this.data[2] / scaling.x, sy);
+                z1 = 0;
+            }
+            let rotation = new Fudge.Vector3(x1, y1, z1);
+            rotation.scale(180 / Math.PI);
+            return [this.translation, scaling, rotation];
+        }
         set(_to) {
             this.data = _to.get();
         }
@@ -2789,8 +2825,9 @@ var Fudge;
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Vector3 {
+    class Vector3 extends Fudge.Mutable {
         constructor(_x = 0, _y = 0, _z = 0) {
+            super();
             this.data = new Float32Array([_x, _y, _z]);
         }
         // TODO: implement equals-functions
@@ -2920,6 +2957,13 @@ var Fudge;
         transform(_matrix) {
             this.data = Vector3.TRANSFORMATION(this, _matrix).data;
         }
+        getMutator() {
+            let mutator = {
+                x: this.data[0], y: this.data[1], z: this.data[2]
+            };
+            return mutator;
+        }
+        reduceMutator(_mutator) { }
     }
     Fudge.Vector3 = Vector3;
 })(Fudge || (Fudge = {}));
