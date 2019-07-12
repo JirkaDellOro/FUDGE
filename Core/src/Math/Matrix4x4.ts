@@ -440,31 +440,41 @@ namespace Fudge {
                 Math.hypot(this.data[8], this.data[9], this.data[10])
             );
 
-            let sy: number = Math.hypot(this.data[0] / scaling.x, this.data[1] / scaling.x); // probably 2. param should be this.data[4] / scaling.y
+            let s0: number = this.data[0] / scaling.x;
+            let s1: number = this.data[1] / scaling.x;
+            let s2: number = this.data[2] / scaling.x;
+            let s6: number = this.data[6] / scaling.y;
+            let s10: number = this.data[10] / scaling.z;
+
+            let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
 
             let singular: boolean = sy < 1e-6; // If
 
-            let x: number, y: number, z: number;
-            if (!singular) {
-                x = Math.atan2(this.data[6] / scaling.y, this.data[10] / scaling.z);
-                y = Math.atan2(-this.data[2] / scaling.x, sy);
-                z = Math.atan2(this.data[1] / scaling.x, this.data[0] / scaling.x);
+            let x1: number, y1: number, z1: number;
+            let x2: number, y2: number, z2: number;
 
-                // x = Math.atan2(R.at<double>(2, 1), R.at<double>(2, 2));
-                // y = Math.atan2(-R.at<double>(2, 0), sy);
-                // z = Math.atan2(R.at<double>(1, 0), R.at<double>(0, 0));
+            if (!singular) {
+                x1 = Math.atan2(s6, s10);
+                y1 = Math.atan2(-s2, sy);
+                z1 = Math.atan2(s1, s0);
+
+                x2 = Math.atan2(-s6, -s10);
+                y2 = Math.atan2(-s2, -sy);
+                z2 = Math.atan2(-s1, -s0);
+                
+                if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
+                    x1 = x2;
+                    y1 = y2;
+                    z1 = z2;
+                }
             }
             else {
-                x = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
-                y = Math.atan2(-this.data[2] / scaling.x, sy);
-                z = 0;
-
-                // x = Math.atan2(-R.at<double>(1, 2), R.at<double>(1, 1));
-                // y = Math.atan2(-R.at<double>(2, 0), sy);
-                // z = 0;
+                x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+                y1 = Math.atan2(-this.data[2] / scaling.x, sy);
+                z1 = 0;
             }
 
-            let rotation: Vector3 = new Vector3(x, y, z);
+            let rotation: Vector3 = new Vector3(x1, y1, z1);
             rotation.scale(180 / Math.PI);
 
             return [this.translation, scaling, rotation];

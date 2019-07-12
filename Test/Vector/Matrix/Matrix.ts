@@ -3,6 +3,7 @@ namespace MarixTest {
     let coSys: ƒ.Node;
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
+    let anim: ƒ.Vector3[] = [ƒ.Vector3.ZERO, new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
 
     function init(_event: Event): void {
         createUI();
@@ -17,17 +18,23 @@ namespace MarixTest {
         update();
         displayVectors(coSys.cmpTransform.local);
 
-        // window.setInterval(
-        //     function (): void {
-        //         let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
-        //         // body.cmpTransform.rotateY(-1.1);
-        //         local.rotateY(1);
-        //         // body.cmpTransform.rotateZ(-0.9);
+        animate();
+    }
 
-        //         displayMatrix(local);
-        //         displayVectors(local);
-        //     },
-        //     20);
+    function animate(): void {
+        window.setInterval(
+            function (): void {
+                let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+
+                anim = local.getVectorRepresentation();
+                // anim[2].x += 1;
+                // anim[2].y += 1;
+                // anim[2].z += 1;
+                setTransform(anim);
+
+                update();
+            },
+            20);
     }
 
     function update(): void {
@@ -35,7 +42,8 @@ namespace MarixTest {
         viewport.draw();
         let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
         displayMatrix(local);
-        // displayVectors(local);
+        // if (!isAbsolute())
+        displayVectors(local);
     }
 
     function createUI(): void {
@@ -61,11 +69,15 @@ namespace MarixTest {
 
     function hndInteraction(_event: Event): void {
         let input: HTMLInputElement = <HTMLInputElement>_event.target;
+        if (input.name == "Interact") {
+            let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+            displayVectors(local);
+            return;
+        }
         let stepped: number = parseFloat(input.value) - parseFloat(input.getAttribute("lastValue"));
         input.setAttribute("stepped", stepped.toString());
 
-        let absolute: boolean = (<HTMLInputElement>document.querySelector("#absolute")).checked;
-        if (absolute)
+        if (isAbsolute())
             interactAbsolute(input);
         else
             interactRelative(input);
@@ -74,6 +86,9 @@ namespace MarixTest {
         input.setAttribute("lastValue", input.value);
     }
 
+    function isAbsolute(): boolean {
+        return (<HTMLInputElement>document.querySelector("#absolute")).checked;
+    }
 
     function interactAbsolute(_input: HTMLInputElement): void {
         let vectors: ƒ.Vector3[] = [];
@@ -86,15 +101,18 @@ namespace MarixTest {
             }
             vectors.push(vector);
         }
+        setTransform(vectors);
+    }
 
+    function setTransform(_vectors: ƒ.Vector3[]): void {
         let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY;
-        matrix.rotateX(vectors[2].x);
-        matrix.rotateZ(vectors[2].z);
-        matrix.rotateY(vectors[2].y);
-        matrix.scale(vectors[1]);
-        matrix.translate(vectors[0]);
+        matrix.translate(_vectors[0]);
+        matrix.rotateZ(_vectors[2].z);
+        matrix.rotateY(_vectors[2].y);
+        matrix.rotateX(_vectors[2].x);
+        matrix.scale(_vectors[1]);
 
-        ƒ.Debug.log(matrix);
+        // ƒ.Debug.log(matrix);
         coSys.cmpTransform.local = matrix;
     }
 

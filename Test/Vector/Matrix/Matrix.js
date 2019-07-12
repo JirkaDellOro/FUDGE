@@ -4,6 +4,7 @@ var MarixTest;
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
+    let anim = [ƒ.Vector3.ZERO, new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
     function init(_event) {
         createUI();
         coSys = Scenes.createCoordinateSystem();
@@ -13,23 +14,26 @@ var MarixTest;
         viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         update();
         displayVectors(coSys.cmpTransform.local);
-        // window.setInterval(
-        //     function (): void {
-        //         let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
-        //         // body.cmpTransform.rotateY(-1.1);
-        //         local.rotateY(1);
-        //         // body.cmpTransform.rotateZ(-0.9);
-        //         displayMatrix(local);
-        //         displayVectors(local);
-        //     },
-        //     20);
+        animate();
+    }
+    function animate() {
+        window.setInterval(function () {
+            let local = coSys.cmpTransform.local;
+            anim = local.getVectorRepresentation();
+            // anim[2].x += 1;
+            // anim[2].y += 1;
+            // anim[2].z += 1;
+            setTransform(anim);
+            update();
+        }, 20);
     }
     function update() {
         ƒ.RenderManager.update();
         viewport.draw();
         let local = coSys.cmpTransform.local;
         displayMatrix(local);
-        // displayVectors(local);
+        // if (!isAbsolute())
+        displayVectors(local);
     }
     function createUI() {
         let fieldset;
@@ -51,15 +55,22 @@ var MarixTest;
     }
     function hndInteraction(_event) {
         let input = _event.target;
+        if (input.name == "Interact") {
+            let local = coSys.cmpTransform.local;
+            displayVectors(local);
+            return;
+        }
         let stepped = parseFloat(input.value) - parseFloat(input.getAttribute("lastValue"));
         input.setAttribute("stepped", stepped.toString());
-        let absolute = document.querySelector("#absolute").checked;
-        if (absolute)
+        if (isAbsolute())
             interactAbsolute(input);
         else
             interactRelative(input);
         update();
         input.setAttribute("lastValue", input.value);
+    }
+    function isAbsolute() {
+        return document.querySelector("#absolute").checked;
     }
     function interactAbsolute(_input) {
         let vectors = [];
@@ -72,13 +83,16 @@ var MarixTest;
             }
             vectors.push(vector);
         }
+        setTransform(vectors);
+    }
+    function setTransform(_vectors) {
         let matrix = ƒ.Matrix4x4.IDENTITY;
-        matrix.rotateX(vectors[2].x);
-        matrix.rotateZ(vectors[2].z);
-        matrix.rotateY(vectors[2].y);
-        matrix.scale(vectors[1]);
-        matrix.translate(vectors[0]);
-        ƒ.Debug.log(matrix);
+        matrix.translate(_vectors[0]);
+        matrix.rotateZ(_vectors[2].z);
+        matrix.rotateY(_vectors[2].y);
+        matrix.rotateX(_vectors[2].x);
+        matrix.scale(_vectors[1]);
+        // ƒ.Debug.log(matrix);
         coSys.cmpTransform.local = matrix;
     }
     function interactRelative(_input) {
