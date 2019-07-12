@@ -18,7 +18,7 @@ namespace MarixTest {
         update();
         displayVectors(coSys.cmpTransform.local);
 
-        animate();
+        // animate();
     }
 
     function animate(): void {
@@ -44,6 +44,8 @@ namespace MarixTest {
         displayMatrix(local);
         // if (!isAbsolute())
         displayVectors(local);
+        let mutator: ƒ.Mutator = local.getMutator();
+        ƒ.Debug.log(mutator);
     }
 
     function createUI(): void {
@@ -56,7 +58,7 @@ namespace MarixTest {
         }
 
         fieldset = document.querySelector("#Vectors");
-        for (let transform of ["t", "s", "r"]) {
+        for (let transform of ["t", "r", "s"]) {
             for (let dimension of ["x", "y", "z"]) {
                 let id: string = transform + dimension;
                 fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' lastValue='0' stepped='0'/></span>`;
@@ -92,7 +94,7 @@ namespace MarixTest {
 
     function interactAbsolute(_input: HTMLInputElement): void {
         let vectors: ƒ.Vector3[] = [];
-        for (let transform of ["t", "s", "r"]) {
+        for (let transform of ["t", "r", "s"]) {
             let vector: ƒ.Vector3 = new ƒ.Vector3();
             for (let dimension of ["x", "y", "z"]) {
                 let id: string = transform + dimension;
@@ -106,11 +108,11 @@ namespace MarixTest {
 
     function setTransform(_vectors: ƒ.Vector3[]): void {
         let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY;
-        matrix.translate(_vectors[0]);
-        matrix.rotateZ(_vectors[2].z);
-        matrix.rotateY(_vectors[2].y);
-        matrix.rotateX(_vectors[2].x);
-        matrix.scale(_vectors[1]);
+        matrix.translate(_vectors[0]); 
+        matrix.rotateZ(_vectors[1].z);
+        matrix.rotateY(_vectors[1].y);
+        matrix.rotateX(_vectors[1].x);
+        matrix.scale(_vectors[2]);
 
         // ƒ.Debug.log(matrix);
         coSys.cmpTransform.local = matrix;
@@ -166,7 +168,7 @@ namespace MarixTest {
     }
     function displayVectors(_matrix: ƒ.Matrix4x4): void {
         let vectors: ƒ.Vector3[] = _matrix.getVectorRepresentation();
-        for (let transform of ["t", "s", "r"]) {
+        for (let transform of ["t", "r", "s"]) {
             let vector: ƒ.Vector3 = vectors.shift();
             for (let dimension of ["x", "y", "z"]) {
                 let id: string = transform + dimension;

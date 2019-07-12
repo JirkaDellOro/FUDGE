@@ -201,11 +201,11 @@ namespace Fudge {
             }
             // Supply matrixdata to shader. 
             let uProjection: WebGLUniformLocation = _renderShader.uniforms["u_projection"];
-            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.get());
 
             if (_renderShader.uniforms["u_world"]) {
                 let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
-                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.get());
 
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
                 RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);

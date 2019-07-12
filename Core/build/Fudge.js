@@ -311,10 +311,10 @@ var Fudge;
             }
             // Supply matrixdata to shader. 
             let uProjection = _renderShader.uniforms["u_projection"];
-            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.data);
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.get());
             if (_renderShader.uniforms["u_world"]) {
                 let uWorld = _renderShader.uniforms["u_world"];
-                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.data);
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.get());
                 RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
                 RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
                 RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Fudge.Mesh.getBufferSpecification());
@@ -2364,6 +2364,7 @@ var Fudge;
     class Matrix4x4 extends Fudge.Mutable {
         constructor() {
             super();
+            this.mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
             this.data = new Float32Array([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2783,7 +2784,7 @@ var Fudge;
             }
             let rotation = new Fudge.Vector3(x1, y1, z1);
             rotation.scale(180 / Math.PI);
-            return [this.translation, scaling, rotation];
+            return [this.translation, rotation, scaling];
         }
         set(_to) {
             this.data = _to.get();
@@ -2803,9 +2804,15 @@ var Fudge;
             return this;
         }
         getMutator() {
+            if (this.mutator)
+                return this.mutator;
+            let vectors = this.getVectorRepresentation();
             let mutator = {
-                data: Object.assign({}, this.data)
+                translation: vectors[0].getMutator(),
+                rotation: vectors[1].getMutator(),
+                scaling: vectors[2].getMutator()
             };
+            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
         reduceMutator(_mutator) { }
@@ -2867,7 +2874,7 @@ var Fudge;
         }
         static TRANSFORMATION(_vector, _matrix) {
             let result = new Vector3();
-            let m = _matrix.data;
+            let m = _matrix.get();
             let [x, y, z] = _vector.get();
             result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
             result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];

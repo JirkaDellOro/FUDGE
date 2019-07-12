@@ -12,7 +12,8 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 extends Mutable implements Serializable {
-        public data: Float32Array; // The data of the matrix.
+        private data: Float32Array; // The data of the matrix.
+        private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
 
         public constructor() {
             super();
@@ -430,7 +431,7 @@ namespace Fudge {
         //#endregion
 
         //#region Transfer
-        getVectorRepresentation(): Vector3[] {
+        public getVectorRepresentation(): Vector3[] {
             // extract translation vector
             // let translation: Vector3 = this.translation;  // already defined
             // extract scaling vector and divide matrix by
@@ -461,7 +462,7 @@ namespace Fudge {
                 x2 = Math.atan2(-s6, -s10);
                 y2 = Math.atan2(-s2, -sy);
                 z2 = Math.atan2(-s1, -s0);
-                
+
                 if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
                     x1 = x2;
                     y1 = y2;
@@ -477,7 +478,7 @@ namespace Fudge {
             let rotation: Vector3 = new Vector3(x1, y1, z1);
             rotation.scale(180 / Math.PI);
 
-            return [this.translation, scaling, rotation];
+            return [this.translation, rotation, scaling];
         }
 
         public set(_to: Matrix4x4): void {
@@ -501,9 +502,17 @@ namespace Fudge {
         }
 
         public getMutator(): Mutator {
+            if (this.mutator)
+                return this.mutator;
+
+            let vectors: Vector3[] = this.getVectorRepresentation();
             let mutator: Mutator = {
-                data: Object.assign({}, this.data)
+                translation: vectors[0].getMutator(),
+                rotation: vectors[1].getMutator(),
+                scaling: vectors[2].getMutator()
             };
+
+            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
         protected reduceMutator(_mutator: Mutator): void {/** */ }

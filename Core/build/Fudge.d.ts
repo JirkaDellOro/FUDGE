@@ -1221,7 +1221,8 @@ declare namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 extends Mutable implements Serializable {
-        data: Float32Array;
+        private data;
+        private mutator;
         constructor();
         translation: Vector3;
         static readonly IDENTITY: Matrix4x4;
