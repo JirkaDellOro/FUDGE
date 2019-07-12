@@ -876,7 +876,10 @@ var Fudge;
             return this;
         }
         mutate(_mutator) {
-            super.mutate(_mutator);
+            this.local.mutate(_mutator);
+        }
+        getMutator() {
+            return this.local.getMutator();
         }
         reduceMutator(_mutator) {
             delete _mutator.world;
@@ -2814,6 +2817,15 @@ var Fudge;
             };
             // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
+        }
+        mutate(_mutator) {
+            let matrix = Matrix4x4.IDENTITY;
+            matrix.translate(_mutator.translation);
+            matrix.rotateZ(_mutator.rotation.z);
+            matrix.rotateY(_mutator.rotation.y);
+            matrix.rotateX(_mutator.rotation.x);
+            matrix.scale(_mutator.scaling);
+            this.set(matrix);
         }
         reduceMutator(_mutator) { }
     }

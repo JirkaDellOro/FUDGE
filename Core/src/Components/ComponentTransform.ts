@@ -13,7 +13,7 @@ namespace Fudge {
 
         //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = {   
+            let serialization: Serialization = {
                 [super.type]: super.serialize()
             };
             return serialization;
@@ -24,7 +24,10 @@ namespace Fudge {
         }
 
         public mutate(_mutator: Mutator): void {
-            super.mutate(_mutator);
+            this.local.mutate(_mutator);
+        }
+        public getMutator(): Mutator { 
+            return this.local.getMutator();
         }
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.world;

@@ -161,9 +161,10 @@ namespace MarixTest {
     }
 
     function displayMatrix(_matrix: ƒ.Matrix4x4): void {
-        for (let index in _matrix.data) {
+        let data: Float32Array = _matrix.get();
+        for (let index in data) {
             let input: HTMLInputElement = document.querySelector("#m" + index);
-            input.value = _matrix.data[index].toFixed(2);
+            input.value = data[index].toFixed(2);
         }
     }
     function displayVectors(_matrix: ƒ.Matrix4x4): void {

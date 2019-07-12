@@ -136,9 +136,10 @@ var MarixTest;
         return vector;
     }
     function displayMatrix(_matrix) {
-        for (let index in _matrix.data) {
+        let data = _matrix.get();
+        for (let index in data) {
             let input = document.querySelector("#m" + index);
-            input.value = _matrix.data[index].toFixed(2);
+            input.value = data[index].toFixed(2);
         }
     }
     function displayVectors(_matrix) {
