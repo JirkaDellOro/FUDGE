@@ -52,7 +52,7 @@ namespace Fudge {
        */
       move(_delta: Vector2, _withTangent: boolean = true): void {
         super.move(_delta);
-        if (_withTangent && this.activated) {
+        if (_withTangent) {
           this.tangentIn.move(_delta);
           this.tangentOut.move(_delta);
         }

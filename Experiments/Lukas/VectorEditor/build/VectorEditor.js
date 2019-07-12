@@ -263,6 +263,12 @@ var Fudge;
                 this.path2D = new Path2D;
                 this.selected = false;
             }
+            /**
+             * Static sorting method intended to be used as a parameter for array.sort().
+             * @param _a First Sketch Object to sort
+             * @param _b Second Sketch Object to sort
+             * @returns >0 if a > b, =0 if a=b and <0 if a < b
+             */
             static sort(_a, _b) {
                 return _a.order - _b.order;
             }
@@ -388,6 +394,7 @@ var Fudge;
             generatePath2D(_radius = 5) {
                 let path = new Path2D();
                 path.arc(this.x, this.y, _radius, 0, 2 * Math.PI);
+                this.path2D = path;
                 return path;
             }
             /**
@@ -482,7 +489,7 @@ var Fudge;
              */
             move(_delta, _withTangent = true) {
                 super.move(_delta);
-                if (_withTangent && this.activated) {
+                if (_withTangent) {
                     this.tangentIn.move(_delta);
                     this.tangentOut.move(_delta);
                 }
@@ -561,13 +568,13 @@ var Fudge;
                 this.mouseup = (_event) => {
                     _event.preventDefault();
                     if (this.selectedTool)
-                        this.selectedTool.mousedown(_event);
+                        this.selectedTool.mouseup(_event);
                     this.redrawAll();
                 };
                 this.mousemove = (_event) => {
                     _event.preventDefault();
                     if (this.selectedTool)
-                        this.selectedTool.mousedown(_event);
+                        this.selectedTool.mousemove(_event);
                     this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Fudge.Vector2(_event.clientX, _event.clientY)));
                     if (_event.buttons > 0 || _event.button > 0)
                         this.redrawAll();
@@ -689,6 +696,31 @@ var Fudge;
                     this.changeHistory.splice(this.changeHistoryIndex);
                 this.changeHistory.push(JSON.stringify(this.sketch));
             }
+            getPathOrPointTheMouseIsOver(_clientPos) {
+                let found;
+                found = this.getPointAtPositionInGroup(this.selectedPoints, _clientPos);
+                if (found)
+                    return found;
+                for (let path of this.selectedPaths) {
+                    found = this.getPointAtPositionInGroup(path.vertices, _clientPos);
+                    if (found)
+                        return found;
+                    if (this.crc.isPointInPath(path.path2D, _clientPos.x, _clientPos.y))
+                        return path;
+                }
+                for (let path of this.sketch.objects) {
+                    if (this.crc.isPointInPath(path.path2D, _clientPos.x, _clientPos.y))
+                        return path;
+                }
+                return null;
+            }
+            getPointAtPositionInGroup(_points, _clientPos) {
+                for (let point of _points) {
+                    if (this.crc.isPointInPath(point.path2D, _clientPos.x, _clientPos.y))
+                        return point;
+                }
+                return null;
+            }
             realPosToCanvasPos(_clientPos) {
                 return new Fudge.Vector2((_clientPos.x - this.transformationPoint.x) / this.scale, (_clientPos.y - this.transformationPoint.y) / this.scale);
             }
@@ -706,6 +738,7 @@ var Fudge;
                     }
                     obj.draw(this.crc);
                 }
+                this.selectedTool.additionalDisplay(this.crc);
                 let transformationPointPath = new Path2D();
                 let lineLength = 10;
                 transformationPointPath.moveTo(-lineLength / this.scale, 0);
@@ -715,6 +748,22 @@ var Fudge;
                 this.crc.strokeStyle = "black";
                 this.crc.lineWidth = 2 / this.scale;
                 this.crc.stroke(transformationPointPath);
+            }
+            deselectAll() {
+                this.deselectAllPaths();
+                this.deselectAllPoints();
+            }
+            deselectAllPoints() {
+                for (let p of this.selectedPoints) {
+                    p.selected = false;
+                }
+                this.selectedPoints = [];
+            }
+            deselectAllPaths() {
+                for (let p of this.selectedPaths) {
+                    p.selected = false;
+                }
+                this.selectedPaths = [];
             }
         }
         Editor.pressedKeys = [];
@@ -1080,8 +1129,35 @@ var Fudge;
                 super("Move");
                 this.icon = "./images/move.svg";
             }
+            mousedown(_event) {
+                this.previousPosition = new Fudge.Vector2(_event.clientX, _event.clientY);
+            }
+            mousemove(_event) {
+                if (_event.buttons == 0)
+                    return;
+                let delta = new Fudge.Vector2(_event.clientX - this.previousPosition.x, _event.clientY - this.previousPosition.y);
+                delta.scale(1 / VectorEditor.vectorEditor.scale);
+                if (_event.buttons == 1) {
+                    if (VectorEditor.vectorEditor.selectedPoints.length > 0) {
+                        for (let p of VectorEditor.vectorEditor.selectedPoints) {
+                            p.move(delta);
+                        }
+                    }
+                    else if (VectorEditor.vectorEditor.selectedPaths.length > 0) {
+                        for (let p of VectorEditor.vectorEditor.selectedPaths) {
+                            p.move(delta);
+                        }
+                    }
+                }
+                else {
+                    VectorEditor.vectorEditor.transformationPoint.add(delta);
+                }
+                this.previousPosition = new Fudge.Vector2(_event.clientX, _event.clientY);
+            }
+            prequisitesFulfilled() {
+                return VectorEditor.vectorEditor.selectedPaths.length > 0 || VectorEditor.vectorEditor.selectedPoints.length > 0;
+            }
         }
-        ToolMove.iRegister = VectorEditor.ToolManager.registerTool(ToolMove);
         VectorEditor.ToolMove = ToolMove;
     })(VectorEditor = Fudge.VectorEditor || (Fudge.VectorEditor = {}));
 })(Fudge || (Fudge = {}));
@@ -1092,7 +1168,81 @@ var Fudge;
         class ToolSelect extends VectorEditor.Tool {
             constructor() {
                 super("Select");
+                this.move = new VectorEditor.ToolMove();
                 this.icon = "./images/cursor.svg";
+            }
+            mousedown(_event) {
+                if (_event.buttons == 0)
+                    return;
+                this.moved = false;
+                let selectedObject = VectorEditor.vectorEditor.getPathOrPointTheMouseIsOver(new Fudge.Vector2(_event.clientX, _event.clientY));
+                if (selectedObject) {
+                    if (VectorEditor.Editor.isShortcutPressed(this.multiSelectShortcut)) {
+                        if (selectedObject instanceof Fudge.SketchTypes.SketchPath) {
+                            let i = VectorEditor.vectorEditor.selectedPaths.indexOf(selectedObject);
+                            if (i > -1) {
+                                VectorEditor.vectorEditor.selectedPaths.splice(i, 1);
+                            }
+                            else {
+                                VectorEditor.vectorEditor.selectedPaths.push(selectedObject);
+                            }
+                        }
+                        else {
+                            let i = VectorEditor.vectorEditor.selectedPoints.indexOf(selectedObject);
+                            if (i > -1) {
+                                VectorEditor.vectorEditor.selectedPoints.splice(i, 1);
+                            }
+                            else {
+                                VectorEditor.vectorEditor.selectedPoints.push(selectedObject);
+                            }
+                        }
+                    }
+                    else {
+                        if (selectedObject instanceof Fudge.SketchTypes.SketchPath) {
+                            VectorEditor.vectorEditor.deselectAll();
+                            VectorEditor.vectorEditor.selectedPaths.push(selectedObject);
+                        }
+                        else {
+                            VectorEditor.vectorEditor.deselectAllPoints();
+                            VectorEditor.vectorEditor.selectedPoints.push(selectedObject);
+                        }
+                        selectedObject.selected = true;
+                    }
+                }
+                else {
+                    this.boxSelect = true;
+                    this.startPosition = VectorEditor.vectorEditor.realPosToCanvasPos(new Fudge.Vector2(_event.clientX, _event.clientY));
+                    this.currentPosition = this.startPosition.copy;
+                }
+                this.move.mousedown(_event);
+            }
+            mousemove(_event) {
+                this.moved = true;
+                if (this.boxSelect) {
+                    this.currentPosition = VectorEditor.vectorEditor.realPosToCanvasPos(new Fudge.Vector2(_event.clientX, _event.clientY));
+                    VectorEditor.vectorEditor.redrawAll();
+                }
+                else {
+                    this.move.mousemove(_event);
+                }
+            }
+            mouseup(_event) {
+                if (!this.moved && this.boxSelect) {
+                    VectorEditor.vectorEditor.deselectAll();
+                    this.boxSelect = false;
+                }
+                if (!this.boxSelect) {
+                    return;
+                }
+                this.boxSelect = false;
+            }
+            additionalDisplay(_crc) {
+                if (!this.boxSelect)
+                    return;
+                let rect = new Path2D();
+                rect.rect(this.startPosition.x, this.startPosition.y, this.currentPosition.x - this.startPosition.x, this.currentPosition.y - this.startPosition.y);
+                _crc.lineWidth = 1 / VectorEditor.vectorEditor.scale;
+                _crc.stroke(rect);
             }
         }
         ToolSelect.iRegister = VectorEditor.ToolManager.registerTool(ToolSelect);

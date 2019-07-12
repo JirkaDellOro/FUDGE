@@ -11,7 +11,12 @@ namespace Fudge {
       path2D: Path2D = new Path2D;
       selected: boolean = false;
 
-
+      /**
+       * Static sorting method intended to be used as a parameter for array.sort(). 
+       * @param _a First Sketch Object to sort
+       * @param _b Second Sketch Object to sort
+       * @returns >0 if a > b, =0 if a=b and <0 if a < b
+       */
       static sort(_a: SketchObject, _b: SketchObject): number {
         return _a.order - _b.order;
       }

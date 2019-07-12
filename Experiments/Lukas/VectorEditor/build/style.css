@@ -69,6 +69,10 @@
   background: #a84b02;
 }
 
+.disabled {
+  background: gray;
+}
+
 #scaleInput {
   width: 3em;
 }

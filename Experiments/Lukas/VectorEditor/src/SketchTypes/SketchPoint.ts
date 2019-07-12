@@ -7,7 +7,7 @@ namespace Fudge {
      */
     export class SketchPoint extends Fudge.Vector2 {
       public selected: boolean;
-      protected path2D: Path2D;
+      public path2D: Path2D;
       
       /**
        * Draws the point on the given context at its position.
@@ -31,6 +31,7 @@ namespace Fudge {
       generatePath2D(_radius: number = 5): Path2D {
         let path: Path2D = new Path2D();
         path.arc(this.x, this.y, _radius, 0, 2 * Math.PI);
+        this.path2D = path;
         return path;
       }
 

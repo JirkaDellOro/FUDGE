@@ -169,6 +169,12 @@ declare namespace Fudge {
             name: string;
             path2D: Path2D;
             selected: boolean;
+            /**
+             * Static sorting method intended to be used as a parameter for array.sort().
+             * @param _a First Sketch Object to sort
+             * @param _b Second Sketch Object to sort
+             * @returns >0 if a > b, =0 if a=b and <0 if a < b
+             */
             static sort(_a: SketchObject, _b: SketchObject): number;
             draw(_crc: CanvasRenderingContext2D): void;
         }
@@ -218,7 +224,7 @@ declare namespace Fudge {
          */
         class SketchPoint extends Fudge.Vector2 {
             selected: boolean;
-            protected path2D: Path2D;
+            path2D: Path2D;
             /**
              * Draws the point on the given context at its position.
              * @param _context The rendering context to draw on
@@ -353,8 +359,13 @@ declare namespace Fudge {
             undo(): void;
             redo(): void;
             saveToChangeHistory(): void;
+            getPathOrPointTheMouseIsOver(_clientPos: Vector2): SketchTypes.SketchPath | SketchTypes.SketchPoint;
+            getPointAtPositionInGroup(_points: SketchTypes.SketchPoint[], _clientPos: Vector2): SketchTypes.SketchPoint;
             realPosToCanvasPos(_clientPos: Vector2): Vector2;
-            private redrawAll;
+            redrawAll(): void;
+            deselectAll(): void;
+            deselectAllPoints(): void;
+            deselectAllPaths(): void;
         }
         let vectorEditor: Editor;
     }
@@ -591,9 +602,11 @@ declare namespace Fudge {
 declare namespace Fudge {
     namespace VectorEditor {
         class ToolMove extends Tool {
-            static iRegister: number;
             previousPosition: Vector2;
             constructor();
+            mousedown(_event: MouseEvent): void;
+            mousemove(_event: MouseEvent): void;
+            prequisitesFulfilled(): boolean;
         }
     }
 }
@@ -603,9 +616,15 @@ declare namespace Fudge {
             static iRegister: number;
             boxSelect: boolean;
             multiSelectShortcut: Shortcut;
+            move: ToolMove;
             startPosition: Vector2;
-            currenPosition: Vector2;
+            currentPosition: Vector2;
+            private moved;
             constructor();
+            mousedown(_event: MouseEvent): void;
+            mousemove(_event: MouseEvent): void;
+            mouseup(_event: MouseEvent): void;
+            additionalDisplay(_crc: CanvasRenderingContext2D): void;
         }
     }
 }

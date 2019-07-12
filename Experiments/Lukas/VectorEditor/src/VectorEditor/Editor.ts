@@ -62,12 +62,12 @@ namespace Fudge {
       }
       mouseup = (_event: MouseEvent) => {
         _event.preventDefault();
-        if (this.selectedTool) this.selectedTool.mousedown(_event);
+        if (this.selectedTool) this.selectedTool.mouseup(_event);
         this.redrawAll();
       }
       mousemove = (_event: MouseEvent) => {
         _event.preventDefault();
-        if (this.selectedTool) this.selectedTool.mousedown(_event);
+        if (this.selectedTool) this.selectedTool.mousemove(_event);
         this.uiHandler.updateMousePosition(this.realPosToCanvasPos(new Vector2(_event.clientX, _event.clientY)));
         if (_event.buttons > 0 || _event.button > 0) this.redrawAll();
       }
@@ -166,6 +166,28 @@ namespace Fudge {
         this.changeHistory.push(JSON.stringify(this.sketch));
       }
 
+      getPathOrPointTheMouseIsOver(_clientPos: Vector2): SketchTypes.SketchPath | SketchTypes.SketchPoint {
+        let found: SketchTypes.SketchPath | SketchTypes.SketchPoint;
+        found = this.getPointAtPositionInGroup(this.selectedPoints, _clientPos);
+        if (found) return found;
+        for (let path of this.selectedPaths) {
+          found = this.getPointAtPositionInGroup(path.vertices, _clientPos);
+          if (found) return found;
+          if (this.crc.isPointInPath(path.path2D, _clientPos.x, _clientPos.y)) return path;
+        }
+        for (let path of this.sketch.objects) {
+          if (this.crc.isPointInPath(path.path2D, _clientPos.x, _clientPos.y)) return <SketchTypes.SketchPath>path;
+        }
+        return null;
+      }
+
+      getPointAtPositionInGroup(_points: SketchTypes.SketchPoint[], _clientPos: Vector2): SketchTypes.SketchPoint {
+        for (let point of _points) {
+          if (this.crc.isPointInPath(point.path2D, _clientPos.x, _clientPos.y)) return point;
+        }
+        return null;
+      }
+
       realPosToCanvasPos(_clientPos: Vector2): Vector2 {
         return new Vector2(
           (_clientPos.x - this.transformationPoint.x) / this.scale,
@@ -173,7 +195,7 @@ namespace Fudge {
       }
 
 
-      private redrawAll(): void {
+      redrawAll(): void {
         // console.log("redraw");
         this.crc.resetTransform();
         this.crc.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -189,6 +211,8 @@ namespace Fudge {
           }
           obj.draw(this.crc);
         }
+        
+        this.selectedTool.additionalDisplay(this.crc);
 
         let transformationPointPath: Path2D = new Path2D();
         let lineLength: number = 10;
@@ -199,6 +223,26 @@ namespace Fudge {
         this.crc.strokeStyle = "black";
         this.crc.lineWidth = 2 / this.scale;
         this.crc.stroke(transformationPointPath);
+      }
+
+      deselectAll(): void {
+        this.deselectAllPaths();
+        this.deselectAllPoints();
+      }
+      
+      deselectAllPoints(): void {
+        for (let p of this.selectedPoints) {
+          p.selected = false;
+        }
+        
+        this.selectedPoints = [];
+      }
+      
+      deselectAllPaths(): void {
+        for (let p of this.selectedPaths) {
+          p.selected = false;
+        }
+        this.selectedPaths = [];
       }
     }
 
