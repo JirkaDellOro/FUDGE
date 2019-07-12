@@ -14,7 +14,7 @@ var MarixTest;
         viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         update();
         displayVectors(coSys.cmpTransform.local);
-        // animate();
+        animate();
     }
     function animate() {
         window.setInterval(function () {
@@ -32,10 +32,7 @@ var MarixTest;
         viewport.draw();
         let local = coSys.cmpTransform.local;
         displayMatrix(local);
-        // if (!isAbsolute())
         displayVectors(local);
-        let mutator = local.getMutator();
-        ƒ.Debug.log(mutator);
     }
     function createUI() {
         let fieldset;
@@ -94,7 +91,6 @@ var MarixTest;
         matrix.rotateY(_vectors[1].y);
         matrix.rotateX(_vectors[1].x);
         matrix.scale(_vectors[2]);
-        // ƒ.Debug.log(matrix);
         coSys.cmpTransform.local = matrix;
     }
     function interactRelative(_input) {

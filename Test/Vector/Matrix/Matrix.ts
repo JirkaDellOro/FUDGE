@@ -18,7 +18,7 @@ namespace MarixTest {
         update();
         displayVectors(coSys.cmpTransform.local);
 
-        // animate();
+        animate();
     }
 
     function animate(): void {
@@ -42,10 +42,7 @@ namespace MarixTest {
         viewport.draw();
         let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
         displayMatrix(local);
-        // if (!isAbsolute())
         displayVectors(local);
-        let mutator: ƒ.Mutator = local.getMutator();
-        ƒ.Debug.log(mutator);
     }
 
     function createUI(): void {
@@ -114,7 +111,6 @@ namespace MarixTest {
         matrix.rotateX(_vectors[1].x);
         matrix.scale(_vectors[2]);
 
-        // ƒ.Debug.log(matrix);
         coSys.cmpTransform.local = matrix;
     }
 
