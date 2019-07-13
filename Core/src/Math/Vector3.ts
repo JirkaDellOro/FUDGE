@@ -9,10 +9,11 @@ namespace Fudge {
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Vector3 {
+    export class Vector3 extends Mutable {
         private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
         public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
+            super();
             this.data = new Float32Array([_x, _y, _z]);
         }
 
@@ -59,7 +60,7 @@ namespace Fudge {
 
         public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3 {
             let result: Vector3 = new Vector3();
-            let m: Float32Array = _matrix.data;
+            let m: Float32Array = _matrix.get();
             let [x, y, z] = _vector.get();
             result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
             result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];
@@ -156,5 +157,14 @@ namespace Fudge {
         public transform(_matrix: Matrix4x4): void {
             this.data = Vector3.TRANSFORMATION(this, _matrix).data;
         }
+
+
+        public getMutator(): Mutator {
+            let mutator: Mutator = {
+                x: this.data[0], y: this.data[1], z: this.data[2]
+            };
+            return mutator;
+        }
+        protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
 }

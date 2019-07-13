@@ -18,11 +18,12 @@ Furtwangen University Didactic Game Editor
 - [Core Reference](https://jirkadelloro.github.io/FUDGE/Core/reference/)
 
 ## Themen für Abschluss- und Studienarbeiten
-- Physikengine  
-- Modeller
+- :pencil: Audiokomponenten 
+- :pencil: Physikengine 
+- :pencil: Modeller
 - Shader
 - Primitve 3D-Modelle und 2D-Shapes 
-- Cameratransformation, Axonometrien und VR
+- :pencil: Cameratransformation, Axonometrien und VR
 - Spritesheet
 - Partikelsysteme
 - Licht und Schatten

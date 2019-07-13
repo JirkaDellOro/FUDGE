@@ -9,5 +9,5 @@ namespace SumUp {
     let v3: ƒ.Vector3 = new ƒ.Vector3(0, 0, 1);
 
     let sum: ƒ.Vector3 = ƒ.Vector3.SUM(v1, v2, v3);
-    console.log(sum);  
+    console.log(sum.getMutator());  
 }
