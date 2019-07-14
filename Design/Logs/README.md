@@ -2,6 +2,12 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 
+# July 11th 2019
+Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
+Should the inspector be there / paired per editor? Singleton? Selectable? 
+([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190711_Whiteboard_saving.jpg))
++Rough overview over tasks for the usertest
+
 # June 26th 2019
 Clarified details about the FUDGE UI
 -> The gizmos axis are color coded: red=y, green=z, blue=x 
