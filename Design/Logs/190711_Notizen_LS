@@ -1,0 +1,13 @@
+Lea Stegk presented a mindmap the intention of which is to decribe all of the functions of FUDGE that need to be implemented at the GUI level. ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
+The presentation resulted in a discussion of how/if the menu bar changes with the different editors and it was considered that the scene editors viewport will always be paired with the inspector window and cannot be parted (though the users can change its position).
+Should the inspector be thereper editor? Singleton? Selectable?. Multiple viewports can be opened, the animation preview, sketch editor open own viewports.
+We will also need a "welcome screen" for FUDGE as a base before any editor is opened.
+
+We decided that FUDGE will have projects and scenes just like Unity. For the project a folder will be created, the organization lies with the user.
+Saving: Will be explicit, also for individual parts. There will be little to no automatisation. If the user presses CTRL+S, everything will be saved. Scenes can be saved individually.
+This means the file structure will be / remains clear / known. 
+([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190711_Whiteboard_saving.jpg))
+
+Relevant for Monika: New viewport where user can choose what it should show -> the second one could be a subclass of viewport
+
+In the GUI, OBJECTS will be renamed in NODES
