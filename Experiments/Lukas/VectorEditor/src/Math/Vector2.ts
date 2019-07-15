@@ -74,10 +74,10 @@ namespace Fudge {
     }
 
     /**
-     * Scales a given vector by a given scale
-     * @param _vector The vector to scale.
-     * @param _scale The scale to scale with.
-     * @returns A new vector representing the scaled version of the given vector
+     * Normalizes a given vector to the given length without editing the original vector.
+     * @param _vector the vector to normalize
+     * @param _length the length of the resulting vector. defaults to 1
+     * @returns a new vector representing the normalised vector scaled by the given length
      */
     public static NORMALIZATION(_vector: Vector2, _length: number = 1): Vector2 {
       let vector: Vector2 = Vector2.ZERO;
@@ -92,7 +92,7 @@ namespace Fudge {
     }
 
     /**
-     * Scales a given vector by a given scale
+     * Scales a given vector by a given scale without changing the original vector
      * @param _vector The vector to scale.
      * @param _scale The scale to scale with.
      * @returns A new vector representing the scaled version of the given vector

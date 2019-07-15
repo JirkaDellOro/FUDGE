@@ -4,7 +4,7 @@ namespace Fudge {
      * The basic Sketch Object that all drawable objects are made of.
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    export class SketchObject {
+    export abstract class SketchObject {
       order: number;
       color: string | CanvasGradient | CanvasPattern = "black";
       name: string;
@@ -21,6 +21,10 @@ namespace Fudge {
         return _a.order - _b.order;
       }
 
+      /**
+       * The basic draw function. Stub because abstract
+       * @param _crc The 2d canvas rendering context to draw on
+       */
       draw(_crc: CanvasRenderingContext2D): void {
         //;
       }

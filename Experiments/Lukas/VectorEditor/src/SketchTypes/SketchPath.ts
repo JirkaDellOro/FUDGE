@@ -21,7 +21,7 @@ namespace Fudge {
       }
 
       /**
-       * (Re-)Generates the Path2D component of a point. 
+       * (Re-)Generates the Path2D component of the whole path. 
        */
       generatePath2D(): void {
         this.path2D = new Path2D();
