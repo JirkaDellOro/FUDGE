@@ -3032,7 +3032,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for cube...
             return serialization;
         }
         deserialize(_serialization) {
@@ -3143,7 +3143,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for pyramid
             return serialization;
         }
         deserialize(_serialization) {
@@ -3232,7 +3232,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for quad
             return serialization;
         }
         deserialize(_serialization) {
