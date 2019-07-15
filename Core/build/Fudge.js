@@ -867,12 +867,14 @@ var Fudge;
         //#region Transfer
         serialize() {
             let serialization = {
+                local: this.local.serialize(),
                 [super.type]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             super.deserialize(_serialization[super.type]);
+            this.local.deserialize(_serialization.local);
             return this;
         }
         mutate(_mutator) {
@@ -2797,13 +2799,11 @@ var Fudge;
         }
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
-            let serialization = {
-                data: Array.from(this.data)
-            };
+            let serialization = this.getMutator();
             return serialization;
         }
         deserialize(_serialization) {
-            this.data = new Float32Array(_serialization.data);
+            this.mutate(_serialization);
             return this;
         }
         getMutator() {

@@ -491,13 +491,11 @@ namespace Fudge {
 
         public serialize(): Serialization {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
-            let serialization: Serialization = {
-                data: Array.from(this.data)
-            };
+            let serialization: Serialization = this.getMutator();
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            this.data = new Float32Array(_serialization.data);
+            this.mutate(_serialization);
             return this;
         }
 
@@ -515,15 +513,15 @@ namespace Fudge {
             // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
-        
+
         public mutate(_mutator: Mutator): void {
             let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
-            matrix.translate(<Vector3>_mutator.translation); 
+            matrix.translate(<Vector3>_mutator.translation);
             matrix.rotateZ((<Vector3>_mutator.rotation).z);
             matrix.rotateY((<Vector3>_mutator.rotation).y);
             matrix.rotateX((<Vector3>_mutator.rotation).x);
             matrix.scale(<Vector3>_mutator.scaling);
-    
+
             this.set(matrix);
         }
         protected reduceMutator(_mutator: Mutator): void {/** */ }
