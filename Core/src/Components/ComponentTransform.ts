@@ -15,12 +15,12 @@ namespace Fudge {
         public serialize(): Serialization {
             let serialization: Serialization = {
                 local: this.local.serialize(),
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             this.local.deserialize(_serialization.local);
             return this;
         }

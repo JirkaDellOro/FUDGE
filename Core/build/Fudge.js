@@ -737,7 +737,7 @@ var Fudge;
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
@@ -748,7 +748,7 @@ var Fudge;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -826,14 +826,14 @@ var Fudge;
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
     }
@@ -868,12 +868,12 @@ var Fudge;
         serialize() {
             let serialization = {
                 local: this.local.serialize(),
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             this.local.deserialize(_serialization.local);
             return this;
         }
@@ -1487,6 +1487,7 @@ var Fudge;
             let upcoming = this;
             // overwrite event target
             Object.defineProperty(_event, "target", { writable: true, value: this });
+            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
             // capture phase

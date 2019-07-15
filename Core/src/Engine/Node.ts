@@ -268,7 +268,7 @@ namespace Fudge {
             let upcoming: Node = this;
             // overwrite event target
             Object.defineProperty(_event, "target", { writable: true, value: this });
-
+            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
 

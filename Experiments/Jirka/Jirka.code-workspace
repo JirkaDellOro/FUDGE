@@ -89,10 +89,6 @@
 			"path": "GoldenLayout"
 		},
 		{
-			"name": "StaticClass",
-			"path": "StaticClass"
-		},
-		{
 			"name": "EventSystem",
 			"path": "EventSystem"
 		},
@@ -113,8 +109,15 @@
 			"path": "InjectMethod"
 		},
 		{
+			"name": "StaticClass",
+			"path": "StaticClass"
+		},
+		{
 			"name": "WebGL",
 			"path": "WebGL"
+		},
+		{
+			"path": "SerializeChain"
 		}
 	],
 	"settings": {}
