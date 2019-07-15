@@ -5,8 +5,8 @@ var SerializeChain;
         get type() {
             return this.constructor.name;
         }
-        getType(_o) {
-            return _o.constructor.name;
+        getSuperType(_o) {
+            return Reflect.getPrototypeOf(Reflect.getPrototypeOf(_o)).constructor.name;
         }
         printInfo() {
             console.log("--A");
@@ -19,6 +19,7 @@ var SerializeChain;
             console.log("--B");
             console.log(this.type);
             console.log(super.constructor.name);
+            console.log(this.getSuperType(this));
             super.printInfo();
         }
     }
@@ -27,6 +28,7 @@ var SerializeChain;
             console.log("--C");
             console.log(this.type);
             console.log(super.constructor.name);
+            console.log(this.getSuperType(this));
             super.printInfo();
         }
     }

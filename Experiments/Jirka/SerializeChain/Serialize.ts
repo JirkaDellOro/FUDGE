@@ -5,8 +5,8 @@ namespace SerializeChain {
             return this.constructor.name;
         }
 
-        getType(_o: A): string {
-            return _o.constructor.name;
+        getSuperType(_o: A): string {
+            return Reflect.getPrototypeOf(Reflect.getPrototypeOf(_o)).constructor.name;
         }
 
         printInfo(): void {
@@ -21,6 +21,7 @@ namespace SerializeChain {
             console.log("--B");
             console.log(this.type);
             console.log(super.constructor.name);
+            console.log(this.getSuperType(this));
             super.printInfo();
         }
     }
@@ -29,6 +30,7 @@ namespace SerializeChain {
             console.log("--C");
             console.log(this.type);
             console.log(super.constructor.name);
+            console.log(this.getSuperType(this));
             super.printInfo();
         }
     }
