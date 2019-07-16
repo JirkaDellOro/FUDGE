@@ -1,3 +1,5 @@
+/// <reference path="../../../../Core/build/Fudge.d.ts"/>
+var ƒ = Fudge;
 var UI;
 (function (UI) {
     let myLayout;
@@ -18,13 +20,22 @@ var UI;
                     }]
             }]
     };
+    console.log("Entering Setup");
+    console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
+    let cameraComponent = new UI.CameraComponent();
     function createSimpleComponent(container, state) {
-        return new UI.SimpleComponent(container, state);
+        console.log("Create Test");
+        console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
+        return cameraComponent.createTestRect(container, state);
+    }
+    function createCameraComponent(container, state) {
+        console.log("Create Camera Component");
+        console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
+        return cameraComponent.createCameraComponent(container, state);
     }
     myLayout = new GoldenLayout(config);
-    myLayout.registerComponent('Inspector', createSimpleComponent);
+    myLayout.registerComponent('Inspector', createCameraComponent);
     myLayout.registerComponent('Viewport', createSimpleComponent);
-    console.log("I work");
     myLayout.init();
 })(UI || (UI = {}));
 //# sourceMappingURL=app.js.map
