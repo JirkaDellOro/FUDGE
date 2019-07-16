@@ -487,11 +487,22 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.name = "Coat";
+            //#endregion
         }
         mutate(_mutator) {
             super.mutate(_mutator);
         }
         useRenderData(_renderShader) { }
+        //#region Transfer
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this.getMutator();
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.mutate(_serialization);
+            return this;
+        }
         reduceMutator() { }
     }
     Fudge.Coat = Coat;
@@ -806,6 +817,20 @@ var Fudge;
             super();
             this.material = _material;
         }
+        //#region Transfer
+        serialize() {
+            let serialization = {
+                material: this.material.serialize(),
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            let material = Fudge.Serializer.deserialize(_serialization.material);
+            this.material = material;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
     }
     Fudge.ComponentMaterial = ComponentMaterial;
 })(Fudge || (Fudge = {}));
@@ -1093,8 +1118,9 @@ var Fudge;
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
-    class Color {
+    class Color extends Fudge.Mutable {
         constructor(_r, _g, _b, _a) {
+            super();
             this.r = _r;
             this.g = _g;
             this.b = _b;
@@ -1103,6 +1129,7 @@ var Fudge;
         getArray() {
             return new Float32Array([this.r, this.g, this.b, this.a]);
         }
+        reduceMutator(_mutator) { }
     }
     Fudge.Color = Color;
 })(Fudge || (Fudge = {}));
@@ -1242,6 +1269,25 @@ var Fudge;
          */
         getShader() {
             return this.shaderType;
+        }
+        //#region Transfer
+        // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = {
+                name: this.name,
+                shader: this.shaderType.name,
+                coat: this.coat.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.name = _serialization.name;
+            // tslint:disable-next-line: no-any
+            this.shaderType = Fudge[_serialization.shader];
+            let coat = Fudge.Serializer.deserialize(_serialization.coat);
+            this.setCoat(coat);
+            return this;
         }
     }
     Fudge.Material = Material;

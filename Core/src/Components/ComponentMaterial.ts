@@ -10,5 +10,21 @@ namespace Fudge {
             super();
             this.material = _material;
         }
+        
+        //#region Transfer
+        public serialize(): Serialization {
+            let serialization: Serialization = {
+                material: this.material.serialize(),
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            let material: Material = <Material>Serializer.deserialize(_serialization.material);
+            this.material = material;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        //#endregion
     }
 }

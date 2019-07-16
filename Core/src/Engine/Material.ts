@@ -3,9 +3,9 @@ namespace Fudge {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Material {
+    export class Material implements Serializable {
         /** The name to call the Material by. */
-        public name: string; 
+        public name: string;
         private shaderType: typeof Shader; // The shader program used by this BaseMaterial
         private coat: Coat;
 
@@ -62,5 +62,27 @@ namespace Fudge {
         public getShader(): typeof Shader {
             return this.shaderType;
         }
+
+
+        //#region Transfer
+        // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately
+        public serialize(): Serialization {
+            let serialization: Serialization = {};
+            serialization[this.constructor.name] = {
+                name: this.name,
+                shader: this.shaderType.name,
+                coat: this.coat.serialize()
+            };
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            this.name = _serialization.name;
+            // tslint:disable-next-line: no-any
+            this.shaderType = (<any>Fudge)[_serialization.shader];
+            let coat: Coat = <Coat>Serializer.deserialize(_serialization.coat);
+            this.setCoat(coat);
+            return this;
+        }
+        //#endregion
     }
 }

@@ -183,13 +183,15 @@ declare namespace Fudge {
      * [[Material]]s reference [[Coat]] and [[Shader]].
      * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
      */
-    class Coat extends Mutable {
+    class Coat extends Mutable implements Serializable {
         name: string;
         protected renderData: {
             [key: string]: unknown;
         };
         mutate(_mutator: Mutator): void;
         useRenderData(_renderShader: RenderShader): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(): void;
     }
     /**
@@ -341,6 +343,8 @@ declare namespace Fudge {
     class ComponentMaterial extends Component {
         material: Material;
         constructor(_material?: Material);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -497,13 +501,14 @@ declare namespace Fudge {
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
-    class Color {
+    class Color extends Mutable {
         r: number;
         g: number;
         b: number;
         a: number;
         constructor(_r: number, _g: number, _b: number, _a: number);
         getArray(): Float32Array;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -597,7 +602,7 @@ declare namespace Fudge {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Material {
+    class Material implements Serializable {
         /** The name to call the Material by. */
         name: string;
         private shaderType;
@@ -626,6 +631,8 @@ declare namespace Fudge {
          * Returns the [[Shader]] referenced by this material
          */
         getShader(): typeof Shader;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {

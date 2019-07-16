@@ -7,7 +7,7 @@ namespace Fudge {
      * [[Material]]s reference [[Coat]] and [[Shader]].   
      * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
      */
-    export class Coat extends Mutable {
+    export class Coat extends Mutable implements Serializable {
         public name: string = "Coat";
         protected renderData: {[key: string]: unknown};
 
@@ -16,7 +16,20 @@ namespace Fudge {
         }
 
         public useRenderData(_renderShader: RenderShader): void {/* injected by RenderExtender*/ }
+        
+        //#region Transfer
+        public serialize(): Serialization {
+            let serialization: Serialization = {};
+            serialization[this.constructor.name] = this.getMutator(); 
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            this.mutate(_serialization);
+            return this;
+        }
+
         protected reduceMutator(): void { /**/ }
+        //#endregion
     }
 
     /**
