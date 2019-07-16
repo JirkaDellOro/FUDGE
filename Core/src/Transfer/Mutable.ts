@@ -107,10 +107,12 @@ namespace Fudge {
          * @param _mutator
          */
         public mutate(_mutator: Mutator): void {
-            // for (let attribute in _mutator)
-            //     (<General>this)[attribute] = _mutator[attribute];
+            // TODO: this overrides types! Check if attribute is mutable and call mutate recursively!
+            for (let attribute in _mutator)
+                (<General>this)[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties
-            Object.assign(this, _mutator);
+            // Reflect.defineProperty()
+            // Object.assign(this, _mutator);
             this.dispatchEvent(new Event(EVENT.MUTATE));
         }
         /**

@@ -8,8 +8,8 @@ var Compare;
         for (var prefix = "", i = 0; i <= _level; prefix += "-", i++)
             ;
         for (let prop in _object1) {
-            if (prop == "ComponentMaterial")
-                continue;
+            // if (prop == "ComponentMaterial")
+            //     continue;
             if (Number(prop).toString() != prop)
                 console.log(`${prefix} Comparing ${prop}`);
             //Check property exists on both objects

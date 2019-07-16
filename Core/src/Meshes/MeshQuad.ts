@@ -22,7 +22,7 @@ namespace Fudge {
 
         public serialize(): Serialization {
             let serialization: Serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for quad
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {

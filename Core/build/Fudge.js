@@ -91,10 +91,12 @@ var Fudge;
          * @param _mutator
          */
         mutate(_mutator) {
-            // for (let attribute in _mutator)
-            //     (<General>this)[attribute] = _mutator[attribute];
+            // TODO: this overrides types! Check if attribute is mutable and call mutate recursively!
+            for (let attribute in _mutator)
+                this[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties
-            Object.assign(this, _mutator);
+            // Reflect.defineProperty()
+            // Object.assign(this, _mutator);
             this.dispatchEvent(new Event("mutate" /* MUTATE */));
         }
     }
@@ -487,11 +489,22 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.name = "Coat";
+            //#endregion
         }
         mutate(_mutator) {
             super.mutate(_mutator);
         }
         useRenderData(_renderShader) { }
+        //#region Transfer
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = this.getMutator();
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.mutate(_serialization);
+            return this;
+        }
         reduceMutator() { }
     }
     Fudge.Coat = Coat;
@@ -737,7 +750,7 @@ var Fudge;
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
@@ -748,7 +761,7 @@ var Fudge;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
                     this.projectOrthographic(); // TODO: serialize and deserialize parameters
@@ -806,6 +819,20 @@ var Fudge;
             super();
             this.material = _material;
         }
+        //#region Transfer
+        serialize() {
+            let serialization = {
+                material: this.material.serialize(),
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            let material = Fudge.Serializer.deserialize(_serialization.material);
+            this.material = material;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
     }
     Fudge.ComponentMaterial = ComponentMaterial;
 })(Fudge || (Fudge = {}));
@@ -826,14 +853,14 @@ var Fudge;
         serialize() {
             let serialization = {
                 mesh: this.mesh.serialize(),
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
             let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
     }
@@ -867,12 +894,14 @@ var Fudge;
         //#region Transfer
         serialize() {
             let serialization = {
-                [super.type]: super.serialize()
+                local: this.local.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         deserialize(_serialization) {
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
+            this.local.deserialize(_serialization.local);
             return this;
         }
         mutate(_mutator) {
@@ -1091,8 +1120,9 @@ var Fudge;
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
-    class Color {
+    class Color extends Fudge.Mutable {
         constructor(_r, _g, _b, _a) {
+            super();
             this.r = _r;
             this.g = _g;
             this.b = _b;
@@ -1101,6 +1131,7 @@ var Fudge;
         getArray() {
             return new Float32Array([this.r, this.g, this.b, this.a]);
         }
+        reduceMutator(_mutator) { }
     }
     Fudge.Color = Color;
 })(Fudge || (Fudge = {}));
@@ -1240,6 +1271,25 @@ var Fudge;
          */
         getShader() {
             return this.shaderType;
+        }
+        //#region Transfer
+        // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = {
+                name: this.name,
+                shader: this.shaderType.name,
+                coat: this.coat.serialize()
+            };
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.name = _serialization.name;
+            // tslint:disable-next-line: no-any
+            this.shaderType = Fudge[_serialization.shader];
+            let coat = Fudge.Serializer.deserialize(_serialization.coat);
+            this.setCoat(coat);
+            return this;
         }
     }
     Fudge.Material = Material;
@@ -1485,6 +1535,7 @@ var Fudge;
             let upcoming = this;
             // overwrite event target
             Object.defineProperty(_event, "target", { writable: true, value: this });
+            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
             while (upcoming.parent)
                 ancestors.push(upcoming = upcoming.parent);
             // capture phase
@@ -2797,13 +2848,11 @@ var Fudge;
         }
         serialize() {
             // TODO: save translation, rotation and scale as vectors for readability and manipulation
-            let serialization = {
-                data: Array.from(this.data)
-            };
+            let serialization = this.getMutator();
             return serialization;
         }
         deserialize(_serialization) {
-            this.data = new Float32Array(_serialization.data);
+            this.mutate(_serialization);
             return this;
         }
         getMutator() {
@@ -3032,7 +3081,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for cube...
             return serialization;
         }
         deserialize(_serialization) {
@@ -3143,7 +3192,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for pyramid
             return serialization;
         }
         deserialize(_serialization) {
@@ -3232,7 +3281,7 @@ var Fudge;
         }
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = this;
+            serialization[this.constructor.name] = {}; // no data needed for quad
             return serialization;
         }
         deserialize(_serialization) {

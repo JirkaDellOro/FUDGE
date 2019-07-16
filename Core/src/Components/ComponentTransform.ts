@@ -14,12 +14,14 @@ namespace Fudge {
         //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {
-                [super.type]: super.serialize()
+                local: this.local.serialize(),
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
+            this.local.deserialize(_serialization.local);
             return this;
         }
 

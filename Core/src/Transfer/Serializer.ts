@@ -6,7 +6,6 @@ namespace Fudge {
         [type: string]: General;
     }
     export interface Serializable {
-        // TODO: if serialization is based on Mutable, object.constructor.name can be replaced with object.type
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }

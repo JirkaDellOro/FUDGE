@@ -16,14 +16,14 @@ namespace Fudge {
         public serialize(): Serialization {
             let serialization: Serialization = {
                 mesh: this.mesh.serialize(),
-                [super.type]: super.serialize()
+                [super.constructor.name]: super.serialize()
             };
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
             let mesh: Mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
-            super.deserialize(_serialization[super.type]);
+            super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
         //#endregion
