@@ -91,12 +91,15 @@ var Fudge;
          * @param _mutator
          */
         mutate(_mutator) {
-            // TODO: this overrides types! Check if attribute is mutable and call mutate recursively!
-            for (let attribute in _mutator)
-                this[attribute] = _mutator[attribute];
             // TODO: don't assign unknown properties
-            // Reflect.defineProperty()
-            // Object.assign(this, _mutator);
+            for (let attribute in _mutator) {
+                let value = _mutator[attribute];
+                let mutant = this[attribute];
+                if (mutant instanceof Mutable)
+                    mutant.mutate(value);
+                else
+                    this[attribute] = value;
+            }
             this.dispatchEvent(new Event("mutate" /* MUTATE */));
         }
     }
