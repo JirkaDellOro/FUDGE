@@ -1,16 +1,44 @@
 "use strict";
 var FileHandling;
 (function (FileHandling) {
-    window.addEventListener("load", handleLoad);
+    window.addEventListener("load", init);
     let loadFunctions = {
         "FileReader": loadFilesWithFileReader,
         "Response": loadFilesWithResponse,
         "Fetch": loadFilesWithFetch
     };
-    function handleLoad(_event) {
+    let selector;
+    let downloader;
+    let filenameDisplay;
+    let content;
+    function init(_event) {
         console.log("Start");
-        let input = document.querySelector("input[type='file']");
-        input.addEventListener("change", handleFileSelect);
+        filenameDisplay = document.querySelector("input#Filename");
+        content = document.querySelector("textarea");
+        selector = document.createElement("input");
+        selector.setAttribute("type", "file");
+        selector.setAttribute("multiple", "true");
+        selector.addEventListener("change", handleFileSelect);
+        downloader = document.createElement("a");
+        let buttons = document.querySelectorAll("button");
+        for (let button of buttons)
+            if (button.id == "Load")
+                button.addEventListener("click", handleLoad);
+            else
+                button.addEventListener("click", handleSave);
+    }
+    function handleLoad(_event) {
+        selector.click();
+    }
+    function handleSave(_event) {
+        let blob = new Blob([content.value], { type: "text/plain" });
+        let url = window.URL.createObjectURL(blob);
+        downloader.setAttribute("href", url);
+        downloader.setAttribute("download", getFilenameDisplay());
+        document.body.appendChild(downloader);
+        downloader.click();
+        document.body.removeChild(downloader);
+        window.URL.revokeObjectURL(url);
     }
     function handleFileSelect(_event) {
         let fileList = _event.target.files;
@@ -26,7 +54,7 @@ var FileHandling;
     function loadFilesWithFileReader(_fileList) {
         console.group("Load with FileReader");
         for (let file of _fileList) {
-            console.log(file);
+            logFile(file);
             let fileReader = new FileReader();
             fileReader.readAsText(file);
             fileReader.addEventListener("load", handleFile);
@@ -34,14 +62,14 @@ var FileHandling;
         console.groupEnd();
     }
     function handleFile(_event) {
-        console.log(_event.target.result);
+        logContent(_event.target.result.toString());
     }
     async function loadFilesWithResponse(_fileList) {
         console.group("Load with Response");
         for (let file of _fileList) {
-            console.log(file);
+            logFile(file);
             const data = await new Response(file).text();
-            console.log(data);
+            logContent(data);
         }
         console.groupEnd();
     }
@@ -49,15 +77,29 @@ var FileHandling;
         console.group("Load with Fetch");
         try {
             for (let file of _fileList) {
-                console.log(file);
+                logFile(file);
                 const data = await fetch(file.name);
-                console.log(data);
+                logContent(data.toString());
             }
         }
         catch (_e) {
             console.error(_e);
         }
         console.groupEnd();
+    }
+    function setFilenameDisplay(_name) {
+        filenameDisplay.value = _name;
+    }
+    function getFilenameDisplay() {
+        return filenameDisplay.value;
+    }
+    function logFile(_file) {
+        setFilenameDisplay(_file.name);
+        console.log(_file);
+    }
+    function logContent(_data) {
+        content.value = _data;
+        console.log(_data);
     }
 })(FileHandling || (FileHandling = {}));
 //# sourceMappingURL=File.js.map
