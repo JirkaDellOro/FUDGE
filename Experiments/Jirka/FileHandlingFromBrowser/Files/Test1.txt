@@ -1,0 +1,5 @@
+File: Test1
+Extension: ".txt"
+Encoding: UTF-8
+Special: äöüß\n\r
+EndOfFile

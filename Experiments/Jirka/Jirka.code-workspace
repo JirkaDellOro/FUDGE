@@ -118,6 +118,9 @@
 		},
 		{
 			"path": "SerializeChain"
+		},
+		{
+			"path": "FileHandlingFromBrowser"
 		}
 	],
 	"settings": {}
