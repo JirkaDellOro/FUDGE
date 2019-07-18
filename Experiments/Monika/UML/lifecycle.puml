@@ -1,0 +1,17 @@
+@startuml UI Lifecycle
+
+start
+:Generate UI;
+:Obtain Mutator from Mutable;
+:Fill UI;
+stop
+:Input<
+:mutate Mutable;
+:Update Mutator;
+:Update UI;
+stop
+:100ms passed<
+:Update Mutator;
+:Update UI;
+stop
+@enduml
