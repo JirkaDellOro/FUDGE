@@ -2,6 +2,9 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 
+# July 18th 2019
+The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.
+
 # July 11th 2019
 Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
 Should the inspector be there / paired per editor? Singleton? Selectable? 
