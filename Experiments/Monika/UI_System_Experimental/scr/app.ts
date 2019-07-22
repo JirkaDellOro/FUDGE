@@ -22,7 +22,12 @@ namespace UI {
     };
     console.log("Entering Setup");
     console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
-    let cameraComponent:CameraComponent = new CameraComponent();
+    console.log("Entering constructor");
+    console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
+    let camera: ƒ.Node;
+    camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+    let cmpCamera: ƒ.ComponentCamera = <ƒ.ComponentCamera>camera.getComponent(ƒ.ComponentCamera);
+    let cameraComponent:CameraComponent = new CameraComponent(cmpCamera);
 
     function createSimpleComponent (container: any, state: any) {
         console.log("Create Test");
