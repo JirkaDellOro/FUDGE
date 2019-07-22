@@ -125,7 +125,7 @@ var GoldenLayoutTest;
         add_content.id = "add_Dropdown";
         add_content.classList.add("dropdown-content");
         let item_Cube = document.createElement("a");
-        item_Cube.innerHTML = "Add Cube";
+        item_Cube.innerHTML = "Add Box";
         item_Cube.addEventListener("click", createbuttonpressed);
         add_content.append(item_Cube);
         let item_sphere = document.createElement("a");
@@ -311,9 +311,11 @@ var GoldenLayoutTest;
         image.src = "empty.png";
         container.getElement().append(image);
         myLayout.on('create-button', function () {
+            image.classList.add("cube");
             image.src = "Cube.png";
         });
         myLayout.on('select-button', function () {
+            image.classList.add("cube_selected");
             image.src = "Cube_selected.png";
         });
         myLayout.on('rotate-button', function () {

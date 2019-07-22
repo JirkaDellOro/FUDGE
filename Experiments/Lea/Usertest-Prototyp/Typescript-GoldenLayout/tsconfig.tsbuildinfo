@@ -154,7 +154,7 @@
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts": {
-        "version": "8e14055d9a4c1663d513ea5c0416cd1b36ff91b067d5637e2b6878d9904adbab",
+        "version": "c983d8d4ec8521114451d66e3b8cdcd5b94a00fc78aa81aef60288eef23338a6",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts": {
@@ -245,7 +245,7 @@
       "c:/users/lankea/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.intl.d.ts",
       "c:/users/lankea/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
       "c:/users/lankea/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
-      "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts",
+      "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts",
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts",
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts",
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/jquerystatic.d.ts",
@@ -255,7 +255,7 @@
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/sizzle/index.d.ts",
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/index.d.ts",
       "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts",
-      "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts"
+      "c:/users/lankea/pictures/studium/thesis/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts"
     ]
   },
   "version": "3.5.3"

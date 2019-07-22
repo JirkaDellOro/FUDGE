@@ -25,6 +25,16 @@ a {
 
 /*sceneeditor*/
 
+.cube {
+    object-fit: scale-down;
+    width: 650px;
+}
+
+.cube_selected {
+    object-fit: scale-down;
+    width: 650px;
+}
+
 .cube_gizmo2 {
     object-fit: scale-down;
     width: 650px;
@@ -233,7 +243,7 @@ h2 {
 }
 
 .lm_content {
-    background-image: url("brushedMetalDarkHorizon.png");
+    background-color: #414141;
 }
 
 .lm_dragProxy .lm_content {
@@ -275,7 +285,7 @@ h2 {
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #999999;
-    background-image: url("brushedMetalHorizon.png");
+    background-color: black;
     box-shadow: 2px -2px 2px rgba(0, 0, 0, 0.3);
     margin-right: 2px;
     padding-bottom: 2px;
