@@ -137,28 +137,34 @@ namespace GoldenLayoutTest {
             tools_content.classList.toggle("show");
         })
 
-        let dropdown_add:HTMLElement = document.createElement("div");
-        dropdown_add.classList.add ("dropdown");
+        let dropdown_editor:HTMLElement = document.createElement("div");
+        dropdown_editor.classList.add ("dropdown");
 
-        let add_content:HTMLElement = document.createElement("div");
-        add_content.id = "add_Dropdown";
-        add_content.classList.add("dropdown-content");
-        let item_Cube:HTMLElement = document.createElement("a");
-        item_Cube.innerHTML = "Add Rectangle";
-        item_Cube.addEventListener("click", createbuttonpressed);
-        add_content.append(item_Cube);
-        let item_sphere:HTMLElement = document.createElement("a");
-        item_sphere.innerHTML = "Add Circle";
-        add_content.append(item_sphere);
-        let item_pyramid:HTMLElement = document.createElement("a");
-        item_pyramid.innerHTML = "Add Pyramid";
-        add_content.append(item_pyramid);
+        let editor_content:HTMLElement = document.createElement("div");
+        editor_content.id = "add_Dropdown";
+        editor_content.classList.add("dropdown-content");
+        let item_tools:HTMLElement = document.createElement("a");
+        item_tools.innerHTML = "Toolbar";
+        item_tools.addEventListener("click", addToolbar);
+        editor_content.append(item_tools);
+        let item_viewport:HTMLElement = document.createElement("a");
+        item_viewport.innerHTML = "Viewport";
+        item_viewport.addEventListener("click", addViewport);
+        editor_content.append(item_viewport);
+        let item_inspector:HTMLElement = document.createElement("a");
+        item_inspector.innerHTML = "Inspector";
+        item_inspector.addEventListener("click", addInspector);
+        editor_content.append(item_inspector);
+        let item_scene:HTMLElement = document.createElement("a");
+        item_scene.innerHTML = "Scene Explorer";
+        item_scene.addEventListener("click", addScene);
+        editor_content.append(item_scene);
 
-        let add_button:HTMLButtonElement = document.createElement("button");
-        add_button.classList.add("dropbutton");
-        add_button.innerHTML = 'Add Object<i class = "fa fa-caret-down"></i>';
-        add_button.addEventListener("click", function(){
-            add_content.classList.toggle("show");
+        let editor_button:HTMLButtonElement = document.createElement("button");
+        editor_button.classList.add("dropbutton");
+        editor_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
+        editor_button.addEventListener("click", function(){
+            editor_content.classList.toggle("show");
         })
 
         let dropdown_help:HTMLElement = document.createElement("div");
@@ -198,13 +204,13 @@ namespace GoldenLayoutTest {
         dropdown_tools.append(tools_content);
         menubar.append(dropdown_tools);
 
-        dropdown_add.append(add_button);
-        dropdown_add.append(add_content);
-        menubar.append(dropdown_add);
+        dropdown_editor.append(editor_button);
+        dropdown_editor.append(editor_content);
+        menubar.append(dropdown_editor);
 
         dropdown_help.append(help_button);
         dropdown_help.append(help_content);
-        menubar.append(help_content);
+        menubar.append(dropdown_help);
 
         let root:HTMLElement = document.getElementById("menu");
         
@@ -519,6 +525,51 @@ namespace GoldenLayoutTest {
     }
 
     function createExplorerComponent(container: any, state: any) {
+        let dropdown_add:HTMLElement = document.createElement("div");
+        dropdown_add.classList.add ("add_dropdown");
+
+        let add_content:HTMLElement = document.createElement("div");
+        add_content.id = "add_Dropdown";
+        add_content.classList.add("dropdown-content");
+        let item_Cube:HTMLElement = document.createElement("a");
+        item_Cube.innerHTML = "Add Box";
+        item_Cube.addEventListener("click", createbuttonpressed);
+        add_content.append(item_Cube);
+        let item_sphere:HTMLElement = document.createElement("a");
+        item_sphere.innerHTML = "Add Sphere";
+        add_content.append(item_sphere);
+        let item_pyramid:HTMLElement = document.createElement("a");
+        item_pyramid.innerHTML = "Add Pyramid";
+        add_content.append(item_pyramid);
+        let item_cylinder:HTMLElement = document.createElement("a");
+        item_cylinder.innerHTML = "Add Cylinder";
+        add_content.append(item_cylinder);
+        let item_Capsule:HTMLElement = document.createElement("a");
+        item_Capsule.innerHTML = "Add Capsule";
+        add_content.append(item_Capsule);
+        let item_plane:HTMLElement = document.createElement("a");
+        item_plane.innerHTML = "Add Plane";
+        add_content.append(item_plane);
+
+        let add_button:HTMLButtonElement = document.createElement("button");
+        add_button.classList.add("dropbutton");
+        add_button.id = "add_button";
+        add_button.innerHTML = 'Add Node<i class = "fa fa-caret-down"></i>';
+        add_button.addEventListener("click", function(){
+            add_content.classList.toggle("show");
+        })
+
+        dropdown_add.append(add_button);
+        dropdown_add.append(add_content);
+        container.getElement().append(dropdown_add);
+
+        window.addEventListener("click", function(_event:MouseEvent){
+            let target:HTMLElement = <HTMLElement>_event.target;
+            if(target.id != "add_button")
+            {
+                add_content.classList.remove("show");
+            }
+        })
         let container_explorer:HTMLElement = document.createElement('div');
         myLayout.on("create-button", function(){
             let hideButton:HTMLButtonElement = document.createElement("button");
@@ -532,7 +583,50 @@ namespace GoldenLayoutTest {
         })
         container.getElement().append(container_explorer);
     }
+    function addToolbar(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Menubar',
+            type: 'component',
+            componentName: 'Menubar',
+            componentState: { label: 'A' }
+        };
 
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addViewport(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Viewport',
+            type: 'component',
+            componentName: 'Viewport',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addScene(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Scene Explorer',
+            type: 'component',
+            componentName: 'Scene Explorer',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addInspector(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Inspector',
+            type: 'component',
+            componentName: 'Inspector',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
     function scenebutton(){
         window.location.href = "editor.html";     
     }

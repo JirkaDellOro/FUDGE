@@ -97,6 +97,40 @@ namespace GoldenLayoutTest {
             window_content.classList.toggle("show");
         })
 
+        let dropdown_editor:HTMLElement = document.createElement("div");
+        dropdown_editor.classList.add ("dropdown");
+
+        let editor_content:HTMLElement = document.createElement("div");
+        editor_content.id = "add_Dropdown";
+        editor_content.classList.add("dropdown-content");
+        let item_tools:HTMLElement = document.createElement("a");
+        item_tools.innerHTML = "Toolbar";
+        item_tools.addEventListener("click", addToolbar);
+        editor_content.append(item_tools);
+        let item_viewport:HTMLElement = document.createElement("a");
+        item_viewport.innerHTML = "Viewport";
+        item_viewport.addEventListener("click", addViewport);
+        editor_content.append(item_viewport);
+        let item_inspector:HTMLElement = document.createElement("a");
+        item_inspector.innerHTML = "Inspector";
+        item_inspector.addEventListener("click", addInspector);
+        editor_content.append(item_inspector);
+        let item_scene:HTMLElement = document.createElement("a");
+        item_scene.innerHTML = "Scene Explorer";
+        item_scene.addEventListener("click", addScene);
+        editor_content.append(item_scene);
+        let item_project:HTMLElement = document.createElement("a");
+        item_project.innerHTML = "Ressource Manager";
+        item_project.addEventListener("click", addRessource);
+        editor_content.append(item_project);
+
+        let editor_button:HTMLButtonElement = document.createElement("button");
+        editor_button.classList.add("dropbutton");
+        editor_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
+        editor_button.addEventListener("click", function(){
+            editor_content.classList.toggle("show");
+        })
+
         let dropdown_tools:HTMLElement = document.createElement("div");
         dropdown_tools.classList.add ("dropdown");
 
@@ -133,39 +167,6 @@ namespace GoldenLayoutTest {
             tools_content.classList.toggle("show");
         })
 
-        let dropdown_add:HTMLElement = document.createElement("div");
-        dropdown_add.classList.add ("dropdown");
-
-        let add_content:HTMLElement = document.createElement("div");
-        add_content.id = "add_Dropdown";
-        add_content.classList.add("dropdown-content");
-        let item_Cube:HTMLElement = document.createElement("a");
-        item_Cube.innerHTML = "Add Box";
-        item_Cube.addEventListener("click", createbuttonpressed);
-        add_content.append(item_Cube);
-        let item_sphere:HTMLElement = document.createElement("a");
-        item_sphere.innerHTML = "Add Sphere";
-        add_content.append(item_sphere);
-        let item_pyramid:HTMLElement = document.createElement("a");
-        item_pyramid.innerHTML = "Add Pyramid";
-        add_content.append(item_pyramid);
-        let item_cylinder:HTMLElement = document.createElement("a");
-        item_cylinder.innerHTML = "Add Cylinder";
-        add_content.append(item_cylinder);
-        let item_Capsule:HTMLElement = document.createElement("a");
-        item_Capsule.innerHTML = "Add Capsule";
-        add_content.append(item_Capsule);
-        let item_plane:HTMLElement = document.createElement("a");
-        item_plane.innerHTML = "Add Plane";
-        add_content.append(item_plane);
-
-        let add_button:HTMLButtonElement = document.createElement("button");
-        add_button.classList.add("dropbutton");
-        add_button.innerHTML = 'Add Node<i class = "fa fa-caret-down"></i>';
-        add_button.addEventListener("click", function(){
-            add_content.classList.toggle("show");
-        })
-
         let dropdown_help:HTMLElement = document.createElement("div");
         dropdown_help.classList.add ("dropdown");
 
@@ -185,7 +186,6 @@ namespace GoldenLayoutTest {
         help_button.addEventListener("click", function(){
             help_content.classList.toggle("show");
         })
-
         
         dropdown_file.append(file_button);
         dropdown_file.append(file_content);
@@ -198,18 +198,18 @@ namespace GoldenLayoutTest {
         dropdown_window.append(window_button);
         dropdown_window.append(window_content);
         menubar.append(dropdown_window);
+        
+        dropdown_editor.append(editor_button);
+        dropdown_editor.append(editor_content);
+        menubar.append(dropdown_editor);
 
         dropdown_tools.append(tools_button);
         dropdown_tools.append(tools_content);
         menubar.append(dropdown_tools);
 
-        dropdown_add.append(add_button);
-        dropdown_add.append(add_content);
-        menubar.append(dropdown_add);
-
         dropdown_help.append(help_button);
         dropdown_help.append(help_content);
-        menubar.append(help_content);
+        menubar.append(dropdown_help);
 
         let root:HTMLElement = document.getElementById("menu");
         
@@ -237,7 +237,12 @@ namespace GoldenLayoutTest {
                 title: "Viewport",
                 componentState: { label: 'D' }
             },
-
+            {
+                type: 'component',
+                componentName: 'Ressource Manager',
+                title: "Ressource Manager",
+                componentState: { label: 'D' }
+            },
             {
                 type: 'column',
                 content: [{
@@ -272,6 +277,7 @@ namespace GoldenLayoutTest {
     myLayout.on('stateChanged', stateupdate);
     myLayout.registerComponent('Viewport', createViewportComponent);
     myLayout.registerComponent('Scene Explorer', createExplorerComponent);
+    myLayout.registerComponent('Ressource Manager', createExplorerComponent);
     myLayout.registerComponent('Inspector', createInspectorComponent);
     myLayout.registerComponent('Menubar', createToolComponent);
     myLayout.init();
@@ -391,8 +397,12 @@ namespace GoldenLayoutTest {
         // fieldset.appendChild(legend);
         // legend.classList.add("unfoldable");
 
+        let fieldset_container:HTMLElement = document.createElement("div");
+        fieldset_container.classList.add("fieldset_container");
+
         let fieldset_transform: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_transform: HTMLLegendElement = document.createElement("legend");
+        legend_transform.classList.add("fieldset_legend")
         legend_transform.innerHTML = "Transform";
         let toggleButton_transform: HTMLButtonElement = document.createElement("button");
         toggleButton_transform.addEventListener("click", toggleFoldElement);
@@ -446,56 +456,34 @@ namespace GoldenLayoutTest {
         fieldset_transform.append(container_rotation);
 
         let container_scale:HTMLElement = document.createElement("div");
-        container_scale.classList.add("fieldset_content");
+        // container_scale.classList.add("fieldset_content");
+        container_scale.classList.add("fieldset_transform");
         let label_scale:HTMLLabelElement = document.createElement("label");
         label_scale.innerHTML = "Scale";
+        label_scale.classList.add("fieldset_header");
         let scale_label_x:HTMLLabelElement = document.createElement("label");
         scale_label_x.innerHTML = "X";
+        scale_label_x.classList.add("fieldset_label");
         let scale_input_x:HTMLInputElement = document.createElement("input");
+        scale_input_x.classList.add("fieldset_input");
         container_scale.append(label_scale);
         container_scale.append(scale_label_x);
         container_scale.append(scale_input_x);
         let scale_label_y:HTMLLabelElement = document.createElement("label");
         scale_label_y.innerHTML = "Y";
+        scale_label_y.classList.add("fieldset_label");
         let scale_input_y:HTMLInputElement = document.createElement("input");
+        scale_input_y.classList.add("fieldset_input");
         container_scale.append(scale_label_y);
         container_scale.append(scale_input_y);
         let scale_label_z:HTMLLabelElement = document.createElement("label");
         scale_label_z.innerHTML = "Z";
+        scale_label_z.classList.add("fieldset_label");
         let scale_input_z:HTMLInputElement = document.createElement("input");
+        scale_input_z.classList.add("fieldset_input");
         container_scale.append(scale_label_z);
         container_scale.append(scale_input_z);
         fieldset_transform.append(container_scale);
-
-
-        let fieldset_script: HTMLFieldSetElement = document.createElement("fieldset");
-        let legend_script: HTMLLegendElement = document.createElement("legend");
-        legend_script.innerHTML = "Script";
-        let toggleButton_script: HTMLButtonElement = document.createElement("button");
-        toggleButton_script.addEventListener("click", toggleFoldElement);
-        toggleButton_script.innerHTML = "v";
-        legend_script.appendChild(toggleButton_script);
-        fieldset_script.appendChild(legend_script);
-        legend_script.classList.add("unfoldable");
-
-        let container_script:HTMLElement = document.createElement("div");
-        container_script.classList.add("fieldset_content");
-        let label_script:HTMLLabelElement = document.createElement("label");
-        label_script.innerHTML = "Script";
-        let script_input:HTMLInputElement = document.createElement("input");
-        let script_add:HTMLButtonElement = document.createElement("button");
-        script_add.innerHTML = "Add Script";
-        script_add.classList.add ("TextButton");
-        script_add.addEventListener("click", scriptbuttonpressed);
-        myLayout.on('script-button', function(){
-            let scriptDiv : HTMLElement = document.createElement("div");
-            scriptDiv.innerHTML = "<a>new_script.ts</a>";
-            container_script.append(scriptDiv);
-        });
-        container_script.append(label_script);
-        container_script.append(script_input);
-        container_script.append(script_add);
-        fieldset_script.append(container_script);
 
         let fieldset_mesh: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_mesh: HTMLLegendElement = document.createElement("legend");
@@ -527,7 +515,6 @@ namespace GoldenLayoutTest {
         legend_material.appendChild(toggleButton_material);
         fieldset_material.appendChild(legend_material);
 
-
         legend_material.classList.add("unfoldable");
 
         let container_material:HTMLElement = document.createElement("div");
@@ -537,7 +524,6 @@ namespace GoldenLayoutTest {
         let material_input:HTMLInputElement = document.createElement("input");
         container_material.append(label_material);
         container_material.append(material_input);
-        // shader_select.innerHTML = "<option value='standard'>Standard Shader</option><option value='celshader'>CelShader</option>";
         let shader_select:HTMLSelectElement = document.createElement("select");
         let option_standard:HTMLOptionElement = document.createElement("option");
         option_standard.value = "standard";
@@ -549,12 +535,81 @@ namespace GoldenLayoutTest {
         shader_select.options.add(option_cel);
         container_material.append(shader_select);
         fieldset_material.append(container_material);
+        
+        let dropdown_add:HTMLElement = document.createElement("div");
+        dropdown_add.classList.add ("add_dropdown");
+
+        let add_content:HTMLElement = document.createElement("div");
+        add_content.id = "add_Dropdown";
+        add_content.classList.add("dropdown-content");
+        let item_transform:HTMLElement = document.createElement("a");
+        item_transform.innerHTML = "Add Transform Component";
+        item_transform.addEventListener("click", createbuttonpressed);
+        add_content.append(item_transform);
+        let item_script:HTMLElement = document.createElement("a");
+        item_script.innerHTML = "Add Script Component";
+        item_script.addEventListener("click", function(){
+            let fieldset_script: HTMLFieldSetElement = document.createElement("fieldset");
+            let legend_script: HTMLLegendElement = document.createElement("legend");
+            legend_script.innerHTML = "NewScript.ts";
+            let toggleButton_script: HTMLButtonElement = document.createElement("button");
+            toggleButton_script.addEventListener("click", toggleFoldElement);
+            toggleButton_script.innerHTML = "v";
+            legend_script.appendChild(toggleButton_script);
+            fieldset_script.appendChild(legend_script);
+            legend_script.classList.add("unfoldable");
+    
+            let container_script:HTMLElement = document.createElement("div");
+            container_script.classList.add("fieldset_content");
+            let label_script:HTMLLabelElement = document.createElement("label");
+            label_script.classList.add("fieldset_label");
+            label_script.innerHTML = "Script";
+            let script_input:HTMLInputElement = document.createElement("input");
+            script_input.classList.add("fieldset_input");
+            container_script.append(label_script);
+            container_script.append(script_input);
+            fieldset_script.append(container_script);
+            fieldset_container.append(fieldset_script);
+        })
+        add_content.append(item_script);
+        let item_pyramid:HTMLElement = document.createElement("a");
+        item_pyramid.innerHTML = "Add Pyramid";
+        add_content.append(item_pyramid);
+        let item_cylinder:HTMLElement = document.createElement("a");
+        item_cylinder.innerHTML = "Add Cylinder";
+        add_content.append(item_cylinder);
+        let item_Capsule:HTMLElement = document.createElement("a");
+        item_Capsule.innerHTML = "Add Capsule";
+        add_content.append(item_Capsule);
+        let item_plane:HTMLElement = document.createElement("a");
+        item_plane.innerHTML = "Add Plane";
+        add_content.append(item_plane);
+
+        let add_button:HTMLButtonElement = document.createElement("button");
+        add_button.classList.add("dropbutton");
+        add_button.id = "add_button";
+        add_button.innerHTML = 'Add Component<i class = "fa fa-caret-down"></i>';
+        add_button.addEventListener("click", function(){
+            add_content.classList.toggle("show");
+        })
+
+        dropdown_add.append(add_button);
+        dropdown_add.append(add_content);
+
+        window.addEventListener("click", function(_event:MouseEvent){
+            let target:HTMLElement = <HTMLElement>_event.target;
+            if(target.id != "add_button")
+            {
+                add_content.classList.remove("show");
+            }
+        })
 
         myLayout.on('select-button', function(){
-            container.getElement().append(fieldset_transform);
-            container.getElement().append(fieldset_script);
-            container.getElement().append(fieldset_mesh);
-            container.getElement().append(fieldset_material);
+            fieldset_container.append(fieldset_transform);
+            fieldset_container.append(fieldset_mesh);
+            fieldset_container.append(fieldset_material);
+            container.getElement().append(fieldset_container);
+            container.getElement().append(dropdown_add);
         });
     }
 
@@ -580,6 +635,52 @@ namespace GoldenLayoutTest {
     }
 
     function createExplorerComponent(container: any, state: any) {
+        let dropdown_add:HTMLElement = document.createElement("div");
+        dropdown_add.classList.add ("add_dropdown");
+
+        let add_content:HTMLElement = document.createElement("div");
+        add_content.id = "add_Dropdown";
+        add_content.classList.add("dropdown-content");
+        let item_Cube:HTMLElement = document.createElement("a");
+        item_Cube.innerHTML = "Add Box";
+        item_Cube.addEventListener("click", createbuttonpressed);
+        add_content.append(item_Cube);
+        let item_sphere:HTMLElement = document.createElement("a");
+        item_sphere.innerHTML = "Add Sphere";
+        add_content.append(item_sphere);
+        let item_pyramid:HTMLElement = document.createElement("a");
+        item_pyramid.innerHTML = "Add Pyramid";
+        add_content.append(item_pyramid);
+        let item_cylinder:HTMLElement = document.createElement("a");
+        item_cylinder.innerHTML = "Add Cylinder";
+        add_content.append(item_cylinder);
+        let item_Capsule:HTMLElement = document.createElement("a");
+        item_Capsule.innerHTML = "Add Capsule";
+        add_content.append(item_Capsule);
+        let item_plane:HTMLElement = document.createElement("a");
+        item_plane.innerHTML = "Add Plane";
+        add_content.append(item_plane);
+
+        let add_button:HTMLButtonElement = document.createElement("button");
+        add_button.classList.add("dropbutton");
+        add_button.id = "add_button";
+        add_button.innerHTML = 'Add Node<i class = "fa fa-caret-down"></i>';
+        add_button.addEventListener("click", function(){
+            add_content.classList.toggle("show");
+        })
+
+        dropdown_add.append(add_button);
+        dropdown_add.append(add_content);
+        container.getElement().append(dropdown_add);
+
+        window.addEventListener("click", function(_event:MouseEvent){
+            let target:HTMLElement = <HTMLElement>_event.target;
+            if(target.id != "add_button")
+            {
+                add_content.classList.remove("show");
+            }
+        })
+    
         let container_explorer:HTMLElement = document.createElement('div');
         myLayout.on("create-button", function(){
             let hideButton:HTMLButtonElement = document.createElement("button");
@@ -604,6 +705,61 @@ namespace GoldenLayoutTest {
         container.getElement().append(container_explorer);
     }
 
+    function addToolbar(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Menubar',
+            type: 'component',
+            componentName: 'Menubar',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addViewport(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Viewport',
+            type: 'component',
+            componentName: 'Viewport',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addRessource(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Ressource Manager',
+            type: 'component',
+            componentName: 'Ressource Manager',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addScene(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Scene Explorer',
+            type: 'component',
+            componentName: 'Scene Explorer',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addInspector(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Inspector',
+            type: 'component',
+            componentName: 'Inspector',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
     function closeMenues(e:MouseEvent){
         let menu:HTMLElement = <HTMLElement>document.getElementById("menu").firstChild;
         let children:HTMLCollection = menu.children
@@ -620,7 +776,6 @@ namespace GoldenLayoutTest {
             }
         }
         let target:HTMLElement = <HTMLElement>e.target;
-        console.log(target);
         if(target.classList.contains("dropbutton"))
         {
             let dropchildren:HTMLCollection = target.parentElement.children;
@@ -629,7 +784,6 @@ namespace GoldenLayoutTest {
                 console.log(dropchild)
                 if(dropchild.classList.contains("dropdown-content"))
                 {
-                    console.log("found you");
                     dropchild.classList.add("show");
                 }
             }

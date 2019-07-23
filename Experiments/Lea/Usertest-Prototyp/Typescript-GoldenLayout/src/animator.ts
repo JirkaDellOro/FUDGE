@@ -97,6 +97,34 @@ namespace GoldenLayoutTest {
             window_content.classList.toggle("show");
         })
 
+        let dropdown_editor:HTMLElement = document.createElement("div");
+        dropdown_editor.classList.add ("dropdown");
+
+        let editor_content:HTMLElement = document.createElement("div");
+        editor_content.id = "add_Dropdown";
+        editor_content.classList.add("dropdown-content");
+        let item_tools:HTMLElement = document.createElement("a");
+        item_tools.innerHTML = "Dopesheet";
+        item_tools.addEventListener("click", addDopesheet);
+        editor_content.append(item_tools);
+        let item_viewport:HTMLElement = document.createElement("a");
+        item_viewport.innerHTML = "Curveview";
+        item_viewport.addEventListener("click", addCurveview);
+        editor_content.append(item_viewport);
+        let item_inspector:HTMLElement = document.createElement("a");
+        item_inspector.innerHTML = "Inspector";
+        item_inspector.addEventListener("click", addInspector);
+        editor_content.append(item_inspector);
+        let item_scene:HTMLElement = document.createElement("a");
+
+
+        let editor_button:HTMLButtonElement = document.createElement("button");
+        editor_button.classList.add("dropbutton");
+        editor_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
+        editor_button.addEventListener("click", function(){
+            editor_content.classList.toggle("show");
+        })
+
         let dropdown_tools:HTMLElement = document.createElement("div");
         dropdown_tools.classList.add ("dropdown");
 
@@ -172,13 +200,17 @@ namespace GoldenLayoutTest {
         dropdown_window.append(window_content);
         menubar.append(dropdown_window);
 
+        dropdown_editor.append(editor_button);
+        dropdown_editor.append(editor_content);
+        menubar.append(dropdown_editor);
+
         dropdown_tools.append(tools_button);
         dropdown_tools.append(tools_content);
         menubar.append(dropdown_tools);
 
         dropdown_help.append(help_button);
         dropdown_help.append(help_content);
-        menubar.append(help_content);
+        menubar.append(dropdown_help);
 
         let root:HTMLElement = document.getElementById("menu");
         
@@ -371,16 +403,6 @@ namespace GoldenLayoutTest {
         //button.addEventListener("click", buttonpressed);
         container.getElement().append(keyframe_button);
 
-        let fieldset_transform: HTMLFieldSetElement = document.createElement("fieldset");
-        let legend_transform: HTMLLegendElement = document.createElement("legend");
-        legend_transform.innerHTML = "Transform";
-        let toggleButton_transform: HTMLButtonElement = document.createElement("button");
-        toggleButton_transform.addEventListener("click", toggleFoldElement);
-        toggleButton_transform.innerHTML = "v";
-        legend_transform.appendChild(toggleButton_transform);
-        fieldset_transform.appendChild(legend_transform);
-        legend_transform.classList.add("unfoldable");
-
         let container_position:HTMLElement = document.createElement("div");
         container_position.classList.add("fieldset_content");
         let label_position:HTMLDivElement = document.createElement("div");
@@ -401,7 +423,6 @@ namespace GoldenLayoutTest {
         let position_input_z:HTMLInputElement = document.createElement("input");
         container_position.append(position_label_z);
         position_label_z.append(position_input_z);
-        fieldset_transform.append(container_position);
 
         let container_rotation:HTMLElement = document.createElement("div");
         container_rotation.classList.add("fieldset_content");
@@ -423,7 +444,6 @@ namespace GoldenLayoutTest {
         let rotation_input_z:HTMLInputElement = document.createElement("input");
         container_rotation.append(rotation_label_z);
         rotation_label_z.append(rotation_input_z);
-        fieldset_transform.append(container_rotation);
 
         let container_scale:HTMLElement = document.createElement("div");
         container_scale.classList.add("fieldset_content");
@@ -445,22 +465,11 @@ namespace GoldenLayoutTest {
         let scale_input_z:HTMLInputElement = document.createElement("input");
         container_scale.append(scale_label_z);
         scale_label_z.append(scale_input_z);
-        fieldset_transform.append(container_scale);
-
-        let fieldset_pivot: HTMLFieldSetElement = document.createElement("fieldset");
-        let legend_pivot: HTMLLegendElement = document.createElement("legend");
-        legend_pivot.innerHTML = "Pivot";
-        let toggleButton_pivot: HTMLButtonElement = document.createElement("button");
-        toggleButton_pivot.addEventListener("click", toggleFoldElement);
-        toggleButton_pivot.innerHTML = "v";
-        legend_pivot.appendChild(toggleButton_pivot);
-        fieldset_pivot.appendChild(legend_pivot);
-        legend_pivot.classList.add("unfoldable");
 
         let container_pivot:HTMLElement = document.createElement("div");
         container_pivot.classList.add("fieldset_content");
         let label_pivot:HTMLDivElement = document.createElement("div");
-        label_pivot.innerHTML = "Position";
+        label_pivot.innerHTML = "Pivot Point";
         let pivot_label_x:HTMLDivElement = document.createElement("div");
         pivot_label_x.innerHTML = "X";
         let pivot_input_x:HTMLInputElement = document.createElement("input");
@@ -477,10 +486,11 @@ namespace GoldenLayoutTest {
         let pivot_input_z:HTMLInputElement = document.createElement("input");
         container_pivot.append(pivot_label_z);
         pivot_label_z.append(pivot_input_z);
-        fieldset_pivot.append(container_pivot);
 
-        container.getElement().append(fieldset_transform);
-        container.getElement().append(fieldset_pivot);
+        container.getElement().append(container_position);
+        container.getElement().append(container_rotation);
+        container.getElement().append(container_scale);
+        container.getElement().append(container_pivot);
     }
 
     function createPersistentComponent(container: any, state: any) {
@@ -509,7 +519,39 @@ namespace GoldenLayoutTest {
     function sketchbutton(){
         window.location.href = "sketch.html";     
     }
+    function addDopesheet(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Dopesheet',
+            type: 'component',
+            componentName: 'Dopesheet',
+            componentState: { label: 'A' }
+        };
 
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addCurveview(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Curveview',
+            type: 'component',
+            componentName: 'Curveview',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
+    function addInspector(e:MouseEvent)
+    {
+        let newItemConfig = {
+            title: 'Inspector',
+            type: 'component',
+            componentName: 'Inspector',
+            componentState: { label: 'A' }
+        };
+
+        myLayout.root.contentItems[ 0 ].addChild( newItemConfig );
+    }
     function closeMenues(e:MouseEvent){
         let menu:HTMLElement = <HTMLElement>document.getElementById("menu").firstChild;
         let children:HTMLCollection = menu.children

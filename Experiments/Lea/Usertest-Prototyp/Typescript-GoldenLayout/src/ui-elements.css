@@ -1,0 +1,289 @@
+a {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+}
+
+/*tooltips*/
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    margin-top: 20px; 
+  
+    /* Position the tooltip */
+    position: fixed;
+    z-index: 1000;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+
+/*sceneeditor*/
+
+.cube {
+    object-fit: scale-down;
+    width: 650px;
+}
+
+.cube_selected {
+    object-fit: scale-down;
+    width: 650px;
+}
+
+.cube_gizmo2 {
+    object-fit: scale-down;
+    width: 650px;
+}
+
+/*animation editor*/
+
+.fakeTimeline {
+    object-fit: scale-down;
+    width: 1135px;
+}
+
+.text {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+    margin: 2px;
+}
+
+.contrButton {
+    object-fit: scale-down;
+    font-size: 16px;
+    /* Set a font size */
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    /* Mouse pointer on hover */
+    background-color: #9d9d9d;
+    border: none;
+    margin: 1px;
+    padding: unset;
+}
+
+.contrButton img {
+    height: 100%;
+    width: 100%;
+}
+
+.contrButton:hover {
+    background-blend-mode: multiply;
+    background-color: #757575;
+}
+.contrButton:active {
+    background-blend-mode: multiply;
+    background-color: #505050;
+}
+
+
+.fake-buttons {
+    height: 20px;
+}
+
+#Invisibutton {
+    background: none;
+    border: none;
+}
+
+.ToolButton {
+    object-fit: scale-down;
+    font-size: 16px;
+    /* Set a font size */
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+    /* Mouse pointer on hover */
+    background-color: #9d9d9d;
+    border: none;
+    padding: 4px 4px 4px 4px;
+    margin: 2px;
+}
+
+.ToolButton img {
+    height: 100%;
+    width: 100%;
+}
+
+.ToolButton:hover {
+    background-blend-mode: multiply;
+    background-color: #757575;
+}
+
+.ToolButton:active {
+    
+    background-color: #505050;
+}
+
+.hide-button {
+    object-fit: scale-down;
+    background: none;
+    border: none;
+    height: 10px;
+    width: 35px;
+    margin: 2px;
+}
+
+.hide-button img {
+    height: 100%;
+    width: 100%;
+}
+
+.TextButton {
+    object-fit: scale-down;
+    font-size: 16px;
+    /* Set a font size */
+    cursor: pointer;
+    /* Mouse pointer on hover */
+    background-color: #9d9d9d;
+    border: none;
+    margin: 2px;
+}
+
+
+fieldset {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 20px;
+}
+
+.fieldset_container{
+    overflow-y: scroll;
+}
+.fieldset_label{
+    grid-column: 1;
+}
+.fieldset_input{
+    grid-column: 2;
+}
+.fieldset_header{
+    grid-column: 1 / span 6;
+}
+
+.fieldset_legend{
+    grid-area: legend;
+}
+.fieldset_button{
+    grid-area: button;
+}
+.fieldset_content {
+    display: grid;
+    grid-auto-columns: 50px;
+    margin: 10px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 20px;
+}
+.fieldset_transform {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto;
+    margin: 10px;
+}
+
+.fieldset_content label {
+    margin: 5px;
+    margin-right: 2px;
+}
+
+.navbar {
+    overflow: hidden;
+    background-color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.navbar a {
+    float: left;
+    font-size: 16px;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+
+.dropdown .dropbutton {
+    cursor: pointer;
+    font-size: 12px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    background-color: inherit;
+    font-family: inherit;
+    margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbutton, .dropbutton:focus {
+    background-color: #ddd;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    max-width: fit-content;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+}
+
+.dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.add_dropdown {
+    display: inline-block;
+    overflow: hidden;
+    width: inherit;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.add_dropdown .dropbutton {
+    cursor: pointer;
+    font-size: 12px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    align-self: center;
+    background-color: inherit;
+    font-family: inherit;
+    display: block;
+    width: inherit;
+}
+
+.add_dropdown:hover .dropbutton, .dropbutton:focus {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
+.folded {
+    display: none;
+}
+
+h2 {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+}
