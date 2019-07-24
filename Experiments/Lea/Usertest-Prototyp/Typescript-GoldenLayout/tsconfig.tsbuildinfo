@@ -146,15 +146,15 @@
         "signature": "b209a815904a485328677714ef8c4ddd2dcf4040154fa204d25cbf31cd4ff0f3"
       },
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts": {
-        "version": "5130993d0ef1bfe14d6e2ee6e02e8c66b356712ffbdb86749a117d2a76f678a4",
+        "version": "75126b0284c5d494a99df69f66ebf3abc5c89d28057d202fa86f6c7dd789717e",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts": {
-        "version": "5476d07a878e6f51788eaf888bb0c325477f703f65c00b77b2240cb703f7033b",
+        "version": "e7c72920bb6b9487a91d894e5daf479f8586e1737f84464df45314ef34380cc7",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts": {
-        "version": "69004a31bfdc1b471859171d36d9e860286d3f90625cd3dbeea046a43c79d6e1",
+        "version": "40cebf64ac7334508f1f8472bd147bb51c8469651848054c5ceb34f2bc562806",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts": {
@@ -240,7 +240,7 @@
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.intl.d.ts",
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
-      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts",
+      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/jquerystatic.d.ts",
@@ -250,7 +250,7 @@
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/sizzle/index.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/index.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts",
-      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts"
+      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts"
     ]
   },
   "version": "3.4.3"

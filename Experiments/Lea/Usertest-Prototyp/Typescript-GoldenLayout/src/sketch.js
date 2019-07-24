@@ -346,36 +346,44 @@ var GoldenLayoutTest;
         let fieldset_Properties = document.createElement("fieldset");
         let legend = document.createElement("legend");
         legend.innerHTML = "Properties";
-        let toggleButton = document.createElement("button");
+        let toggleButton = document.createElement("img");
         toggleButton.addEventListener("click", toggleFoldElement);
-        toggleButton.innerHTML = "v";
+        toggleButton.src = 'icons/foldable_open.png';
         legend.appendChild(toggleButton);
         fieldset_Properties.appendChild(legend);
         legend.classList.add("unfoldable");
         let container_Properties = document.createElement("div");
         container_Properties.classList.add("fieldset_content");
         let label_fillcolor = document.createElement("div");
+        label_fillcolor.classList.add("column1");
         label_fillcolor.innerHTML = "Fill Color";
         let input_fillcolor = document.createElement("input");
         input_fillcolor.type = "color";
-        label_fillcolor.append(input_fillcolor);
+        input_fillcolor.classList.add("column2");
         container_Properties.append(label_fillcolor);
+        container_Properties.append(input_fillcolor);
         let label_linecolor = document.createElement("div");
-        label_linecolor.innerHTML = "Fill Color";
+        label_linecolor.innerHTML = "Line Color";
+        label_linecolor.classList.add("column1");
         let input_linecolor = document.createElement("input");
         input_linecolor.type = "color";
-        label_linecolor.append(input_linecolor);
+        input_linecolor.classList.add("column2");
         container_Properties.append(label_linecolor);
+        container_Properties.append(input_linecolor);
         let label_linewidth = document.createElement("div");
         label_linewidth.innerHTML = "Line Width";
+        label_linewidth.classList.add("column1");
         let input_linewidth = document.createElement("input");
-        label_linewidth.append(input_linewidth);
+        input_linewidth.classList.add("column2");
         container_Properties.append(label_linewidth);
+        container_Properties.append(input_linewidth);
         let label_order = document.createElement("div");
         label_order.innerHTML = "Layer";
+        label_order.classList.add("column1");
         let input_order = document.createElement("input");
-        label_order.append(input_order);
+        input_order.classList.add("column2");
         container_Properties.append(label_order);
+        container_Properties.append(input_order);
         fieldset_Properties.append(container_Properties);
         container.getElement().append(fieldset_Properties);
     }
@@ -505,14 +513,21 @@ var GoldenLayoutTest;
         let foldToggle;
         //Toggle the folding behaviour of the Folding Target
         foldTarget.classList.contains("fieldset_folded") ? foldToggle = false : foldToggle = true;
-        foldToggle == true ? foldTarget.classList.add("fieldset_folded") : foldTarget.classList.remove("fieldset_folded");
-        foldToggle == true ? target.innerHTML = ">" : target.innerHTML = "v";
+        foldTarget.classList.toggle("fieldset_folded");
+        if (foldToggle == true) {
+            target.src = "icons/foldable_closed.png";
+        }
+        else {
+            target.src = "icons/foldable_open.png";
+        }
+        // foldToggle == true ?  : foldTarget.classList.remove("fieldset_folded");
+        // foldToggle == true ? target.innerHTML = "<img scr ='icons/Keyframe.png'>" : target.innerHTML = "<img scr='icons/event.png'>";
         let children = foldTarget.children;
         // for (let i = 0; i < children.length; i++) {
         for (let child of children) {
             // let child: HTMLElement = <HTMLElement>children[i];
             if (!child.classList.contains("unfoldable")) {
-                foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
+                child.classList.toggle("folded");
             }
         }
     }

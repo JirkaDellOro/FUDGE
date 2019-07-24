@@ -356,7 +356,7 @@ namespace GoldenLayoutTest {
         rotate_button.addEventListener("click", rotatebuttonpressed);
         container.getElement().append(rotate_button);
         let scale_button: HTMLSpanElement = document.createElement("button");
-        scale_button.innerHTML = '<img src = "icons/Scale_v2.png">';
+        scale_button.innerHTML = '<img src = "icons/scale_v3.png">';
         scale_button.classList.add("ToolButton");
         //button.addEventListener("click", buttonpressed);
         container.getElement().append(scale_button);
@@ -406,7 +406,7 @@ namespace GoldenLayoutTest {
         legend_transform.innerHTML = "Transform";
         let toggleButton_transform: HTMLImageElement = document.createElement("img");
         toggleButton_transform.addEventListener("click", toggleFoldElement);
-        toggleButton_transform.src = 'icons/KeyFrame.png';
+        toggleButton_transform.src = 'icons/foldable_open.png';
         legend_transform.appendChild(toggleButton_transform);
         fieldset_transform.appendChild(legend_transform);
         legend_transform.classList.add("unfoldable");
@@ -504,7 +504,7 @@ namespace GoldenLayoutTest {
         legend_mesh.innerHTML = "Mesh";
         let toggleButton_mesh: HTMLImageElement = document.createElement("img");
         toggleButton_mesh.addEventListener("click", toggleFoldElement);
-        toggleButton_mesh.src = 'icons/KeyFrame.png';
+        toggleButton_mesh.src = 'icons/foldable_open.png';
         legend_mesh.appendChild(toggleButton_mesh);
         fieldset_mesh.appendChild(legend_mesh);
         legend_mesh.classList.add("unfoldable");
@@ -525,7 +525,7 @@ namespace GoldenLayoutTest {
         legend_material.innerHTML = "Material";
         let toggleButton_material: HTMLImageElement = document.createElement("img");
         toggleButton_material.addEventListener("click", toggleFoldElement);
-        toggleButton_material.src = 'icons/KeyFrame.png';
+        toggleButton_material.src = 'icons/foldable_open.png';
         legend_material.appendChild(toggleButton_material);
         fieldset_material.appendChild(legend_material);
 
@@ -571,7 +571,7 @@ namespace GoldenLayoutTest {
             legend_script.innerHTML = "NewScript.ts";
             let toggleButton_script: HTMLImageElement = document.createElement("img");
             toggleButton_script.addEventListener("click", toggleFoldElement);
-            toggleButton_script.src = 'icons/KeyFrame.png';
+            toggleButton_script.src = 'icons/foldable_open.png';
             legend_script.appendChild(toggleButton_script);
             fieldset_script.appendChild(legend_script);
             legend_script.classList.add("unfoldable");
@@ -819,10 +819,10 @@ namespace GoldenLayoutTest {
         foldTarget.classList.toggle("fieldset_folded");
         if(foldToggle == true)
         {
-            target.src =  "icons/Keyframe.png";
+            target.src =  "icons/foldable_closed.png";
         }
         else{
-            target.src =  "icons/Keyframe.png";
+            target.src =  "icons/foldable_open.png";
         }
         // foldToggle == true ?  : foldTarget.classList.remove("fieldset_folded");
         // foldToggle == true ? target.innerHTML = "<img scr ='icons/Keyframe.png'>" : target.innerHTML = "<img scr='icons/event.png'>";
