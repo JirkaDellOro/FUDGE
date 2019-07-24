@@ -284,7 +284,7 @@ namespace GoldenLayoutTest {
     function createCurveviewComponent(container: any, state: any) {
         let image:HTMLImageElement = document.createElement("img");
         image.classList.add("fakeTimeline");
-        image.src = "AnimationEditor.png";
+        image.src = "AnimationEditorCurveView.png";
         container.getElement().append(image);
     }
 

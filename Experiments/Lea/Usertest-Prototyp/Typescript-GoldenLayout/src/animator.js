@@ -247,7 +247,7 @@ var GoldenLayoutTest;
     function createCurveviewComponent(container, state) {
         let image = document.createElement("img");
         image.classList.add("fakeTimeline");
-        image.src = "AnimationEditor.png";
+        image.src = "AnimationEditorCurveView.png";
         container.getElement().append(image);
     }
     function createInspectorComponent(container, state) {

@@ -343,7 +343,6 @@ namespace GoldenLayoutTest {
         let rotate_button: HTMLSpanElement = document.createElement("button");
         rotate_button.innerHTML = '<img src = "icons/rotate.png">';
         rotate_button.classList.add("ToolButton");
-        rotate_button.addEventListener("click", rotatebuttonpressed);
         container.getElement().append(rotate_button);
         let scale_button: HTMLSpanElement = document.createElement("button");
         scale_button.innerHTML = '<img src = "icons/Scale_v2.png">';
@@ -352,7 +351,7 @@ namespace GoldenLayoutTest {
         container.getElement().append(scale_button);
         let pen_button: HTMLSpanElement = document.createElement("button");
         pen_button.classList.add("ToolButton");
-        pen_button.innerHTML = '<img src = "icons/select.png">';
+        pen_button.innerHTML = '<img src = "icons/PenTool.png">';
         container.getElement().append(pen_button);
         let combine_button: HTMLSpanElement = document.createElement("button");
         combine_button.classList.add("ToolButton");
@@ -371,16 +370,16 @@ namespace GoldenLayoutTest {
     {
         let image:HTMLImageElement = document.createElement("img");
         image.addEventListener("click", selectbuttonpressed);
-        image.src = "empty.png";
+        image.src = "SketchEditor_canvas.png";
         container.getElement().append(image);
         myLayout.on('create-button', function(){
-            image.src = "Cube.png";
+            image.src = "SketchEditor_canvas.png";
         })
         myLayout.on('select-button', function(){
-            image.src = "Cube_selected.png";
+            image.src = "SketchEditor_canvas.png";
         });
         myLayout.on('rotate-button', function(){
-            image.src = "Cube_gizmo.png";
+            image.src = "SketchEditor_canvas.png";
         });
         myLayout.on('hide-button', function(){
             image.classList.toggle("folded");
@@ -398,67 +397,6 @@ namespace GoldenLayoutTest {
         // legend.appendChild(toggleButton);
         // fieldset.appendChild(legend);
         // legend.classList.add("unfoldable");
-        let fieldset_transform: HTMLFieldSetElement = document.createElement("fieldset");
-        let legend_transform: HTMLLegendElement = document.createElement("legend");
-        legend_transform.innerHTML = "Transform";
-        let toggleButton_transform: HTMLButtonElement = document.createElement("button");
-        toggleButton_transform.addEventListener("click", toggleFoldElement);
-        toggleButton_transform.innerHTML = "v";
-        legend_transform.appendChild(toggleButton_transform);
-        fieldset_transform.appendChild(legend_transform);
-        legend_transform.classList.add("unfoldable");
-
-        let container_position:HTMLElement = document.createElement("div");
-        container_position.classList.add("fieldset_content");
-        let label_position:HTMLLabelElement = document.createElement("label");
-        label_position.innerHTML = "Position";
-        let position_label_x:HTMLLabelElement = document.createElement("label");
-        position_label_x.innerHTML = "X";
-        let position_input_x:HTMLInputElement = document.createElement("input");
-        container_position.append(label_position);
-        container_position.append(position_label_x);
-        container_position.append(position_input_x);
-        let position_label_y:HTMLLabelElement = document.createElement("label");
-        position_label_y.innerHTML = "Y";
-        let position_input_y:HTMLInputElement = document.createElement("input");
-        container_position.append(position_label_y);
-        container_position.append(position_input_y);
-        fieldset_transform.append(container_position);
-
-        let container_rotation:HTMLElement = document.createElement("div");
-        container_rotation.classList.add("fieldset_content");
-        let label_rotation:HTMLLabelElement = document.createElement("label");
-        label_rotation.innerHTML = "Rotation";
-        let rotation_label_x:HTMLLabelElement = document.createElement("label");
-        rotation_label_x.innerHTML = "X";
-        let rotation_input_x:HTMLInputElement = document.createElement("input");
-        container_rotation.append(label_rotation);
-        container_rotation.append(rotation_label_x);
-        container_rotation.append(rotation_input_x);
-        let rotation_label_y:HTMLLabelElement = document.createElement("label");
-        rotation_label_y.innerHTML = "Y";
-        let rotation_input_y:HTMLInputElement = document.createElement("input");
-        container_rotation.append(rotation_label_y);
-        container_rotation.append(rotation_input_y);
-        fieldset_transform.append(container_rotation);
-
-        let container_scale:HTMLElement = document.createElement("div");
-        container_scale.classList.add("fieldset_content");
-        let label_scale:HTMLLabelElement = document.createElement("label");
-        label_scale.innerHTML = "Scale";
-        let scale_label_x:HTMLLabelElement = document.createElement("label");
-        scale_label_x.innerHTML = "X";
-        let scale_input_x:HTMLInputElement = document.createElement("input");
-        container_scale.append(label_scale);
-        container_scale.append(scale_label_x);
-        container_scale.append(scale_input_x);
-        let scale_label_y:HTMLLabelElement = document.createElement("label");
-        scale_label_y.innerHTML = "Y";
-        let scale_input_y:HTMLInputElement = document.createElement("input");
-        container_scale.append(scale_label_y);
-        container_scale.append(scale_input_y);
-        fieldset_transform.append(container_scale);
-
         let fieldset_Properties: HTMLFieldSetElement = document.createElement("fieldset");
         let legend: HTMLLegendElement = document.createElement("legend");
         legend.innerHTML = "Properties";
@@ -498,8 +436,6 @@ namespace GoldenLayoutTest {
         container_Properties.append(label_order);
 
         fieldset_Properties.append(container_Properties);
-
-        container.getElement().append(fieldset_transform);
         container.getElement().append(fieldset_Properties);
     }
 
@@ -532,24 +468,14 @@ namespace GoldenLayoutTest {
         add_content.id = "add_Dropdown";
         add_content.classList.add("dropdown-content");
         let item_Cube:HTMLElement = document.createElement("a");
-        item_Cube.innerHTML = "Add Box";
-        item_Cube.addEventListener("click", createbuttonpressed);
+        item_Cube.innerHTML = "Add Rectangle";
         add_content.append(item_Cube);
         let item_sphere:HTMLElement = document.createElement("a");
-        item_sphere.innerHTML = "Add Sphere";
+        item_sphere.innerHTML = "Add Circle";
         add_content.append(item_sphere);
         let item_pyramid:HTMLElement = document.createElement("a");
         item_pyramid.innerHTML = "Add Pyramid";
         add_content.append(item_pyramid);
-        let item_cylinder:HTMLElement = document.createElement("a");
-        item_cylinder.innerHTML = "Add Cylinder";
-        add_content.append(item_cylinder);
-        let item_Capsule:HTMLElement = document.createElement("a");
-        item_Capsule.innerHTML = "Add Capsule";
-        add_content.append(item_Capsule);
-        let item_plane:HTMLElement = document.createElement("a");
-        item_plane.innerHTML = "Add Plane";
-        add_content.append(item_plane);
 
         let add_button:HTMLButtonElement = document.createElement("button");
         add_button.classList.add("dropbutton");
@@ -571,16 +497,6 @@ namespace GoldenLayoutTest {
             }
         })
         let container_explorer:HTMLElement = document.createElement('div');
-        myLayout.on("create-button", function(){
-            let hideButton:HTMLButtonElement = document.createElement("button");
-            hideButton.classList.add("hide-button");
-            hideButton.innerHTML = "<img src='eye.png'>";
-            hideButton.addEventListener("click", hidebuttonpressed);
-            let label_cube:HTMLElement = document.createElement("a");
-            label_cube.innerHTML = "Box";
-            container_explorer.append(hideButton);
-            container_explorer.append(label_cube);
-        })
         container.getElement().append(container_explorer);
     }
     function addToolbar(e:MouseEvent)

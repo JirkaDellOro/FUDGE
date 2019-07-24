@@ -404,53 +404,67 @@ namespace GoldenLayoutTest {
         let legend_transform: HTMLLegendElement = document.createElement("legend");
         legend_transform.classList.add("fieldset_legend")
         legend_transform.innerHTML = "Transform";
-        let toggleButton_transform: HTMLButtonElement = document.createElement("button");
+        let toggleButton_transform: HTMLImageElement = document.createElement("img");
         toggleButton_transform.addEventListener("click", toggleFoldElement);
-        toggleButton_transform.innerHTML = "v";
+        toggleButton_transform.src = 'icons/KeyFrame.png';
         legend_transform.appendChild(toggleButton_transform);
         fieldset_transform.appendChild(legend_transform);
         legend_transform.classList.add("unfoldable");
 
         let container_position:HTMLElement = document.createElement("div");
-        container_position.classList.add("fieldset_content");
+        container_position.classList.add("fieldset_transform");
         let label_position:HTMLLabelElement = document.createElement("label");
+        label_position.classList.add("column1-6");
         label_position.innerHTML = "Position";
         let position_label_x:HTMLLabelElement = document.createElement("label");
+        position_label_x.classList.add("column1");
         position_label_x.innerHTML = "X";
         let position_input_x:HTMLInputElement = document.createElement("input");
+        position_input_x.classList.add("column2");
         container_position.append(label_position);
         container_position.append(position_label_x);
         container_position.append(position_input_x);
         let position_label_y:HTMLLabelElement = document.createElement("label");
+        position_label_y.classList.add("column3");
         position_label_y.innerHTML = "Y";
         let position_input_y:HTMLInputElement = document.createElement("input");
+        position_input_y.classList.add("column4");
         container_position.append(position_label_y);
         container_position.append(position_input_y);
         let position_label_z:HTMLLabelElement = document.createElement("label");
+        position_label_z.classList.add("column5");
         position_label_z.innerHTML = "Z";
         let position_input_z:HTMLInputElement = document.createElement("input");
+        position_input_z.classList.add("column6");
         container_position.append(position_label_z);
         container_position.append(position_input_z);
         fieldset_transform.append(container_position);
 
         let container_rotation:HTMLElement = document.createElement("div");
-        container_rotation.classList.add("fieldset_content");
+        container_rotation.classList.add("fieldset_transform");
         let label_rotation:HTMLLabelElement = document.createElement("label");
+        label_rotation.classList.add("column1-6");
         label_rotation.innerHTML = "Rotation";
         let rotation_label_x:HTMLLabelElement = document.createElement("label");
+        rotation_label_x.classList.add("column1");
         rotation_label_x.innerHTML = "X";
         let rotation_input_x:HTMLInputElement = document.createElement("input");
+        rotation_input_x.classList.add("column2");
         container_rotation.append(label_rotation);
         container_rotation.append(rotation_label_x);
         container_rotation.append(rotation_input_x);
         let rotation_label_y:HTMLLabelElement = document.createElement("label");
+        rotation_label_y.classList.add("column3");
         rotation_label_y.innerHTML = "Y";
         let rotation_input_y:HTMLInputElement = document.createElement("input");
+        rotation_input_y.classList.add("column4");
         container_rotation.append(rotation_label_y);
         container_rotation.append(rotation_input_y);
         let rotation_label_z:HTMLLabelElement = document.createElement("label");
+        rotation_label_z.classList.add("column5");
         rotation_label_z.innerHTML = "Z";
         let rotation_input_z:HTMLInputElement = document.createElement("input");
+        rotation_input_z.classList.add("column6");
         container_rotation.append(rotation_label_z);
         container_rotation.append(rotation_input_z);
         fieldset_transform.append(container_rotation);
@@ -459,28 +473,28 @@ namespace GoldenLayoutTest {
         // container_scale.classList.add("fieldset_content");
         container_scale.classList.add("fieldset_transform");
         let label_scale:HTMLLabelElement = document.createElement("label");
+        label_scale.classList.add("column1-6");
         label_scale.innerHTML = "Scale";
-        label_scale.classList.add("fieldset_header");
         let scale_label_x:HTMLLabelElement = document.createElement("label");
         scale_label_x.innerHTML = "X";
-        scale_label_x.classList.add("fieldset_label");
+        scale_label_x.classList.add("column1");
         let scale_input_x:HTMLInputElement = document.createElement("input");
-        scale_input_x.classList.add("fieldset_input");
+        scale_input_x.classList.add("column2");
         container_scale.append(label_scale);
         container_scale.append(scale_label_x);
         container_scale.append(scale_input_x);
         let scale_label_y:HTMLLabelElement = document.createElement("label");
         scale_label_y.innerHTML = "Y";
-        scale_label_y.classList.add("fieldset_label");
+        scale_label_y.classList.add("column3");
         let scale_input_y:HTMLInputElement = document.createElement("input");
-        scale_input_y.classList.add("fieldset_input");
+        scale_input_y.classList.add("column4");
         container_scale.append(scale_label_y);
         container_scale.append(scale_input_y);
         let scale_label_z:HTMLLabelElement = document.createElement("label");
         scale_label_z.innerHTML = "Z";
-        scale_label_z.classList.add("fieldset_label");
+        scale_label_z.classList.add("column5");
         let scale_input_z:HTMLInputElement = document.createElement("input");
-        scale_input_z.classList.add("fieldset_input");
+        scale_input_z.classList.add("column6");
         container_scale.append(scale_label_z);
         container_scale.append(scale_input_z);
         fieldset_transform.append(container_scale);
@@ -488,9 +502,9 @@ namespace GoldenLayoutTest {
         let fieldset_mesh: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_mesh: HTMLLegendElement = document.createElement("legend");
         legend_mesh.innerHTML = "Mesh";
-        let toggleButton_mesh: HTMLButtonElement = document.createElement("button");
+        let toggleButton_mesh: HTMLImageElement = document.createElement("img");
         toggleButton_mesh.addEventListener("click", toggleFoldElement);
-        toggleButton_mesh.innerHTML = "v";
+        toggleButton_mesh.src = 'icons/KeyFrame.png';
         legend_mesh.appendChild(toggleButton_mesh);
         fieldset_mesh.appendChild(legend_mesh);
         legend_mesh.classList.add("unfoldable");
@@ -508,10 +522,10 @@ namespace GoldenLayoutTest {
 
         let fieldset_material: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_material: HTMLLegendElement = document.createElement("legend");
-        legend_material.innerHTML = "material";
-        let toggleButton_material: HTMLButtonElement = document.createElement("button");
+        legend_material.innerHTML = "Material";
+        let toggleButton_material: HTMLImageElement = document.createElement("img");
         toggleButton_material.addEventListener("click", toggleFoldElement);
-        toggleButton_material.innerHTML = "v";
+        toggleButton_material.src = 'icons/KeyFrame.png';
         legend_material.appendChild(toggleButton_material);
         fieldset_material.appendChild(legend_material);
 
@@ -520,11 +534,14 @@ namespace GoldenLayoutTest {
         let container_material:HTMLElement = document.createElement("div");
         container_material.classList.add("fieldset_content");
         let label_material:HTMLLabelElement = document.createElement("label");
-        label_material.innerHTML = "material";
+        label_material.classList.add("column1");
+        label_material.innerHTML = "Material";
         let material_input:HTMLInputElement = document.createElement("input");
+        material_input.classList.add("column2");
         container_material.append(label_material);
         container_material.append(material_input);
         let shader_select:HTMLSelectElement = document.createElement("select");
+        shader_select.classList.add("column3");
         let option_standard:HTMLOptionElement = document.createElement("option");
         option_standard.value = "standard";
         option_standard.text = "Standard Shader";
@@ -552,9 +569,9 @@ namespace GoldenLayoutTest {
             let fieldset_script: HTMLFieldSetElement = document.createElement("fieldset");
             let legend_script: HTMLLegendElement = document.createElement("legend");
             legend_script.innerHTML = "NewScript.ts";
-            let toggleButton_script: HTMLButtonElement = document.createElement("button");
+            let toggleButton_script: HTMLImageElement = document.createElement("img");
             toggleButton_script.addEventListener("click", toggleFoldElement);
-            toggleButton_script.innerHTML = "v";
+            toggleButton_script.src = 'icons/KeyFrame.png';
             legend_script.appendChild(toggleButton_script);
             fieldset_script.appendChild(legend_script);
             legend_script.classList.add("unfoldable");
@@ -794,20 +811,28 @@ namespace GoldenLayoutTest {
     {
         _event.preventDefault();
         if (_event.target != _event.currentTarget) return;
-        let target: HTMLElement = <HTMLElement>_event.target;
+        let target: HTMLImageElement = <HTMLImageElement>_event.target;
         let foldTarget = target.parentElement.parentElement;
         let foldToggle: Boolean;
         //Toggle the folding behaviour of the Folding Target
         foldTarget.classList.contains("fieldset_folded") ? foldToggle = false : foldToggle = true;
-        foldToggle == true ? foldTarget.classList.add("fieldset_folded") : foldTarget.classList.remove("fieldset_folded");
-        foldToggle == true ? target.innerHTML = ">" : target.innerHTML = "v";
+        foldTarget.classList.toggle("fieldset_folded");
+        if(foldToggle == true)
+        {
+            target.src =  "icons/Keyframe.png";
+        }
+        else{
+            target.src =  "icons/Keyframe.png";
+        }
+        // foldToggle == true ?  : foldTarget.classList.remove("fieldset_folded");
+        // foldToggle == true ? target.innerHTML = "<img scr ='icons/Keyframe.png'>" : target.innerHTML = "<img scr='icons/event.png'>";
         let children: HTMLCollection = foldTarget.children;
 
         // for (let i = 0; i < children.length; i++) {
         for (let child of children) {
             // let child: HTMLElement = <HTMLElement>children[i];
             if (!child.classList.contains("unfoldable")) {
-                foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
+                child.classList.toggle("folded");
             }
         }
     }
