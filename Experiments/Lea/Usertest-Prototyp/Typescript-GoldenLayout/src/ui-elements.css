@@ -91,7 +91,9 @@ a {
     background: none;
     border: none;
 }
-
+.fold_button{
+    height: 15px;
+}
 .ToolButton {
     object-fit: scale-down;
     font-size: 16px;

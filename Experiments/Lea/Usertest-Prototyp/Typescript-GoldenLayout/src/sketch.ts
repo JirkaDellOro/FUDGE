@@ -401,6 +401,7 @@ namespace GoldenLayoutTest {
         let legend: HTMLLegendElement = document.createElement("legend");
         legend.innerHTML = "Properties";
         let toggleButton: HTMLImageElement = document.createElement("img");
+        toggleButton.classList.add("fold_button");
         toggleButton.addEventListener("click", toggleFoldElement);
         toggleButton.src = 'icons/foldable_open.png';
         legend.appendChild(toggleButton);

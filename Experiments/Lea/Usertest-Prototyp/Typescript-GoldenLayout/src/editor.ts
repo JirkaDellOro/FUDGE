@@ -405,6 +405,7 @@ namespace GoldenLayoutTest {
         legend_transform.classList.add("fieldset_legend")
         legend_transform.innerHTML = "Transform";
         let toggleButton_transform: HTMLImageElement = document.createElement("img");
+        toggleButton_transform.classList.add("fold_button");
         toggleButton_transform.addEventListener("click", toggleFoldElement);
         toggleButton_transform.src = 'icons/foldable_open.png';
         legend_transform.appendChild(toggleButton_transform);
@@ -503,6 +504,7 @@ namespace GoldenLayoutTest {
         let legend_mesh: HTMLLegendElement = document.createElement("legend");
         legend_mesh.innerHTML = "Mesh";
         let toggleButton_mesh: HTMLImageElement = document.createElement("img");
+        toggleButton_mesh.classList.add("fold_button");
         toggleButton_mesh.addEventListener("click", toggleFoldElement);
         toggleButton_mesh.src = 'icons/foldable_open.png';
         legend_mesh.appendChild(toggleButton_mesh);
@@ -512,8 +514,10 @@ namespace GoldenLayoutTest {
         let container_mesh:HTMLElement = document.createElement("div");
         container_mesh.classList.add("fieldset_content");
         let label_mesh:HTMLLabelElement = document.createElement("label");
+        label_mesh.classList.add("column1");
         label_mesh.innerHTML = "Mesh";
         let mesh_input:HTMLInputElement = document.createElement("input");
+        mesh_input.classList.add("column2");
 
         container_mesh.append(label_mesh);
         container_mesh.append(mesh_input);
@@ -524,6 +528,7 @@ namespace GoldenLayoutTest {
         let legend_material: HTMLLegendElement = document.createElement("legend");
         legend_material.innerHTML = "Material";
         let toggleButton_material: HTMLImageElement = document.createElement("img");
+        toggleButton_material.classList.add("fold_button");
         toggleButton_material.addEventListener("click", toggleFoldElement);
         toggleButton_material.src = 'icons/foldable_open.png';
         legend_material.appendChild(toggleButton_material);
@@ -570,6 +575,7 @@ namespace GoldenLayoutTest {
             let legend_script: HTMLLegendElement = document.createElement("legend");
             legend_script.innerHTML = "NewScript.ts";
             let toggleButton_script: HTMLImageElement = document.createElement("img");
+            toggleButton_script.classList.add("fold_button");
             toggleButton_script.addEventListener("click", toggleFoldElement);
             toggleButton_script.src = 'icons/foldable_open.png';
             legend_script.appendChild(toggleButton_script);
