@@ -136,7 +136,7 @@ a {
     background-color: #757575;
 }
 
-.ToolButton:active {
+.ToolButton:focus {
     
     background-color: #505050;
 }
@@ -166,8 +166,7 @@ a {
     margin: 2px;
 }
 .fieldset_header{
-    display: grid;
-    grid-template-columns: auto auto;
+    display: inherit;
     margin: 10px;
 }
 fieldset{
@@ -179,6 +178,14 @@ fieldset{
 .fieldset_container{
     overflow-y: scroll;
     overflow-x: hidden;
+}
+.column1row1{
+    grid-column: 1;
+    grid-row: 1;
+}
+.column2row1{
+    grid-column: 2;
+    grid-row: 1;
 }
 .column1{
     grid-column: 1;
