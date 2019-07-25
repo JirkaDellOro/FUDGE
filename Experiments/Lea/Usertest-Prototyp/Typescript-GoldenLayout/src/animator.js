@@ -213,7 +213,20 @@ var GoldenLayoutTest;
                                 componentName: 'Inspector',
                                 title: "Inspector",
                                 componentState: { label: 'B' }
-                            }]
+                            },
+                            {
+                                type: 'component',
+                                componentName: 'Viewport',
+                                title: "Viewport",
+                                componentState: { label: 'B' }
+                            },
+                            {
+                                type: 'component',
+                                componentName: 'Menubar',
+                                title: "Menubar",
+                                componentState: { label: 'B' }
+                            }
+                        ]
                     }]
             }]
     };
@@ -233,6 +246,8 @@ var GoldenLayoutTest;
     myLayout.registerComponent('Dopesheet', createDopesheetComponent);
     myLayout.registerComponent('Curveview', createCurveviewComponent);
     myLayout.registerComponent('Inspector', createInspectorComponent);
+    myLayout.registerComponent('Viewport', createViewportComponent);
+    myLayout.registerComponent('Menubar', createToolComponent);
     myLayout.init();
     function stateupdate() {
         let state = JSON.stringify(myLayout.toConfig());
@@ -242,12 +257,20 @@ var GoldenLayoutTest;
         let image = document.createElement("img");
         image.classList.add("fakeTimeline");
         image.src = "AnimationEditor.png";
+        myLayout.on('create-button', function () {
+            image.classList.add("cube");
+            image.src = "AnimationEditor_keyframe.png";
+        });
         container.getElement().append(image);
     }
     function createCurveviewComponent(container, state) {
         let image = document.createElement("img");
+        image.src = "AnimationEditor.png";
         image.classList.add("fakeTimeline");
-        image.src = "AnimationEditorCurveView.png";
+        myLayout.on('create-button', function () {
+            image.classList.add("cube");
+            image.src = "AnimationEditorCurveView.png";
+        });
         container.getElement().append(image);
     }
     function createInspectorComponent(container, state) {
@@ -365,14 +388,17 @@ var GoldenLayoutTest;
         keyframe_button.innerHTML = '<img src = "icons/Keyframe.png">';
         keyframe_button.classList.add("contrButton");
         keyframe_button.classList.add("tooltip");
+        keyframe_button.addEventListener("click", function () {
+            myLayout.emit('create-button');
+        });
         let keyframe_tooltip = document.createElement("span");
         keyframe_tooltip.classList.add("tooltiptext");
         keyframe_tooltip.innerHTML = "Add Keyframe";
         keyframe_button.append(keyframe_tooltip);
         //button.addEventListener("click", buttonpressed);
         button_container.append(keyframe_button);
-        let container_position = document.createElement("div");
-        container_position.classList.add("fieldset_content");
+        let container_properties = document.createElement("div");
+        container_properties.classList.add("fieldset_content");
         let label_position = document.createElement("div");
         label_position.classList.add("column1");
         label_position.innerHTML = "Position";
@@ -381,25 +407,23 @@ var GoldenLayoutTest;
         position_label_x.innerHTML = "X";
         let position_input_x = document.createElement("input");
         position_input_x.classList.add("column3");
-        container_position.append(label_position);
-        container_position.append(position_label_x);
-        container_position.append(position_input_x);
+        container_properties.append(label_position);
+        container_properties.append(position_label_x);
+        container_properties.append(position_input_x);
         let position_label_y = document.createElement("div");
         position_label_y.classList.add("column2");
         position_label_y.innerHTML = "Y";
         let position_input_y = document.createElement("input");
         position_input_y.classList.add("column3");
-        container_position.append(position_label_y);
-        container_position.append(position_input_y);
+        container_properties.append(position_label_y);
+        container_properties.append(position_input_y);
         let position_label_z = document.createElement("div");
         position_label_z.classList.add("column2");
         position_label_z.innerHTML = "Z";
         let position_input_z = document.createElement("input");
         position_input_z.classList.add("column3");
-        container_position.append(position_label_z);
-        container_position.append(position_input_z);
-        let container_rotation = document.createElement("div");
-        container_rotation.classList.add("fieldset_content");
+        container_properties.append(position_label_z);
+        container_properties.append(position_input_z);
         let label_rotation = document.createElement("div");
         label_rotation.classList.add("column1");
         label_rotation.innerHTML = "Rotation";
@@ -408,25 +432,23 @@ var GoldenLayoutTest;
         rotation_label_x.innerHTML = "X";
         let rotation_input_x = document.createElement("input");
         rotation_input_x.classList.add("column3");
-        container_rotation.append(label_rotation);
-        container_rotation.append(rotation_label_x);
-        container_rotation.append(rotation_input_x);
+        container_properties.append(label_rotation);
+        container_properties.append(rotation_label_x);
+        container_properties.append(rotation_input_x);
         let rotation_label_y = document.createElement("div");
         rotation_label_y.classList.add("column2");
         rotation_label_y.innerHTML = "Y";
         let rotation_input_y = document.createElement("input");
         rotation_input_y.classList.add("column3");
-        container_rotation.append(rotation_label_y);
-        container_rotation.append(rotation_input_y);
+        container_properties.append(rotation_label_y);
+        container_properties.append(rotation_input_y);
         let rotation_label_z = document.createElement("div");
         rotation_label_z.classList.add("column2");
         rotation_label_z.innerHTML = "Z";
         let rotation_input_z = document.createElement("input");
         rotation_input_z.classList.add("column3");
-        container_rotation.append(rotation_label_z);
-        container_rotation.append(rotation_input_z);
-        let container_scale = document.createElement("div");
-        container_scale.classList.add("fieldset_content");
+        container_properties.append(rotation_label_z);
+        container_properties.append(rotation_input_z);
         let label_scale = document.createElement("div");
         label_scale.classList.add("column1");
         label_scale.innerHTML = "Scale";
@@ -435,25 +457,23 @@ var GoldenLayoutTest;
         scale_label_x.innerHTML = "X";
         let scale_input_x = document.createElement("input");
         scale_input_x.classList.add("column3");
-        container_scale.append(label_scale);
-        container_scale.append(scale_label_x);
-        container_scale.append(scale_input_x);
+        container_properties.append(label_scale);
+        container_properties.append(scale_label_x);
+        container_properties.append(scale_input_x);
         let scale_label_y = document.createElement("div");
         scale_label_y.classList.add("column2");
         scale_label_y.innerHTML = "Y";
         let scale_input_y = document.createElement("input");
         scale_input_y.classList.add("column3");
-        container_scale.append(scale_label_y);
-        container_scale.append(scale_input_y);
+        container_properties.append(scale_label_y);
+        container_properties.append(scale_input_y);
         let scale_label_z = document.createElement("div");
         scale_label_z.classList.add("column2");
         scale_label_z.innerHTML = "Z";
         let scale_input_z = document.createElement("input");
         scale_input_z.classList.add("column3");
-        container_scale.append(scale_label_z);
-        container_scale.append(scale_input_z);
-        let container_pivot = document.createElement("div");
-        container_pivot.classList.add("fieldset_content");
+        container_properties.append(scale_label_z);
+        container_properties.append(scale_input_z);
         let label_pivot = document.createElement("div");
         label_pivot.classList.add("column1");
         label_pivot.innerHTML = "Pivot";
@@ -462,29 +482,67 @@ var GoldenLayoutTest;
         pivot_label_x.innerHTML = "X";
         let pivot_input_x = document.createElement("input");
         pivot_input_x.classList.add("column3");
-        container_pivot.append(label_pivot);
-        container_pivot.append(pivot_label_x);
-        container_pivot.append(pivot_input_x);
+        container_properties.append(label_pivot);
+        container_properties.append(pivot_label_x);
+        container_properties.append(pivot_input_x);
         let pivot_label_y = document.createElement("div");
         pivot_label_y.classList.add("column2");
         pivot_label_y.innerHTML = "Y";
         let pivot_input_y = document.createElement("input");
         pivot_input_y.classList.add("column3");
-        container_pivot.append(pivot_label_y);
-        container_pivot.append(pivot_input_y);
+        container_properties.append(pivot_label_y);
+        container_properties.append(pivot_input_y);
         let pivot_label_z = document.createElement("div");
         pivot_label_z.classList.add("column2");
         pivot_label_z.innerHTML = "Z";
         let pivot_input_z = document.createElement("input");
         pivot_input_z.classList.add("column3");
-        container_pivot.append(pivot_label_z);
-        container_pivot.append(pivot_input_z);
+        container_properties.append(pivot_label_z);
+        container_properties.append(pivot_input_z);
         container.getElement().append(content);
         container.getElement().append(button_container);
-        container.getElement().append(container_position);
-        container.getElement().append(container_rotation);
-        container.getElement().append(container_scale);
-        container.getElement().append(container_pivot);
+        container.getElement().append(container_properties);
+    }
+    function createViewportComponent(container, state) {
+        let image = document.createElement("img");
+        image.src = "Cube_selected.png";
+        image.classList.add("cube_gizmo");
+        container.getElement().append(image);
+        myLayout.on('rotate', function () {
+            image.classList.add("cube_gizmo");
+            image.src = "Cube_gizmo2.png";
+            image.addEventListener("click", function () {
+                myLayout.emit("create-button");
+            });
+        });
+    }
+    function createToolComponent(container, state) {
+        let select_button = document.createElement("button");
+        select_button.classList.add("ToolButton");
+        select_button.innerHTML = '<img src = "icons/select.png">';
+        container.getElement().append(select_button);
+        let pan_button = document.createElement("button");
+        pan_button.classList.add("ToolButton");
+        pan_button.innerHTML = '<img src = "icons/hand.png">';
+        //button.addEventListener("click", buttonpressed);
+        container.getElement().append(pan_button);
+        let move_button = document.createElement("button");
+        move_button.innerHTML = '<img src="icons/movetool.png">';
+        move_button.classList.add("ToolButton");
+        //button.addEventListener("click", buttonpressed);
+        container.getElement().append(move_button);
+        let rotate_button = document.createElement("button");
+        rotate_button.innerHTML = '<img src = "icons/rotate.png">';
+        rotate_button.classList.add("ToolButton");
+        rotate_button.addEventListener("click", function () {
+            myLayout.emit("rotate");
+        });
+        container.getElement().append(rotate_button);
+        let scale_button = document.createElement("button");
+        scale_button.innerHTML = '<img src = "icons/scale_v3.png">';
+        scale_button.classList.add("ToolButton");
+        //button.addEventListener("click", buttonpressed);
+        container.getElement().append(scale_button);
     }
     function createPersistentComponent(container, state) {
         if (!typeof window.localStorage) {

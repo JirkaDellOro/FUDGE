@@ -277,7 +277,7 @@ namespace GoldenLayoutTest {
     myLayout.on('stateChanged', stateupdate);
     myLayout.registerComponent('Viewport', createViewportComponent);
     myLayout.registerComponent('Scene Explorer', createExplorerComponent);
-    myLayout.registerComponent('Ressource Manager', createExplorerComponent);
+    myLayout.registerComponent('Ressource Manager', createRessourceComponent);
     myLayout.registerComponent('Inspector', createInspectorComponent);
     myLayout.registerComponent('Menubar', createToolComponent);
     myLayout.init();
@@ -512,7 +512,7 @@ namespace GoldenLayoutTest {
         legend_mesh.classList.add("unfoldable");
 
         let container_mesh:HTMLElement = document.createElement("div");
-        container_mesh.classList.add("fieldset_content");
+        container_mesh.classList.add("fieldset_mesh");
         let label_mesh:HTMLLabelElement = document.createElement("label");
         label_mesh.classList.add("column1");
         label_mesh.innerHTML = "Mesh";
@@ -537,7 +537,7 @@ namespace GoldenLayoutTest {
         legend_material.classList.add("unfoldable");
 
         let container_material:HTMLElement = document.createElement("div");
-        container_material.classList.add("fieldset_content");
+        container_material.classList.add("fieldset_material");
         let label_material:HTMLLabelElement = document.createElement("label");
         label_material.classList.add("column1");
         label_material.innerHTML = "Material";
@@ -656,6 +656,7 @@ namespace GoldenLayoutTest {
         });
         return container
     }
+    
 
     function createExplorerComponent(container: any, state: any) {
         let dropdown_add:HTMLElement = document.createElement("div");
@@ -726,6 +727,27 @@ namespace GoldenLayoutTest {
             container_explorer.append(label_cube);
         })
         container.getElement().append(container_explorer);
+    }
+    function createRessourceComponent(container: any, state: any){
+        let container_ressource:HTMLElement = document.createElement("div");
+        container_ressource.classList.add("ressource_explorer")
+        let folder_src:HTMLImageElement = document.createElement("img");
+        folder_src.src = "icons/folder.png";
+        folder_src.classList.add("column1");
+        let folder_models:HTMLImageElement = document.createElement("img");
+        folder_models.src = "icons/folder.png";
+        folder_models.classList.add("column2");
+        container_ressource.append(folder_src);
+        container_ressource.append(folder_models);
+        let label_src:HTMLElement = document.createElement("div");
+        label_src.innerHTML = "src";
+        label_src.classList.add("column1");
+        container_ressource.append(label_src);
+        let label_models:HTMLElement = document.createElement("div");
+        label_models.innerHTML = "models";
+        label_models.classList.add("column2");
+        container_ressource.append(label_models);
+        container.getElement().append(container_ressource);
     }
 
     function addToolbar(e:MouseEvent)

@@ -245,7 +245,7 @@ var GoldenLayoutTest;
     myLayout.on('stateChanged', stateupdate);
     myLayout.registerComponent('Viewport', createViewportComponent);
     myLayout.registerComponent('Scene Explorer', createExplorerComponent);
-    myLayout.registerComponent('Ressource Manager', createExplorerComponent);
+    myLayout.registerComponent('Ressource Manager', createRessourceComponent);
     myLayout.registerComponent('Inspector', createInspectorComponent);
     myLayout.registerComponent('Menubar', createToolComponent);
     myLayout.init();
@@ -453,7 +453,7 @@ var GoldenLayoutTest;
         fieldset_mesh.appendChild(legend_mesh);
         legend_mesh.classList.add("unfoldable");
         let container_mesh = document.createElement("div");
-        container_mesh.classList.add("fieldset_content");
+        container_mesh.classList.add("fieldset_mesh");
         let label_mesh = document.createElement("label");
         label_mesh.classList.add("column1");
         label_mesh.innerHTML = "Mesh";
@@ -473,7 +473,7 @@ var GoldenLayoutTest;
         fieldset_material.appendChild(legend_material);
         legend_material.classList.add("unfoldable");
         let container_material = document.createElement("div");
-        container_material.classList.add("fieldset_content");
+        container_material.classList.add("fieldset_material");
         let label_material = document.createElement("label");
         label_material.classList.add("column1");
         label_material.innerHTML = "Material";
@@ -645,6 +645,27 @@ var GoldenLayoutTest;
             container_explorer.append(label_cube);
         });
         container.getElement().append(container_explorer);
+    }
+    function createRessourceComponent(container, state) {
+        let container_ressource = document.createElement("div");
+        container_ressource.classList.add("ressource_explorer");
+        let folder_src = document.createElement("img");
+        folder_src.src = "icons/folder.png";
+        folder_src.classList.add("column1");
+        let folder_models = document.createElement("img");
+        folder_models.src = "icons/folder.png";
+        folder_models.classList.add("column2");
+        container_ressource.append(folder_src);
+        container_ressource.append(folder_models);
+        let label_src = document.createElement("div");
+        label_src.innerHTML = "src";
+        label_src.classList.add("column1");
+        container_ressource.append(label_src);
+        let label_models = document.createElement("div");
+        label_models.innerHTML = "models";
+        label_models.classList.add("column2");
+        container_ressource.append(label_models);
+        container.getElement().append(container_ressource);
     }
     function addToolbar(e) {
         let newItemConfig = {
