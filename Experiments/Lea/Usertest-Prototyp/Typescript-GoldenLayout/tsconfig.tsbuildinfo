@@ -153,8 +153,8 @@
         "version": "37d7917d894950250688be1e20b813c9e539b7d43b2b340ba0ed1b60f4fef3ee",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
-      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts": {
-        "version": "4a8370866001529a1e75af8fa93068704d3de081d10b4a90ad7513f087e224bc",
+      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.d.ts": {
+        "version": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7",
         "signature": "726a20581804f3ca69b439b5827f4e27303631b4402621e1dea60b2d77a549c7"
       },
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts": {
@@ -242,6 +242,7 @@
       "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/animator.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/editor.ts",
+      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/jquerystatic.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/jquery.d.ts",
@@ -249,8 +250,7 @@
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/legacy.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/sizzle/index.d.ts",
       "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/jquery/index.d.ts",
-      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts",
-      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/src/sketch.ts"
+      "e:/data/github/fudge/experiments/lea/usertest-prototyp/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts"
     ]
   },
   "version": "3.4.3"
