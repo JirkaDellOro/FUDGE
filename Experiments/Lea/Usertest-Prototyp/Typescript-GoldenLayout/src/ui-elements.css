@@ -24,6 +24,20 @@ a {
   }
 
 /*sceneeditor*/
+.addnodebutton {
+    cursor: pointer;
+    font-size: 12px;
+    border-style: solid;
+    border-width: 1px;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    align-self: center;
+    background-color: inherit;
+    font-family: inherit;
+    display: block;
+    width: inherit;
+}
 
 .cube {
     object-fit: scale-down;
@@ -334,3 +348,4 @@ h2 {
     object-fit: scale-down;
     width: 850px;
 }
+

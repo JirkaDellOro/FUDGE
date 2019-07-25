@@ -336,28 +336,53 @@ namespace GoldenLayoutTest {
     function createToolComponent(container: any, state: any) {
         let select_button: HTMLSpanElement = document.createElement("button");
         select_button.classList.add("ToolButton");
+        select_button.classList.add("tooltip");
         select_button.innerHTML = '<img src = "icons/select.png">';
         container.getElement().append(select_button);
+        let select_tooltip:HTMLSpanElement = document.createElement("span");
+        select_tooltip.classList.add("tooltiptext");
+        select_tooltip.innerHTML = "Select"
+        select_button.append(select_tooltip);
         let pan_button: HTMLSpanElement = document.createElement("button");
         pan_button.classList.add("ToolButton");
+        pan_button.classList.add("tooltip");
         pan_button.innerHTML = '<img src = "icons/hand.png">';
         //button.addEventListener("click", buttonpressed);
         container.getElement().append(pan_button);
-        let move_button: HTMLSpanElement = document.createElement("button");
-        move_button.innerHTML = '<img src="icons/movetool.png">';
-        move_button.classList.add("ToolButton");
+        let panview_tooltip:HTMLSpanElement = document.createElement("span");
+        panview_tooltip.classList.add("tooltiptext");
+        panview_tooltip.innerHTML = "Pan View"
+        pan_button.append(panview_tooltip);
+        let translate_button: HTMLSpanElement = document.createElement("button");
+        translate_button.innerHTML = '<img src="icons/movetool.png">';
+        translate_button.classList.add("ToolButton");
+        translate_button.classList.add("tooltip");
         //button.addEventListener("click", buttonpressed);
-        container.getElement().append(move_button);
+        container.getElement().append(translate_button);
+        let translate_tooltip:HTMLSpanElement = document.createElement("span");
+        translate_tooltip.classList.add("tooltiptext");
+        translate_tooltip.innerHTML = "Translate"
+       translate_button.append(translate_tooltip);
         let rotate_button: HTMLSpanElement = document.createElement("button");
         rotate_button.innerHTML = '<img src = "icons/rotate.png">';
         rotate_button.classList.add("ToolButton");
+        rotate_button.classList.add("tooltip");
         rotate_button.addEventListener("click", rotatebuttonpressed);
         container.getElement().append(rotate_button);
+        let rotate_tooltip:HTMLSpanElement = document.createElement("span");
+        rotate_tooltip.classList.add("tooltiptext");
+        rotate_tooltip.innerHTML = "Rotate"
+       rotate_button.append(rotate_tooltip);
         let scale_button: HTMLSpanElement = document.createElement("button");
         scale_button.innerHTML = '<img src = "icons/scale_v3.png">';
         scale_button.classList.add("ToolButton");
+        scale_button.classList.add("tooltip");
         //button.addEventListener("click", buttonpressed);
         container.getElement().append(scale_button);
+        let scale_tooltip:HTMLSpanElement = document.createElement("span");
+        scale_tooltip.classList.add("tooltiptext");
+        scale_tooltip.innerHTML = "Scale"
+        scale_button.append(scale_tooltip);
     }
 
     function createViewportComponent(container:any, state:any)
@@ -607,7 +632,7 @@ namespace GoldenLayoutTest {
         add_content.append(item_plane);
 
         let add_button:HTMLButtonElement = document.createElement("button");
-        add_button.classList.add("dropbutton");
+        add_button.classList.add("addnodebutton");
         add_button.id = "add_button";
         add_button.innerHTML = 'Add Component<i class = "fa fa-caret-down"></i>';
         add_button.addEventListener("click", function(){
@@ -684,7 +709,7 @@ namespace GoldenLayoutTest {
         add_content.append(item_plane);
 
         let add_button:HTMLButtonElement = document.createElement("button");
-        add_button.classList.add("dropbutton");
+        add_button.classList.add("addnodebutton");
         add_button.id = "add_button";
         add_button.innerHTML = 'Add Node<i class = "fa fa-caret-down"></i>';
         add_button.addEventListener("click", function(){
