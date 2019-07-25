@@ -1,7 +1,7 @@
 a {
     font-family: Arial, sans-serif;
     font-size: 12px;
-    color: #999999;
+    color: white;
 }
 
 /*tooltips*/
@@ -35,6 +35,11 @@ a {
     width: 650px;
 }
 
+.cube_gizmo {
+    object-fit: scale-down;
+    width: 650px;
+}
+
 .cube_gizmo2 {
     object-fit: scale-down;
     width: 650px;
@@ -44,14 +49,14 @@ a {
 
 .fakeTimeline {
     object-fit: scale-down;
-    width: 1155px;
-    margin-top: 3px;
+    width: 1180px;
+    margin-top: 30px;
 }
 
 .text {
     font-family: Arial, sans-serif;
     font-size: 12px;
-    color: #999999;
+    color: white;
     margin: 2px;
 }
 
@@ -154,6 +159,7 @@ a {
 fieldset{
     color: white;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
     margin: 20px;
 }
 .fieldset_container{
@@ -188,6 +194,7 @@ fieldset{
     margin: 10px;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
     grid-gap: 1px;
 }
 .fieldset_transform {
@@ -321,4 +328,9 @@ h2 {
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #999999;
+}
+
+.sketch_canvas {
+    object-fit: scale-down;
+    width: 850px;
 }

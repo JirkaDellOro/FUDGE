@@ -64,9 +64,6 @@ var GoldenLayoutTest;
         let window_content = document.createElement("div");
         window_content.id = "window_Dropdown";
         window_content.classList.add("dropdown-content");
-        let item_materialEditor = document.createElement("a");
-        item_materialEditor.innerHTML = "Material Editor";
-        window_content.append(item_materialEditor);
         let item_sketchEditor = document.createElement("a");
         item_sketchEditor.innerHTML = "Sketch Editor";
         item_sketchEditor.addEventListener("click", sketchbutton);
@@ -78,12 +75,9 @@ var GoldenLayoutTest;
         let item_3D = document.createElement("a");
         item_3D.innerHTML = "3D Model Editor";
         window_content.append(item_3D);
-        let item_resetLayout = document.createElement("a");
-        item_resetLayout.innerHTML = "Reset Layout";
-        window_content.append(item_resetLayout);
         let window_button = document.createElement("button");
         window_button.classList.add("dropbutton");
-        window_button.innerHTML = 'Window<i class = "fa fa-caret-down"></i>';
+        window_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
         window_button.addEventListener("click", function () {
             window_content.classList.toggle("show");
         });
@@ -112,9 +106,12 @@ var GoldenLayoutTest;
         item_project.innerHTML = "Ressource Manager";
         item_project.addEventListener("click", addRessource);
         editor_content.append(item_project);
+        let item_resetLayout = document.createElement("a");
+        item_resetLayout.innerHTML = "Reset Layout";
+        editor_content.append(item_resetLayout);
         let editor_button = document.createElement("button");
         editor_button.classList.add("dropbutton");
-        editor_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
+        editor_button.innerHTML = 'Window<i class = "fa fa-caret-down"></i>';
         editor_button.addEventListener("click", function () {
             editor_content.classList.toggle("show");
         });
@@ -328,7 +325,7 @@ var GoldenLayoutTest;
         });
         myLayout.on('rotate-button', function () {
             image.classList.add("cube_gizmo");
-            image.src = "Cube_gizmo2.png";
+            image.src = "Cube_rotationGizmo1.png";
         });
         myLayout.on('hide-button', function () {
             image.classList.toggle("folded");
