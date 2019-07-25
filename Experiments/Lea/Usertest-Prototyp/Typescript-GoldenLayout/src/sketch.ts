@@ -72,10 +72,7 @@ namespace GoldenLayoutTest {
         let window_content: HTMLElement = document.createElement("div");
         window_content.id = "window_Dropdown";
         window_content.classList.add("dropdown-content");
-        let item_materialEditor: HTMLElement = document.createElement("a");
-        item_materialEditor.innerHTML = "Material Editor";
-        window_content.append(item_materialEditor);
-        let item_sketchEditor: HTMLElement = document.createElement("a");
+        let item_sketchEditor:HTMLElement = document.createElement("a");
         item_sketchEditor.innerHTML = "Scene Editor";
         item_sketchEditor.addEventListener("click", scenebutton)
         window_content.append(item_sketchEditor);
@@ -86,19 +83,53 @@ namespace GoldenLayoutTest {
         let item_3D: HTMLElement = document.createElement("a");
         item_3D.innerHTML = "3D Model Editor";
         window_content.append(item_3D);
-        let item_resetLayout: HTMLElement = document.createElement("a");
-        item_resetLayout.innerHTML = "Reset Layout";
-        window_content.append(item_resetLayout);
 
-        let window_button: HTMLButtonElement = document.createElement("button");
+
+        let window_button:HTMLButtonElement = document.createElement("button");
         window_button.classList.add("dropbutton");
-        window_button.innerHTML = 'Window<i class = "fa fa-caret-down"></i>';
-        window_button.addEventListener("click", function () {
+        window_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
+        window_button.addEventListener("click", function(){
             window_content.classList.toggle("show");
         })
 
-        let dropdown_tools: HTMLElement = document.createElement("div");
-        dropdown_tools.classList.add("dropdown");
+
+
+        let dropdown_editor:HTMLElement = document.createElement("div");
+        dropdown_editor.classList.add ("dropdown");
+
+        let editor_content:HTMLElement = document.createElement("div");
+        editor_content.id = "add_Dropdown";
+        editor_content.classList.add("dropdown-content");
+        let item_tools:HTMLElement = document.createElement("a");
+        item_tools.innerHTML = "Toolbar";
+        item_tools.addEventListener("click", addToolbar);
+        editor_content.append(item_tools);
+        let item_viewport:HTMLElement = document.createElement("a");
+        item_viewport.innerHTML = "Viewport";
+        item_viewport.addEventListener("click", addViewport);
+        editor_content.append(item_viewport);
+        let item_inspector:HTMLElement = document.createElement("a");
+        item_inspector.innerHTML = "Inspector";
+        item_inspector.addEventListener("click", addInspector);
+        editor_content.append(item_inspector);
+        let item_scene:HTMLElement = document.createElement("a");
+        item_scene.innerHTML = "Scene Explorer";
+        item_scene.addEventListener("click", addScene);
+        editor_content.append(item_scene);
+        let item_resetLayout:HTMLElement = document.createElement("a");
+        item_resetLayout.innerHTML = "Reset Layout";
+        editor_content.append(item_resetLayout);
+
+
+        let editor_button:HTMLButtonElement = document.createElement("button");
+        editor_button.classList.add("dropbutton");
+        editor_button.innerHTML = 'Window<i class = "fa fa-caret-down"></i>';
+        editor_button.addEventListener("click", function(){
+            editor_content.classList.toggle("show");
+        })
+
+        let dropdown_tools:HTMLElement = document.createElement("div");
+        dropdown_tools.classList.add ("dropdown");
 
 
         let tools_content: HTMLElement = document.createElement("div");
@@ -125,8 +156,8 @@ namespace GoldenLayoutTest {
         let item_combine: HTMLElement = document.createElement("a");
         item_combine.innerHTML = "Combine Selection";
         tools_content.append(item_combine);
-        let item_allign: HTMLElement = document.createElement("a");
-        item_allign.innerHTML = "Allign Shape";
+        let item_allign:HTMLElement = document.createElement("a");
+        item_allign.innerHTML = "Align Shape";
         tools_content.append(item_allign);
 
 
@@ -137,38 +168,8 @@ namespace GoldenLayoutTest {
             tools_content.classList.toggle("show");
         })
 
-        let dropdown_editor: HTMLElement = document.createElement("div");
-        dropdown_editor.classList.add("dropdown");
-
-        let editor_content: HTMLElement = document.createElement("div");
-        editor_content.id = "add_Dropdown";
-        editor_content.classList.add("dropdown-content");
-        let item_tools: HTMLElement = document.createElement("a");
-        item_tools.innerHTML = "Toolbar";
-        item_tools.addEventListener("click", addToolbar);
-        editor_content.append(item_tools);
-        let item_viewport: HTMLElement = document.createElement("a");
-        item_viewport.innerHTML = "Viewport";
-        item_viewport.addEventListener("click", addViewport);
-        editor_content.append(item_viewport);
-        let item_inspector: HTMLElement = document.createElement("a");
-        item_inspector.innerHTML = "Inspector";
-        item_inspector.addEventListener("click", addInspector);
-        editor_content.append(item_inspector);
-        let item_scene: HTMLElement = document.createElement("a");
-        item_scene.innerHTML = "Scene Explorer";
-        item_scene.addEventListener("click", addScene);
-        editor_content.append(item_scene);
-
-        let editor_button: HTMLButtonElement = document.createElement("button");
-        editor_button.classList.add("dropbutton");
-        editor_button.innerHTML = 'Editor<i class = "fa fa-caret-down"></i>';
-        editor_button.addEventListener("click", function () {
-            editor_content.classList.toggle("show");
-        })
-
-        let dropdown_help: HTMLElement = document.createElement("div");
-        dropdown_help.classList.add("dropdown");
+        let dropdown_help:HTMLElement = document.createElement("div");
+        dropdown_help.classList.add ("dropdown");
 
         let help_content: HTMLElement = document.createElement("div");
         help_content.id = "help_Dropdown";
@@ -200,13 +201,13 @@ namespace GoldenLayoutTest {
         dropdown_window.append(window_content);
         menubar.append(dropdown_window);
 
-        dropdown_tools.append(tools_button);
-        dropdown_tools.append(tools_content);
-        menubar.append(dropdown_tools);
-
         dropdown_editor.append(editor_button);
         dropdown_editor.append(editor_content);
         menubar.append(dropdown_editor);
+
+        dropdown_tools.append(tools_button);
+        dropdown_tools.append(tools_content);
+        menubar.append(dropdown_tools);
 
         dropdown_help.append(help_button);
         dropdown_help.append(help_content);
@@ -360,6 +361,7 @@ namespace GoldenLayoutTest {
         let image: HTMLImageElement = document.createElement("img");
         image.addEventListener("click", selectbuttonpressed);
         image.src = "SketchEditor_canvas.png";
+        image.classList.add("sketch_canvas");
         container.getElement().append(image);
         myLayout.on('create-button', function () {
             image.src = "SketchEditor_canvas.png";
@@ -427,8 +429,8 @@ namespace GoldenLayoutTest {
         container_Properties.append(label_linewidth);
         container_Properties.append(input_linewidth);
 
-        let label_order: HTMLDivElement = document.createElement("div");
-        label_order.innerHTML = "Layer";
+        let label_order:HTMLDivElement = document.createElement("div");
+        label_order.innerHTML = "Order";
         label_order.classList.add("column1");
         let input_order: HTMLInputElement = document.createElement("input");
         input_order.classList.add("column2");
