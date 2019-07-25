@@ -336,30 +336,37 @@ namespace GoldenLayoutTest {
         window.location.href = "sketch.html";
     }
     function createToolComponent(container: any, state: any) {
+        let button_container:HTMLElement = document.createElement("div");
         let select_button: HTMLSpanElement = document.createElement("button");
         select_button.classList.add("ToolButton");
+        select_button.focus();
         select_button.innerHTML = '<img src = "icons/select.png">';
-        container.getElement().append(select_button);
+        button_container.append(select_button);
         let pan_button: HTMLSpanElement = document.createElement("button");
         pan_button.classList.add("ToolButton");
         pan_button.innerHTML = '<img src = "icons/hand.png">';
         //button.addEventListener("click", buttonpressed);
-        container.getElement().append(pan_button);
+        button_container.append(pan_button);
         let move_button: HTMLSpanElement = document.createElement("button");
         move_button.innerHTML = '<img src="icons/movetool.png">';
         move_button.classList.add("ToolButton");
         //button.addEventListener("click", buttonpressed);
-        container.getElement().append(move_button);
+        button_container.append(move_button);
         let rotate_button: HTMLSpanElement = document.createElement("button");
         rotate_button.innerHTML = '<img src = "icons/rotate.png">';
         rotate_button.classList.add("ToolButton");
         rotate_button.addEventListener("click", rotatebuttonpressed);
-        container.getElement().append(rotate_button);
+        button_container.append(rotate_button);
         let scale_button: HTMLSpanElement = document.createElement("button");
         scale_button.innerHTML = '<img src = "icons/scale_v3.png">';
         scale_button.classList.add("ToolButton");
         //button.addEventListener("click", buttonpressed);
-        container.getElement().append(scale_button);
+        button_container.append(scale_button);
+        button_container.addEventListener("focusout", function(_event:MouseEvent){
+            let target:HTMLButtonElement = <HTMLButtonElement>_event.target;
+            target.focus();
+        })
+        container.getElement().append(button_container);
     }
 
     function createViewportComponent(container:any, state:any)
@@ -402,13 +409,14 @@ namespace GoldenLayoutTest {
 
         let fieldset_transform: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_transform: HTMLLegendElement = document.createElement("legend");
-        legend_transform.classList.add("fieldset_legend")
-        legend_transform.innerHTML = "Transform";
         let toggleButton_transform: HTMLImageElement = document.createElement("img");
         toggleButton_transform.classList.add("fold_button");
         toggleButton_transform.addEventListener("click", toggleFoldElement);
         toggleButton_transform.src = 'icons/foldable_open.png';
         legend_transform.appendChild(toggleButton_transform);
+        let title_transform:HTMLElement = document.createElement("span");
+        title_transform.innerHTML = "Transform";
+        legend_transform.append(title_transform);
         fieldset_transform.appendChild(legend_transform);
         legend_transform.classList.add("unfoldable");
 
@@ -502,12 +510,15 @@ namespace GoldenLayoutTest {
 
         let fieldset_mesh: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_mesh: HTMLLegendElement = document.createElement("legend");
-        legend_mesh.innerHTML = "Mesh";
+
         let toggleButton_mesh: HTMLImageElement = document.createElement("img");
         toggleButton_mesh.classList.add("fold_button");
         toggleButton_mesh.addEventListener("click", toggleFoldElement);
         toggleButton_mesh.src = 'icons/foldable_open.png';
         legend_mesh.appendChild(toggleButton_mesh);
+        let title_mesh:HTMLElement = document.createElement("span");
+        title_mesh.innerHTML = "Mesh";
+        legend_mesh.append(title_mesh);
         fieldset_mesh.appendChild(legend_mesh);
         legend_mesh.classList.add("unfoldable");
 
@@ -526,12 +537,14 @@ namespace GoldenLayoutTest {
 
         let fieldset_material: HTMLFieldSetElement = document.createElement("fieldset");
         let legend_material: HTMLLegendElement = document.createElement("legend");
-        legend_material.innerHTML = "Material";
         let toggleButton_material: HTMLImageElement = document.createElement("img");
         toggleButton_material.classList.add("fold_button");
         toggleButton_material.addEventListener("click", toggleFoldElement);
         toggleButton_material.src = 'icons/foldable_open.png';
         legend_material.appendChild(toggleButton_material);
+        let title_material:HTMLElement = document.createElement("span");
+        title_material.innerHTML = "Material";
+        legend_material.append(title_material);
         fieldset_material.appendChild(legend_material);
 
         legend_material.classList.add("unfoldable");
@@ -573,12 +586,14 @@ namespace GoldenLayoutTest {
         item_script.addEventListener("click", function(){
             let fieldset_script: HTMLFieldSetElement = document.createElement("fieldset");
             let legend_script: HTMLLegendElement = document.createElement("legend");
-            legend_script.innerHTML = "NewScript.ts";
             let toggleButton_script: HTMLImageElement = document.createElement("img");
             toggleButton_script.classList.add("fold_button");
             toggleButton_script.addEventListener("click", toggleFoldElement);
             toggleButton_script.src = 'icons/foldable_open.png';
             legend_script.appendChild(toggleButton_script);
+            let title_script:HTMLElement = document.createElement("span");
+            title_script.innerHTML = "NewScript.ts";
+            legend_script.append(title_script);
             fieldset_script.appendChild(legend_script);
             legend_script.classList.add("unfoldable");
     
