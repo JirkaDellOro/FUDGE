@@ -13,7 +13,9 @@ The question of "does the server code need to be a seperate application running 
 Next the topic of identifying Networked Nodes came up. How the ID is assigned requires experimenting, most likely the server will assign unique IDs based on the commands it gets. Nodes that exist on game-start can simply have iterating IDs.
 On that note: How do objects handle NetworkCommands? We arrived at the conclusion that event-driven command logic might be a good solution. Not every potential network-object has to subscribe, only the parents node. Searching a childnode by ID can be handled by the parent node, minimizing the event-subscriptions. 
 Destroying objects might become tricky, because JavaScript has no Destructor and using an ObjectManager can block GarbageCollection, making it non-viable.
-For now we do layercake. Next step is working ahtoritative server, then figuring out how best to assign IDs to networked objects. Once that is done, first syncing experiments can be done, which will allow networked games on a rudimentary level.
+For now we do layercake. Next step is working ahtoritative server, then figuring out how best to assign IDs to networked objects. Once that is done, first syncing experiments can be done, which will allow networked games on a rudimentary level.  
+
+Addition by Jirka: an idea is to Subclass ComponentScript to ComponentScriptServer and ComponentScriptClient. To do networking, either or both must be used on the appropriate nodes and again subclassed and network-ids are automatically given to only those nodes.
 
 
 # July 18th 2019
