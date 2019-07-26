@@ -1,0 +1,19 @@
+- Wie kann man Netzwerkobjekte Identifizieren und verarbeiten
+
+- Eventgetrieben -> Jedes Objekt das vom Netzwerk manipuliert werden kann, subscribed bei einem
+	NetworkCommandEvent, vergleicht ob die eigene ID mit der im Command spezifizierten übereinstimmt
+	und führ tden Command aus
+	-> Erfordert unique IDs die auf jedem Client gleich sind, Was passiert wenn man während dem Spiel
+		ein NetzwerkObject erstellt (z.b. ein Geschoss)? Wie Syncd man das.
+	-> Jedes Object ist potentiell networked, müssen also alle objecte subscriben?
+		-> Nein, wenn die Parentnode subscribed und dann die children durchgeht und prüft ob die
+			Id eines der children ist, kann die Parentnode den command weitergeben
+- Es gibt keinen Destructor in JavaScript. ObjectManager fällt dadurch flach weil der sonst GarbageCollection
+	verhindert
+
+- Schichtweise arbeiten, Verbindung steht, jetzt Authoritative Server, dann manuelles Networking und spääääter
+	Automation beurteilen und machen
+
+- Wie kombinieren wir Server/Clientcode bzw wie können wir sie sinnvoll trennen, damit der Server auch Ahnung
+	vom Szenenbaum hat
+- Servercode nur von Host ausführen lassen, nicht allen Clients
