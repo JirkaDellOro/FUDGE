@@ -9,6 +9,11 @@ namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
+
+    export interface SerializableResource extends Serializable {
+        idResource: string;
+    }
+
     export class Serializer {
         // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
