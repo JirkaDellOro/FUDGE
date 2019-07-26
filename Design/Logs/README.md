@@ -1,6 +1,13 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
-This readme-file describes in a few words the contents of each log and the major issues discussed  
+This readme-file describes in a few words the contents of each log and the major issues discussed 
+
+# July 25th 2019
+[Whiteboard](190725_Whiteboard.jpg) | [Notes](190726_NotesOnResourceSerialization.jpg)
+## Serialization
+Lukas and Jirka discuss how to separate resources, that are referenced multiple time, from single instances of objects referencing those resources when serializing FUDGE data. Conclusion was to try an approach using an additional interface "Resource" that simply requires an implementation of an id for a resource (should be called `idResource`). This way the serializer can test an object for being a resource, fetch its id and use this to complete the serialization of the referencing object or, if id is yet undefined, serialize that resource first, save it to a resource area (depending on the structure to save serialization to), create the id and then do the above. Serializer, a static class at this point of time, should support serializer instances, so that multpiple serializers can hold data, and contain the logic for the separation. Serializables should remain as stupid as possible.
+## Network
+@Falco: your turn!
 
 # July 11th 2019
 Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
