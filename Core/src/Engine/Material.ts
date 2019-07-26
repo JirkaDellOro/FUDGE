@@ -3,9 +3,10 @@ namespace Fudge {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Material implements Serializable {
+    export class Material implements SerializableResource {
         /** The name to call the Material by. */
         public name: string;
+        public idResource: string = undefined;
         private shaderType: typeof Shader; // The shader program used by this BaseMaterial
         private coat: Coat;
 

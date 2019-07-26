@@ -20,16 +20,6 @@ namespace Fudge {
             this.textureUVs = this.createTextureUVs();
         }
 
-        public serialize(): Serialization {
-            let serialization: Serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed for quad
-            return serialization;
-        }
-        public deserialize(_serialization: Serialization): Serializable {
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
-        }
-
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
                 /*0*/ -1, 1, 0, /*1*/ -1, -1, 0,  /*2*/ 1, -1, 0, /*3*/ 1, 1, 0

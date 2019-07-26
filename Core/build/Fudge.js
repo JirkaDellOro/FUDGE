@@ -553,6 +553,8 @@ var Fudge;
          */
         static serialize(_object) {
             let serialization = {};
+            if (Serializer.isResource(_object))
+                Fudge.Debug.log("SerializableResource: ", _object);
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
@@ -575,6 +577,13 @@ var Fudge;
                 throw new Error("Deserialization failed: " + message);
             }
             return null;
+        }
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object) {
+            return (Reflect.has(_object, "idResource"));
         }
     }
     Fudge.Serializer = Serializer;
@@ -1228,6 +1237,7 @@ var Fudge;
      */
     class Material {
         constructor(_name, _shader, _coat) {
+            this.idResource = undefined;
             this.name = _name;
             this.shaderType = _shader;
             if (_shader) {
@@ -3047,6 +3057,9 @@ var Fudge;
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Mesh {
+        constructor() {
+            this.idResource = undefined;
+        }
         static getBufferSpecification() {
             return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
         }
@@ -3055,6 +3068,16 @@ var Fudge;
         }
         getIndexCount() {
             return this.indices.length;
+        }
+        // Serialize/Deserialize for all meshes that calculate without parameters
+        serialize() {
+            let serialization = {};
+            serialization[this.constructor.name] = {}; // no data needed ...
+            return serialization;
+        }
+        deserialize(_serialization) {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
         }
     }
     Fudge.Mesh = Mesh;
@@ -3081,15 +3104,6 @@ var Fudge;
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
             this.normalsFace = this.createFaceNormals();
-        }
-        serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed for cube...
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
         }
         createVertices() {
             let vertices = new Float32Array([
@@ -3193,15 +3207,6 @@ var Fudge;
             this.textureUVs = this.createTextureUVs();
             this.normalsFace = this.createFaceNormals();
         }
-        serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed for pyramid
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
-        }
         createVertices() {
             let vertices = new Float32Array([
                 // floor
@@ -3281,15 +3286,6 @@ var Fudge;
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
-        }
-        serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed for quad
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
         }
         createVertices() {
             let vertices = new Float32Array([

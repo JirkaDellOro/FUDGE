@@ -5,12 +5,14 @@ namespace Fudge {
      * 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export abstract class Mesh implements Serializable {
+    export abstract class Mesh implements SerializableResource {
         // TODO: check if these arrays must be cached like this or if calling the methods is better.
         public vertices: Float32Array;
         public indices: Uint16Array;
         public textureUVs: Float32Array;
         public normalsFace: Float32Array;
+
+        public idResource: string = undefined;
 
         public static getBufferSpecification(): BufferSpecification {
             return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
@@ -22,8 +24,16 @@ namespace Fudge {
             return this.indices.length;
         }
 
-        public abstract serialize(): Serialization;
-        public abstract deserialize(_serialization: Serialization): Serializable;
+        // Serialize/Deserialize for all meshes that calculate without parameters
+        public serialize(): Serialization {
+            let serialization: Serialization = {};
+            serialization[this.constructor.name] = {}; // no data needed ...
+            return serialization;
+        }
+        public deserialize(_serialization: Serialization): Serializable {
+            this.create(); // TODO: must not be created, if an identical mesh already exists
+            return this;
+        }
 
         public abstract create(): void;
         protected abstract createVertices(): Float32Array;

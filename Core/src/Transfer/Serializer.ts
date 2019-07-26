@@ -25,6 +25,8 @@ namespace Fudge {
          */
         public static serialize(_object: Serializable): Serialization {
             let serialization: Serialization = {};
+            if (Serializer.isResource(_object))
+                Debug.log("SerializableResource: ", _object);
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
@@ -47,6 +49,13 @@ namespace Fudge {
                 throw new Error("Deserialization failed: " + message);
             }
             return null;
+        }
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        public static isResource(_object: Serializable): boolean { 
+            return (Reflect.has(_object, "idResource"));
         }
     }
 }

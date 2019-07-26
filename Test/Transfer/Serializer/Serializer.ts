@@ -6,6 +6,8 @@ namespace TestSerializer {
     function init(): void {
         Scenes.createMiniScene();
 
+        let mutator: ƒ.Mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
+        ƒ.Debug.log(mutator);
         let result: ƒ.Serializable = testSerialization(Scenes.node);
         console.groupCollapsed("Comparison");
         Compare.compare(Scenes.node, result);

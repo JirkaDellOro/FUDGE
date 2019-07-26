@@ -220,6 +220,9 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
+    interface SerializableResource extends Serializable {
+        idResource: string;
+    }
     class Serializer {
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
@@ -233,6 +236,11 @@ declare namespace Fudge {
          * @param _serialization
          */
         static deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object: Serializable): boolean;
     }
 }
 declare namespace Fudge {
@@ -602,9 +610,10 @@ declare namespace Fudge {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Material implements Serializable {
+    class Material implements SerializableResource {
         /** The name to call the Material by. */
         name: string;
+        idResource: string;
         private shaderType;
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
@@ -1413,16 +1422,17 @@ declare namespace Fudge {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Mesh implements Serializable {
+    abstract class Mesh implements SerializableResource {
         vertices: Float32Array;
         indices: Uint16Array;
         textureUVs: Float32Array;
         normalsFace: Float32Array;
+        idResource: string;
         static getBufferSpecification(): BufferSpecification;
         getVertexCount(): number;
         getIndexCount(): number;
-        abstract serialize(): Serialization;
-        abstract deserialize(_serialization: Serialization): Serializable;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         abstract create(): void;
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
@@ -1444,8 +1454,6 @@ declare namespace Fudge {
     class MeshCube extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -1466,8 +1474,6 @@ declare namespace Fudge {
     class MeshPyramid extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -1487,8 +1493,6 @@ declare namespace Fudge {
     class MeshQuad extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;

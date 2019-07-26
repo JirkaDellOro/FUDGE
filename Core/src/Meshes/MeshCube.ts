@@ -22,16 +22,6 @@ namespace Fudge {
             this.normalsFace = this.createFaceNormals();
         }
 
-        public serialize(): Serialization {
-            let serialization: Serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed for cube...
-            return serialization;
-        }
-        public deserialize(_serialization: Serialization): Serializable {
-            this.create(); // TODO: must not be created, if an identical mesh already exists
-            return this;
-        }
-
         protected createVertices(): Float32Array {
             let vertices: Float32Array = new Float32Array([
                 // First wrap
