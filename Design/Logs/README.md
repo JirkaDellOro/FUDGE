@@ -9,6 +9,10 @@ Lukas and Jirka discuss how to separate resources, that are referenced multiple 
 ## Network
 @Falco: your turn!
 
+# July 18th 2019
+The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_NotizenLS))
+Also talked and re-capped the Jobs the FUDGE UI need to do, as well as discussing a rough design for how Gizmos should be handled internally in the FUDGE Core and how a KeyManager could function for FUDGE ([2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_ViewportEditor_Keymanager_FUDGEUI.txt))([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_Whiteboard.JPG))
+
 # July 11th 2019
 Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
 Should the inspector be there / paired per editor? Singleton? Selectable? 

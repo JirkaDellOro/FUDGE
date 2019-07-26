@@ -1,0 +1,26 @@
+The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch. Takeaways:
+- FUDGE will not run inside the browser, only the finished product. 
+- We need to create a splashscreen with generic menu bar (should it change with the different editors? -> NO! stays the same)
+- Make editors accessible through new menu bar item "Editor" instead of listing them in the "window" entry.
+- Editors need their own window, it shouldn´t be replaced on change but added so multiple ones can be viewed side by side.
+
+Scene editor: blue circle of rotate gizmo needs to be wider 
+Text sizes need adjusting to Menu bar text 
+use grid layout css eg. for fieldsets and their labels
+place "Add Node" button in Scene explorer 
+
+Viewport: Option to show/hide gizmos (lights, cameras etc.)
+Replace Rotation Gizmo with normal translation gizmo with sphere in center to signify rotation tool; scale and translation tools also get their own symbol in the center.
+
+Inspector: v in foldable menu needs to be replaced with triangle and placed before component
+the name of the script should be displayed in place of the title "script". Each script gets its own component
+In the beginning there are no components, need to be added by user via "Add Component" button (like Unity)
+"Assets" will be renamed to "Resource"
+
+Animation editor: Autokey feature does not need to be implemented at this point, low priority
+inspector and timeline too big, half size and use new free space for preview viewport
+
+Sketch editor: delete Rotation/Scale property in inspector
+rename "layer" property to "order"
+implement rulers that measure in px (standard origin at middle, x left negative, y upper half negative, origin shape: +)
+

@@ -1,0 +1,21 @@
+Rough Design - ViewportEditor
+
+- Render Scene -> Gain Calculated World Transforms for all Nodes of the Scene
+- Check if Gizmos should be rendered or not
+- If yes, Check all Nodes to determine what Components need what Gizmo the Node needs (Icons, Handels, etc...)
+- Check for possible Offset of the Components of the node
+- Render Gizmos on top at the appropriate position
+
+Keymanager
+- Save pressed keys, keys that are not pressed can be implied from which are pressed
+- Save the keypress on KeyDown and delete it from the stack 
+- Use pre-existing DOM Events. Everything should be possible with the provided Systems
+
+Jobs of the FUDGE UI System
+- Generate UI either automatically (from Mutable) or Manually (TS/HTML)
+- Styleable (CSS)
+- Provide Pre-Made UI-Elements such as Foldable Fieldsets and Steppers (Custom Elements)
+- Display Gizmos on the Editor Viewport and handle interactions with them
+- Keep UI Updated with an Event-Based, Self-Updating Lifecycle
+- Monitor and Manage Keyboard and Mouseinputs
+- Audio-Feedback (Left for future Projects)
