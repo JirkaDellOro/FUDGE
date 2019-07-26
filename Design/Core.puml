@@ -48,6 +48,9 @@ package Fudge <<Rectangle>> {
         [key: string]: Node
       }
       class Node extends EventTarget {
+        + name: string
+        + mtxWorld: Matrix4x4
+        + timestampUpdate: number
         - parent: Node | null
         - children: Node[]
         - components: MapClassToComponents
@@ -208,26 +211,34 @@ package Fudge <<Rectangle>> {
     }
 
     class ComponentCamera extends Component {
-      - orthographic: boolean
-      - projectionMatrix: Matrix4x4
+      - projection: PROJECTION
+      - transform: Matrix4x4
       - fieldOfView: number
       - aspectRatio: number
+      - direction: FIELD_OF_VIEW;
       - backgroundColor: Color
       - backgroundEnabled: boolean
     }
     class ComponentMaterial extends Component {
-      - material: Material;
+      + material: Material;
     }
     class ComponentMesh extends Component {
-      - mesh: Mesh
-    }
-    class ComponentPivot extends Component {
-      + local: Matrix4x4
+      + pivot: Matrix4x4
+      + mesh: Mesh
     }
     class ComponentTransform extends ComponentPivot {
-      + world: Matrix4x4
+      + local: Matrix4x4
+    }
+    class ComponentLight extends Component {
+      - light: Light
     }
     class ComponentScript extends Component {
+    }
+    class ComponentScriptServer extends ComponentScript {
+      // to be designed
+    }
+    class ComponentScriptClient extends ComponentScript {
+      // to be designed
     }
   }
 
@@ -248,14 +259,14 @@ package Fudge <<Rectangle>> {
 
   package "Math" <<Folder>> {
     class Vector3 {
-      - data: number[]
-      // to be refactored, components as x,y,z numbers
+      - data: Float32Array
     }
     class Matrix3x3 {
       + data: number[]
     }
     class Matrix4x4 extends Mutable {
-      + data: Float32Array
+      - data: Float32Array
+      - mutator: Mutator
     }
     file "Framing" {
       interface Rectangle {
@@ -393,6 +404,6 @@ package Fudge <<Rectangle>> {
   Mesh ---> BufferSpecification : provides >
 
   'improve layout
-  Node -[hidden]right- Component
-  CoatTextured "n" -[hidden]up-> Texture
+  'Node -[hidden]right- Component
+  'CoatTextured "n" -[hidden]up-> Texture
   @enduml
