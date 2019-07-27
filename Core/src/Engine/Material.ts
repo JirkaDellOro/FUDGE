@@ -71,6 +71,7 @@ namespace Fudge {
             let serialization: Serialization = {};
             serialization[this.constructor.name] = {
                 name: this.name,
+                idResource: this.idResource,
                 shader: this.shaderType.name,
                 coat: this.coat.serialize()
             };
@@ -78,6 +79,7 @@ namespace Fudge {
         }
         public deserialize(_serialization: Serialization): Serializable {
             this.name = _serialization.name;
+            this.idResource = _serialization.idResource;
             // tslint:disable-next-line: no-any
             this.shaderType = (<any>Fudge)[_serialization.shader];
             let coat: Coat = <Coat>Serializer.deserialize(_serialization.coat);

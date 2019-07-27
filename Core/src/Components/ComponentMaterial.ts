@@ -10,17 +10,26 @@ namespace Fudge {
             super();
             this.material = _material;
         }
-        
+
         //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = {
-                material: this.material.serialize(),
-                [super.constructor.name]: super.serialize()
-            };
+            let serialization: Serialization;
+            /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
+            let idMaterial: string = this.material.idResource;
+            if (idMaterial)
+                serialization = { idMaterial: idMaterial };
+            else
+                serialization = { material: this.material.serialize() };
+
+            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
-            let material: Material = <Material>Serializer.deserialize(_serialization.material);
+            let material: Material;
+            if (_serialization.idMaterial)
+                material = <Material>ResourceManager.get(_serialization.idMaterial);
+            else
+                material = <Material>Serializer.deserialize(_serialization.material);
             this.material = material;
             super.deserialize(_serialization[super.constructor.name]);
             return this;

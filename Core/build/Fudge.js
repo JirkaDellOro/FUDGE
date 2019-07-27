@@ -553,8 +553,6 @@ var Fudge;
          */
         static serialize(_object) {
             let serialization = {};
-            if (Serializer.isResource(_object))
-                Fudge.Debug.log("SerializableResource: ", _object);
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
         }
@@ -577,13 +575,6 @@ var Fudge;
                 throw new Error("Deserialization failed: " + message);
             }
             return null;
-        }
-        /**
-         * Tests, if an object is a [[SerializableResource]]
-         * @param _object The object to examine
-         */
-        static isResource(_object) {
-            return (Reflect.has(_object, "idResource"));
         }
     }
     Fudge.Serializer = Serializer;
@@ -833,14 +824,22 @@ var Fudge;
         }
         //#region Transfer
         serialize() {
-            let serialization = {
-                material: this.material.serialize(),
-                [super.constructor.name]: super.serialize()
-            };
+            let serialization;
+            /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
+            let idMaterial = this.material.idResource;
+            if (idMaterial)
+                serialization = { idMaterial: idMaterial };
+            else
+                serialization = { material: this.material.serialize() };
+            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         deserialize(_serialization) {
-            let material = Fudge.Serializer.deserialize(_serialization.material);
+            let material;
+            if (_serialization.idMaterial)
+                material = Fudge.ResourceManager.get(_serialization.idMaterial);
+            else
+                material = Fudge.Serializer.deserialize(_serialization.material);
             this.material = material;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
@@ -863,14 +862,22 @@ var Fudge;
         }
         //#region Transfer
         serialize() {
-            let serialization = {
-                mesh: this.mesh.serialize(),
-                [super.constructor.name]: super.serialize()
-            };
+            let serialization;
+            /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
+            let idMesh = this.mesh.idResource;
+            if (idMesh)
+                serialization = { idMesh: idMesh };
+            else
+                serialization = { mesh: this.mesh.serialize() };
+            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         deserialize(_serialization) {
-            let mesh = Fudge.Serializer.deserialize(_serialization.mesh);
+            let mesh;
+            if (_serialization.idMesh)
+                mesh = Fudge.ResourceManager.get(_serialization.idMesh);
+            else
+                mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
             super.deserialize(_serialization[super.constructor.name]);
             return this;
@@ -1291,6 +1298,7 @@ var Fudge;
             let serialization = {};
             serialization[this.constructor.name] = {
                 name: this.name,
+                idResource: this.idResource,
                 shader: this.shaderType.name,
                 coat: this.coat.serialize()
             };
@@ -1298,6 +1306,7 @@ var Fudge;
         }
         deserialize(_serialization) {
             this.name = _serialization.name;
+            this.idResource = _serialization.idResource;
             // tslint:disable-next-line: no-any
             this.shaderType = Fudge[_serialization.shader];
             let coat = Fudge.Serializer.deserialize(_serialization.coat);
@@ -3072,7 +3081,9 @@ var Fudge;
         // Serialize/Deserialize for all meshes that calculate without parameters
         serialize() {
             let serialization = {};
-            serialization[this.constructor.name] = {}; // no data needed ...
+            serialization[this.constructor.name] = {
+                idResource: this.idResource
+            }; // no data needed ...
             return serialization;
         }
         deserialize(_serialization) {
@@ -3255,10 +3266,11 @@ var Fudge;
                 let v0 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
                 let v1 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
                 let normal = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(v0, v1));
-                let index = vertex[2] * 3;
-                normals[index] = normal.x;
-                normals[index + 1] = normal.y;
-                normals[index + 2] = normal.z;
+                // let index: number = vertex[2] * 3;
+                // normals[index] = normal.x;
+                // normals[index + 1] = normal.y;
+                // normals[index + 2] = normal.z;
+                normals.push(normal.x, normal.y, normal.z);
             }
             normals.push(0, 0, 0);
             return new Float32Array(normals);
@@ -3788,5 +3800,78 @@ var Fudge;
     class TextureHTML extends TextureCanvas {
     }
     Fudge.TextureHTML = TextureHTML;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ResourceManager {
+        static register(_resource) {
+            if (!_resource.idResource)
+                _resource.idResource = ResourceManager.generateId(_resource);
+            ResourceManager.resources[_resource.idResource] = _resource;
+        }
+        static generateId(_resource) {
+            // TODO: build id and integrate info from resource, not just date
+            let idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
+            return idResource;
+        }
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object) {
+            return (Reflect.has(_object, "idResource"));
+        }
+        static get(_idResource) {
+            let resource = ResourceManager.resources[_idResource];
+            if (!resource) {
+                let serialization = ResourceManager.serialization[_idResource];
+                if (!serialization) {
+                    Fudge.Debug.error("Resource not found", _idResource);
+                    return null;
+                }
+                resource = ResourceManager.deserializeResource(serialization);
+            }
+            return resource;
+        }
+        static serialize() {
+            let serialization = {};
+            for (let idResource in ResourceManager.resources) {
+                let resource = ResourceManager.resources[idResource];
+                if (idResource != resource.idResource)
+                    Fudge.Debug.error("Resource-id mismatch", resource);
+                serialization[idResource] = resource.serialize();
+            }
+            return serialization;
+        }
+        static deserialize(_serialization) {
+            ResourceManager.serialization = _serialization;
+            ResourceManager.resources = {};
+            for (let idResource in _serialization) {
+                let serialization = _serialization[idResource];
+                let resource = ResourceManager.deserializeResource(serialization);
+                if (resource)
+                    ResourceManager.resources[idResource] = resource;
+            }
+            return ResourceManager.resources;
+        }
+        static deserializeResource(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    ResourceManager.resources = {};
+    ResourceManager.serialization = null;
+    Fudge.ResourceManager = ResourceManager;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

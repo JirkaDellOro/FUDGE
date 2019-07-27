@@ -39,7 +39,7 @@ var Compare;
         }
         //Check object 2 for any extra properties
         for (let prop in _object2) {
-            if (typeof (_object1[prop]) == "undefined") {
+            if (typeof (_object1[prop]) == "undefined") { // && typeof (_object2[prop]) != "undefined") {
                 console.error(`Property mismatch ${prop} | ${_object1} : ${_object2}`);
                 return false;
             }
