@@ -14,14 +14,24 @@ namespace Fudge {
 
         //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = {
-                mesh: this.mesh.serialize(),
-                [super.constructor.name]: super.serialize()
-            };
+            let serialization: Serialization;
+            /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
+            let idMesh: string = this.mesh.idResource;
+            if (idMesh)
+                serialization = { idMesh: idMesh };
+            else
+                serialization = { mesh: this.mesh.serialize() };
+
+            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
+
         public deserialize(_serialization: Serialization): Serializable {
-            let mesh: Mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
+            let mesh: Mesh;
+            if (_serialization.idMesh)
+                mesh = <Mesh>ResourceManager.get(_serialization.idMesh);
+            else
+                mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
             super.deserialize(_serialization[super.constructor.name]);
             return this;

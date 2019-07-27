@@ -11,8 +11,7 @@ namespace TestSerializer {
         let result: ƒ.Serializable = testSerialization(Scenes.node);
         console.groupCollapsed("Comparison");
         Compare.compare(Scenes.node, result);
-        console.groupEnd();
-        
+        console.groupEnd();   
     }
 
     function testSerialization(_object: ƒ.Serializable): ƒ.Serializable {

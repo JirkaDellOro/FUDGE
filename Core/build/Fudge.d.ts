@@ -220,9 +220,6 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
-    interface SerializableResource extends Serializable {
-        idResource: string;
-    }
     class Serializer {
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
@@ -236,11 +233,6 @@ declare namespace Fudge {
          * @param _serialization
          */
         static deserialize(_serialization: Serialization): Serializable;
-        /**
-         * Tests, if an object is a [[SerializableResource]]
-         * @param _object The object to examine
-         */
-        static isResource(_object: Serializable): boolean;
     }
 }
 declare namespace Fudge {
@@ -1667,5 +1659,31 @@ declare namespace Fudge {
      * Texture created from an HTML-page
      */
     class TextureHTML extends TextureCanvas {
+    }
+}
+declare namespace Fudge {
+    interface SerializableResource extends Serializable {
+        idResource: string;
+    }
+    interface Resources {
+        [idResource: string]: SerializableResource;
+    }
+    interface SerializationOfResources {
+        [idResource: string]: Serialization;
+    }
+    class ResourceManager {
+        static resources: Resources;
+        static serialization: SerializationOfResources;
+        static register(_resource: SerializableResource): void;
+        static generateId(_resource: SerializableResource): string;
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object: Serializable): boolean;
+        static get(_idResource: string): SerializableResource;
+        static serialize(): SerializationOfResources;
+        static deserialize(_serialization: SerializationOfResources): Resources;
+        static deserializeResource(_serialization: Serialization): SerializableResource;
     }
 }
