@@ -9,7 +9,7 @@ namespace TestSerializer {
         let mutator: ƒ.Mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
         ƒ.Debug.log(mutator);
         let result: ƒ.Serializable = testSerialization(Scenes.node);
-        console.groupCollapsed("Comparison");
+        console.group("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();   
     }

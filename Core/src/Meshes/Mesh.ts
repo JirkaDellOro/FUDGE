@@ -34,6 +34,7 @@ namespace Fudge {
         }
         public deserialize(_serialization: Serialization): Serializable {
             this.create(); // TODO: must not be created, if an identical mesh already exists
+            this.idResource = _serialization.idResource;
             return this;
         }
 

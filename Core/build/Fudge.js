@@ -552,9 +552,10 @@ var Fudge;
          * @param _object An object to serialize, implementing the Serializable interface
          */
         static serialize(_object) {
-            let serialization = {};
-            serialization[_object.constructor.name] = _object.serialize();
-            return serialization;
+            // let serialization: Serialization = {};
+            // serialization[_object.constructor.name] = _object.serialize();
+            // return serialization;
+            return _object.serialize();
         }
         /**
          * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
@@ -1315,320 +1316,6 @@ var Fudge;
         }
     }
     Fudge.Material = Material;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Node extends EventTarget {
-        /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
-         */
-        constructor(_name) {
-            super();
-            this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
-            this.timestampUpdate = 0;
-            this.parent = null; // The parent of this node.
-            this.children = []; // array of child nodes appended to this node.
-            this.components = {};
-            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
-            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
-            this.listeners = {};
-            this.captures = {};
-            this.name = _name;
-        }
-        /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent() {
-            return this.parent;
-        }
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor() {
-            let ancestor = this;
-            while (ancestor.getParent())
-                ancestor = ancestor.getParent();
-            return ancestor;
-        }
-        /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
-         */
-        get cmpTransform() {
-            return this.getComponents(Fudge.ComponentTransform)[0];
-        }
-        /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Returns null if no [[ComponentTransform]] is attached
-         */
-        // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
-        // public get mtxLocal(): Matrix4x4 {
-        //     let cmpTransform: ComponentTransform = this.cmpTransform;
-        //     if (cmpTransform)
-        //         return cmpTransform.local;
-        //     else
-        //         return null;
-        // }
-        // #region Scenetree
-        /**
-         * Returns a clone of the list of children
-         */
-        getChildren() {
-            return this.children.slice(0);
-        }
-        /**
-         * Returns an array of references to childnodes with the supplied name.
-         * @param _name The name of the nodes to be found.
-         * @return An array with references to nodes
-         */
-        getChildrenByName(_name) {
-            let found = [];
-            found = this.children.filter((_node) => _node.name == _name);
-            return found;
-        }
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @param _node The node to be added as a child
-         * @throws Error when trying to add an ancestor of this
-         */
-        appendChild(_node) {
-            if (this.children.includes(_node))
-                // _node is already a child of this
-                return;
-            let ancestor = this;
-            while (ancestor) {
-                if (ancestor == _node)
-                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
-                else
-                    ancestor = ancestor.parent;
-            }
-            this.children.push(_node);
-            _node.setParent(this);
-            _node.dispatchEvent(new Event("childAdd" /* CHILD_APPEND */, { bubbles: true }));
-        }
-        /**
-         * Removes the reference to the give node from the list of children
-         * @param _node The node to be removed.
-         */
-        removeChild(_node) {
-            let iFound = this.children.indexOf(_node);
-            if (iFound < 0)
-                return;
-            _node.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
-            this.children.splice(iFound, 1);
-            _node.setParent(null);
-        }
-        /**
-         * Generator yielding the node and all successors in the branch below for iteration
-         */
-        get branch() {
-            return this.getBranchGenerator();
-        }
-        isUpdated(_timestampUpdate) {
-            return (this.timestampUpdate == _timestampUpdate);
-        }
-        // #endregion
-        // #region Components
-        /**
-         * Returns a clone of the list of components of the given class attached this node.
-         * @param _class The class of the components to be found.
-         */
-        getComponents(_class) {
-            return (this.components[_class.name] || []).slice(0);
-        }
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
-         */
-        getComponent(_class) {
-            let list = this.components[_class.name];
-            if (list)
-                return list[0];
-            return null;
-        }
-        /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component) {
-            if (_component.getContainer() == this)
-                return;
-            if (this.components[_component.type] === undefined)
-                this.components[_component.type] = [_component];
-            else if (_component.isSingleton)
-                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
-            else
-                this.components[_component.type].push(_component);
-            _component.setContainer(this);
-            _component.dispatchEvent(new Event("componentAdd" /* COMPONENT_ADD */));
-        }
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
-         */
-        removeComponent(_component) {
-            try {
-                let componentsOfType = this.components[_component.type];
-                let foundAt = componentsOfType.indexOf(_component);
-                if (foundAt < 0)
-                    return;
-                componentsOfType.splice(foundAt, 1);
-                _component.setContainer(null);
-                _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
-            }
-            catch {
-                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
-            }
-        }
-        // #endregion
-        // #region Serialization
-        serialize() {
-            let serialization = {
-                name: this.name
-                // TODO: serialize references, does parent need to be serialized at all?
-                //parent: this.parent
-            };
-            let components = {};
-            for (let type in this.components) {
-                components[type] = [];
-                for (let component of this.components[type]) {
-                    components[type].push(component.serialize());
-                }
-            }
-            serialization["components"] = components;
-            let children = [];
-            for (let child of this.children) {
-                children.push(child.serialize());
-            }
-            serialization["children"] = children;
-            return serialization;
-        }
-        deserialize(_serialization) {
-            this.name = _serialization.name;
-            // this.parent = is set when the nodes are added
-            for (let type in _serialization.components) {
-                for (let data of _serialization.components[type]) {
-                    let serializedComponent = { [type]: data };
-                    let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
-                    this.addComponent(deserializedComponent);
-                }
-            }
-            for (let child of _serialization.children) {
-                let serializedChild = { "Node": child };
-                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
-            return this;
-        }
-        // #endregion
-        // #region Events
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        addEventListener(_type, _handler, _capture = false) {
-            if (_capture) {
-                if (!this.captures[_type])
-                    this.captures[_type] = [];
-                this.captures[_type].push(_handler);
-            }
-            else {
-                if (!this.listeners[_type])
-                    this.listeners[_type] = [];
-                this.listeners[_type].push(_handler);
-            }
-        }
-        /**
-         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         * @param _event The event to dispatch
-         */
-        dispatchEvent(_event) {
-            let ancestors = [];
-            let upcoming = this;
-            // overwrite event target
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
-            while (upcoming.parent)
-                ancestors.push(upcoming = upcoming.parent);
-            // capture phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            for (let i = ancestors.length - 1; i >= 0; i--) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                let captures = ancestor.captures[_event.type] || [];
-                for (let handler of captures)
-                    handler(_event);
-            }
-            if (!_event.bubbles)
-                return true;
-            // target phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            let listeners = this.listeners[_event.type] || [];
-            for (let handler of listeners)
-                handler(_event);
-            // bubble phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
-            for (let i = 0; i < ancestors.length; i++) {
-                let ancestor = ancestors[i];
-                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-                let listeners = ancestor.listeners[_event.type] || [];
-                for (let handler of listeners)
-                    handler(_event);
-            }
-            return true; //TODO: return a meaningful value, see documentation of dispatch event
-        }
-        /**
-         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
-         */
-        broadcastEvent(_event) {
-            // overwrite event target and phase
-            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-            Object.defineProperty(_event, "target", { writable: true, value: this });
-            this.broadcastEventRecursive(_event);
-        }
-        broadcastEventRecursive(_event) {
-            // capture phase only
-            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-            let captures = this.captures[_event.type] || [];
-            for (let handler of captures)
-                handler(_event);
-            // appears to be slower, astonishingly...
-            // captures.forEach(function (handler: Function): void {
-            //     handler(_event);
-            // });
-            // same for children
-            for (let child of this.children) {
-                child.broadcastEventRecursive(_event);
-            }
-        }
-        // #endregion
-        /**
-         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        setParent(_parent) {
-            this.parent = _parent;
-        }
-        *getBranchGenerator() {
-            yield this;
-            for (let child of this.children)
-                yield* child.branch;
-        }
-    }
-    Fudge.Node = Node;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -3088,6 +2775,7 @@ var Fudge;
         }
         deserialize(_serialization) {
             this.create(); // TODO: must not be created, if an identical mesh already exists
+            this.idResource = _serialization.idResource;
             return this;
         }
     }
@@ -3612,6 +3300,329 @@ var Fudge;
     RenderManager.nodes = new Map();
     Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Node extends EventTarget {
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name) {
+            super();
+            this.mtxWorld = Fudge.Matrix4x4.IDENTITY;
+            this.timestampUpdate = 0;
+            this.parent = null; // The parent of this node.
+            this.children = []; // array of child nodes appended to this node.
+            this.components = {};
+            // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
+            // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
+            this.listeners = {};
+            this.captures = {};
+            this.name = _name;
+        }
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent() {
+            return this.parent;
+        }
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor() {
+            let ancestor = this;
+            while (ancestor.getParent())
+                ancestor = ancestor.getParent();
+            return ancestor;
+        }
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
+        get cmpTransform() {
+            return this.getComponents(Fudge.ComponentTransform)[0];
+        }
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
+        // public get mtxLocal(): Matrix4x4 {
+        //     let cmpTransform: ComponentTransform = this.cmpTransform;
+        //     if (cmpTransform)
+        //         return cmpTransform.local;
+        //     else
+        //         return null;
+        // }
+        // #region Scenetree
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren() {
+            return this.children.slice(0);
+        }
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
+         */
+        getChildrenByName(_name) {
+            let found = [];
+            found = this.children.filter((_node) => _node.name == _name);
+            return found;
+        }
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
+         */
+        appendChild(_node) {
+            if (this.children.includes(_node))
+                // _node is already a child of this
+                return;
+            let ancestor = this;
+            while (ancestor) {
+                if (ancestor == _node)
+                    throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
+                else
+                    ancestor = ancestor.parent;
+            }
+            this.children.push(_node);
+            _node.setParent(this);
+            _node.dispatchEvent(new Event("childAdd" /* CHILD_APPEND */, { bubbles: true }));
+        }
+        /**
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
+         */
+        removeChild(_node) {
+            let iFound = this.children.indexOf(_node);
+            if (iFound < 0)
+                return;
+            _node.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
+            this.children.splice(iFound, 1);
+            _node.setParent(null);
+        }
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        get branch() {
+            return this.getBranchGenerator();
+        }
+        isUpdated(_timestampUpdate) {
+            return (this.timestampUpdate == _timestampUpdate);
+        }
+        // #endregion
+        // #region Components
+        /**
+         * Returns a clone of the list of components of the given class attached this node.
+         * @param _class The class of the components to be found.
+         */
+        getComponents(_class) {
+            return (this.components[_class.name] || []).slice(0);
+        }
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent(_class) {
+            let list = this.components[_class.name];
+            if (list)
+                return list[0];
+            return null;
+        }
+        /**
+         * Adds the supplied component into the nodes component map.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component) {
+            if (_component.getContainer() == this)
+                return;
+            if (this.components[_component.type] === undefined)
+                this.components[_component.type] = [_component];
+            else if (_component.isSingleton)
+                throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
+            else
+                this.components[_component.type].push(_component);
+            _component.setContainer(this);
+            _component.dispatchEvent(new Event("componentAdd" /* COMPONENT_ADD */));
+        }
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
+         * @throws Exception when component is not found
+         */
+        removeComponent(_component) {
+            try {
+                let componentsOfType = this.components[_component.type];
+                let foundAt = componentsOfType.indexOf(_component);
+                if (foundAt < 0)
+                    return;
+                componentsOfType.splice(foundAt, 1);
+                _component.setContainer(null);
+                _component.dispatchEvent(new Event("componentRemove" /* COMPONENT_REMOVE */));
+            }
+            catch {
+                throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
+            }
+        }
+        // #endregion
+        // #region Serialization
+        serialize() {
+            let serialization = {
+                name: this.name
+                // TODO: serialize references, does parent need to be serialized at all?
+                //parent: this.parent
+            };
+            let components = {};
+            for (let type in this.components) {
+                components[type] = [];
+                for (let component of this.components[type]) {
+                    components[type].push(component.serialize());
+                }
+            }
+            serialization["components"] = components;
+            let children = [];
+            for (let child of this.children) {
+                children.push(child.serialize());
+            }
+            serialization["children"] = children;
+            return { [this.constructor.name]: serialization };
+        }
+        deserialize(_serialization) {
+            this.name = _serialization.name;
+            // this.parent = is set when the nodes are added
+            for (let type in _serialization.components) {
+                for (let data of _serialization.components[type]) {
+                    let serializedComponent = { [type]: data };
+                    let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
+                    this.addComponent(deserializedComponent);
+                }
+            }
+            for (let serializedChild of _serialization.children) {
+                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
+            return this;
+        }
+        // #endregion
+        // #region Events
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type, _handler, _capture = false) {
+            if (_capture) {
+                if (!this.captures[_type])
+                    this.captures[_type] = [];
+                this.captures[_type].push(_handler);
+            }
+            else {
+                if (!this.listeners[_type])
+                    this.listeners[_type] = [];
+                this.listeners[_type].push(_handler);
+            }
+        }
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event) {
+            let ancestors = [];
+            let upcoming = this;
+            // overwrite event target
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            // TODO: consider using Reflect instead of Object throughout. See also Render and Mutable...
+            while (upcoming.parent)
+                ancestors.push(upcoming = upcoming.parent);
+            // capture phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            for (let i = ancestors.length - 1; i >= 0; i--) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let captures = ancestor.captures[_event.type] || [];
+                for (let handler of captures)
+                    handler(_event);
+            }
+            if (!_event.bubbles)
+                return true;
+            // target phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let listeners = this.listeners[_event.type] || [];
+            for (let handler of listeners)
+                handler(_event);
+            // bubble phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
+            for (let i = 0; i < ancestors.length; i++) {
+                let ancestor = ancestors[i];
+                Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
+                let listeners = ancestor.listeners[_event.type] || [];
+                for (let handler of listeners)
+                    handler(_event);
+            }
+            return true; //TODO: return a meaningful value, see documentation of dispatch event
+        }
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event) {
+            // overwrite event target and phase
+            Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+            Object.defineProperty(_event, "target", { writable: true, value: this });
+            this.broadcastEventRecursive(_event);
+        }
+        broadcastEventRecursive(_event) {
+            // capture phase only
+            Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+            let captures = this.captures[_event.type] || [];
+            for (let handler of captures)
+                handler(_event);
+            // appears to be slower, astonishingly...
+            // captures.forEach(function (handler: Function): void {
+            //     handler(_event);
+            // });
+            // same for children
+            for (let child of this.children) {
+                child.broadcastEventRecursive(_event);
+            }
+        }
+        // #endregion
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        setParent(_parent) {
+            this.parent = _parent;
+        }
+        *getBranchGenerator() {
+            yield this;
+            for (let child of this.children)
+                yield* child.branch;
+        }
+    }
+    Fudge.Node = Node;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class NodeResource extends Fudge.Node {
+        constructor() {
+            super(...arguments);
+            this.idResource = undefined;
+        }
+    }
+    Fudge.NodeResource = NodeResource;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Coats/Coat.ts"/>
 var Fudge;
 /// <reference path="../Coats/Coat.ts"/>
@@ -3832,6 +3843,16 @@ var Fudge;
                 resource = ResourceManager.deserializeResource(serialization);
             }
             return resource;
+        }
+        static registerNodeAsResource(_node) {
+            // let nodeResource: NodeResource = <NodeResource>_node;
+            // ResourceManager.register(nodeResource);
+            // replace node with NodeResourceInstance 
+            // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
+            let serialization = _node.serialize();
+            let nodeResource = Fudge.Serializer.deserialize(serialization);
+            ResourceManager.register(nodeResource);
+            return nodeResource;
         }
         static serialize() {
             let serialization = {};

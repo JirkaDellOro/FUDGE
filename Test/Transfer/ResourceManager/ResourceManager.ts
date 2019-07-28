@@ -39,8 +39,13 @@ namespace TestSerializer {
         a.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
 
+        let node: ƒ.Node = new ƒ.Node("Node_1");
+        let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
+        ƒ.Debug.log(node);
+        ƒ.Debug.log(nodeResource);
+
         let result: ƒ.Resources = testSerialization();
-        console.groupCollapsed("Comparison");
+        console.group("Comparison");
         Compare.compare(ƒ.ResourceManager.resources, result);
         console.groupEnd();
     }

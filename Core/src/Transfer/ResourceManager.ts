@@ -26,12 +26,12 @@ namespace Fudge {
             let idResource: string = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
             return idResource;
         }
-        
+
         /**
          * Tests, if an object is a [[SerializableResource]]
          * @param _object The object to examine
          */
-        public static isResource(_object: Serializable): boolean { 
+        public static isResource(_object: Serializable): boolean {
             return (Reflect.has(_object, "idResource"));
         }
 
@@ -46,6 +46,18 @@ namespace Fudge {
                 resource = ResourceManager.deserializeResource(serialization);
             }
             return resource;
+        }
+
+        public static registerNodeAsResource(_node: Node): NodeResource {
+            // let nodeResource: NodeResource = <NodeResource>_node;
+            // ResourceManager.register(nodeResource);
+            // replace node with NodeResourceInstance 
+            // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
+            let serialization: Serialization = _node.serialize();
+            let nodeResource: NodeResource = <NodeResource>Serializer.deserialize(serialization);
+            ResourceManager.register(nodeResource);
+
+            return nodeResource;
         }
 
         public static serialize(): SerializationOfResources {

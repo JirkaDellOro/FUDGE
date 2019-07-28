@@ -7,7 +7,7 @@ var TestSerializer;
         let mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
         ƒ.Debug.log(mutator);
         let result = testSerialization(Scenes.node);
-        console.groupCollapsed("Comparison");
+        console.group("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
     }

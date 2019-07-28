@@ -3,7 +3,7 @@ namespace Fudge {
     export type General = any;
 
     export interface Serialization {
-        [type: string]: General;
+        [type: string]: General;    
     }
     export interface Serializable {
         serialize(): Serialization;
@@ -20,9 +20,10 @@ namespace Fudge {
          * @param _object An object to serialize, implementing the Serializable interface
          */
         public static serialize(_object: Serializable): Serialization {
-            let serialization: Serialization = {};
-            serialization[_object.constructor.name] = _object.serialize();
-            return serialization;
+            // let serialization: Serialization = {};
+            // serialization[_object.constructor.name] = _object.serialize();
+            // return serialization;
+            return _object.serialize();
         }
 
         /**

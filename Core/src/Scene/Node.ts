@@ -11,7 +11,7 @@ namespace Fudge {
         public name: string; // The name to call this node by.
         public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
         public timestampUpdate: number = 0;
-        
+
         private parent: Node | null = null; // The parent of this node.
         private children: Node[] = []; // array of child nodes appended to this node.
         private components: MapClassToComponents = {};
@@ -126,7 +126,7 @@ namespace Fudge {
         public get branch(): IterableIterator<Node> {
             return this.getBranchGenerator();
         }
-        
+
         public isUpdated(_timestampUpdate: number): boolean {
             return (this.timestampUpdate == _timestampUpdate);
         }
@@ -212,7 +212,7 @@ namespace Fudge {
             }
             serialization["children"] = children;
 
-            return serialization;
+            return { [this.constructor.name]: serialization };
         }
 
         public deserialize(_serialization: Serialization): Serializable {
@@ -227,8 +227,7 @@ namespace Fudge {
                 }
             }
 
-            for (let child of _serialization.children) {
-                let serializedChild: Serialization = { "Node": child };
+            for (let serializedChild of _serialization.children) {
                 let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
                 this.appendChild(deserializedChild);
             }

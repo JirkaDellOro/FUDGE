@@ -637,123 +637,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface MapClassToComponents {
-        [className: string]: Component[];
-    }
-    /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Node extends EventTarget implements Serializable {
-        name: string;
-        mtxWorld: Matrix4x4;
-        timestampUpdate: number;
-        private parent;
-        private children;
-        private components;
-        private listeners;
-        private captures;
-        /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
-         */
-        constructor(_name: string);
-        /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent(): Node | null;
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor(): Node | null;
-        /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
-         */
-        readonly cmpTransform: ComponentTransform;
-        /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Returns null if no [[ComponentTransform]] is attached
-         */
-        /**
-         * Returns a clone of the list of children
-         */
-        getChildren(): Node[];
-        /**
-         * Returns an array of references to childnodes with the supplied name.
-         * @param _name The name of the nodes to be found.
-         * @return An array with references to nodes
-         */
-        getChildrenByName(_name: string): Node[];
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @param _node The node to be added as a child
-         * @throws Error when trying to add an ancestor of this
-         */
-        appendChild(_node: Node): void;
-        /**
-         * Removes the reference to the give node from the list of children
-         * @param _node The node to be removed.
-         */
-        removeChild(_node: Node): void;
-        /**
-         * Generator yielding the node and all successors in the branch below for iteration
-         */
-        readonly branch: IterableIterator<Node>;
-        isUpdated(_timestampUpdate: number): boolean;
-        /**
-         * Returns a clone of the list of components of the given class attached this node.
-         * @param _class The class of the components to be found.
-         */
-        getComponents<T extends Component>(_class: typeof Component): T[];
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
-         */
-        getComponent<T extends Component>(_class: typeof Component): T;
-        /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component: Component): void;
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
-         */
-        removeComponent(_component: Component): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         * @param _event The event to dispatch
-         */
-        dispatchEvent(_event: Event): boolean;
-        /**
-         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
-         */
-        broadcastEvent(_event: Event): void;
-        private broadcastEventRecursive;
-        /**
-         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        private setParent;
-        private getBranchGenerator;
-    }
-}
-declare namespace Fudge {
     /**
      * Baseclass for different kinds of lights.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1587,6 +1470,128 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface MapClassToComponents {
+        [className: string]: Component[];
+    }
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Node extends EventTarget implements Serializable {
+        name: string;
+        mtxWorld: Matrix4x4;
+        timestampUpdate: number;
+        private parent;
+        private children;
+        private components;
+        private listeners;
+        private captures;
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name: string);
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor(): Node | null;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
+        readonly cmpTransform: ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren(): Node[];
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
+         */
+        getChildrenByName(_name: string): Node[];
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
+         */
+        appendChild(_node: Node): void;
+        /**
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
+         */
+        removeChild(_node: Node): void;
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        readonly branch: IterableIterator<Node>;
+        isUpdated(_timestampUpdate: number): boolean;
+        /**
+         * Returns a clone of the list of components of the given class attached this node.
+         * @param _class The class of the components to be found.
+         */
+        getComponents<T extends Component>(_class: typeof Component): T[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent<T extends Component>(_class: typeof Component): T;
+        /**
+         * Adds the supplied component into the nodes component map.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component: Component): void;
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
+         * @throws Exception when component is not found
+         */
+        removeComponent(_component: Component): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event: Event): void;
+        private broadcastEventRecursive;
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        private setParent;
+        private getBranchGenerator;
+    }
+}
+declare namespace Fudge {
+    class NodeResource extends Node implements SerializableResource {
+        idResource: string;
+    }
+}
+declare namespace Fudge {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1682,6 +1687,7 @@ declare namespace Fudge {
          */
         static isResource(_object: Serializable): boolean;
         static get(_idResource: string): SerializableResource;
+        static registerNodeAsResource(_node: Node): NodeResource;
         static serialize(): SerializationOfResources;
         static deserialize(_serialization: SerializationOfResources): Resources;
         static deserializeResource(_serialization: Serialization): SerializableResource;
