@@ -1,4 +1,10 @@
 namespace Fudge {
+    export class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type: string, _event: KeyboardEventƒ) {
+            super(type, _event);
+        }
+    }
+
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
      */

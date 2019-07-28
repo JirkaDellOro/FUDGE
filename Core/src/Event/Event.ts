@@ -40,12 +40,6 @@ namespace Fudge {
         WHEEL = "ƒwheel"
     }
 
-    export class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ) {
-            super(type, _event);
-        }
-    }
-
     export class PointerEventƒ extends PointerEvent {
         public pointerX: number;
         public pointerY: number;

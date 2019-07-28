@@ -550,9 +550,6 @@ declare namespace Fudge {
     const enum EVENT_WHEEL {
         WHEEL = "\u0192wheel"
     }
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ);
-    }
     class PointerEventƒ extends PointerEvent {
         pointerX: number;
         pointerY: number;
@@ -634,6 +631,33 @@ declare namespace Fudge {
         getShader(): typeof Shader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
+    interface SerializableResource extends Serializable {
+        idResource: string;
+    }
+    interface Resources {
+        [idResource: string]: SerializableResource;
+    }
+    interface SerializationOfResources {
+        [idResource: string]: Serialization;
+    }
+    class ResourceManager {
+        static resources: Resources;
+        static serialization: SerializationOfResources;
+        static register(_resource: SerializableResource): void;
+        static generateId(_resource: SerializableResource): string;
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object: Serializable): boolean;
+        static get(_idResource: string): SerializableResource;
+        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): NodeResource;
+        static serialize(): SerializationOfResources;
+        static deserialize(_serialization: SerializationOfResources): Resources;
+        static deserializeResource(_serialization: Serialization): SerializableResource;
     }
 }
 declare namespace Fudge {
@@ -823,6 +847,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type: string, _event: KeyboardEventƒ);
+    }
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
      */
@@ -1529,6 +1556,17 @@ declare namespace Fudge {
          */
         removeChild(_node: Node): void;
         /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _node The node to be found.
+         */
+        findChild(_node: Node): number;
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        replaceChild(_replace: Node, _with: Node): boolean;
+        /**
          * Generator yielding the node and all successors in the branch below for iteration
          */
         readonly branch: IterableIterator<Node>;
@@ -1594,7 +1632,10 @@ declare namespace Fudge {
 declare namespace Fudge {
     class NodeResourceInstance extends Node {
         /** id of the resource that instance was created from */
-        idSource: string;
+        private idSource;
+        constructor(_nodeResource: NodeResource);
+        reset(): void;
+        private set;
     }
 }
 declare namespace Fudge {
@@ -1670,33 +1711,5 @@ declare namespace Fudge {
      * Texture created from an HTML-page
      */
     class TextureHTML extends TextureCanvas {
-    }
-}
-declare namespace Fudge {
-    interface SerializableResource extends Serializable {
-        idResource: string;
-    }
-    interface Resources {
-        [idResource: string]: SerializableResource;
-    }
-    interface SerializationOfResources {
-        [idResource: string]: Serialization;
-    }
-    class ResourceManager {
-        static resources: Resources;
-        static serialization: SerializationOfResources;
-        static register(_resource: SerializableResource): void;
-        static generateId(_resource: SerializableResource): string;
-        /**
-         * Tests, if an object is a [[SerializableResource]]
-         * @param _object The object to examine
-         */
-        static isResource(_object: Serializable): boolean;
-        static get(_idResource: string): SerializableResource;
-        static registerNodeAsResource(_node: Node): NodeResource;
-        static instantiateNodeResource(_nodeResource: NodeResource): NodeResourceInstance;
-        static serialize(): SerializationOfResources;
-        static deserialize(_serialization: SerializationOfResources): Resources;
-        static deserializeResource(_serialization: Serialization): SerializableResource;
     }
 }

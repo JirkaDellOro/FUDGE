@@ -55,20 +55,11 @@ namespace Fudge {
             ResourceManager.register(nodeResource);
 
             if (_replaceWithInstance && _node.getParent()) {
-                let instance: NodeResourceInstance = ResourceManager.instantiateNodeResource(nodeResource);
+                let instance: NodeResourceInstance = new NodeResourceInstance(nodeResource);
                 _node.getParent().replaceChild(_node, instance);
             }
 
             return nodeResource;
-        }
-
-        public static instantiateNodeResource(_nodeResource: NodeResource): NodeResourceInstance {
-            let instance: NodeResourceInstance = new NodeResourceInstance("NodeResourceInstance");
-            // TODO: cache serialization for optimization
-            let serialization: Serialization = _nodeResource.serialize();
-            instance.deserialize(serialization["NodeResource"]);
-            instance.idSource = _nodeResource.idResource;   
-            return instance;
         }
 
         public static serialize(): SerializationOfResources {

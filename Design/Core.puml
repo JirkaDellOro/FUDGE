@@ -39,7 +39,46 @@ package Fudge <<Rectangle>> {
     class DebugDialog extends DebugTarget {
     }
   }
-  package "Engine" <<Folder>> {
+
+  package "Browser" <<Cloud>> {
+    class EventTarget
+    class WebGL2RenderingContext
+    class HTMLCanvasElement
+    class CanvasRenderingContext2D
+  }
+
+  package "Transfer" <<Folder>> {
+    file "Serializer" {
+      interface Serializable {
+        serialize(): Serialization
+        deserialize(_serialization: Serialization): Serializable
+      }
+      interface Serialization {
+        [type: string]: General
+      }
+      class Serializer {
+        + {static} serialize(_object: Serializable): Serialization
+        + {static} deserialize(_serialization: Serialization): Serializable
+      }
+    }
+    file "Mutable" {
+      interface MutatorAttributeTypes
+      interface Mutator
+
+      interface MutatorForAnimation extends Mutator
+      interface MutatorForUserInterface extends Mutator
+      abstract class Mutable extends EventTarget {
+        + getMutator(): Mutator
+        + getMutatorForAnimation(): MutatorForAnimation
+        + getMutatorForUserInterface(): MutatorForUserInterface
+        + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
+        + updateMutator(_mutator: Mutator): void
+        # mutate(_mutator: Mutator): void
+      }
+    }
+  }
+
+  package "Scene" <<Folder>> {
     file "Node" {
       interface MapClassToComponents{
         [className: string]: Component[]
@@ -58,6 +97,14 @@ package Fudge <<Rectangle>> {
         - captures: MapEventTypeToListener
       }
     }
+    class NodeResource extends Node {
+    }
+    class NodeResourceInstance extends Node {
+      - idSource: string = undefined
+    }
+  }
+
+  package "Engine" <<Folder>> {
     class Color {
       + r: number
       + g: number
@@ -92,21 +139,68 @@ package Fudge <<Rectangle>> {
       }
     }
 
-    file "Event"{
-      interface MapEventTypeToListener {
-        [eventType: string]: EventListener[]
+    file "ResourceManager"{
+      interface SerializableResource extends Serializable {
+        idResource: string;
       }
-
-      enum EVENT
-
-      class EventTargetStatic extends EventTarget {
-        #{static} targetStatic: EventTargetStatic
+      interface Resources {
+        [idResource: string]: SerializableResource;
+      }
+      interface SerializationOfResources {
+        [idResource: string]: Serialization;
+      }
+      class ResourceManager {
+        + {static} resources: Resources
+        + {static} serialization: SerializationOfResources
       }
     }
 
     class Loop extends EventTargetStatic {
       - {static} running: boolean = false
       + {static} start(): void
+    }
+  }
+
+  package "Event" <<Folder>> {
+    file "Event"{
+      interface MapEventTypeToListener {
+        [eventType: string]: EventListener[]
+      }
+
+      enum EVENT
+      enum EVENT_POINTER
+      enum EVENT_DRAGDROP
+      enum EVENT_WHEEL
+
+      class KeyboardEventƒ extends KeyboardEvent{
+      }
+      class PointerEventƒ extends PointerEvent {
+        + pointerX: number;
+        + pointerY: number;
+        + canvasX: number;
+        + canvasY: number;
+        + clientRect: ClientRect;
+      }
+      class DragDropEventƒ extends DragEvent {
+        + pointerX: number;
+        + pointerY: number;
+        + canvasX: number;
+        + canvasY: number;
+        + clientRect: ClientRect;
+      }
+      class WheelEventƒ extends WheelEvent {
+      }
+      class EventTargetStatic extends EventTarget {
+        #{static} targetStatic: EventTargetStatic
+      }
+
+    }
+
+    file "EventKeyboard" {
+      class KeyboardEventƒ extends KeyboardEvent {
+      }
+      enum EVENT_KEYBOARD
+      enum KEYBOARD_CODE
     }
   }
 
@@ -166,44 +260,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Browser" <<Cloud>> {
-    class EventTarget
-    class WebGL2RenderingContext
-    class HTMLCanvasElement
-    class CanvasRenderingContext2D
-  }
-  package "Transfer" <<Folder>> {
-    file "Serializer" {
-      interface Serializable {
-        serialize(): Serialization
-        deserialize(_serialization: Serialization): Serializable
-      }
-      interface Serialization {
-        [type: string]: General
-      }
-      class Serializer {
-        + {static} serialize(_object: Serializable): Serialization
-        + {static} deserialize(_serialization: Serialization): Serializable
-      }
-    }
-    file "Mutable" {
-      interface MutatorAttributeTypes
-      interface Mutator
-
-      interface MutatorForAnimation extends Mutator
-      interface MutatorForUserInterface extends Mutator
-      abstract class Mutable extends EventTarget {
-        + getMutator(): Mutator
-        + getMutatorForAnimation(): MutatorForAnimation
-        + getMutatorForUserInterface(): MutatorForUserInterface
-        + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
-        + updateMutator(_mutator: Mutator): void
-        # mutate(_mutator: Mutator): void
-      }
-    }
-  }
-
-  package "Components" <<Folder>> {
+  package "Component" <<Folder>> {
     abstract class Component extends Mutable {
       # singleton: boolean
       - container: Node | null
@@ -242,7 +299,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Meshes" <<Folder>> {
+  package "Mesh" <<Folder>> {
     class Mesh {
       + vertices: Float32Array;
       + indices: Uint16Array;
@@ -301,7 +358,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Shaders" << Folder>> {
+  package "Shader" << Folder>> {
     class Shader {
       + {static} getCoat(): typeof Coat
       + {static} loadVertexShaderSource(): string
@@ -315,7 +372,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Coats" << Folder>> {
+  package "Coat" << Folder>> {
     class Coat extends Mutable {
       + name: string
       # renderData: MapAttributeToUnknown
@@ -326,7 +383,7 @@ package Fudge <<Rectangle>> {
     class CoatTextured extends Coat
   }
 
-  package "Textures" << Folder>> {
+  package "Texture" << Folder>> {
     abstract class Texture extends Mutable {
     }
     class TextureImage extends Texture {
@@ -340,7 +397,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Lights" << Folder>> {
+  package "Light" << Folder>> {
     abstract class Light extends Mutable {
       + color: Color
     }
@@ -357,9 +414,10 @@ package Fudge <<Rectangle>> {
   }
 
   'Interface consumption
-  Mesh --() Serializable
+  Mesh --() SerializableResource
   Component --() Serializable
   Node  --() Serializable
+  NodeResource --() SerializableResource
   Matrix4x4 --() Serializable
   Serializer  -(0- Serializable
   Serializer  -(0- Serialization
@@ -370,6 +428,7 @@ package Fudge <<Rectangle>> {
   FramingComplex "1" -0)- "2" Border
   Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
   MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
+  Material --() SerializableResource
 
   'Associations, Compositions, Aggregations
   Node "0..1 parent" o-- "n children" Node
@@ -403,7 +462,9 @@ package Fudge <<Rectangle>> {
 
   Mesh ---> BufferSpecification : provides >
 
+  ResourceManager "1" ---> "n" NodeResource : register >
+
   'improve layout
-  'Node -[hidden]right- Component
+  ' Node -[hidden]right- Mutable
   'CoatTextured "n" -[hidden]up-> Texture
   @enduml

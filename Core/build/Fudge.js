@@ -1157,12 +1157,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    Fudge.KeyboardEventƒ = KeyboardEventƒ;
     class PointerEventƒ extends PointerEvent {
         constructor(type, _event) {
             super(type, _event);
@@ -1316,6 +1310,90 @@ var Fudge;
         }
     }
     Fudge.Material = Material;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ResourceManager {
+        static register(_resource) {
+            if (!_resource.idResource)
+                _resource.idResource = ResourceManager.generateId(_resource);
+            ResourceManager.resources[_resource.idResource] = _resource;
+        }
+        static generateId(_resource) {
+            // TODO: build id and integrate info from resource, not just date
+            let idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
+            return idResource;
+        }
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object) {
+            return (Reflect.has(_object, "idResource"));
+        }
+        static get(_idResource) {
+            let resource = ResourceManager.resources[_idResource];
+            if (!resource) {
+                let serialization = ResourceManager.serialization[_idResource];
+                if (!serialization) {
+                    Fudge.Debug.error("Resource not found", _idResource);
+                    return null;
+                }
+                resource = ResourceManager.deserializeResource(serialization);
+            }
+            return resource;
+        }
+        static registerNodeAsResource(_node, _replaceWithInstance = true) {
+            let serialization = _node.serialize();
+            let nodeResource = new Fudge.NodeResource("NodeResource");
+            nodeResource.deserialize(serialization["Node"]);
+            ResourceManager.register(nodeResource);
+            if (_replaceWithInstance && _node.getParent()) {
+                let instance = new Fudge.NodeResourceInstance(nodeResource);
+                _node.getParent().replaceChild(_node, instance);
+            }
+            return nodeResource;
+        }
+        static serialize() {
+            let serialization = {};
+            for (let idResource in ResourceManager.resources) {
+                let resource = ResourceManager.resources[idResource];
+                if (idResource != resource.idResource)
+                    Fudge.Debug.error("Resource-id mismatch", resource);
+                serialization[idResource] = resource.serialize();
+            }
+            return serialization;
+        }
+        static deserialize(_serialization) {
+            ResourceManager.serialization = _serialization;
+            ResourceManager.resources = {};
+            for (let idResource in _serialization) {
+                let serialization = _serialization[idResource];
+                let resource = ResourceManager.deserializeResource(serialization);
+                if (resource)
+                    ResourceManager.resources[idResource] = resource;
+            }
+            return ResourceManager.resources;
+        }
+        static deserializeResource(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    ResourceManager.resources = {};
+    ResourceManager.serialization = null;
+    Fudge.ResourceManager = ResourceManager;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1699,6 +1777,12 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
+    Fudge.KeyboardEventƒ = KeyboardEventƒ;
     /**
      * The codes sent from a standard english keyboard layout
      */
@@ -3399,12 +3483,36 @@ var Fudge;
          * @param _node The node to be removed.
          */
         removeChild(_node) {
-            let iFound = this.children.indexOf(_node);
-            if (iFound < 0)
+            let found = this.findChild(_node);
+            if (found < 0)
                 return;
             _node.dispatchEvent(new Event("childRemove" /* CHILD_REMOVE */, { bubbles: true }));
-            this.children.splice(iFound, 1);
+            this.children.splice(found, 1);
             _node.setParent(null);
+        }
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _node The node to be found.
+         */
+        findChild(_node) {
+            return this.children.indexOf(_node);
+        }
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        replaceChild(_replace, _with) {
+            let found = this.findChild(_replace);
+            if (found < 0)
+                return false;
+            let previousParent = _with.getParent();
+            if (previousParent)
+                previousParent.removeChild(_with);
+            _replace.setParent(null);
+            this.children[found] = _with;
+            _with.setParent(this);
+            return true;
         }
         /**
          * Generator yielding the node and all successors in the branch below for iteration
@@ -3626,10 +3734,20 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class NodeResourceInstance extends Fudge.Node {
-        constructor() {
-            super(...arguments);
+        constructor(_nodeResource) {
+            super("NodeResourceInstance");
             /** id of the resource that instance was created from */
             this.idSource = undefined;
+            this.set(_nodeResource);
+        }
+        reset() {
+            let resource = Fudge.ResourceManager.get(this.idSource);
+            this.set(resource);
+        }
+        set(_nodeResource) {
+            let serialization = _nodeResource.serialize();
+            this.deserialize(serialization["NodeResource"]);
+            this.idSource = _nodeResource.idResource;
         }
     }
     Fudge.NodeResourceInstance = NodeResourceInstance;
@@ -3822,97 +3940,5 @@ var Fudge;
     class TextureHTML extends TextureCanvas {
     }
     Fudge.TextureHTML = TextureHTML;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class ResourceManager {
-        static register(_resource) {
-            if (!_resource.idResource)
-                _resource.idResource = ResourceManager.generateId(_resource);
-            ResourceManager.resources[_resource.idResource] = _resource;
-        }
-        static generateId(_resource) {
-            // TODO: build id and integrate info from resource, not just date
-            let idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
-            return idResource;
-        }
-        /**
-         * Tests, if an object is a [[SerializableResource]]
-         * @param _object The object to examine
-         */
-        static isResource(_object) {
-            return (Reflect.has(_object, "idResource"));
-        }
-        static get(_idResource) {
-            let resource = ResourceManager.resources[_idResource];
-            if (!resource) {
-                let serialization = ResourceManager.serialization[_idResource];
-                if (!serialization) {
-                    Fudge.Debug.error("Resource not found", _idResource);
-                    return null;
-                }
-                resource = ResourceManager.deserializeResource(serialization);
-            }
-            return resource;
-        }
-        static registerNodeAsResource(_node) {
-            // let nodeResource: NodeResource = <NodeResource>_node;
-            // ResourceManager.register(nodeResource);
-            // replace node with NodeResourceInstance 
-            // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
-            let serialization = _node.serialize();
-            let nodeResource = new Fudge.NodeResource("NodeResource");
-            nodeResource.deserialize(serialization["Node"]);
-            ResourceManager.register(nodeResource);
-            return nodeResource;
-        }
-        static instantiateNodeResource(_nodeResource) {
-            let instance = new Fudge.NodeResourceInstance("NodeResourceInstance");
-            // TODO: cache serialization for optimization
-            let serialization = _nodeResource.serialize();
-            instance.deserialize(serialization["NodeResource"]);
-            instance.idSource = _nodeResource.idResource;
-            return instance;
-        }
-        static serialize() {
-            let serialization = {};
-            for (let idResource in ResourceManager.resources) {
-                let resource = ResourceManager.resources[idResource];
-                if (idResource != resource.idResource)
-                    Fudge.Debug.error("Resource-id mismatch", resource);
-                serialization[idResource] = resource.serialize();
-            }
-            return serialization;
-        }
-        static deserialize(_serialization) {
-            ResourceManager.serialization = _serialization;
-            ResourceManager.resources = {};
-            for (let idResource in _serialization) {
-                let serialization = _serialization[idResource];
-                let resource = ResourceManager.deserializeResource(serialization);
-                if (resource)
-                    ResourceManager.resources[idResource] = resource;
-            }
-            return ResourceManager.resources;
-        }
-        static deserializeResource(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-    }
-    ResourceManager.resources = {};
-    ResourceManager.serialization = null;
-    Fudge.ResourceManager = ResourceManager;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map
