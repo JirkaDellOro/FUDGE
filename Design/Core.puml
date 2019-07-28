@@ -10,7 +10,7 @@ skinparam handwritten false
 left to right direction
 'top to bottom direction
 
-package Fudge <<Rectangle>> {
+'package Fudge <<Rectangle>> {
   ' gl2: WebGL2RenderingContext
 
   package "Debug"{
@@ -161,7 +161,7 @@ package Fudge <<Rectangle>> {
     }
   }
 
-  package "Event" <<Folder>> {
+  package "Event " <<Folder>> {
     file "Event"{
       interface MapEventTypeToListener {
         [eventType: string]: EventListener[]
@@ -462,9 +462,12 @@ package Fudge <<Rectangle>> {
 
   Mesh ---> BufferSpecification : provides >
 
-  ResourceManager "1" ---> "n" NodeResource : register >
+  ResourceManager "1" o--> "n" NodeResource : register >
 
   'improve layout
   ' Node -[hidden]right- Mutable
   'CoatTextured "n" -[hidden]up-> Texture
+  'Engine -[hidden]right- Component
+  Debug -[hidden]right- Event
+
   @enduml
