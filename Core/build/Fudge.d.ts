@@ -1592,6 +1592,12 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class NodeResourceInstance extends Node {
+        /** id of the resource that instance was created from */
+        idSource: string;
+    }
+}
+declare namespace Fudge {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1688,6 +1694,7 @@ declare namespace Fudge {
         static isResource(_object: Serializable): boolean;
         static get(_idResource: string): SerializableResource;
         static registerNodeAsResource(_node: Node): NodeResource;
+        static instantiateNodeResource(_nodeResource: NodeResource): NodeResourceInstance;
         static serialize(): SerializationOfResources;
         static deserialize(_serialization: SerializationOfResources): Resources;
         static deserializeResource(_serialization: Serialization): SerializableResource;

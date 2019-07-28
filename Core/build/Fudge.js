@@ -3623,6 +3623,17 @@ var Fudge;
     }
     Fudge.NodeResource = NodeResource;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class NodeResourceInstance extends Fudge.Node {
+        constructor() {
+            super(...arguments);
+            /** id of the resource that instance was created from */
+            this.idSource = undefined;
+        }
+    }
+    Fudge.NodeResourceInstance = NodeResourceInstance;
+})(Fudge || (Fudge = {}));
 /// <reference path="../Coats/Coat.ts"/>
 var Fudge;
 /// <reference path="../Coats/Coat.ts"/>
@@ -3850,9 +3861,18 @@ var Fudge;
             // replace node with NodeResourceInstance 
             // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
             let serialization = _node.serialize();
-            let nodeResource = Fudge.Serializer.deserialize(serialization);
+            let nodeResource = new Fudge.NodeResource("NodeResource");
+            nodeResource.deserialize(serialization["Node"]);
             ResourceManager.register(nodeResource);
             return nodeResource;
+        }
+        static instantiateNodeResource(_nodeResource) {
+            let instance = new Fudge.NodeResourceInstance("NodeResourceInstance");
+            // TODO: cache serialization for optimization
+            let serialization = _nodeResource.serialize();
+            instance.deserialize(serialization["NodeResource"]);
+            instance.idSource = _nodeResource.idResource;
+            return instance;
         }
         static serialize() {
             let serialization = {};

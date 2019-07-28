@@ -38,9 +38,11 @@ var TestSerializer;
         let nodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
         ƒ.Debug.log(node);
         ƒ.Debug.log(nodeResource);
+        let instance = ƒ.ResourceManager.instantiateNodeResource(nodeResource);
+        ƒ.Debug.log(instance);
         let result = testSerialization();
         console.group("Comparison");
-        Compare.compare(ƒ.ResourceManager.resources, result);
+        Compare.compare(node, instance);
         console.groupEnd();
     }
     function testSerialization() {

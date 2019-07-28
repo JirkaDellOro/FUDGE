@@ -44,9 +44,12 @@ namespace TestSerializer {
         ƒ.Debug.log(node);
         ƒ.Debug.log(nodeResource);
 
+        let instance: ƒ.NodeResourceInstance = ƒ.ResourceManager.instantiateNodeResource(nodeResource);
+        ƒ.Debug.log(instance);
+
         let result: ƒ.Resources = testSerialization();
         console.group("Comparison");
-        Compare.compare(ƒ.ResourceManager.resources, result);
+        Compare.compare(node, instance);
         console.groupEnd();
     }
 

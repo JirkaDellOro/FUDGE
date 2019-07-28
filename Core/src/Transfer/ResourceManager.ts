@@ -54,10 +54,20 @@ namespace Fudge {
             // replace node with NodeResourceInstance 
             // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
             let serialization: Serialization = _node.serialize();
-            let nodeResource: NodeResource = <NodeResource>Serializer.deserialize(serialization);
+            let nodeResource: NodeResource = new NodeResource("NodeResource"); 
+            nodeResource.deserialize(serialization["Node"]);
             ResourceManager.register(nodeResource);
 
             return nodeResource;
+        }
+
+        public static instantiateNodeResource(_nodeResource: NodeResource): NodeResourceInstance {
+            let instance: NodeResourceInstance = new NodeResourceInstance("NodeResourceInstance");
+            // TODO: cache serialization for optimization
+            let serialization: Serialization = _nodeResource.serialize();
+            instance.deserialize(serialization["NodeResource"]);
+            instance.idSource = _nodeResource.idResource;   
+            return instance;
         }
 
         public static serialize(): SerializationOfResources {
