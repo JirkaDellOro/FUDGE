@@ -48,15 +48,16 @@ namespace Fudge {
             return resource;
         }
 
-        public static registerNodeAsResource(_node: Node): NodeResource {
-            // let nodeResource: NodeResource = <NodeResource>_node;
-            // ResourceManager.register(nodeResource);
-            // replace node with NodeResourceInstance 
-            // -> therefore it would be better to just alter its class and create the resource be serializing/deserializing
+        public static registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): NodeResource {
             let serialization: Serialization = _node.serialize();
             let nodeResource: NodeResource = new NodeResource("NodeResource"); 
             nodeResource.deserialize(serialization["Node"]);
             ResourceManager.register(nodeResource);
+
+            if (_replaceWithInstance && _node.getParent()) {
+                let instance: NodeResourceInstance = ResourceManager.instantiateNodeResource(nodeResource);
+                _node.getParent().replaceChild(_node, instance);
+            }
 
             return nodeResource;
         }

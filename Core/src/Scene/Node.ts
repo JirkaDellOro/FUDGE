@@ -111,13 +111,39 @@ namespace Fudge {
          * @param _node The node to be removed.
          */
         public removeChild(_node: Node): void {
-            let iFound: number = this.children.indexOf(_node);
-            if (iFound < 0)
+            let found: number = this.findChild(_node);
+            if (found < 0)
                 return;
 
             _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
-            this.children.splice(iFound, 1);
+            this.children.splice(found, 1);
             _node.setParent(null);
+        }
+
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _node The node to be found.
+         */
+        public findChild(_node: Node): number {
+            return this.children.indexOf(_node);
+        }
+
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        public replaceChild(_replace: Node, _with: Node): boolean {
+            let found: number = this.findChild(_replace);
+            if (found < 0)
+                return false;
+            let previousParent: Node = _with.getParent();
+            if (previousParent)
+                previousParent.removeChild(_with);
+            _replace.setParent(null);
+            this.children[found] = _with;
+            _with.setParent(this);
+            return true;
         }
 
         /**
