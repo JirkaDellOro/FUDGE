@@ -33,6 +33,9 @@ namespace Compare {
                         return false;
                     }
                     break;
+                case "number":
+                    if (isNaN(_object1[prop]) && isNaN(_object2[prop]))
+                        break;
                 //Compare values
                 default:
                     if (_object1[prop] != _object2[prop]) {

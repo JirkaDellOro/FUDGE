@@ -28,8 +28,8 @@ namespace TestSerializer {
         // let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         // ƒ.ResourceManager.register(material);
 
-        // let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-        // ƒ.ResourceManager.register(mesh);
+        let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
+        ƒ.ResourceManager.register(mesh);
 
         let a: Resource = new Resource();
         let b: Resource = new Resource();
@@ -39,17 +39,18 @@ namespace TestSerializer {
         a.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
 
-        let node: ƒ.Node = new ƒ.Node("Node_1");
-        let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
-        ƒ.Debug.log(node);
-        ƒ.Debug.log(nodeResource);
+        // let node: ƒ.Node = new ƒ.Node("Node_1");
+        // let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
+        // ƒ.Debug.log(node);
+        // ƒ.Debug.log(nodeResource);
 
-        let instance: ƒ.NodeResourceInstance = ƒ.ResourceManager.instantiateNodeResource(nodeResource);
-        ƒ.Debug.log(instance);
+        // let instance: ƒ.NodeResourceInstance = ƒ.ResourceManager.instantiateNodeResource(nodeResource);
+        // ƒ.Debug.log(instance);
 
         let result: ƒ.Resources = testSerialization();
         console.group("Comparison");
-        Compare.compare(node, instance);
+        // Compare.compare(node, instance);
+        Compare.compare(ƒ.ResourceManager.resources, result);
         console.groupEnd();
     }
 

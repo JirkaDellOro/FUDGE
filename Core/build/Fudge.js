@@ -1210,9 +1210,9 @@ var Fudge;
     EventTargetStatic.targetStatic = new EventTargetStatic();
     Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
-///<reference path="../Events/Event.ts"/>
+///<reference path="../Event/Event.ts"/>
 var Fudge;
-///<reference path="../Events/Event.ts"/>
+///<reference path="../Event/Event.ts"/>
 (function (Fudge) {
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
@@ -1387,11 +1387,11 @@ var Fudge;
     }
     Fudge.LightSpot = LightSpot;
 })(Fudge || (Fudge = {}));
-/// <reference path="../Lights/Light.ts"/>
-/// <reference path="../Components/ComponentLight.ts"/>
+/// <reference path="../Light/Light.ts"/>
+/// <reference path="../Component/ComponentLight.ts"/>
 var Fudge;
-/// <reference path="../Lights/Light.ts"/>
-/// <reference path="../Components/ComponentLight.ts"/>
+/// <reference path="../Light/Light.ts"/>
+/// <reference path="../Component/ComponentLight.ts"/>
 (function (Fudge) {
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
@@ -2954,11 +2954,11 @@ var Fudge;
                 let v0 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
                 let v1 = Fudge.Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
                 let normal = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(v0, v1));
-                // let index: number = vertex[2] * 3;
-                // normals[index] = normal.x;
-                // normals[index + 1] = normal.y;
-                // normals[index + 2] = normal.z;
-                normals.push(normal.x, normal.y, normal.z);
+                let index = vertex[2] * 3;
+                normals[index] = normal.x;
+                normals[index + 1] = normal.y;
+                normals[index + 2] = normal.z;
+                // normals.push(normal.x, normal.y, normal.z);
             }
             normals.push(0, 0, 0);
             return new Float32Array(normals);
@@ -3634,9 +3634,9 @@ var Fudge;
     }
     Fudge.NodeResourceInstance = NodeResourceInstance;
 })(Fudge || (Fudge = {}));
-/// <reference path="../Coats/Coat.ts"/>
+/// <reference path="../Coat/Coat.ts"/>
 var Fudge;
-/// <reference path="../Coats/Coat.ts"/>
+/// <reference path="../Coat/Coat.ts"/>
 (function (Fudge) {
     /**
      * Static superclass for the representation of WebGl shaderprograms.

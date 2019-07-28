@@ -1,5 +1,5 @@
-/// <reference path="../Lights/Light.ts"/>
-/// <reference path="../Components/ComponentLight.ts"/>
+/// <reference path="../Light/Light.ts"/>
+/// <reference path="../Component/ComponentLight.ts"/>
 namespace Fudge {
     export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
