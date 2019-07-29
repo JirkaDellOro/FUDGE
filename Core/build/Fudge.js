@@ -600,6 +600,7 @@ var Fudge;
         }
         activate(_on) {
             this.active = _on;
+            this.dispatchEvent(new Event(_on ? "componentActivate" /* COMPONENT_ACTIVATE */ : "componentDeactivate" /* COMPONENT_DEACTIVATE */));
         }
         get isActive() {
             return this.active;
@@ -870,6 +871,7 @@ var Fudge;
                 serialization = { idMesh: idMesh };
             else
                 serialization = { mesh: this.mesh.serialize() };
+            serialization.pivot = this.pivot.serialize();
             serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
@@ -880,6 +882,7 @@ var Fudge;
             else
                 mesh = Fudge.Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
+            this.pivot.deserialize(_serialization.pivot);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
@@ -3640,16 +3643,16 @@ var Fudge;
         deserialize(_serialization) {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
+            for (let serializedChild of _serialization.children) {
+                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
             for (let type in _serialization.components) {
                 for (let data of _serialization.components[type]) {
                     let serializedComponent = { [type]: data };
                     let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
-            }
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
             }
             return this;
         }

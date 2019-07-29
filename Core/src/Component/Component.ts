@@ -12,6 +12,7 @@ namespace Fudge {
 
         public activate(_on: boolean): void {
             this.active = _on;
+            this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
         }
         public get isActive(): boolean {
             return this.active;

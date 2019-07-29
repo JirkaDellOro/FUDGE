@@ -245,17 +245,17 @@ namespace Fudge {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
 
+            for (let serializedChild of _serialization.children) {
+                let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
+
             for (let type in _serialization.components) {
                 for (let data of _serialization.components[type]) {
                     let serializedComponent: Serialization = { [type]: data };
                     let deserializedComponent: Component = <Component>Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
-            }
-
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
             }
 
             return this;

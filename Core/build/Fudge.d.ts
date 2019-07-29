@@ -525,6 +525,10 @@ declare namespace Fudge {
         COMPONENT_ADD = "componentAdd",
         /** dispatched to a [[Component]] when its being removed from a [[Node]] */
         COMPONENT_REMOVE = "componentRemove",
+        /** dispatched to a [[Component]] when its being added to a [[Node]] */
+        COMPONENT_ACTIVATE = "componentActivate",
+        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
+        COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
         CHILD_APPEND = "childAdd",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */

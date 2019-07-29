@@ -22,6 +22,7 @@ namespace Fudge {
             else
                 serialization = { mesh: this.mesh.serialize() };
 
+            serialization.pivot = this.pivot.serialize();
             serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
@@ -33,6 +34,8 @@ namespace Fudge {
             else
                 mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
             this.mesh = mesh;
+
+            this.pivot.deserialize(_serialization.pivot);
             super.deserialize(_serialization[super.constructor.name]);
             return this;
         }
