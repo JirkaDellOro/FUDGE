@@ -10,7 +10,7 @@ var Scripts;
                 console.log("Mutation", this);
             };
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentAdd);
-            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using concentional function
+            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using conventional function
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.hndLoopFrame); // when using arrow-function
             this.addEventListener("mutate" /* MUTATE */, this.hndMutation);
         }

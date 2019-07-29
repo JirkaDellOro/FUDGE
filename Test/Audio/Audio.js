@@ -27,7 +27,7 @@ var AudioTest;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
-        let camera = Scenes.createCamera(parameter.cameraPosition, ƒ.Vector3.ZERO);
+        let camera = Scenes.createCamera(parameter.cameraPosition, ƒ.Vector3.ZERO());
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
         startInteraction(viewport, body);
         viewport.setFocus(true);

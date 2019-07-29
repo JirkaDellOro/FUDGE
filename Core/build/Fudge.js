@@ -2755,8 +2755,12 @@ var Fudge;
             const vector = new Vector3(0, 0, _scale);
             return vector;
         }
-        static get ZERO() {
+        static ZERO() {
             const vector = new Vector3(0, 0, 0);
+            return vector;
+        }
+        static ONE(_scale = 1) {
+            const vector = new Vector3(_scale, _scale, _scale);
             return vector;
         }
         static TRANSFORMATION(_vector, _matrix) {
@@ -2769,7 +2773,7 @@ var Fudge;
             return result;
         }
         static NORMALIZATION(_vector, _length = 1) {
-            let vector = Vector3.ZERO;
+            let vector = Vector3.ZERO();
             try {
                 let [x, y, z] = _vector.data;
                 let factor = _length / Math.hypot(x, y, z);

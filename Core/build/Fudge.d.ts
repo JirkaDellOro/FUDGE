@@ -1304,7 +1304,8 @@ declare namespace Fudge {
         static X(_scale?: number): Vector3;
         static Y(_scale?: number): Vector3;
         static Z(_scale?: number): Vector3;
-        static readonly ZERO: Vector3;
+        static ZERO(): Vector3;
+        static ONE(_scale?: number): Vector3;
         static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
         static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**

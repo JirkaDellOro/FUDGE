@@ -9,7 +9,7 @@ namespace TextureTest {
 
         let cube: ƒ.Node = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
 
-        cube.cmpTransform.local.translate(ƒ.Vector3.ZERO);
+        cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
         branch.appendChild(cube);

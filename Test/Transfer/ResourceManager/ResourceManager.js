@@ -1,5 +1,5 @@
-var TestSerializer;
-(function (TestSerializer) {
+var ResourceManager;
+(function (ResourceManager) {
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     class Resource {
@@ -71,5 +71,5 @@ var TestSerializer;
         console.groupEnd();
         return reconstruction;
     }
-})(TestSerializer || (TestSerializer = {}));
+})(ResourceManager || (ResourceManager = {}));
 //# sourceMappingURL=ResourceManager.js.map

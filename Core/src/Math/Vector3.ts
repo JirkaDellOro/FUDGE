@@ -53,8 +53,13 @@ namespace Fudge {
             return vector;
         }
 
-        public static get ZERO(): Vector3 {
+        public static ZERO(): Vector3 {
             const vector: Vector3 = new Vector3(0, 0, 0);
+            return vector;
+        }
+
+        public static ONE(_scale: number = 1): Vector3 {
+            const vector: Vector3 = new Vector3(_scale, _scale, _scale);
             return vector;
         }
 
@@ -70,7 +75,7 @@ namespace Fudge {
 
 
         public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
-            let vector: Vector3 = Vector3.ZERO;
+            let vector: Vector3 = Vector3.ZERO();
             try {
                 let [x, y, z] = _vector.data;
                 let factor: number = _length / Math.hypot(x, y, z);

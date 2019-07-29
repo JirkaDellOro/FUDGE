@@ -1,4 +1,4 @@
-namespace TestSerializer {
+namespace ResourceManager {
     import ƒ = Fudge;
 
     window.addEventListener("DOMContentLoaded", init);
