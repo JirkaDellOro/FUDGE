@@ -643,21 +643,50 @@ declare namespace Fudge {
     interface SerializationOfResources {
         [idResource: string]: Serialization;
     }
+    /**
+     * Static class handling the resources used with the current FUDGE-instance.
+     * Keeps a list of the resources and generates ids to retrieve them
+     *
+     */
     class ResourceManager {
         static resources: Resources;
         static serialization: SerializationOfResources;
+        /**
+         * Generates an id for the resources and registers it with the list of resources
+         * @param _resource
+         */
         static register(_resource: SerializableResource): void;
+        /**
+         * Generate a user readable and unique id using the type of the resource, the date and random numbers
+         * @param _resource
+         */
         static generateId(_resource: SerializableResource): string;
         /**
          * Tests, if an object is a [[SerializableResource]]
          * @param _object The object to examine
          */
         static isResource(_object: Serializable): boolean;
+        /**
+         * Retrieves the resource stored with the given id
+         * @param _idResource
+         */
         static get(_idResource: string): SerializableResource;
+        /**
+         * Creates and registers a resource from a [[Node]], copying the complete branch starting with it
+         * @param _node A node to create the resource from
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+         */
         static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): NodeResource;
+        /**
+         * Serialize all resources
+         */
         static serialize(): SerializationOfResources;
+        /**
+         * Create resources from a serialization, deleting all resources previously registered
+         * @param _serialization
+         */
         static deserialize(_serialization: SerializationOfResources): Resources;
-        static deserializeResource(_serialization: Serialization): SerializableResource;
+        private static deserializeResource;
     }
 }
 declare namespace Fudge {
@@ -1625,16 +1654,30 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
+     */
     class NodeResource extends Node implements SerializableResource {
         idResource: string;
     }
 }
 declare namespace Fudge {
+    /**
+     * An instance of a [[NodeResource]].
+     * This node keeps a reference to its resource an can thus optimize serialization
+     */
     class NodeResourceInstance extends Node {
         /** id of the resource that instance was created from */
         private idSource;
         constructor(_nodeResource: NodeResource);
+        /**
+         * Recreate this node from the [[NodeResource]] referenced
+         */
         reset(): void;
+        /**
+         * Set this node to be a recreation of the [[NodeResource]] given
+         * @param _nodeResource
+         */
         private set;
     }
 }

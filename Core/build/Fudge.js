@@ -1313,15 +1313,31 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Static class handling the resources used with the current FUDGE-instance.
+     * Keeps a list of the resources and generates ids to retrieve them
+     *
+     */
     class ResourceManager {
+        /**
+         * Generates an id for the resources and registers it with the list of resources
+         * @param _resource
+         */
         static register(_resource) {
             if (!_resource.idResource)
                 _resource.idResource = ResourceManager.generateId(_resource);
             ResourceManager.resources[_resource.idResource] = _resource;
         }
+        /**
+         * Generate a user readable and unique id using the type of the resource, the date and random numbers
+         * @param _resource
+         */
         static generateId(_resource) {
             // TODO: build id and integrate info from resource, not just date
-            let idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
+            let idResource;
+            do
+                idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5).substr(2, 5);
+            while (ResourceManager.resources[idResource]);
             return idResource;
         }
         /**
@@ -1331,6 +1347,10 @@ var Fudge;
         static isResource(_object) {
             return (Reflect.has(_object, "idResource"));
         }
+        /**
+         * Retrieves the resource stored with the given id
+         * @param _idResource
+         */
         static get(_idResource) {
             let resource = ResourceManager.resources[_idResource];
             if (!resource) {
@@ -1343,6 +1363,11 @@ var Fudge;
             }
             return resource;
         }
+        /**
+         * Creates and registers a resource from a [[Node]], copying the complete branch starting with it
+         * @param _node A node to create the resource from
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+         */
         static registerNodeAsResource(_node, _replaceWithInstance = true) {
             let serialization = _node.serialize();
             let nodeResource = new Fudge.NodeResource("NodeResource");
@@ -1354,6 +1379,9 @@ var Fudge;
             }
             return nodeResource;
         }
+        /**
+         * Serialize all resources
+         */
         static serialize() {
             let serialization = {};
             for (let idResource in ResourceManager.resources) {
@@ -1364,6 +1392,10 @@ var Fudge;
             }
             return serialization;
         }
+        /**
+         * Create resources from a serialization, deleting all resources previously registered
+         * @param _serialization
+         */
         static deserialize(_serialization) {
             ResourceManager.serialization = _serialization;
             ResourceManager.resources = {};
@@ -1376,6 +1408,7 @@ var Fudge;
             return ResourceManager.resources;
         }
         static deserializeResource(_serialization) {
+            // TODO: examine, if this could be accomplished using the regular Serializer...
             let reconstruct;
             try {
                 // loop constructed solely to access type-property. Only one expected!
@@ -3723,6 +3756,9 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
+     */
     class NodeResource extends Fudge.Node {
         constructor() {
             super(...arguments);
@@ -3733,18 +3769,31 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * An instance of a [[NodeResource]].
+     * This node keeps a reference to its resource an can thus optimize serialization
+     */
     class NodeResourceInstance extends Fudge.Node {
         constructor(_nodeResource) {
             super("NodeResourceInstance");
             /** id of the resource that instance was created from */
+            // TODO: examine, if this should be a direct reference to the NodeResource, instead of the id
             this.idSource = undefined;
             this.set(_nodeResource);
         }
+        /**
+         * Recreate this node from the [[NodeResource]] referenced
+         */
         reset() {
             let resource = Fudge.ResourceManager.get(this.idSource);
             this.set(resource);
         }
+        /**
+         * Set this node to be a recreation of the [[NodeResource]] given
+         * @param _nodeResource
+         */
         set(_nodeResource) {
+            // TODO: examine, if the serialization should be stored in the NodeResource for optimization
             let serialization = _nodeResource.serialize();
             this.deserialize(serialization["NodeResource"]);
             this.idSource = _nodeResource.idResource;

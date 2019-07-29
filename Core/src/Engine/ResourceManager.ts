@@ -11,19 +11,35 @@ namespace Fudge {
         [idResource: string]: Serialization;
     }
 
+    /**
+     * Static class handling the resources used with the current FUDGE-instance.  
+     * Keeps a list of the resources and generates ids to retrieve them
+     * 
+     */
     export class ResourceManager {
         public static resources: Resources = {};
         public static serialization: SerializationOfResources = null;
 
+        /**
+         * Generates an id for the resources and registers it with the list of resources 
+         * @param _resource 
+         */
         public static register(_resource: SerializableResource): void {
             if (!_resource.idResource)
                 _resource.idResource = ResourceManager.generateId(_resource);
             ResourceManager.resources[_resource.idResource] = _resource;
         }
 
+        /**
+         * Generate a user readable and unique id using the type of the resource, the date and random numbers
+         * @param _resource
+         */
         public static generateId(_resource: SerializableResource): string {
             // TODO: build id and integrate info from resource, not just date
-            let idResource: string = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5);
+            let idResource: string;
+            do
+                idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5).substr(2, 5);
+            while (ResourceManager.resources[idResource]);
             return idResource;
         }
 
@@ -35,6 +51,10 @@ namespace Fudge {
             return (Reflect.has(_object, "idResource"));
         }
 
+        /**
+         * Retrieves the resource stored with the given id
+         * @param _idResource
+         */
         public static get(_idResource: string): SerializableResource {
             let resource: SerializableResource = ResourceManager.resources[_idResource];
             if (!resource) {
@@ -48,9 +68,14 @@ namespace Fudge {
             return resource;
         }
 
+        /**
+         * Creates and registers a resource from a [[Node]], copying the complete branch starting with it
+         * @param _node A node to create the resource from
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+         */
         public static registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): NodeResource {
             let serialization: Serialization = _node.serialize();
-            let nodeResource: NodeResource = new NodeResource("NodeResource"); 
+            let nodeResource: NodeResource = new NodeResource("NodeResource");
             nodeResource.deserialize(serialization["Node"]);
             ResourceManager.register(nodeResource);
 
@@ -62,6 +87,9 @@ namespace Fudge {
             return nodeResource;
         }
 
+        /**
+         * Serialize all resources
+         */
         public static serialize(): SerializationOfResources {
             let serialization: SerializationOfResources = {};
             for (let idResource in ResourceManager.resources) {
@@ -73,6 +101,10 @@ namespace Fudge {
             return serialization;
         }
 
+        /**
+         * Create resources from a serialization, deleting all resources previously registered
+         * @param _serialization 
+         */
         public static deserialize(_serialization: SerializationOfResources): Resources {
             ResourceManager.serialization = _serialization;
             ResourceManager.resources = {};
@@ -85,7 +117,8 @@ namespace Fudge {
             return ResourceManager.resources;
         }
 
-        public static deserializeResource(_serialization: Serialization): SerializableResource {
+        private static deserializeResource(_serialization: Serialization): SerializableResource {
+            // TODO: examine, if this could be accomplished using the regular Serializer...
             let reconstruct: Serializable;
             try {
                 // loop constructed solely to access type-property. Only one expected!

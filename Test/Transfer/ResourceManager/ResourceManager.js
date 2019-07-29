@@ -28,22 +28,25 @@ var TestSerializer;
         // ƒ.ResourceManager.register(material);
         // let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
         // ƒ.ResourceManager.register(mesh);
-        // let a: Resource = new Resource();
-        // let b: Resource = new Resource();
-        // ƒ.ResourceManager.register(a);
-        // ƒ.ResourceManager.register(b);
-        // a.reference = b;
+        let a = new Resource();
+        let c = new Resource();
+        let b = new Resource();
+        ƒ.ResourceManager.register(a);
+        ƒ.ResourceManager.register(c);
+        ƒ.ResourceManager.register(b);
+        a.reference = b;
+        c.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
-        let node = new ƒ.Node("Node_1");
-        let nodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
-        ƒ.Debug.log(node);
-        ƒ.Debug.log(nodeResource);
-        let instance = new ƒ.NodeResourceInstance(nodeResource);
-        ƒ.Debug.log(instance);
+        // let node: ƒ.Node = new ƒ.Node("Node_1");
+        // let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
+        // ƒ.Debug.log(node);
+        // ƒ.Debug.log(nodeResource);
+        // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
+        // ƒ.Debug.log(instance);
         let result = testSerialization();
         console.group("Comparison");
-        Compare.compare(node, instance);
-        // Compare.compare(ƒ.ResourceManager.resources, result);
+        // Compare.compare(node, instance); 
+        Compare.compare(ƒ.ResourceManager.resources, result);
         console.groupEnd();
     }
     function testSerialization() {

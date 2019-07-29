@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>PROJECTION | Fudge Core</title>
+	<title>SerializableResource | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,81 +59,116 @@
 					<a href="../modules/fudge.html">Fudge</a>
 				</li>
 				<li>
-					<a href="fudge.projection.html">PROJECTION</a>
+					<a href="fudge.serializableresource.html">SerializableResource</a>
 				</li>
 			</ul>
-			<h1>Enumeration PROJECTION</h1>
+			<h1>Interface SerializableResource</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Defines identifiers for the various projections a camera can provide.
-						TODO: change back to number enum if strings not needed</p>
-					</div>
-				</div>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">SerializableResource</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implemented by</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../classes/fudge.material.html" class="tsd-signature-type">Material</a></li>
+					<li><a href="../classes/fudge.mesh.html" class="tsd-signature-type">Mesh</a></li>
+					<li><a href="../classes/fudge.meshcube.html" class="tsd-signature-type">MeshCube</a></li>
+					<li><a href="../classes/fudge.meshpyramid.html" class="tsd-signature-type">MeshPyramid</a></li>
+					<li><a href="../classes/fudge.meshquad.html" class="tsd-signature-type">MeshQuad</a></li>
+					<li><a href="../classes/fudge.noderesource.html" class="tsd-signature-type">NodeResource</a></li>
+				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.projection.html#central" class="tsd-kind-icon">CENTRAL</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.projection.html#dimetric" class="tsd-kind-icon">DIMETRIC</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.projection.html#orthographic" class="tsd-kind-icon">ORTHOGRAPHIC</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.projection.html#stereo" class="tsd-kind-icon">STEREO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudge.serializableresource.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-inherited">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="fudge.serializableresource.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="fudge.serializableresource.html#serialize" class="tsd-kind-icon">serialize</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="central" class="tsd-anchor"></a>
-					<h3>CENTRAL</h3>
-					<div class="tsd-signature tsd-kind-icon">CENTRAL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;central&quot;</span></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="idresource" class="tsd-anchor"></a>
+					<h3>id<wbr>Resource</h3>
+					<div class="tsd-signature tsd-kind-icon">id<wbr>Resource<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Component/ComponentCamera.ts#L11">Component/ComponentCamera.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Engine/ResourceManager.ts#L3">Engine/ResourceManager.ts:3</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="dimetric" class="tsd-anchor"></a>
-					<h3>DIMETRIC</h3>
-					<div class="tsd-signature tsd-kind-icon">DIMETRIC<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;dimetric&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Component/ComponentCamera.ts#L13">Component/ComponentCamera.ts:13</a></li>
-						</ul>
-					</aside>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="deserialize" class="tsd-anchor"></a>
+					<h3>deserialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudge.serializable.html">Serializable</a>.<a href="fudge.serializable.html#deserialize">deserialize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Transfer/Serializer.ts#L10">Transfer/Serializer.ts:10</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_serialization: <a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudge.serializable.html" class="tsd-signature-type">Serializable</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="orthographic" class="tsd-anchor"></a>
-					<h3>ORTHOGRAPHIC</h3>
-					<div class="tsd-signature tsd-kind-icon">ORTHOGRAPHIC<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;orthographic&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Component/ComponentCamera.ts#L12">Component/ComponentCamera.ts:12</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="stereo" class="tsd-anchor"></a>
-					<h3>STEREO</h3>
-					<div class="tsd-signature tsd-kind-icon">STEREO<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;stereo&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Component/ComponentCamera.ts#L14">Component/ComponentCamera.ts:14</a></li>
-						</ul>
-					</aside>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+					<a name="serialize" class="tsd-anchor"></a>
+					<h3>serialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudge.serializable.html">Serializable</a>.<a href="fudge.serializable.html#serialize">serialize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/83dce70/Core/src/Transfer/Serializer.ts#L9">Transfer/Serializer.ts:9</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -152,20 +187,17 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum tsd-parent-kind-module">
-						<a href="fudge.projection.html" class="tsd-kind-icon">PROJECTION</a>
+					<li class="current tsd-kind-interface tsd-parent-kind-module">
+						<a href="fudge.serializableresource.html" class="tsd-kind-icon">Serializable<wbr>Resource</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudge.projection.html#central" class="tsd-kind-icon">CENTRAL</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="fudge.serializableresource.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudge.projection.html#dimetric" class="tsd-kind-icon">DIMETRIC</a>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="fudge.serializableresource.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudge.projection.html#orthographic" class="tsd-kind-icon">ORTHOGRAPHIC</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudge.projection.html#stereo" class="tsd-kind-icon">STEREO</a>
+							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
+								<a href="fudge.serializableresource.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 						</ul>
 					</li>
