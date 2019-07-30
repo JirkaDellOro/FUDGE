@@ -12,21 +12,28 @@ var NodeResource;
                 ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.update);
             };
             this.start = (_event) => {
-                this.local = this.getContainer().cmpTransform.local;
-                this.pivot = this.getContainer().getComponent(ƒ.ComponentMesh).pivot;
-                this.pivot.translateZ(-1);
-                this.pivot.scale(ƒ.Vector3.ONE(0.2));
-                this.local.rotateY(Math.random() * 360);
+                this.mtxLocal = this.getContainer().cmpTransform.local;
+                this.mtxPivot = this.getContainer().getComponent(ƒ.ComponentMesh).pivot;
+                this.mtxPivot.translateZ(-0.5);
+                this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));
+                this.mtxLocal.rotateY(Math.random() * 360);
                 ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.update);
             };
             this.update = (_event) => {
-                this.local.rotateY(1);
-                this.pivot.rotateX(5);
+                // tpo: test performance optimization
+                this.mtxLocal.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxLocal, AnimateSatellite.mtxRotY));
+                this.mtxPivot.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxPivot, AnimateSatellite.mtxRotX));
+                // :tpo
+                // this.mtxLocal.rotateY(1);
+                // this.mtxPivot.rotateX(5);
             };
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
     }
+    // tpo: test performance optimization
+    AnimateSatellite.mtxRotY = ƒ.Matrix4x4.ROTATION_Y(1);
+    AnimateSatellite.mtxRotX = ƒ.Matrix4x4.ROTATION_X(5);
     NodeResource.AnimateSatellite = AnimateSatellite;
 })(NodeResource || (NodeResource = {}));
 //# sourceMappingURL=AnimateSatellite.js.map

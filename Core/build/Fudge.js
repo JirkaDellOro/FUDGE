@@ -1316,6 +1316,29 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class ObjectManager {
+        static create(_T) {
+            let key = _T.name;
+            let instances = ObjectManager.depot[key];
+            if (instances && instances.length > 0)
+                return instances.pop();
+            else
+                return new _T();
+        }
+        static reuse(_instance) {
+            let key = _instance.constructor.name;
+            //console.log(key);
+            let instances = ObjectManager.depot[key] || [];
+            instances.push(_instance);
+            ObjectManager.depot[key] = instances;
+            //console.log(this.depot);
+        }
+    }
+    ObjectManager.depot = {};
+    Fudge.ObjectManager = ObjectManager;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     /**
      * Static class handling the resources used with the current FUDGE-instance.
      * Keeps a list of the resources and generates ids to retrieve them
@@ -2247,8 +2270,9 @@ var Fudge;
     class Matrix4x4 extends Fudge.Mutable {
         constructor() {
             super();
+            this.data = new Float32Array(16); // The data of the matrix.
             this.mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
-            this.data = new Float32Array([
+            this.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -2307,7 +2331,7 @@ var Fudge;
             let b31 = b[3 * 4 + 1];
             let b32 = b[3 * 4 + 2];
             let b33 = b[3 * 4 + 3];
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
                 b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
                 b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32,
@@ -2329,7 +2353,7 @@ var Fudge;
         }
         /**
          * Computes and returns the inverse of a passed matrix.
-         * @param _matrix Tha matrix to compute the inverse of.
+         * @param _matrix The matrix to compute the inverse of.
          */
         static INVERSION(_matrix) {
             let m = _matrix.data;
@@ -2383,7 +2407,7 @@ var Fudge;
                 (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
             let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 d * t0,
                 d * t1,
                 d * t2,
@@ -2414,7 +2438,7 @@ var Fudge;
             zAxis.normalize();
             let xAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(_up, zAxis));
             let yAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(zAxis, xAxis));
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 xAxis.x, xAxis.y, xAxis.z, 0,
                 yAxis.x, yAxis.y, yAxis.z, 0,
                 zAxis.x, zAxis.y, zAxis.z, 0,
@@ -2431,7 +2455,7 @@ var Fudge;
          */
         static TRANSLATION(_translate) {
             let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -2448,7 +2472,7 @@ var Fudge;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 1, 0, 0, 0,
                 0, cos, sin, 0,
                 0, -sin, cos, 0,
@@ -2465,7 +2489,7 @@ var Fudge;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 cos, 0, -sin, 0,
                 0, 1, 0, 0,
                 sin, 0, cos, 0,
@@ -2482,7 +2506,7 @@ var Fudge;
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 cos, sin, 0, 0,
                 -sin, cos, 0, 0,
                 0, 0, 1, 0,
@@ -2496,7 +2520,7 @@ var Fudge;
          */
         static SCALING(_scalar) {
             let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
                 0, 0, _scalar.z, 0,
@@ -2518,7 +2542,7 @@ var Fudge;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
                 0, 0, (_near + _far) * rangeInv, -1,
@@ -2546,7 +2570,7 @@ var Fudge;
          */
         static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
             let matrix = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
                 0, 0, 2 / (_near - _far), 0,
@@ -2565,7 +2589,7 @@ var Fudge;
         * @param _angleInDegrees The angle to rotate by.
         */
         rotateX(_angleInDegrees) {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)));
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
@@ -2573,7 +2597,7 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateY(_angleInDegrees) {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)));
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
@@ -2581,15 +2605,15 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateZ(_angleInDegrees) {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)));
         }
         lookAt(_target, _up = Fudge.Vector3.Y()) {
-            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+            this.set(Matrix4x4.LOOK_AT(this.translation, _target)); // TODO: Handle rotation around z-axis
         }
         //#endregion
         //#region Translation
         translate(_by) {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)));
         }
         /**
          * Translate the transformation along the x-axis.
@@ -2629,7 +2653,7 @@ var Fudge;
         //#endregion
         //#region Transformation
         multiply(_matrix) {
-            this.data = Matrix4x4.MULTIPLICATION(this, _matrix).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
         }
         //#endregion
         //#region Transfer
@@ -2670,7 +2694,8 @@ var Fudge;
             return [this.translation, rotation, scaling];
         }
         set(_to) {
-            this.data = _to.get();
+            // this.data = _to.get();
+            this.data.set(_to.data);
         }
         get() {
             return new Float32Array(this.data);

@@ -1,8 +1,12 @@
 module NodeResource {
     import ƒ = Fudge;
     export class AnimateSatellite extends ƒ.ComponentScript {
-        private local: ƒ.Matrix4x4;
-        private pivot: ƒ.Matrix4x4;
+        // tpo: test performance optimization
+        private static mtxRotY: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Y(1);
+        private static mtxRotX: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_X(5);
+        // :tpo
+        private mtxLocal: ƒ.Matrix4x4;
+        private mtxPivot: ƒ.Matrix4x4;
 
         constructor() {
             super();
@@ -20,19 +24,23 @@ module NodeResource {
         }
 
         public start = (_event: Event) => {
-            this.local = this.getContainer().cmpTransform.local;
-            this.pivot = (<ƒ.ComponentMesh>this.getContainer().getComponent(ƒ.ComponentMesh)).pivot;
+            this.mtxLocal = this.getContainer().cmpTransform.local;
+            this.mtxPivot = (<ƒ.ComponentMesh>this.getContainer().getComponent(ƒ.ComponentMesh)).pivot;
 
-            this.pivot.translateZ(-1);
-            this.pivot.scale(ƒ.Vector3.ONE(0.2));
-            this.local.rotateY(Math.random() * 360);
+            this.mtxPivot.translateZ(-0.5);
+            this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));
+            this.mtxLocal.rotateY(Math.random() * 360);
 
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
 
         public update = (_event: Event) => {
-            this.local.rotateY(1);
-            this.pivot.rotateX(5);
+            // tpo: test performance optimization
+            this.mtxLocal.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxLocal, AnimateSatellite.mtxRotY));
+            this.mtxPivot.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxPivot, AnimateSatellite.mtxRotX));
+            // :tpo
+            // this.mtxLocal.rotateY(1);
+            // this.mtxPivot.rotateX(5);
         }
     }
 }

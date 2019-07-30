@@ -638,6 +638,13 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class ObjectManager {
+        private static depot;
+        static create<T>(_T: new () => T): T;
+        static reuse(_instance: Object): void;
+    }
+}
+declare namespace Fudge {
     interface SerializableResource extends Serializable {
         idResource: string;
     }
@@ -1186,7 +1193,7 @@ declare namespace Fudge {
         static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
-         * @param _matrix Tha matrix to compute the inverse of.
+         * @param _matrix The matrix to compute the inverse of.
          */
         static INVERSION(_matrix: Matrix4x4): Matrix4x4;
         /**

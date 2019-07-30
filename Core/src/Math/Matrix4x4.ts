@@ -12,12 +12,12 @@ namespace Fudge {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 extends Mutable implements Serializable {
-        private data: Float32Array; // The data of the matrix.
+        private data: Float32Array = new Float32Array(16); // The data of the matrix.
         private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
 
         public constructor() {
             super();
-            this.data = new Float32Array([
+            this.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -79,7 +79,7 @@ namespace Fudge {
             let b31: number = b[3 * 4 + 1];
             let b32: number = b[3 * 4 + 2];
             let b33: number = b[3 * 4 + 3];
-            matrix.data = new Float32Array(
+            matrix.data.set(
                 [
                     b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
                     b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31,
@@ -103,7 +103,7 @@ namespace Fudge {
 
         /**
          * Computes and returns the inverse of a passed matrix.
-         * @param _matrix Tha matrix to compute the inverse of.
+         * @param _matrix The matrix to compute the inverse of.
          */
         public static INVERSION(_matrix: Matrix4x4): Matrix4x4 {
             let m: Float32Array = _matrix.data;
@@ -161,7 +161,7 @@ namespace Fudge {
             let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
             let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 d * t0, // [0]
                 d * t1, // [1]
                 d * t2, // [2]
@@ -193,7 +193,7 @@ namespace Fudge {
             zAxis.normalize();
             let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
             let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
-            matrix.data = new Float32Array(
+            matrix.data.set(
                 [
                     xAxis.x, xAxis.y, xAxis.z, 0,
                     yAxis.x, yAxis.y, yAxis.z, 0,
@@ -212,7 +212,7 @@ namespace Fudge {
          */
         public static TRANSLATION(_translate: Vector3): Matrix4x4 {
             let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
@@ -230,7 +230,7 @@ namespace Fudge {
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 1, 0, 0, 0,
                 0, cos, sin, 0,
                 0, -sin, cos, 0,
@@ -248,7 +248,7 @@ namespace Fudge {
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 cos, 0, -sin, 0,
                 0, 1, 0, 0,
                 sin, 0, cos, 0,
@@ -266,7 +266,7 @@ namespace Fudge {
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 cos, sin, 0, 0,
                 -sin, cos, 0, 0,
                 0, 0, 1, 0,
@@ -281,7 +281,7 @@ namespace Fudge {
          */
         public static SCALING(_scalar: Vector3): Matrix4x4 {
             let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
                 0, 0, _scalar.z, 0,
@@ -304,7 +304,7 @@ namespace Fudge {
             let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv: number = 1.0 / (_near - _far);
             let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
                 0, 0, (_near + _far) * rangeInv, -1,
@@ -335,7 +335,7 @@ namespace Fudge {
          */
         public static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near: number = -400, _far: number = 400): Matrix4x4 {
             let matrix: Matrix4x4 = new Matrix4x4;
-            matrix.data = new Float32Array([
+            matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
                 0, 0, 2 / (_near - _far), 0,
@@ -355,7 +355,7 @@ namespace Fudge {
         * @param _angleInDegrees The angle to rotate by.
         */
         public rotateX(_angleInDegrees: number): void {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)));
         }
 
         /**
@@ -364,7 +364,7 @@ namespace Fudge {
          * @param _angleInDegrees The angle to rotate by.
          */
         public rotateY(_angleInDegrees: number): void {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)));
         }
 
         /**
@@ -373,17 +373,17 @@ namespace Fudge {
          * @param _angleInDegrees The angle to rotate by.
          */
         public rotateZ(_angleInDegrees: number): void {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)));
         }
 
         public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
-            this.data = Matrix4x4.LOOK_AT(this.translation, _target).data; // TODO: Handle rotation around z-axis
+            this.set(Matrix4x4.LOOK_AT(this.translation, _target)); // TODO: Handle rotation around z-axis
         }
         //#endregion
 
         //#region Translation
         public translate(_by: Vector3): void {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)));
         }
 
         /**
@@ -426,7 +426,7 @@ namespace Fudge {
 
         //#region Transformation
         public multiply(_matrix: Matrix4x4): void {
-            this.data = Matrix4x4.MULTIPLICATION(this, _matrix).data;
+            this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
         }
         //#endregion
 
@@ -482,7 +482,8 @@ namespace Fudge {
         }
 
         public set(_to: Matrix4x4): void {
-            this.data = _to.get();
+            // this.data = _to.get();
+            this.data.set(_to.data);
         }
 
         public get(): Float32Array {
