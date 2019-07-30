@@ -17,6 +17,9 @@ For now we do layercake. Next step is working ahtoritative server, then figuring
 
 Addition by Jirka: an idea is to Subclass ComponentScript to ComponentScriptServer and ComponentScriptClient. To do networking, either or both must be used on the appropriate nodes and again subclassed and network-ids are automatically given to only those nodes.
 
+## UI: 
+After pre-discussing the Usertest, we talked about whether it would be more practical to use a single "FUDGE" Window that encompases all the editors, or if multiple Editor Windows would be more sensible. 
+We concluded that a multi-window approach could be best, as it gives some speration between the editor contexts but further research into whether something like that is even possible needs to be done first.
 
 # July 18th 2019
 The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_NotizenLS))
