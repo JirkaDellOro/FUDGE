@@ -2,6 +2,11 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed 
 
+
+# July 25th 2019
+after the presentation of the usertest results it was decided to rename the menu bar item "window" into "layout" and the "editor" menu item into "window".
+To do until big megre: Styleguide and assets for all elements.
+
 # July 25th 2019
 [Whiteboard](190725_Whiteboard.jpg) | [Notes](190726_NotesOnResourceSerialization.jpg)
 ## Serialization
@@ -20,6 +25,12 @@ Addition by Jirka: an idea is to Subclass ComponentScript to ComponentScriptServ
 ## UI: 
 After pre-discussing the Usertest, we talked about whether it would be more practical to use a single "FUDGE" Window that encompases all the editors, or if multiple Editor Windows would be more sensible. 
 We concluded that a multi-window approach could be best, as it gives some speration between the editor contexts but further research into whether something like that is even possible needs to be done first.
+
+The "foldable" buttons should be replaced with something stylable by CSS. The "label" and "event" icons will be replaced with their icons derived from UML.
+The fieldsets from the animation editor should be smaller and the next frame has the hotkey next frame button + Ctrl.
+
+Monika: is communication via multiple windows (editors) possible in electron? 
+        inspector values can annd should be broken down into exponentials -> num, to exponential
 
 # July 18th 2019
 The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_NotizenLS))
