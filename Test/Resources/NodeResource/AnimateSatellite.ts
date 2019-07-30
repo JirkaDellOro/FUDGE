@@ -36,11 +36,11 @@ module NodeResource {
 
         public update = (_event: Event) => {
             // tpo: test performance optimization
-            this.mtxLocal.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxLocal, AnimateSatellite.mtxRotY));
-            this.mtxPivot.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxPivot, AnimateSatellite.mtxRotX));
+            // this.mtxLocal.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxLocal, AnimateSatellite.mtxRotY));
+            // this.mtxPivot.set(ƒ.Matrix4x4.MULTIPLICATION(this.mtxPivot, AnimateSatellite.mtxRotX));
             // :tpo
-            // this.mtxLocal.rotateY(1);
-            // this.mtxPivot.rotateX(5);
+            this.mtxLocal.rotateY(1);
+            this.mtxPivot.rotateX(5);
         }
     }
 }

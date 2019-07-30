@@ -1331,6 +1331,7 @@ var Fudge;
             let instances = ObjectManager.depot[key] || [];
             instances.push(_instance);
             ObjectManager.depot[key] = instances;
+            // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
             //console.log(this.depot);
         }
     }
@@ -2287,7 +2288,14 @@ var Fudge;
         }
         //#region STATICS
         static get IDENTITY() {
-            const result = new Matrix4x4();
+            // const result: Matrix4x4 = new Matrix4x4();
+            const result = Fudge.ObjectManager.create(Matrix4x4);
+            result.data.set([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
             return result;
         }
         /**
@@ -2298,7 +2306,8 @@ var Fudge;
         static MULTIPLICATION(_a, _b) {
             let a = _a.data;
             let b = _b.data;
-            let matrix = new Matrix4x4();
+            // let matrix: Matrix4x4 = new Matrix4x4();
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             let a00 = a[0 * 4 + 0];
             let a01 = a[0 * 4 + 1];
             let a02 = a[0 * 4 + 2];
@@ -2406,7 +2415,8 @@ var Fudge;
             let t3 = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
                 (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
-            let matrix = new Matrix4x4;
+            // let matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             matrix.data.set([
                 d * t0,
                 d * t1,
@@ -2433,7 +2443,8 @@ var Fudge;
          * @param _targetPosition The position to look at.
          */
         static LOOK_AT(_transformPosition, _targetPosition, _up = Fudge.Vector3.Y()) {
-            const matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             let zAxis = Fudge.Vector3.DIFFERENCE(_transformPosition, _targetPosition);
             zAxis.normalize();
             let xAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(_up, zAxis));
@@ -2454,7 +2465,8 @@ var Fudge;
          * @param _translate
          */
         static TRANSLATION(_translate) {
-            let matrix = new Matrix4x4;
+            // let matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2468,7 +2480,8 @@ var Fudge;
          * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_X(_angleInDegrees) {
-            const matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2485,7 +2498,8 @@ var Fudge;
          * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_Y(_angleInDegrees) {
-            const matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            let matrix = Fudge.ObjectManager.create(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2502,7 +2516,8 @@ var Fudge;
          * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_Z(_angleInDegrees) {
-            const matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2519,7 +2534,8 @@ var Fudge;
          * @param _scalar
          */
         static SCALING(_scalar) {
-            let matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
@@ -2541,7 +2557,8 @@ var Fudge;
             let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
-            let matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
@@ -2569,7 +2586,8 @@ var Fudge;
          * @param _far The positionvalue of the projectionspace's far border
          */
         static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
-            let matrix = new Matrix4x4;
+            // const matrix: Matrix4x4 = new Matrix4x4;
+            const matrix = Fudge.ObjectManager.create(Matrix4x4);
             matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
@@ -2589,7 +2607,9 @@ var Fudge;
         * @param _angleInDegrees The angle to rotate by.
         */
         rotateX(_angleInDegrees) {
-            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees)));
+            const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
@@ -2597,7 +2617,9 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateY(_angleInDegrees) {
-            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees)));
+            const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
@@ -2605,15 +2627,21 @@ var Fudge;
          * @param _angleInDegrees The angle to rotate by.
          */
         rotateZ(_angleInDegrees) {
-            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees)));
+            const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         lookAt(_target, _up = Fudge.Vector3.Y()) {
-            this.set(Matrix4x4.LOOK_AT(this.translation, _target)); // TODO: Handle rotation around z-axis
+            const matrix = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         //#endregion
         //#region Translation
         translate(_by) {
-            this.set(Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by)));
+            const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         /**
          * Translate the transformation along the x-axis.
@@ -2639,7 +2667,9 @@ var Fudge;
         //#endregion
         //#region Scaling
         scale(_by) {
-            this.data = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by)).data;
+            const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
+            this.set(matrix);
+            Fudge.ObjectManager.reuse(matrix);
         }
         scaleX(_by) {
             this.scale(new Fudge.Vector3(_by, 1, 1));
