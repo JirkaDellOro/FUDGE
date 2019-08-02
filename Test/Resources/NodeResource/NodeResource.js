@@ -27,6 +27,14 @@ var NodeResource;
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));
                 }
+        let srlResources = ƒ.ResourceManager.serialize();
+        let srlInstance = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
+        console.group("Resources");
+        console.log(ƒ.Serializer.stringify(srlResources));
+        console.groupEnd();
+        console.group("NodeInstance");
+        console.log(ƒ.Serializer.stringify(srlInstance));
+        console.groupEnd();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
         function update(_event) {
@@ -38,9 +46,11 @@ var NodeResource;
         let mtrOrange = new ƒ.Material("Orange", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0.5, 0, 1)));
         let mtrCyan = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
         let pyramid = new ƒ.MeshPyramid();
-        ƒ.ResourceManager.register(pyramid);
         let cube = new ƒ.MeshCube();
+        ƒ.ResourceManager.register(pyramid);
         ƒ.ResourceManager.register(cube);
+        ƒ.ResourceManager.register(mtrOrange);
+        ƒ.ResourceManager.register(mtrCyan);
         let center = Scenes.createCompleteMeshNode("Center", mtrOrange, pyramid);
         center.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
         let satellite = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);

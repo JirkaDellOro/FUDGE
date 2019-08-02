@@ -234,11 +234,12 @@ namespace Fudge {
 
             let children: Serialization[] = [];
             for (let child of this.children) {
-                children.push(child.serialize());
+                children.push(Serializer.serialize(child));
             }
             serialization["children"] = children;
 
-            return { [this.constructor.name]: serialization };
+            // return { [this.constructor.name]: serialization };
+            return serialization;
         }
 
         public deserialize(_serialization: Serialization): Serializable {

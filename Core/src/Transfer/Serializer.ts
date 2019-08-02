@@ -3,7 +3,7 @@ namespace Fudge {
     export type General = any;
 
     export interface Serialization {
-        [type: string]: General;    
+        [type: string]: General;
     }
     export interface Serializable {
         serialize(): Serialization;
@@ -20,16 +20,16 @@ namespace Fudge {
          * @param _object An object to serialize, implementing the Serializable interface
          */
         public static serialize(_object: Serializable): Serialization {
-            // let serialization: Serialization = {};
-            // serialization[_object.constructor.name] = _object.serialize();
-            // return serialization;
-            return _object.serialize();
+            let serialization: Serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
+            // return _object.serialize();
         }
 
         /**
          * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
          * including attached components, children, superclass-objects
-         * @param _serialization 
+         * @param _serialization Required as { "Classname": {attribute: value, ... } }
          */
         public static deserialize(_serialization: Serialization): Serializable {
             let reconstruct: Serializable;
@@ -44,6 +44,28 @@ namespace Fudge {
                 throw new Error("Deserialization failed: " + message);
             }
             return null;
+        }
+
+        //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
+        public static prettify(_json: string): string { return _json; }
+
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        public static stringify(_serialization: Serialization): string {
+            // adjustments to serialization can be made here before stringification, if desired
+            let json: string = JSON.stringify(_serialization, null, 2);
+            let pretty: string = Serializer.prettify(json);
+            return pretty;
+        }
+
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json 
+         */
+        public static parse(_json: string): Serialization {
+            return JSON.parse(_json);
         }
     }
 }

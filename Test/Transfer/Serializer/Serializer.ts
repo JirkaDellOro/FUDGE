@@ -25,12 +25,12 @@ namespace TestSerializer {
         console.groupEnd();
 
         console.groupCollapsed("Stringified");
-        let json: string = JSON.stringify(serialization, null, 2);
+        let json: string = ƒ.Serializer.stringify(serialization);
         console.log(json);
         console.groupEnd();
 
         console.group("Parsed");
-        serialization = JSON.parse(json);
+        serialization = ƒ.Serializer.parse(json);
         console.log(serialization);
         console.groupEnd();
 

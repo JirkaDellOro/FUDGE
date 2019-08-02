@@ -552,15 +552,15 @@ var Fudge;
          * @param _object An object to serialize, implementing the Serializable interface
          */
         static serialize(_object) {
-            // let serialization: Serialization = {};
-            // serialization[_object.constructor.name] = _object.serialize();
-            // return serialization;
-            return _object.serialize();
+            let serialization = {};
+            serialization[_object.constructor.name] = _object.serialize();
+            return serialization;
+            // return _object.serialize();
         }
         /**
          * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
          * including attached components, children, superclass-objects
-         * @param _serialization
+         * @param _serialization Required as { "Classname": {attribute: value, ... } }
          */
         static deserialize(_serialization) {
             let reconstruct;
@@ -576,6 +576,25 @@ var Fudge;
                 throw new Error("Deserialization failed: " + message);
             }
             return null;
+        }
+        //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
+        static prettify(_json) { return _json; }
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        static stringify(_serialization) {
+            // adjustments to serialization can be made here before stringification, if desired
+            let json = JSON.stringify(_serialization, null, 2);
+            let pretty = Serializer.prettify(json);
+            return pretty;
+        }
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json
+         */
+        static parse(_json) {
+            return JSON.parse(_json);
         }
     }
     Fudge.Serializer = Serializer;
@@ -1398,7 +1417,7 @@ var Fudge;
         static registerNodeAsResource(_node, _replaceWithInstance = true) {
             let serialization = _node.serialize();
             let nodeResource = new Fudge.NodeResource("NodeResource");
-            nodeResource.deserialize(serialization["Node"]);
+            nodeResource.deserialize(serialization);
             ResourceManager.register(nodeResource);
             if (_replaceWithInstance && _node.getParent()) {
                 let instance = new Fudge.NodeResourceInstance(nodeResource);
@@ -3693,10 +3712,11 @@ var Fudge;
             serialization["components"] = components;
             let children = [];
             for (let child of this.children) {
-                children.push(child.serialize());
+                children.push(Fudge.Serializer.serialize(child));
             }
             serialization["children"] = children;
-            return { [this.constructor.name]: serialization };
+            // return { [this.constructor.name]: serialization };
+            return serialization;
         }
         deserialize(_serialization) {
             this.name = _serialization.name;
@@ -3859,7 +3879,7 @@ var Fudge;
          */
         set(_nodeResource) {
             // TODO: examine, if the serialization should be stored in the NodeResource for optimization
-            let serialization = _nodeResource.serialize();
+            let serialization = Fudge.Serializer.serialize(_nodeResource);
             this.deserialize(serialization["NodeResource"]);
             this.idSource = _nodeResource.idResource;
         }

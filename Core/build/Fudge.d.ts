@@ -230,9 +230,20 @@ declare namespace Fudge {
         /**
          * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
          * including attached components, children, superclass-objects
-         * @param _serialization
+         * @param _serialization Required as { "Classname": {attribute: value, ... } }
          */
         static deserialize(_serialization: Serialization): Serializable;
+        static prettify(_json: string): string;
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        static stringify(_serialization: Serialization): string;
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json
+         */
+        static parse(_json: string): Serialization;
     }
 }
 declare namespace Fudge {
