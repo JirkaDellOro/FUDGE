@@ -1,4 +1,4 @@
-namespace NodeResource {
+module NodeResource {
     import ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
 
@@ -20,9 +20,10 @@ namespace NodeResource {
         // branch.appendChild(center);
 
         Fudge["AnimateSatellite"] = AnimateSatellite;
+        console.log(AnimateSatellite["namespaceX"]);
         let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(center, false);
 
-        let dim: ƒ.Vector3 = new ƒ.Vector3(3, 3, 3);
+        let dim: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
 
         for (let z: number = -dim.z; z < dim.z + 1; z++)
             for (let y: number = -dim.y; y < dim.y + 1; y++)
@@ -36,10 +37,10 @@ namespace NodeResource {
 
         let srlResources: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
         let srlInstance: ƒ.Serialization = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
-        console.group("Resources");
+        console.groupCollapsed("Resources");
         console.log(ƒ.Serializer.stringify(srlResources));
         console.groupEnd();
-        console.group("NodeInstance");
+        console.groupCollapsed("NodeInstance");
         console.log(ƒ.Serializer.stringify(srlInstance));
         console.groupEnd();
 

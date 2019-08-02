@@ -16,8 +16,9 @@ var NodeResource;
         let center = createCenterAndSatellite();
         // branch.appendChild(center);
         Fudge["AnimateSatellite"] = NodeResource.AnimateSatellite;
+        console.log(NodeResource.AnimateSatellite["namespaceX"]);
         let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
-        let dim = new ƒ.Vector3(3, 3, 3);
+        let dim = new ƒ.Vector3(0, 0, 0);
         for (let z = -dim.z; z < dim.z + 1; z++)
             for (let y = -dim.y; y < dim.y + 1; y++)
                 for (let x = -dim.x; x < dim.x + 1; x++) {
@@ -29,10 +30,10 @@ var NodeResource;
                 }
         let srlResources = ƒ.ResourceManager.serialize();
         let srlInstance = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
-        console.group("Resources");
+        console.groupCollapsed("Resources");
         console.log(ƒ.Serializer.stringify(srlResources));
         console.groupEnd();
-        console.group("NodeInstance");
+        console.groupCollapsed("NodeInstance");
         console.log(ƒ.Serializer.stringify(srlInstance));
         console.groupEnd();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);

@@ -27,10 +27,20 @@ var NodeResource;
                 this.mtxLocal.rotateY(1);
                 this.mtxPivot.rotateX(5);
             };
+            ƒ.Debug.log(AnimateSatellite.__namespace);
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
     }
+    // @ts-ignore
+    // tslint:disable-next-line: variable-name
+    AnimateSatellite.__namespace = (function (_namespace) {
+        for (let prop in window)
+            if (window[prop] == _namespace)
+                return prop;
+        return null;
+        // @ts-ignore
+    })(arguments[0]);
     // tpo: test performance optimization
     AnimateSatellite.mtxRotY = ƒ.Matrix4x4.ROTATION_Y(1);
     AnimateSatellite.mtxRotX = ƒ.Matrix4x4.ROTATION_X(5);
