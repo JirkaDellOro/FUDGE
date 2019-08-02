@@ -22,8 +22,10 @@ namespace Fudge {
     }
 
     evaluate(_time: number): number {
+      _time -= this.keyIn.time;
       let time2: number = _time * _time;
       let time3: number = time2 * _time;
+      // console.log(this.a * time3 , this.b * time2 , this.c * _time , this.d);
       return this.a * time3 + this.b * time2 + this.c * _time + this.d;
     }
 
@@ -48,11 +50,13 @@ namespace Fudge {
         return;
       }
 
+      let x1: number = this.keyOut.time - this.keyIn.time;
+
       this.d = this.keyIn.value;
       this.c = this.keyIn.getSlopeOut;
 
-      this.a = (-this.keyOut.time * (this.keyIn.getSlopeOut + this.keyOut.getSlopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(this.keyOut.time, 3);
-      this.b = (this.keyOut.getSlopeIn - this.keyIn.getSlopeOut - 3 * this.a * Math.pow(this.keyOut.time, 2)) / (2 * this.keyOut.time);
+      this.a = (-x1 * (this.keyIn.getSlopeOut + this.keyOut.getSlopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
+      this.b = (this.keyOut.getSlopeIn - this.keyIn.getSlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
     }
   }
 

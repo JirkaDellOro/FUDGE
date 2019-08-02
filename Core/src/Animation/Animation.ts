@@ -24,23 +24,24 @@ namespace Fudge {
   export class Animation extends Mutable implements Serializable {
     // name: string;
     animatedObject: MutatorForAnimation;
-    sequences: { [name: string]: AnimationSequence };
+    sequences: Map<Mutator, AnimationSequenceAsso>;
     totalTime: number = 0;
     events: AnimationEventTrigger = {};
     labels: AnimationLabel = {};
-    playmode: ANIMPLAYMODE = ANIMPLAYMODE.LOOP;
     fps: number = 60;
     sps: number = 10;
+    playmode: ANIMPLAYMODE;
 
     private startTime: number = 0;
     private timeAtStart: number = 0;
     private lastTime: number = 0;
     private direction: number = 0;
 
-    constructor(_animObj: MutatorForAnimation) {
+    constructor(_animObj: MutatorForAnimation, _playmode: ANIMPLAYMODE = ANIMPLAYMODE.LOOP) {
       super();
       this.animatedObject = _animObj;
-      this.sequences = {};
+      this.playmode = _playmode;
+      this.sequences = new Map<Mutator, AnimationSequenceAsso>();
     }
 
     /**
@@ -48,9 +49,13 @@ namespace Fudge {
      */
 
     update(_time: number): void {
+      this.calculateTotalTime();
       let time: number = this.calculateCurrentTime(_time);
-      for (let name in this.sequences) {
-        this.animatedObject[name] = this.sequences[name].evaluate(time);
+      for (let mutator of this.sequences.keys()) {
+        let aa: AnimationSequenceAsso = this.sequences.get(mutator);
+        for (let name in aa) {
+          mutator[name] = aa[name].evaluate(time);
+        }
       }
 
       this.checkEvents(time);
@@ -61,6 +66,13 @@ namespace Fudge {
       let en: Enumerator = new Enumerator(this.labels);
       return en;
     }
+
+    jumpTo(_time: number, _currentTime: number): void {
+      this.startTime = _time;
+      this.timeAtStart = _currentTime;
+      this.lastTime = _currentTime;
+    }
+
 
 
     //#region transfer
@@ -73,36 +85,36 @@ namespace Fudge {
         fps: this.fps,
         sps: this.sps
       };
-      for (let name in this.sequences) {
-        s.sequences[name] = this.sequences[name].serialize();
-      }
-      for (let name in this.events) {
-        s.events[name] = this.events[name];
-      }
-      for (let name in this.labels) {
-        s.labels[name] = this.labels[name];
-      }
+      // for (let name in this.sequences) {
+      //   s.sequences[name] = this.sequences[name].serialize();
+      // }
+      // for (let name in this.events) {
+      //   s.events[name] = this.events[name];
+      // }
+      // for (let name in this.labels) {
+      //   s.labels[name] = this.labels[name];
+      // }
 
       return s;
     }
     deserialize(_serialization: Serialization): Serializable {
-      this.playmode = _serialization.playmode;
-      this.fps = _serialization.fps;
-      this.sps = _serialization.sps;
-      this.sequences = {};
-      this.events = {};
-      this.labels = {};
-      this.startTime = 0;
+      // this.playmode = _serialization.playmode;
+      // this.fps = _serialization.fps;
+      // this.sps = _serialization.sps;
+      // this.sequences = new Map<MutatorForAnimation, AnimationSequenceAsso>();
+      // this.events = {};
+      // this.labels = {};
+      // this.startTime = 0;
 
-      for (let name in _serialization.sequences) {
-        this.sequences[name] = _serialization.sequences[name].deserialize();
-      }
-      for (let name in _serialization.labels) {
-        this.labels[name] = _serialization.labels[name];
-      }
-      for (let name in _serialization.events) {
-        this.events[name] = _serialization.events[name];
-      }
+      // for (let name in _serialization.sequences) {
+      //   this.sequences[name] = _serialization.sequences[name].deserialize();
+      // }
+      // for (let name in _serialization.labels) {
+      //   this.labels[name] = _serialization.labels[name];
+      // }
+      // for (let name in _serialization.events) {
+      //   this.events[name] = _serialization.events[name];
+      // }
       this.calculateTotalTime();
       return this;
     }
@@ -113,10 +125,12 @@ namespace Fudge {
 
     private calculateTotalTime(): void {
       this.totalTime = 0;
-      for (let s in this.sequences) {
-        if (this.sequences[s].keys.length > 0) {
-          let sequenceTime: number = this.sequences[s].keys[this.sequences[s].keys.length - 1].time;
-          this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+      for (let aa of this.sequences.values()) {
+        for (let s in aa) {
+          if (aa[s].keys.length > 0) {
+            let sequenceTime: number = aa[s].keys[aa[s].keys.length - 1].time;
+            this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+          }
         }
       }
     }
@@ -160,6 +174,7 @@ namespace Fudge {
     }
 
     private calculateDirection(_time: number): number {
+      _time = _time + this.startTime - this.timeAtStart;
       switch (this.playmode) {
         case ANIMPLAYMODE.PINGPONG:
           if (Math.floor(_time / this.totalTime) % 2 == 0)
@@ -183,7 +198,7 @@ namespace Fudge {
       if (this.playmode == ANIMPLAYMODE.STOP || this.direction == 0)
         return;
       for (let name in this.events) {
-        if ( this.direction > 0 && this.lastTime < this.events[name] && this.events[name] < _time
+        if (this.direction > 0 && this.lastTime < this.events[name] && this.events[name] < _time
           || this.direction < 0 && this.lastTime > this.events[name] && this.events[name] > _time) {
           this.dispatchEvent(new Event(name));
         }
