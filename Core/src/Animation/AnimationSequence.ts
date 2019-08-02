@@ -7,17 +7,18 @@ namespace Fudge {
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationSequence extends Mutable implements Serializable {
-    keys: AnimationKey[];
+    keys: AnimationKey[] = [];
 
     evaluate(_time: number): number {
-      if (this.keys.length == 1)
+      // console.log(this.keys.length == 1 || this.keys[0].time < _time);
+      if (this.keys.length == 1 || this.keys[0].time > _time)
         return this.keys[0].value;
 
       if (this.keys.length == 0)
         return 0;
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
-        if (this.keys[i].time < _time && this.keys[i + 1].time < _time) {
+        if (this.keys[i].time < _time && this.keys[i + 1].time > _time) {
           return this.keys[i].functionOut.evaluate(_time);
         }
       }
