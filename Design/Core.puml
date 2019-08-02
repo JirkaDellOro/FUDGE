@@ -416,7 +416,6 @@ left to right direction
       + range: number
     }
     class LightSpot extends LightPoint {
-      
     }
   }
 
