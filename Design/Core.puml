@@ -24,6 +24,7 @@ left to right direction
       + {static} log(_message: Object, ..._args: Object[]): void
       + {static} warn(_message: Object, ..._args: Object[]): void
       + {static} error(_message: Object, ..._args: Object[]): void
+      - {static} delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void
     }
     abstract class DebugTarget {
       + delegates: MapDebugFilterToDelegate
