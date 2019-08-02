@@ -24,6 +24,7 @@ left to right direction
       + {static} log(_message: Object, ..._args: Object[]): void
       + {static} warn(_message: Object, ..._args: Object[]): void
       + {static} error(_message: Object, ..._args: Object[]): void
+      - {static} delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void
     }
     abstract class DebugTarget {
       + delegates: MapDebugFilterToDelegate
@@ -32,11 +33,10 @@ left to right direction
     }
     class DebugAlert extends DebugTarget {
     }
-    class DebugFile extends DebugTarget {
-    }
-    class DebugServer extends DebugTarget {
-    }
     class DebugDialog extends DebugTarget {
+    }
+    class DebugTextarea extends DebugTarget {
+
     }
   }
 
@@ -73,7 +73,7 @@ left to right direction
         + getMutatorForUserInterface(): MutatorForUserInterface
         + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
         + updateMutator(_mutator: Mutator): void
-        # mutate(_mutator: Mutator): void
+        + mutate(_mutator: Mutator): void
       }
     }
   }
@@ -83,9 +83,7 @@ left to right direction
       interface MapClassToComponents{
         [className: string]: Component[]
       }
-      interface MapStringToNode {
-        [key: string]: Node
-      }
+      
       class Node extends EventTarget {
         + name: string
         + mtxWorld: Matrix4x4
@@ -105,7 +103,7 @@ left to right direction
   }
 
   package "Engine" <<Folder>> {
-    class Color {
+    class Color extends Mutable{
       + r: number
       + g: number
       + b: number
@@ -117,6 +115,11 @@ left to right direction
       - coat: Coat
     }
 
+    class OnjectManager{
+      - {static} depot: {[type: string]:Object[]
+    }
+
+
     file "Viewport" {
       interface MapLightTypeToLightList {
         [type: typeof Light]: ComponentLight[]
@@ -124,14 +127,14 @@ left to right direction
       class Viewport extends EventTarget {
         + name: string
         + camera: ComponentCamera
-        + branch: Node
+        - branch: Node
         + rectSource: Rectangle
         + rectDestination: Rectangle
         + frameClientToCanvas: Framing
         + frameCanvasToDestination: Framing
         + frameDestinationToSource: Framing
         + frameSourceToRender: Framing
-        + mappingRects: boolean
+        + adjustingFrames: boolean
         + adjustingCamera: boolean
         + lights: MapLightTypeToComponentLight
         - canvas: HTMLCanvasElement
@@ -172,8 +175,7 @@ left to right direction
       enum EVENT_DRAGDROP
       enum EVENT_WHEEL
 
-      class KeyboardEventƒ extends KeyboardEvent{
-      }
+      
       class PointerEventƒ extends PointerEvent {
         + pointerX: number;
         + pointerY: number;
@@ -197,7 +199,8 @@ left to right direction
     }
 
     file "EventKeyboard" {
-      class KeyboardEventƒ extends KeyboardEvent {
+      
+      class KeyboardEventƒ extends KeyboardEvent{
       }
       enum EVENT_KEYBOARD
       enum KEYBOARD_CODE
@@ -283,7 +286,7 @@ left to right direction
       + pivot: Matrix4x4
       + mesh: Mesh
     }
-    class ComponentTransform extends ComponentPivot {
+    class ComponentTransform extends Component {
       + local: Matrix4x4
     }
     class ComponentLight extends Component {
@@ -315,7 +318,7 @@ left to right direction
   }
 
   package "Math" <<Folder>> {
-    class Vector3 {
+    class Vector3 extends Mutable {
       - data: Float32Array
     }
     class Matrix3x3 {
@@ -338,7 +341,11 @@ left to right direction
         top: number
         bottom: number
       }
-      abstract class Framing {
+      interface Vector2 {
+        x:number
+        y:number
+      }
+      abstract class Framing extends Mutable {
         + getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point
         + getPointInverse(_point: Point, _rect: Rectangle): Point
         + getRect(_rectFrame: Rectangle): Rectangle
@@ -352,8 +359,8 @@ left to right direction
         + height: number
       }
       class FramingScaled extends Framing {
-        + width: number
-        + height: number
+        + normWidth: number
+        + normHeight: number
       }
     }
   }
@@ -361,8 +368,8 @@ left to right direction
   package "Shader" << Folder>> {
     class Shader {
       + {static} getCoat(): typeof Coat
-      + {static} loadVertexShaderSource(): string
-      + {static} loadFragmentShaderSource(): string
+      + {static} getVertexShaderSource(): string
+      + {static} getFragmentShaderSource(): string
     }
     class ShaderUniColor extends Shader {
     }
@@ -409,7 +416,7 @@ left to right direction
       + range: number
     }
     class LightSpot extends LightPoint {
-      + angle: number
+      
     }
   }
 
@@ -423,9 +430,9 @@ left to right direction
   Serializer  -(0- Serialization
   Mutable -(0- Mutator
   Mutable -(0- MutatorAttributeTypes
-  Node "1" -0)- "2" MapEventTypeToListener
-  Framing -0)- Rectangle
-  FramingComplex "1" -0)- "2" Border
+  Node "1" -(0- "2" MapEventTypeToListener
+  Framing -(0- Rectangle
+  FramingComplex "1" -(0- "2" Border
   Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
   MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
   Material --() SerializableResource
@@ -435,7 +442,6 @@ left to right direction
   Node "1 container" o-- "n components" Component
 
   ComponentMesh "n" ---> "1" Mesh : refers >
-  ComponentPivot --->"1" Matrix4x4
   ComponentTransform --->"1" Matrix4x4
   ComponentMaterial "n" ---> "1" Material : refers >
 
