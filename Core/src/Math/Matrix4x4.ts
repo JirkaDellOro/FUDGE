@@ -372,7 +372,7 @@ namespace Fudge {
         * @param _angleInDegrees The angle to rotate by.
         */
         public rotateX(_angleInDegrees: number): void {
-            const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees))
+            const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
             this.set(matrix);
             ObjectManager.reuse(matrix);
         }

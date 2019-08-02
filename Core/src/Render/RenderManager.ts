@@ -72,7 +72,7 @@ namespace Fudge {
             let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
             this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
 
-            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh}; //, doneTransformToWorld: false };
+            let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
             this.nodes.set(_node, nodeReferences);
         }
 
@@ -223,6 +223,10 @@ namespace Fudge {
                 let childNode: Node = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera); //, world);
             }
+
+            ObjectManager.reuse(projection);
+            if (finalTransform != _node.mtxWorld)
+                ObjectManager.reuse(finalTransform);
         }
 
         private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
@@ -280,7 +284,7 @@ namespace Fudge {
          * @param _node 
          * @param _world 
          */
-        private static recalculateTransformsOfNodeAndChildren(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY): void {
+        private static recalculateTransformsOfNodeAndChildren(_node: Node, _world: Matrix4x4): void {
             let world: Matrix4x4 = _world;
             let cmpTransform: ComponentTransform = _node.cmpTransform;
             if (cmpTransform)

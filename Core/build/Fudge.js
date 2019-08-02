@@ -3373,6 +3373,9 @@ var Fudge;
                 let childNode = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera); //, world);
             }
+            Fudge.ObjectManager.reuse(projection);
+            if (finalTransform != _node.mtxWorld)
+                Fudge.ObjectManager.reuse(finalTransform);
         }
         static drawNode(_node, _finalTransform, _projection) {
             let references = this.nodes.get(_node);
@@ -3422,7 +3425,7 @@ var Fudge;
          * @param _node
          * @param _world
          */
-        static recalculateTransformsOfNodeAndChildren(_node, _world = Fudge.Matrix4x4.IDENTITY) {
+        static recalculateTransformsOfNodeAndChildren(_node, _world) {
             let world = _world;
             let cmpTransform = _node.cmpTransform;
             if (cmpTransform)

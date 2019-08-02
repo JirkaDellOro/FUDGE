@@ -9,8 +9,8 @@ namespace Fudge {
                 return <T>instances.pop();
             else
                 return new _T();
-                
         }
+        
         public static reuse(_instance: Object): void {
             let key: string = _instance.constructor.name;
             //console.log(key);
