@@ -115,7 +115,7 @@ left to right direction
       - coat: Coat
     }
 
-    class OnjectManager{
+    class ObjectManager{
       - {static} depot: {[type: string]:Object[]
     }
 
