@@ -19,8 +19,7 @@ namespace Fudge {
         
         //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = {};
-            serialization[this.constructor.name] = this.getMutator(); 
+            let serialization: Serialization = this.getMutator(); 
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {

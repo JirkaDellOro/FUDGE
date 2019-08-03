@@ -1,9 +1,10 @@
 var NamespaceRegistrar;
 (function (NamespaceRegistrar) {
     class Registrar {
-        static reconstruct(_path, _type) {
+        static reconstruct(_path) {
+            let typeName = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace = Registrar.getNamespace(_path);
-            let reconstruction = new namespace[_type];
+            let reconstruction = new namespace[typeName];
             return reconstruction;
         }
         static registerNamespace(_namespace) {
@@ -79,7 +80,7 @@ var NamespaceReflection;
         let namespace;
         namespace = NamespaceRegistrar.Registrar.getNamespace(path);
         let reconstruction = new namespace[_o.constructor.name];
-        let reconViaPath = NamespaceRegistrar.Registrar.reconstruct(path, _o.constructor.name);
+        let reconViaPath = NamespaceRegistrar.Registrar.reconstruct(path);
         console.log("Path: ", path);
         console.log("Namespace: ", namespace);
         console.log("Reconstruction: ", reconstruction);

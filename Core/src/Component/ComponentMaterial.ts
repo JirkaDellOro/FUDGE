@@ -19,7 +19,7 @@ namespace Fudge {
             if (idMaterial)
                 serialization = { idMaterial: idMaterial };
             else
-                serialization = { material: this.material.serialize() };
+                serialization = { material: Serializer.serialize(this.material) };
 
             serialization[super.constructor.name] = super.serialize();
             return serialization;

@@ -7,9 +7,10 @@ namespace NamespaceRegistrar {
     export class Registrar {
         private static namespaces: NamespaceRegister = {};
 
-        public static reconstruct(_path: string, _type: string): Object {
+        public static reconstruct(_path: string): Object {
+            let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace: Object = Registrar.getNamespace(_path);
-            let reconstruction: Object = new namespace[_type];
+            let reconstruction: Object = new namespace[typeName];
             return reconstruction;
         }
 
@@ -97,7 +98,7 @@ namespace NamespaceReflection {
         let namespace: Object;
         namespace = NamespaceRegistrar.Registrar.getNamespace(path);
         let reconstruction: Object = new namespace[_o.constructor.name];
-        let reconViaPath: Object = NamespaceRegistrar.Registrar.reconstruct(path, _o.constructor.name);
+        let reconViaPath: Object = NamespaceRegistrar.Registrar.reconstruct(path);
         console.log("Path: ", path);
         console.log("Namespace: ", namespace);
         console.log("Reconstruction: ", reconstruction);

@@ -26,8 +26,7 @@ namespace Fudge {
 
         // Serialize/Deserialize for all meshes that calculate without parameters
         public serialize(): Serialization {
-            let serialization: Serialization = {};
-            serialization[this.constructor.name] = {
+            let serialization: Serialization = {
                 idResource: this.idResource
             }; // no data needed ...
             return serialization;

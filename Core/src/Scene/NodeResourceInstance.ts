@@ -28,7 +28,11 @@ namespace Fudge {
         private set(_nodeResource: NodeResource): void {
             // TODO: examine, if the serialization should be stored in the NodeResource for optimization
             let serialization: Serialization = Serializer.serialize(_nodeResource);
-            this.deserialize(serialization["NodeResource"]);
+            //Serializer.deserialize(serialization);
+            for (let path in serialization) {
+                this.deserialize(serialization[path]);
+                break;
+            }
             this.idSource = _nodeResource.idResource;
         }
 

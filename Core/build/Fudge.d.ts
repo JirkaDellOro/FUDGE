@@ -247,6 +247,9 @@ declare namespace Fudge {
          * @param _json
          */
         static parse(_json: string): Serialization;
+        private static reconstruct;
+        private static getFullPath;
+        private static getNamespace;
         private static findNamespaceIn;
     }
 }

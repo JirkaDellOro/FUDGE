@@ -20,7 +20,8 @@ namespace Fudge {
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
 
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-        private static namespaces: NamespaceRegister = { "ƒ": Fudge };
+        private static namespaces: NamespaceRegister = { "Fudge": Fudge };
+        // private static namespaces: NamespaceRegister = { "ƒ": Fudge };
 
         public static registerNamespace(_namespace: Object): void {
             for (let name in Serializer.namespaces)
@@ -53,7 +54,9 @@ namespace Fudge {
         public static serialize(_object: Serializable): Serialization {
             let serialization: Serialization = {};
             // TODO: save the namespace with the constructors name
-            serialization[_object.constructor.name] = _object.serialize();
+            // serialization[_object.constructor.name] = _object.serialize();
+            let path: string = this.getFullPath(_object);
+            serialization[path] = _object.serialize();
             return serialization;
             // return _object.serialize();
         }
@@ -67,9 +70,10 @@ namespace Fudge {
             let reconstruct: Serializable;
             try {
                 // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new (<General>Fudge)[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
+                for (let path in _serialization) {
+                    // reconstruct = new (<General>Fudge)[typeName];
+                    reconstruct = Serializer.reconstruct(path);
+                    reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             } catch (message) {
@@ -100,26 +104,27 @@ namespace Fudge {
             return JSON.parse(_json);
         }
 
-        // private static reconstruct(_path: string, _type: string): Object {
-        //     let namespace: Object = Serializer.getNamespace(_path);
-        //     let reconstruction: Object = new (<General>namespace)[_type];
-        //     return reconstruction;
-        // }
+        private static reconstruct(_path: string): Serializable {
+            let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
+            let namespace: Object = Serializer.getNamespace(_path);
+            let reconstruction: Serializable = new (<General>namespace)[typeName];
+            return reconstruction;
+        }
 
-        // private static getFullPath(_object: Serializable): string {
-        //     let typeName: string = _object.constructor.name;
-        //     console.log("Searching namespace of: " + typeName);
-        //     for (let namespaceName in Serializer.namespaces) {
-        //         if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
-        //             return namespaceName + "." + typeName;
-        //     }
-        //     return null;
-        // }
+        private static getFullPath(_object: Serializable): string {
+            let typeName: string = _object.constructor.name;
+            console.log("Searching namespace of: " + typeName);
+            for (let namespaceName in Serializer.namespaces) {
+                if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
+                    return namespaceName + "." + typeName;
+            }
+            return null;
+        }
 
-        // private static getNamespace(_path: string): Object {
-        //     let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
-        //     return Serializer.namespaces[namespaceName];
-        // }
+        private static getNamespace(_path: string): Object {
+            let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
+            return Serializer.namespaces[namespaceName];
+        }
 
         private static findNamespaceIn(_namespace: Object, _parent: Object): string {
             for (let prop in _parent)

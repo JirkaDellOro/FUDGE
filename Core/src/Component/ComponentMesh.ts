@@ -20,7 +20,7 @@ namespace Fudge {
             if (idMesh)
                 serialization = { idMesh: idMesh };
             else
-                serialization = { mesh: this.mesh.serialize() };
+                serialization = { mesh: Serializer.serialize(this.mesh) };
 
             serialization.pivot = this.pivot.serialize();
             serialization[super.constructor.name] = super.serialize();

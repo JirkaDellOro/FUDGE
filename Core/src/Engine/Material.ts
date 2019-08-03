@@ -68,12 +68,11 @@ namespace Fudge {
         //#region Transfer
         // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately
         public serialize(): Serialization {
-            let serialization: Serialization = {};
-            serialization[this.constructor.name] = {
+            let serialization: Serialization = {
                 name: this.name,
                 idResource: this.idResource,
                 shader: this.shaderType.name,
-                coat: this.coat.serialize()
+                coat: Serializer.serialize(this.coat)
             };
             return serialization;
         }

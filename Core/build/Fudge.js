@@ -500,8 +500,7 @@ var Fudge;
         useRenderData(_renderShader) { }
         //#region Transfer
         serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = this.getMutator();
+            let serialization = this.getMutator();
             return serialization;
         }
         deserialize(_serialization) {
@@ -544,6 +543,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class Serializer {
+        // private static namespaces: NamespaceRegister = { "ƒ": Fudge };
         static registerNamespace(_namespace) {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -569,7 +569,9 @@ var Fudge;
         static serialize(_object) {
             let serialization = {};
             // TODO: save the namespace with the constructors name
-            serialization[_object.constructor.name] = _object.serialize();
+            // serialization[_object.constructor.name] = _object.serialize();
+            let path = this.getFullPath(_object);
+            serialization[path] = _object.serialize();
             return serialization;
             // return _object.serialize();
         }
@@ -582,9 +584,10 @@ var Fudge;
             let reconstruct;
             try {
                 // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
+                for (let path in _serialization) {
+                    // reconstruct = new (<General>Fudge)[typeName];
+                    reconstruct = Serializer.reconstruct(path);
+                    reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             }
@@ -612,24 +615,25 @@ var Fudge;
         static parse(_json) {
             return JSON.parse(_json);
         }
-        // private static reconstruct(_path: string, _type: string): Object {
-        //     let namespace: Object = Serializer.getNamespace(_path);
-        //     let reconstruction: Object = new (<General>namespace)[_type];
-        //     return reconstruction;
-        // }
-        // private static getFullPath(_object: Serializable): string {
-        //     let typeName: string = _object.constructor.name;
-        //     console.log("Searching namespace of: " + typeName);
-        //     for (let namespaceName in Serializer.namespaces) {
-        //         if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
-        //             return namespaceName + "." + typeName;
-        //     }
-        //     return null;
-        // }
-        // private static getNamespace(_path: string): Object {
-        //     let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
-        //     return Serializer.namespaces[namespaceName];
-        // }
+        static reconstruct(_path) {
+            let typeName = _path.substr(_path.lastIndexOf(".") + 1);
+            let namespace = Serializer.getNamespace(_path);
+            let reconstruction = new namespace[typeName];
+            return reconstruction;
+        }
+        static getFullPath(_object) {
+            let typeName = _object.constructor.name;
+            console.log("Searching namespace of: " + typeName);
+            for (let namespaceName in Serializer.namespaces) {
+                if (_object instanceof Serializer.namespaces[namespaceName][typeName])
+                    return namespaceName + "." + typeName;
+            }
+            return null;
+        }
+        static getNamespace(_path) {
+            let namespaceName = _path.substr(0, _path.lastIndexOf("."));
+            return Serializer.namespaces[namespaceName];
+        }
         static findNamespaceIn(_namespace, _parent) {
             for (let prop in _parent)
                 if (_parent[prop] == _namespace)
@@ -640,7 +644,7 @@ var Fudge;
     // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
     // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
     /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-    Serializer.namespaces = { "ƒ": Fudge };
+    Serializer.namespaces = { "Fudge": Fudge };
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
@@ -895,7 +899,7 @@ var Fudge;
             if (idMaterial)
                 serialization = { idMaterial: idMaterial };
             else
-                serialization = { material: this.material.serialize() };
+                serialization = { material: Fudge.Serializer.serialize(this.material) };
             serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
@@ -933,7 +937,7 @@ var Fudge;
             if (idMesh)
                 serialization = { idMesh: idMesh };
             else
-                serialization = { mesh: this.mesh.serialize() };
+                serialization = { mesh: Fudge.Serializer.serialize(this.mesh) };
             serialization.pivot = this.pivot.serialize();
             serialization[super.constructor.name] = super.serialize();
             return serialization;
@@ -1356,12 +1360,11 @@ var Fudge;
         //#region Transfer
         // TODO: this type of serialization was implemented for implicit Material create. Check if obsolete when only one material class exists and/or materials are stored separately
         serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = {
+            let serialization = {
                 name: this.name,
                 idResource: this.idResource,
                 shader: this.shaderType.name,
-                coat: this.coat.serialize()
+                coat: Fudge.Serializer.serialize(this.coat)
             };
             return serialization;
         }
@@ -3009,8 +3012,7 @@ var Fudge;
         }
         // Serialize/Deserialize for all meshes that calculate without parameters
         serialize() {
-            let serialization = {};
-            serialization[this.constructor.name] = {
+            let serialization = {
                 idResource: this.idResource
             }; // no data needed ...
             return serialization;
@@ -3750,7 +3752,8 @@ var Fudge;
             for (let type in this.components) {
                 components[type] = [];
                 for (let component of this.components[type]) {
-                    components[type].push(component.serialize());
+                    // components[type].push(component.serialize());
+                    components[type].push(Fudge.Serializer.serialize(component));
                 }
             }
             serialization["components"] = components;
@@ -3770,8 +3773,7 @@ var Fudge;
                 this.appendChild(deserializedChild);
             }
             for (let type in _serialization.components) {
-                for (let data of _serialization.components[type]) {
-                    let serializedComponent = { [type]: data };
+                for (let serializedComponent of _serialization.components[type]) {
                     let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
@@ -3924,7 +3926,11 @@ var Fudge;
         set(_nodeResource) {
             // TODO: examine, if the serialization should be stored in the NodeResource for optimization
             let serialization = Fudge.Serializer.serialize(_nodeResource);
-            this.deserialize(serialization["NodeResource"]);
+            //Serializer.deserialize(serialization);
+            for (let path in serialization) {
+                this.deserialize(serialization[path]);
+                break;
+            }
             this.idSource = _nodeResource.idResource;
         }
     }

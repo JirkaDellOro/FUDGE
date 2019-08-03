@@ -227,7 +227,8 @@ namespace Fudge {
             for (let type in this.components) {
                 components[type] = [];
                 for (let component of this.components[type]) {
-                    components[type].push(component.serialize());
+                    // components[type].push(component.serialize());
+                    components[type].push(Serializer.serialize(component));
                 }
             }
             serialization["components"] = components;
@@ -252,8 +253,7 @@ namespace Fudge {
             }
 
             for (let type in _serialization.components) {
-                for (let data of _serialization.components[type]) {
-                    let serializedComponent: Serialization = { [type]: data };
+                for (let serializedComponent of _serialization.components[type]) {
                     let deserializedComponent: Component = <Component>Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
