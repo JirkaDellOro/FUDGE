@@ -544,8 +544,23 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        static registerNamespace(_namespace) {
+            for (let name in Serializer.namespaces)
+                if (Serializer.namespaces[name] == _namespace)
+                    return;
+            let name = Serializer.findNamespaceIn(_namespace, window);
+            if (!name)
+                for (let parentName in Serializer.namespaces) {
+                    name = Serializer.findNamespaceIn(_namespace, Serializer.namespaces[parentName]);
+                    if (name) {
+                        name = parentName + "." + name;
+                        break;
+                    }
+                }
+            if (!name)
+                throw ("Namespace not found. Maybe parent namespace hasn't been registered before?");
+            Serializer.namespaces[name] = _namespace;
+        }
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
@@ -553,6 +568,7 @@ var Fudge;
          */
         static serialize(_object) {
             let serialization = {};
+            // TODO: save the namespace with the constructors name
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
             // return _object.serialize();
@@ -596,7 +612,35 @@ var Fudge;
         static parse(_json) {
             return JSON.parse(_json);
         }
+        // private static reconstruct(_path: string, _type: string): Object {
+        //     let namespace: Object = Serializer.getNamespace(_path);
+        //     let reconstruction: Object = new (<General>namespace)[_type];
+        //     return reconstruction;
+        // }
+        // private static getFullPath(_object: Serializable): string {
+        //     let typeName: string = _object.constructor.name;
+        //     console.log("Searching namespace of: " + typeName);
+        //     for (let namespaceName in Serializer.namespaces) {
+        //         if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
+        //             return namespaceName + "." + typeName;
+        //     }
+        //     return null;
+        // }
+        // private static getNamespace(_path: string): Object {
+        //     let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
+        //     return Serializer.namespaces[namespaceName];
+        // }
+        static findNamespaceIn(_namespace, _parent) {
+            for (let prop in _parent)
+                if (_parent[prop] == _namespace)
+                    return prop;
+            return null;
+        }
     }
+    // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+    // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+    /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+    Serializer.namespaces = { "ƒ": Fudge };
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>

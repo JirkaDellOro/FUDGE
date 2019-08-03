@@ -220,7 +220,10 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
-    class Serializer {
+    abstract class Serializer {
+        /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+        private static namespaces;
+        static registerNamespace(_namespace: Object): void;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
@@ -244,6 +247,7 @@ declare namespace Fudge {
          * @param _json
          */
         static parse(_json: string): Serialization;
+        private static findNamespaceIn;
     }
 }
 declare namespace Fudge {

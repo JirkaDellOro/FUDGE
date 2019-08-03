@@ -10,9 +10,40 @@ namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
 
-    export class Serializer {
+    interface NamespaceRegister {
+        [name: string]: Object;
+    }
+
+
+    export abstract class Serializer {
         // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+
+        /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+        private static namespaces: NamespaceRegister = { "ƒ": Fudge };
+
+        public static registerNamespace(_namespace: Object): void {
+            for (let name in Serializer.namespaces)
+                if (Serializer.namespaces[name] == _namespace)
+                    return;
+
+            let name: string = Serializer.findNamespaceIn(_namespace, window);
+            if (!name)
+                for (let parentName in Serializer.namespaces) {
+                    name = Serializer.findNamespaceIn(_namespace, Serializer.namespaces[parentName]);
+                    if (name) {
+                        name = parentName + "." + name;
+                        break;
+                    }
+                }
+
+
+            if (!name)
+                throw ("Namespace not found. Maybe parent namespace hasn't been registered before?");
+
+            Serializer.namespaces[name] = _namespace;
+        }
+
 
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
@@ -21,6 +52,7 @@ namespace Fudge {
          */
         public static serialize(_object: Serializable): Serialization {
             let serialization: Serialization = {};
+            // TODO: save the namespace with the constructors name
             serialization[_object.constructor.name] = _object.serialize();
             return serialization;
             // return _object.serialize();
@@ -66,6 +98,34 @@ namespace Fudge {
          */
         public static parse(_json: string): Serialization {
             return JSON.parse(_json);
+        }
+
+        // private static reconstruct(_path: string, _type: string): Object {
+        //     let namespace: Object = Serializer.getNamespace(_path);
+        //     let reconstruction: Object = new (<General>namespace)[_type];
+        //     return reconstruction;
+        // }
+
+        // private static getFullPath(_object: Serializable): string {
+        //     let typeName: string = _object.constructor.name;
+        //     console.log("Searching namespace of: " + typeName);
+        //     for (let namespaceName in Serializer.namespaces) {
+        //         if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
+        //             return namespaceName + "." + typeName;
+        //     }
+        //     return null;
+        // }
+
+        // private static getNamespace(_path: string): Object {
+        //     let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
+        //     return Serializer.namespaces[namespaceName];
+        // }
+
+        private static findNamespaceIn(_namespace: Object, _parent: Object): string {
+            for (let prop in _parent)
+                if ((<General>_parent)[prop] == _namespace)
+                    return prop;
+            return null;
         }
     }
 }
