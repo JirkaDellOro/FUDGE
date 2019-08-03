@@ -36,7 +36,7 @@ namespace Fudge {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    export class RenderOperator {
+    export abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport: Rectangle;
 

@@ -3,20 +3,20 @@ namespace Fudge {
         idResource: string;
     }
 
-    export interface Resources {
+    interface Resources {
         [idResource: string]: SerializableResource;
     }
 
-    export interface SerializationOfResources {
+    interface SerializationOfResources {
         [idResource: string]: Serialization;
     }
 
     /**
      * Static class handling the resources used with the current FUDGE-instance.  
-     * Keeps a list of the resources and generates ids to retrieve them
-     * 
+     * Keeps a list of the resources and generates ids to retrieve them.  
+     * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    export class ResourceManager {
+    export abstract class ResourceManager {
         public static resources: Resources = {};
         public static serialization: SerializationOfResources = null;
 

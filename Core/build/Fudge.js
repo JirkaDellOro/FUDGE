@@ -542,7 +542,39 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created,
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
     class Serializer {
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace
+         */
         static registerNamespace(_namespace) {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -563,7 +595,7 @@ var Fudge;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
          */
         static serialize(_object) {
             let serialization = {};
@@ -577,9 +609,9 @@ var Fudge;
             // return _object.serialize();
         }
         /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
          * including attached components, children, superclass-objects
-         * @param _serialization Required as { "Classname": {attribute: value, ... } }
+         * @param _serialization
          */
         static deserialize(_serialization) {
             let reconstruct;
@@ -616,6 +648,10 @@ var Fudge;
         static parse(_json) {
             return JSON.parse(_json);
         }
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
+         * @param _path
+         */
         static reconstruct(_path) {
             let typeName = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace = Serializer.getNamespace(_path);
@@ -624,6 +660,10 @@ var Fudge;
             let reconstruction = new namespace[typeName];
             return reconstruction;
         }
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object
+         */
         static getFullPath(_object) {
             let typeName = _object.constructor.name;
             // Debug.log("Searching namespace of: " + typeName);
@@ -634,10 +674,19 @@ var Fudge;
             }
             return null;
         }
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
         static getNamespace(_path) {
             let namespaceName = _path.substr(0, _path.lastIndexOf("."));
             return Serializer.namespaces[namespaceName];
         }
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace
+         * @param _parent
+         */
         static findNamespaceIn(_namespace, _parent) {
             for (let prop in _parent)
                 if (_parent[prop] == _namespace)
@@ -645,10 +694,7 @@ var Fudge;
             return null;
         }
     }
-    // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-    // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
     /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-    // private static namespaces: NamespaceRegister = { "Fudge": Fudge };
     Serializer.namespaces = { "ƒ": Fudge };
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
@@ -1387,7 +1433,15 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Keeps a depot of objects that have been marked for reuse, sorted by type.
+     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     */
     class ObjectManager {
+        /**
+         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * @param _T The class identifier of the desired object
+         */
         static create(_T) {
             let key = _T.name;
             let instances = ObjectManager.depot[key];
@@ -1396,6 +1450,10 @@ var Fudge;
             else
                 return new _T();
         }
+        /**
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * @param _instance
+         */
         static reuse(_instance) {
             let key = _instance.constructor.name;
             //Debug.log(key);
@@ -1413,8 +1471,8 @@ var Fudge;
 (function (Fudge) {
     /**
      * Static class handling the resources used with the current FUDGE-instance.
-     * Keeps a list of the resources and generates ids to retrieve them
-     *
+     * Keeps a list of the resources and generates ids to retrieve them.
+     * Resources are objects referenced multiple times but supposed to be stored only once
      */
     class ResourceManager {
         /**

@@ -40,7 +40,7 @@ namespace Fudge {
      * Stores the references to the shader, the coat and the mesh used for each node registered. 
      * With these references, the already buffered data is retrieved when rendering.
      */
-    export class RenderManager extends RenderOperator {
+    export abstract class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */

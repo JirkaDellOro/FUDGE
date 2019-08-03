@@ -106,7 +106,7 @@ declare namespace Fudge {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    class RenderOperator {
+    abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
         /**
@@ -220,20 +220,52 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
+    /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created,
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
     abstract class Serializer {
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
         private static namespaces;
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace
+         */
         static registerNamespace(_namespace: Object): void;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
          */
         static serialize(_object: Serializable): Serialization;
         /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
          * including attached components, children, superclass-objects
-         * @param _serialization Required as { "Classname": {attribute: value, ... } }
+         * @param _serialization
          */
         static deserialize(_serialization: Serialization): Serializable;
         static prettify(_json: string): string;
@@ -247,9 +279,26 @@ declare namespace Fudge {
          * @param _json
          */
         static parse(_json: string): Serialization;
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
+         * @param _path
+         */
         private static reconstruct;
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object
+         */
         private static getFullPath;
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
         private static getNamespace;
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace
+         * @param _parent
+         */
         private static findNamespaceIn;
     }
 }
@@ -656,9 +705,21 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class ObjectManager {
+    /**
+     * Keeps a depot of objects that have been marked for reuse, sorted by type.
+     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     */
+    abstract class ObjectManager {
         private static depot;
+        /**
+         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * @param _T The class identifier of the desired object
+         */
         static create<T>(_T: new () => T): T;
+        /**
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * @param _instance
+         */
         static reuse(_instance: Object): void;
     }
 }
@@ -674,10 +735,10 @@ declare namespace Fudge {
     }
     /**
      * Static class handling the resources used with the current FUDGE-instance.
-     * Keeps a list of the resources and generates ids to retrieve them
-     *
+     * Keeps a list of the resources and generates ids to retrieve them.
+     * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    class ResourceManager {
+    abstract class ResourceManager {
         static resources: Resources;
         static serialization: SerializationOfResources;
         /**
@@ -1466,7 +1527,7 @@ declare namespace Fudge {
      * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
-    class RenderManager extends RenderOperator {
+    abstract class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */

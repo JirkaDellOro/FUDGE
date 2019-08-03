@@ -14,15 +14,42 @@ namespace Fudge {
         [name: string]: Object;
     }
 
-
+    /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.  
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.  
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)  
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```      
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,  
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows  
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created, 
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value. 
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
     export abstract class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
-
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-        // private static namespaces: NamespaceRegister = { "Fudge": Fudge };
         private static namespaces: NamespaceRegister = { "ƒ": Fudge };
 
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace 
+         */
         public static registerNamespace(_namespace: Object): void {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -48,7 +75,7 @@ namespace Fudge {
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
          */
         public static serialize(_object: Serializable): Serialization {
             let serialization: Serialization = {};
@@ -63,9 +90,9 @@ namespace Fudge {
         }
 
         /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
          * including attached components, children, superclass-objects
-         * @param _serialization Required as { "Classname": {attribute: value, ... } }
+         * @param _serialization 
          */
         public static deserialize(_serialization: Serialization): Serializable {
             let reconstruct: Serializable;
@@ -104,7 +131,11 @@ namespace Fudge {
         public static parse(_json: string): Serialization {
             return JSON.parse(_json);
         }
-
+        
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.) 
+         * @param _path 
+         */
         private static reconstruct(_path: string): Serializable {
             let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace: Object = Serializer.getNamespace(_path);
@@ -114,22 +145,35 @@ namespace Fudge {
             return reconstruction;
         }
 
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object 
+         */
         private static getFullPath(_object: Serializable): string {
             let typeName: string = _object.constructor.name;
             // Debug.log("Searching namespace of: " + typeName);
             for (let namespaceName in Serializer.namespaces) {
-                let found: General = (<General>Serializer.namespaces)[namespaceName][typeName]
+                let found: General = (<General>Serializer.namespaces)[namespaceName][typeName];
                 if (found && _object instanceof found)
                     return namespaceName + "." + typeName;
             }
             return null;
         }
 
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
         private static getNamespace(_path: string): Object {
             let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
             return Serializer.namespaces[namespaceName];
         }
 
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace 
+         * @param _parent 
+         */
         private static findNamespaceIn(_namespace: Object, _parent: Object): string {
             for (let prop in _parent)
                 if ((<General>_parent)[prop] == _namespace)
