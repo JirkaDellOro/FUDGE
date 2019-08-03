@@ -1,18 +1,17 @@
 namespace ResourceManager {
     import ƒ = Fudge;
+    ƒ.Serializer.registerNamespace(ResourceManager);
 
     window.addEventListener("DOMContentLoaded", init);
 
-    class Resource implements ƒ.SerializableResource {
+    export class Resource implements ƒ.SerializableResource {
         public idResource: string = null;
         public reference: Resource = null;
 
         public serialize(): ƒ.Serialization {
             return {
-                [this.constructor.name]: {
                     idResource: this.idResource,
                     idReference: (this.reference) ? this.reference.idResource : null
-                }
             };
         }
         public deserialize(_serialization: ƒ.Serialization): Resource {
@@ -24,7 +23,6 @@ namespace ResourceManager {
     }
 
     function init(): void {
-        Fudge["Resource"] = Resource;
         // let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         // ƒ.ResourceManager.register(material);
 

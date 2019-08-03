@@ -91,7 +91,7 @@ namespace Fudge {
             let output: string = "SceneGraph for this viewport:";
             output += "\n \n";
             output += this.branch.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+            Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
 
         // #region Drawing

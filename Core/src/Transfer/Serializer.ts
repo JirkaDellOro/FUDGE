@@ -20,8 +20,8 @@ namespace Fudge {
         // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
 
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-        private static namespaces: NamespaceRegister = { "Fudge": Fudge };
-        // private static namespaces: NamespaceRegister = { "ƒ": Fudge };
+        // private static namespaces: NamespaceRegister = { "Fudge": Fudge };
+        private static namespaces: NamespaceRegister = { "ƒ": Fudge };
 
         public static registerNamespace(_namespace: Object): void {
             for (let name in Serializer.namespaces)
@@ -38,9 +38,8 @@ namespace Fudge {
                     }
                 }
 
-
             if (!name)
-                throw ("Namespace not found. Maybe parent namespace hasn't been registered before?");
+                throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
 
             Serializer.namespaces[name] = _namespace;
         }
@@ -56,6 +55,8 @@ namespace Fudge {
             // TODO: save the namespace with the constructors name
             // serialization[_object.constructor.name] = _object.serialize();
             let path: string = this.getFullPath(_object);
+            if (!path)
+                throw new Error(`Namespace of serializable object of type ${_object.constructor.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
             serialization[path] = _object.serialize();
             return serialization;
             // return _object.serialize();
@@ -107,15 +108,18 @@ namespace Fudge {
         private static reconstruct(_path: string): Serializable {
             let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace: Object = Serializer.getNamespace(_path);
+            if (!namespace)
+                throw new Error(`Namespace of serializable object of type ${typeName} not found. Maybe the namespace hasn't been registered?`);
             let reconstruction: Serializable = new (<General>namespace)[typeName];
             return reconstruction;
         }
 
         private static getFullPath(_object: Serializable): string {
             let typeName: string = _object.constructor.name;
-            console.log("Searching namespace of: " + typeName);
+            // Debug.log("Searching namespace of: " + typeName);
             for (let namespaceName in Serializer.namespaces) {
-                if (_object instanceof (<General>Serializer.namespaces)[namespaceName][typeName])
+                let found: General = (<General>Serializer.namespaces)[namespaceName][typeName]
+                if (found && _object instanceof found)
                     return namespaceName + "." + typeName;
             }
             return null;

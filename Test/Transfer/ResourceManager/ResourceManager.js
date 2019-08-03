@@ -1,6 +1,7 @@
 var ResourceManager;
 (function (ResourceManager) {
     var ƒ = Fudge;
+    ƒ.Serializer.registerNamespace(ResourceManager);
     window.addEventListener("DOMContentLoaded", init);
     class Resource {
         constructor() {
@@ -9,10 +10,8 @@ var ResourceManager;
         }
         serialize() {
             return {
-                [this.constructor.name]: {
-                    idResource: this.idResource,
-                    idReference: (this.reference) ? this.reference.idResource : null
-                }
+                idResource: this.idResource,
+                idReference: (this.reference) ? this.reference.idResource : null
             };
         }
         deserialize(_serialization) {
@@ -22,8 +21,8 @@ var ResourceManager;
             return this;
         }
     }
+    ResourceManager.Resource = Resource;
     function init() {
-        Fudge["Resource"] = Resource;
         // let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         // ƒ.ResourceManager.register(material);
         // let mesh: ƒ.Mesh = new ƒ.MeshPyramid();

@@ -1,6 +1,7 @@
 var NodeResource;
 (function (NodeResource) {
     var ƒ = Fudge;
+    ƒ.Serializer.registerNamespace(NodeResource);
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         ƒ.Debug.log("Start");
@@ -15,8 +16,8 @@ var NodeResource;
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), canvas);
         let center = createCenterAndSatellite();
         // branch.appendChild(center);
-        Fudge["AnimateSatellite"] = NodeResource.AnimateSatellite;
-        console.log(NodeResource.AnimateSatellite["namespaceX"]);
+        // Fudge["AnimateSatellite"] = AnimateSatellite;
+        // console.log(AnimateSatellite["namespaceX"]);
         let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
         let dim = new ƒ.Vector3(0, 0, 0);
         for (let z = -dim.z; z < dim.z + 1; z++)

@@ -543,7 +543,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class Serializer {
-        // private static namespaces: NamespaceRegister = { "ƒ": Fudge };
         static registerNamespace(_namespace) {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -558,7 +557,7 @@ var Fudge;
                     }
                 }
             if (!name)
-                throw ("Namespace not found. Maybe parent namespace hasn't been registered before?");
+                throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
             Serializer.namespaces[name] = _namespace;
         }
         /**
@@ -571,6 +570,8 @@ var Fudge;
             // TODO: save the namespace with the constructors name
             // serialization[_object.constructor.name] = _object.serialize();
             let path = this.getFullPath(_object);
+            if (!path)
+                throw new Error(`Namespace of serializable object of type ${_object.constructor.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
             serialization[path] = _object.serialize();
             return serialization;
             // return _object.serialize();
@@ -618,14 +619,17 @@ var Fudge;
         static reconstruct(_path) {
             let typeName = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace = Serializer.getNamespace(_path);
+            if (!namespace)
+                throw new Error(`Namespace of serializable object of type ${typeName} not found. Maybe the namespace hasn't been registered?`);
             let reconstruction = new namespace[typeName];
             return reconstruction;
         }
         static getFullPath(_object) {
             let typeName = _object.constructor.name;
-            console.log("Searching namespace of: " + typeName);
+            // Debug.log("Searching namespace of: " + typeName);
             for (let namespaceName in Serializer.namespaces) {
-                if (_object instanceof Serializer.namespaces[namespaceName][typeName])
+                let found = Serializer.namespaces[namespaceName][typeName];
+                if (found && _object instanceof found)
                     return namespaceName + "." + typeName;
             }
             return null;
@@ -644,7 +648,8 @@ var Fudge;
     // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
     // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
     /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-    Serializer.namespaces = { "Fudge": Fudge };
+    // private static namespaces: NamespaceRegister = { "Fudge": Fudge };
+    Serializer.namespaces = { "ƒ": Fudge };
     Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
@@ -1289,7 +1294,7 @@ var Fudge;
         static start() {
             if (!Loop.running)
                 Loop.loop(performance.now());
-            console.log("Loop running");
+            Fudge.Debug.log("Loop running");
         }
         static loop(_timestamp) {
             // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
@@ -1393,12 +1398,12 @@ var Fudge;
         }
         static reuse(_instance) {
             let key = _instance.constructor.name;
-            //console.log(key);
+            //Debug.log(key);
             let instances = ObjectManager.depot[key] || [];
             instances.push(_instance);
             ObjectManager.depot[key] = instances;
             // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
-            //console.log(this.depot);
+            //Debug.log(this.depot);
         }
     }
     ObjectManager.depot = {};
@@ -1481,7 +1486,7 @@ var Fudge;
                 let resource = ResourceManager.resources[idResource];
                 if (idResource != resource.idResource)
                     Fudge.Debug.error("Resource-id mismatch", resource);
-                serialization[idResource] = resource.serialize();
+                serialization[idResource] = Fudge.Serializer.serialize(resource);
             }
             return serialization;
         }
@@ -1501,20 +1506,7 @@ var Fudge;
             return ResourceManager.resources;
         }
         static deserializeResource(_serialization) {
-            // TODO: examine, if this could be accomplished using the regular Serializer...
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
+            return Fudge.Serializer.deserialize(_serialization);
         }
     }
     ResourceManager.resources = {};
@@ -1722,7 +1714,7 @@ var Fudge;
             let output = "SceneGraph for this viewport:";
             output += "\n \n";
             output += this.branch.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+            Fudge.Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
         // #region Drawing
         /**
@@ -3322,7 +3314,7 @@ var Fudge;
                     this.addNode(node);
                 }
                 catch (_e) {
-                    console.log(_e);
+                    Fudge.Debug.log(_e);
                 }
             return true;
         }

@@ -1,5 +1,6 @@
-module NodeResource {
+namespace NodeResource {
     import ƒ = Fudge;
+    ƒ.Serializer.registerNamespace(NodeResource);
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
@@ -19,8 +20,8 @@ module NodeResource {
         let center: ƒ.Node = createCenterAndSatellite();
         // branch.appendChild(center);
 
-        Fudge["AnimateSatellite"] = AnimateSatellite;
-        console.log(AnimateSatellite["namespaceX"]);
+        // Fudge["AnimateSatellite"] = AnimateSatellite;
+        // console.log(AnimateSatellite["namespaceX"]);
         let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(center, false);
 
         let dim: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);

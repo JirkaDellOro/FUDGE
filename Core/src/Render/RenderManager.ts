@@ -89,7 +89,7 @@ namespace Fudge {
                     // may fail when some components are missing. TODO: cleanup
                     this.addNode(node);
                 } catch (_e) {
-                    console.log(_e);
+                    Debug.log(_e);
                 }
             return true;
         }

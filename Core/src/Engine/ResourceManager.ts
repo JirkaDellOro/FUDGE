@@ -96,7 +96,7 @@ namespace Fudge {
                 let resource: SerializableResource = ResourceManager.resources[idResource];
                 if (idResource != resource.idResource)
                     Debug.error("Resource-id mismatch", resource);
-                serialization[idResource] = resource.serialize();
+                serialization[idResource] = Serializer.serialize(resource);
             }
             return serialization;
         }
@@ -118,19 +118,7 @@ namespace Fudge {
         }
 
         private static deserializeResource(_serialization: Serialization): SerializableResource {
-            // TODO: examine, if this could be accomplished using the regular Serializer...
-            let reconstruct: Serializable;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new (<General>Fudge)[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return <SerializableResource>reconstruct;
-                }
-            } catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
+            return <SerializableResource>Serializer.deserialize(_serialization);
         }
     }
 }

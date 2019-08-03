@@ -13,12 +13,12 @@ namespace Fudge {
         
         public static reuse(_instance: Object): void {
             let key: string = _instance.constructor.name;
-            //console.log(key);
+            //Debug.log(key);
             let instances: Object[] = ObjectManager.depot[key] || [];
             instances.push(_instance);
             ObjectManager.depot[key] = instances;
             // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
-            //console.log(this.depot);
+            //Debug.log(this.depot);
         }
     }
 }

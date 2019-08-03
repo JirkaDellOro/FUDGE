@@ -2,16 +2,6 @@ namespace NodeResource {
     import ƒ = Fudge;
 
     export class AnimateSatellite extends ƒ.ComponentScript {
-        // @ts-ignore
-        // tslint:disable-next-line: variable-name
-        private static __namespace: string = (function (_namespace: Object): string {
-            for (let prop in window)
-                if (window[prop] == _namespace)
-                    return prop;
-            return null;
-            // @ts-ignore
-        })(arguments[0]);
-
         // tpo: test performance optimization
         private static mtxRotY: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Y(1);
         private static mtxRotX: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_X(5);
@@ -21,7 +11,6 @@ namespace NodeResource {
 
         constructor() {
             super();
-            ƒ.Debug.log(AnimateSatellite.__namespace);
             this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
             this.addEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndRemoveComponent);
         }
