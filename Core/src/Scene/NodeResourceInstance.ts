@@ -10,7 +10,8 @@ namespace Fudge {
 
         constructor(_nodeResource: NodeResource) {
             super("NodeResourceInstance");
-            this.set(_nodeResource);
+            if (_nodeResource)
+                this.set(_nodeResource);
         }
 
         /**

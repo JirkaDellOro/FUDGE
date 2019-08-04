@@ -5,7 +5,6 @@ namespace ScriptSerialization {
 
     function init(): void {
         ƒ.Debug.log("Start");
-        ƒ.RenderManager.initialize();
 
         let root: ƒ.Node = new ƒ.Node("Root");
         let branch: ƒ.Node = new ƒ.Node("Branch");
@@ -14,10 +13,7 @@ namespace ScriptSerialization {
         document.body.appendChild(canvas);
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
         root.appendChild(coSys);
-        root.appendChild(branch);
-
-        let viewport: ƒ.Viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), canvas);
+        // root.appendChild(branch);
 
         let test: ƒ.Node = createTest();
         branch.appendChild(test);
@@ -30,15 +26,11 @@ namespace ScriptSerialization {
         instance.name = "Instance";
         branch.appendChild(instance);
 
-
         let cmpScript: Test = instance.getComponent(Test);
         let mutator: ƒ.Mutator = cmpScript.getMutator();
-        // ƒ.Debug.log("Mutator", mutator);
         mutator.startPosition["x"] = 1;
         cmpScript.mutate(mutator);
 
-
-        update(null);
 
         let srlResources: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
         let srlBranch: ƒ.Serialization = ƒ.Serializer.serialize(branch);
@@ -50,9 +42,28 @@ namespace ScriptSerialization {
         console.log(srlBranch);
         console.groupEnd();
 
+        console.group("Serialization/Deserialization");
+        ƒ.Debug.log("Original branch", branch);
+        let json: string = ƒ.Serializer.stringify(srlBranch);
+        console.groupCollapsed("Json");
+        ƒ.Debug.log("JSON", json);
+        console.groupEnd();
+        let parsed: ƒ.Serialization = ƒ.Serializer.parse(json);
+        ƒ.Debug.log("Parsed", parsed);
+        let reconstruct: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(parsed);
+        ƒ.Debug.log("Reconstructed branch", reconstruct);
+        console.groupEnd();
+        
+        root.appendChild(reconstruct);
+
+        ƒ.RenderManager.initialize();
+        let viewport: ƒ.Viewport = new ƒ.Viewport();
+        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), canvas);
         // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
         // ƒ.Loop.start();
+        Compare.compare(branch, reconstruct);
 
+        update(null);
         function update(_event: Event): void {
             ƒ.RenderManager.update();
             viewport.draw();

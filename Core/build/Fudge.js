@@ -3967,7 +3967,8 @@ var Fudge;
             /** id of the resource that instance was created from */
             // TODO: examine, if this should be a direct reference to the NodeResource, instead of the id
             this.idSource = undefined;
-            this.set(_nodeResource);
+            if (_nodeResource)
+                this.set(_nodeResource);
         }
         /**
          * Recreate this node from the [[NodeResource]] referenced
