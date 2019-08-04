@@ -434,6 +434,8 @@ declare namespace Fudge {
      */
     class ComponentScript extends Component {
         constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -592,9 +594,9 @@ declare namespace Fudge {
         COMPONENT_ADD = "componentAdd",
         /** dispatched to a [[Component]] when its being removed from a [[Node]] */
         COMPONENT_REMOVE = "componentRemove",
-        /** dispatched to a [[Component]] when its being added to a [[Node]] */
+        /** dispatched to a [[Component]] when its being activated */
         COMPONENT_ACTIVATE = "componentActivate",
-        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
+        /** dispatched to a [[Component]] when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
         CHILD_APPEND = "childAdd",
@@ -605,7 +607,13 @@ declare namespace Fudge {
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
-        FOCUS_OUT = "focusout"
+        FOCUS_OUT = "focusout",
+        /** dispatched to [[Node]] when it's done serializing */
+        NODE_SERIALIZED = "nodeSerialized",
+        /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
+        NODE_DESERIALIZED = "nodeDeserialized",
+        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -1765,6 +1773,8 @@ declare namespace Fudge {
          * Recreate this node from the [[NodeResource]] referenced
          */
         reset(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         /**
          * Set this node to be a recreation of the [[NodeResource]] given
          * @param _nodeResource

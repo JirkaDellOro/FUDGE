@@ -21,6 +21,19 @@ namespace Fudge {
             this.set(resource);
         }
 
+        //TODO: optimize using the referenced NodeResource, serialize/deserialize only the differences
+        public serialize(): Serialization {
+            let serialization: Serialization = super.serialize();
+            serialization.idSource = this.idSource;
+            return serialization;
+        }
+
+        public deserialize(_serialization: Serialization): Serializable {
+            super.deserialize(_serialization);
+            this.idSource = _serialization.idSource;
+            return this;
+        }
+
         /**
          * Set this node to be a recreation of the [[NodeResource]] given
          * @param _nodeResource
@@ -34,8 +47,9 @@ namespace Fudge {
                 break;
             }
             this.idSource = _nodeResource.idResource;
+            this.dispatchEvent(new Event(EVENT.NODERESOURCE_INSTANTIATED));
         }
 
-        //TODO: serialize/deserialize using the referenced NodeResource!
+
     }
 }

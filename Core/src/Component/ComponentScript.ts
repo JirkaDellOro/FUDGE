@@ -8,5 +8,14 @@ namespace Fudge {
             super();
             this.singleton = false;
         }
+
+        public serialize(): Serialization {
+            return this.getMutator();
+        }
+
+        public deserialize(_serialization: Serialization): Serializable {
+            this.mutate(_serialization);
+            return this;
+        }
     }
 }

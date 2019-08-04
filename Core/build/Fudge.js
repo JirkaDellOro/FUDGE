@@ -1018,6 +1018,13 @@ var Fudge;
             super();
             this.singleton = false;
         }
+        serialize() {
+            return this.getMutator();
+        }
+        deserialize(_serialization) {
+            this.mutate(_serialization);
+            return this;
+        }
     }
     Fudge.ComponentScript = ComponentScript;
 })(Fudge || (Fudge = {}));
@@ -3795,8 +3802,6 @@ var Fudge;
         serialize() {
             let serialization = {
                 name: this.name
-                // TODO: serialize references, does parent need to be serialized at all?
-                //parent: this.parent
             };
             let components = {};
             for (let type in this.components) {
@@ -3812,22 +3817,24 @@ var Fudge;
                 children.push(Fudge.Serializer.serialize(child));
             }
             serialization["children"] = children;
-            // return { [this.constructor.name]: serialization };
+            this.dispatchEvent(new Event("nodeSerialized" /* NODE_SERIALIZED */));
             return serialization;
         }
         deserialize(_serialization) {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
+            // deserialize components first so scripts can react to children being appended
             for (let type in _serialization.components) {
                 for (let serializedComponent of _serialization.components[type]) {
                     let deserializedComponent = Fudge.Serializer.deserialize(serializedComponent);
                     this.addComponent(deserializedComponent);
                 }
             }
+            for (let serializedChild of _serialization.children) {
+                let deserializedChild = Fudge.Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
+            this.dispatchEvent(new Event("nodeDeserialized" /* NODE_DESERIALIZED */));
             return this;
         }
         // #endregion
@@ -3969,6 +3976,17 @@ var Fudge;
             let resource = Fudge.ResourceManager.get(this.idSource);
             this.set(resource);
         }
+        //TODO: optimize using the referenced NodeResource, serialize/deserialize only the differences
+        serialize() {
+            let serialization = super.serialize();
+            serialization.idSource = this.idSource;
+            return serialization;
+        }
+        deserialize(_serialization) {
+            super.deserialize(_serialization);
+            this.idSource = _serialization.idSource;
+            return this;
+        }
         /**
          * Set this node to be a recreation of the [[NodeResource]] given
          * @param _nodeResource
@@ -3982,6 +4000,7 @@ var Fudge;
                 break;
             }
             this.idSource = _nodeResource.idResource;
+            this.dispatchEvent(new Event("nodeResourceInstantiated" /* NODERESOURCE_INSTANTIATED */));
         }
     }
     Fudge.NodeResourceInstance = NodeResourceInstance;

@@ -219,8 +219,6 @@ namespace Fudge {
         public serialize(): Serialization {
             let serialization: Serialization = {
                 name: this.name
-                // TODO: serialize references, does parent need to be serialized at all?
-                //parent: this.parent
             };
 
             let components: Serialization = {};
@@ -239,7 +237,7 @@ namespace Fudge {
             }
             serialization["children"] = children;
 
-            // return { [this.constructor.name]: serialization };
+            this.dispatchEvent(new Event(EVENT.NODE_SERIALIZED));
             return serialization;
         }
 
@@ -247,11 +245,7 @@ namespace Fudge {
             this.name = _serialization.name;
             // this.parent = is set when the nodes are added
 
-            for (let serializedChild of _serialization.children) {
-                let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
-                this.appendChild(deserializedChild);
-            }
-
+            // deserialize components first so scripts can react to children being appended
             for (let type in _serialization.components) {
                 for (let serializedComponent of _serialization.components[type]) {
                     let deserializedComponent: Component = <Component>Serializer.deserialize(serializedComponent);
@@ -259,6 +253,12 @@ namespace Fudge {
                 }
             }
 
+            for (let serializedChild of _serialization.children) {
+                let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
+                this.appendChild(deserializedChild);
+            }
+
+            this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
             return this;
         }
         // #endregion
