@@ -351,7 +351,7 @@ var GoldenLayoutTest;
         });
         myLayout.on('rotate-button', function () {
             image.classList.add("cube_gizmo");
-            image.src = "Cube_rotationGizmo1.png";
+            image.src = "Cube_rotationGizmo3.png";
         });
         myLayout.on('hide-button', function () {
             image.classList.toggle("folded");
@@ -558,18 +558,9 @@ var GoldenLayoutTest;
             fieldset_container.append(fieldset_script);
         });
         add_content.append(item_script);
-        let item_pyramid = document.createElement("a");
-        item_pyramid.innerHTML = "Add Pyramid";
-        add_content.append(item_pyramid);
-        let item_cylinder = document.createElement("a");
-        item_cylinder.innerHTML = "Add Cylinder";
-        add_content.append(item_cylinder);
-        let item_Capsule = document.createElement("a");
-        item_Capsule.innerHTML = "Add Capsule";
-        add_content.append(item_Capsule);
-        let item_plane = document.createElement("a");
-        item_plane.innerHTML = "Add Plane";
-        add_content.append(item_plane);
+        let item_material = document.createElement("a");
+        item_material.innerHTML = "Add Material Component";
+        add_content.append(item_material);
         let add_button = document.createElement("button");
         add_button.classList.add("addnodebutton");
         add_button.id = "add_button";
@@ -577,6 +568,7 @@ var GoldenLayoutTest;
         add_button.addEventListener("click", function () {
             add_content.classList.toggle("show");
         });
+        //please work
         dropdown_add.append(add_button);
         dropdown_add.append(add_content);
         window.addEventListener("click", function (_event) {

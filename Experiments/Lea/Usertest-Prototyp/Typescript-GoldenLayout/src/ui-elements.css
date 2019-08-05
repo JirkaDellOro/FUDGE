@@ -4,6 +4,11 @@ a {
     color: white;
 }
 
+.dropdown-content {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: black;
+}
 /*tooltips*/
 .tooltip .tooltiptext {
     visibility: hidden;
