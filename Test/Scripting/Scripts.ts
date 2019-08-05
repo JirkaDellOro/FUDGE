@@ -9,7 +9,7 @@ namespace Scripts {
         constructor() {
             super();
             this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
-            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using concentional function
+            this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using conventional function
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.hndLoopFrame);  // when using arrow-function
             this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }

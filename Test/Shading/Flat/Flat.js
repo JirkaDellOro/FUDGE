@@ -6,7 +6,7 @@ var TextureTest;
         let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
         let material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
         let cube = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
-        cube.cmpTransform.local.translate(ƒ.Vector3.ZERO);
+        cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         let branch = new ƒ.Node("Branch");
         branch.appendChild(cube);
         ƒ.RenderManager.initialize();

@@ -1,6 +1,36 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
-This readme-file describes in a few words the contents of each log and the major issues discussed  
+This readme-file describes in a few words the contents of each log and the major issues discussed 
+
+
+# July 25th 2019
+after the presentation of the usertest results it was decided to rename the menu bar item "window" into "layout" and the "editor" menu item into "window".
+To do until big megre: Styleguide and assets for all elements.
+
+# July 25th 2019
+[Whiteboard](190725_Whiteboard.jpg) | [Notes](190726_NotesOnResourceSerialization.jpg)
+## Serialization
+Lukas and Jirka discuss how to separate resources, that are referenced multiple time, from single instances of objects referencing those resources when serializing FUDGE data. Conclusion was to try an approach using an additional interface "Resource" that simply requires an implementation of an id for a resource (should be called `idResource`). This way the serializer can test an object for being a resource, fetch its id and use this to complete the serialization of the referencing object or, if id is yet undefined, serialize that resource first, save it to a resource area (depending on the structure to save serialization to), create the id and then do the above. Instead of using just a random number as id, the id may carry more information such as the type of resource, the name or the date of creation.   
+Serializer, a static class at this point of time, should support serializer instances, so that multpiple serializers can hold data, and contain the logic for the separation. Serializables should remain as stupid as possible.
+## Network
+Falco showed the basic datachannel connection established via Signaling Server. It'S functioning and pretty stable, therefore the next steps can happen. Next step being: Creating an authoritative Server, where every client creates a datachannel connection with and to the Server only. No Peer To Peer outside of that. 
+The question of "does the server code need to be a seperate application running outside the game or not?" came up. Server and Clientcode can be derived from another class "NetworkClient" which, when implemented by a node, subscribes the node to networkevents. Futher seperation can be achieved by a simple boolean. Hosting is then possible, having a player run the serverlogic while playing at the same time
+Next the topic of identifying Networked Nodes came up. How the ID is assigned requires experimenting, most likely the server will assign unique IDs based on the commands it gets. Nodes that exist on game-start can simply have iterating IDs.
+On that note: How do objects handle NetworkCommands? We arrived at the conclusion that event-driven command logic might be a good solution. Not every potential network-object has to subscribe, only the parents node. Searching a childnode by ID can be handled by the parent node, minimizing the event-subscriptions. 
+Destroying objects might become tricky, because JavaScript has no Destructor and using an ObjectManager can block GarbageCollection, making it non-viable.
+For now we do layercake. Next step is working ahtoritative server, then figuring out how best to assign IDs to networked objects. Once that is done, first syncing experiments can be done, which will allow networked games on a rudimentary level.  
+
+Addition by Jirka: an idea is to Subclass ComponentScript to ComponentScriptServer and ComponentScriptClient. To do networking, either or both must be used on the appropriate nodes and again subclassed and network-ids are automatically given to only those nodes.
+
+## UI: 
+After pre-discussing the Usertest, we talked about whether it would be more practical to use a single "FUDGE" Window that encompases all the editors, or if multiple Editor Windows would be more sensible. 
+We concluded that a multi-window approach could be best, as it gives some speration between the editor contexts but further research into whether something like that is even possible needs to be done first.
+
+The "foldable" buttons should be replaced with something stylable by CSS. The "label" and "event" icons will be replaced with their icons derived from UML.
+The fieldsets from the animation editor should be smaller and the next frame has the hotkey next frame button + Ctrl.
+
+Monika: is communication via multiple windows (editors) possible in electron? 
+        inspector values can annd should be broken down into exponentials -> num, to exponential
 
 # July 18th 2019
 The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_NotizenLS))

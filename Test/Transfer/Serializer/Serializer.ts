@@ -6,11 +6,12 @@ namespace TestSerializer {
     function init(): void {
         Scenes.createMiniScene();
 
+        let mutator: ƒ.Mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
+        ƒ.Debug.log(mutator);
         let result: ƒ.Serializable = testSerialization(Scenes.node);
-        console.groupCollapsed("Comparison");
+        console.group("Comparison");
         Compare.compare(Scenes.node, result);
-        console.groupEnd();
-        
+        console.groupEnd();   
     }
 
     function testSerialization(_object: ƒ.Serializable): ƒ.Serializable {
@@ -24,12 +25,12 @@ namespace TestSerializer {
         console.groupEnd();
 
         console.groupCollapsed("Stringified");
-        let json: string = JSON.stringify(serialization, null, 2);
+        let json: string = ƒ.Serializer.stringify(serialization);
         console.log(json);
         console.groupEnd();
 
         console.group("Parsed");
-        serialization = JSON.parse(json);
+        serialization = ƒ.Serializer.parse(json);
         console.log(serialization);
         console.groupEnd();
 

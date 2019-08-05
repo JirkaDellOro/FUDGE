@@ -106,7 +106,7 @@ declare namespace Fudge {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    class RenderOperator {
+    abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
         /**
@@ -220,19 +220,86 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
-    class Serializer {
+    /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created,
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
+    abstract class Serializer {
+        /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+        private static namespaces;
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace
+         */
+        static registerNamespace(_namespace: Object): void;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
          */
         static serialize(_object: Serializable): Serialization;
         /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
          * including attached components, children, superclass-objects
          * @param _serialization
          */
         static deserialize(_serialization: Serialization): Serializable;
+        static prettify(_json: string): string;
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        static stringify(_serialization: Serialization): string;
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json
+         */
+        static parse(_json: string): Serialization;
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
+         * @param _path
+         */
+        private static reconstruct;
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object
+         */
+        private static getFullPath;
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
+        private static getNamespace;
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace
+         * @param _parent
+         */
+        private static findNamespaceIn;
     }
 }
 declare namespace Fudge {
@@ -367,6 +434,8 @@ declare namespace Fudge {
      */
     class ComponentScript extends Component {
         constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {
@@ -525,6 +594,10 @@ declare namespace Fudge {
         COMPONENT_ADD = "componentAdd",
         /** dispatched to a [[Component]] when its being removed from a [[Node]] */
         COMPONENT_REMOVE = "componentRemove",
+        /** dispatched to a [[Component]] when its being activated */
+        COMPONENT_ACTIVATE = "componentActivate",
+        /** dispatched to a [[Component]] when its being deactivated */
+        COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
         CHILD_APPEND = "childAdd",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
@@ -534,7 +607,13 @@ declare namespace Fudge {
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
         /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
-        FOCUS_OUT = "focusout"
+        FOCUS_OUT = "focusout",
+        /** dispatched to [[Node]] when it's done serializing */
+        NODE_SERIALIZED = "nodeSerialized",
+        /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
+        NODE_DESERIALIZED = "nodeDeserialized",
+        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -549,9 +628,6 @@ declare namespace Fudge {
     }
     const enum EVENT_WHEEL {
         WHEEL = "\u0192wheel"
-    }
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ);
     }
     class PointerEventƒ extends PointerEvent {
         pointerX: number;
@@ -602,9 +678,10 @@ declare namespace Fudge {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Material implements Serializable {
+    class Material implements SerializableResource {
         /** The name to call the Material by. */
         name: string;
+        idResource: string;
         private shaderType;
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
@@ -636,120 +713,78 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface MapClassToComponents {
-        [className: string]: Component[];
+    /**
+     * Keeps a depot of objects that have been marked for reuse, sorted by type.
+     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     */
+    abstract class ObjectManager {
+        private static depot;
+        /**
+         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * @param _T The class identifier of the desired object
+         */
+        static create<T>(_T: new () => T): T;
+        /**
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * @param _instance
+         */
+        static reuse(_instance: Object): void;
+    }
+}
+declare namespace Fudge {
+    interface SerializableResource extends Serializable {
+        idResource: string;
+    }
+    interface Resources {
+        [idResource: string]: SerializableResource;
+    }
+    interface SerializationOfResources {
+        [idResource: string]: Serialization;
     }
     /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Static class handling the resources used with the current FUDGE-instance.
+     * Keeps a list of the resources and generates ids to retrieve them.
+     * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    class Node extends EventTarget implements Serializable {
-        name: string;
-        mtxWorld: Matrix4x4;
-        timestampUpdate: number;
-        private parent;
-        private children;
-        private components;
-        private listeners;
-        private captures;
+    abstract class ResourceManager {
+        static resources: Resources;
+        static serialization: SerializationOfResources;
         /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
+         * Generates an id for the resources and registers it with the list of resources
+         * @param _resource
          */
-        constructor(_name: string);
+        static register(_resource: SerializableResource): void;
         /**
-         * Returns a reference to this nodes parent node
+         * Generate a user readable and unique id using the type of the resource, the date and random numbers
+         * @param _resource
          */
-        getParent(): Node | null;
+        static generateId(_resource: SerializableResource): string;
         /**
-         * Traces back the ancestors of this node and returns the first
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
          */
-        getAncestor(): Node | null;
+        static isResource(_object: Serializable): boolean;
         /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         * Retrieves the resource stored with the given id
+         * @param _idResource
          */
-        readonly cmpTransform: ComponentTransform;
+        static get(_idResource: string): SerializableResource;
         /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Returns null if no [[ComponentTransform]] is attached
+         * Creates and registers a resource from a [[Node]], copying the complete branch starting with it
+         * @param _node A node to create the resource from
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
          */
+        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): NodeResource;
         /**
-         * Returns a clone of the list of children
+         * Serialize all resources
          */
-        getChildren(): Node[];
+        static serialize(): SerializationOfResources;
         /**
-         * Returns an array of references to childnodes with the supplied name.
-         * @param _name The name of the nodes to be found.
-         * @return An array with references to nodes
+         * Create resources from a serialization, deleting all resources previously registered
+         * @param _serialization
          */
-        getChildrenByName(_name: string): Node[];
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @param _node The node to be added as a child
-         * @throws Error when trying to add an ancestor of this
-         */
-        appendChild(_node: Node): void;
-        /**
-         * Removes the reference to the give node from the list of children
-         * @param _node The node to be removed.
-         */
-        removeChild(_node: Node): void;
-        /**
-         * Generator yielding the node and all successors in the branch below for iteration
-         */
-        readonly branch: IterableIterator<Node>;
-        isUpdated(_timestampUpdate: number): boolean;
-        /**
-         * Returns a clone of the list of components of the given class attached this node.
-         * @param _class The class of the components to be found.
-         */
-        getComponents<T extends Component>(_class: typeof Component): T[];
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
-         */
-        getComponent<T extends Component>(_class: typeof Component): T;
-        /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component: Component): void;
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
-         */
-        removeComponent(_component: Component): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         * @param _event The event to dispatch
-         */
-        dispatchEvent(_event: Event): boolean;
-        /**
-         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
-         */
-        broadcastEvent(_event: Event): void;
-        private broadcastEventRecursive;
-        /**
-         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
-         * @param _parent The parent to be set for this node.
-         */
-        private setParent;
-        private getBranchGenerator;
+        static deserialize(_serialization: SerializationOfResources): Resources;
+        private static deserializeResource;
     }
 }
 declare namespace Fudge {
@@ -939,6 +974,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class KeyboardEventƒ extends KeyboardEvent {
+        constructor(type: string, _event: KeyboardEventƒ);
+    }
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
      */
@@ -1242,7 +1280,7 @@ declare namespace Fudge {
         static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
-         * @param _matrix Tha matrix to compute the inverse of.
+         * @param _matrix The matrix to compute the inverse of.
          */
         static INVERSION(_matrix: Matrix4x4): Matrix4x4;
         /**
@@ -1364,7 +1402,8 @@ declare namespace Fudge {
         static X(_scale?: number): Vector3;
         static Y(_scale?: number): Vector3;
         static Z(_scale?: number): Vector3;
-        static readonly ZERO: Vector3;
+        static ZERO(): Vector3;
+        static ONE(_scale?: number): Vector3;
         static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
         static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
@@ -1413,16 +1452,17 @@ declare namespace Fudge {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Mesh implements Serializable {
+    abstract class Mesh implements SerializableResource {
         vertices: Float32Array;
         indices: Uint16Array;
         textureUVs: Float32Array;
         normalsFace: Float32Array;
+        idResource: string;
         static getBufferSpecification(): BufferSpecification;
         getVertexCount(): number;
         getIndexCount(): number;
-        abstract serialize(): Serialization;
-        abstract deserialize(_serialization: Serialization): Serializable;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         abstract create(): void;
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
@@ -1444,8 +1484,6 @@ declare namespace Fudge {
     class MeshCube extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -1466,8 +1504,6 @@ declare namespace Fudge {
     class MeshPyramid extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -1487,8 +1523,6 @@ declare namespace Fudge {
     class MeshQuad extends Mesh {
         constructor();
         create(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -1501,7 +1535,7 @@ declare namespace Fudge {
      * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
-    class RenderManager extends RenderOperator {
+    abstract class RenderManager extends RenderOperator {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -1588,6 +1622,164 @@ declare namespace Fudge {
          * @param _creator
          */
         private static createReference;
+    }
+}
+declare namespace Fudge {
+    interface MapClassToComponents {
+        [className: string]: Component[];
+    }
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Node extends EventTarget implements Serializable {
+        name: string;
+        mtxWorld: Matrix4x4;
+        timestampUpdate: number;
+        private parent;
+        private children;
+        private components;
+        private listeners;
+        private captures;
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name: string);
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor(): Node | null;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
+        readonly cmpTransform: ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Returns null if no [[ComponentTransform]] is attached
+         */
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren(): Node[];
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         * @param _name The name of the nodes to be found.
+         * @return An array with references to nodes
+         */
+        getChildrenByName(_name: string): Node[];
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @param _node The node to be added as a child
+         * @throws Error when trying to add an ancestor of this
+         */
+        appendChild(_node: Node): void;
+        /**
+         * Removes the reference to the give node from the list of children
+         * @param _node The node to be removed.
+         */
+        removeChild(_node: Node): void;
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _node The node to be found.
+         */
+        findChild(_node: Node): number;
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        replaceChild(_replace: Node, _with: Node): boolean;
+        /**
+         * Generator yielding the node and all successors in the branch below for iteration
+         */
+        readonly branch: IterableIterator<Node>;
+        isUpdated(_timestampUpdate: number): boolean;
+        /**
+         * Returns a clone of the list of components of the given class attached this node.
+         * @param _class The class of the components to be found.
+         */
+        getComponents<T extends Component>(_class: typeof Component): T[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent<T extends Component>(_class: typeof Component): T;
+        /**
+         * Adds the supplied component into the nodes component map.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component: Component): void;
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
+         * @throws Exception when component is not found
+         */
+        removeComponent(_component: Component): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event: Event): void;
+        private broadcastEventRecursive;
+        /**
+         * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
+         * @param _parent The parent to be set for this node.
+         */
+        private setParent;
+        private getBranchGenerator;
+    }
+}
+declare namespace Fudge {
+    /**
+     * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
+     */
+    class NodeResource extends Node implements SerializableResource {
+        idResource: string;
+    }
+}
+declare namespace Fudge {
+    /**
+     * An instance of a [[NodeResource]].
+     * This node keeps a reference to its resource an can thus optimize serialization
+     */
+    class NodeResourceInstance extends Node {
+        /** id of the resource that instance was created from */
+        private idSource;
+        constructor(_nodeResource: NodeResource);
+        /**
+         * Recreate this node from the [[NodeResource]] referenced
+         */
+        reset(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        /**
+         * Set this node to be a recreation of the [[NodeResource]] given
+         * @param _nodeResource
+         */
+        private set;
     }
 }
 declare namespace Fudge {

@@ -1,4 +1,4 @@
-///<reference path="../Events/Event.ts"/>
+///<reference path="../Event/Event.ts"/>
 namespace Fudge {
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
@@ -12,7 +12,7 @@ namespace Fudge {
         public static start(): void {
             if (!Loop.running)
                 Loop.loop(performance.now());
-            console.log("Loop running");
+            Debug.log("Loop running");
         }
         private static loop(_timestamp: number): void {
             // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default

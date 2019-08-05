@@ -4,8 +4,10 @@ var TestSerializer;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         Scenes.createMiniScene();
+        let mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
+        ƒ.Debug.log(mutator);
         let result = testSerialization(Scenes.node);
-        console.groupCollapsed("Comparison");
+        console.group("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
     }
@@ -18,11 +20,11 @@ var TestSerializer;
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Stringified");
-        let json = JSON.stringify(serialization, null, 2);
+        let json = ƒ.Serializer.stringify(serialization);
         console.log(json);
         console.groupEnd();
         console.group("Parsed");
-        serialization = JSON.parse(json);
+        serialization = ƒ.Serializer.parse(json);
         console.log(serialization);
         console.groupEnd();
         console.group("Reconstructed");

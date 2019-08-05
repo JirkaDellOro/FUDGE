@@ -89,6 +89,14 @@
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">Node</span>
+								<ul class="tsd-hierarchy">
+									<li>
+										<a href="fudge.noderesource.html" class="tsd-signature-type">NodeResource</a>
+									</li>
+									<li>
+										<a href="fudge.noderesourceinstance.html" class="tsd-signature-type">NodeResourceInstance</a>
+									</li>
+								</ul>
 							</li>
 						</ul>
 					</li>
@@ -115,6 +123,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.node.html#mtxworld" class="tsd-kind-icon">mtx<wbr>World</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.node.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudge.node.html#timestampupdate" class="tsd-kind-icon">timestamp<wbr>Update</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.node.html#eventtarget" class="tsd-kind-icon">Event<wbr>Target</a></li>
 							</ul>
 						</section>
@@ -134,15 +143,18 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#broadcastevent" class="tsd-kind-icon">broadcast<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudge.node.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#findchild" class="tsd-kind-icon">find<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#getancestor" class="tsd-kind-icon">get<wbr>Ancestor</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#getchildren" class="tsd-kind-icon">get<wbr>Children</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#getchildrenbyname" class="tsd-kind-icon">get<wbr>Children<wbr>ByName</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="fudge.node.html#getcomponent" class="tsd-kind-icon">get<wbr>Component</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="fudge.node.html#getcomponents" class="tsd-kind-icon">get<wbr>Components</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#isupdated" class="tsd-kind-icon">is<wbr>Updated</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#removechild" class="tsd-kind-icon">remove<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#removecomponent" class="tsd-kind-icon">remove<wbr>Component</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudge.node.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#replacechild" class="tsd-kind-icon">replace<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudge.node.html#serialize" class="tsd-kind-icon">serialize</a></li>
 							</ul>
 						</section>
@@ -161,7 +173,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L19">Engine/Node.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L21">Scene/Node.ts:21</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -193,7 +205,7 @@
 					<div class="tsd-signature tsd-kind-icon">mtx<wbr>World<span class="tsd-signature-symbol">:</span> <a href="fudge.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a><span class="tsd-signature-symbol"> =&nbsp;Matrix4x4.IDENTITY</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L12">Engine/Node.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L12">Scene/Node.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -203,7 +215,17 @@
 					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L11">Engine/Node.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L11">Scene/Node.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="timestampupdate" class="tsd-anchor"></a>
+					<h3>timestamp<wbr>Update</h3>
+					<div class="tsd-signature tsd-kind-icon">timestamp<wbr>Update<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L13">Scene/Node.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -253,7 +275,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L124">Engine/Node.ts:124</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L152">Scene/Node.ts:152</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -275,7 +297,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L50">Engine/Node.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L52">Scene/Node.ts:52</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -300,7 +322,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L152">Engine/Node.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L184">Scene/Node.ts:184</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -332,7 +354,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventTarget.addEventListener</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L242">Engine/Node.ts:242</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L274">Scene/Node.ts:274</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -376,7 +398,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L89">Engine/Node.ts:89</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L91">Scene/Node.ts:91</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -412,7 +434,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L305">Engine/Node.ts:305</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L337">Scene/Node.ts:337</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -445,7 +467,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L212">Engine/Node.ts:212</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L246">Scene/Node.ts:246</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -469,7 +491,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides EventTarget.dispatchEvent</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L260">Engine/Node.ts:260</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L292">Scene/Node.ts:292</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -493,6 +515,37 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="findchild" class="tsd-anchor"></a>
+					<h3>find<wbr>Child</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">find<wbr>Child<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L127">Scene/Node.ts:127</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the position of the node in the list of children or -1 if not found</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_node: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The node to be found.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="getancestor" class="tsd-anchor"></a>
 					<h3>get<wbr>Ancestor</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -502,7 +555,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L40">Engine/Node.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L42">Scene/Node.ts:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -527,7 +580,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L70">Engine/Node.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L72">Scene/Node.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -549,7 +602,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L78">Engine/Node.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L80">Scene/Node.ts:80</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -581,7 +634,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L141">Engine/Node.ts:141</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L173">Scene/Node.ts:173</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -618,7 +671,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L134">Engine/Node.ts:134</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L166">Scene/Node.ts:166</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -655,7 +708,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L33">Engine/Node.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L35">Scene/Node.ts:35</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -671,6 +724,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="isupdated" class="tsd-anchor"></a>
+					<h3>is<wbr>Updated</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Updated<span class="tsd-signature-symbol">(</span>_timestampUpdate<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L156">Scene/Node.ts:156</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_timestampUpdate: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="removechild" class="tsd-anchor"></a>
 					<h3>remove<wbr>Child</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -680,7 +756,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L111">Engine/Node.ts:111</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L113">Scene/Node.ts:113</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -711,7 +787,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L171">Engine/Node.ts:171</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L203">Scene/Node.ts:203</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -773,6 +849,43 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="replacechild" class="tsd-anchor"></a>
+					<h3>replace<wbr>Child</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">replace<wbr>Child<span class="tsd-signature-symbol">(</span>_replace<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a>, _with<span class="tsd-signature-symbol">: </span><a href="fudge.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L136">Scene/Node.ts:136</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Replaces a child node with another, preserving the position in the list of children</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_replace: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The node to be replaced</p>
+									</div>
+								</li>
+								<li>
+									<h5>_with: <a href="fudge.node.html" class="tsd-signature-type">Node</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The node to replace with</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="serialize" class="tsd-anchor"></a>
 					<h3>serialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -783,7 +896,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudge.serializable.html">Serializable</a>.<a href="../interfaces/fudge.serializable.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Engine/Node.ts#L187">Engine/Node.ts:187</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Scene/Node.ts#L219">Scene/Node.ts:219</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
@@ -819,6 +932,9 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudge.node.html#name" class="tsd-kind-icon">name</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudge.node.html#timestampupdate" class="tsd-kind-icon">timestamp<wbr>Update</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.node.html#eventtarget" class="tsd-kind-icon">Event<wbr>Target</a>
 							</li>
@@ -847,6 +963,9 @@
 								<a href="fudge.node.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.node.html#findchild" class="tsd-kind-icon">find<wbr>Child</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.node.html#getancestor" class="tsd-kind-icon">get<wbr>Ancestor</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -865,6 +984,9 @@
 								<a href="fudge.node.html#getparent" class="tsd-kind-icon">get<wbr>Parent</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.node.html#isupdated" class="tsd-kind-icon">is<wbr>Updated</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.node.html#removechild" class="tsd-kind-icon">remove<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -872,6 +994,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudge.node.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudge.node.html#replacechild" class="tsd-kind-icon">replace<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudge.node.html#serialize" class="tsd-kind-icon">serialize</a>

@@ -1,5 +1,7 @@
 namespace ObjectManagerTest {
     export class ObjectManager {
+        private static depot: {} = {};
+
         public static create<T>(_T: new () => T): T {
             let key: string = _T.name;
             let instances: Object[] = this.depot[key];
@@ -16,7 +18,5 @@ namespace ObjectManagerTest {
             this.depot[key] = instances;
             //console.log(this.depot);
         }
-
-        private static depot: {} = {};
     }
 }

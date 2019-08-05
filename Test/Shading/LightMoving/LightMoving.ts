@@ -8,7 +8,7 @@ namespace TextureTest {
         let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.local.translate(ƒ.Vector3.ZERO);
+        body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
         let lights: ƒ.Node = new ƒ.Node("Lights");

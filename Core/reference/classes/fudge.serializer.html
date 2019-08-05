@@ -69,6 +69,34 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Handles the external serialization and deserialization of <a href="../interfaces/fudge.serializable.html">Serializable</a> objects. The internal process is handled by the objects themselves.
+							A <a href="../interfaces/fudge.serialization.html">Serialization</a> object can be created from a <a href="../interfaces/fudge.serializable.html">Serializable</a> object and a JSON-String may be created from that.
+						Vice versa, a JSON-String can be parsed to a <a href="../interfaces/fudge.serialization.html">Serialization</a> which can be deserialized to a <a href="../interfaces/fudge.serializable.html">Serializable</a> object.</p>
+						<pre><code class="language-plaintext"> [Serializable] → (serialize) → [Serialization] → (stringify)
+                                                       ↓
+                                                   [String]
+                                                       ↓
+ [Serializable] ← (deserialize) ← [Serialization] ← (parse)</code></pre>
+						<p>While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+						the <a href="fudge.serializer.html">Serializer</a> keeps track of the namespaces and classes in order to recreate <a href="../interfaces/fudge.serializable.html">Serializable</a> objects. The general structure of a <a href="../interfaces/fudge.serialization.html">Serialization</a> is as follows</p>
+						<pre><code class="language-plaintext">{
+     namespaceName.className: {
+         propertyName: propertyValue,
+         ...,
+         propertyNameOfReference: SerializationOfTheReferencedObject,
+         ...,
+         constructorNameOfSuperclass: SerializationOfSuperClass
+     }
+}</code></pre>
+						<p>Since the instance of the superclass is created automatically when an object is created,
+							the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+						The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -85,7 +113,11 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#parse" class="tsd-kind-icon">parse</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#prettify" class="tsd-kind-icon">prettify</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#registernamespace" class="tsd-kind-icon">register<wbr>Namespace</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.serializer.html#stringify" class="tsd-kind-icon">stringify</a></li>
 							</ul>
 						</section>
 					</div>
@@ -103,12 +135,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Transfer/Serializer.ts#L33">Transfer/Serializer.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L97">Transfer/Serializer.ts:97</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+									<p>Returns a FUDGE-object reconstructed from the information in the <a href="../interfaces/fudge.serialization.html">Serialization</a> given,
 									including attached components, children, superclass-objects</p>
 								</div>
 							</div>
@@ -125,6 +157,89 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="parse" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> parse</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">parse<span class="tsd-signature-symbol">(</span>_json<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L131">Transfer/Serializer.ts:131</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a <a href="../interfaces/fudge.serialization.html">Serialization</a> created from the given JSON-String. Result may be passed to <a href="fudge.serializer.html">Serializer</a>.deserialize</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_json: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="prettify" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> prettify</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">prettify<span class="tsd-signature-symbol">(</span>_json<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L114">Transfer/Serializer.ts:114</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_json: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="registernamespace" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> register<wbr>Namespace</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">register<wbr>Namespace<span class="tsd-signature-symbol">(</span>_namespace<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L53">Transfer/Serializer.ts:53</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Registers a namespace to the <a href="fudge.serializer.html">Serializer</a>, to enable automatic instantiation of classes defined within</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_namespace: <span class="tsd-signature-type">Object</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="serialize" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> serialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -134,7 +249,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Transfer/Serializer.ts#L22">Transfer/Serializer.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L80">Transfer/Serializer.ts:80</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -148,11 +263,41 @@
 								<li>
 									<h5>_object: <a href="../interfaces/fudge.serializable.html" class="tsd-signature-type">Serializable</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>An object to serialize, implementing the Serializable interface</p>
+										<p>An object to serialize, implementing the <a href="../interfaces/fudge.serializable.html">Serializable</a> interface</p>
 									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="stringify" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> stringify</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">stringify<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Transfer/Serializer.ts#L120">Transfer/Serializer.ts:120</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by <a href="fudge.serializer.html">Serializer</a>.serialize</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_serialization: <a href="../interfaces/fudge.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -180,7 +325,19 @@
 								<a href="fudge.serializer.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.serializer.html#parse" class="tsd-kind-icon">parse</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.serializer.html#prettify" class="tsd-kind-icon">prettify</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.serializer.html#registernamespace" class="tsd-kind-icon">register<wbr>Namespace</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.serializer.html#serialize" class="tsd-kind-icon">serialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.serializer.html#stringify" class="tsd-kind-icon">stringify</a>
 							</li>
 						</ul>
 					</li>

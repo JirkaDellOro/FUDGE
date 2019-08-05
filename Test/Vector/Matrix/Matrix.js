@@ -4,7 +4,7 @@ var MarixTest;
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
-    let anim = [ƒ.Vector3.ZERO, new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
+    let anim = [ƒ.Vector3.ZERO(), new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
     function init(_event) {
         createUI();
         coSys = Scenes.createCoordinateSystem();

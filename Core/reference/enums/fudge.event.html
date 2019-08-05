@@ -85,7 +85,9 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#child_append" class="tsd-kind-icon">CHILD_<wbr>APPEND</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#component_activate" class="tsd-kind-icon">COMPONENT_<wbr>ACTIVATE</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#component_add" class="tsd-kind-icon">COMPONENT_<wbr>ADD</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#component_deactivate" class="tsd-kind-icon">COMPONENT_<wbr>DEACTIVATE</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#component_remove" class="tsd-kind-icon">COMPONENT_<wbr>REMOVE</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#focus_in" class="tsd-kind-icon">FOCUS_<wbr>IN</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudge.event.html#focus_out" class="tsd-kind-icon">FOCUS_<wbr>OUT</a></li>
@@ -104,7 +106,7 @@
 					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>APPEND<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;childAdd&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L17">Events/Event.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L21">Event/Event.ts:21</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -119,7 +121,7 @@
 					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>REMOVE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;childRemove&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L19">Events/Event.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L23">Event/Event.ts:23</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -129,12 +131,12 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="component_add" class="tsd-anchor"></a>
-					<h3>COMPONENT_<wbr>ADD</h3>
-					<div class="tsd-signature tsd-kind-icon">COMPONENT_<wbr>ADD<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;componentAdd&quot;</span></div>
+					<a name="component_activate" class="tsd-anchor"></a>
+					<h3>COMPONENT_<wbr>ACTIVATE</h3>
+					<div class="tsd-signature tsd-kind-icon">COMPONENT_<wbr>ACTIVATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;componentActivate&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L13">Events/Event.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L17">Event/Event.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -144,12 +146,42 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="component_add" class="tsd-anchor"></a>
+					<h3>COMPONENT_<wbr>ADD</h3>
+					<div class="tsd-signature tsd-kind-icon">COMPONENT_<wbr>ADD<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;componentAdd&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L13">Event/Event.ts:13</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>dispatched to a <a href="../classes/fudge.component.html">Component</a> when its being added to a <a href="../classes/fudge.node.html">Node</a></p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="component_deactivate" class="tsd-anchor"></a>
+					<h3>COMPONENT_<wbr>DEACTIVATE</h3>
+					<div class="tsd-signature tsd-kind-icon">COMPONENT_<wbr>DEACTIVATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;componentDeactivate&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L19">Event/Event.ts:19</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>dispatched to a <a href="../classes/fudge.component.html">Component</a> when its being removed from a <a href="../classes/fudge.node.html">Node</a></p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
 					<a name="component_remove" class="tsd-anchor"></a>
 					<h3>COMPONENT_<wbr>REMOVE</h3>
 					<div class="tsd-signature tsd-kind-icon">COMPONENT_<wbr>REMOVE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;componentRemove&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L15">Events/Event.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L15">Event/Event.ts:15</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -164,7 +196,7 @@
 					<div class="tsd-signature tsd-kind-icon">FOCUS_<wbr>IN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;focusin&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L23">Events/Event.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L27">Event/Event.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -179,7 +211,7 @@
 					<div class="tsd-signature tsd-kind-icon">FOCUS_<wbr>OUT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;focusout&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L25">Events/Event.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L29">Event/Event.ts:29</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -194,7 +226,7 @@
 					<div class="tsd-signature tsd-kind-icon">LOOP_<wbr>FRAME<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;loopFrame&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L11">Events/Event.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L11">Event/Event.ts:11</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -209,7 +241,7 @@
 					<div class="tsd-signature tsd-kind-icon">MUTATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;mutate&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a40d680/Core/src/Events/Event.ts#L21">Events/Event.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L25">Event/Event.ts:25</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -245,7 +277,13 @@
 								<a href="fudge.event.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudge.event.html#component_activate" class="tsd-kind-icon">COMPONENT_<wbr>ACTIVATE</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
 								<a href="fudge.event.html#component_add" class="tsd-kind-icon">COMPONENT_<wbr>ADD</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudge.event.html#component_deactivate" class="tsd-kind-icon">COMPONENT_<wbr>DEACTIVATE</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
 								<a href="fudge.event.html#component_remove" class="tsd-kind-icon">COMPONENT_<wbr>REMOVE</a>

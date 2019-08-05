@@ -35,7 +35,7 @@ namespace AudioTest {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(parameter.cameraPosition, ƒ.Vector3.ZERO);
+        let camera: ƒ.Node = Scenes.createCamera(parameter.cameraPosition, ƒ.Vector3.ZERO());
         viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
 
         startInteraction(viewport, body);

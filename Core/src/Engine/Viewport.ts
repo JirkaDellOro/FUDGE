@@ -1,5 +1,5 @@
-/// <reference path="../Lights/Light.ts"/>
-/// <reference path="../Components/ComponentLight.ts"/>
+/// <reference path="../Light/Light.ts"/>
+/// <reference path="../Component/ComponentLight.ts"/>
 namespace Fudge {
     export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
@@ -91,7 +91,7 @@ namespace Fudge {
             let output: string = "SceneGraph for this viewport:";
             output += "\n \n";
             output += this.branch.name;
-            console.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+            Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
         }
 
         // #region Drawing
