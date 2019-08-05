@@ -176,6 +176,8 @@ namespace Fudge {
     private calculateDirection(_time: number): number {
       _time = _time + this.startTime - this.timeAtStart;
       switch (this.playmode) {
+        case ANIMPLAYMODE.STOP: 
+          return 0;
         case ANIMPLAYMODE.PINGPONG:
           if (Math.floor(_time / this.totalTime) % 2 == 0)
             return 1;
