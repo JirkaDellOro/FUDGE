@@ -34,16 +34,17 @@ namespace AnimationTest {
     // animseq["x"].addKey(new ƒ.AnimationKey(3000, 90));
     // animseq["x"].addKey(new ƒ.AnimationKey(4000, 135));
     animseq["y"].addKey(new ƒ.AnimationKey(0, 0));
-    animseq["y"].addKey(new ƒ.AnimationKey(5000, 90));
-    animseq["y"].addKey(new ƒ.AnimationKey(10000, 0));
+    animseq["y"].addKey(new ƒ.AnimationKey(2000, 90));
+    animseq["y"].addKey(new ƒ.AnimationKey(3000, 180));
+    animseq["y"].addKey(new ƒ.AnimationKey(4000, 0));
 
-    animation.events["myEvent"] = 5000;
-    animation.labels["jumpHere"] = 5000;
+    animation.events["myEvent"] = 2000;
+    animation.labels["jumpHere"] = 2500;
 
     animation.addEventListener("myEvent", hndlEv);
     animation.jumpTo(animation.labels["jumpHere"], 0);
 
-    // animation.playmode = ƒ.ANIMPLAYMODE.PINGPONG;
+    // animation.playmode = ƒ.ANIMPLAYMODE.STOP;
     // console.log(animation.sequences);
     // animation.update(1000);
     // console.log(animation);
@@ -55,7 +56,7 @@ namespace AnimationTest {
     // let mutator: ƒ.MutatorForAnimation = mesh.getMutatorForAnimation();
     // mutator.pivot["rotation"].x++;
     let time: number = Date.now() - startTime;
-    // if(time > 2000) debugger;
+    // if (time > 2000) debugger;
     animation.update(time);
 
     mesh.mutate(animation.animatedObject);
