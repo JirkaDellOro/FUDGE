@@ -1,5 +1,96 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created,
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
+    abstract class Serializer {
+        /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+        private static namespaces;
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace
+         */
+        static registerNamespace(_namespace: Object): void;
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         */
+        static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization: Serialization): Serializable;
+        static prettify(_json: string): string;
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        static stringify(_serialization: Serialization): string;
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json
+         */
+        static parse(_json: string): Serialization;
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
+         * @param _path
+         */
+        private static reconstruct;
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object
+         */
+        private static getFullPath;
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
+        private static getNamespace;
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace
+         * @param _parent
+         */
+        private static findNamespaceIn;
+    }
+}
+declare namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -62,6 +153,138 @@ declare namespace Fudge {
          * @param _mutator
          */
         protected abstract reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Holds different playmodes for the animation to use.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    enum ANIMPLAYMODE {
+        INHERIT = 0,
+        LOOP = 1,
+        PINGPONG = 2,
+        PLAYONCE = 3,
+        PLAYONCESTOPAFTER = 4,
+        REVERSELOOP = 5,
+        STOP = 6
+    }
+    /**
+     * Animation Class to hold all required Objects that are part of an Animation.
+     * Also holds functions to play said Animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class Animation extends Mutable implements Serializable {
+        animatedObject: MutatorForAnimation;
+        sequences: Map<Mutator, AnimationSequenceAsso>;
+        totalTime: number;
+        events: AnimationEventTrigger;
+        labels: AnimationLabel;
+        fps: number;
+        sps: number;
+        playmode: ANIMPLAYMODE;
+        private startTime;
+        private timeAtStart;
+        private lastTime;
+        private direction;
+        constructor(_animObj: MutatorForAnimation, _playmode?: ANIMPLAYMODE);
+        /**
+         * Updates the applied Mutator of the root object using the given time
+         */
+        update(_time: number): void;
+        readonly getLabels: Enumerator;
+        jumpTo(_time: number, _currentTime: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        private calculateTotalTime;
+        private calculateCurrentTime;
+        private calculateDirection;
+        private checkEvents;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    interface AnimationEventTrigger {
+        [name: string]: number;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Calculates the values between [[AnimationKeys]]
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationFunction {
+        private a;
+        private b;
+        private c;
+        private d;
+        private keyIn;
+        private keyOut;
+        constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        evaluate(_time: number): number;
+        setKeyIn: AnimationKey;
+        setKeyOut: AnimationKey;
+        calculate(): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationKey extends Mutable implements Serializable {
+        time: number;
+        value: number;
+        constant: boolean;
+        functionIn: AnimationFunction;
+        functionOut: AnimationFunction;
+        broken: boolean;
+        path2D: Path2D;
+        private slopeIn;
+        private slopeOut;
+        constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number);
+        readonly getSlopeIn: number;
+        readonly getSlopeOut: number;
+        setSlopeIn: number;
+        setSlopeOut: number;
+        static sort(_a: AnimationKey, _b: AnimationKey): number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Holds information about Animation Labels
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    interface AnimationLabel {
+        [name: string]: number;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationSequence extends Mutable implements Serializable {
+        keys: AnimationKey[];
+        evaluate(_time: number): number;
+        addKey(_key: AnimationKey): void;
+        removeKey(_key: AnimationKey): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        private regenerateFunctions;
+    }
+}
+declare namespace Fudge {
+    interface AnimationSequenceAsso {
+        [name: string]: AnimationSequence;
     }
 }
 declare namespace Fudge {
@@ -209,97 +432,6 @@ declare namespace Fudge {
         tilingX: number;
         tilingY: number;
         repetition: boolean;
-    }
-}
-declare namespace Fudge {
-    type General = any;
-    interface Serialization {
-        [type: string]: General;
-    }
-    interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-    /**
-     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
-     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
-     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
-     * ```plaintext
-     *  [Serializable] → (serialize) → [Serialization] → (stringify)
-     *                                                        ↓
-     *                                                    [String]
-     *                                                        ↓
-     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
-     * ```
-     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
-     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
-     * ```plaintext
-     * {
-     *      namespaceName.className: {
-     *          propertyName: propertyValue,
-     *          ...,
-     *          propertyNameOfReference: SerializationOfTheReferencedObject,
-     *          ...,
-     *          constructorNameOfSuperclass: SerializationOfSuperClass
-     *      }
-     * }
-     * ```
-     * Since the instance of the superclass is created automatically when an object is created,
-     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
-     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
-     */
-    abstract class Serializer {
-        /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-        private static namespaces;
-        /**
-         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
-         * @param _namespace
-         */
-        static registerNamespace(_namespace: Object): void;
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the [[Serializable]] interface
-         */
-        static serialize(_object: Serializable): Serialization;
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization: Serialization): Serializable;
-        static prettify(_json: string): string;
-        /**
-         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
-         * @param _serialization
-         */
-        static stringify(_serialization: Serialization): string;
-        /**
-         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
-         * @param _json
-         */
-        static parse(_json: string): Serialization;
-        /**
-         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
-         * @param _path
-         */
-        private static reconstruct;
-        /**
-         * Returns the full path to the class of the object, if found in the registered namespaces
-         * @param _object
-         */
-        private static getFullPath;
-        /**
-         * Returns the namespace-object defined within the full path, if registered
-         * @param _path
-         */
-        private static getNamespace;
-        /**
-         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
-         * @param _namespace
-         * @param _parent
-         */
-        private static findNamespaceIn;
     }
 }
 declare namespace Fudge {
