@@ -1,5 +1,29 @@
 /// <reference types="webgl2" />
 declare namespace Fudge {
+    type General = any;
+    interface Serialization {
+        [type: string]: General;
+    }
+    interface Serializable {
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+    class Serializer {
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object: Serializable): Serialization;
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace Fudge {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -62,6 +86,138 @@ declare namespace Fudge {
          * @param _mutator
          */
         protected abstract reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Holds different playmodes for the animation to use.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    enum ANIMPLAYMODE {
+        INHERIT = 0,
+        LOOP = 1,
+        PINGPONG = 2,
+        PLAYONCE = 3,
+        PLAYONCESTOPAFTER = 4,
+        REVERSELOOP = 5,
+        STOP = 6
+    }
+    /**
+     * Animation Class to hold all required Objects that are part of an Animation.
+     * Also holds functions to play said Animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class Animation extends Mutable implements Serializable {
+        animatedObject: MutatorForAnimation;
+        sequences: Map<Mutator, AnimationSequenceAsso>;
+        totalTime: number;
+        events: AnimationEventTrigger;
+        labels: AnimationLabel;
+        fps: number;
+        sps: number;
+        playmode: ANIMPLAYMODE;
+        private startTime;
+        private timeAtStart;
+        private lastTime;
+        private direction;
+        constructor(_animObj: MutatorForAnimation, _playmode?: ANIMPLAYMODE);
+        /**
+         * Updates the applied Mutator of the root object using the given time
+         */
+        update(_time: number): void;
+        readonly getLabels: Enumerator;
+        jumpTo(_time: number, _currentTime: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        private calculateTotalTime;
+        private calculateCurrentTime;
+        private calculateDirection;
+        private checkEvents;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    interface AnimationEventTrigger {
+        [name: string]: number;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Calculates the values between [[AnimationKeys]]
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationFunction {
+        private a;
+        private b;
+        private c;
+        private d;
+        private keyIn;
+        private keyOut;
+        constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        evaluate(_time: number): number;
+        setKeyIn: AnimationKey;
+        setKeyOut: AnimationKey;
+        calculate(): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationKey extends Mutable implements Serializable {
+        time: number;
+        value: number;
+        constant: boolean;
+        functionIn: AnimationFunction;
+        functionOut: AnimationFunction;
+        broken: boolean;
+        path2D: Path2D;
+        private slopeIn;
+        private slopeOut;
+        constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number);
+        readonly getSlopeIn: number;
+        readonly getSlopeOut: number;
+        setSlopeIn: number;
+        setSlopeOut: number;
+        static sort(_a: AnimationKey, _b: AnimationKey): number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Holds information about Animation Labels
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    interface AnimationLabel {
+        [name: string]: number;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationSequence extends Mutable implements Serializable {
+        keys: AnimationKey[];
+        evaluate(_time: number): number;
+        addKey(_key: AnimationKey): void;
+        removeKey(_key: AnimationKey): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        private regenerateFunctions;
+    }
+}
+declare namespace Fudge {
+    interface AnimationSequenceAsso {
+        [name: string]: AnimationSequence;
     }
 }
 declare namespace Fudge {
@@ -209,30 +365,6 @@ declare namespace Fudge {
         tilingX: number;
         tilingY: number;
         repetition: boolean;
-    }
-}
-declare namespace Fudge {
-    type General = any;
-    interface Serialization {
-        [type: string]: General;
-    }
-    interface Serializable {
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-    }
-    class Serializer {
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object: Serializable): Serialization;
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace Fudge {

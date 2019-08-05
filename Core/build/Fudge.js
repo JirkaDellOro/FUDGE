@@ -7,6 +7,45 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var Fudge;
 (function (Fudge) {
+    class Serializer {
+        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
+        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the Serializable interface
+         */
+        static serialize(_object) {
+            // let serialization: Serialization = {};
+            // serialization[_object.constructor.name] = _object.serialize();
+            // return serialization;
+            return _object.serialize();
+        }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let typeName in _serialization) {
+                    reconstruct = new Fudge[typeName];
+                    reconstruct.deserialize(_serialization[typeName]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+    }
+    Fudge.Serializer = Serializer;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     /**
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
@@ -104,6 +143,404 @@ var Fudge;
         }
     }
     Fudge.Mutable = Mutable;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     * Holds different playmodes for the animation to use.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    let ANIMPLAYMODE;
+    (function (ANIMPLAYMODE) {
+        ANIMPLAYMODE[ANIMPLAYMODE["INHERIT"] = 0] = "INHERIT";
+        ANIMPLAYMODE[ANIMPLAYMODE["LOOP"] = 1] = "LOOP";
+        ANIMPLAYMODE[ANIMPLAYMODE["PINGPONG"] = 2] = "PINGPONG";
+        ANIMPLAYMODE[ANIMPLAYMODE["PLAYONCE"] = 3] = "PLAYONCE";
+        ANIMPLAYMODE[ANIMPLAYMODE["PLAYONCESTOPAFTER"] = 4] = "PLAYONCESTOPAFTER";
+        ANIMPLAYMODE[ANIMPLAYMODE["REVERSELOOP"] = 5] = "REVERSELOOP";
+        ANIMPLAYMODE[ANIMPLAYMODE["STOP"] = 6] = "STOP";
+    })(ANIMPLAYMODE = Fudge.ANIMPLAYMODE || (Fudge.ANIMPLAYMODE = {}));
+    /**
+     * Animation Class to hold all required Objects that are part of an Animation.
+     * Also holds functions to play said Animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class Animation extends Fudge.Mutable {
+        constructor(_animObj, _playmode = ANIMPLAYMODE.LOOP) {
+            super();
+            this.totalTime = 0;
+            this.events = {};
+            this.labels = {};
+            this.fps = 60;
+            this.sps = 10;
+            this.startTime = 0;
+            this.timeAtStart = 0;
+            this.lastTime = 0;
+            this.direction = 0;
+            this.animatedObject = _animObj;
+            this.playmode = _playmode;
+            this.sequences = new Map();
+        }
+        /**
+         * Updates the applied Mutator of the root object using the given time
+         */
+        update(_time) {
+            this.calculateTotalTime();
+            let time = this.calculateCurrentTime(_time);
+            for (let mutator of this.sequences.keys()) {
+                let aa = this.sequences.get(mutator);
+                for (let name in aa) {
+                    mutator[name] = aa[name].evaluate(time);
+                }
+            }
+            this.checkEvents(time);
+            this.lastTime = time;
+        }
+        get getLabels() {
+            let en = new Enumerator(this.labels);
+            return en;
+        }
+        jumpTo(_time, _currentTime) {
+            this.startTime = _time;
+            this.timeAtStart = _currentTime;
+            this.lastTime = _currentTime;
+        }
+        //#region transfer
+        serialize() {
+            let s = {
+                sequences: {},
+                events: {},
+                labels: {},
+                playmode: this.playmode,
+                fps: this.fps,
+                sps: this.sps
+            };
+            // for (let name in this.sequences) {
+            //   s.sequences[name] = this.sequences[name].serialize();
+            // }
+            // for (let name in this.events) {
+            //   s.events[name] = this.events[name];
+            // }
+            // for (let name in this.labels) {
+            //   s.labels[name] = this.labels[name];
+            // }
+            return s;
+        }
+        deserialize(_serialization) {
+            // this.playmode = _serialization.playmode;
+            // this.fps = _serialization.fps;
+            // this.sps = _serialization.sps;
+            // this.sequences = new Map<MutatorForAnimation, AnimationSequenceAsso>();
+            // this.events = {};
+            // this.labels = {};
+            // this.startTime = 0;
+            // for (let name in _serialization.sequences) {
+            //   this.sequences[name] = _serialization.sequences[name].deserialize();
+            // }
+            // for (let name in _serialization.labels) {
+            //   this.labels[name] = _serialization.labels[name];
+            // }
+            // for (let name in _serialization.events) {
+            //   this.events[name] = _serialization.events[name];
+            // }
+            this.calculateTotalTime();
+            return this;
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.lastEvent;
+        }
+        //#endregion
+        calculateTotalTime() {
+            this.totalTime = 0;
+            for (let aa of this.sequences.values()) {
+                for (let s in aa) {
+                    if (aa[s].keys.length > 0) {
+                        let sequenceTime = aa[s].keys[aa[s].keys.length - 1].time;
+                        this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+                    }
+                }
+            }
+        }
+        calculateCurrentTime(_time) {
+            this.direction = this.calculateDirection(_time);
+            let time = ((_time - this.timeAtStart) * this.direction + this.startTime) % this.totalTime;
+            if (this.direction < 0) {
+                time += this.totalTime;
+            }
+            return time;
+            // _time = _time + this.startTime;
+            // if (this.playmode == ANIMPLAYMODE.STOP) {
+            //   this.timeAtStart = this.startTime;
+            //   return;
+            // }
+            // if (this.playmode == ANIMPLAYMODE.PLAYONCE && _time > this.totalTime) {
+            //   this.timeAtStart = this.totalTime;
+            //   return;
+            // }
+            // if (this.playmode == ANIMPLAYMODE.PLAYONCESTOPAFTER && _time > this.totalTime) {
+            //   this.timeAtStart = 0;
+            //   return;
+            // }
+            // let t: number = _time % this.totalTime;
+            // switch (this.playmode) {
+            //   case ANIMPLAYMODE.PINGPONG:
+            //     let tmp: number = Math.floor(_time / this.totalTime) % 2;
+            //     if (tmp == 1)
+            //       t = this.totalTime - t;
+            //     break;
+            //   case ANIMPLAYMODE.REVERSELOOP:
+            //     t = this.totalTime - t;
+            //     break;
+            //   default:
+            //     break;
+            // }
+            // this.timeAtStart = t;
+        }
+        calculateDirection(_time) {
+            _time = _time + this.startTime - this.timeAtStart;
+            switch (this.playmode) {
+                case ANIMPLAYMODE.STOP:
+                    return 0;
+                case ANIMPLAYMODE.PINGPONG:
+                    if (Math.floor(_time / this.totalTime) % 2 == 0)
+                        return 1;
+                    else
+                        return -1;
+                case ANIMPLAYMODE.REVERSELOOP:
+                    return -1;
+                case ANIMPLAYMODE.PLAYONCE:
+                case ANIMPLAYMODE.PLAYONCESTOPAFTER:
+                    if (_time > this.totalTime) {
+                        return 0;
+                    }
+                default:
+                    return 1;
+            }
+        }
+        checkEvents(_time) {
+            //TODO Catch Events at the beginning & end of the animation
+            if (this.playmode == ANIMPLAYMODE.STOP || this.direction == 0)
+                return;
+            for (let name in this.events) {
+                if (this.direction > 0 && this.lastTime < this.events[name] && this.events[name] < _time
+                    || this.direction < 0 && this.lastTime > this.events[name] && this.events[name] > _time) {
+                    this.dispatchEvent(new Event(name));
+                }
+            }
+        }
+    }
+    Fudge.Animation = Animation;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     * Calculates the values between [[AnimationKeys]]
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationFunction {
+        constructor(_keyIn, _keyOut = null) {
+            this.a = 0;
+            this.b = 0;
+            this.c = 0;
+            this.d = 0;
+            this.keyIn = _keyIn;
+            this.keyOut = _keyOut;
+            this.calculate();
+        }
+        evaluate(_time) {
+            _time -= this.keyIn.time;
+            let time2 = _time * _time;
+            let time3 = time2 * _time;
+            // console.log(this.a * time3 , this.b * time2 , this.c * _time , this.d);
+            return this.a * time3 + this.b * time2 + this.c * _time + this.d;
+        }
+        set setKeyIn(_keyIn) {
+            this.keyIn = _keyIn;
+            this.calculate();
+        }
+        set setKeyOut(_keyOut) {
+            this.keyOut = _keyOut;
+            this.calculate();
+        }
+        calculate() {
+            if (!this.keyIn) {
+                this.d = this.c = this.b = this.a = 0;
+                return;
+            }
+            if (!this.keyOut || this.keyIn.constant) {
+                this.d = this.keyIn.value;
+                this.c = this.b = this.a = 0;
+                return;
+            }
+            let x1 = this.keyOut.time - this.keyIn.time;
+            this.d = this.keyIn.value;
+            this.c = this.keyIn.getSlopeOut;
+            this.a = (-x1 * (this.keyIn.getSlopeOut + this.keyOut.getSlopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
+            this.b = (this.keyOut.getSlopeIn - this.keyIn.getSlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
+        }
+    }
+    Fudge.AnimationFunction = AnimationFunction;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationKey extends Fudge.Mutable {
+        constructor(_time = 0, _value = 0, _slopeIn = 0, _slopeOut = 0) {
+            super();
+            this.constant = false;
+            this.slopeIn = 0;
+            this.slopeOut = 0;
+            this.time = _time;
+            this.value = _value;
+            this.slopeIn = _slopeIn;
+            this.slopeOut = _slopeOut;
+            this.broken = this.slopeIn != -this.slopeOut;
+        }
+        get getSlopeIn() {
+            return this.slopeIn;
+        }
+        get getSlopeOut() {
+            return this.slopeOut;
+        }
+        set setSlopeIn(_slope) {
+            this.slopeIn = _slope;
+            this.functionIn.calculate();
+        }
+        set setSlopeOut(_slope) {
+            this.slopeOut = _slope;
+            this.functionOut.calculate();
+        }
+        static sort(_a, _b) {
+            return _a.time - _b.time;
+        }
+        //#region transfer
+        serialize() {
+            let s = {};
+            // s[this.constructor.name] = {
+            //   time : this.time,
+            //   value : this.value,
+            //   slopeIn : this.slopeIn,
+            //   slopeOut : this.slopeOut,
+            //   constant : this.constant
+            // };
+            s.time = this.time;
+            s.value = this.value;
+            s.slopeIn = this.slopeIn;
+            s.slopeOut = this.slopeOut;
+            s.constant = this.constant;
+            return s;
+        }
+        deserialize(_serialization) {
+            this.time = _serialization.time;
+            this.value = _serialization.value;
+            this.slopeIn = _serialization.slopeIn;
+            this.slopeOut = _serialization.slopeOut;
+            this.constant = _serialization.constant;
+            this.broken = this.slopeIn != -this.slopeOut;
+            return this;
+        }
+        reduceMutator(_mutator) {
+            //
+        }
+    }
+    Fudge.AnimationKey = AnimationKey;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationSequence extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.keys = [];
+        }
+        evaluate(_time) {
+            // console.log(this.keys.length == 1 || this.keys[0].time < _time);
+            if (this.keys.length == 1 || this.keys[0].time > _time)
+                return this.keys[0].value;
+            if (this.keys.length == 0)
+                return 0;
+            for (let i = 0; i < this.keys.length - 1; i++) {
+                if (this.keys[i].time < _time && this.keys[i + 1].time > _time) {
+                    return this.keys[i].functionOut.evaluate(_time);
+                }
+            }
+            return this.keys[this.keys.length - 1].value;
+        }
+        addKey(_key) {
+            this.keys.push(_key);
+            this.keys.sort(Fudge.AnimationKey.sort);
+            this.regenerateFunctions();
+        }
+        removeKey(_key) {
+            for (let i = 0; i < this.keys.length; i++) {
+                if (this.keys[i] == _key) {
+                    this.keys.splice(i, 1);
+                    this.regenerateFunctions();
+                    return;
+                }
+            }
+        }
+        //#region transfer
+        serialize() {
+            let s = {};
+            s.keys = [];
+            for (let i = 0; i < this.keys.length; i++) {
+                s.keys[i] = this.keys[i].serialize();
+            }
+            return s;
+        }
+        deserialize(_serialization) {
+            for (let i = 0; i < _serialization.keys.length; i++) {
+                // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));
+                let k = new Fudge.AnimationKey();
+                k.deserialize(_serialization.keys[i]);
+            }
+            this.regenerateFunctions();
+            return this;
+        }
+        reduceMutator(_mutator) {
+            //
+        }
+        //#endregion
+        regenerateFunctions() {
+            for (let i = 0; i < this.keys.length; i++) {
+                let f = new Fudge.AnimationFunction(this.keys[i]);
+                this.keys[i].functionOut = f;
+                if (i == this.keys.length - 1) {
+                    f.setKeyOut = this.keys[0];
+                    this.keys[0].functionIn = f;
+                    break;
+                }
+                f.setKeyOut = this.keys[i + 1];
+                this.keys[i + 1].functionIn = f;
+            }
+        }
+    }
+    Fudge.AnimationSequence = AnimationSequence;
 })(Fudge || (Fudge = {}));
 //<reference path="../Coats/Coat.ts"/>
 var Fudge;
@@ -540,45 +977,6 @@ var Fudge;
         Fudge.RenderInjector.decorateCoat
     ], CoatTextured);
     Fudge.CoatTextured = CoatTextured;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class Serializer {
-        // TODO: examine, if this class should be placed in another namespace, since calling Fudge[...] there doesn't require the use of 'any'
-        // TODO: examine, if the deserialize-Methods of Serializables should be static, returning a new object of the class
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the Serializable interface
-         */
-        static serialize(_object) {
-            // let serialization: Serialization = {};
-            // serialization[_object.constructor.name] = _object.serialize();
-            // return serialization;
-            return _object.serialize();
-        }
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the serialization-object given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let typeName in _serialization) {
-                    reconstruct = new Fudge[typeName];
-                    reconstruct.deserialize(_serialization[typeName]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-    }
-    Fudge.Serializer = Serializer;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
