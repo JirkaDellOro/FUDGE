@@ -2,49 +2,33 @@
 /// <reference path="../UI/MutableUI.ts"/>
 var UI;
 (function (UI) {
-    var ƒ = Fudge;
-    class CameraComponent extends UI.MutableUI {
-        constructor(mutable) {
-            super(mutable);
-            this.animate = (_event) => {
-                console.log("Entering animate function");
-                console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
-                console.log(this.branch);
-                this.branch.cmpTransform.local.rotateY(1);
-                ƒ.RenderManager.update();
-                // prepare and draw viewport
-                //viewPort.prepare();
-                this.viewPort.draw();
+    class CameraUI extends UI.MutableUI {
+        constructor(container, state, _camera) {
+            super(_camera);
+            this.updateUI = (_event) => {
+                let target = _event.target;
+                this.mutator = this.mutable.getMutator();
+                let formData = new FormData(this.root);
+                // this.fillById(this.mutator);
+                if (target.type == "checkbox") {
+                    this.mutator[target.id] = target.checked;
+                }
+                else {
+                    for (let entry of formData) {
+                        if (entry[0] == target.id) {
+                            this.mutator[entry[0]] = entry[1];
+                        }
+                    }
+                }
+                this.mutable.mutate(this.mutator);
             };
-            this.camera = mutable;
-            this.viewPort = new ƒ.Viewport();
-            this.branch = Scenes.createAxisCross();
-            this.branch.addComponent(new ƒ.ComponentTransform());
-            console.log("branch:");
-            console.log(this.branch);
-            // initialize RenderManager and transmit content
-            ƒ.RenderManager.initialize();
-            ƒ.RenderManager.addBranch(this.branch);
-            ƒ.RenderManager.update();
-            // initialize viewports
-            this.canvas = document.createElement("canvas");
-            this.viewPort.initialize(this.canvas.id, this.branch, cmpCamera, this.canvas);
-        }
-        createCameraComponent(_container, state) {
-            console.log("Entering CameraComponent");
-            console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
-            UI.UIGenerator.createFromMutator(this.mutable, this.root);
-            _container.getElement().html(this.root);
-        }
-        createTestRect(_container, state) {
-            console.log("Entering TestRect");
-            console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
-            let uiMaps = {};
-            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
-            ƒ.Loop.start();
-            _container.getElement().html(this.canvas);
+            this.camera = _camera;
+            this.root = document.createElement("form");
+            UI.UIGenerator.createFromMutator(_camera, this.root);
+            this.root.addEventListener("input", this.updateUI);
+            container.getElement().html(this.root);
         }
     }
-    UI.CameraComponent = CameraComponent;
+    UI.CameraUI = CameraUI;
 })(UI || (UI = {}));
 //# sourceMappingURL=CameraComponent.js.map

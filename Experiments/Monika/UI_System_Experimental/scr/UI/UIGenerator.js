@@ -2,22 +2,20 @@
 var UI;
 (function (UI) {
     class UIGenerator {
-        static createFromMutator(mutable, element) {
-            let name = mutable.constructor.name;
-            let types;
-            let mutator = mutable.getMutator();
-            let fieldset = UIGenerator.createFieldset(name, element);
-            types = mutable.getMutatorAttributeTypes(mutator);
-            UIGenerator.generateUI(mutator, types, fieldset);
-        }
-        static generateUI(_obj, _types, _parent) {
+        static createFromMutator(_mutable, element) {
+            let name = _mutable.constructor.name;
+            let _types;
+            let mutator = _mutable.getMutator();
+            let _parent = UIGenerator.createFieldset(name, element);
+            let data;
+            _types = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in _types) {
                 let type = _types[key];
-                let value = _obj[key].toString();
+                let value = mutator[key].toString();
                 if (type instanceof Object) {
                     //Type is Enum
                     UIGenerator.createLabelElement(key, _parent);
-                    UIGenerator.createDropdown(type, value, _parent);
+                    UIGenerator.createDropdown(key, type, value, _parent);
                 }
                 else {
                     switch (type) {
@@ -25,7 +23,7 @@ var UI;
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
                             let num_value = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: num_value });
+                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -41,9 +39,12 @@ var UI;
                     }
                 }
             }
+            return data;
         }
-        static createDropdown(_content, _value, _parent, _cssClass) {
+        static createDropdown(_id, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
+            dropdown.id = _id;
+            dropdown.name = _id;
             for (let value in _content) {
                 let entry = document.createElement("option");
                 entry.text = value;
@@ -90,6 +91,7 @@ var UI;
             if (!params._cssClass == undefined)
                 valueInput.classList.add(params._cssClass);
             valueInput.id = _id;
+            valueInput.name = _id;
             valueInput.value = params._value;
             _parent.appendChild(valueInput);
             return valueInput;
@@ -99,6 +101,7 @@ var UI;
             valueInput.type = "checkbox";
             valueInput.checked = _value;
             valueInput.classList.add(_cssClass);
+            valueInput.name = _id;
             valueInput.id = _id;
             _parent.appendChild(valueInput);
             return valueInput;
@@ -107,6 +110,14 @@ var UI;
             if (params._value == undefined)
                 params._value = 0;
             let stepper = new UI.Stepper(_id, { value: params._value });
+            // if(params._mutable != null)
+            //     stepper.addEventListener("input", function(_event:Event){
+            //         let mutator:ƒ.Mutator =  params._mutable.getMutator();
+            //         let stepperValueHolder:HTMLInputElement = <HTMLInputElement>stepper.firstChild;
+            //         let inputValue:String = stepperValueHolder.value;
+            //         mutator[_id] = inputValue;
+            //         params._mutable.mutate(mutator); 
+            //     })
             _parent.append(stepper);
             return stepper;
         }
