@@ -1,6 +1,9 @@
+<<<<<<< Updated upstream
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
 import ƒ = Fudge;
 
+=======
+>>>>>>> Stashed changes
 namespace UI {
     let myLayout: GoldenLayout;
     let savedState: string;
@@ -20,6 +23,7 @@ namespace UI {
             }]
         }]
     };
+<<<<<<< Updated upstream
     console.log("Entering Setup");
     console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
     console.log("Entering constructor");
@@ -45,6 +49,16 @@ namespace UI {
     myLayout = new GoldenLayout(config);
     myLayout.registerComponent('Inspector', createCameraComponent);
     myLayout.registerComponent('Viewport', createSimpleComponent);
+=======
+    function createSimpleComponent (container: any, state: any) {
+        // return SimpleComponent.create(container, state);
+        return new SimpleComponent(container, state);
+    }
+    myLayout = new GoldenLayout(config);
+    myLayout.registerComponent('Inspector', createSimpleComponent);
+    myLayout.registerComponent('Viewport', createSimpleComponent);
+    console.log("I work");
+>>>>>>> Stashed changes
 
     myLayout.init();
 

@@ -87,7 +87,6 @@ var Scenes;
         }
         Scenes.viewPort = new ƒ.Viewport();
         Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), _canvas);
-        // viewPort.drawScene();
         Scenes.viewPort.showSceneGraph();
     }
     Scenes.createViewport = createViewport;

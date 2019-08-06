@@ -3,6 +3,7 @@ namespace UI {
     import ƒ = Fudge;
 
     export class UIGenerator {
+<<<<<<< Updated upstream
         public static createFromMutator(mutable: ƒ.Mutable, element: HTMLElement) {
             let name: string = mutable.constructor.name;
             let types: ƒ.MutatorAttributeTypes;
@@ -38,6 +39,38 @@ namespace UI {
                         case "String":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value })
+=======
+        public static createFromMutator(mutator: ƒ.Mutable, element: HTMLElement) {
+            // let mutator: ƒ.Mutator = { people: [{ name: "Lukas", age: 24 }, { name: "Jirka", age: 54 }], cars: [{ brand: "Audi", km: 20000, new: false }, { brand: "VW", km: 100000, new: true }] };
+            UIGenerator.generateUI(mutator, element);
+        }
+
+        private static generateUI(_obj: ƒ.Mutable, _parent: HTMLElement): void {
+            let types: ƒ.MutatorAttributeTypes;
+            let mutator:ƒ.Mutator = _obj.getMutator();
+            types = _obj.getMutatorAttributeTypes(mutator);
+            for (let key in _obj) {
+                let value: Object = _obj[key];
+                if (value instanceof Object) {
+                    let fieldset:HTMLElement = UIGenerator.createFieldset(key, _parent);
+                    fieldset.addEventListener("click", UIGenerator.toggleListObj);
+                    this.generateUI(<ƒ.Mutable>value, fieldset);
+                    _parent.appendChild(fieldset);
+                }
+                else {
+                    switch (typeof value) {
+                        case "number":
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createTextElement(key, value, _parent)
+                            break;
+                        case "boolean":
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createCheckboxElement(key, value, _parent);
+                            break;
+                        case "string":
+                            UIGenerator.createLabelElement(key, key, _parent);
+                            UIGenerator.createTextElement(key, value, _parent)
+>>>>>>> Stashed changes
                             break;
                         default:
                             break;
@@ -45,6 +78,7 @@ namespace UI {
                 }
             }
         }
+<<<<<<< Updated upstream
         public static createDropdown(_content: Object, _value: string, _parent: HTMLElement, _cssClass?: string) {
             let dropdown: HTMLSelectElement = document.createElement("select");
             for (let value in _content) {
@@ -109,11 +143,46 @@ namespace UI {
             valueInput.type = "checkbox";
             valueInput.checked = _value;
             valueInput.classList.add(_cssClass);
+=======
+        public static createFieldset(_legend: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
+            let legend: HTMLLegendElement = document.createElement("legend");
+            legend.innerHTML = _legend;
+            fieldset.appendChild(legend);
+            legend.classList.add("unfoldable");
+            fieldset.classList.add(_class);
+            return fieldset;
+        }
+        public static createLabelElement(_id:string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let label: HTMLElement = document.createElement("label");
+            label.innerHTML = _value;
+            label.classList.add(_class);
+            label.id = _id;
+            _parent.appendChild(label);
+            return label;
+        }
+
+        public static createTextElement(_id: string, _value: string, _parent: HTMLElement, _class?: string): HTMLElement {
+            let valueInput: HTMLInputElement = document.createElement("input");
+            valueInput.value = _value;
+            valueInput.classList.add(_class);
             valueInput.id = _id;
             _parent.appendChild(valueInput);
             return valueInput;
         }
 
+        public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _class?: string): HTMLElement {
+            let valueInput: HTMLInputElement = document.createElement("input");
+            valueInput.type = "checkbox";
+            valueInput.checked = _value;
+            valueInput.classList.add(_class);
+>>>>>>> Stashed changes
+            valueInput.id = _id;
+            _parent.appendChild(valueInput);
+            return valueInput;
+        }
+
+<<<<<<< Updated upstream
         public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string } = {}) {
 
             if (params._value == undefined)
@@ -140,6 +209,22 @@ namespace UI {
                 // let child: HTMLElement = <HTMLElement>children[i];
                 if (!child.classList.contains("unfoldable")) {
                     foldToggle == true ? child.classList.add("folded") : child.classList.remove("folded");
+=======
+        private static toggleListObj(_event: MouseEvent): void {
+            _event.preventDefault();
+            if (_event.target != _event.currentTarget) return;
+            let target: HTMLElement = <HTMLElement>_event.target;
+
+            let children: HTMLCollection = target.children;
+
+            for (let i = 0; i < children.length; i++) {
+                let child: HTMLElement = <HTMLElement>children[i];
+                if (!child.classList.contains("unfoldable")) {
+                    let childNowVisible: boolean = child.style.display == "none" ? true : false;
+                    let displayStyle: string = child.tagName == "FIELDSET" ? "list-item" : "inline";
+                    child.style.display = childNowVisible ? displayStyle : "none";
+                    childNowVisible ? target.classList.remove("folded") : target.classList.add("folded");
+>>>>>>> Stashed changes
                 }
             }
         }

@@ -1,4 +1,3 @@
-/// <reference path="../../../../Core/build/Fudge.d.ts"/>
 var ƒ = Fudge;
 var UI;
 (function (UI) {
@@ -22,7 +21,12 @@ var UI;
     };
     console.log("Entering Setup");
     console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
-    let cameraComponent = new UI.CameraComponent();
+    console.log("Entering constructor");
+    console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());
+    let camera;
+    camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+    let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+    let cameraComponent = new UI.CameraComponent(cmpCamera);
     function createSimpleComponent(container, state) {
         console.log("Create Test");
         console.log(new Date().getSeconds() + " " + new Date().getUTCMilliseconds());

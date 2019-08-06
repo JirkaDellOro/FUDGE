@@ -156,60 +156,33 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    /**
-     * Holds different playmodes for the animation to use.
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    enum ANIMPLAYMODE {
-        INHERIT = 0,
-        LOOP = 1,
-        PINGPONG = 2,
-        PLAYONCE = 3,
-        PLAYONCESTOPAFTER = 4,
-        REVERSELOOP = 5,
-        STOP = 6
+    interface AnimationStructure {
+        [attribute: string]: Serialization | AnimationSequence;
     }
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
      * @author Lukas Scheuerle, HFU, 2019
      */
-    class Animation extends Mutable implements Serializable {
-        animatedObject: MutatorForAnimation;
-        sequences: Map<Mutator, AnimationSequenceAsso>;
+    class Animation extends Mutable implements SerializableResource {
+        idResource: string;
+        name: string;
         totalTime: number;
-        events: AnimationEventTrigger;
         labels: AnimationLabel;
         fps: number;
         sps: number;
-        playmode: ANIMPLAYMODE;
-        private startTime;
-        private timeAtStart;
-        private lastTime;
-        private direction;
-        constructor(_animObj: MutatorForAnimation, _playmode?: ANIMPLAYMODE);
-        /**
-         * Updates the applied Mutator of the root object using the given time
-         */
-        update(_time: number): void;
+        animationStructure: AnimationStructure;
+        constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        getMutated(_time: number, _direction: number): Mutator;
         readonly getLabels: Enumerator;
-        jumpTo(_time: number, _currentTime: number): void;
+        calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
-        private calculateTotalTime;
-        private calculateCurrentTime;
-        private calculateDirection;
-        private checkEvents;
-    }
-}
-declare namespace Fudge {
-    /**
-     *
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    interface AnimationEventTrigger {
-        [name: string]: number;
+        private traverseStructureForSerialisation;
+        private traverseStructureForDeserialisation;
+        private traverseStructureForMutator;
+        private traverseStructureForTime;
     }
 }
 declare namespace Fudge {
@@ -254,6 +227,7 @@ declare namespace Fudge {
         static sort(_a: AnimationKey, _b: AnimationKey): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -280,11 +254,6 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
         private regenerateFunctions;
-    }
-}
-declare namespace Fudge {
-    interface AnimationSequenceAsso {
-        [name: string]: AnimationSequence;
     }
 }
 declare namespace Fudge {
@@ -462,6 +431,59 @@ declare namespace Fudge {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Holds different playmodes the animation uses to play back its animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    enum ANIMATION_PLAYMODE {
+        INHERIT = 0,
+        LOOP = 1,
+        PINGPONG = 2,
+        PLAYONCE = 3,
+        PLAYONCESTOPAFTER = 4,
+        REVERSELOOP = 5,
+        STOP = 6
+    }
+    enum ANIMATION_PLAYBACK {
+        /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+        TIMEBASED_CONTINOUS = 0,
+        /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+        TIMEBASED_RASTERED_TO_FPS = 1,
+        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+        FRAMEBASED = 2
+    }
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    interface AnimationEventTrigger {
+        [name: string]: number;
+    }
+    /**
+     * Holds an [[Animation]] and controls it.
+     * @authors Lukas Scheuerle, HFU, 2019
+     */
+    class ComponentAnimator extends Component {
+        animation: Animation;
+        playmode: ANIMATION_PLAYMODE;
+        playback: ANIMATION_PLAYBACK;
+        events: AnimationEventTrigger;
+        private lastTime;
+        private startTime;
+        private timeAtStart;
+        constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
+        jumpTo(_time: number, _currentTime: number): void;
+        private updateAnimationLoop;
+        private updateAnimationContinous;
+        private updateAnimationRastered;
+        private updateAnimationFramebased;
+        private updateAnimation;
+        private calculateCurrentTime;
+        private calculateDirection;
+        private checkEvents;
     }
 }
 declare namespace Fudge {
@@ -1831,6 +1853,11 @@ declare namespace Fudge {
          */
         readonly branch: IterableIterator<Node>;
         isUpdated(_timestampUpdate: number): boolean;
+        /**
+         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
+         * @param _mutator The mutator generated from an [[Animation]]
+         */
+        applyAnimation(_mutator: Mutator): void;
         /**
          * Returns a clone of the list of components of the given class attached this node.
          * @param _class The class of the components to be found.
