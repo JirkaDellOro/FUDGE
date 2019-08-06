@@ -29,6 +29,7 @@ namespace UI {
                     }
                 }
             }
+
             this.mutable.mutate(this.mutator);
         }
     }
