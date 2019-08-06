@@ -40,17 +40,10 @@ namespace UI {
     export class Stepper extends HTMLSpanElement {
         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
             super();
-<<<<<<< Updated upstream
             let stepper: HTMLInputElement = document.createElement("input");
             stepper.name = _label;
             stepper.type = "number";
             stepper.value = params.value.toString();
-=======
-            this.textContent = _label + " ";
-            let stepper: HTMLInputElement = document.createElement("input");
-            stepper.name = _label;
-            stepper.type = "number";
->>>>>>> Stashed changes
             stepper.id = _label;
             stepper.step = String(params.step) || "1";
             this.appendChild(stepper);
