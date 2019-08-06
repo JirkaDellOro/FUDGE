@@ -9,7 +9,11 @@ namespace GoldenLayoutTest {
         }
 
         private static generateUI(_obj: ƒ.Mutator, _parent: HTMLElement): void {
+<<<<<<< Updated upstream
             
+=======
+            _obj.constructor.name;
+>>>>>>> Stashed changes
             for (let key in _obj) {
                 let value: Object = _obj[key];
                 if (value instanceof Object) {
