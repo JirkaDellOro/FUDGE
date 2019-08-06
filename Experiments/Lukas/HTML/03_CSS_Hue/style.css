@@ -1,0 +1,9 @@
+img {
+  /* filter: hue-rotate(60deg) brightness(387%) saturate(114%); */
+  background: url(https://dummyimage.com/600x400/);
+  width: 600px; /* Width of new image */
+  height: 400px; /* Height of new image */
+  padding-left: 600px; /* Equal to width of new image */
+  
+  box-sizing: border-box;
+}
