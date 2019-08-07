@@ -3,7 +3,7 @@ var AnimationTest;
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
     let node;
-    let mesh;
+    let cmpMesh;
     let animation;
     let startTime = Date.now();
     function init() {
@@ -11,12 +11,41 @@ var AnimationTest;
         Scenes.createViewport();
         Scenes.viewPort.draw();
         node = Scenes.node;
-        mesh = node.getComponent(ƒ.ComponentMesh);
+        cmpMesh = node.getComponent(ƒ.ComponentMesh);
         initAnim();
-        window.requestAnimationFrame(frame);
     }
     function initAnim() {
-        let mutator = mesh.getMutatorForAnimation();
+        let nS = node.serialize();
+        console.log(cmpMesh.getMutator());
+        // console.log(ƒ.Serializer.stringify(nS));
+        let animseq = new ƒ.AnimationSequence();
+        animseq.addKey(new ƒ.AnimationKey(0, 0));
+        animseq.addKey(new ƒ.AnimationKey(5000, 90));
+        let animStructure = {
+            components: {
+                ComponentMesh: [
+                    {
+                        "ƒ.ComponentMesh": {
+                            pivot: {
+                                rotation: {
+                                    x: animseq,
+                                    y: animseq
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+        animation = new ƒ.Animation(animStructure);
+        console.log(animation);
+        // animation.animationStructure["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]["pivot"]["rotation"]["y"] = animseq;
+        // console.log(animation.getMutated(2));
+        // window.requestAnimationFrame(frame);
+        window.setInterval(frame, 500);
+    }
+    function initAnimOld() {
+        let mutator = cmpMesh.getMutatorForAnimation();
         animation = new ƒ.Animation(mutator);
         let animseq = {
             // x: new ƒ.AnimationSequence(),
@@ -48,12 +77,17 @@ var AnimationTest;
         // mutator.pivot["rotation"].x++;
         let time = Date.now() - startTime;
         // if (time > 2000) debugger;
-        animation.update(time);
-        mesh.mutate(animation.animatedObject);
+        // animation.update(time);
+        let mutator = animation.getMutated(time);
+        // console.log(node.getComponent(ƒ.ComponentMesh).getMutator());
+        // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
+        // node.getComponent(ƒ.ComponentMesh).mutate(<ƒ.Mutator>(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]));
+        node.applyAnimation(mutator);
+        // mesh.mutate(animation.animatedObject);
         // console.clear();
         // console.log(time % 4000, animation.animatedObject["pivot"]["rotation"]["x"]);
         Scenes.viewPort.draw();
-        window.requestAnimationFrame(frame);
+        // window.requestAnimationFrame(frame);
     }
     function hndlEv(_e) {
         console.log("event!");
