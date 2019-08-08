@@ -11,11 +11,18 @@ var UI;
     function init() {
         let config = {
             content: [{
-                    type: 'row',
+                    type: 'column',
                     content: [{
                             type: 'component',
                             componentName: 'Inspector',
                             title: "Inspector",
+                            height: 10
+                        },
+                        {
+                            type: 'component',
+                            componentName: 'Manual',
+                            title: "Manual",
+                            height: 12
                         },
                         {
                             type: 'component',
@@ -29,7 +36,7 @@ var UI;
         myLayout = new GoldenLayout(config);
         myLayout.registerComponent('Inspector', createCameraComponent);
         myLayout.registerComponent('Viewport', createViewportComponent);
-        // myLayout.registerComponent('Manual', createTestComponent);
+        myLayout.registerComponent('Manual', createTestComponent);
         myLayout.init();
     }
     function initViewport() {
