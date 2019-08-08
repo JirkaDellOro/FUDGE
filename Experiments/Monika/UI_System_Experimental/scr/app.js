@@ -21,13 +21,15 @@ var UI;
                             type: 'component',
                             componentName: 'Viewport',
                             title: "Viewport",
-                        }]
+                        },
+                    ]
                 }]
         };
         initViewport();
         myLayout = new GoldenLayout(config);
         myLayout.registerComponent('Inspector', createCameraComponent);
         myLayout.registerComponent('Viewport', createViewportComponent);
+        // myLayout.registerComponent('Manual', createTestComponent);
         myLayout.init();
     }
     function initViewport() {
@@ -40,11 +42,14 @@ var UI;
         ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.createElement("canvas");
+        canvas.height = 800;
+        canvas.width = 1200;
         document.body.append(canvas);
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
-        viewPort.adjustingFrames = true;
+        viewPort.adjustingFrames = false;
+        viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
@@ -59,6 +64,9 @@ var UI;
     }
     function createCameraComponent(container, state) {
         return new UI.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    }
+    function createTestComponent(container, state) {
+        return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
 })(UI || (UI = {}));
 //# sourceMappingURL=app.js.map

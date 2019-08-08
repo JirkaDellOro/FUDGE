@@ -1,30 +1,22 @@
 {
-  "name": "typescript-goldenlayout",
+  "name": "electron-quick-start",
   "version": "1.0.0",
-  "description": "Experiment",
-  "main": "index.js",
+  "description": "A minimal Electron application",
+  "main": "main.js",
   "scripts": {
-    "test": "bla"
+    "start": "electron ."
   },
-  "repository": {
-    "type": "git",
-    "url": "FUDGE"
-  },
+  "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
-    "ads"
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
   ],
-  "author": "daodpa+",
-  "license": "ISC",
-  "dependencies": {
-    "@types/jquery": "^3.3.29",
-    "fs": "0.0.1-security",
-    "golden-layout": "^1.5.9",
-    "html": "^1.0.0",
-    "http": "0.0.0",
-    "jquery": "^3.4.0",
-    "typescript": "^3.4.3"
-  },
+  "author": "GitHub",
+  "license": "CC0-1.0",
   "devDependencies": {
-    "@types/node": "^11.13.4"
+    "electron": "^6.0.0"
   }
 }

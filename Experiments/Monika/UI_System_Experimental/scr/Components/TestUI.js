@@ -2,7 +2,7 @@
 /// <reference path="../UI/MutableUI.ts"/>
 var UI;
 (function (UI) {
-    class CameraUI extends UI.MutableUI {
+    class TestUI extends UI.MutableUI {
         constructor(container, state, _camera) {
             super(_camera);
             this.updateUI = (_event) => {
@@ -22,12 +22,16 @@ var UI;
                 }
                 this.mutable.mutate(this.mutator);
             };
+            this.camera = _camera;
             this.root = document.createElement("form");
+            let testdiv = document.createElement("div");
+            testdiv.innerHTML = "I was created manually";
+            this.root.append(testdiv);
             UI.UIGenerator.createFromMutator(_camera, this.root);
             this.root.addEventListener("input", this.updateUI);
             container.getElement().html(this.root);
         }
     }
-    UI.CameraUI = CameraUI;
+    UI.TestUI = TestUI;
 })(UI || (UI = {}));
-//# sourceMappingURL=CameraComponent.js.map
+//# sourceMappingURL=TestUI.js.map
