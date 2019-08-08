@@ -1854,8 +1854,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Instances of this class generate a timestamp that correlates with the time elapsed
-     * since the start of the program but allows for resetting and scaling
+     * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
+     * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Time {
@@ -1864,8 +1864,9 @@ declare namespace Fudge {
         private scale;
         private offset;
         private lastCallToElapsed;
+        private timers;
         constructor();
-        readonly game: Time;
+        static readonly game: Time;
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds
          */
@@ -1889,19 +1890,38 @@ declare namespace Fudge {
          * Automatically reset at every call to set(...) and setScale(...)
          */
         getElapsedSincePreviousCall(): number;
+        setTimeout(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number;
+        setInterval(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number;
+        clearTimeout(_id: number): void;
+        clearInterval(_id: number): void;
+        clearAllTimers(): void;
     }
 }
 declare namespace Fudge {
+    enum LOOP_MODE {
+        FRAME_REQUEST = "frameRequest",
+        TIME_GAME = "timeGame",
+        TIME_REAL = "timeReal"
+    }
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
      * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
      */
     class Loop extends EventTargetStatic {
+        static timeStartGame: number;
+        static timeStartReal: number;
         private static running;
+        private static mode;
+        private static idIntervall;
+        private static fps;
         /**
          * Start the core loop
          */
-        static start(): void;
-        private static loop;
+        static start(_mode?: LOOP_MODE, _fps?: number): void;
+        static stop(): void;
+        private static dispatchLoopEvent;
+        private static loopFrame;
+        private static loopReal;
+        private static loopGame;
     }
 }
