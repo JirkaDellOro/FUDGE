@@ -1442,37 +1442,51 @@ var Fudge;
 (function (Fudge) {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
      */
-    class ObjectManager {
+    class Recycler {
         /**
-         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
          * @param _T The class identifier of the desired object
          */
-        static create(_T) {
+        static get(_T) {
             let key = _T.name;
-            let instances = ObjectManager.depot[key];
+            let instances = Recycler.depot[key];
             if (instances && instances.length > 0)
                 return instances.pop();
             else
                 return new _T();
         }
         /**
-         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
          */
-        static reuse(_instance) {
+        static store(_instance) {
             let key = _instance.constructor.name;
             //Debug.log(key);
-            let instances = ObjectManager.depot[key] || [];
+            let instances = Recycler.depot[key] || [];
             instances.push(_instance);
-            ObjectManager.depot[key] = instances;
+            Recycler.depot[key] = instances;
             // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
             //Debug.log(this.depot);
         }
+        /**
+         * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
+         * @param _T
+         */
+        static dump(_T) {
+            let key = _T.name;
+            Recycler.depot[key] = [];
+        }
+        /**
+         * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
+         */
+        static dumpAll() {
+            Recycler.depot = {};
+        }
     }
-    ObjectManager.depot = {};
-    Fudge.ObjectManager = ObjectManager;
+    Recycler.depot = {};
+    Fudge.Recycler = Recycler;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2412,7 +2426,7 @@ var Fudge;
         //#region STATICS
         static get IDENTITY() {
             // const result: Matrix4x4 = new Matrix4x4();
-            const result = Fudge.ObjectManager.create(Matrix4x4);
+            const result = Fudge.Recycler.get(Matrix4x4);
             result.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2430,7 +2444,7 @@ var Fudge;
             let a = _a.data;
             let b = _b.data;
             // let matrix: Matrix4x4 = new Matrix4x4();
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let a00 = a[0 * 4 + 0];
             let a01 = a[0 * 4 + 1];
             let a02 = a[0 * 4 + 2];
@@ -2539,7 +2553,7 @@ var Fudge;
                 (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 d * t0,
                 d * t1,
@@ -2567,7 +2581,7 @@ var Fudge;
          */
         static LOOK_AT(_transformPosition, _targetPosition, _up = Fudge.Vector3.Y()) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let zAxis = Fudge.Vector3.DIFFERENCE(_transformPosition, _targetPosition);
             zAxis.normalize();
             let xAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(_up, zAxis));
@@ -2589,7 +2603,7 @@ var Fudge;
          */
         static TRANSLATION(_translate) {
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2604,7 +2618,7 @@ var Fudge;
          */
         static ROTATION_X(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2622,7 +2636,7 @@ var Fudge;
          */
         static ROTATION_Y(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            let matrix = Fudge.ObjectManager.create(Matrix4x4);
+            let matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2640,7 +2654,7 @@ var Fudge;
          */
         static ROTATION_Z(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2658,7 +2672,7 @@ var Fudge;
          */
         static SCALING(_scalar) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
@@ -2681,7 +2695,7 @@ var Fudge;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
@@ -2710,7 +2724,7 @@ var Fudge;
          */
         static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
@@ -2732,7 +2746,7 @@ var Fudge;
         rotateX(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
@@ -2742,7 +2756,7 @@ var Fudge;
         rotateY(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
@@ -2752,19 +2766,20 @@ var Fudge;
         rotateZ(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         lookAt(_target, _up = Fudge.Vector3.Y()) {
             const matrix = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         //#endregion
         //#region Translation
         translate(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+            // TODO: possible optimization, translation may alter mutator instead of deleting it.
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Translate the transformation along the x-axis.
@@ -2792,7 +2807,7 @@ var Fudge;
         scale(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         scaleX(_by) {
             this.scale(new Fudge.Vector3(_by, 1, 1));
@@ -2849,6 +2864,7 @@ var Fudge;
         set(_to) {
             // this.data = _to.get();
             this.data.set(_to.data);
+            this.mutator = null;
         }
         get() {
             return new Float32Array(this.data);
@@ -2871,17 +2887,20 @@ var Fudge;
                 rotation: vectors[1].getMutator(),
                 scaling: vectors[2].getMutator()
             };
-            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
         mutate(_mutator) {
+            // hole eigenen Mutator und sichere
+            // mutiere gespeicherten Mutator entsprechend _mutator
             let matrix = Matrix4x4.IDENTITY;
             matrix.translate(_mutator.translation);
+            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
             matrix.rotateZ(_mutator.rotation.z);
             matrix.rotateY(_mutator.rotation.y);
             matrix.rotateX(_mutator.rotation.x);
             matrix.scale(_mutator.scaling);
             this.set(matrix);
+            // this.mutator = gespeicherter, mutierter Mutator
         }
         reduceMutator(_mutator) { }
     }
@@ -3495,9 +3514,9 @@ var Fudge;
                 let childNode = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera); //, world);
             }
-            Fudge.ObjectManager.reuse(projection);
+            Fudge.Recycler.store(projection);
             if (finalTransform != _node.mtxWorld)
-                Fudge.ObjectManager.reuse(finalTransform);
+                Fudge.Recycler.store(finalTransform);
         }
         static drawNode(_node, _finalTransform, _projection) {
             let references = this.nodes.get(_node);

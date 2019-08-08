@@ -35,7 +35,7 @@ namespace Fudge {
         //#region STATICS
         public static get IDENTITY(): Matrix4x4 {
             // const result: Matrix4x4 = new Matrix4x4();
-            const result: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const result: Matrix4x4 = Recycler.get(Matrix4x4);
             result.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -54,7 +54,7 @@ namespace Fudge {
             let a: Float32Array = _a.data;
             let b: Float32Array = _b.data;
             // let matrix: Matrix4x4 = new Matrix4x4();
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             let a00: number = a[0 * 4 + 0];
             let a01: number = a[0 * 4 + 1];
             let a02: number = a[0 * 4 + 2];
@@ -169,7 +169,7 @@ namespace Fudge {
             let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             matrix.data.set([
                 d * t0, // [0]
                 d * t1, // [1]
@@ -198,7 +198,7 @@ namespace Fudge {
          */
         public static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             let zAxis: Vector3 = Vector3.DIFFERENCE(_transformPosition, _targetPosition);
             zAxis.normalize();
             let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
@@ -222,7 +222,7 @@ namespace Fudge {
          */
         public static TRANSLATION(_translate: Vector3): Matrix4x4 {
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -238,7 +238,7 @@ namespace Fudge {
          */
         public static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
@@ -257,7 +257,7 @@ namespace Fudge {
          */
         public static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            let matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            let matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
@@ -276,7 +276,7 @@ namespace Fudge {
          */
         public static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             let angleInRadians: number = _angleInDegrees * Math.PI / 180;
             let sin: number = Math.sin(angleInRadians);
             let cos: number = Math.cos(angleInRadians);
@@ -295,7 +295,7 @@ namespace Fudge {
          */
         public static SCALING(_scalar: Vector3): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
@@ -319,7 +319,7 @@ namespace Fudge {
             let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv: number = 1.0 / (_near - _far);
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
@@ -351,7 +351,7 @@ namespace Fudge {
          */
         public static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near: number = -400, _far: number = 400): Matrix4x4 {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix: Matrix4x4 = ObjectManager.create(Matrix4x4);
+            const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
             matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
@@ -374,7 +374,7 @@ namespace Fudge {
         public rotateX(_angleInDegrees: number): void {
             const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
 
         /**
@@ -385,7 +385,7 @@ namespace Fudge {
         public rotateY(_angleInDegrees: number): void {
             const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
 
         /**
@@ -396,21 +396,22 @@ namespace Fudge {
         public rotateZ(_angleInDegrees: number): void {
             const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
 
         public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
             const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
         //#endregion
 
         //#region Translation
         public translate(_by: Vector3): void {
             const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+            // TODO: possible optimization, translation may alter mutator instead of deleting it.
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
 
         /**
@@ -440,7 +441,7 @@ namespace Fudge {
         public scale(_by: Vector3): void {
             const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
             this.set(matrix);
-            ObjectManager.reuse(matrix);
+            Recycler.store(matrix);
         }
         public scaleX(_by: number): void {
             this.scale(new Vector3(_by, 1, 1));
@@ -513,6 +514,7 @@ namespace Fudge {
         public set(_to: Matrix4x4): void {
             // this.data = _to.get();
             this.data.set(_to.data);
+            this.mutator = null;
         }
 
         public get(): Float32Array {
@@ -540,19 +542,25 @@ namespace Fudge {
                 scaling: vectors[2].getMutator()
             };
 
-            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
 
         public mutate(_mutator: Mutator): void {
+            // hole eigenen Mutator und sichere
+            // mutiere gespeicherten Mutator entsprechend _mutator
             let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
+
             matrix.translate(<Vector3>_mutator.translation);
+
+            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
             matrix.rotateZ((<Vector3>_mutator.rotation).z);
             matrix.rotateY((<Vector3>_mutator.rotation).y);
             matrix.rotateX((<Vector3>_mutator.rotation).x);
+
             matrix.scale(<Vector3>_mutator.scaling);
 
             this.set(matrix);
+            // this.mutator = gespeicherter, mutierter Mutator
         }
         protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
