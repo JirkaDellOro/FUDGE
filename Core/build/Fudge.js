@@ -1375,6 +1375,11 @@ var Fudge;
         }
         mutate(_mutator) {
             super.mutate(_mutator);
+            switch (this.projection) {
+                case PROJECTION.CENTRAL:
+                    this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+                    break;
+            }
         }
         reduceMutator(_mutator) {
             delete _mutator.transform;
@@ -1752,82 +1757,6 @@ var Fudge;
         reduceMutator(_mutator) { }
     }
     Fudge.Color = Color;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class PointerEventƒ extends PointerEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    Fudge.PointerEventƒ = PointerEventƒ;
-    class DragDropEventƒ extends DragEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    Fudge.DragDropEventƒ = DragDropEventƒ;
-    class WheelEventƒ extends WheelEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    Fudge.WheelEventƒ = WheelEventƒ;
-    /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
-     */
-    class EventTargetStatic extends EventTarget {
-        constructor() {
-            super();
-        }
-        static addEventListener(_type, _handler) {
-            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
-        }
-        static removeEventListener(_type, _handler) {
-            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
-        }
-        static dispatchEvent(_event) {
-            EventTargetStatic.targetStatic.dispatchEvent(_event);
-            return true;
-        }
-    }
-    EventTargetStatic.targetStatic = new EventTargetStatic();
-    Fudge.EventTargetStatic = EventTargetStatic;
-})(Fudge || (Fudge = {}));
-///<reference path="../Event/Event.ts"/>
-var Fudge;
-///<reference path="../Event/Event.ts"/>
-(function (Fudge) {
-    /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
-     */
-    class Loop extends Fudge.EventTargetStatic {
-        /**
-         * Start the core loop
-         */
-        static start() {
-            if (!Loop.running)
-                Loop.loop(performance.now());
-            Fudge.Debug.log("Loop running");
-        }
-        static loop(_timestamp) {
-            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
-            let event = new Event("loopFrame" /* LOOP_FRAME */);
-            Loop.targetStatic.dispatchEvent(event);
-            window.requestAnimationFrame(Loop.loop);
-        }
-    }
-    Loop.running = false;
-    Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2441,6 +2370,55 @@ var Fudge;
         }
     }
     Fudge.Viewport = Viewport;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class PointerEventƒ extends PointerEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.PointerEventƒ = PointerEventƒ;
+    class DragDropEventƒ extends DragEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.DragDropEventƒ = DragDropEventƒ;
+    class WheelEventƒ extends WheelEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
+    Fudge.WheelEventƒ = WheelEventƒ;
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        constructor() {
+            super();
+        }
+        static addEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
+        }
+        static removeEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
+        }
+        static dispatchEvent(_event) {
+            EventTargetStatic.targetStatic.dispatchEvent(_event);
+            return true;
+        }
+    }
+    EventTargetStatic.targetStatic = new EventTargetStatic();
+    Fudge.EventTargetStatic = EventTargetStatic;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -4739,5 +4717,100 @@ var Fudge;
     class TextureHTML extends TextureCanvas {
     }
     Fudge.TextureHTML = TextureHTML;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Instances of this class generate a timestamp that correlates with the time elapsed
+     * since the start of the program but allows for resetting and scaling
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Time {
+        constructor() {
+            this.start = performance.now();
+            this.scale = 1.0;
+            this.offset = 0.0;
+            this.lastCallToElapsed = 0.0;
+        }
+        get game() {
+            return Time.gameTime;
+        }
+        /**
+         * Retrieves the current scaled timestamp of this instance in milliseconds
+         */
+        get() {
+            return this.offset + this.scale * (performance.now() - this.start);
+        }
+        /**
+         * (Re-) Sets the timestamp of this instance
+         * @param _time The timestamp to represent the current time (default 0.0)
+         */
+        set(_time = 0) {
+            this.offset = _time;
+            this.start = performance.now();
+            this.getElapsedSincePreviousCall();
+        }
+        /**
+         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1)
+         * @param _scale The desired scaling (default 1.0)
+         */
+        setScale(_scale = 1.0) {
+            this.set(this.get());
+            this.scale = _scale;
+            this.getElapsedSincePreviousCall();
+        }
+        /**
+         * Retrieves the current scaling of this time
+         */
+        getScale() {
+            return this.scale;
+        }
+        /**
+         * Retrieves the scaled time in milliseconds passed since the last call to this method
+         * Automatically reset at every call to set(...) and setScale(...)
+         */
+        getElapsedSincePreviousCall() {
+            let current = this.get();
+            let elapsed = current - this.lastCallToElapsed;
+            this.lastCallToElapsed = current;
+            return elapsed;
+        }
+    }
+    Time.gameTime = new Time();
+    Fudge.Time = Time;
+})(Fudge || (Fudge = {}));
+///<reference path="../Event/Event.ts"/>
+///<reference path="../Time/Time.ts"/>
+var Fudge;
+///<reference path="../Event/Event.ts"/>
+///<reference path="../Time/Time.ts"/>
+(function (Fudge) {
+    // enum LOOP {
+    //     FRAME_REQUESTED,
+    //     TIME_GAME,
+    //     TIME_REAL
+    // }
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends Fudge.EventTargetStatic {
+        /**
+         * Start the core loop
+         */
+        static start() {
+            if (!Loop.running)
+                Loop.loop(performance.now());
+            Fudge.Debug.log("Loop running");
+        }
+        static loop(_timestamp) {
+            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
+            let event = new Event("loopFrame" /* LOOP_FRAME */);
+            Loop.targetStatic.dispatchEvent(event);
+            window.requestAnimationFrame(Loop.loop);
+        }
+    }
+    Loop.running = false;
+    Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

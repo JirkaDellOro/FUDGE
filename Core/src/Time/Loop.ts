@@ -1,5 +1,11 @@
 ///<reference path="../Event/Event.ts"/>
+///<reference path="../Time/Time.ts"/>
 namespace Fudge {
+    // enum LOOP {
+    //     FRAME_REQUESTED,
+    //     TIME_GAME,
+    //     TIME_REAL
+    // }
     /**
      * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
      * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
