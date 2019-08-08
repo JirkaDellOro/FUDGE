@@ -72,8 +72,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-						it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window</p>
+						<p>Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+						It then fires <a href="../enums/fudge.event.html">EVENT</a>.LOOP_FRAME to all added listeners at each frame</p>
 					</div>
 				</div>
 			</section>
@@ -95,6 +95,15 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#timeframegame" class="tsd-kind-icon">time<wbr>Frame<wbr>Game</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#timeframereal" class="tsd-kind-icon">time<wbr>Frame<wbr>Real</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#timestartgame" class="tsd-kind-icon">time<wbr>Start<wbr>Game</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#timestartreal" class="tsd-kind-icon">time<wbr>Start<wbr>Real</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudge.loop.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
@@ -104,8 +113,72 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.loop.html#dispatchevent-1" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudge.loop.html#removeeventlistener-1" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#start" class="tsd-kind-icon">start</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudge.loop.html#stop" class="tsd-kind-icon">stop</a></li>
 							</ul>
 						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="timeframegame" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> time<wbr>Frame<wbr>Game</h3>
+					<div class="tsd-signature tsd-kind-icon">time<wbr>Frame<wbr>Game<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L22">Time/Loop.ts:22</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The gametime elapsed since the last loop cycle</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="timeframereal" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> time<wbr>Frame<wbr>Real</h3>
+					<div class="tsd-signature tsd-kind-icon">time<wbr>Frame<wbr>Real<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L24">Time/Loop.ts:24</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The realtime elapsed since the last loop cycle</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="timestartgame" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> time<wbr>Start<wbr>Game</h3>
+					<div class="tsd-signature tsd-kind-icon">time<wbr>Start<wbr>Game<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L18">Time/Loop.ts:18</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The gametime the loop was started, overwritten at each start</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="timestartreal" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> time<wbr>Start<wbr>Real</h3>
+					<div class="tsd-signature tsd-kind-icon">time<wbr>Start<wbr>Real<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L20">Time/Loop.ts:20</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The realtime the loop was started, overwritten at each start</p>
+						</div>
 					</div>
 				</section>
 			</section>
@@ -229,7 +302,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.eventtargetstatic.html">EventTargetStatic</a>.<a href="fudge.eventtargetstatic.html#addeventlistener-1">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L95">Event/Event.ts:95</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Event/Event.ts#L101">Event/Event.ts:101</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -256,7 +329,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.eventtargetstatic.html">EventTargetStatic</a>.<a href="fudge.eventtargetstatic.html#dispatchevent-1">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L101">Event/Event.ts:101</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Event/Event.ts#L107">Event/Event.ts:107</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -280,7 +353,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudge.eventtargetstatic.html">EventTargetStatic</a>.<a href="fudge.eventtargetstatic.html#removeeventlistener-1">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Event/Event.ts#L98">Event/Event.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Event/Event.ts#L104">Event/Event.ts:104</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -300,18 +373,51 @@
 					<a name="start" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> start</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">start<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">start<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">?: </span><a href="../enums/fudge.loop_mode.html" class="tsd-signature-type">LOOP_MODE</a>, _fps<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6d55eb71/Core/src/Engine/Loop.ts#L12">Engine/Loop.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L38">Time/Loop.ts:38</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Start the core loop</p>
+									<p>Starts the loop with the given mode and fps</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _mode: <a href="../enums/fudge.loop_mode.html" class="tsd-signature-type">LOOP_MODE</a><span class="tsd-signature-symbol"> =&nbsp;LOOP_MODE.FRAME_REQUEST</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _fps: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;30</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="stop" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> stop</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">stop<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/68995c82/Core/src/Time/Loop.ts#L71">Time/Loop.ts:71</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Stops the loop</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -338,6 +444,18 @@
 					<li class="current tsd-kind-class tsd-parent-kind-module">
 						<a href="fudge.loop.html" class="tsd-kind-icon">Loop</a>
 						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.loop.html#timeframegame" class="tsd-kind-icon">time<wbr>Frame<wbr>Game</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.loop.html#timeframereal" class="tsd-kind-icon">time<wbr>Frame<wbr>Real</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.loop.html#timestartgame" class="tsd-kind-icon">time<wbr>Start<wbr>Game</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.loop.html#timestartreal" class="tsd-kind-icon">time<wbr>Start<wbr>Real</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudge.loop.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
@@ -358,6 +476,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudge.loop.html#start" class="tsd-kind-icon">start</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudge.loop.html#stop" class="tsd-kind-icon">stop</a>
 							</li>
 						</ul>
 					</li>
