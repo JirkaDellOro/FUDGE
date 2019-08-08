@@ -2025,6 +2025,9 @@ declare namespace Fudge {
         private lastCallToElapsed;
         private timers;
         constructor();
+        /**
+         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         */
         static readonly game: Time;
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds
@@ -2053,32 +2056,51 @@ declare namespace Fudge {
         setInterval(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number;
         clearTimeout(_id: number): void;
         clearInterval(_id: number): void;
+        /**
+         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         */
         clearAllTimers(): void;
     }
 }
 declare namespace Fudge {
     enum LOOP_MODE {
+        /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
+        /** Loop cycles with the given framerate in [[Time]].game */
         TIME_GAME = "timeGame",
+        /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
         TIME_REAL = "timeReal"
     }
     /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
      */
     class Loop extends EventTargetStatic {
+        /** The gametime the loop was started, overwritten at each start */
         static timeStartGame: number;
+        /** The realtime the loop was started, overwritten at each start */
         static timeStartReal: number;
+        /** The gametime elapsed since the last loop cycle */
+        static timeFrameGame: number;
+        /** The realtime elapsed since the last loop cycle */
+        static timeFrameReal: number;
+        private static timeLastFrameGame;
+        private static timeLastFrameReal;
         private static running;
         private static mode;
         private static idIntervall;
         private static fps;
         /**
-         * Start the core loop
+         * Starts the loop with the given mode and fps
+         * @param _mode
+         * @param _fps
          */
         static start(_mode?: LOOP_MODE, _fps?: number): void;
+        /**
+         * Stops the loop
+         */
         static stop(): void;
-        private static dispatchLoopEvent;
+        private static loop;
         private static loopFrame;
         private static loopReal;
         private static loopGame;

@@ -1,8 +1,15 @@
 namespace Fudge {
+    enum TIMER_TYPE {
+        INTERVAL,
+        TIMEOUT
+    }
 
     interface TimerData {
-        type: "Intervall" | "Timeout";
+        type: TIMER_TYPE;
         startTime: number;
+        callback: TimerHandler;
+        timeout: number;
+        arguments: Object[];
     }
 
     interface Timers {
@@ -29,6 +36,9 @@ namespace Fudge {
             this.lastCallToElapsed = 0.0;
         }
 
+        /**
+         * Returns the game-time-object which starts automatically and serves as base for various internal operations. 
+         */
         public static get game(): Time {
             return Time.gameTime;
         }
@@ -83,14 +93,14 @@ namespace Fudge {
         public setTimeout(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number {
             // TODO: handle time scale and reset 
             let id: number = window.setInterval(_callback, _timeout, _arguments);
-            let timer: TimerData = { type: "Timeout", startTime: this.get() };
+            let timer: TimerData = { type: TIMER_TYPE.TIMEOUT, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
             this.timers[id] = timer;
             return id;
         }
         public setInterval(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number {
             // TODO: handle time scale and reset 
             let id: number = window.setInterval(_callback, _timeout, _arguments);
-            let timer: TimerData = { type: "Intervall", startTime: this.get() };
+            let timer: TimerData = { type: TIMER_TYPE.INTERVAL, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
             this.timers[id] = timer;
             return id;
         }
@@ -103,9 +113,12 @@ namespace Fudge {
             delete this.timers[_id];
         }
 
+        /**
+         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         */
         public clearAllTimers(): void {
             for (let id in this.timers) {
-                if (this.timers[id].type == "Timeout")
+                if (this.timers[id].type == TIMER_TYPE.TIMEOUT)
                     this.clearTimeout(parseInt(id));
                 else
                     this.clearInterval(parseInt(id));

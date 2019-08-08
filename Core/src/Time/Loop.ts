@@ -2,24 +2,38 @@
 ///<reference path="../Time/Time.ts"/>
 namespace Fudge {
     export enum LOOP_MODE {
+        /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
+        /** Loop cycles with the given framerate in [[Time]].game */
         TIME_GAME = "timeGame",
+        /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
         TIME_REAL = "timeReal"
     }
     /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
      */
     export class Loop extends EventTargetStatic {
+        /** The gametime the loop was started, overwritten at each start */
         public static timeStartGame: number;
+        /** The realtime the loop was started, overwritten at each start */
         public static timeStartReal: number;
+        /** The gametime elapsed since the last loop cycle */
+        public static timeFrameGame: number;
+        /** The realtime elapsed since the last loop cycle */
+        public static timeFrameReal: number;
+
+        private static timeLastFrameGame: number;
+        private static timeLastFrameReal: number;
         private static running: boolean = false;
         private static mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST;
         private static idIntervall: number = 0;
         private static fps: number = 30;
 
         /**
-         * Start the core loop
+         * Starts the loop with the given mode and fps
+         * @param _mode 
+         * @param _fps 
          */
         public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 30): void {
             Loop.stop();
@@ -51,6 +65,9 @@ namespace Fudge {
             }
         }
 
+        /**
+         * Stops the loop
+         */
         public static stop(): void {
             if (!Loop.running)
                 return;
@@ -72,20 +89,29 @@ namespace Fudge {
             Debug.log("Loop stopped!");
         }
 
-        private static dispatchLoopEvent(): void {
+        private static loop(): void {
+            let time: number;
+            time = performance.now();
+            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeLastFrameReal = time;
+
+            time = Time.game.get();
+            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeLastFrameGame = time;
+
             let event: Event = new Event(EVENT.LOOP_FRAME);
             Loop.targetStatic.dispatchEvent(event);
         }
 
         private static loopFrame(): void {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
             Loop.idIntervall = window.requestAnimationFrame(Loop.loopFrame);
         }
         private static loopReal(): void {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
         }
         private static loopGame(): void {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
         }
     }
 

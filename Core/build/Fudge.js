@@ -4720,6 +4720,11 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    let TIMER_TYPE;
+    (function (TIMER_TYPE) {
+        TIMER_TYPE[TIMER_TYPE["INTERVAL"] = 0] = "INTERVAL";
+        TIMER_TYPE[TIMER_TYPE["TIMEOUT"] = 1] = "TIMEOUT";
+    })(TIMER_TYPE || (TIMER_TYPE = {}));
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
@@ -4733,6 +4738,9 @@ var Fudge;
             this.offset = 0.0;
             this.lastCallToElapsed = 0.0;
         }
+        /**
+         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         */
         static get game() {
             return Time.gameTime;
         }
@@ -4781,14 +4789,14 @@ var Fudge;
         setTimeout(_callback, _timeout, ..._arguments) {
             // TODO: handle time scale and reset 
             let id = window.setInterval(_callback, _timeout, _arguments);
-            let timer = { type: "Timeout", startTime: this.get() };
+            let timer = { type: TIMER_TYPE.TIMEOUT, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
             this.timers[id] = timer;
             return id;
         }
         setInterval(_callback, _timeout, ..._arguments) {
             // TODO: handle time scale and reset 
             let id = window.setInterval(_callback, _timeout, _arguments);
-            let timer = { type: "Intervall", startTime: this.get() };
+            let timer = { type: TIMER_TYPE.INTERVAL, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
             this.timers[id] = timer;
             return id;
         }
@@ -4800,9 +4808,12 @@ var Fudge;
             window.clearInterval(_id);
             delete this.timers[_id];
         }
+        /**
+         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         */
         clearAllTimers() {
             for (let id in this.timers) {
-                if (this.timers[id].type == "Timeout")
+                if (this.timers[id].type == TIMER_TYPE.TIMEOUT)
                     this.clearTimeout(parseInt(id));
                 else
                     this.clearInterval(parseInt(id));
@@ -4820,17 +4831,22 @@ var Fudge;
 (function (Fudge) {
     let LOOP_MODE;
     (function (LOOP_MODE) {
+        /** Loop cycles controlled by window.requestAnimationFrame */
         LOOP_MODE["FRAME_REQUEST"] = "frameRequest";
+        /** Loop cycles with the given framerate in [[Time]].game */
         LOOP_MODE["TIME_GAME"] = "timeGame";
+        /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = Fudge.LOOP_MODE || (Fudge.LOOP_MODE = {}));
     /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
      */
     class Loop extends Fudge.EventTargetStatic {
         /**
-         * Start the core loop
+         * Starts the loop with the given mode and fps
+         * @param _mode
+         * @param _fps
          */
         static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 30) {
             Loop.stop();
@@ -4858,6 +4874,9 @@ var Fudge;
                     break;
             }
         }
+        /**
+         * Stops the loop
+         */
         static stop() {
             if (!Loop.running)
                 return;
@@ -4876,19 +4895,26 @@ var Fudge;
             }
             Fudge.Debug.log("Loop stopped!");
         }
-        static dispatchLoopEvent() {
+        static loop() {
+            let time;
+            time = performance.now();
+            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeLastFrameReal = time;
+            time = Fudge.Time.game.get();
+            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeLastFrameGame = time;
             let event = new Event("loopFrame" /* LOOP_FRAME */);
             Loop.targetStatic.dispatchEvent(event);
         }
         static loopFrame() {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
             Loop.idIntervall = window.requestAnimationFrame(Loop.loopFrame);
         }
         static loopReal() {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
         }
         static loopGame() {
-            Loop.dispatchLoopEvent();
+            Loop.loop();
         }
     }
     Loop.running = false;
