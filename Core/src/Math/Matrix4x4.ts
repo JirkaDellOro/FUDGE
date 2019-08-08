@@ -556,21 +556,21 @@ namespace Fudge {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       if (newTranslation) {
         mutator["translation"] = {
-          x: newTranslation.x || oldTranslation.x, 
-          y: newTranslation.y || oldTranslation.y, 
-          z: newTranslation.z || oldTranslation.z};
+          x: newTranslation.x != undefined ? newTranslation.x : oldTranslation.x, 
+          y: newTranslation.y != undefined ? newTranslation.y : oldTranslation.y, 
+          z: newTranslation.z != undefined ? newTranslation.z : oldTranslation.z};
       }
       if (newRotation) {
         mutator["rotation"] = {
-          x: newRotation.x || oldRotation.x, 
-          y: newRotation.y || oldRotation.y, 
-          z: newRotation.z || oldRotation.z};
+          x: newRotation.x != undefined ? newRotation.x : oldRotation.x, 
+          y: newRotation.y != undefined ? newRotation.y : oldRotation.y, 
+          z: newRotation.z != undefined ? newRotation.z : oldRotation.z};
       }
       if (newScaling) {
         mutator["scaling"] = {
-          x: newScaling.x || oldScaling.x, 
-          y: newScaling.y || oldScaling.y, 
-          z: newScaling.z || oldScaling.z};
+          x: newScaling.x != undefined ? newScaling.x : oldScaling.x, 
+          y: newScaling.y != undefined ? newScaling.y : oldScaling.y, 
+          z: newScaling.z != undefined ? newScaling.z : oldScaling.z};
       }
 
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
