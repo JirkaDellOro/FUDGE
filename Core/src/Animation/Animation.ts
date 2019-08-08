@@ -27,8 +27,6 @@ namespace Fudge {
 
     getMutated(_time: number, _direction: number): Mutator {
       let m: Mutator = {};
-      this.totalTime = 5000;
-      // this.calculateTotalTime();
 
       m = this.traverseStructureForMutator(this.animationStructure, m, _time);
       return m;
