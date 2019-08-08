@@ -2,7 +2,7 @@
 namespace UI {
     import ƒ = Fudge;
     export abstract class MutableUI {
-        protected timeUpdate: number = 250;
+        protected timeUpdate: number = 190;
         protected root: HTMLElement;
         protected mutable: ƒ.Mutable;
         protected mutator: ƒ.Mutator;

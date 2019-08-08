@@ -14,23 +14,26 @@ namespace UI {
     function init() {
         let config: GoldenLayout.Config = {
             content: [{
-                type: 'row',
+                type: 'column',
                 content: [{
                     type: 'component',
                     componentName: 'Inspector',
                     title: "Inspector",
+                    height: 10
+                },
+                {
+                    type: 'component',
+                    componentName: 'Manual',
+                    title: "Manual",
+                    height: 12
                 },
                 {
                     type: 'component',
                     componentName: 'Viewport',
                     title: "Viewport",
                 },
-                // {
-                //     type: 'component',
-                //     componentName: 'Manual',
-                //     title: "Manual",
-                // },
-            ]
+
+                ]
             }]
         };
 
@@ -39,7 +42,7 @@ namespace UI {
         myLayout = new GoldenLayout(config);
         myLayout.registerComponent('Inspector', createCameraComponent);
         myLayout.registerComponent('Viewport', createViewportComponent);
-        // myLayout.registerComponent('Manual', createTestComponent);
+        myLayout.registerComponent('Manual', createTestComponent);
 
         myLayout.init();
     }

@@ -3,7 +3,7 @@ var UI;
 (function (UI) {
     class MutableUI {
         constructor(mutable) {
-            this.timeUpdate = 250;
+            this.timeUpdate = 190;
             this.updateUI = (_e) => {
                 console.log(_e);
                 this.mutable.mutate(this.mutator);
