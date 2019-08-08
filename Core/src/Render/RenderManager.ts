@@ -224,9 +224,9 @@ namespace Fudge {
                 this.drawBranch(childNode, _cmpCamera); //, world);
             }
 
-            ObjectManager.reuse(projection);
+            Recycler.store(projection);
             if (finalTransform != _node.mtxWorld)
-                ObjectManager.reuse(finalTransform);
+                Recycler.store(finalTransform);
         }
 
         private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
