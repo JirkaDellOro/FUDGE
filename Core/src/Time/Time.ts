@@ -1,14 +1,15 @@
-namespace TimeTest {
+namespace Fudge {
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed
      * since the start of the program but allows for resetting and scaling
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Time {
+        private static gameTime: Time = new Time();
         private start: number;
         private scale: number;
         private offset: number;
-        private lastCallToElapsed: number; 
+        private lastCallToElapsed: number;
 
         constructor() {
             this.start = performance.now();
@@ -17,9 +18,12 @@ namespace TimeTest {
             this.lastCallToElapsed = 0.0;
         }
 
+        public get game(): Time {
+            return Time.gameTime;
+        }
+
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds
-         * # Watch out for headlines
          */
         get(): number {
             return this.offset + this.scale * (performance.now() - this.start);

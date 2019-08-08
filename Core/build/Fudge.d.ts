@@ -581,99 +581,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface MapEventTypeToListener {
-        [eventType: string]: EventListener[];
-    }
-    /**
-     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
-     */
-    const enum EVENT {
-        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
-        LOOP_FRAME = "loopFrame",
-        /** dispatched to a [[Component]] when its being added to a [[Node]] */
-        COMPONENT_ADD = "componentAdd",
-        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
-        COMPONENT_REMOVE = "componentRemove",
-        /** dispatched to a [[Component]] when its being activated */
-        COMPONENT_ACTIVATE = "componentActivate",
-        /** dispatched to a [[Component]] when its being deactivated */
-        COMPONENT_DEACTIVATE = "componentDeactivate",
-        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
-        CHILD_APPEND = "childAdd",
-        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
-        CHILD_REMOVE = "childRemove",
-        /** dispatched to a [[Mutable]] when its being mutated */
-        MUTATE = "mutate",
-        /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
-        FOCUS_IN = "focusin",
-        /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
-        FOCUS_OUT = "focusout",
-        /** dispatched to [[Node]] when it's done serializing */
-        NODE_SERIALIZED = "nodeSerialized",
-        /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
-        NODE_DESERIALIZED = "nodeDeserialized",
-        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
-    }
-    const enum EVENT_POINTER {
-        UP = "\u0192pointerup",
-        DOWN = "\u0192pointerdown"
-    }
-    const enum EVENT_DRAGDROP {
-        DRAG = "\u0192drag",
-        DROP = "\u0192drop",
-        START = "\u0192dragstart",
-        END = "\u0192dragend",
-        OVER = "\u0192dragover"
-    }
-    const enum EVENT_WHEEL {
-        WHEEL = "\u0192wheel"
-    }
-    class PointerEventƒ extends PointerEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: PointerEventƒ);
-    }
-    class DragDropEventƒ extends DragEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: DragDropEventƒ);
-    }
-    class WheelEventƒ extends WheelEvent {
-        constructor(type: string, _event: WheelEventƒ);
-    }
-    /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
-     */
-    class EventTargetStatic extends EventTarget {
-        protected static targetStatic: EventTargetStatic;
-        protected constructor();
-        static addEventListener(_type: string, _handler: EventListener): void;
-        static removeEventListener(_type: string, _handler: EventListener): void;
-        static dispatchEvent(_event: Event): boolean;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
-     */
-    class Loop extends EventTargetStatic {
-        private static running;
-        /**
-         * Start the core loop
-         */
-        static start(): void;
-        private static loop;
-    }
-}
-declare namespace Fudge {
     /**
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -980,6 +887,85 @@ declare namespace Fudge {
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
+    }
+}
+declare namespace Fudge {
+    interface MapEventTypeToListener {
+        [eventType: string]: EventListener[];
+    }
+    /**
+     * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
+     */
+    const enum EVENT {
+        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
+        LOOP_FRAME = "loopFrame",
+        /** dispatched to a [[Component]] when its being added to a [[Node]] */
+        COMPONENT_ADD = "componentAdd",
+        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
+        COMPONENT_REMOVE = "componentRemove",
+        /** dispatched to a [[Component]] when its being activated */
+        COMPONENT_ACTIVATE = "componentActivate",
+        /** dispatched to a [[Component]] when its being deactivated */
+        COMPONENT_DEACTIVATE = "componentDeactivate",
+        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
+        CHILD_APPEND = "childAdd",
+        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
+        CHILD_REMOVE = "childRemove",
+        /** dispatched to a [[Mutable]] when its being mutated */
+        MUTATE = "mutate",
+        /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
+        FOCUS_IN = "focusin",
+        /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
+        FOCUS_OUT = "focusout",
+        /** dispatched to [[Node]] when it's done serializing */
+        NODE_SERIALIZED = "nodeSerialized",
+        /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
+        NODE_DESERIALIZED = "nodeDeserialized",
+        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
+    }
+    const enum EVENT_POINTER {
+        UP = "\u0192pointerup",
+        DOWN = "\u0192pointerdown"
+    }
+    const enum EVENT_DRAGDROP {
+        DRAG = "\u0192drag",
+        DROP = "\u0192drop",
+        START = "\u0192dragstart",
+        END = "\u0192dragend",
+        OVER = "\u0192dragover"
+    }
+    const enum EVENT_WHEEL {
+        WHEEL = "\u0192wheel"
+    }
+    class PointerEventƒ extends PointerEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: PointerEventƒ);
+    }
+    class DragDropEventƒ extends DragEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: DragDropEventƒ);
+    }
+    class WheelEventƒ extends WheelEvent {
+        constructor(type: string, _event: WheelEventƒ);
+    }
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        protected static targetStatic: EventTargetStatic;
+        protected constructor();
+        static addEventListener(_type: string, _handler: EventListener): void;
+        static removeEventListener(_type: string, _handler: EventListener): void;
+        static dispatchEvent(_event: Event): boolean;
     }
 }
 declare namespace Fudge {
@@ -1864,5 +1850,58 @@ declare namespace Fudge {
      * Texture created from an HTML-page
      */
     class TextureHTML extends TextureCanvas {
+    }
+}
+declare namespace Fudge {
+    /**
+     * Instances of this class generate a timestamp that correlates with the time elapsed
+     * since the start of the program but allows for resetting and scaling
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Time {
+        private static gameTime;
+        private start;
+        private scale;
+        private offset;
+        private lastCallToElapsed;
+        constructor();
+        readonly game: Time;
+        /**
+         * Retrieves the current scaled timestamp of this instance in milliseconds
+         */
+        get(): number;
+        /**
+         * (Re-) Sets the timestamp of this instance
+         * @param _time The timestamp to represent the current time (default 0.0)
+         */
+        set(_time?: number): void;
+        /**
+         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1)
+         * @param _scale The desired scaling (default 1.0)
+         */
+        setScale(_scale?: number): void;
+        /**
+         * Retrieves the current scaling of this time
+         */
+        getScale(): number;
+        /**
+         * Retrieves the scaled time in milliseconds passed since the last call to this method
+         * Automatically reset at every call to set(...) and setScale(...)
+         */
+        getElapsedSincePreviousCall(): number;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
+     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
+     */
+    class Loop extends EventTargetStatic {
+        private static running;
+        /**
+         * Start the core loop
+         */
+        static start(): void;
+        private static loop;
     }
 }
