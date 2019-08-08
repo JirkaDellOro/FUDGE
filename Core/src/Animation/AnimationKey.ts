@@ -80,6 +80,10 @@ namespace Fudge {
       return this;
     }
 
+    getMutator(): Mutator {
+      return this.serialize();
+    }
+
     protected reduceMutator(_mutator: Mutator): void {
       //
     }

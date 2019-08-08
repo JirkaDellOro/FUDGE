@@ -43,8 +43,10 @@ namespace Fudge {
 
     //#region transfer
     serialize(): Serialization {
-      let s: Serialization = {};
-      s.keys = [];
+      let s: Serialization = {
+        keys: [],
+        animationSequence: true
+      };
       for (let i: number = 0; i < this.keys.length; i++) {
         s.keys[i] = this.keys[i].serialize();
       }
