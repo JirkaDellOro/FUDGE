@@ -869,20 +869,29 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
      */
-    abstract class ObjectManager {
+    abstract class Recycler {
         private static depot;
         /**
-         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
          * @param _T The class identifier of the desired object
          */
-        static create<T>(_T: new () => T): T;
+        static get<T>(_T: new () => T): T;
         /**
-         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
          */
-        static reuse(_instance: Object): void;
+        static store(_instance: Object): void;
+        /**
+         * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
+         * @param _T
+         */
+        static dump<T>(_T: new () => T): void;
+        /**
+         * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
+         */
+        static dumpAll(): void;
     }
 }
 declare namespace Fudge {
