@@ -1,15 +1,9 @@
-h2 {
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    color: #999999;
-}
-
 .lm_goldenlayout {
     background-image: url("brushedMetalHorizon.png");
 }
 
 .lm_content {
-    background-image: url("brushedMetalDarkHorizon.png");
+    background-color: #414141;
 }
 
 .lm_dragProxy .lm_content {
@@ -51,7 +45,7 @@ h2 {
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #999999;
-    background-image: url("brushedMetalHorizon.png");
+    background-color: black;
     box-shadow: 2px -2px 2px rgba(0, 0, 0, 0.3);
     margin-right: 2px;
     padding-bottom: 2px;
@@ -174,7 +168,7 @@ ul.tree li ul {
     display: none;
 }
 
-ul.tree li.open > ul {
+ul.tree li.open>ul {
     display: block;
 }
 
@@ -185,7 +179,7 @@ ul.tree li a {
 
 ul.tree li a:before {
     height: 1em;
-    padding:0 .1em;
+    padding: 0 .1em;
     font-size: .8em;
     display: block;
     position: absolute;
@@ -193,10 +187,10 @@ ul.tree li a:before {
     top: .2em;
 }
 
-ul.tree li > a:not(:last-child):before {
+ul.tree li>a:not(:last-child):before {
     content: '+';
 }
 
-ul.tree li.open > a:not(:last-child):before {
+ul.tree li.open>a:not(:last-child):before {
     content: '-';
 }

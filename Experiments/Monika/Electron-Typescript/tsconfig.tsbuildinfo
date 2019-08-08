@@ -1,189 +1,361 @@
 {
   "program": {
     "fileInfos": {
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es5.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es5.d.ts": {
         "version": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88",
         "signature": "c8665e66018917580e71792b91022bcaf53fb946fab4aaf8dfb0738ed564db88"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.d.ts": {
         "version": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96",
         "signature": "7994d44005046d1413ea31d046577cdda33b8b2470f30281fd9c8b3c99fe2d96"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2016.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2016.d.ts": {
         "version": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1",
         "signature": "5f217838d25704474d9ef93774f04164889169ca31475fe423a9de6758f058d1"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.d.ts": {
         "version": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743",
         "signature": "459097c7bdd88fc5731367e56591e4f465f2c9de81a35427a7bd473165c34743"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.d.ts": {
         "version": "2edd3ddf436ef8e12df876dcae4ecd6a8748577944c477bf4b20d5596e0c9843",
         "signature": "2edd3ddf436ef8e12df876dcae4ecd6a8748577944c477bf4b20d5596e0c9843"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.d.ts": {
         "version": "6549045e428b5f483bc82d6e8f6d01a72decd0cb7387f650f365f2210fe10808",
         "signature": "6549045e428b5f483bc82d6e8f6d01a72decd0cb7387f650f365f2210fe10808"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.d.ts": {
         "version": "1c05c805f62c1c06a60b7812cd8de2dff7a5bda2218ce5edda5d9d298b1c48e1",
         "signature": "1c05c805f62c1c06a60b7812cd8de2dff7a5bda2218ce5edda5d9d298b1c48e1"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.dom.d.ts": {
         "version": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376",
         "signature": "6994c583b66862deca24d7bbf77297d95b9d3da8160dbd9beef6b847cf7c1376"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.iterable.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.dom.iterable.d.ts": {
         "version": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3",
         "signature": "4c892766803cef795d73d69aee436dc7a80157163e0cf35e6d0e86917cbd42f3"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.webworker.importscripts.d.ts": {
         "version": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b",
         "signature": "fe4e59403e34c7ff747abe4ff6abbc7718229556d7c1a5b93473fb53156c913b"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.scripthost.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.scripthost.d.ts": {
         "version": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9",
         "signature": "b9faa17292f17d2ad75e34fac77dd63a6403af1dba02d39cd0cbb9ffdf3de8b9"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.core.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.core.d.ts": {
         "version": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d",
         "signature": "384f66a3422d80014c51de2682159bb26f1e35854029880ccd5f6d1f00e6a36d"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.collection.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.collection.d.ts": {
         "version": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0",
         "signature": "dd94d8ef48c562389eb58af8df3a3a34d11367f7c818192aa5f16470d469e3f0"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.generator.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.generator.d.ts": {
         "version": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3",
         "signature": "828413486bdcaa342558e8e4570b1b287b776cb61b4b70b0214bd10c5d9a94c3"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.iterable.d.ts": {
         "version": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4",
         "signature": "4d1f39313a169b8599b8817688f504b56ba8204c2ebafd03f66ff77ddb1899a4"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.promise.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.promise.d.ts": {
         "version": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe",
         "signature": "7c07d934680d0e33275a44d22fb11a4ff31d46c8c26a8d056828a478753f1efe"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.proxy.d.ts": {
         "version": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe",
         "signature": "5e72f949a89717db444e3bd9433468890068bb21a5638d8ab15a1359e05e54fe"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.reflect.d.ts": {
         "version": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976",
         "signature": "f5b242136ae9bfb1cc99a5971cccc44e99947ae6b5ef6fd8aa54b5ade553b976"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.symbol.d.ts": {
         "version": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230",
         "signature": "9ae2860252d6b5f16e2026d8a2c2069db7b2a3295e98b6031d01337b96437230"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts": {
         "version": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303",
         "signature": "3e0a459888f32b42138d5a39f706ff2d55d500ab1031e0988b5568b0f67c2303"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2016.array.include.d.ts": {
         "version": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0",
         "signature": "3f96f1e570aedbd97bf818c246727151e873125d0512e4ae904330286c721bc0"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.object.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.object.d.ts": {
         "version": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4",
         "signature": "ff8ad203e83338289b0f5defc1a5b5c253fb7d251b464db497383f915a0df3f4"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts": {
         "version": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f",
         "signature": "b8667586a618c5cf64523d4e500ae39e781428abfb28f3de441fc66b56144b6f"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.string.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.string.d.ts": {
         "version": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c",
         "signature": "21df2e0059f14dcb4c3a0e125859f6b6ff01332ee24b0065a741d121250bc71c"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.intl.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.intl.d.ts": {
         "version": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6",
         "signature": "c1759cb171c7619af0d2234f2f8fb2a871ee88e956e2ed91bb61778e41f272c6"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts": {
         "version": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46",
         "signature": "28569d59e07d4378cb3d54979c4c60f9f06305c9bb6999ffe6cab758957adc46"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts": {
         "version": "42102aaeb1bfec213be1e9777466a6d551eeba8567fed18c0cdbca8c35e3c6e4",
         "signature": "42102aaeb1bfec213be1e9777466a6d551eeba8567fed18c0cdbca8c35e3c6e4"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.intl.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.intl.d.ts": {
         "version": "1b820b57379c726f94af50cd60053674af53ff9d079c1563cc70071e8b757dd0",
         "signature": "1b820b57379c726f94af50cd60053674af53ff9d079c1563cc70071e8b757dd0"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.promise.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.promise.d.ts": {
         "version": "efe049114bad1035b0aa9a4a0359f50ab776e3897c411521e51d3013079cbd62",
         "signature": "efe049114bad1035b0aa9a4a0359f50ab776e3897c411521e51d3013079cbd62"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.regexp.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.regexp.d.ts": {
         "version": "e7780d04cd4120ee554c665829db2bbdd6b947cbaa3c150b7d9ea74df3beb2e8",
         "signature": "e7780d04cd4120ee554c665829db2bbdd6b947cbaa3c150b7d9ea74df3beb2e8"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.array.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.array.d.ts": {
         "version": "fc7c02b980e7dda0ed14d57ee71705c09efc51ec6286a10b971a25a3bb29262b",
         "signature": "fc7c02b980e7dda0ed14d57ee71705c09efc51ec6286a10b971a25a3bb29262b"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.string.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.string.d.ts": {
         "version": "669427ac10ef9f52b6a7a502a66670eaabba675e0a660eb971041bd73c9894e3",
         "signature": "669427ac10ef9f52b6a7a502a66670eaabba675e0a660eb971041bd73c9894e3"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.symbol.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.symbol.d.ts": {
         "version": "7a842c21e0fe143eb3ad4d689a1470bab5ed9bc7fd7223fe8b56cbae27038d62",
         "signature": "7a842c21e0fe143eb3ad4d689a1470bab5ed9bc7fd7223fe8b56cbae27038d62"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.intl.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.intl.d.ts": {
         "version": "f6e0c89daaf72eac38dfb1d5ef0972183f7f26a68da15bfe5bcb7cfccf0c7db8",
         "signature": "f6e0c89daaf72eac38dfb1d5ef0972183f7f26a68da15bfe5bcb7cfccf0c7db8"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.bigint.d.ts": {
         "version": "63b66918290d794f73832a6d0325be5026236674fe8c0cb0b68d162000d7bbe8",
         "signature": "63b66918290d794f73832a6d0325be5026236674fe8c0cb0b68d162000d7bbe8"
       },
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.full.d.ts": {
         "version": "b209a815904a485328677714ef8c4ddd2dcf4040154fa204d25cbf31cd4ff0f3",
         "signature": "b209a815904a485328677714ef8c4ddd2dcf4040154fa204d25cbf31cd4ff0f3"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/src/app.ts": {
-        "version": "b363bc18a48a2a906913680bd4f5e1296966eb917fcaa72ab9e3376bed04b1bc",
-        "signature": "39b4411400aa57a1727a2f99e301d0660628d2541b4c05be9fdeaa0bfbe1d703"
+      "e:/data/github/fudge/experiments/monika/electron-typescript/src/app.ts": {
+        "version": "fdeeaabafeb383890b4816136aae6e85dd72d10012e9990ac61fd84a6f3ec58c",
+        "signature": "9fa99698442c2a156b42502804b4a07f8bfee35acd70497db3f9b26c2d7216b1"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/src/simplecomponent.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/src/simplecomponent.ts": {
         "version": "07bab645c8e0852c350b28b622118bd941f591cb0bfba1a2d748ea3e2104d0f3",
         "signature": "bc1b8b6c907b7a3dc2cfb249ace1654efd5b6481ad0228dfa1a0a1907647e7b1"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/golden-layout/index.d.ts": {
         "version": "dfe03e9e57228c0c48b4f6839c5e687ceac0404621b2b75c9ee0e434bae6535f",
         "signature": "dfe03e9e57228c0c48b4f6839c5e687ceac0404621b2b75c9ee0e434bae6535f"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/jquerystatic.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/jquerystatic.d.ts": {
         "version": "84c8e0dfd0d885abd37c1d213ef0b949dd8ef795291e7e7b1baadbbe4bc0f8a9",
         "signature": "84c8e0dfd0d885abd37c1d213ef0b949dd8ef795291e7e7b1baadbbe4bc0f8a9"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/jquery.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/jquery.d.ts": {
         "version": "9d21da8939908dafa89d693c3e22aabeef28c075b68bb863257e631deef520f5",
         "signature": "9d21da8939908dafa89d693c3e22aabeef28c075b68bb863257e631deef520f5"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/misc.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/misc.d.ts": {
         "version": "c3579059bcd987d5017753ae5fd3902b6d0c658c7ee94381570085fdbcbd08a0",
         "signature": "c3579059bcd987d5017753ae5fd3902b6d0c658c7ee94381570085fdbcbd08a0"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/legacy.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/legacy.d.ts": {
         "version": "8c4a3355af2c490a8af67c4ec304e970424a15ef648a3c3fbb3ee6634461e2cc",
         "signature": "8c4a3355af2c490a8af67c4ec304e970424a15ef648a3c3fbb3ee6634461e2cc"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/sizzle/index.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/sizzle/index.d.ts": {
         "version": "7ddac8a4ba398441cfd6d8a69380401378f122ee8cc2d848e6e32f4db2b6c876",
         "signature": "7ddac8a4ba398441cfd6d8a69380401378f122ee8cc2d848e6e32f4db2b6c876"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/index.d.ts": {
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/index.d.ts": {
         "version": "6739393f79c9a48ec82c6faa0d6b25d556daf3b6871fc4e5131f5445a13e7d15",
         "signature": "6739393f79c9a48ec82c6faa0d6b25d556daf3b6871fc4e5131f5445a13e7d15"
       },
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts": {
-        "version": "c701ceb2f8615d60e99531c3667c570bfdd84cea45ce4421ea908153c49436e3",
-        "signature": "c701ceb2f8615d60e99531c3667c570bfdd84cea45ce4421ea908153c49436e3"
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/globals.d.ts": {
+        "version": "b4cc3f267394f85076d04afc86df4d44c453cb6e0ab31504919dfb47d128bb6c",
+        "signature": "b4cc3f267394f85076d04afc86df4d44c453cb6e0ab31504919dfb47d128bb6c"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/assert.d.ts": {
+        "version": "e37e4814461321ef67cbb2f4c9def6be18ff85670e6c665131b320e052905b75",
+        "signature": "e37e4814461321ef67cbb2f4c9def6be18ff85670e6c665131b320e052905b75"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/async_hooks.d.ts": {
+        "version": "138476cfdccbb9e2c7e06602bc216af843a56c4f3469a79106bc660ba94bd66a",
+        "signature": "138476cfdccbb9e2c7e06602bc216af843a56c4f3469a79106bc660ba94bd66a"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/buffer.d.ts": {
+        "version": "fe892fea1e75a442fffb4a604d7eeb451e858787a9f2f01c4e83bf12a3b5048d",
+        "signature": "fe892fea1e75a442fffb4a604d7eeb451e858787a9f2f01c4e83bf12a3b5048d"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/events.d.ts": {
+        "version": "4a419878f025046ff6748d073123b0451849f83b7dbca907037a53e3eaa9bbbb",
+        "signature": "4a419878f025046ff6748d073123b0451849f83b7dbca907037a53e3eaa9bbbb"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/stream.d.ts": {
+        "version": "c07900741b39a32e2167f08aadcdea84b077727f828f27ceebf534715ea66d97",
+        "signature": "c07900741b39a32e2167f08aadcdea84b077727f828f27ceebf534715ea66d97"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/dns.d.ts": {
+        "version": "05e732266b5a36789fd9eb846b1f45fec1b6e318b740e3f20fc22fd95f9ebf31",
+        "signature": "05e732266b5a36789fd9eb846b1f45fec1b6e318b740e3f20fc22fd95f9ebf31"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/net.d.ts": {
+        "version": "56a15cc211894d79aa44cbb46c276bfd3f10458a61bff2dec99114db8a7e71e3",
+        "signature": "56a15cc211894d79aa44cbb46c276bfd3f10458a61bff2dec99114db8a7e71e3"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/child_process.d.ts": {
+        "version": "13084b2c9d246289892aceb7ecc3fe9666a9cf6d8e59cae17f76649f4e0773e8",
+        "signature": "13084b2c9d246289892aceb7ecc3fe9666a9cf6d8e59cae17f76649f4e0773e8"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/cluster.d.ts": {
+        "version": "d2704553f735d9b9cf31a26cbf4dd085e89b0ec3eec33d684b2517555370b665",
+        "signature": "d2704553f735d9b9cf31a26cbf4dd085e89b0ec3eec33d684b2517555370b665"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/console.d.ts": {
+        "version": "525c8fc510d9632d2a0a9de2d41c3ac1cdd79ff44d3b45c6d81cacabb683528d",
+        "signature": "525c8fc510d9632d2a0a9de2d41c3ac1cdd79ff44d3b45c6d81cacabb683528d"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/constants.d.ts": {
+        "version": "b952021e804dcd9cb5e5552e1ec8bf9f479b61e20da5641e2a542fe77db9a598",
+        "signature": "b952021e804dcd9cb5e5552e1ec8bf9f479b61e20da5641e2a542fe77db9a598"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/crypto.d.ts": {
+        "version": "6b956acd0fa4df8f2723012d18498954438874cc63a0bd639dc470135a782101",
+        "signature": "6b956acd0fa4df8f2723012d18498954438874cc63a0bd639dc470135a782101"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/dgram.d.ts": {
+        "version": "3d1cb0eaae19fa89fe381bba6d5a149d1bf34efc0134220879f57e2061732a6d",
+        "signature": "3d1cb0eaae19fa89fe381bba6d5a149d1bf34efc0134220879f57e2061732a6d"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/domain.d.ts": {
+        "version": "ae3487bdb9b50c1d8bbeb6b55c8b2b9aa79bbc46d7afbc3483169ad8750c4304",
+        "signature": "ae3487bdb9b50c1d8bbeb6b55c8b2b9aa79bbc46d7afbc3483169ad8750c4304"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/querystring.d.ts": {
+        "version": "8969e0b4d22ca77ad011c8fc4a25ec5d515bdfae4ecbd22608ed0d5c38829c1e",
+        "signature": "8969e0b4d22ca77ad011c8fc4a25ec5d515bdfae4ecbd22608ed0d5c38829c1e"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/url.d.ts": {
+        "version": "431151f55411c3f27cf539b987a7d1de453188ed58e54bc946183d280d3444a2",
+        "signature": "431151f55411c3f27cf539b987a7d1de453188ed58e54bc946183d280d3444a2"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/fs.d.ts": {
+        "version": "6fb7f35ccf86d2bd2e1b5b1a6f481206f095a78f62218c62776614af5b8c14a1",
+        "signature": "6fb7f35ccf86d2bd2e1b5b1a6f481206f095a78f62218c62776614af5b8c14a1"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/http.d.ts": {
+        "version": "896c59370c35abd48415751b78ce927eda463a20f1a3921bf3dc4962504ec06e",
+        "signature": "896c59370c35abd48415751b78ce927eda463a20f1a3921bf3dc4962504ec06e"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/tls.d.ts": {
+        "version": "68f639766f4b9d5c832bbca1203955969a8686137a4a197285dd64519cc26e58",
+        "signature": "68f639766f4b9d5c832bbca1203955969a8686137a4a197285dd64519cc26e58"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/http2.d.ts": {
+        "version": "e36a3ca6d86f19ff207dabc61d27088c464f2dc3ffb64b0daf17dc33b85191e6",
+        "signature": "e36a3ca6d86f19ff207dabc61d27088c464f2dc3ffb64b0daf17dc33b85191e6"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/https.d.ts": {
+        "version": "152af7c23ec219f632afa2d861abc65993f56cd39a4f3a4018515dbc05950a74",
+        "signature": "152af7c23ec219f632afa2d861abc65993f56cd39a4f3a4018515dbc05950a74"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/inspector.d.ts": {
+        "version": "3a0bdc4c5b6f84a1abb5356d7a7fa1f96ac6c5b5646eec3ef2b33c1ed095e155",
+        "signature": "3a0bdc4c5b6f84a1abb5356d7a7fa1f96ac6c5b5646eec3ef2b33c1ed095e155"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/module.d.ts": {
+        "version": "03394bf8deb8781b490ae9266a843fbdf00647947d79e25fcbf1d89a9e9c8a66",
+        "signature": "03394bf8deb8781b490ae9266a843fbdf00647947d79e25fcbf1d89a9e9c8a66"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/os.d.ts": {
+        "version": "0ab49f803fa1d0f26682096e87ae239be05fee89ac538d30c59ab5a15bd38e6a",
+        "signature": "0ab49f803fa1d0f26682096e87ae239be05fee89ac538d30c59ab5a15bd38e6a"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/path.d.ts": {
+        "version": "61c84c3b0eb6e60196d15ae5e21793a1d4241c547f0bdd0529ffae838d1a073c",
+        "signature": "61c84c3b0eb6e60196d15ae5e21793a1d4241c547f0bdd0529ffae838d1a073c"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/perf_hooks.d.ts": {
+        "version": "981192e57b0e159c977f1d8e8b8576e9d6b4e013b902e9c0d4b178cb47e2dc86",
+        "signature": "981192e57b0e159c977f1d8e8b8576e9d6b4e013b902e9c0d4b178cb47e2dc86"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/process.d.ts": {
+        "version": "3a8848a9c307429b861402cc69bc472ffe0c05b86474fc158723169161e16389",
+        "signature": "3a8848a9c307429b861402cc69bc472ffe0c05b86474fc158723169161e16389"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/punycode.d.ts": {
+        "version": "eeb0d1ad28e70773ac57ae9fe939c3bad6af2525a463c28f9ec31b5953de6735",
+        "signature": "eeb0d1ad28e70773ac57ae9fe939c3bad6af2525a463c28f9ec31b5953de6735"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/readline.d.ts": {
+        "version": "544728a999d35afc7b9e6d7420fb10046c16fcc5cb54fef21d2f5de78bf98830",
+        "signature": "544728a999d35afc7b9e6d7420fb10046c16fcc5cb54fef21d2f5de78bf98830"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/vm.d.ts": {
+        "version": "f98df5ec124f441b465332271d0b083aeec815cd3c92d9249b9739e6318477a9",
+        "signature": "f98df5ec124f441b465332271d0b083aeec815cd3c92d9249b9739e6318477a9"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/util.d.ts": {
+        "version": "766b7f1a0e67ed1106ae02583408d9e3a820201c4539f9bed8be8e4f07ee6e92",
+        "signature": "766b7f1a0e67ed1106ae02583408d9e3a820201c4539f9bed8be8e4f07ee6e92"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/repl.d.ts": {
+        "version": "d0b0b533dc34ff7ffd019665fdc2b2aeae717bc1347e17a5bdc4d6572b5c109a",
+        "signature": "d0b0b533dc34ff7ffd019665fdc2b2aeae717bc1347e17a5bdc4d6572b5c109a"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/string_decoder.d.ts": {
+        "version": "17e157df6125098a1a34eb4d201ee4ac03bbe97e471ab5627bb2c40fce555948",
+        "signature": "17e157df6125098a1a34eb4d201ee4ac03bbe97e471ab5627bb2c40fce555948"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/timers.d.ts": {
+        "version": "b40652bf8ce4a18133b31349086523b219724dca8df3448c1a0742528e7ad5b9",
+        "signature": "b40652bf8ce4a18133b31349086523b219724dca8df3448c1a0742528e7ad5b9"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/trace_events.d.ts": {
+        "version": "978aecd2e6bc2ac094e9a35eda98ff8586713857b3655e7c98ca5ed8f7d50662",
+        "signature": "978aecd2e6bc2ac094e9a35eda98ff8586713857b3655e7c98ca5ed8f7d50662"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/tty.d.ts": {
+        "version": "3a59044813b24482ad7a7963bbee6b62507561969e273fbdc992ed9bc948fe13",
+        "signature": "3a59044813b24482ad7a7963bbee6b62507561969e273fbdc992ed9bc948fe13"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/v8.d.ts": {
+        "version": "e880a08fbb0d9ee2f733f9183f4d1bdb75bc9e0e64060a8a1fc30540791fcded",
+        "signature": "e880a08fbb0d9ee2f733f9183f4d1bdb75bc9e0e64060a8a1fc30540791fcded"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/worker_threads.d.ts": {
+        "version": "e761c833140e3ab6f9deab37fe034154f3eb15547dce61395d9b0b1f130f3fa3",
+        "signature": "e761c833140e3ab6f9deab37fe034154f3eb15547dce61395d9b0b1f130f3fa3"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/zlib.d.ts": {
+        "version": "58257a0147702ab415ed18164557a0feb9c5d1351792ea293a876e6b7ed0c559",
+        "signature": "58257a0147702ab415ed18164557a0feb9c5d1351792ea293a876e6b7ed0c559"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/base.d.ts": {
+        "version": "6622f76993bdfeaacb947ba7c4cf26f2e5c5194194d02d792c3cba4174cd8fce",
+        "signature": "6622f76993bdfeaacb947ba7c4cf26f2e5c5194194d02d792c3cba4174cd8fce"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/util.d.ts": {
+        "version": "4f54f0a9dd3b644c99ec32b32f8804d5978bc854799b228ae9c467bf3c84c64c",
+        "signature": "4f54f0a9dd3b644c99ec32b32f8804d5978bc854799b228ae9c467bf3c84c64c"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/globals.d.ts": {
+        "version": "ce6b191c382ee19f23678b8c364484627bcf424e8f408357a2f5530fb8d52a45",
+        "signature": "ce6b191c382ee19f23678b8c364484627bcf424e8f408357a2f5530fb8d52a45"
+      },
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/index.d.ts": {
+        "version": "765fc34423b93c2ab763670d8d11d99e5f47387c13c161d6f1640dd6d91b7d1c",
+        "signature": "765fc34423b93c2ab763670d8d11d99e5f47387c13c161d6f1640dd6d91b7d1c"
       }
     },
     "options": {
@@ -194,59 +366,102 @@
       "composite": true,
       "noImplicitAny": true,
       "typeRoots": [
-        "c:/Users/Akiko/Documents/GitHub/FUDGE/Experiments/Monika/Typescript-GoldenLayout/node_modules/@types"
+        "e:/DAta/GitHub/FUDGE/Experiments/Monika/Electron-Typescript/node_modules/@types"
       ],
-      "project": "c:\\Users\\Akiko\\Documents\\GitHub\\FUDGE\\Experiments\\Monika\\Typescript-GoldenLayout\\tsconfig.json",
+      "project": "e:\\DAta\\GitHub\\FUDGE\\Experiments\\Monika\\Electron-Typescript\\tsconfig.json",
       "watch": true,
-      "configFilePath": "c:/Users/Akiko/Documents/GitHub/FUDGE/Experiments/Monika/Typescript-GoldenLayout/tsconfig.json"
+      "configFilePath": "e:/DAta/GitHub/FUDGE/Experiments/Monika/Electron-Typescript/tsconfig.json"
     },
     "semanticDiagnosticsPerFile": [
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es5.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2016.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.dom.iterable.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.scripthost.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.core.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.collection.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.generator.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.promise.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.object.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.string.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.intl.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.intl.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.promise.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2018.regexp.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.array.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.string.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.es2019.symbol.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.intl.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
-      "c:/users/akiko/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/src/app.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/src/simplecomponent.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/golden-layout/index.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/jquerystatic.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/jquery.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/misc.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/legacy.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/sizzle/index.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/jquery/index.d.ts",
-      "c:/users/akiko/documents/github/fudge/experiments/monika/typescript-goldenlayout/node_modules/@types/webgl2/index.d.ts"
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es5.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2016.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.dom.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.dom.iterable.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.scripthost.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.core.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.collection.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.generator.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.iterable.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.promise.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.proxy.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.reflect.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.symbol.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2016.array.include.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.object.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.string.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.intl.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.intl.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.promise.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2018.regexp.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.array.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.string.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.es2019.symbol.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.intl.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/typescript/lib/lib.esnext.full.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/src/simplecomponent.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/golden-layout/index.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/jquerystatic.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/jquery.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/misc.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/legacy.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/sizzle/index.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/jquery/index.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/globals.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/assert.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/async_hooks.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/buffer.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/events.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/stream.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/dns.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/net.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/child_process.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/cluster.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/console.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/constants.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/crypto.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/dgram.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/domain.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/querystring.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/url.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/fs.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/http.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/tls.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/http2.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/https.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/inspector.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/module.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/os.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/path.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/perf_hooks.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/process.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/punycode.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/readline.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/vm.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/util.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/repl.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/string_decoder.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/timers.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/trace_events.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/tty.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/v8.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/worker_threads.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/zlib.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/base.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/util.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/globals.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/node_modules/@types/node/ts3.2/index.d.ts",
+      "e:/data/github/fudge/experiments/monika/electron-typescript/src/app.ts"
     ]
   },
   "version": "3.4.3"
