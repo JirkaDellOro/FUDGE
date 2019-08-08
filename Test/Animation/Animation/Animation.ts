@@ -18,26 +18,24 @@ namespace AnimationTest {
     initAnim();
 
   }
-  
+
   function initAnim(): void {
     let nS: ƒ.Serialization = node.serialize();
     console.log(cmpMesh.getMutator());
-    // console.log(ƒ.Serializer.stringify(nS));
-    
+    console.log(ƒ.Serializer.stringify(nS));
+
     let animseq: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     animseq.addKey(new ƒ.AnimationKey(0, 0));
-    animseq.addKey(new ƒ.AnimationKey(5000, 90));
-    
+    animseq.addKey(new ƒ.AnimationKey(5000, 45));
+
     let animStructure: ƒ.AnimationStructure = {
       components: {
-        ComponentMesh: [
+        ComponentTransform: [
           {
-            "ƒ.ComponentMesh": {
-              pivot: {
-                rotation: {
-                  x: animseq,
-                  y: animseq
-                }
+            "ƒ.ComponentTransform": {
+              rotation: {
+                x: animseq,
+                y: animseq
               }
             }
           }
@@ -45,45 +43,47 @@ namespace AnimationTest {
       }
     };
     animation = new ƒ.Animation(animStructure);
-    
+
     console.log(animation);
     // animation.animationStructure["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]["pivot"]["rotation"]["y"] = animseq;
-    
+
     // console.log(animation.getMutated(2));
     // window.requestAnimationFrame(frame);
-    window.setInterval(frame, 500);
+    // window.setInterval(frame, 500);
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, frame);
+    ƒ.Loop.start();
   }
-  
-  function initAnimOld(): void {
-    let mutator: ƒ.MutatorForAnimation = cmpMesh.getMutatorForAnimation();
-    animation = new ƒ.Animation(mutator);
-    let animseq: ƒ.AnimationSequenceAsso = {
-      // x: new ƒ.AnimationSequence(),
-      y: new ƒ.AnimationSequence()
-    };
-    // console.log(mutator.pivot["rotation"]);
-    animation.sequences.set(mutator["pivot"]["rotation"], animseq);
-    // animseq["x"].addKey(new ƒ.AnimationKey(0, 0));
-    // animseq["x"].addKey(new ƒ.AnimationKey(2000, 0));
-    // animseq["x"].addKey(new ƒ.AnimationKey(3000, 90));
-    // animseq["x"].addKey(new ƒ.AnimationKey(4000, 135));
-    animseq["y"].addKey(new ƒ.AnimationKey(0, 0));
-    animseq["y"].addKey(new ƒ.AnimationKey(2000, 90));
-    animseq["y"].addKey(new ƒ.AnimationKey(3000, 180));
-    animseq["y"].addKey(new ƒ.AnimationKey(4000, 0));
 
-    animation.events["myEvent"] = 2000;
-    animation.labels["jumpHere"] = 2500;
+  // function initAnimOld(): void {
+  //   let mutator: ƒ.MutatorForAnimation = cmpMesh.getMutatorForAnimation();
+  //   animation = new ƒ.Animation(mutator);
+  //   let animseq: ƒ.AnimationSequenceAsso = {
+  //     // x: new ƒ.AnimationSequence(),
+  //     y: new ƒ.AnimationSequence()
+  //   };
+  //   // console.log(mutator.pivot["rotation"]);
+  //   animation.sequences.set(mutator["pivot"]["rotation"], animseq);
+  //   // animseq["x"].addKey(new ƒ.AnimationKey(0, 0));
+  //   // animseq["x"].addKey(new ƒ.AnimationKey(2000, 0));
+  //   // animseq["x"].addKey(new ƒ.AnimationKey(3000, 90));
+  //   // animseq["x"].addKey(new ƒ.AnimationKey(4000, 135));
+  //   animseq["y"].addKey(new ƒ.AnimationKey(0, 0));
+  //   animseq["y"].addKey(new ƒ.AnimationKey(2000, 90));
+  //   animseq["y"].addKey(new ƒ.AnimationKey(3000, 180));
+  //   animseq["y"].addKey(new ƒ.AnimationKey(4000, 0));
 
-    animation.addEventListener("myEvent", hndlEv);
-    animation.jumpTo(animation.labels["jumpHere"], 0);
+  //   animation.events["myEvent"] = 2000;
+  //   animation.labels["jumpHere"] = 2500;
 
-    // animation.playmode = ƒ.ANIMPLAYMODE.STOP;
-    // console.log(animation.sequences);
-    // animation.update(1000);
-    // console.log(animation);
-    // console.log(mutator.pivot);
-  }
+  //   animation.addEventListener("myEvent", hndlEv);
+  //   animation.jumpTo(animation.labels["jumpHere"], 0);
+
+  //   // animation.playmode = ƒ.ANIMPLAYMODE.STOP;
+  //   // console.log(animation.sequences);
+  //   // animation.update(1000);
+  //   // console.log(animation);
+  //   // console.log(mutator.pivot);
+  // }
 
   function frame(): void {
     // console.log(Date.now() - startTime);
@@ -92,7 +92,7 @@ namespace AnimationTest {
     let time: number = Date.now() - startTime;
     // if (time > 2000) debugger;
     // animation.update(time);
-    let mutator: ƒ.Mutator = animation.getMutated(time);
+    let mutator: ƒ.Mutator = animation.getMutated(time, ƒ.ANIMATION_PLAYMODE.LOOP);
     // console.log(node.getComponent(ƒ.ComponentMesh).getMutator());
     // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
     // node.getComponent(ƒ.ComponentMesh).mutate(<ƒ.Mutator>(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]));
@@ -101,8 +101,8 @@ namespace AnimationTest {
     // mesh.mutate(animation.animatedObject);
     // console.clear();
     // console.log(time % 4000, animation.animatedObject["pivot"]["rotation"]["x"]);
+    ƒ.RenderManager.update();
     Scenes.viewPort.draw();
-    // window.requestAnimationFrame(frame);
   }
 
   function hndlEv(_e: Event): void {
