@@ -31,19 +31,23 @@ namespace Fudge {
         private static mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST;
         private static idIntervall: number = 0;
         private static fpsDesired: number = 30;
-        private static framesToAverage: number = 10;
+        private static framesToAverage: number = 30;
 
         /**
          * Starts the loop with the given mode and fps
          * @param _mode 
          * @param _fps 
          */
-        public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 30): void {
+        public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 60): void {
             Loop.stop();
 
             Loop.timeStartGame = Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fpsDesired = _fps;
+            Loop.timeLastFrameGame = Loop.timeStartGame;
+            Loop.timeLastFrameReal = Loop.timeStartReal;
+            Loop.fpsDesired = (_mode == LOOP_MODE.FRAME_REQUEST) ? 60 : _fps;
+            Loop.framesToAverage = Loop.fpsDesired;
+            Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
             Loop.mode = _mode;
 
             let log: string = `Loop starting in mode ${Loop.mode}`;

@@ -7,7 +7,7 @@ var TimeLoop;
         document.forms[0].addEventListener("change", handleChange);
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
-        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL, 20);
+        ƒ.Loop.start(ƒ.LOOP_MODE.FRAME_REQUEST, 60);
     }
     function handleChange(_event) {
         let formData = new FormData(document.forms[0]);
@@ -21,7 +21,7 @@ var TimeLoop;
         let meter = document.querySelector("[name=frame]");
         meter.value = (meter.value + 1) % 10;
         let avg = document.querySelector("[name=avg]");
-        avg.value = ƒ.Loop.getFpsRealAverage().toFixed(2);
+        avg.value = ƒ.Loop.getFpsRealAverage().toFixed(1);
     }
 })(TimeLoop || (TimeLoop = {}));
 //# sourceMappingURL=TimeLoop.js.map

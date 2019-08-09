@@ -4971,11 +4971,15 @@ var Fudge;
          * @param _mode
          * @param _fps
          */
-        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 30) {
+        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 60) {
             Loop.stop();
             Loop.timeStartGame = Fudge.Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fpsDesired = _fps;
+            Loop.timeLastFrameGame = Loop.timeStartGame;
+            Loop.timeLastFrameReal = Loop.timeStartReal;
+            Loop.fpsDesired = (_mode == LOOP_MODE.FRAME_REQUEST) ? 60 : _fps;
+            Loop.framesToAverage = Loop.fpsDesired;
+            Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
             Loop.mode = _mode;
             let log = `Loop starting in mode ${Loop.mode}`;
             if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
@@ -5064,7 +5068,7 @@ var Fudge;
     Loop.mode = LOOP_MODE.FRAME_REQUEST;
     Loop.idIntervall = 0;
     Loop.fpsDesired = 30;
-    Loop.framesToAverage = 10;
+    Loop.framesToAverage = 30;
     Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map
