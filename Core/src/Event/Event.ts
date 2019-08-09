@@ -32,7 +32,9 @@ namespace Fudge {
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[Time]] when it's scaling changed  */
+        TIME_SCALED = "timeScaled"
     }
 
     export const enum EVENT_POINTER {

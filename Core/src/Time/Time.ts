@@ -27,11 +27,11 @@ namespace Fudge {
                 let callback: Function = (): void => {
                     _time.clearTimeout(id);
                     _callback(_arguments);
-                    id = window.setInterval(callback, _timeout / _time.getScale());
                 };
+                id = window.setTimeout(callback, _timeout / _time.getScale());
             }
             else
-                id = window.setTimeout(_callback, _timeout / _time.getScale(), _arguments);
+                id = window.setInterval(_callback, _timeout / _time.getScale(), _arguments);
 
             this.id = id;
         }
@@ -42,7 +42,7 @@ namespace Fudge {
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Time {
+    export class Time extends EventTarget {
         private static gameTime: Time = new Time();
         private start: number;
         private scale: number;
@@ -51,6 +51,7 @@ namespace Fudge {
         private timers: Timer[] = [];
 
         constructor() {
+            super();
             this.start = performance.now();
             this.scale = 1.0;
             this.offset = 0.0;
@@ -90,6 +91,7 @@ namespace Fudge {
             this.rescaleAllTimers();
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
+            this.dispatchEvent(new Event(EVENT.TIME_SCALED));
         }
 
         /**
@@ -156,6 +158,10 @@ namespace Fudge {
             let timer: Timer = new Timer(this, _type, _callback, _timeout, _arguments);
             this.timers.push(timer);
             return timer.id;
+        }
+
+        private deleteTimer(_id: number): void {
+            
         }
         //#endregion
     }

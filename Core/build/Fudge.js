@@ -3335,6 +3335,7 @@ var Fudge;
                 rotation: vectors[1].getMutator(),
                 scaling: vectors[2].getMutator()
             };
+            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
         mutate(_mutator) {
@@ -4738,11 +4739,11 @@ var Fudge;
                 let callback = () => {
                     _time.clearTimeout(id);
                     _callback(_arguments);
-                    id = window.setInterval(callback, _timeout / _time.getScale());
                 };
+                id = window.setTimeout(callback, _timeout / _time.getScale());
             }
             else
-                id = window.setTimeout(_callback, _timeout / _time.getScale(), _arguments);
+                id = window.setInterval(_callback, _timeout / _time.getScale(), _arguments);
             this.id = id;
         }
     }
@@ -4751,8 +4752,9 @@ var Fudge;
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time {
+    class Time extends EventTarget {
         constructor() {
+            super();
             this.timers = [];
             this.start = performance.now();
             this.scale = 1.0;
@@ -4789,6 +4791,7 @@ var Fudge;
             this.rescaleAllTimers();
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
+            this.dispatchEvent(new Event("timeScaled" /* TIME_SCALED */));
         }
         /**
          * Retrieves the current scaling of this time
@@ -4848,6 +4851,8 @@ var Fudge;
             let timer = new Timer(this, _type, _callback, _timeout, _arguments);
             this.timers.push(timer);
             return timer.id;
+        }
+        deleteTimer(_id) {
         }
     }
     Time.gameTime = new Time();

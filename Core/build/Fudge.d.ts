@@ -1076,7 +1076,9 @@ declare namespace Fudge {
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[Time]] when it's scaling changed  */
+        TIME_SCALED = "timeScaled"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -2017,7 +2019,7 @@ declare namespace Fudge {
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time {
+    class Time extends EventTarget {
         private static gameTime;
         private start;
         private scale;
@@ -2062,6 +2064,7 @@ declare namespace Fudge {
         clearAllTimers(): void;
         rescaleAllTimers(): void;
         private setTimer;
+        private deleteTimer;
     }
 }
 declare namespace Fudge {
