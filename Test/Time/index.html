@@ -8,7 +8,8 @@
     <title>Time and Loop</title>
     <style>
         input,
-        select, meter {
+        select,
+        meter {
             width: 10em;
         }
     </style>
@@ -22,15 +23,17 @@
             <legend>Loop</legend>
             <input name="avg" disabled></input> Avg<br />
             <input type="number" name="fps" min="0" max="1000" value="30"> FPS<br />
-            <select name="base" value="Real">
-                <option value="Frame">Animation Frame</option>
-                <option value="Real">Real Time</option>
-                <option value="Game">Game Time</option>
-            </select> Base</br>
+            <select name="mode" value="Real">
+                <option value="FRAME_REQUEST">FRAME_REQUEST</option>
+                <option value="TIME_GAME">TIME_GAME</option>
+                <option value="TIME_REAL">TIME_REAL</option>
+            </select> Mode</br>
             <meter min="0" max="10" value="0" name="frame"> Frame<br />
         </fieldset>
+    </form>
+    <form>
         <fieldset id="time">
-            <legend>Time</legend>
+            <legend>Time.game</legend>
             <input name="time" disabled></input> Time<br />
             <input type="number" name="scale" min="-1000" max="1000" step="0.1" value="1"> Scale<br />
             <input type="number" name="timeout" min="1000" max="100000" step="100" value="1000"> Timeout<br />

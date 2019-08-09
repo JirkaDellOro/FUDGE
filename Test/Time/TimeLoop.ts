@@ -4,16 +4,26 @@ namespace TimeLoop {
 
     function handleLoad(_event: Event): void {
         console.log("Start");
-        document.forms[0].addEventListener("change", handleChange);
+        document.forms[0].addEventListener("change", handleChangeLoop);
+        document.forms[1].addEventListener("change", handleChangeTime);
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, handleFrame);
-        ƒ.Loop.start(ƒ.LOOP_MODE.FRAME_REQUEST, 60);
+        loop();
     }
 
-    function handleChange(_event: Event): void {
+    function handleChangeLoop(_event: Event): void {
         let formData: FormData = new FormData(document.forms[0]);
-        for (let entry of formData)
-            console.dir(entry);
+        let mode: string = String(formData.get("mode"));
+        let fps: number = Number(formData.get("fps"));
+
+        ƒ.Loop.start(ƒ.LOOP_MODE[mode], fps, true);
+    }
+
+    function handleChangeTime(_event: Event): void {
+        let formData: FormData = new FormData(<HTMLFormElement>_event.currentTarget);
+        let scale: number = Number(formData.get("scale"));
+        ƒ.Time.game.setScale(scale);
+        console.log("Scale set to: " + scale);
     }
 
     function handleButtonClick(_event: Event): void {
@@ -22,9 +32,21 @@ namespace TimeLoop {
 
     function handleFrame(_event: Event): void {
         let meter: HTMLMeterElement = document.querySelector("[name=frame]");
-        meter.value = (meter.value + 1) % 10;
+        meter.value = 1 + meter.value % 10;
 
         let avg: HTMLInputElement = document.querySelector("[name=avg]");
         avg.value = ƒ.Loop.getFpsRealAverage().toFixed(1);
+    }
+
+    function loop(): void {
+        let time: HTMLInputElement = document.querySelector("[name=time]");
+        let date: Date = new Date(ƒ.Time.game.get());
+        // time.value = ƒ.Time.game.get().toPrecision();
+        time.value =
+            String(date.getMinutes()).padStart(2, "0") + ":" +
+            String(date.getSeconds()).padStart(2, "0") + ":" +
+            String(date.getMilliseconds()).padStart(4, "0");
+
+        window.requestAnimationFrame(loop);
     }
 }

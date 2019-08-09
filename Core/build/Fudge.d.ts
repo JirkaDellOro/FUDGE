@@ -2098,14 +2098,17 @@ declare namespace Fudge {
         private static running;
         private static mode;
         private static idIntervall;
+        private static idRequest;
         private static fpsDesired;
         private static framesToAverage;
+        private static syncWithAnimationFrame;
         /**
          * Starts the loop with the given mode and fps
          * @param _mode
-         * @param _fps
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
          */
-        static start(_mode?: LOOP_MODE, _fps?: number): void;
+        static start(_mode?: LOOP_MODE, _fps?: number, _syncWithAnimationFrame?: boolean): void;
         /**
          * Stops the loop
          */
@@ -2114,7 +2117,6 @@ declare namespace Fudge {
         static getFpsRealAverage(): number;
         private static loop;
         private static loopFrame;
-        private static loopReal;
-        private static loopGame;
+        private static loopTime;
     }
 }

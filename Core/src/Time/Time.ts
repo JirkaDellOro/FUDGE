@@ -88,8 +88,9 @@ namespace Fudge {
          */
         public setScale(_scale: number = 1.0): void {
             this.set(this.get());
-            this.rescaleAllTimers();
             this.scale = _scale;
+            //TODO: catch scale=0
+            this.rescaleAllTimers();
             this.getElapsedSincePreviousCall();
             this.dispatchEvent(new Event(EVENT.TIME_SCALED));
         }
@@ -143,14 +144,15 @@ namespace Fudge {
 
         public rescaleAllTimers(): void {
             for (let timer of this.timers) {
-                if (timer.type == TIMER_TYPE.TIMEOUT)
+                if (timer.type == TIMER_TYPE.TIMEOUT) {
                     this.clearTimeout(timer.id);
-                else
+                    let timeoutLeft: number = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                    this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+                }
+                else {
                     this.clearInterval(timer.id);
-
-                // rescaling
-                let timeoutLeft: number = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+                    this.setTimer(timer.type, timer.callback, timer.timeout, timer.arguments);
+                }
             }
         }
 

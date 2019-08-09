@@ -4873,8 +4873,9 @@ var Fudge;
          */
         setScale(_scale = 1.0) {
             this.set(this.get());
-            this.rescaleAllTimers();
             this.scale = _scale;
+            //TODO: catch scale=0
+            this.rescaleAllTimers();
             this.getElapsedSincePreviousCall();
             this.dispatchEvent(new Event("timeScaled" /* TIME_SCALED */));
         }
@@ -4923,13 +4924,15 @@ var Fudge;
         }
         rescaleAllTimers() {
             for (let timer of this.timers) {
-                if (timer.type == TIMER_TYPE.TIMEOUT)
+                if (timer.type == TIMER_TYPE.TIMEOUT) {
                     this.clearTimeout(timer.id);
-                else
+                    let timeoutLeft = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                    this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+                }
+                else {
                     this.clearInterval(timer.id);
-                // rescaling
-                let timeoutLeft = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+                    this.setTimer(timer.type, timer.callback, timer.timeout, timer.arguments);
+                }
             }
         }
         setTimer(_type, _callback, _timeout, _arguments) {
@@ -4969,9 +4972,10 @@ var Fudge;
         /**
          * Starts the loop with the given mode and fps
          * @param _mode
-         * @param _fps
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
          */
-        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 60) {
+        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 60, _syncWithAnimationFrame = false) {
             Loop.stop();
             Loop.timeStartGame = Fudge.Time.game.get();
             Loop.timeStartReal = performance.now();
@@ -4981,6 +4985,7 @@ var Fudge;
             Loop.framesToAverage = Loop.fpsDesired;
             Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
             Loop.mode = _mode;
+            Loop.syncWithAnimationFrame = _syncWithAnimationFrame;
             let log = `Loop starting in mode ${Loop.mode}`;
             if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
                 log += ` with attempted ${_fps} fps`;
@@ -4990,16 +4995,17 @@ var Fudge;
                     Loop.loopFrame();
                     break;
                 case LOOP_MODE.TIME_REAL:
-                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / Loop.fpsDesired);
-                    Loop.loopReal();
+                    Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopGame, 1000 / Loop.fpsDesired);
-                    Loop.loopGame();
+                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 default:
                     break;
             }
+            Loop.running = true;
         }
         /**
          * Stops the loop
@@ -5009,13 +5015,15 @@ var Fudge;
                 return;
             switch (Loop.mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    window.cancelAnimationFrame(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
                     Fudge.Time.game.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 default:
                     break;
@@ -5043,13 +5051,13 @@ var Fudge;
         }
         static loopFrame() {
             Loop.loop();
-            Loop.idIntervall = window.requestAnimationFrame(Loop.loopFrame);
+            Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
         }
-        static loopReal() {
-            Loop.loop();
-        }
-        static loopGame() {
-            Loop.loop();
+        static loopTime() {
+            if (Loop.syncWithAnimationFrame)
+                Loop.idRequest = window.requestAnimationFrame(Loop.loop);
+            else
+                Loop.loop();
         }
     }
     /** The gametime the loop was started, overwritten at each start */
@@ -5067,8 +5075,10 @@ var Fudge;
     Loop.running = false;
     Loop.mode = LOOP_MODE.FRAME_REQUEST;
     Loop.idIntervall = 0;
+    Loop.idRequest = 0;
     Loop.fpsDesired = 30;
     Loop.framesToAverage = 30;
+    Loop.syncWithAnimationFrame = false;
     Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map
