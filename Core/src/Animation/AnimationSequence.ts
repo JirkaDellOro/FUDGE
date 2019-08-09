@@ -57,6 +57,7 @@ namespace Fudge {
         // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));
         let k: AnimationKey = new AnimationKey();
         k.deserialize(_serialization.keys[i]);
+        this.keys[i] = k;
       }
 
       this.regenerateFunctions();

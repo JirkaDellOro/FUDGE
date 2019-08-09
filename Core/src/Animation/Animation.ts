@@ -43,19 +43,21 @@ namespace Fudge {
     }
     //#region transfer
     serialize(): Serialization {
-      // let s: Serialization = {
-      //   name: this.name,
-      //   labels: {},
-      //   fps: this.fps,
-      //   sps: this.sps,
-      //   animationStructure: this.animationStructure.getMutatir()
-      // };
-      // for (let name in this.labels) {
-      //   s.labels[name] = this.labels[name];
-      // }
-      return this.getMutator();
+      let s: Serialization = {
+        idResource: this.idResource,
+        name: this.name,
+        labels: {},
+        fps: this.fps,
+        sps: this.sps
+      };
+      for (let name in this.labels) {
+        s.labels[name] = this.labels[name];
+      }
+      s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
+      return s;
     }
     deserialize(_serialization: Serialization): Serializable {
+      this.idResource = _serialization.idResource,
       this.name = _serialization.name;
       this.fps = _serialization.fps;
       this.sps = _serialization.sps;
@@ -72,13 +74,23 @@ namespace Fudge {
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.totalTime;
     }
+    private traverseStructureForSerialisation(_serialization: Serialization, _structure: AnimationStructure): Serialization {
+      for (let n in _structure) {
+        if (_structure[n] instanceof AnimationSequence) {
+          _serialization[n] = _structure[n].serialize();
+        } else {
+          _serialization[n] = this.traverseStructureForSerialisation({}, <AnimationStructure>_structure[n]);
+        }
+      }
+      return _serialization;
+    }
     private traverseStructureForDeserialisation(_serialization: Serialization, _structure: AnimationStructure): AnimationStructure {
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
           _structure[n] = animSeq.deserialize(_serialization[n]);
         } else {
-          _structure[n] = this.traverseStructureForDeserialisation(_serialization[n], <AnimationStructure>_structure[n]);
+          _structure[n] = this.traverseStructureForDeserialisation(_serialization[n], {});
         }
       }
       return _structure;
@@ -99,9 +111,12 @@ namespace Fudge {
 
     private traverseStructureForTime(_structure: AnimationStructure): void {
       for (let n in _structure) {
-        if (_structure[n] instanceof AnimationSequence && _structure[n].keys.length > 0) {
-          let sequenceTime: number = _structure[n].keys[_structure[n].keys.length - 1].time;
-          this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+        if (_structure[n] instanceof AnimationSequence) {
+          let sequence: AnimationSequence = <AnimationSequence>_structure[n];
+          if (sequence.keys.length > 0) {
+            let sequenceTime: number = sequence.keys[sequence.keys.length - 1].time;
+            this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+          }
         } else {
           this.traverseStructureForTime(<AnimationStructure>_structure[n]);
         }
