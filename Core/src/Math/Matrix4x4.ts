@@ -1,36 +1,36 @@
 namespace Fudge {
 
-    /**
-     * Stores a 4x4 transformation matrix and provides operations for it.
-     * ```plaintext
-     * [ 0, 1, 2, 3 ] <- row vector x
-     * [ 4, 5, 6, 7 ] <- row vector y
-     * [ 8, 9,10,11 ] <- row vector z
-     * [12,13,14,15 ] <- translation
-     *            ^  homogeneous column
-     * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class Matrix4x4 extends Mutable implements Serializable {
-        private data: Float32Array = new Float32Array(16); // The data of the matrix.
-        private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
+  /**
+   * Stores a 4x4 transformation matrix and provides operations for it.
+   * ```plaintext
+   * [ 0, 1, 2, 3 ] <- row vector x
+   * [ 4, 5, 6, 7 ] <- row vector y
+   * [ 8, 9,10,11 ] <- row vector z
+   * [12,13,14,15 ] <- translation
+   *            ^  homogeneous column
+   * ```
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export class Matrix4x4 extends Mutable implements Serializable {
+    private data: Float32Array = new Float32Array(16); // The data of the matrix.
+    private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
 
-        public constructor() {
-            super();
-            this.data.set([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
-        }
+    public constructor() {
+      super();
+      this.data.set([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ]);
+    }
 
-        public get translation(): Vector3 {
-            return new Vector3(this.data[12], this.data[13], this.data[14]);
-        }
-        public set translation(_translation: Vector3) {
-            this.data.set(_translation.get(), 12);
-        }
+    public get translation(): Vector3 {
+      return new Vector3(this.data[12], this.data[13], this.data[14]);
+    }
+    public set translation(_translation: Vector3) {
+      this.data.set(_translation.get(), 12);
+    }
 
         //#region STATICS
         public static get IDENTITY(): Matrix4x4 {
@@ -109,64 +109,64 @@ namespace Fudge {
             return matrix;
         }
 
-        /**
-         * Computes and returns the inverse of a passed matrix.
-         * @param _matrix The matrix to compute the inverse of.
-         */
-        public static INVERSION(_matrix: Matrix4x4): Matrix4x4 {
-            let m: Float32Array = _matrix.data;
-            let m00: number = m[0 * 4 + 0];
-            let m01: number = m[0 * 4 + 1];
-            let m02: number = m[0 * 4 + 2];
-            let m03: number = m[0 * 4 + 3];
-            let m10: number = m[1 * 4 + 0];
-            let m11: number = m[1 * 4 + 1];
-            let m12: number = m[1 * 4 + 2];
-            let m13: number = m[1 * 4 + 3];
-            let m20: number = m[2 * 4 + 0];
-            let m21: number = m[2 * 4 + 1];
-            let m22: number = m[2 * 4 + 2];
-            let m23: number = m[2 * 4 + 3];
-            let m30: number = m[3 * 4 + 0];
-            let m31: number = m[3 * 4 + 1];
-            let m32: number = m[3 * 4 + 2];
-            let m33: number = m[3 * 4 + 3];
-            let tmp0: number = m22 * m33;
-            let tmp1: number = m32 * m23;
-            let tmp2: number = m12 * m33;
-            let tmp3: number = m32 * m13;
-            let tmp4: number = m12 * m23;
-            let tmp5: number = m22 * m13;
-            let tmp6: number = m02 * m33;
-            let tmp7: number = m32 * m03;
-            let tmp8: number = m02 * m23;
-            let tmp9: number = m22 * m03;
-            let tmp10: number = m02 * m13;
-            let tmp11: number = m12 * m03;
-            let tmp12: number = m20 * m31;
-            let tmp13: number = m30 * m21;
-            let tmp14: number = m10 * m31;
-            let tmp15: number = m30 * m11;
-            let tmp16: number = m10 * m21;
-            let tmp17: number = m20 * m11;
-            let tmp18: number = m00 * m31;
-            let tmp19: number = m30 * m01;
-            let tmp20: number = m00 * m21;
-            let tmp21: number = m20 * m01;
-            let tmp22: number = m00 * m11;
-            let tmp23: number = m10 * m01;
+    /**
+     * Computes and returns the inverse of a passed matrix.
+     * @param _matrix The matrix to compute the inverse of.
+     */
+    public static INVERSION(_matrix: Matrix4x4): Matrix4x4 {
+      let m: Float32Array = _matrix.data;
+      let m00: number = m[0 * 4 + 0];
+      let m01: number = m[0 * 4 + 1];
+      let m02: number = m[0 * 4 + 2];
+      let m03: number = m[0 * 4 + 3];
+      let m10: number = m[1 * 4 + 0];
+      let m11: number = m[1 * 4 + 1];
+      let m12: number = m[1 * 4 + 2];
+      let m13: number = m[1 * 4 + 3];
+      let m20: number = m[2 * 4 + 0];
+      let m21: number = m[2 * 4 + 1];
+      let m22: number = m[2 * 4 + 2];
+      let m23: number = m[2 * 4 + 3];
+      let m30: number = m[3 * 4 + 0];
+      let m31: number = m[3 * 4 + 1];
+      let m32: number = m[3 * 4 + 2];
+      let m33: number = m[3 * 4 + 3];
+      let tmp0: number = m22 * m33;
+      let tmp1: number = m32 * m23;
+      let tmp2: number = m12 * m33;
+      let tmp3: number = m32 * m13;
+      let tmp4: number = m12 * m23;
+      let tmp5: number = m22 * m13;
+      let tmp6: number = m02 * m33;
+      let tmp7: number = m32 * m03;
+      let tmp8: number = m02 * m23;
+      let tmp9: number = m22 * m03;
+      let tmp10: number = m02 * m13;
+      let tmp11: number = m12 * m03;
+      let tmp12: number = m20 * m31;
+      let tmp13: number = m30 * m21;
+      let tmp14: number = m10 * m31;
+      let tmp15: number = m30 * m11;
+      let tmp16: number = m10 * m21;
+      let tmp17: number = m20 * m11;
+      let tmp18: number = m00 * m31;
+      let tmp19: number = m30 * m01;
+      let tmp20: number = m00 * m21;
+      let tmp21: number = m20 * m01;
+      let tmp22: number = m00 * m11;
+      let tmp23: number = m10 * m01;
 
-            let t0: number = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
-                (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
+      let t0: number = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
+        (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
 
-            let t1: number = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
-                (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
-            let t2: number = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
-                (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
-            let t3: number = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
-                (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
+      let t1: number = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
+        (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
+      let t2: number = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
+        (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
+      let t3: number = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
+        (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
 
-            let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+      let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
             // let matrix: Matrix4x4 = new Matrix4x4;
             const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -327,18 +327,18 @@ namespace Fudge {
                 0, 0, _near * _far * rangeInv * 2, 0
             ]);
 
-            if (_direction == FIELD_OF_VIEW.DIAGONAL) {
-                _aspect = Math.sqrt(_aspect);
-                matrix.data[0] = f / _aspect;
-                matrix.data[5] = f * _aspect;
-            }
-            else if (_direction == FIELD_OF_VIEW.VERTICAL)
-                matrix.data[0] = f / _aspect;
-            else //FOV_DIRECTION.HORIZONTAL
-                matrix.data[5] = f * _aspect;
+      if (_direction == FIELD_OF_VIEW.DIAGONAL) {
+        _aspect = Math.sqrt(_aspect);
+        matrix.data[0] = f / _aspect;
+        matrix.data[5] = f * _aspect;
+      }
+      else if (_direction == FIELD_OF_VIEW.VERTICAL)
+        matrix.data[0] = f / _aspect;
+      else //FOV_DIRECTION.HORIZONTAL
+        matrix.data[5] = f * _aspect;
 
-            return matrix;
-        }
+      return matrix;
+    }
 
         /**
          * Computes and returns a matrix that applies orthographic projection to an object, if its transform is multiplied by it.
@@ -414,28 +414,28 @@ namespace Fudge {
             Recycler.store(matrix);
         }
 
-        /**
-         * Translate the transformation along the x-axis.
-         * @param _x The value of the translation.
-         */
-        public translateX(_x: number): void {
-            this.data[12] += _x;
-        }
-        /**
-         * Translate the transformation along the y-axis.
-         * @param _y The value of the translation.
-         */
-        public translateY(_y: number): void {
-            this.data[13] += _y;
-        }
-        /**
-         * Translate the transformation along the z-axis.
-         * @param _z The value of the translation.
-         */
-        public translateZ(_z: number): void {
-            this.data[14] += _z;
-        }
-        //#endregion
+    /**
+     * Translate the transformation along the x-axis.
+     * @param _x The value of the translation.
+     */
+    public translateX(_x: number): void {
+      this.data[12] += _x;
+    }
+    /**
+     * Translate the transformation along the y-axis.
+     * @param _y The value of the translation.
+     */
+    public translateY(_y: number): void {
+      this.data[13] += _y;
+    }
+    /**
+     * Translate the transformation along the z-axis.
+     * @param _z The value of the translation.
+     */
+    public translateZ(_z: number): void {
+      this.data[14] += _z;
+    }
+    //#endregion
 
         //#region Scaling
         public scale(_by: Vector3): void {
@@ -454,62 +454,62 @@ namespace Fudge {
         }
         //#endregion
 
-        //#region Transformation
-        public multiply(_matrix: Matrix4x4): void {
-            this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
+    //#region Transformation
+    public multiply(_matrix: Matrix4x4): void {
+      this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
+    }
+    //#endregion
+
+    //#region Transfer
+    public getVectorRepresentation(): Vector3[] {
+      // extract translation vector
+      // let translation: Vector3 = this.translation;  // already defined
+      // extract scaling vector and divide matrix by
+      let scaling: Vector3 = new Vector3(
+        Math.hypot(this.data[0], this.data[1], this.data[2]),
+        Math.hypot(this.data[4], this.data[5], this.data[6]),
+        Math.hypot(this.data[8], this.data[9], this.data[10])
+      );
+
+      let s0: number = this.data[0] / scaling.x;
+      let s1: number = this.data[1] / scaling.x;
+      let s2: number = this.data[2] / scaling.x;
+      let s6: number = this.data[6] / scaling.y;
+      let s10: number = this.data[10] / scaling.z;
+
+      let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
+
+      let singular: boolean = sy < 1e-6; // If
+
+      let x1: number, y1: number, z1: number;
+      let x2: number, y2: number, z2: number;
+
+      if (!singular) {
+        x1 = Math.atan2(s6, s10);
+        y1 = Math.atan2(-s2, sy);
+        z1 = Math.atan2(s1, s0);
+
+        x2 = Math.atan2(-s6, -s10);
+        y2 = Math.atan2(-s2, -sy);
+        z2 = Math.atan2(-s1, -s0);
+
+        if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
+          x1 = x2;
+          y1 = y2;
+          z1 = z2;
         }
-        //#endregion
+      }
+      else {
+        x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
+        y1 = Math.atan2(-this.data[2] / scaling.x, sy);
+        z1 = 0;
+      }
 
-        //#region Transfer
-        public getVectorRepresentation(): Vector3[] {
-            // extract translation vector
-            // let translation: Vector3 = this.translation;  // already defined
-            // extract scaling vector and divide matrix by
-            let scaling: Vector3 = new Vector3(
-                Math.hypot(this.data[0], this.data[1], this.data[2]),
-                Math.hypot(this.data[4], this.data[5], this.data[6]),
-                Math.hypot(this.data[8], this.data[9], this.data[10])
-            );
+      let rotation: Vector3 = new Vector3(x1, y1, z1);
+      rotation.scale(180 / Math.PI);
 
-            let s0: number = this.data[0] / scaling.x;
-            let s1: number = this.data[1] / scaling.x;
-            let s2: number = this.data[2] / scaling.x;
-            let s6: number = this.data[6] / scaling.y;
-            let s10: number = this.data[10] / scaling.z;
-
-            let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
-
-            let singular: boolean = sy < 1e-6; // If
-
-            let x1: number, y1: number, z1: number;
-            let x2: number, y2: number, z2: number;
-
-            if (!singular) {
-                x1 = Math.atan2(s6, s10);
-                y1 = Math.atan2(-s2, sy);
-                z1 = Math.atan2(s1, s0);
-
-                x2 = Math.atan2(-s6, -s10);
-                y2 = Math.atan2(-s2, -sy);
-                z2 = Math.atan2(-s1, -s0);
-
-                if (Math.abs(x2) + Math.abs(y2) + Math.abs(z2) < Math.abs(x1) + Math.abs(y1) + Math.abs(z1)) {
-                    x1 = x2;
-                    y1 = y2;
-                    z1 = z2;
-                }
-            }
-            else {
-                x1 = Math.atan2(-this.data[9] / scaling.z, this.data[5] / scaling.y);
-                y1 = Math.atan2(-this.data[2] / scaling.x, sy);
-                z1 = 0;
-            }
-
-            let rotation: Vector3 = new Vector3(x1, y1, z1);
-            rotation.scale(180 / Math.PI);
-
-            return [this.translation, rotation, scaling];
-        }
+      return [this.translation, rotation, scaling];
+    }
 
         public set(_to: Matrix4x4): void {
             // this.data = _to.get();
@@ -517,52 +517,75 @@ namespace Fudge {
             this.mutator = null;
         }
 
-        public get(): Float32Array {
-            return new Float32Array(this.data);
-        }
-
-        public serialize(): Serialization {
-            // TODO: save translation, rotation and scale as vectors for readability and manipulation
-            let serialization: Serialization = this.getMutator();
-            return serialization;
-        }
-        public deserialize(_serialization: Serialization): Serializable {
-            this.mutate(_serialization);
-            return this;
-        }
-
-        public getMutator(): Mutator {
-            if (this.mutator)
-                return this.mutator;
-
-            let vectors: Vector3[] = this.getVectorRepresentation();
-            let mutator: Mutator = {
-                translation: vectors[0].getMutator(),
-                rotation: vectors[1].getMutator(),
-                scaling: vectors[2].getMutator()
-            };
-
-            return mutator;
-        }
-
-        public mutate(_mutator: Mutator): void {
-            // hole eigenen Mutator und sichere
-            // mutiere gespeicherten Mutator entsprechend _mutator
-            let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
-
-            matrix.translate(<Vector3>_mutator.translation);
-
-            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
-            matrix.rotateZ((<Vector3>_mutator.rotation).z);
-            matrix.rotateY((<Vector3>_mutator.rotation).y);
-            matrix.rotateX((<Vector3>_mutator.rotation).x);
-
-            matrix.scale(<Vector3>_mutator.scaling);
-
-            this.set(matrix);
-            // this.mutator = gespeicherter, mutierter Mutator
-        }
-        protected reduceMutator(_mutator: Mutator): void {/** */ }
+    public get(): Float32Array {
+      return new Float32Array(this.data);
     }
-    //#endregion
+
+    public serialize(): Serialization {
+      // TODO: save translation, rotation and scale as vectors for readability and manipulation
+      let serialization: Serialization = this.getMutator();
+      return serialization;
+    }
+    public deserialize(_serialization: Serialization): Serializable {
+      this.mutate(_serialization);
+      return this;
+    }
+
+    public getMutator(): Mutator {
+      if (this.mutator)
+        return this.mutator;
+
+      let vectors: Vector3[] = this.getVectorRepresentation();
+      let mutator: Mutator = {
+        translation: vectors[0].getMutator(),
+        rotation: vectors[1].getMutator(),
+        scaling: vectors[2].getMutator()
+      };
+
+      // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
+      return mutator;
+    }
+
+    public mutate(_mutator: Mutator): void {
+      let mutator: Mutator = this.getMutator();
+
+      let oldTranslation: Vector3 = <Vector3>mutator["translation"];
+      let oldRotation: Vector3 = <Vector3>mutator["rotation"];
+      let oldScaling: Vector3 = <Vector3>mutator["scaling"];
+      let newTranslation: Vector3 = <Vector3>_mutator["translation"];
+      let newRotation: Vector3 = <Vector3>_mutator["rotation"];
+      let newScaling: Vector3 = <Vector3>_mutator["scaling"];
+      if (newTranslation) {
+        mutator["translation"] = {
+          x: newTranslation.x != undefined ? newTranslation.x : oldTranslation.x, 
+          y: newTranslation.y != undefined ? newTranslation.y : oldTranslation.y, 
+          z: newTranslation.z != undefined ? newTranslation.z : oldTranslation.z};
+      }
+      if (newRotation) {
+        mutator["rotation"] = {
+          x: newRotation.x != undefined ? newRotation.x : oldRotation.x, 
+          y: newRotation.y != undefined ? newRotation.y : oldRotation.y, 
+          z: newRotation.z != undefined ? newRotation.z : oldRotation.z};
+      }
+      if (newScaling) {
+        mutator["scaling"] = {
+          x: newScaling.x != undefined ? newScaling.x : oldScaling.x, 
+          y: newScaling.y != undefined ? newScaling.y : oldScaling.y, 
+          z: newScaling.z != undefined ? newScaling.z : oldScaling.z};
+      }
+
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
+      matrix.translate(<Vector3>mutator.translation);
+      // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
+      matrix.rotateZ((<Vector3>mutator.rotation).z);
+      matrix.rotateY((<Vector3>mutator.rotation).y);
+      matrix.rotateX((<Vector3>mutator.rotation).x);
+      matrix.scale(<Vector3>mutator.scaling);
+      this.set(matrix);
+      this.mutator = mutator;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {/** */ }
+  }
+  //#endregion
 }
