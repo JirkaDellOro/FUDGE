@@ -20,9 +20,12 @@ namespace Fudge {
     sps: number = 10;
     animationStructure: AnimationStructure = {};
 
-    constructor(_animStructure: AnimationStructure) {
+    constructor(_name: string, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
+      this.name = _name;
       this.animationStructure = _animStructure;
+      this.fps = _fps;
+      this.calculateTotalTime();
     }
 
     getMutated(_time: number, _direction: number): Mutator {

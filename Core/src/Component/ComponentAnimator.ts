@@ -15,8 +15,11 @@ namespace Fudge {
   }
 
   export enum ANIMATION_PLAYBACK {
-    UNLIMITED,
-    LIMITEDTOFRAMERATE,
+    /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+    TIMEBASED_CONTINOUS,
+    /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+    TIMEBASED_RASTERED_TO_FPS,
+    /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
     FRAMEBASED
   }
 
@@ -47,9 +50,10 @@ namespace Fudge {
       this.animation = _animation;
       this.playmode = _playmode;
       this.playback = _playback;
-      
+
       //TODO: update animation total time when loading a different animation?
       this.animation.calculateTotalTime();
+      this.lastTime = 0;
       //TODO: get an individual time class to work with.
       this.jumpTo(0, Date.now()); // <-- remove this when time class is implemented
       //TODO: register updateAnimatioStart() properly into the gameloop
@@ -60,17 +64,18 @@ namespace Fudge {
       _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
       this.startTime = _time;
       this.timeAtStart = _currentTime;
-      this.lastTime = _currentTime;
+      if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
+        this.lastTime = _currentTime;
     }
 
     //#region updateAnimation
     private updateAnimationLoop(): void {
       switch (this.playback) {
-        case ANIMATION_PLAYBACK.UNLIMITED:
-          this.updateAnimationUnlimited();
+        case ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS:
+          this.updateAnimationContinous();
           break;
-        case ANIMATION_PLAYBACK.LIMITEDTOFRAMERATE:
-          this.updateAnimationWithFramerate();
+        case ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS:
+          this.updateAnimationRastered();
           break;
         case ANIMATION_PLAYBACK.FRAMEBASED:
           this.updateAnimationFramebased();
@@ -78,7 +83,7 @@ namespace Fudge {
       }
     }
 
-    private updateAnimationUnlimited(): void {
+    private updateAnimationContinous(): void {
       //TODO: use own time class
       let direction: number = this.calculateDirection(Date.now());
       let time: number = this.calculateCurrentTime(Date.now(), direction);
@@ -86,20 +91,21 @@ namespace Fudge {
       this.updateAnimation(time, direction);
     }
 
-    private updateAnimationWithFramerate(): void {
+    private updateAnimationRastered(): void {
+      //TODO: use own time class
       let direction: number = this.calculateDirection(Date.now());
       let time: number = this.calculateCurrentTime(Date.now(), direction);
       time = time - (time % (1000 / this.animation.fps));
 
+      //TODO: possible optimisation: only update animation if next Frame has been reached
       this.updateAnimation(time, direction);
     }
 
     private updateAnimationFramebased(): void {
       let timePerFrame: number = 1000 / this.animation.fps;
-      // let frames: number = this.animation.totalTime / timePerFrame;
       let time: number = this.lastTime + timePerFrame;
       let direction: number = this.calculateDirection(time);
-      time = this.calculateCurrentTime(time, direction);
+      time = time % this.animation.totalTime;
 
       this.updateAnimation(time, direction);
     }
