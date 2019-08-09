@@ -29,7 +29,7 @@ var AnimatorComponentTest;
                 ]
             }
         };
-        let animation = new ƒ.Animation(animStructure);
+        let animation = new ƒ.Animation("testAnimation", animStructure, 1);
         animation.labels["test"] = 3000;
         console.group("before");
         console.log(animation);
@@ -41,7 +41,7 @@ var AnimatorComponentTest;
         animFromSeri.deserialize(serialisation);
         console.log(animFromSeri);
         console.groupEnd();
-        let cmpAnimation = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.PINGPONG, ƒ.ANIMATION_PLAYBACK.UNLIMITED);
+        let cmpAnimation = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS);
         node.addComponent(cmpAnimation);
         console.log(node);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, frame);

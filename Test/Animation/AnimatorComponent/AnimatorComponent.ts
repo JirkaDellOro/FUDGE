@@ -34,7 +34,7 @@ namespace AnimatorComponentTest {
         ]
       }
     };
-    let animation: ƒ.Animation = new ƒ.Animation(animStructure);
+    let animation: ƒ.Animation = new ƒ.Animation("testAnimation", animStructure, 1);
     animation.labels["test"] = 3000;
 
     console.group("before");
@@ -48,7 +48,7 @@ namespace AnimatorComponentTest {
     console.log(animFromSeri);
     console.groupEnd();
 
-    let cmpAnimation: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.PINGPONG, ƒ.ANIMATION_PLAYBACK.UNLIMITED);
+    let cmpAnimation: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS);
     node.addComponent(cmpAnimation);
     console.log(node);
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, frame);

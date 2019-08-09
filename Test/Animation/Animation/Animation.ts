@@ -42,7 +42,7 @@ namespace AnimationTest {
         ]
       }
     };
-    animation = new ƒ.Animation(animStructure);
+    animation = new ƒ.Animation("testAnimation", animStructure);
 
     console.log(animation);
     // animation.animationStructure["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]["pivot"]["rotation"]["y"] = animseq;
@@ -54,37 +54,6 @@ namespace AnimationTest {
     ƒ.Loop.start();
   }
 
-  // function initAnimOld(): void {
-  //   let mutator: ƒ.MutatorForAnimation = cmpMesh.getMutatorForAnimation();
-  //   animation = new ƒ.Animation(mutator);
-  //   let animseq: ƒ.AnimationSequenceAsso = {
-  //     // x: new ƒ.AnimationSequence(),
-  //     y: new ƒ.AnimationSequence()
-  //   };
-  //   // console.log(mutator.pivot["rotation"]);
-  //   animation.sequences.set(mutator["pivot"]["rotation"], animseq);
-  //   // animseq["x"].addKey(new ƒ.AnimationKey(0, 0));
-  //   // animseq["x"].addKey(new ƒ.AnimationKey(2000, 0));
-  //   // animseq["x"].addKey(new ƒ.AnimationKey(3000, 90));
-  //   // animseq["x"].addKey(new ƒ.AnimationKey(4000, 135));
-  //   animseq["y"].addKey(new ƒ.AnimationKey(0, 0));
-  //   animseq["y"].addKey(new ƒ.AnimationKey(2000, 90));
-  //   animseq["y"].addKey(new ƒ.AnimationKey(3000, 180));
-  //   animseq["y"].addKey(new ƒ.AnimationKey(4000, 0));
-
-  //   animation.events["myEvent"] = 2000;
-  //   animation.labels["jumpHere"] = 2500;
-
-  //   animation.addEventListener("myEvent", hndlEv);
-  //   animation.jumpTo(animation.labels["jumpHere"], 0);
-
-  //   // animation.playmode = ƒ.ANIMPLAYMODE.STOP;
-  //   // console.log(animation.sequences);
-  //   // animation.update(1000);
-  //   // console.log(animation);
-  //   // console.log(mutator.pivot);
-  // }
-
   function frame(): void {
     // console.log(Date.now() - startTime);
     // let mutator: ƒ.MutatorForAnimation = mesh.getMutatorForAnimation();
@@ -92,6 +61,7 @@ namespace AnimationTest {
     let time: number = Date.now() - startTime;
     // if (time > 2000) debugger;
     // animation.update(time);
+    time = time % animation.totalTime;
     let mutator: ƒ.Mutator = animation.getMutated(time, ƒ.ANIMATION_PLAYMODE.LOOP);
     // console.log(node.getComponent(ƒ.ComponentMesh).getMutator());
     // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
