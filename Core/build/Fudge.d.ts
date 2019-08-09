@@ -2091,10 +2091,13 @@ declare namespace Fudge {
         static timeFrameReal: number;
         private static timeLastFrameGame;
         private static timeLastFrameReal;
+        private static timeLastFrameGameAvg;
+        private static timeLastFrameRealAvg;
         private static running;
         private static mode;
         private static idIntervall;
-        private static fps;
+        private static fpsDesired;
+        private static framesToAverage;
         /**
          * Starts the loop with the given mode and fps
          * @param _mode
@@ -2105,6 +2108,8 @@ declare namespace Fudge {
          * Stops the loop
          */
         static stop(): void;
+        static getFpsGameAverage(): number;
+        static getFpsRealAverage(): number;
         private static loop;
         private static loopFrame;
         private static loopReal;

@@ -4890,7 +4890,7 @@ var Fudge;
             Loop.stop();
             Loop.timeStartGame = Fudge.Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fps = _fps;
+            Loop.fpsDesired = _fps;
             Loop.mode = _mode;
             let log = `Loop starting in mode ${Loop.mode}`;
             if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
@@ -4898,15 +4898,15 @@ var Fudge;
             Fudge.Debug.log(log);
             switch (_mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    this.loopFrame();
+                    Loop.loopFrame();
                     break;
                 case LOOP_MODE.TIME_REAL:
-                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / this.fps);
-                    this.loopReal();
+                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / Loop.fpsDesired);
+                    Loop.loopReal();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopGame, 1000 / this.fps);
-                    this.loopGame();
+                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopGame, 1000 / Loop.fpsDesired);
+                    Loop.loopGame();
                     break;
                 default:
                     break;
@@ -4933,14 +4933,22 @@ var Fudge;
             }
             Fudge.Debug.log("Loop stopped!");
         }
+        static getFpsGameAverage() {
+            return 1000 / Loop.timeLastFrameGameAvg;
+        }
+        static getFpsRealAverage() {
+            return 1000 / Loop.timeLastFrameRealAvg;
+        }
         static loop() {
             let time;
             time = performance.now();
-            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeFrameReal = time - Loop.timeLastFrameReal;
             Loop.timeLastFrameReal = time;
             time = Fudge.Time.game.get();
-            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeFrameGame = time - Loop.timeLastFrameGame;
             Loop.timeLastFrameGame = time;
+            Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
+            Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
             let event = new Event("loopFrame" /* LOOP_FRAME */);
             Loop.targetStatic.dispatchEvent(event);
         }
@@ -4955,10 +4963,23 @@ var Fudge;
             Loop.loop();
         }
     }
+    /** The gametime the loop was started, overwritten at each start */
+    Loop.timeStartGame = 0;
+    /** The realtime the loop was started, overwritten at each start */
+    Loop.timeStartReal = 0;
+    /** The gametime elapsed since the last loop cycle */
+    Loop.timeFrameGame = 0;
+    /** The realtime elapsed since the last loop cycle */
+    Loop.timeFrameReal = 0;
+    Loop.timeLastFrameGame = 0;
+    Loop.timeLastFrameReal = 0;
+    Loop.timeLastFrameGameAvg = 0;
+    Loop.timeLastFrameRealAvg = 0;
     Loop.running = false;
     Loop.mode = LOOP_MODE.FRAME_REQUEST;
     Loop.idIntervall = 0;
-    Loop.fps = 30;
+    Loop.fpsDesired = 30;
+    Loop.framesToAverage = 10;
     Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

@@ -15,20 +15,23 @@ namespace Fudge {
      */
     export class Loop extends EventTargetStatic {
         /** The gametime the loop was started, overwritten at each start */
-        public static timeStartGame: number;
+        public static timeStartGame: number = 0;
         /** The realtime the loop was started, overwritten at each start */
-        public static timeStartReal: number;
+        public static timeStartReal: number = 0;
         /** The gametime elapsed since the last loop cycle */
-        public static timeFrameGame: number;
+        public static timeFrameGame: number = 0;
         /** The realtime elapsed since the last loop cycle */
-        public static timeFrameReal: number;
+        public static timeFrameReal: number = 0;
 
-        private static timeLastFrameGame: number;
-        private static timeLastFrameReal: number;
+        private static timeLastFrameGame: number = 0;
+        private static timeLastFrameReal: number = 0;
+        private static timeLastFrameGameAvg: number = 0;
+        private static timeLastFrameRealAvg: number = 0;
         private static running: boolean = false;
         private static mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST;
         private static idIntervall: number = 0;
-        private static fps: number = 30;
+        private static fpsDesired: number = 30;
+        private static framesToAverage: number = 10;
 
         /**
          * Starts the loop with the given mode and fps
@@ -40,7 +43,7 @@ namespace Fudge {
 
             Loop.timeStartGame = Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fps = _fps;
+            Loop.fpsDesired = _fps;
             Loop.mode = _mode;
 
             let log: string = `Loop starting in mode ${Loop.mode}`;
@@ -50,15 +53,15 @@ namespace Fudge {
 
             switch (_mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    this.loopFrame();
+                    Loop.loopFrame();
                     break;
                 case LOOP_MODE.TIME_REAL:
-                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / this.fps);
-                    this.loopReal();
+                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / Loop.fpsDesired);
+                    Loop.loopReal();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Time.game.setInterval(Loop.loopGame, 1000 / this.fps);
-                    this.loopGame();
+                    Loop.idIntervall = Time.game.setInterval(Loop.loopGame, 1000 / Loop.fpsDesired);
+                    Loop.loopGame();
                     break;
                 default:
                     break;
@@ -89,15 +92,25 @@ namespace Fudge {
             Debug.log("Loop stopped!");
         }
 
+        public static getFpsGameAverage(): number {
+            return 1000 / Loop.timeLastFrameGameAvg;
+        }
+        public static getFpsRealAverage(): number {
+            return 1000 / Loop.timeLastFrameRealAvg;
+        }
+
         private static loop(): void {
             let time: number;
             time = performance.now();
-            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeFrameReal = time - Loop.timeLastFrameReal;
             Loop.timeLastFrameReal = time;
 
             time = Time.game.get();
-            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeFrameGame = time - Loop.timeLastFrameGame;
             Loop.timeLastFrameGame = time;
+
+            Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
+            Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
 
             let event: Event = new Event(EVENT.LOOP_FRAME);
             Loop.targetStatic.dispatchEvent(event);
