@@ -1,1 +1,0 @@
-{"version":3,"file":"simpleComponent.js","sourceRoot":"","sources":["simpleComponent.ts"],"names":[],"mappings":"AAAA,MAAM,eAAe;IAEjB,YAAmB,SAAa,EAAE,KAAS;QAEvC,IAAI,OAAO,GAAmB,QAAQ,CAAC,aAAa,CAAC,MAAM,CAAC,CAAC;QAC7D,OAAO,CAAC,SAAS,GAAG,2BAA2B,CAAC;QAChD,SAAS,CAAC,UAAU,EAAE,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;IACzC,CAAC;CACJ"}
