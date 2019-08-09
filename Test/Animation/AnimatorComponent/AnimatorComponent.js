@@ -29,21 +29,25 @@ var AnimatorComponentTest;
                 ]
             }
         };
-        let animation = new ƒ.Animation("testAnimation", animStructure, 1);
+        let animation = new ƒ.Animation("testAnimation", animStructure, 10);
         animation.labels["test"] = 3000;
-        console.group("before");
-        console.log(animation);
-        let serialisation = animation.serialize();
-        console.log(ƒ.Serializer.stringify(serialisation));
-        console.groupEnd();
-        console.group("after");
-        let animFromSeri = new ƒ.Animation(null);
-        animFromSeri.deserialize(serialisation);
-        console.log(animFromSeri);
-        console.groupEnd();
-        let cmpAnimation = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS);
+        animation.events["myEvent"] = 0;
+        //#region serialisation
+        // console.group("before");
+        // console.log(animation);
+        // let serialisation: ƒ.Serialization = animation.serialize();
+        // console.log(ƒ.Serializer.stringify(serialisation));
+        // console.groupEnd();
+        // console.group("after");
+        // let animFromSeri: ƒ.Animation = new ƒ.Animation(null);
+        // animFromSeri.deserialize(serialisation);
+        // console.log(animFromSeri);
+        // console.groupEnd();
+        //#endregion
+        let cmpAnimation = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.FRAMEBASED);
         node.addComponent(cmpAnimation);
-        console.log(node);
+        // cmpAnimation.speed = 10;
+        cmpAnimation.addEventListener("myEvent", hndlEv);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, frame);
         ƒ.Loop.start();
     }
