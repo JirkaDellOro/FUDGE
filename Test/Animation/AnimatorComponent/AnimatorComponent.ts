@@ -35,8 +35,20 @@ namespace AnimatorComponentTest {
       }
     };
     let animation: ƒ.Animation = new ƒ.Animation(animStructure);
+    animation.labels["test"] = 3000;
 
-    let cmpAnimation: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.UNLIMITED);
+    console.group("before");
+    console.log(animation);
+    let serialisation: ƒ.Serialization = animation.serialize();
+    console.log(ƒ.Serializer.stringify(serialisation));
+    console.groupEnd();
+    console.group("after");
+    let animFromSeri: ƒ.Animation = new ƒ.Animation(null);
+    animFromSeri.deserialize(serialisation);
+    console.log(animFromSeri);
+    console.groupEnd();
+
+    let cmpAnimation: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animFromSeri, ƒ.ANIMATION_PLAYMODE.PINGPONG, ƒ.ANIMATION_PLAYBACK.UNLIMITED);
     node.addComponent(cmpAnimation);
     console.log(node);
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, frame);
