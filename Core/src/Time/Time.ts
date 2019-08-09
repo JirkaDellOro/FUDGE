@@ -4,16 +4,37 @@ namespace Fudge {
         TIMEOUT
     }
 
-    interface TimerData {
+    class Timer {
         type: TIMER_TYPE;
-        startTime: number;
-        callback: TimerHandler;
+        callback: Function;
         timeout: number;
         arguments: Object[];
-    }
+        startTimeReal: number;
+        timeoutReal: number;
+        id: number;
 
-    interface Timers {
-        [id: number]: TimerData;
+        constructor(_time: Time, _type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]) {
+            this.type = _type;
+            this.timeout = _timeout;
+            this.arguments = _arguments;
+            this.startTimeReal = performance.now();
+            this.timeoutReal = this.timeout / _time.getScale();
+
+            this.callback = _callback;
+
+            let id: number;
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                let callback: Function = (): void => {
+                    _time.clearTimeout(id);
+                    _callback(_arguments);
+                    id = window.setInterval(callback, _timeout / _time.getScale());
+                };
+            }
+            else
+                id = window.setTimeout(_callback, _timeout / _time.getScale(), _arguments);
+
+            this.id = id;
+        }
     }
 
     /**
@@ -27,7 +48,7 @@ namespace Fudge {
         private scale: number;
         private offset: number;
         private lastCallToElapsed: number;
-        private timers: Timers = {};
+        private timers: Timer[] = [];
 
         constructor() {
             this.start = performance.now();
@@ -66,6 +87,7 @@ namespace Fudge {
          */
         public setScale(_scale: number = 1.0): void {
             this.set(this.get());
+            this.rescaleAllTimers();
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
         }
@@ -90,19 +112,11 @@ namespace Fudge {
 
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
-        public setTimeout(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number {
-            // TODO: handle time scale and reset 
-            let id: number = window.setInterval(_callback, _timeout, _arguments);
-            let timer: TimerData = { type: TIMER_TYPE.TIMEOUT, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
-            this.timers[id] = timer;
-            return id;
+        public setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
+            return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
         }
-        public setInterval(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number {
-            // TODO: handle time scale and reset 
-            let id: number = window.setInterval(_callback, _timeout, _arguments);
-            let timer: TimerData = { type: TIMER_TYPE.INTERVAL, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
-            this.timers[id] = timer;
-            return id;
+        public setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
+            return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
         }
         public clearTimeout(_id: number): void {
             window.clearInterval(_id);
@@ -123,6 +137,25 @@ namespace Fudge {
                 else
                     this.clearInterval(parseInt(id));
             }
+        }
+
+        public rescaleAllTimers(): void {
+            for (let timer of this.timers) {
+                if (timer.type == TIMER_TYPE.TIMEOUT)
+                    this.clearTimeout(timer.id);
+                else
+                    this.clearInterval(timer.id);
+
+                // rescaling
+                let timeoutLeft: number = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+            }
+        }
+
+        private setTimer(_type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]): number {
+            let timer: Timer = new Timer(this, _type, _callback, _timeout, _arguments);
+            this.timers.push(timer);
+            return timer.id;
         }
         //#endregion
     }

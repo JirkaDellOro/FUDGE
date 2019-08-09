@@ -1893,14 +1893,16 @@ declare namespace Fudge {
          * Automatically reset at every call to set(...) and setScale(...)
          */
         getElapsedSincePreviousCall(): number;
-        setTimeout(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number;
-        setInterval(_callback: TimerHandler, _timeout: number, ..._arguments: Object[]): number;
+        setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
+        setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
         clearTimeout(_id: number): void;
         clearInterval(_id: number): void;
         /**
          * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers(): void;
+        rescaleAllTimers(): void;
+        private setTimer;
     }
 }
 declare namespace Fudge {

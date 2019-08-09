@@ -38,7 +38,9 @@ var NodeResource;
         console.log(ƒ.Serializer.stringify(srlInstance));
         console.groupEnd();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 100);
+        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
+        ƒ.Time.game.setScale(10);
+        ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
         function update(_event) {
             ƒ.RenderManager.update();
             viewport.draw();

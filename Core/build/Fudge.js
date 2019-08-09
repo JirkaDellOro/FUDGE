@@ -4199,6 +4199,27 @@ var Fudge;
         TIMER_TYPE[TIMER_TYPE["INTERVAL"] = 0] = "INTERVAL";
         TIMER_TYPE[TIMER_TYPE["TIMEOUT"] = 1] = "TIMEOUT";
     })(TIMER_TYPE || (TIMER_TYPE = {}));
+    class Timer {
+        constructor(_time, _type, _callback, _timeout, _arguments) {
+            this.type = _type;
+            this.timeout = _timeout;
+            this.arguments = _arguments;
+            this.startTimeReal = performance.now();
+            this.timeoutReal = this.timeout / _time.getScale();
+            this.callback = _callback;
+            let id;
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                let callback = () => {
+                    _time.clearTimeout(id);
+                    _callback(_arguments);
+                    id = window.setInterval(callback, _timeout / _time.getScale());
+                };
+            }
+            else
+                id = window.setTimeout(_callback, _timeout / _time.getScale(), _arguments);
+            this.id = id;
+        }
+    }
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
@@ -4206,7 +4227,7 @@ var Fudge;
      */
     class Time {
         constructor() {
-            this.timers = {};
+            this.timers = [];
             this.start = performance.now();
             this.scale = 1.0;
             this.offset = 0.0;
@@ -4239,6 +4260,7 @@ var Fudge;
          */
         setScale(_scale = 1.0) {
             this.set(this.get());
+            this.rescaleAllTimers();
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
         }
@@ -4261,18 +4283,10 @@ var Fudge;
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
         setTimeout(_callback, _timeout, ..._arguments) {
-            // TODO: handle time scale and reset 
-            let id = window.setInterval(_callback, _timeout, _arguments);
-            let timer = { type: TIMER_TYPE.TIMEOUT, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
-            this.timers[id] = timer;
-            return id;
+            return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
         }
         setInterval(_callback, _timeout, ..._arguments) {
-            // TODO: handle time scale and reset 
-            let id = window.setInterval(_callback, _timeout, _arguments);
-            let timer = { type: TIMER_TYPE.INTERVAL, startTime: this.get(), callback: _callback, timeout: _timeout, arguments: _arguments };
-            this.timers[id] = timer;
-            return id;
+            return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
         }
         clearTimeout(_id) {
             window.clearInterval(_id);
@@ -4292,6 +4306,22 @@ var Fudge;
                 else
                     this.clearInterval(parseInt(id));
             }
+        }
+        rescaleAllTimers() {
+            for (let timer of this.timers) {
+                if (timer.type == TIMER_TYPE.TIMEOUT)
+                    this.clearTimeout(timer.id);
+                else
+                    this.clearInterval(timer.id);
+                // rescaling
+                let timeoutLeft = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+            }
+        }
+        setTimer(_type, _callback, _timeout, _arguments) {
+            let timer = new Timer(this, _type, _callback, _timeout, _arguments);
+            this.timers.push(timer);
+            return timer.id;
         }
     }
     Time.gameTime = new Time();
