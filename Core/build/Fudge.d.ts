@@ -160,6 +160,20 @@ declare namespace Fudge {
         [attribute: string]: Serialization | AnimationSequence;
     }
     /**
+    * Holds information about Animation Labels
+    * @author Lukas Scheuerle, HFU, 2019
+    */
+    interface AnimationLabel {
+        [name: string]: number;
+    }
+    /**
+    * Holds information about Animation Event Triggers
+    * @author Lukas Scheuerle, HFU, 2019
+    */
+    interface AnimationEventTrigger {
+        [name: string]: number;
+    }
+    /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
      * @author Lukas Scheuerle, HFU, 2019
@@ -169,6 +183,7 @@ declare namespace Fudge {
         name: string;
         totalTime: number;
         labels: AnimationLabel;
+        events: AnimationEventTrigger;
         fps: number;
         sps: number;
         animationStructure: AnimationStructure;
@@ -229,15 +244,6 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Holds information about Animation Labels
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    interface AnimationLabel {
-        [name: string]: number;
     }
 }
 declare namespace Fudge {
@@ -456,13 +462,6 @@ declare namespace Fudge {
         FRAMEBASED = 2
     }
     /**
-     *
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    interface AnimationEventTrigger {
-        [name: string]: number;
-    }
-    /**
      * Holds an [[Animation]] and controls it.
      * @authors Lukas Scheuerle, HFU, 2019
      */
@@ -470,11 +469,13 @@ declare namespace Fudge {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        events: AnimationEventTrigger;
+        time: Time;
+        speedScalesWithGlobalSpeed: boolean;
+        private speedScale;
         private lastTime;
-        private startTime;
-        private timeAtStart;
+        private lastFrameTime;
         constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
+        speed: number;
         jumpTo(_time: number, _currentTime: number): void;
         private updateAnimationLoop;
         private updateAnimationContinous;
@@ -483,7 +484,8 @@ declare namespace Fudge {
         private updateAnimation;
         private calculateCurrentTime;
         private calculateDirection;
-        private checkEvents;
+        private updateScale;
+        private checkEventBetween;
     }
 }
 declare namespace Fudge {

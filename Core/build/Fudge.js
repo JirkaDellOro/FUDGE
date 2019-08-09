@@ -279,6 +279,7 @@ var Fudge;
             super();
             this.totalTime = 0;
             this.labels = {};
+            this.events = {};
             this.fps = 60;
             this.sps = 10;
             this.animationStructure = {};
@@ -306,23 +307,31 @@ var Fudge;
                 idResource: this.idResource,
                 name: this.name,
                 labels: {},
+                events: {},
                 fps: this.fps,
                 sps: this.sps
             };
             for (let name in this.labels) {
                 s.labels[name] = this.labels[name];
             }
+            for (let name in this.events) {
+                s.events[name] = this.events[name];
+            }
             s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
             return s;
         }
         deserialize(_serialization) {
-            this.idResource = _serialization.idResource,
-                this.name = _serialization.name;
+            this.idResource = _serialization.idResource;
+            this.name = _serialization.name;
             this.fps = _serialization.fps;
             this.sps = _serialization.sps;
             this.labels = {};
             for (let name in _serialization.labels) {
                 this.labels[name] = _serialization.labels[name];
+            }
+            this.events = {};
+            for (let name in _serialization.events) {
+                this.events[name] = _serialization.events[name];
             }
             this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
             this.calculateTotalTime();
@@ -1135,28 +1144,39 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Fudge.Component {
+        // private lastDirection: number = 0;
+        // private startTime: number = 0;
+        // private timeAtStart: number = 0;
         constructor(_animation, _playmode, _playback) {
             super();
-            this.lastTime = 0;
-            this.startTime = 0;
-            this.timeAtStart = 0;
+            this.speedScalesWithGlobalSpeed = true;
+            this.speedScale = 1;
+            this.lastTime = -1;
+            this.lastFrameTime = -1;
             this.animation = _animation;
             this.playmode = _playmode;
             this.playback = _playback;
+            this.time = new Fudge.Time();
             //TODO: update animation total time when loading a different animation?
             this.animation.calculateTotalTime();
-            this.lastTime = 0;
-            //TODO: get an individual time class to work with.
-            this.jumpTo(0, Date.now()); // <-- remove this when time class is implemented
+            this.lastFrameTime = -(1000 / this.animation.fps);
+            this.jumpTo(0, 0);
             //TODO: register updateAnimatioStart() properly into the gameloop
             Fudge.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.updateAnimationLoop.bind(this));
+            Fudge.Time.game.addEventListener("timeScaled" /* TIME_SCALED */, this.updateScale.bind(this));
+        }
+        set speed(_s) {
+            this.speedScale = _s;
+            this.updateScale();
         }
         jumpTo(_time, _currentTime) {
             _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
-            this.startTime = _time;
-            this.timeAtStart = _currentTime;
-            if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
-                this.lastTime = _currentTime;
+            //TODO: maybe this can be outsourced to the time class as well.
+            this.time.set(_time);
+            // this.startTime = _time;
+            // this.timeAtStart = _currentTime;
+            // if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
+            //   this.lastTime = _currentTime;
         }
         //#region updateAnimation
         updateAnimationLoop() {
@@ -1173,42 +1193,57 @@ var Fudge;
             }
         }
         updateAnimationContinous() {
-            //TODO: use own time class
-            let direction = this.calculateDirection(Date.now());
-            let time = this.calculateCurrentTime(Date.now(), direction);
+            let time = this.time.get();
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
             this.updateAnimation(time, direction);
+            //TODO: fix backwards
+            this.checkEventBetween(this.lastTime, time);
+            this.lastTime = time;
         }
         updateAnimationRastered() {
-            //TODO: use own time class
-            let direction = this.calculateDirection(Date.now());
-            let time = this.calculateCurrentTime(Date.now(), direction);
-            time = time - (time % (1000 / this.animation.fps));
-            //TODO: possible optimisation: only update animation if next Frame has been reached
-            this.updateAnimation(time, direction);
+            let time = this.time.get();
+            //TODO: fix backwards
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
+            let timePerFrame = 1000 / this.animation.fps;
+            time = time - (time % timePerFrame);
+            if (this.lastFrameTime != time) {
+                // TODO: possible optimisation: only update animation if next Frame has been reached
+                this.updateAnimation(time, direction);
+                this.checkEventBetween(time, time + timePerFrame);
+                this.lastFrameTime = time;
+            }
         }
         updateAnimationFramebased() {
             let timePerFrame = 1000 / this.animation.fps;
-            let time = this.lastTime + timePerFrame;
+            let time = this.lastFrameTime + timePerFrame;
             let direction = this.calculateDirection(time);
             time = time % this.animation.totalTime;
+            //TODO: fix backwards
+            // if(direction < 0) {
+            //   let newTime: number = this.animation.totalTime
+            // }
             this.updateAnimation(time, direction);
+            this.checkEventBetween(time, time + timePerFrame);
+            // console.log(time)
+            this.lastFrameTime = time;
         }
         updateAnimation(_time, _direction) {
             let mutator = this.animation.getMutated(_time, _direction);
             this.getContainer().applyAnimation(mutator);
-            this.checkEvents(_time, _direction);
-            this.lastTime = _time;
+            // this.checkEvents(_time, _direction);
         }
         //#endregion
         calculateCurrentTime(_time, _direction) {
-            let time = ((_time - this.timeAtStart) * _direction + this.startTime) % this.animation.totalTime;
+            let time = _time % this.animation.totalTime;
             if (_direction < 0) {
-                time += this.animation.totalTime;
+                time = this.animation.totalTime - time;
             }
             return time;
         }
         calculateDirection(_time) {
-            _time = _time + this.startTime - this.timeAtStart;
+            // _time = _time + this.startTime - this.timeAtStart;
             switch (this.playmode) {
                 case ANIMATION_PLAYMODE.STOP:
                     return 0;
@@ -1228,13 +1263,63 @@ var Fudge;
                     return 1;
             }
         }
-        checkEvents(_time, _direction) {
-            //TODO Catch Events at the beginning & end of the animation
-            if (this.playmode == ANIMATION_PLAYMODE.STOP || _direction == 0)
-                return;
-            for (let name in this.events) {
-                if (_direction > 0 && this.lastTime < this.events[name] && this.events[name] < _time
-                    || _direction < 0 && this.lastTime > this.events[name] && this.events[name] > _time) {
+        updateScale() {
+            let newScale = this.speedScale;
+            if (this.speedScalesWithGlobalSpeed)
+                newScale *= Fudge.Time.game.getScale();
+            this.time.setScale(newScale);
+        }
+        // private checkEvents(_time: number, _direction: number): void {
+        //   if (_time == this.lastTime)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.STOP || _direction == 0)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.PINGPONG) {
+        //     if (this.lastDirection == _direction) {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, _time);
+        //       } else {
+        //         this.checkEventBetween(_time, this.lastTime);
+        //       }
+        //     } else {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //         this.checkEventBetween(_time, this.animation.totalTime);
+        //       } else {
+        //         this.checkEventBetween(0, this.lastTime);
+        //         this.checkEventBetween(0, this.animation.totalTime);
+        //       }
+        //     }
+        //     this.lastDirection = _direction;
+        //   }
+        //   else if (_direction > 0) {
+        //     if (this.lastTime < _time) {
+        //       this.checkEventBetween(this.lastTime, _time);
+        //     } else {
+        //       this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //       this.checkEventBetween(0, _time);
+        //     }
+        //   } else {
+        //     if (_time < this.lastTime) {
+        //       this.checkEventBetween(_time, this.lastTime);
+        //     } else {
+        //       this.checkEventBetween(0, this.lastTime);
+        //       this.checkEventBetween(_time, this.animation.totalTime);
+        //     }
+        //   }
+        //   this.lastTime = _time;
+        // }
+        checkEventBetween(_min, _max) {
+            if (_min > _max) {
+                // let t: number = _min;
+                // _min = _max;
+                // _max = t;
+                this.checkEventBetween(0, _min);
+                this.checkEventBetween(_max, this.animation.totalTime);
+            }
+            for (let name in this.animation.events) {
+                if (_min <= this.animation.events[name] && this.animation.events[name] <= _max) {
+                    console.log(_min, this.animation.events[name], _max, this.time.get());
                     this.dispatchEvent(new Event(name));
                 }
             }
