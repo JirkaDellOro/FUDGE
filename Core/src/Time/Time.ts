@@ -122,11 +122,11 @@ namespace Fudge {
         }
         public clearTimeout(_id: number): void {
             window.clearInterval(_id);
-            delete this.timers[_id];
+            this.deleteTimer(_id);
         }
         public clearInterval(_id: number): void {
             window.clearInterval(_id);
-            delete this.timers[_id];
+            this.deleteTimer(_id);
         }
 
         /**
@@ -161,7 +161,9 @@ namespace Fudge {
         }
 
         private deleteTimer(_id: number): void {
-            
+            for (let i: number = this.timers.length - 1; i >= 0; i--)
+                if (this.timers[i].id == _id)
+                    this.timers.splice(i, 1);
         }
         //#endregion
     }

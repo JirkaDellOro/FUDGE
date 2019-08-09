@@ -4819,11 +4819,11 @@ var Fudge;
         }
         clearTimeout(_id) {
             window.clearInterval(_id);
-            delete this.timers[_id];
+            this.deleteTimer(_id);
         }
         clearInterval(_id) {
             window.clearInterval(_id);
-            delete this.timers[_id];
+            this.deleteTimer(_id);
         }
         /**
          * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
@@ -4853,6 +4853,9 @@ var Fudge;
             return timer.id;
         }
         deleteTimer(_id) {
+            for (let i = this.timers.length - 1; i >= 0; i--)
+                if (this.timers[i].id == _id)
+                    this.timers.splice(i, 1);
         }
     }
     Time.gameTime = new Time();
