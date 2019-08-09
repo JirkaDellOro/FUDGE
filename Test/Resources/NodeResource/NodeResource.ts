@@ -24,7 +24,7 @@ namespace NodeResource {
         // console.log(AnimateSatellite["namespaceX"]);
         let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(center, false);
 
-        let dim: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
+        let dim: ƒ.Vector3 = new ƒ.Vector3(2, 2, 2);
 
         for (let z: number = -dim.z; z < dim.z + 1; z++)
             for (let y: number = -dim.y; y < dim.y + 1; y++)
@@ -46,7 +46,10 @@ namespace NodeResource {
         console.groupEnd();
 
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
-        ƒ.Loop.start();
+        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
+        ƒ.Time.game.setScale(10);
+
+        ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
 
         function update(_event: Event): void {
             ƒ.RenderManager.update();
