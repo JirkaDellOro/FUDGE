@@ -94,6 +94,7 @@ namespace Fudge {
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
+                    // TODO: DANGER! id changes internally in game when time is scaled!
                     Time.game.clearInterval(Loop.idIntervall);
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;

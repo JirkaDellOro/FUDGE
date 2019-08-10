@@ -27,9 +27,14 @@ namespace TimeLoop {
     }
 
     function handleButtonClick(_event: Event): void {
-        console.log("Button");
+        let timeout: number = Number((<HTMLInputElement>document.querySelector("input[name=timeout]")).value);
+        console.log("Timeout set to: " + timeout);
+        ƒ.Time.game.setTimeout(handleTimeout, timeout);
     }
-
+    function handleTimeout(): void {
+        let meter: HTMLMeterElement = document.querySelector("[name=event]");
+        meter.value = 1 + meter.value % 10;
+    }
     function handleFrame(_event: Event): void {
         let meter: HTMLMeterElement = document.querySelector("[name=frame]");
         meter.value = 1 + meter.value % 10;
@@ -45,7 +50,7 @@ namespace TimeLoop {
         time.value =
             String(date.getMinutes()).padStart(2, "0") + ":" +
             String(date.getSeconds()).padStart(2, "0") + ":" +
-            String(date.getMilliseconds()).padStart(4, "0");
+            String(date.getMilliseconds()).padStart(3, "0");
 
         window.requestAnimationFrame(loop);
     }

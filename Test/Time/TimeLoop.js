@@ -23,7 +23,13 @@ var TimeLoop;
         console.log("Scale set to: " + scale);
     }
     function handleButtonClick(_event) {
-        console.log("Button");
+        let timeout = Number(document.querySelector("input[name=timeout]").value);
+        console.log("Timeout set to: " + timeout);
+        ƒ.Time.game.setTimeout(handleTimeout, timeout);
+    }
+    function handleTimeout() {
+        let meter = document.querySelector("[name=event]");
+        meter.value = 1 + meter.value % 10;
     }
     function handleFrame(_event) {
         let meter = document.querySelector("[name=frame]");
@@ -38,7 +44,7 @@ var TimeLoop;
         time.value =
             String(date.getMinutes()).padStart(2, "0") + ":" +
                 String(date.getSeconds()).padStart(2, "0") + ":" +
-                String(date.getMilliseconds()).padStart(4, "0");
+                String(date.getMilliseconds()).padStart(3, "0");
         window.requestAnimationFrame(loop);
     }
 })(TimeLoop || (TimeLoop = {}));

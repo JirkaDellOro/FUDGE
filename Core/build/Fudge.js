@@ -4817,19 +4817,38 @@ var Fudge;
             this.timeout = _timeout;
             this.arguments = _arguments;
             this.startTimeReal = performance.now();
-            this.timeoutReal = this.timeout / _time.getScale();
             this.callback = _callback;
+            let scale = Math.abs(_time.getScale());
+            if (!scale) {
+                // Time is stopped, timer won't be active
+                this.active = false;
+                return;
+            }
             let id;
+            this.timeoutReal = this.timeout / scale;
             if (this.type == TIMER_TYPE.TIMEOUT) {
                 let callback = () => {
-                    _time.clearTimeout(id);
+                    _time.deleteTimerByInternalId(this.id);
                     _callback(_arguments);
                 };
-                id = window.setTimeout(callback, _timeout / _time.getScale());
+                id = window.setTimeout(callback, this.timeoutReal);
             }
             else
-                id = window.setInterval(_callback, _timeout / _time.getScale(), _arguments);
+                id = window.setInterval(_callback, this.timeoutReal, _arguments);
             this.id = id;
+            this.active = true;
+        }
+        clear() {
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                if (this.active)
+                    // save remaining time to timeout as new timeout for restart
+                    this.timeout = this.timeout * (1 - (performance.now() - this.startTimeReal) / this.timeoutReal);
+                window.clearTimeout(this.id);
+            }
+            else
+                // TODO: reusing timer starts interval anew. Should be remaining interval as timeout, then starting interval anew 
+                window.clearInterval(this.id);
+            this.active = false;
         }
     }
     /**
@@ -4840,7 +4859,8 @@ var Fudge;
     class Time extends EventTarget {
         constructor() {
             super();
-            this.timers = [];
+            this.timers = {};
+            this.idTimerNext = 0;
             this.start = performance.now();
             this.scale = 1.0;
             this.offset = 0.0;
@@ -4897,53 +4917,85 @@ var Fudge;
         }
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setTimeout(_callback, _timeout, ..._arguments) {
             return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
         }
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setInterval(_callback, _timeout, ..._arguments) {
             return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
         }
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearTimeout(_id) {
-            window.clearInterval(_id);
-            this.deleteTimer(_id);
-        }
-        clearInterval(_id) {
-            window.clearInterval(_id);
             this.deleteTimer(_id);
         }
         /**
-         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         * See Javascript documentation
+         * @param _id
+         */
+        clearInterval(_id) {
+            this.deleteTimer(_id);
+        }
+        /**
+         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers() {
             for (let id in this.timers) {
-                if (this.timers[id].type == TIMER_TYPE.TIMEOUT)
-                    this.clearTimeout(parseInt(id));
-                else
-                    this.clearInterval(parseInt(id));
+                this.deleteTimer(Number(id));
             }
         }
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
         rescaleAllTimers() {
-            for (let timer of this.timers) {
-                if (timer.type == TIMER_TYPE.TIMEOUT) {
-                    this.clearTimeout(timer.id);
-                    let timeoutLeft = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                    this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
-                }
-                else {
-                    this.clearInterval(timer.id);
-                    this.setTimer(timer.type, timer.callback, timer.timeout, timer.arguments);
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                timer.clear();
+                if (!this.scale)
+                    // Time has stopped, no need to replace cleared timers
+                    continue;
+                let timeout = timer.timeout;
+                // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
+                //     // for an active timeout-timer, calculate the remaining time to timeout
+                //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                let replace = new Timer(this, timer.type, timer.callback, timeout, timer.arguments);
+                this.timers[id] = replace;
+            }
+        }
+        /**
+         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * @param _id
+         */
+        deleteTimerByInternalId(_id) {
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                if (timer.id == _id) {
+                    timer.clear();
+                    delete this.timers[id];
                 }
             }
         }
         setTimer(_type, _callback, _timeout, _arguments) {
             let timer = new Timer(this, _type, _callback, _timeout, _arguments);
-            this.timers.push(timer);
-            return timer.id;
+            this.timers[++this.idTimerNext] = timer;
+            return this.idTimerNext;
         }
         deleteTimer(_id) {
-            for (let i = this.timers.length - 1; i >= 0; i--)
-                if (this.timers[i].id == _id)
-                    this.timers.splice(i, 1);
+            this.timers[_id].clear();
+            delete this.timers[_id];
         }
     }
     Time.gameTime = new Time();
@@ -5022,6 +5074,7 @@ var Fudge;
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
+                    // TODO: DANGER! id changes internally in game when time is scaled!
                     Fudge.Time.game.clearInterval(Loop.idIntervall);
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;

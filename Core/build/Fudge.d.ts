@@ -2028,6 +2028,7 @@ declare namespace Fudge {
         private offset;
         private lastCallToElapsed;
         private timers;
+        private idTimerNext;
         constructor();
         /**
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
@@ -2056,15 +2057,43 @@ declare namespace Fudge {
          * Automatically reset at every call to set(...) and setScale(...)
          */
         getElapsedSincePreviousCall(): number;
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearTimeout(_id: number): void;
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearInterval(_id: number): void;
         /**
-         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers(): void;
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
         rescaleAllTimers(): void;
+        /**
+         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * @param _id
+         */
+        deleteTimerByInternalId(_id: number): void;
         private setTimer;
         private deleteTimer;
     }
