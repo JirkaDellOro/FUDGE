@@ -1080,7 +1080,11 @@ declare namespace Fudge {
         /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
         NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
         /** dispatched to [[Time]] when it's scaling changed  */
-        TIME_SCALED = "timeScaled"
+        TIME_SCALED = "timeScaled",
+        /** dispatched to [[FileIo]] when a list of files has been loaded  */
+        FILE_LOADED = "fileLoaded",
+        /** dispatched to [[FileIo]] when a list of files has been saved */
+        FILE_SAVED = "fileSaved"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -2147,5 +2151,20 @@ declare namespace Fudge {
         private static loop;
         private static loopFrame;
         private static loopTime;
+    }
+}
+declare namespace Fudge {
+    interface MapFilenameToContent {
+        [filename: string]: string;
+    }
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends EventTargetStatic {
+        static load(): void;
+        static save(_toSave: MapFilenameToContent): void;
+        static handleFileSelect(_event: Event): Promise<void>;
+        static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
     }
 }

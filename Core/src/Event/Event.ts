@@ -34,7 +34,11 @@ namespace Fudge {
         /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
         NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
         /** dispatched to [[Time]] when it's scaling changed  */
-        TIME_SCALED = "timeScaled"
+        TIME_SCALED = "timeScaled",
+        /** dispatched to [[FileIo]] when a list of files has been loaded  */
+        FILE_LOADED = "fileLoaded",
+        /** dispatched to [[FileIo]] when a list of files has been saved */
+        FILE_SAVED = "fileSaved"
     }
 
     export const enum EVENT_POINTER {

@@ -5134,4 +5134,58 @@ var Fudge;
     Loop.syncWithAnimationFrame = false;
     Fudge.Loop = Loop;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends Fudge.EventTargetStatic {
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static load() {
+            let selector;
+            selector = document.createElement("input");
+            selector.setAttribute("type", "file");
+            selector.setAttribute("multiple", "true");
+            selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
+            selector.click();
+        }
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static save(_toSave) {
+            for (let filename in _toSave) {
+                let content = _toSave[filename];
+                let blob = new Blob([content], { type: "text/plain" });
+                let url = window.URL.createObjectURL(blob);
+                //*/ using anchor element for download
+                let downloader;
+                downloader = document.createElement("a");
+                downloader.setAttribute("href", url);
+                downloader.setAttribute("download", filename);
+                document.body.appendChild(downloader);
+                downloader.click();
+                document.body.removeChild(downloader);
+                window.URL.revokeObjectURL(url);
+            }
+            let event = new CustomEvent("fileSaved" /* FILE_SAVED */, { detail: { mapFilenameToContent: _toSave } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async handleFileSelect(_event) {
+            let fileList = _event.target.files;
+            if (fileList.length == 0)
+                return;
+            let loaded = {};
+            await FileIoBrowserLocal.loadFiles(fileList, loaded);
+            let event = new CustomEvent("fileLoaded" /* FILE_LOADED */, { detail: { mapFilenameToContent: loaded } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async loadFiles(_fileList, _loaded) {
+            for (let filename in _fileList) {
+                let file = _fileList[filename];
+                const content = await new Response(file).text();
+                _loaded[filename] = content;
+            }
+        }
+    }
+    Fudge.FileIoBrowserLocal = FileIoBrowserLocal;
+})(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

@@ -142,5 +142,11 @@ var Scenes;
         }
     }
     Scenes.dollyViewportCamera = dollyViewportCamera;
+    function save(_filename, _json) {
+        let content = ƒ.Serializer.stringify(_json);
+        let map = { [_filename]: content };
+        ƒ.FileIoBrowserLocal.save(map);
+    }
+    Scenes.save = save;
 })(Scenes || (Scenes = {}));
 //# sourceMappingURL=Scenes.js.map
