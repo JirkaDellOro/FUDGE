@@ -9,9 +9,6 @@ function createWindow() {
     window = new electron_1.BrowserWindow({
         width: 1920,
         height: 1080,
-        webPreferences: {
-            nodeIntegration: true,
-        },
     });
     window.loadURL(url.format({
         pathname: path.join(__dirname, 'app.html'),

@@ -91,7 +91,8 @@ namespace UI {
         let clrCoffee: Fudge.Color = new Fudge.Color(0.35, 0.17, 0.03, 1);
         let coatCoffee: Fudge.CoatColored = new Fudge.CoatColored(clrCoffee);
         let mtrCoffee: Fudge.Material = new Fudge.Material("Coffee", Fudge.ShaderUniColor, coatCoffee);
-        let nodeCube: Fudge.Node;
+        let nodeCube: Fudge.Node = new Fudge.Node("Cube");
+        console.log(nodeCube);
         let cmpMesh: Fudge.ComponentMesh = new Fudge.ComponentMesh(meshCube);
         let cmpMaterial: Fudge.ComponentMaterial = new Fudge.ComponentMaterial(mtrCoffee);
         let cmpTransform: Fudge.ComponentTransform = new Fudge.ComponentTransform();
