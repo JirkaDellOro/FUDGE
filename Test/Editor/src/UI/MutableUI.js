@@ -1,6 +1,6 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
-var UI;
-(function (UI) {
+var MoniUI;
+(function (MoniUI) {
     class MutableUI {
         constructor(mutable) {
             this.timeUpdate = 190;
@@ -40,6 +40,6 @@ var UI;
             }
         }
     }
-    UI.MutableUI = MutableUI;
-})(UI || (UI = {}));
+    MoniUI.MutableUI = MutableUI;
+})(MoniUI || (MoniUI = {}));
 //# sourceMappingURL=MutableUI.js.map

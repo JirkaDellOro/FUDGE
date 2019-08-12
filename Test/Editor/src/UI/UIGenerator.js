@@ -1,6 +1,6 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
-var UI;
-(function (UI) {
+var MoniUI;
+(function (MoniUI) {
     class UIGenerator {
         static createFromMutator(_mutable, element) {
             let name = _mutable.constructor.name;
@@ -109,7 +109,7 @@ var UI;
         static createStepperElement(_id, _parent, params = {}) {
             if (params._value == undefined)
                 params._value = 0;
-            let stepper = new UI.Stepper(_id, { value: params._value });
+            let stepper = new MoniUI.Stepper(_id, { value: params._value });
             // if(params._mutable != null)
             //     stepper.addEventListener("input", function(_event:Event){
             //         let mutator:ƒ.Mutator =  params._mutable.getMutator();
@@ -142,6 +142,6 @@ var UI;
             }
         }
     }
-    UI.UIGenerator = UIGenerator;
-})(UI || (UI = {}));
+    MoniUI.UIGenerator = UIGenerator;
+})(MoniUI || (MoniUI = {}));
 //# sourceMappingURL=UIGenerator.js.map

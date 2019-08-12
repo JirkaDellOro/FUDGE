@@ -1,4 +1,4 @@
-namespace UI {
+namespace MoniUI {
     import ƒ = Fudge;
 
     export interface ParamsCamera { aspect?: number; fieldOfView?: number; }
@@ -104,7 +104,7 @@ namespace UI {
     }
 
     export class FramingScaled extends FieldSet<Size> {
-        result: UI.Rectangle;
+        result: MoniUI.Rectangle;
 
         constructor(_name: string = "FramingScaled") {
             super(_name);
@@ -128,7 +128,7 @@ namespace UI {
         constructor(_name: string = "FramingComplex") {
             super(_name);
             this.values = { Result: {}, Padding: {}, Margin: {} };
-            let result: UI.Rectangle = new Rectangle("Result");
+            let result: MoniUI.Rectangle = new Rectangle("Result");
             result.disableAll(true);
             this.appendChild(result);
             this.appendChild(new Border("Padding", 1));

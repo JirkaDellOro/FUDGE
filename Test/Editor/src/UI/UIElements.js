@@ -1,5 +1,5 @@
-var UI;
-(function (UI) {
+var MoniUI;
+(function (MoniUI) {
     class FieldSet extends HTMLFieldSetElement {
         constructor(_name = "FieldSet") {
             super();
@@ -29,7 +29,7 @@ var UI;
             }
         }
     }
-    UI.FieldSet = FieldSet;
+    MoniUI.FieldSet = FieldSet;
     class Stepper extends HTMLSpanElement {
         constructor(_label, params = {}) {
             super();
@@ -42,7 +42,7 @@ var UI;
             this.appendChild(stepper);
         }
     }
-    UI.Stepper = Stepper;
+    MoniUI.Stepper = Stepper;
     class Border extends FieldSet {
         constructor(_name = "Border", _step = 1) {
             super(_name);
@@ -53,7 +53,7 @@ var UI;
             this.appendChild(new Stepper("bottom", { step: _step }));
         }
     }
-    UI.Border = Border;
+    MoniUI.Border = Border;
     class Rectangle extends FieldSet {
         constructor(_name = "Rectangle") {
             super(_name);
@@ -82,7 +82,7 @@ var UI;
             super.disable({ x: true, y: true, width: true, height: true });
         }
     }
-    UI.Rectangle = Rectangle;
+    MoniUI.Rectangle = Rectangle;
     class Camera extends FieldSet {
         constructor(_name = "Camera") {
             super(_name);
@@ -91,7 +91,7 @@ var UI;
             this.appendChild(new Stepper("aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
         }
     }
-    UI.Camera = Camera;
+    MoniUI.Camera = Camera;
     class FramingScaled extends FieldSet {
         constructor(_name = "FramingScaled") {
             super(_name);
@@ -109,7 +109,7 @@ var UI;
                 super.set(_values);
         }
     }
-    UI.FramingScaled = FramingScaled;
+    MoniUI.FramingScaled = FramingScaled;
     class FramingComplex extends FieldSet {
         constructor(_name = "FramingComplex") {
             super(_name);
@@ -140,12 +140,12 @@ var UI;
             }
         }
     }
-    UI.FramingComplex = FramingComplex;
+    MoniUI.FramingComplex = FramingComplex;
     customElements.define("ui-stepper", Stepper, { extends: "span" });
     customElements.define("ui-framingcomplex", FramingComplex, { extends: "fieldset" });
     customElements.define("ui-scale", FramingScaled, { extends: "fieldset" });
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
-})(UI || (UI = {}));
+})(MoniUI || (MoniUI = {}));
 //# sourceMappingURL=UIElements.js.map

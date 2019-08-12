@@ -1,5 +1,5 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
-namespace UI {
+namespace MoniUI {
     import ƒ = Fudge;
 
     export class UIGenerator {
