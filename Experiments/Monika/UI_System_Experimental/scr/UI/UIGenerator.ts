@@ -3,24 +3,20 @@ namespace UI {
     import ƒ = Fudge;
 
     export class UIGenerator {
-        public static createFromMutator(mutable: ƒ.Mutable, element: HTMLElement) {
-            let name: string = mutable.constructor.name;
-            let types: ƒ.MutatorAttributeTypes;
-            let mutator: ƒ.Mutator = mutable.getMutator();
-            let fieldset = UIGenerator.createFieldset(name, element);
-
-            types = mutable.getMutatorAttributeTypes(mutator);
-            UIGenerator.generateUI(mutator, types, fieldset);
-        }
-
-        private static generateUI(_obj: ƒ.Mutator, _types: ƒ.MutatorAttributeTypes, _parent: HTMLElement): void {
+        public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement):FormData {
+            let name: string = _mutable.constructor.name;
+            let _types: ƒ.MutatorAttributeTypes;
+            let mutator: ƒ.Mutator = _mutable.getMutator();
+            let _parent = UIGenerator.createFieldset(name, element);
+            let data:FormData;
+            _types = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in _types) {
                 let type: Object = _types[key];
-                let value: string = _obj[key].toString();
+                let value: string = mutator[key].toString();
                 if (type instanceof Object) {
                     //Type is Enum
                     UIGenerator.createLabelElement(key, _parent);
-                    UIGenerator.createDropdown(type, value, _parent)
+                    UIGenerator.createDropdown(key, type, value, _parent);
                 }
                 else {
                     switch (type) {
@@ -28,7 +24,8 @@ namespace UI {
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
                             let num_value: number = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: num_value });
+                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable});
+
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -44,9 +41,12 @@ namespace UI {
                     }
                 }
             }
+            return data;
         }
-        public static createDropdown(_content: Object, _value: string, _parent: HTMLElement, _cssClass?: string) {
+        public static createDropdown(_id:string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string):HTMLSelectElement {
             let dropdown: HTMLSelectElement = document.createElement("select");
+            dropdown.id = _id;
+            dropdown.name = _id;
             for (let value in _content) {
                 let entry: HTMLOptionElement = document.createElement("option");
                 entry.text = value;
@@ -60,7 +60,7 @@ namespace UI {
             return dropdown;
         }
 
-        public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLElement {
+        public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
             let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
             let legend: HTMLLegendElement = document.createElement("legend");
             legend.innerHTML = _legend;
@@ -91,34 +91,45 @@ namespace UI {
             return label;
         }
 
-        public static createTextElement(_id: string, _parent: HTMLElement, params: { _value?: string, _cssClass?: string } = {}): HTMLElement {
+        public static createTextElement(_id: string, _parent: HTMLElement, params: { _value?: string, _cssClass?: string } = {}): HTMLInputElement {
             let valueInput: HTMLInputElement = document.createElement("input");
             if (params._value == undefined)
                 params._value = "";
             if (!params._cssClass == undefined)
                 valueInput.classList.add(params._cssClass);
             valueInput.id = _id;
+            valueInput.name = _id;
             valueInput.value = params._value;
             _parent.appendChild(valueInput);
 
             return valueInput;
         }
 
-        public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _cssClass?: string): HTMLElement {
+        public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
             let valueInput: HTMLInputElement = document.createElement("input");
             valueInput.type = "checkbox";
             valueInput.checked = _value;
             valueInput.classList.add(_cssClass);
+            valueInput.name = _id;
             valueInput.id = _id;
             _parent.appendChild(valueInput);
             return valueInput;
         }
 
-        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string } = {}) {
+        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?:ƒ.Mutable } = {}):HTMLSpanElement {
 
             if (params._value == undefined)
                 params._value = 0;
-            let stepper: UI.Stepper = new Stepper(_id, { value: params._value });
+            let stepper: HTMLSpanElement = new Stepper(_id, { value: params._value });
+            // if(params._mutable != null)
+            //     stepper.addEventListener("input", function(_event:Event){
+                    
+            //         let mutator:ƒ.Mutator =  params._mutable.getMutator();
+            //         let stepperValueHolder:HTMLInputElement = <HTMLInputElement>stepper.firstChild;
+            //         let inputValue:String = stepperValueHolder.value;
+            //         mutator[_id] = inputValue;
+            //         params._mutable.mutate(mutator); 
+            //     })
             _parent.append(stepper);
             return stepper;
         }

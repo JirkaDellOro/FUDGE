@@ -3,13 +3,14 @@ var UI;
 (function (UI) {
     class MutableUI {
         constructor(mutable) {
-            this.timeUpdate = 1000;
-            this.updateUI = (e) => {
-                console.log(e);
+            this.timeUpdate = 190;
+            this.updateUI = (_e) => {
+                console.log(_e);
                 this.mutable.mutate(this.mutator);
             };
-            this.updateMutator = (e) => {
+            this.updateMutator = (_e) => {
                 this.mutable.updateMutator(this.mutator);
+                this.fillById(this.mutator, this.root);
             };
             this.root = document.createElement("div");
             this.mutable = mutable;
@@ -17,12 +18,23 @@ var UI;
             window.setInterval(this.updateMutator, this.timeUpdate);
             this.root.addEventListener("input", this.updateUI);
         }
-        fillById(mutator) {
-            for (let key in mutator) {
-                let children = this.root.children;
-                for (let child of children) {
+        fillById(_mutator, _root) {
+            let children = _root.children;
+            for (let child of children) {
+                if (child.children.length > 0) {
+                    this.fillById(_mutator, child);
+                }
+                for (let key in _mutator) {
                     if (child.id == key) {
-                        child.nodeValue = mutator[key].toString();
+                        let type = child.getAttribute("type");
+                        if (type == "checkbox") {
+                            let checkbox = child;
+                            checkbox.checked = _mutator[key];
+                        }
+                        else {
+                            let input = child;
+                            input.value = _mutator[key];
+                        }
                     }
                 }
             }

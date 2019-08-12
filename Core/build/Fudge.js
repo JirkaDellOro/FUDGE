@@ -8,6 +8,164 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var Fudge;
 (function (Fudge) {
     /**
+     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
+     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * ```plaintext
+     *  [Serializable] → (serialize) → [Serialization] → (stringify)
+     *                                                        ↓
+     *                                                    [String]
+     *                                                        ↓
+     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     * ```
+     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * ```plaintext
+     * {
+     *      namespaceName.className: {
+     *          propertyName: propertyValue,
+     *          ...,
+     *          propertyNameOfReference: SerializationOfTheReferencedObject,
+     *          ...,
+     *          constructorNameOfSuperclass: SerializationOfSuperClass
+     *      }
+     * }
+     * ```
+     * Since the instance of the superclass is created automatically when an object is created,
+     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
+     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
+     */
+    class Serializer {
+        /**
+         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * @param _namespace
+         */
+        static registerNamespace(_namespace) {
+            for (let name in Serializer.namespaces)
+                if (Serializer.namespaces[name] == _namespace)
+                    return;
+            let name = Serializer.findNamespaceIn(_namespace, window);
+            if (!name)
+                for (let parentName in Serializer.namespaces) {
+                    name = Serializer.findNamespaceIn(_namespace, Serializer.namespaces[parentName]);
+                    if (name) {
+                        name = parentName + "." + name;
+                        break;
+                    }
+                }
+            if (!name)
+                throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
+            Serializer.namespaces[name] = _namespace;
+        }
+        /**
+         * Returns a javascript object representing the serializable FUDGE-object given,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         */
+        static serialize(_object) {
+            let serialization = {};
+            // TODO: save the namespace with the constructors name
+            // serialization[_object.constructor.name] = _object.serialize();
+            let path = this.getFullPath(_object);
+            if (!path)
+                throw new Error(`Namespace of serializable object of type ${_object.constructor.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
+            serialization[path] = _object.serialize();
+            return serialization;
+            // return _object.serialize();
+        }
+        /**
+         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
+         * including attached components, children, superclass-objects
+         * @param _serialization
+         */
+        static deserialize(_serialization) {
+            let reconstruct;
+            try {
+                // loop constructed solely to access type-property. Only one expected!
+                for (let path in _serialization) {
+                    // reconstruct = new (<General>Fudge)[typeName];
+                    reconstruct = Serializer.reconstruct(path);
+                    reconstruct.deserialize(_serialization[path]);
+                    return reconstruct;
+                }
+            }
+            catch (message) {
+                throw new Error("Deserialization failed: " + message);
+            }
+            return null;
+        }
+        //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
+        static prettify(_json) { return _json; }
+        /**
+         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * @param _serialization
+         */
+        static stringify(_serialization) {
+            // adjustments to serialization can be made here before stringification, if desired
+            let json = JSON.stringify(_serialization, null, 2);
+            let pretty = Serializer.prettify(json);
+            return pretty;
+        }
+        /**
+         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * @param _json
+         */
+        static parse(_json) {
+            return JSON.parse(_json);
+        }
+        /**
+         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
+         * @param _path
+         */
+        static reconstruct(_path) {
+            let typeName = _path.substr(_path.lastIndexOf(".") + 1);
+            let namespace = Serializer.getNamespace(_path);
+            if (!namespace)
+                throw new Error(`Namespace of serializable object of type ${typeName} not found. Maybe the namespace hasn't been registered?`);
+            let reconstruction = new namespace[typeName];
+            return reconstruction;
+        }
+        /**
+         * Returns the full path to the class of the object, if found in the registered namespaces
+         * @param _object
+         */
+        static getFullPath(_object) {
+            let typeName = _object.constructor.name;
+            // Debug.log("Searching namespace of: " + typeName);
+            for (let namespaceName in Serializer.namespaces) {
+                let found = Serializer.namespaces[namespaceName][typeName];
+                if (found && _object instanceof found)
+                    return namespaceName + "." + typeName;
+            }
+            return null;
+        }
+        /**
+         * Returns the namespace-object defined within the full path, if registered
+         * @param _path
+         */
+        static getNamespace(_path) {
+            let namespaceName = _path.substr(0, _path.lastIndexOf("."));
+            return Serializer.namespaces[namespaceName];
+        }
+        /**
+         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
+         * @param _namespace
+         * @param _parent
+         */
+        static findNamespaceIn(_namespace, _parent) {
+            for (let prop in _parent)
+                if (_parent[prop] == _namespace)
+                    return prop;
+            return null;
+        }
+    }
+    /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
+    Serializer.namespaces = { "ƒ": Fudge };
+    Fudge.Serializer = Serializer;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
      * thus providing and using interfaces created at runtime
      */
@@ -104,6 +262,346 @@ var Fudge;
         }
     }
     Fudge.Mutable = Mutable;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     * Animation Class to hold all required Objects that are part of an Animation.
+     * Also holds functions to play said Animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class Animation extends Fudge.Mutable {
+        constructor(_name, _animStructure = {}, _fps = 60) {
+            super();
+            this.totalTime = 0;
+            this.labels = {};
+            this.events = {};
+            this.fps = 60;
+            this.sps = 10;
+            this.animationStructure = {};
+            this.name = _name;
+            this.animationStructure = _animStructure;
+            this.fps = _fps;
+            this.calculateTotalTime();
+        }
+        getMutated(_time, _direction) {
+            let m = {};
+            m = this.traverseStructureForMutator(this.animationStructure, m, _time);
+            return m;
+        }
+        get getLabels() {
+            let en = new Enumerator(this.labels);
+            return en;
+        }
+        calculateTotalTime() {
+            this.totalTime = 0;
+            this.traverseStructureForTime(this.animationStructure);
+        }
+        //#region transfer
+        serialize() {
+            let s = {
+                idResource: this.idResource,
+                name: this.name,
+                labels: {},
+                events: {},
+                fps: this.fps,
+                sps: this.sps
+            };
+            for (let name in this.labels) {
+                s.labels[name] = this.labels[name];
+            }
+            for (let name in this.events) {
+                s.events[name] = this.events[name];
+            }
+            s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
+            return s;
+        }
+        deserialize(_serialization) {
+            this.idResource = _serialization.idResource;
+            this.name = _serialization.name;
+            this.fps = _serialization.fps;
+            this.sps = _serialization.sps;
+            this.labels = {};
+            for (let name in _serialization.labels) {
+                this.labels[name] = _serialization.labels[name];
+            }
+            this.events = {};
+            for (let name in _serialization.events) {
+                this.events[name] = _serialization.events[name];
+            }
+            this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
+            this.calculateTotalTime();
+            return this;
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.totalTime;
+        }
+        traverseStructureForSerialisation(_serialization, _structure) {
+            for (let n in _structure) {
+                if (_structure[n] instanceof Fudge.AnimationSequence) {
+                    _serialization[n] = _structure[n].serialize();
+                }
+                else {
+                    _serialization[n] = this.traverseStructureForSerialisation({}, _structure[n]);
+                }
+            }
+            return _serialization;
+        }
+        traverseStructureForDeserialisation(_serialization, _structure) {
+            for (let n in _serialization) {
+                if (_serialization[n].animationSequence) {
+                    let animSeq = new Fudge.AnimationSequence();
+                    _structure[n] = animSeq.deserialize(_serialization[n]);
+                }
+                else {
+                    _structure[n] = this.traverseStructureForDeserialisation(_serialization[n], {});
+                }
+            }
+            return _structure;
+        }
+        //#endregion
+        traverseStructureForMutator(_structure, _newMutator, _time) {
+            for (let n in _structure) {
+                if (_structure[n] instanceof Fudge.AnimationSequence) {
+                    _newMutator[n] = _structure[n].evaluate(_time);
+                }
+                else {
+                    _newMutator[n] = this.traverseStructureForMutator(_structure[n], {}, _time);
+                }
+            }
+            return _newMutator;
+        }
+        traverseStructureForTime(_structure) {
+            for (let n in _structure) {
+                if (_structure[n] instanceof Fudge.AnimationSequence) {
+                    let sequence = _structure[n];
+                    if (sequence.keys.length > 0) {
+                        let sequenceTime = sequence.keys[sequence.keys.length - 1].time;
+                        this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
+                    }
+                }
+                else {
+                    this.traverseStructureForTime(_structure[n]);
+                }
+            }
+        }
+    }
+    Fudge.Animation = Animation;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     * Calculates the values between [[AnimationKeys]]
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationFunction {
+        constructor(_keyIn, _keyOut = null) {
+            this.a = 0;
+            this.b = 0;
+            this.c = 0;
+            this.d = 0;
+            this.keyIn = _keyIn;
+            this.keyOut = _keyOut;
+            this.calculate();
+        }
+        evaluate(_time) {
+            _time -= this.keyIn.time;
+            let time2 = _time * _time;
+            let time3 = time2 * _time;
+            // console.log(this.a * time3 , this.b * time2 , this.c * _time , this.d);
+            return this.a * time3 + this.b * time2 + this.c * _time + this.d;
+        }
+        set setKeyIn(_keyIn) {
+            this.keyIn = _keyIn;
+            this.calculate();
+        }
+        set setKeyOut(_keyOut) {
+            this.keyOut = _keyOut;
+            this.calculate();
+        }
+        calculate() {
+            if (!this.keyIn) {
+                this.d = this.c = this.b = this.a = 0;
+                return;
+            }
+            if (!this.keyOut || this.keyIn.constant) {
+                this.d = this.keyIn.value;
+                this.c = this.b = this.a = 0;
+                return;
+            }
+            let x1 = this.keyOut.time - this.keyIn.time;
+            this.d = this.keyIn.value;
+            this.c = this.keyIn.getSlopeOut;
+            this.a = (-x1 * (this.keyIn.getSlopeOut + this.keyOut.getSlopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
+            this.b = (this.keyOut.getSlopeIn - this.keyIn.getSlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
+        }
+    }
+    Fudge.AnimationFunction = AnimationFunction;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationKey extends Fudge.Mutable {
+        constructor(_time = 0, _value = 0, _slopeIn = 0, _slopeOut = 0) {
+            super();
+            this.constant = false;
+            this.slopeIn = 0;
+            this.slopeOut = 0;
+            this.time = _time;
+            this.value = _value;
+            this.slopeIn = _slopeIn;
+            this.slopeOut = _slopeOut;
+            this.broken = this.slopeIn != -this.slopeOut;
+        }
+        get getSlopeIn() {
+            return this.slopeIn;
+        }
+        get getSlopeOut() {
+            return this.slopeOut;
+        }
+        set setSlopeIn(_slope) {
+            this.slopeIn = _slope;
+            this.functionIn.calculate();
+        }
+        set setSlopeOut(_slope) {
+            this.slopeOut = _slope;
+            this.functionOut.calculate();
+        }
+        static sort(_a, _b) {
+            return _a.time - _b.time;
+        }
+        //#region transfer
+        serialize() {
+            let s = {};
+            // s[this.constructor.name] = {
+            //   time : this.time,
+            //   value : this.value,
+            //   slopeIn : this.slopeIn,
+            //   slopeOut : this.slopeOut,
+            //   constant : this.constant
+            // };
+            s.time = this.time;
+            s.value = this.value;
+            s.slopeIn = this.slopeIn;
+            s.slopeOut = this.slopeOut;
+            s.constant = this.constant;
+            return s;
+        }
+        deserialize(_serialization) {
+            this.time = _serialization.time;
+            this.value = _serialization.value;
+            this.slopeIn = _serialization.slopeIn;
+            this.slopeOut = _serialization.slopeOut;
+            this.constant = _serialization.constant;
+            this.broken = this.slopeIn != -this.slopeOut;
+            return this;
+        }
+        getMutator() {
+            return this.serialize();
+        }
+        reduceMutator(_mutator) {
+            //
+        }
+    }
+    Fudge.AnimationKey = AnimationKey;
+})(Fudge || (Fudge = {}));
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+var Fudge;
+/// <reference path="../Transfer/Serializer.ts"/>
+/// <reference path="../Transfer/Mutable.ts"/>
+(function (Fudge) {
+    /**
+     *
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class AnimationSequence extends Fudge.Mutable {
+        constructor() {
+            super(...arguments);
+            this.keys = [];
+        }
+        evaluate(_time) {
+            // console.log(this.keys.length == 1 || this.keys[0].time < _time);
+            if (this.keys.length == 1 || this.keys[0].time >= _time)
+                return this.keys[0].value;
+            if (this.keys.length == 0)
+                return 0;
+            for (let i = 0; i < this.keys.length - 1; i++) {
+                if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
+                    return this.keys[i].functionOut.evaluate(_time);
+                }
+            }
+            return this.keys[this.keys.length - 1].value;
+        }
+        addKey(_key) {
+            this.keys.push(_key);
+            this.keys.sort(Fudge.AnimationKey.sort);
+            this.regenerateFunctions();
+        }
+        removeKey(_key) {
+            for (let i = 0; i < this.keys.length; i++) {
+                if (this.keys[i] == _key) {
+                    this.keys.splice(i, 1);
+                    this.regenerateFunctions();
+                    return;
+                }
+            }
+        }
+        //#region transfer
+        serialize() {
+            let s = {
+                keys: [],
+                animationSequence: true
+            };
+            for (let i = 0; i < this.keys.length; i++) {
+                s.keys[i] = this.keys[i].serialize();
+            }
+            return s;
+        }
+        deserialize(_serialization) {
+            for (let i = 0; i < _serialization.keys.length; i++) {
+                // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));
+                let k = new Fudge.AnimationKey();
+                k.deserialize(_serialization.keys[i]);
+                this.keys[i] = k;
+            }
+            this.regenerateFunctions();
+            return this;
+        }
+        reduceMutator(_mutator) {
+            //
+        }
+        //#endregion
+        regenerateFunctions() {
+            for (let i = 0; i < this.keys.length; i++) {
+                let f = new Fudge.AnimationFunction(this.keys[i]);
+                this.keys[i].functionOut = f;
+                if (i == this.keys.length - 1) {
+                    f.setKeyOut = this.keys[0];
+                    this.keys[0].functionIn = f;
+                    break;
+                }
+                f.setKeyOut = this.keys[i + 1];
+                this.keys[i + 1].functionIn = f;
+            }
+        }
+    }
+    Fudge.AnimationSequence = AnimationSequence;
 })(Fudge || (Fudge = {}));
 //<reference path="../Coats/Coat.ts"/>
 var Fudge;
@@ -540,164 +1038,6 @@ var Fudge;
     ], CoatTextured);
     Fudge.CoatTextured = CoatTextured;
 })(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    /**
-     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
-     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
-     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
-     * ```plaintext
-     *  [Serializable] → (serialize) → [Serialization] → (stringify)
-     *                                                        ↓
-     *                                                    [String]
-     *                                                        ↓
-     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
-     * ```
-     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
-     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
-     * ```plaintext
-     * {
-     *      namespaceName.className: {
-     *          propertyName: propertyValue,
-     *          ...,
-     *          propertyNameOfReference: SerializationOfTheReferencedObject,
-     *          ...,
-     *          constructorNameOfSuperclass: SerializationOfSuperClass
-     *      }
-     * }
-     * ```
-     * Since the instance of the superclass is created automatically when an object is created,
-     * the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
-     * The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.
-     */
-    class Serializer {
-        /**
-         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
-         * @param _namespace
-         */
-        static registerNamespace(_namespace) {
-            for (let name in Serializer.namespaces)
-                if (Serializer.namespaces[name] == _namespace)
-                    return;
-            let name = Serializer.findNamespaceIn(_namespace, window);
-            if (!name)
-                for (let parentName in Serializer.namespaces) {
-                    name = Serializer.findNamespaceIn(_namespace, Serializer.namespaces[parentName]);
-                    if (name) {
-                        name = parentName + "." + name;
-                        break;
-                    }
-                }
-            if (!name)
-                throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
-            Serializer.namespaces[name] = _namespace;
-        }
-        /**
-         * Returns a javascript object representing the serializable FUDGE-object given,
-         * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the [[Serializable]] interface
-         */
-        static serialize(_object) {
-            let serialization = {};
-            // TODO: save the namespace with the constructors name
-            // serialization[_object.constructor.name] = _object.serialize();
-            let path = this.getFullPath(_object);
-            if (!path)
-                throw new Error(`Namespace of serializable object of type ${_object.constructor.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
-            serialization[path] = _object.serialize();
-            return serialization;
-            // return _object.serialize();
-        }
-        /**
-         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
-         * including attached components, children, superclass-objects
-         * @param _serialization
-         */
-        static deserialize(_serialization) {
-            let reconstruct;
-            try {
-                // loop constructed solely to access type-property. Only one expected!
-                for (let path in _serialization) {
-                    // reconstruct = new (<General>Fudge)[typeName];
-                    reconstruct = Serializer.reconstruct(path);
-                    reconstruct.deserialize(_serialization[path]);
-                    return reconstruct;
-                }
-            }
-            catch (message) {
-                throw new Error("Deserialization failed: " + message);
-            }
-            return null;
-        }
-        //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
-        static prettify(_json) { return _json; }
-        /**
-         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
-         * @param _serialization
-         */
-        static stringify(_serialization) {
-            // adjustments to serialization can be made here before stringification, if desired
-            let json = JSON.stringify(_serialization, null, 2);
-            let pretty = Serializer.prettify(json);
-            return pretty;
-        }
-        /**
-         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
-         * @param _json
-         */
-        static parse(_json) {
-            return JSON.parse(_json);
-        }
-        /**
-         * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
-         * @param _path
-         */
-        static reconstruct(_path) {
-            let typeName = _path.substr(_path.lastIndexOf(".") + 1);
-            let namespace = Serializer.getNamespace(_path);
-            if (!namespace)
-                throw new Error(`Namespace of serializable object of type ${typeName} not found. Maybe the namespace hasn't been registered?`);
-            let reconstruction = new namespace[typeName];
-            return reconstruction;
-        }
-        /**
-         * Returns the full path to the class of the object, if found in the registered namespaces
-         * @param _object
-         */
-        static getFullPath(_object) {
-            let typeName = _object.constructor.name;
-            // Debug.log("Searching namespace of: " + typeName);
-            for (let namespaceName in Serializer.namespaces) {
-                let found = Serializer.namespaces[namespaceName][typeName];
-                if (found && _object instanceof found)
-                    return namespaceName + "." + typeName;
-            }
-            return null;
-        }
-        /**
-         * Returns the namespace-object defined within the full path, if registered
-         * @param _path
-         */
-        static getNamespace(_path) {
-            let namespaceName = _path.substr(0, _path.lastIndexOf("."));
-            return Serializer.namespaces[namespaceName];
-        }
-        /**
-         * Finds the namespace-object in properties of the parent-object (e.g. window), if present
-         * @param _namespace
-         * @param _parent
-         */
-        static findNamespaceIn(_namespace, _parent) {
-            for (let prop in _parent)
-                if (_parent[prop] == _namespace)
-                    return prop;
-            return null;
-        }
-    }
-    /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-    Serializer.namespaces = { "ƒ": Fudge };
-    Fudge.Serializer = Serializer;
-})(Fudge || (Fudge = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 var Fudge;
@@ -771,6 +1111,221 @@ var Fudge;
         }
     }
     Fudge.Component = Component;
+})(Fudge || (Fudge = {}));
+/// <reference path="Component.ts"/>
+var Fudge;
+/// <reference path="Component.ts"/>
+(function (Fudge) {
+    /**
+     * Holds different playmodes the animation uses to play back its animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    let ANIMATION_PLAYMODE;
+    (function (ANIMATION_PLAYMODE) {
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["INHERIT"] = 0] = "INHERIT";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["LOOP"] = 1] = "LOOP";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["PINGPONG"] = 2] = "PINGPONG";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["PLAYONCE"] = 3] = "PLAYONCE";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["PLAYONCESTOPAFTER"] = 4] = "PLAYONCESTOPAFTER";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["REVERSELOOP"] = 5] = "REVERSELOOP";
+        ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["STOP"] = 6] = "STOP";
+    })(ANIMATION_PLAYMODE = Fudge.ANIMATION_PLAYMODE || (Fudge.ANIMATION_PLAYMODE = {}));
+    let ANIMATION_PLAYBACK;
+    (function (ANIMATION_PLAYBACK) {
+        /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+        ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["TIMEBASED_CONTINOUS"] = 0] = "TIMEBASED_CONTINOUS";
+        /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+        ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["TIMEBASED_RASTERED_TO_FPS"] = 1] = "TIMEBASED_RASTERED_TO_FPS";
+        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+        ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["FRAMEBASED"] = 2] = "FRAMEBASED";
+    })(ANIMATION_PLAYBACK = Fudge.ANIMATION_PLAYBACK || (Fudge.ANIMATION_PLAYBACK = {}));
+    /**
+     * Holds an [[Animation]] and controls it.
+     * @authors Lukas Scheuerle, HFU, 2019
+     */
+    class ComponentAnimator extends Fudge.Component {
+        // private lastDirection: number = 0;
+        // private startTime: number = 0;
+        // private timeAtStart: number = 0;
+        constructor(_animation, _playmode, _playback) {
+            super();
+            this.speedScalesWithGlobalSpeed = true;
+            this.speedScale = 1;
+            this.lastTime = -1;
+            this.lastFrameTime = -1;
+            this.animation = _animation;
+            this.playmode = _playmode;
+            this.playback = _playback;
+            this.time = new Fudge.Time();
+            //TODO: update animation total time when loading a different animation?
+            this.animation.calculateTotalTime();
+            this.lastFrameTime = -(1000 / this.animation.fps);
+            this.jumpTo(0, 0);
+            //TODO: register updateAnimatioStart() properly into the gameloop
+            Fudge.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.updateAnimationLoop.bind(this));
+            Fudge.Time.game.addEventListener("timeScaled" /* TIME_SCALED */, this.updateScale.bind(this));
+        }
+        set speed(_s) {
+            this.speedScale = _s;
+            this.updateScale();
+        }
+        jumpTo(_time, _currentTime) {
+            _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
+            //TODO: maybe this can be outsourced to the time class as well.
+            this.time.set(_time);
+            // this.startTime = _time;
+            // this.timeAtStart = _currentTime;
+            // if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
+            //   this.lastTime = _currentTime;
+        }
+        //#region updateAnimation
+        updateAnimationLoop() {
+            switch (this.playback) {
+                case ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS:
+                    this.updateAnimationContinous();
+                    break;
+                case ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS:
+                    this.updateAnimationRastered();
+                    break;
+                case ANIMATION_PLAYBACK.FRAMEBASED:
+                    this.updateAnimationFramebased();
+                    break;
+            }
+        }
+        updateAnimationContinous() {
+            let time = this.time.get();
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
+            this.updateAnimation(time, direction);
+            //TODO: fix backwards
+            this.checkEventBetween(this.lastTime, time);
+            this.lastTime = time;
+        }
+        updateAnimationRastered() {
+            let time = this.time.get();
+            //TODO: fix backwards
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
+            let timePerFrame = 1000 / this.animation.fps;
+            time = time - (time % timePerFrame);
+            if (this.lastFrameTime != time) {
+                // TODO: possible optimisation: only update animation if next Frame has been reached
+                this.updateAnimation(time, direction);
+                this.checkEventBetween(time, time + timePerFrame);
+                this.lastFrameTime = time;
+            }
+        }
+        updateAnimationFramebased() {
+            let timePerFrame = 1000 / this.animation.fps;
+            let time = this.lastFrameTime + timePerFrame;
+            let direction = this.calculateDirection(time);
+            time = time % this.animation.totalTime;
+            //TODO: fix backwards
+            // if(direction < 0) {
+            //   let newTime: number = this.animation.totalTime
+            // }
+            this.updateAnimation(time, direction);
+            this.checkEventBetween(time, time + timePerFrame);
+            // console.log(time)
+            this.lastFrameTime = time;
+        }
+        updateAnimation(_time, _direction) {
+            let mutator = this.animation.getMutated(_time, _direction);
+            this.getContainer().applyAnimation(mutator);
+            // this.checkEvents(_time, _direction);
+        }
+        //#endregion
+        calculateCurrentTime(_time, _direction) {
+            let time = _time % this.animation.totalTime;
+            if (_direction < 0) {
+                time = this.animation.totalTime - time;
+            }
+            return time;
+        }
+        calculateDirection(_time) {
+            // _time = _time + this.startTime - this.timeAtStart;
+            switch (this.playmode) {
+                case ANIMATION_PLAYMODE.STOP:
+                    return 0;
+                case ANIMATION_PLAYMODE.PINGPONG:
+                    if (Math.floor(_time / this.animation.totalTime) % 2 == 0)
+                        return 1;
+                    else
+                        return -1;
+                case ANIMATION_PLAYMODE.REVERSELOOP:
+                    return -1;
+                case ANIMATION_PLAYMODE.PLAYONCE:
+                case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+                    if (_time > this.animation.totalTime) {
+                        return 0;
+                    }
+                default:
+                    return 1;
+            }
+        }
+        updateScale() {
+            let newScale = this.speedScale;
+            if (this.speedScalesWithGlobalSpeed)
+                newScale *= Fudge.Time.game.getScale();
+            this.time.setScale(newScale);
+        }
+        // private checkEvents(_time: number, _direction: number): void {
+        //   if (_time == this.lastTime)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.STOP || _direction == 0)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.PINGPONG) {
+        //     if (this.lastDirection == _direction) {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, _time);
+        //       } else {
+        //         this.checkEventBetween(_time, this.lastTime);
+        //       }
+        //     } else {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //         this.checkEventBetween(_time, this.animation.totalTime);
+        //       } else {
+        //         this.checkEventBetween(0, this.lastTime);
+        //         this.checkEventBetween(0, this.animation.totalTime);
+        //       }
+        //     }
+        //     this.lastDirection = _direction;
+        //   }
+        //   else if (_direction > 0) {
+        //     if (this.lastTime < _time) {
+        //       this.checkEventBetween(this.lastTime, _time);
+        //     } else {
+        //       this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //       this.checkEventBetween(0, _time);
+        //     }
+        //   } else {
+        //     if (_time < this.lastTime) {
+        //       this.checkEventBetween(_time, this.lastTime);
+        //     } else {
+        //       this.checkEventBetween(0, this.lastTime);
+        //       this.checkEventBetween(_time, this.animation.totalTime);
+        //     }
+        //   }
+        //   this.lastTime = _time;
+        // }
+        checkEventBetween(_min, _max) {
+            if (_min > _max) {
+                // let t: number = _min;
+                // _min = _max;
+                // _max = t;
+                this.checkEventBetween(0, _min);
+                this.checkEventBetween(_max, this.animation.totalTime);
+            }
+            for (let name in this.animation.events) {
+                if (_min <= this.animation.events[name] && this.animation.events[name] <= _max) {
+                    console.log(_min, this.animation.events[name], _max, this.time.get());
+                    this.dispatchEvent(new Event(name));
+                }
+            }
+        }
+    }
+    Fudge.ComponentAnimator = ComponentAnimator;
 })(Fudge || (Fudge = {}));
 /// <reference path="Component.ts"/>
 var Fudge;
@@ -905,6 +1460,11 @@ var Fudge;
         }
         mutate(_mutator) {
             super.mutate(_mutator);
+            switch (this.projection) {
+                case PROJECTION.CENTRAL:
+                    this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+                    break;
+            }
         }
         reduceMutator(_mutator) {
             delete _mutator.transform;
@@ -1285,82 +1845,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class PointerEventƒ extends PointerEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    Fudge.PointerEventƒ = PointerEventƒ;
-    class DragDropEventƒ extends DragEvent {
-        constructor(type, _event) {
-            super(type, _event);
-            let target = _event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
-        }
-    }
-    Fudge.DragDropEventƒ = DragDropEventƒ;
-    class WheelEventƒ extends WheelEvent {
-        constructor(type, _event) {
-            super(type, _event);
-        }
-    }
-    Fudge.WheelEventƒ = WheelEventƒ;
-    /**
-     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
-     */
-    class EventTargetStatic extends EventTarget {
-        constructor() {
-            super();
-        }
-        static addEventListener(_type, _handler) {
-            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
-        }
-        static removeEventListener(_type, _handler) {
-            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
-        }
-        static dispatchEvent(_event) {
-            EventTargetStatic.targetStatic.dispatchEvent(_event);
-            return true;
-        }
-    }
-    EventTargetStatic.targetStatic = new EventTargetStatic();
-    Fudge.EventTargetStatic = EventTargetStatic;
-})(Fudge || (Fudge = {}));
-///<reference path="../Event/Event.ts"/>
-var Fudge;
-///<reference path="../Event/Event.ts"/>
-(function (Fudge) {
-    /**
-     * Core loop of a Fudge application. Initializes automatically and must be startet via Loop.start().
-     * it then fires EVENT.ANIMATION_FRAME to all listeners added at each animation frame requested from the host window
-     */
-    class Loop extends Fudge.EventTargetStatic {
-        /**
-         * Start the core loop
-         */
-        static start() {
-            if (!Loop.running)
-                Loop.loop(performance.now());
-            Fudge.Debug.log("Loop running");
-        }
-        static loop(_timestamp) {
-            // TODO: do something with timestamp... store in gametime, since there actually is already a timestamp in the event by default
-            let event = new Event("loopFrame" /* LOOP_FRAME */);
-            Loop.targetStatic.dispatchEvent(event);
-            window.requestAnimationFrame(Loop.loop);
-        }
-    }
-    Loop.running = false;
-    Fudge.Loop = Loop;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     /**
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1442,37 +1926,51 @@ var Fudge;
 (function (Fudge) {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using [[ObjectManager]] reduces load on the carbage collector and thus supports smooth performance
+     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
      */
-    class ObjectManager {
+    class Recycler {
         /**
-         * Returns an object of the requested type for recycling or a new one, if the depot was empty
+         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
          * @param _T The class identifier of the desired object
          */
-        static create(_T) {
+        static get(_T) {
             let key = _T.name;
-            let instances = ObjectManager.depot[key];
+            let instances = Recycler.depot[key];
             if (instances && instances.length > 0)
                 return instances.pop();
             else
                 return new _T();
         }
         /**
-         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope.
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
          */
-        static reuse(_instance) {
+        static store(_instance) {
             let key = _instance.constructor.name;
             //Debug.log(key);
-            let instances = ObjectManager.depot[key] || [];
+            let instances = Recycler.depot[key] || [];
             instances.push(_instance);
-            ObjectManager.depot[key] = instances;
+            Recycler.depot[key] = instances;
             // Debug.log(`ObjectManager.depot[${key}]: ${ObjectManager.depot[key].length}`);
             //Debug.log(this.depot);
         }
+        /**
+         * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
+         * @param _T
+         */
+        static dump(_T) {
+            let key = _T.name;
+            Recycler.depot[key] = [];
+        }
+        /**
+         * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
+         */
+        static dumpAll() {
+            Recycler.depot = {};
+        }
     }
-    ObjectManager.depot = {};
-    Fudge.ObjectManager = ObjectManager;
+    Recycler.depot = {};
+    Fudge.Recycler = Recycler;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1960,6 +2458,55 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class PointerEventƒ extends PointerEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.PointerEventƒ = PointerEventƒ;
+    class DragDropEventƒ extends DragEvent {
+        constructor(type, _event) {
+            super(type, _event);
+            let target = _event.target;
+            this.clientRect = target.getClientRects()[0];
+            this.pointerX = _event.clientX - this.clientRect.left;
+            this.pointerY = _event.clientY - this.clientRect.top;
+        }
+    }
+    Fudge.DragDropEventƒ = DragDropEventƒ;
+    class WheelEventƒ extends WheelEvent {
+        constructor(type, _event) {
+            super(type, _event);
+        }
+    }
+    Fudge.WheelEventƒ = WheelEventƒ;
+    /**
+     * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop
+     */
+    class EventTargetStatic extends EventTarget {
+        constructor() {
+            super();
+        }
+        static addEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.addEventListener(_type, _handler);
+        }
+        static removeEventListener(_type, _handler) {
+            EventTargetStatic.targetStatic.removeEventListener(_type, _handler);
+        }
+        static dispatchEvent(_event) {
+            EventTargetStatic.targetStatic.dispatchEvent(_event);
+            return true;
+        }
+    }
+    EventTargetStatic.targetStatic = new EventTargetStatic();
+    Fudge.EventTargetStatic = EventTargetStatic;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     class KeyboardEventƒ extends KeyboardEvent {
         constructor(type, _event) {
             super(type, _event);
@@ -2412,7 +2959,7 @@ var Fudge;
         //#region STATICS
         static get IDENTITY() {
             // const result: Matrix4x4 = new Matrix4x4();
-            const result = Fudge.ObjectManager.create(Matrix4x4);
+            const result = Fudge.Recycler.get(Matrix4x4);
             result.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2430,7 +2977,7 @@ var Fudge;
             let a = _a.data;
             let b = _b.data;
             // let matrix: Matrix4x4 = new Matrix4x4();
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let a00 = a[0 * 4 + 0];
             let a01 = a[0 * 4 + 1];
             let a02 = a[0 * 4 + 2];
@@ -2539,7 +3086,7 @@ var Fudge;
                 (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
             let d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 d * t0,
                 d * t1,
@@ -2567,7 +3114,7 @@ var Fudge;
          */
         static LOOK_AT(_transformPosition, _targetPosition, _up = Fudge.Vector3.Y()) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let zAxis = Fudge.Vector3.DIFFERENCE(_transformPosition, _targetPosition);
             zAxis.normalize();
             let xAxis = Fudge.Vector3.NORMALIZATION(Fudge.Vector3.CROSS(_up, zAxis));
@@ -2589,7 +3136,7 @@ var Fudge;
          */
         static TRANSLATION(_translate) {
             // let matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -2604,7 +3151,7 @@ var Fudge;
          */
         static ROTATION_X(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2622,7 +3169,7 @@ var Fudge;
          */
         static ROTATION_Y(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            let matrix = Fudge.ObjectManager.create(Matrix4x4);
+            let matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2640,7 +3187,7 @@ var Fudge;
          */
         static ROTATION_Z(_angleInDegrees) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             let angleInRadians = _angleInDegrees * Math.PI / 180;
             let sin = Math.sin(angleInRadians);
             let cos = Math.cos(angleInRadians);
@@ -2658,7 +3205,7 @@ var Fudge;
          */
         static SCALING(_scalar) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 _scalar.x, 0, 0, 0,
                 0, _scalar.y, 0, 0,
@@ -2681,7 +3228,7 @@ var Fudge;
             let f = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
             let rangeInv = 1.0 / (_near - _far);
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 f, 0, 0, 0,
                 0, f, 0, 0,
@@ -2710,7 +3257,7 @@ var Fudge;
          */
         static PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, _near = -400, _far = 400) {
             // const matrix: Matrix4x4 = new Matrix4x4;
-            const matrix = Fudge.ObjectManager.create(Matrix4x4);
+            const matrix = Fudge.Recycler.get(Matrix4x4);
             matrix.data.set([
                 2 / (_right - _left), 0, 0, 0,
                 0, 2 / (_top - _bottom), 0, 0,
@@ -2732,7 +3279,7 @@ var Fudge;
         rotateX(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
@@ -2742,7 +3289,7 @@ var Fudge;
         rotateY(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
@@ -2752,19 +3299,20 @@ var Fudge;
         rotateZ(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         lookAt(_target, _up = Fudge.Vector3.Y()) {
             const matrix = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         //#endregion
         //#region Translation
         translate(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+            // TODO: possible optimization, translation may alter mutator instead of deleting it.
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         /**
          * Translate the transformation along the x-axis.
@@ -2792,7 +3340,7 @@ var Fudge;
         scale(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
             this.set(matrix);
-            Fudge.ObjectManager.reuse(matrix);
+            Fudge.Recycler.store(matrix);
         }
         scaleX(_by) {
             this.scale(new Fudge.Vector3(_by, 1, 1));
@@ -2849,6 +3397,7 @@ var Fudge;
         set(_to) {
             // this.data = _to.get();
             this.data.set(_to.data);
+            this.mutator = null;
         }
         get() {
             return new Float32Array(this.data);
@@ -2875,13 +3424,43 @@ var Fudge;
             return mutator;
         }
         mutate(_mutator) {
+            let mutator = this.getMutator();
+            let oldTranslation = mutator["translation"];
+            let oldRotation = mutator["rotation"];
+            let oldScaling = mutator["scaling"];
+            let newTranslation = _mutator["translation"];
+            let newRotation = _mutator["rotation"];
+            let newScaling = _mutator["scaling"];
+            if (newTranslation) {
+                mutator["translation"] = {
+                    x: newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
+                    y: newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
+                    z: newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
+                };
+            }
+            if (newRotation) {
+                mutator["rotation"] = {
+                    x: newRotation.x != undefined ? newRotation.x : oldRotation.x,
+                    y: newRotation.y != undefined ? newRotation.y : oldRotation.y,
+                    z: newRotation.z != undefined ? newRotation.z : oldRotation.z
+                };
+            }
+            if (newScaling) {
+                mutator["scaling"] = {
+                    x: newScaling.x != undefined ? newScaling.x : oldScaling.x,
+                    y: newScaling.y != undefined ? newScaling.y : oldScaling.y,
+                    z: newScaling.z != undefined ? newScaling.z : oldScaling.z
+                };
+            }
             let matrix = Matrix4x4.IDENTITY;
-            matrix.translate(_mutator.translation);
-            matrix.rotateZ(_mutator.rotation.z);
-            matrix.rotateY(_mutator.rotation.y);
-            matrix.rotateX(_mutator.rotation.x);
-            matrix.scale(_mutator.scaling);
+            matrix.translate(mutator.translation);
+            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
+            matrix.rotateZ(mutator.rotation.z);
+            matrix.rotateY(mutator.rotation.y);
+            matrix.rotateX(mutator.rotation.x);
+            matrix.scale(mutator.scaling);
             this.set(matrix);
+            this.mutator = mutator;
         }
         reduceMutator(_mutator) { }
     }
@@ -3495,9 +4074,9 @@ var Fudge;
                 let childNode = _node.getChildren()[name];
                 this.drawBranch(childNode, _cmpCamera); //, world);
             }
-            Fudge.ObjectManager.reuse(projection);
+            Fudge.Recycler.store(projection);
             if (finalTransform != _node.mtxWorld)
-                Fudge.ObjectManager.reuse(finalTransform);
+                Fudge.Recycler.store(finalTransform);
         }
         static drawNode(_node, _finalTransform, _projection) {
             let references = this.nodes.get(_node);
@@ -3742,6 +4321,36 @@ var Fudge;
         }
         isUpdated(_timestampUpdate) {
             return (this.timestampUpdate == _timestampUpdate);
+        }
+        /**
+         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
+         * @param _mutator The mutator generated from an [[Animation]]
+         */
+        applyAnimation(_mutator) {
+            if (_mutator.components) {
+                for (let componentName in _mutator.components) {
+                    if (this.components[componentName]) {
+                        let mutatorOfComponent = _mutator.components;
+                        for (let i in mutatorOfComponent[componentName]) {
+                            if (this.components[componentName][+i]) {
+                                let componentToMutate = this.components[componentName][+i];
+                                let mutatorArray = mutatorOfComponent[componentName];
+                                let mutatorToGive = mutatorArray[+i][("ƒ." + componentName)];
+                                componentToMutate.mutate(mutatorToGive);
+                            }
+                        }
+                    }
+                }
+            }
+            if (_mutator.children) {
+                for (let i = 0; i < _mutator.children.length; i++) {
+                    let name = _mutator.children[i]["ƒ.Node"].name;
+                    let childNodes = this.getChildrenByName(name);
+                    for (let childNode of childNodes) {
+                        childNode.applyAnimation(_mutator.children[i]["ƒ.Node"]);
+                    }
+                }
+            }
         }
         // #endregion
         // #region Components
@@ -4194,5 +4803,389 @@ var Fudge;
     class TextureHTML extends TextureCanvas {
     }
     Fudge.TextureHTML = TextureHTML;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let TIMER_TYPE;
+    (function (TIMER_TYPE) {
+        TIMER_TYPE[TIMER_TYPE["INTERVAL"] = 0] = "INTERVAL";
+        TIMER_TYPE[TIMER_TYPE["TIMEOUT"] = 1] = "TIMEOUT";
+    })(TIMER_TYPE || (TIMER_TYPE = {}));
+    class Timer {
+        constructor(_time, _type, _callback, _timeout, _arguments) {
+            this.type = _type;
+            this.timeout = _timeout;
+            this.arguments = _arguments;
+            this.startTimeReal = performance.now();
+            this.callback = _callback;
+            let scale = Math.abs(_time.getScale());
+            if (!scale) {
+                // Time is stopped, timer won't be active
+                this.active = false;
+                return;
+            }
+            let id;
+            this.timeoutReal = this.timeout / scale;
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                let callback = () => {
+                    _time.deleteTimerByInternalId(this.id);
+                    _callback(_arguments);
+                };
+                id = window.setTimeout(callback, this.timeoutReal);
+            }
+            else
+                id = window.setInterval(_callback, this.timeoutReal, _arguments);
+            this.id = id;
+            this.active = true;
+        }
+        clear() {
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                if (this.active)
+                    // save remaining time to timeout as new timeout for restart
+                    this.timeout = this.timeout * (1 - (performance.now() - this.startTimeReal) / this.timeoutReal);
+                window.clearTimeout(this.id);
+            }
+            else
+                // TODO: reusing timer starts interval anew. Should be remaining interval as timeout, then starting interval anew 
+                window.clearInterval(this.id);
+            this.active = false;
+        }
+    }
+    /**
+     * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
+     * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Time extends EventTarget {
+        constructor() {
+            super();
+            this.timers = {};
+            this.idTimerNext = 0;
+            this.start = performance.now();
+            this.scale = 1.0;
+            this.offset = 0.0;
+            this.lastCallToElapsed = 0.0;
+        }
+        /**
+         * Returns the game-time-object which starts automatically and serves as base for various internal operations.
+         */
+        static get game() {
+            return Time.gameTime;
+        }
+        /**
+         * Retrieves the current scaled timestamp of this instance in milliseconds
+         */
+        get() {
+            return this.offset + this.scale * (performance.now() - this.start);
+        }
+        /**
+         * (Re-) Sets the timestamp of this instance
+         * @param _time The timestamp to represent the current time (default 0.0)
+         */
+        set(_time = 0) {
+            this.offset = _time;
+            this.start = performance.now();
+            this.getElapsedSincePreviousCall();
+        }
+        /**
+         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1)
+         * @param _scale The desired scaling (default 1.0)
+         */
+        setScale(_scale = 1.0) {
+            this.set(this.get());
+            this.scale = _scale;
+            //TODO: catch scale=0
+            this.rescaleAllTimers();
+            this.getElapsedSincePreviousCall();
+            this.dispatchEvent(new Event("timeScaled" /* TIME_SCALED */));
+        }
+        /**
+         * Retrieves the current scaling of this time
+         */
+        getScale() {
+            return this.scale;
+        }
+        /**
+         * Retrieves the scaled time in milliseconds passed since the last call to this method
+         * Automatically reset at every call to set(...) and setScale(...)
+         */
+        getElapsedSincePreviousCall() {
+            let current = this.get();
+            let elapsed = current - this.lastCallToElapsed;
+            this.lastCallToElapsed = current;
+            return elapsed;
+        }
+        //#region Timers
+        // TODO: examine if web-workers would enhance performance here!
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
+        setTimeout(_callback, _timeout, ..._arguments) {
+            return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
+        }
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
+        setInterval(_callback, _timeout, ..._arguments) {
+            return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
+        }
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
+        clearTimeout(_id) {
+            this.deleteTimer(_id);
+        }
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
+        clearInterval(_id) {
+            this.deleteTimer(_id);
+        }
+        /**
+         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
+         */
+        clearAllTimers() {
+            for (let id in this.timers) {
+                this.deleteTimer(Number(id));
+            }
+        }
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
+        rescaleAllTimers() {
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                timer.clear();
+                if (!this.scale)
+                    // Time has stopped, no need to replace cleared timers
+                    continue;
+                let timeout = timer.timeout;
+                // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
+                //     // for an active timeout-timer, calculate the remaining time to timeout
+                //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                let replace = new Timer(this, timer.type, timer.callback, timeout, timer.arguments);
+                this.timers[id] = replace;
+            }
+        }
+        /**
+         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * @param _id
+         */
+        deleteTimerByInternalId(_id) {
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                if (timer.id == _id) {
+                    timer.clear();
+                    delete this.timers[id];
+                }
+            }
+        }
+        setTimer(_type, _callback, _timeout, _arguments) {
+            let timer = new Timer(this, _type, _callback, _timeout, _arguments);
+            this.timers[++this.idTimerNext] = timer;
+            return this.idTimerNext;
+        }
+        deleteTimer(_id) {
+            this.timers[_id].clear();
+            delete this.timers[_id];
+        }
+    }
+    Time.gameTime = new Time();
+    Fudge.Time = Time;
+})(Fudge || (Fudge = {}));
+///<reference path="../Event/Event.ts"/>
+///<reference path="../Time/Time.ts"/>
+var Fudge;
+///<reference path="../Event/Event.ts"/>
+///<reference path="../Time/Time.ts"/>
+(function (Fudge) {
+    let LOOP_MODE;
+    (function (LOOP_MODE) {
+        /** Loop cycles controlled by window.requestAnimationFrame */
+        LOOP_MODE["FRAME_REQUEST"] = "frameRequest";
+        /** Loop cycles with the given framerate in [[Time]].game */
+        LOOP_MODE["TIME_GAME"] = "timeGame";
+        /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
+        LOOP_MODE["TIME_REAL"] = "timeReal";
+    })(LOOP_MODE = Fudge.LOOP_MODE || (Fudge.LOOP_MODE = {}));
+    /**
+     * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
+     * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
+     */
+    class Loop extends Fudge.EventTargetStatic {
+        /**
+         * Starts the loop with the given mode and fps
+         * @param _mode
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
+         */
+        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 60, _syncWithAnimationFrame = false) {
+            Loop.stop();
+            Loop.timeStartGame = Fudge.Time.game.get();
+            Loop.timeStartReal = performance.now();
+            Loop.timeLastFrameGame = Loop.timeStartGame;
+            Loop.timeLastFrameReal = Loop.timeStartReal;
+            Loop.fpsDesired = (_mode == LOOP_MODE.FRAME_REQUEST) ? 60 : _fps;
+            Loop.framesToAverage = Loop.fpsDesired;
+            Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
+            Loop.mode = _mode;
+            Loop.syncWithAnimationFrame = _syncWithAnimationFrame;
+            let log = `Loop starting in mode ${Loop.mode}`;
+            if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
+                log += ` with attempted ${_fps} fps`;
+            Fudge.Debug.log(log);
+            switch (_mode) {
+                case LOOP_MODE.FRAME_REQUEST:
+                    Loop.loopFrame();
+                    break;
+                case LOOP_MODE.TIME_REAL:
+                    Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
+                    break;
+                case LOOP_MODE.TIME_GAME:
+                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
+                    break;
+                default:
+                    break;
+            }
+            Loop.running = true;
+        }
+        /**
+         * Stops the loop
+         */
+        static stop() {
+            if (!Loop.running)
+                return;
+            switch (Loop.mode) {
+                case LOOP_MODE.FRAME_REQUEST:
+                    window.cancelAnimationFrame(Loop.idRequest);
+                    break;
+                case LOOP_MODE.TIME_REAL:
+                    window.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
+                    break;
+                case LOOP_MODE.TIME_GAME:
+                    // TODO: DANGER! id changes internally in game when time is scaled!
+                    Fudge.Time.game.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
+                    break;
+                default:
+                    break;
+            }
+            Fudge.Debug.log("Loop stopped!");
+        }
+        static getFpsGameAverage() {
+            return 1000 / Loop.timeLastFrameGameAvg;
+        }
+        static getFpsRealAverage() {
+            return 1000 / Loop.timeLastFrameRealAvg;
+        }
+        static loop() {
+            let time;
+            time = performance.now();
+            Loop.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeLastFrameReal = time;
+            time = Fudge.Time.game.get();
+            Loop.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeLastFrameGame = time;
+            Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
+            Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
+            let event = new Event("loopFrame" /* LOOP_FRAME */);
+            Loop.targetStatic.dispatchEvent(event);
+        }
+        static loopFrame() {
+            Loop.loop();
+            Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
+        }
+        static loopTime() {
+            if (Loop.syncWithAnimationFrame)
+                Loop.idRequest = window.requestAnimationFrame(Loop.loop);
+            else
+                Loop.loop();
+        }
+    }
+    /** The gametime the loop was started, overwritten at each start */
+    Loop.timeStartGame = 0;
+    /** The realtime the loop was started, overwritten at each start */
+    Loop.timeStartReal = 0;
+    /** The gametime elapsed since the last loop cycle */
+    Loop.timeFrameGame = 0;
+    /** The realtime elapsed since the last loop cycle */
+    Loop.timeFrameReal = 0;
+    Loop.timeLastFrameGame = 0;
+    Loop.timeLastFrameReal = 0;
+    Loop.timeLastFrameGameAvg = 0;
+    Loop.timeLastFrameRealAvg = 0;
+    Loop.running = false;
+    Loop.mode = LOOP_MODE.FRAME_REQUEST;
+    Loop.idIntervall = 0;
+    Loop.idRequest = 0;
+    Loop.fpsDesired = 30;
+    Loop.framesToAverage = 30;
+    Loop.syncWithAnimationFrame = false;
+    Fudge.Loop = Loop;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends Fudge.EventTargetStatic {
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static load() {
+            let selector;
+            selector = document.createElement("input");
+            selector.setAttribute("type", "file");
+            selector.setAttribute("multiple", "true");
+            selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
+            selector.click();
+        }
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static save(_toSave) {
+            for (let filename in _toSave) {
+                let content = _toSave[filename];
+                let blob = new Blob([content], { type: "text/plain" });
+                let url = window.URL.createObjectURL(blob);
+                //*/ using anchor element for download
+                let downloader;
+                downloader = document.createElement("a");
+                downloader.setAttribute("href", url);
+                downloader.setAttribute("download", filename);
+                document.body.appendChild(downloader);
+                downloader.click();
+                document.body.removeChild(downloader);
+                window.URL.revokeObjectURL(url);
+            }
+            let event = new CustomEvent("fileSaved" /* FILE_SAVED */, { detail: { mapFilenameToContent: _toSave } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async handleFileSelect(_event) {
+            let fileList = _event.target.files;
+            if (fileList.length == 0)
+                return;
+            let loaded = {};
+            await FileIoBrowserLocal.loadFiles(fileList, loaded);
+            let event = new CustomEvent("fileLoaded" /* FILE_LOADED */, { detail: { mapFilenameToContent: loaded } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async loadFiles(_fileList, _loaded) {
+            for (let filename in _fileList) {
+                let file = _fileList[filename];
+                const content = await new Response(file).text();
+                _loaded[filename] = content;
+            }
+        }
+    }
+    Fudge.FileIoBrowserLocal = FileIoBrowserLocal;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

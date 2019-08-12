@@ -2,7 +2,7 @@
 namespace UI {
     import ƒ = Fudge;
     export abstract class MutableUI {
-        protected timeUpdate: number = 1000;
+        protected timeUpdate: number = 190;
         protected root: HTMLElement;
         protected mutable: ƒ.Mutable;
         protected mutator: ƒ.Mutator;
@@ -15,27 +15,37 @@ namespace UI {
             this.root.addEventListener("input", this.updateUI);
         }
 
-        protected updateUI =(e: Event)=> {
-            console.log(e);
+        protected updateUI = (_e: Event) => {
+            console.log(_e);
             this.mutable.mutate(this.mutator);
 
         }
 
-        protected updateMutator = (e: Event) => {
+        protected updateMutator = (_e: Event) => {
             this.mutable.updateMutator(this.mutator);
+            this.fillById(this.mutator, this.root);
         }
 
-        protected fillById(mutator: ƒ.Mutator) {
-            for (let key in mutator) {
-                let children: HTMLCollection = this.root.children;
-                for (let child of children) {
+        protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement) {
+            let children: HTMLCollection = _root.children;
+            for (let child of children) {
+                if (child.children.length > 0) {
+                    this.fillById(_mutator, <HTMLInputElement>child);
+                }
+                for (let key in _mutator) {
                     if (child.id == key) {
-                        child.nodeValue = mutator[key].toString();
+                        let type: string = child.getAttribute("type");
+                        if (type == "checkbox") {
+                            let checkbox: HTMLInputElement = <HTMLInputElement>child;
+                            checkbox.checked = <boolean>_mutator[key];
+                        }
+                        else {
+                            let input: HTMLInputElement = <HTMLInputElement>child;
+                            input.value = <string>_mutator[key];
+                        }
                     }
                 }
             }
         }
-
     }
-
 }

@@ -38,12 +38,14 @@ namespace FileHandling {
     function handleSave(_event: Event): void {
         let blob: Blob = new Blob([content.value], { type: "text/plain" });
         let url: string = window.URL.createObjectURL(blob);
+        //*/ using anchor element for download
         downloader.setAttribute("href", url);
         downloader.setAttribute("download", getFilenameDisplay());
         document.body.appendChild(downloader);
         downloader.click();
         document.body.removeChild(downloader);
         window.URL.revokeObjectURL(url);
+        //*/
     }
 
     function handleFileSelect(_event: Event): void {

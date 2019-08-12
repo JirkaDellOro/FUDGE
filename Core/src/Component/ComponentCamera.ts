@@ -130,6 +130,12 @@ namespace Fudge {
 
         public mutate(_mutator: Mutator): void {
             super.mutate(_mutator);
+
+            switch (this.projection) {
+                case PROJECTION.CENTRAL:
+                    this.projectCentral(this.aspectRatio, this.fieldOfView, this.direction);
+                    break;
+            }
         }
 
         protected reduceMutator(_mutator: Mutator): void {

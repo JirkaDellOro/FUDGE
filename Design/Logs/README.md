@@ -2,6 +2,44 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed 
 
+# August 8th 2019
+[Whiteboard](190808_Whiteboard.jpg)
+
+## Time
+Jirka and Lukas discuss how to implement a Time Class, where it is needed and what capabilities it needs. That includes:  
+- A static GameTime, reachable through `Time.game`.
+- Animations have an individual Time class instance, that may be linked to the GameTime in its speed modifier.
+- This means that the Time Class needs to fire an Event if their speed is changed, so the Animation can be notified and set her own speed accordingly.  
+- More Events: setTimeout and setIntervall. Need to scale with changes in speed with the remaining time at the moment of the change. 
+- Audio has its own built-in time, the component should offer a way to scale with gametime.  
+- Other applications that are further away in the future:
+  - prerendering spritesheets
+  - postrendering game/sequence
+
+This change also means that the Loop Class should add multiple ways to fire its looping events:  
+- as fast as possible using requestAnimationFrame
+- timebased: using Frames Per Second relative to...
+  - Realtime
+  - GameTime
+
+## Animation
+### Playmode
+The Animation gets 3 different plamodes: 
+- Framebased, which will jump to the next frame every update cycle, independent of time  
+- Continous, which will jump to the exact point in time that the animation should be at, independent of FPS of the Animation  
+- Rastered, which will jump to the correct frame, dependent on the time, according to the FPS of the Animation  
+If it is either of the framebased options, the first and last frame should only appear once if the Animation is in PINGPONG mode.
+
+### Events
+Events should be triggered depending on the playmode:
+- Framebased or Rastered: At the first moment the frame that includes the Event is drawn. _!This means, that an Event that is supposed to happen after the last frame will likely not be fired!_  
+- Continous: In an update cycle all Events between this one and the last cycle shall be fired.
+
+# August 5th 2019
+[Whiteboard](190805_Whiteboard.jpg)
+## Animation
+Jirka and Lukas discuss changes to the Animation Object. Animation is to be turned into a resource, moving all time calculations into the ComponentAnimator and using the Animation as a quasi-static value provider.  
+Changes to the way the AnimationSequence is saved have also been discussed: Instead of being mapped to just the name, the structure of the serialisation of the node is used to hold the information about where to use what animation. This is also the structure that the "Mutator" will be returned. The Node needs information on what to do with this Mutator, without becoming a Mutable itself.
 
 # July 25th 2019
 after the presentation of the usertest results it was decided to rename the menu bar item "window" into "layout" and the "editor" menu item into "window".

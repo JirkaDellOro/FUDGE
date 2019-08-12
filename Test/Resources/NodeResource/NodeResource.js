@@ -19,7 +19,7 @@ var NodeResource;
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
         let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
-        let dim = new ƒ.Vector3(0, 0, 0);
+        let dim = new ƒ.Vector3(2, 2, 2);
         for (let z = -dim.z; z < dim.z + 1; z++)
             for (let y = -dim.y; y < dim.y + 1; y++)
                 for (let x = -dim.x; x < dim.x + 1; x++) {
@@ -38,7 +38,10 @@ var NodeResource;
         console.log(ƒ.Serializer.stringify(srlInstance));
         console.groupEnd();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        ƒ.Loop.start();
+        // debugger;
+        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
+        ƒ.Time.game.setScale(10);
+        ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
         function update(_event) {
             ƒ.RenderManager.update();
             viewport.draw();

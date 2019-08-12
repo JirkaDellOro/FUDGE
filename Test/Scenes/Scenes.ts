@@ -169,4 +169,10 @@ namespace Scenes {
             _viewport.draw();
         }
     }
+
+    export function save(_filename: string, _json: ƒ.Serialization): void {
+        let content: string = ƒ.Serializer.stringify(_json);
+        let map: ƒ.MapFilenameToContent = {[_filename]: content};
+        ƒ.FileIoBrowserLocal.save(map);
+    }
 }

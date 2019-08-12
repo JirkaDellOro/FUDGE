@@ -8,9 +8,7 @@ namespace TimeTest {
         private start: number;
         private scale: number;
         private offset: number;
-        /** just **testing** Comment */
         private lastCallToElapsed: number; 
-        private xz: string;
 
         constructor() {
             this.start = performance.now();
@@ -44,10 +42,6 @@ namespace TimeTest {
             this.scale = _scale;
             this.getElapsedSincePreviousCall();
         }
-
-        /**
-         * # I wonder what this comment does... appearently nothing
-         */
 
         /**
          * Retrieves the current scaling of this time
