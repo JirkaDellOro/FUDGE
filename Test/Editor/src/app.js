@@ -1,5 +1,6 @@
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
-console.log(Fudge);
+// <reference path="../../../Core/src/Transfer/Serializer.ts"/>
+// <reference path="../../../Core/build/Fudge.d.ts"/>
+// console.log(Fudge);
 var UI;
 (function (UI) {
     let myLayout;
