@@ -170,8 +170,11 @@ namespace Fudge {
               if (this.components[componentName][+i]) {
                 let componentToMutate: Component = this.components[componentName][+i];
                 let mutatorArray: Mutator[] = (<Array<Mutator>>mutatorOfComponent[componentName]);
-                let mutatorToGive: Mutator = <Mutator>mutatorArray[+i][("ƒ." + componentName)];
-                componentToMutate.mutate(mutatorToGive);
+                let mutatorWithComponentName: Mutator = <Mutator>mutatorArray[+i];
+                for (let cname in mutatorWithComponentName) {   // trick used to get the only entry in the list
+                  let mutatorToGive: Mutator = <Mutator> mutatorWithComponentName[cname];
+                  componentToMutate.mutate(mutatorToGive);
+                }
               }
             }
           }
@@ -184,7 +187,7 @@ namespace Fudge {
           for (let childNode of childNodes) {
             childNode.applyAnimation(<Mutator>(<Array<Mutator>>_mutator.children)[i]["ƒ.Node"]);
           }
-        }
+        } 
       }
     }
     // #endregion
