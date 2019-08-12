@@ -160,6 +160,20 @@ declare namespace Fudge {
         [attribute: string]: Serialization | AnimationSequence;
     }
     /**
+    * Holds information about Animation Labels
+    * @author Lukas Scheuerle, HFU, 2019
+    */
+    interface AnimationLabel {
+        [name: string]: number;
+    }
+    /**
+    * Holds information about Animation Event Triggers
+    * @author Lukas Scheuerle, HFU, 2019
+    */
+    interface AnimationEventTrigger {
+        [name: string]: number;
+    }
+    /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
      * @author Lukas Scheuerle, HFU, 2019
@@ -169,6 +183,7 @@ declare namespace Fudge {
         name: string;
         totalTime: number;
         labels: AnimationLabel;
+        events: AnimationEventTrigger;
         fps: number;
         sps: number;
         animationStructure: AnimationStructure;
@@ -229,15 +244,6 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Holds information about Animation Labels
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    interface AnimationLabel {
-        [name: string]: number;
     }
 }
 declare namespace Fudge {
@@ -456,13 +462,6 @@ declare namespace Fudge {
         FRAMEBASED = 2
     }
     /**
-     *
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    interface AnimationEventTrigger {
-        [name: string]: number;
-    }
-    /**
      * Holds an [[Animation]] and controls it.
      * @authors Lukas Scheuerle, HFU, 2019
      */
@@ -470,11 +469,13 @@ declare namespace Fudge {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        events: AnimationEventTrigger;
+        time: Time;
+        speedScalesWithGlobalSpeed: boolean;
+        private speedScale;
         private lastTime;
-        private startTime;
-        private timeAtStart;
+        private lastFrameTime;
         constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
+        speed: number;
         jumpTo(_time: number, _currentTime: number): void;
         private updateAnimationLoop;
         private updateAnimationContinous;
@@ -483,7 +484,8 @@ declare namespace Fudge {
         private updateAnimation;
         private calculateCurrentTime;
         private calculateDirection;
-        private checkEvents;
+        private updateScale;
+        private checkEventBetween;
     }
 }
 declare namespace Fudge {
@@ -1076,7 +1078,13 @@ declare namespace Fudge {
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
         /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated"
+        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[Time]] when it's scaling changed  */
+        TIME_SCALED = "timeScaled",
+        /** dispatched to [[FileIo]] when a list of files has been loaded  */
+        FILE_LOADED = "fileLoaded",
+        /** dispatched to [[FileIo]] when a list of files has been saved */
+        FILE_SAVED = "fileSaved"
     }
     const enum EVENT_POINTER {
         UP = "\u0192pointerup",
@@ -2017,13 +2025,14 @@ declare namespace Fudge {
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time {
+    class Time extends EventTarget {
         private static gameTime;
         private start;
         private scale;
         private offset;
         private lastCallToElapsed;
         private timers;
+        private idTimerNext;
         constructor();
         /**
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
@@ -2052,16 +2061,45 @@ declare namespace Fudge {
          * Automatically reset at every call to set(...) and setScale(...)
          */
         getElapsedSincePreviousCall(): number;
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearTimeout(_id: number): void;
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearInterval(_id: number): void;
         /**
-         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers(): void;
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
         rescaleAllTimers(): void;
+        /**
+         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * @param _id
+         */
+        deleteTimerByInternalId(_id: number): void;
         private setTimer;
+        private deleteTimer;
     }
 }
 declare namespace Fudge {
@@ -2088,23 +2126,45 @@ declare namespace Fudge {
         static timeFrameReal: number;
         private static timeLastFrameGame;
         private static timeLastFrameReal;
+        private static timeLastFrameGameAvg;
+        private static timeLastFrameRealAvg;
         private static running;
         private static mode;
         private static idIntervall;
-        private static fps;
+        private static idRequest;
+        private static fpsDesired;
+        private static framesToAverage;
+        private static syncWithAnimationFrame;
         /**
          * Starts the loop with the given mode and fps
          * @param _mode
-         * @param _fps
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
          */
-        static start(_mode?: LOOP_MODE, _fps?: number): void;
+        static start(_mode?: LOOP_MODE, _fps?: number, _syncWithAnimationFrame?: boolean): void;
         /**
          * Stops the loop
          */
         static stop(): void;
+        static getFpsGameAverage(): number;
+        static getFpsRealAverage(): number;
         private static loop;
         private static loopFrame;
-        private static loopReal;
-        private static loopGame;
+        private static loopTime;
+    }
+}
+declare namespace Fudge {
+    interface MapFilenameToContent {
+        [filename: string]: string;
+    }
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends EventTargetStatic {
+        static load(): void;
+        static save(_toSave: MapFilenameToContent): void;
+        static handleFileSelect(_event: Event): Promise<void>;
+        static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
     }
 }

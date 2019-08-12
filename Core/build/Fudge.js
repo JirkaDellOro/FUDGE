@@ -279,6 +279,7 @@ var Fudge;
             super();
             this.totalTime = 0;
             this.labels = {};
+            this.events = {};
             this.fps = 60;
             this.sps = 10;
             this.animationStructure = {};
@@ -306,23 +307,31 @@ var Fudge;
                 idResource: this.idResource,
                 name: this.name,
                 labels: {},
+                events: {},
                 fps: this.fps,
                 sps: this.sps
             };
             for (let name in this.labels) {
                 s.labels[name] = this.labels[name];
             }
+            for (let name in this.events) {
+                s.events[name] = this.events[name];
+            }
             s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
             return s;
         }
         deserialize(_serialization) {
-            this.idResource = _serialization.idResource,
-                this.name = _serialization.name;
+            this.idResource = _serialization.idResource;
+            this.name = _serialization.name;
             this.fps = _serialization.fps;
             this.sps = _serialization.sps;
             this.labels = {};
             for (let name in _serialization.labels) {
                 this.labels[name] = _serialization.labels[name];
+            }
+            this.events = {};
+            for (let name in _serialization.events) {
+                this.events[name] = _serialization.events[name];
             }
             this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
             this.calculateTotalTime();
@@ -1135,28 +1144,39 @@ var Fudge;
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Fudge.Component {
+        // private lastDirection: number = 0;
+        // private startTime: number = 0;
+        // private timeAtStart: number = 0;
         constructor(_animation, _playmode, _playback) {
             super();
-            this.lastTime = 0;
-            this.startTime = 0;
-            this.timeAtStart = 0;
+            this.speedScalesWithGlobalSpeed = true;
+            this.speedScale = 1;
+            this.lastTime = -1;
+            this.lastFrameTime = -1;
             this.animation = _animation;
             this.playmode = _playmode;
             this.playback = _playback;
+            this.time = new Fudge.Time();
             //TODO: update animation total time when loading a different animation?
             this.animation.calculateTotalTime();
-            this.lastTime = 0;
-            //TODO: get an individual time class to work with.
-            this.jumpTo(0, Date.now()); // <-- remove this when time class is implemented
+            this.lastFrameTime = -(1000 / this.animation.fps);
+            this.jumpTo(0, 0);
             //TODO: register updateAnimatioStart() properly into the gameloop
             Fudge.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.updateAnimationLoop.bind(this));
+            Fudge.Time.game.addEventListener("timeScaled" /* TIME_SCALED */, this.updateScale.bind(this));
+        }
+        set speed(_s) {
+            this.speedScale = _s;
+            this.updateScale();
         }
         jumpTo(_time, _currentTime) {
             _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
-            this.startTime = _time;
-            this.timeAtStart = _currentTime;
-            if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
-                this.lastTime = _currentTime;
+            //TODO: maybe this can be outsourced to the time class as well.
+            this.time.set(_time);
+            // this.startTime = _time;
+            // this.timeAtStart = _currentTime;
+            // if (this.playback != ANIMATION_PLAYBACK.FRAMEBASED)
+            //   this.lastTime = _currentTime;
         }
         //#region updateAnimation
         updateAnimationLoop() {
@@ -1173,42 +1193,57 @@ var Fudge;
             }
         }
         updateAnimationContinous() {
-            //TODO: use own time class
-            let direction = this.calculateDirection(Date.now());
-            let time = this.calculateCurrentTime(Date.now(), direction);
+            let time = this.time.get();
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
             this.updateAnimation(time, direction);
+            //TODO: fix backwards
+            this.checkEventBetween(this.lastTime, time);
+            this.lastTime = time;
         }
         updateAnimationRastered() {
-            //TODO: use own time class
-            let direction = this.calculateDirection(Date.now());
-            let time = this.calculateCurrentTime(Date.now(), direction);
-            time = time - (time % (1000 / this.animation.fps));
-            //TODO: possible optimisation: only update animation if next Frame has been reached
-            this.updateAnimation(time, direction);
+            let time = this.time.get();
+            //TODO: fix backwards
+            let direction = this.calculateDirection(time);
+            time = this.calculateCurrentTime(time, direction);
+            let timePerFrame = 1000 / this.animation.fps;
+            time = time - (time % timePerFrame);
+            if (this.lastFrameTime != time) {
+                // TODO: possible optimisation: only update animation if next Frame has been reached
+                this.updateAnimation(time, direction);
+                this.checkEventBetween(time, time + timePerFrame);
+                this.lastFrameTime = time;
+            }
         }
         updateAnimationFramebased() {
             let timePerFrame = 1000 / this.animation.fps;
-            let time = this.lastTime + timePerFrame;
+            let time = this.lastFrameTime + timePerFrame;
             let direction = this.calculateDirection(time);
             time = time % this.animation.totalTime;
+            //TODO: fix backwards
+            // if(direction < 0) {
+            //   let newTime: number = this.animation.totalTime
+            // }
             this.updateAnimation(time, direction);
+            this.checkEventBetween(time, time + timePerFrame);
+            // console.log(time)
+            this.lastFrameTime = time;
         }
         updateAnimation(_time, _direction) {
             let mutator = this.animation.getMutated(_time, _direction);
             this.getContainer().applyAnimation(mutator);
-            this.checkEvents(_time, _direction);
-            this.lastTime = _time;
+            // this.checkEvents(_time, _direction);
         }
         //#endregion
         calculateCurrentTime(_time, _direction) {
-            let time = ((_time - this.timeAtStart) * _direction + this.startTime) % this.animation.totalTime;
+            let time = _time % this.animation.totalTime;
             if (_direction < 0) {
-                time += this.animation.totalTime;
+                time = this.animation.totalTime - time;
             }
             return time;
         }
         calculateDirection(_time) {
-            _time = _time + this.startTime - this.timeAtStart;
+            // _time = _time + this.startTime - this.timeAtStart;
             switch (this.playmode) {
                 case ANIMATION_PLAYMODE.STOP:
                     return 0;
@@ -1228,13 +1263,63 @@ var Fudge;
                     return 1;
             }
         }
-        checkEvents(_time, _direction) {
-            //TODO Catch Events at the beginning & end of the animation
-            if (this.playmode == ANIMATION_PLAYMODE.STOP || _direction == 0)
-                return;
-            for (let name in this.events) {
-                if (_direction > 0 && this.lastTime < this.events[name] && this.events[name] < _time
-                    || _direction < 0 && this.lastTime > this.events[name] && this.events[name] > _time) {
+        updateScale() {
+            let newScale = this.speedScale;
+            if (this.speedScalesWithGlobalSpeed)
+                newScale *= Fudge.Time.game.getScale();
+            this.time.setScale(newScale);
+        }
+        // private checkEvents(_time: number, _direction: number): void {
+        //   if (_time == this.lastTime)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.STOP || _direction == 0)
+        //     return;
+        //   if (this.playmode == ANIMATION_PLAYMODE.PINGPONG) {
+        //     if (this.lastDirection == _direction) {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, _time);
+        //       } else {
+        //         this.checkEventBetween(_time, this.lastTime);
+        //       }
+        //     } else {
+        //       if (_direction > 0) {
+        //         this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //         this.checkEventBetween(_time, this.animation.totalTime);
+        //       } else {
+        //         this.checkEventBetween(0, this.lastTime);
+        //         this.checkEventBetween(0, this.animation.totalTime);
+        //       }
+        //     }
+        //     this.lastDirection = _direction;
+        //   }
+        //   else if (_direction > 0) {
+        //     if (this.lastTime < _time) {
+        //       this.checkEventBetween(this.lastTime, _time);
+        //     } else {
+        //       this.checkEventBetween(this.lastTime, this.animation.totalTime);
+        //       this.checkEventBetween(0, _time);
+        //     }
+        //   } else {
+        //     if (_time < this.lastTime) {
+        //       this.checkEventBetween(_time, this.lastTime);
+        //     } else {
+        //       this.checkEventBetween(0, this.lastTime);
+        //       this.checkEventBetween(_time, this.animation.totalTime);
+        //     }
+        //   }
+        //   this.lastTime = _time;
+        // }
+        checkEventBetween(_min, _max) {
+            if (_min > _max) {
+                // let t: number = _min;
+                // _min = _max;
+                // _max = t;
+                this.checkEventBetween(0, _min);
+                this.checkEventBetween(_max, this.animation.totalTime);
+            }
+            for (let name in this.animation.events) {
+                if (_min <= this.animation.events[name] && this.animation.events[name] <= _max) {
+                    console.log(_min, this.animation.events[name], _max, this.time.get());
                     this.dispatchEvent(new Event(name));
                 }
             }
@@ -3335,6 +3420,7 @@ var Fudge;
                 rotation: vectors[1].getMutator(),
                 scaling: vectors[2].getMutator()
             };
+            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
             return mutator;
         }
         mutate(_mutator) {
@@ -4731,19 +4817,38 @@ var Fudge;
             this.timeout = _timeout;
             this.arguments = _arguments;
             this.startTimeReal = performance.now();
-            this.timeoutReal = this.timeout / _time.getScale();
             this.callback = _callback;
+            let scale = Math.abs(_time.getScale());
+            if (!scale) {
+                // Time is stopped, timer won't be active
+                this.active = false;
+                return;
+            }
             let id;
+            this.timeoutReal = this.timeout / scale;
             if (this.type == TIMER_TYPE.TIMEOUT) {
                 let callback = () => {
-                    _time.clearTimeout(id);
+                    _time.deleteTimerByInternalId(this.id);
                     _callback(_arguments);
-                    id = window.setInterval(callback, _timeout / _time.getScale());
                 };
+                id = window.setTimeout(callback, this.timeoutReal);
             }
             else
-                id = window.setTimeout(_callback, _timeout / _time.getScale(), _arguments);
+                id = window.setInterval(_callback, this.timeoutReal, _arguments);
             this.id = id;
+            this.active = true;
+        }
+        clear() {
+            if (this.type == TIMER_TYPE.TIMEOUT) {
+                if (this.active)
+                    // save remaining time to timeout as new timeout for restart
+                    this.timeout = this.timeout * (1 - (performance.now() - this.startTimeReal) / this.timeoutReal);
+                window.clearTimeout(this.id);
+            }
+            else
+                // TODO: reusing timer starts interval anew. Should be remaining interval as timeout, then starting interval anew 
+                window.clearInterval(this.id);
+            this.active = false;
         }
     }
     /**
@@ -4751,9 +4856,11 @@ var Fudge;
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Time {
+    class Time extends EventTarget {
         constructor() {
-            this.timers = [];
+            super();
+            this.timers = {};
+            this.idTimerNext = 0;
             this.start = performance.now();
             this.scale = 1.0;
             this.offset = 0.0;
@@ -4786,9 +4893,11 @@ var Fudge;
          */
         setScale(_scale = 1.0) {
             this.set(this.get());
-            this.rescaleAllTimers();
             this.scale = _scale;
+            //TODO: catch scale=0
+            this.rescaleAllTimers();
             this.getElapsedSincePreviousCall();
+            this.dispatchEvent(new Event("timeScaled" /* TIME_SCALED */));
         }
         /**
          * Retrieves the current scaling of this time
@@ -4808,46 +4917,85 @@ var Fudge;
         }
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setTimeout(_callback, _timeout, ..._arguments) {
             return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
         }
+        /**
+         * See Javascript documentation. Creates an internal [[Timer]] object
+         * @param _callback
+         * @param _timeout
+         * @param _arguments
+         */
         setInterval(_callback, _timeout, ..._arguments) {
             return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
         }
+        /**
+         * See Javascript documentation
+         * @param _id
+         */
         clearTimeout(_id) {
-            window.clearInterval(_id);
-            delete this.timers[_id];
-        }
-        clearInterval(_id) {
-            window.clearInterval(_id);
-            delete this.timers[_id];
+            this.deleteTimer(_id);
         }
         /**
-         * Stops and deletes all timers attached. Should be called before this Time-object leaves scope
+         * See Javascript documentation
+         * @param _id
+         */
+        clearInterval(_id) {
+            this.deleteTimer(_id);
+        }
+        /**
+         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers() {
             for (let id in this.timers) {
-                if (this.timers[id].type == TIMER_TYPE.TIMEOUT)
-                    this.clearTimeout(parseInt(id));
-                else
-                    this.clearInterval(parseInt(id));
+                this.deleteTimer(Number(id));
             }
         }
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
         rescaleAllTimers() {
-            for (let timer of this.timers) {
-                if (timer.type == TIMER_TYPE.TIMEOUT)
-                    this.clearTimeout(timer.id);
-                else
-                    this.clearInterval(timer.id);
-                // rescaling
-                let timeoutLeft = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                this.setTimer(timer.type, timer.callback, timeoutLeft, timer.arguments);
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                timer.clear();
+                if (!this.scale)
+                    // Time has stopped, no need to replace cleared timers
+                    continue;
+                let timeout = timer.timeout;
+                // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
+                //     // for an active timeout-timer, calculate the remaining time to timeout
+                //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
+                let replace = new Timer(this, timer.type, timer.callback, timeout, timer.arguments);
+                this.timers[id] = replace;
+            }
+        }
+        /**
+         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * @param _id
+         */
+        deleteTimerByInternalId(_id) {
+            for (let id in this.timers) {
+                let timer = this.timers[id];
+                if (timer.id == _id) {
+                    timer.clear();
+                    delete this.timers[id];
+                }
             }
         }
         setTimer(_type, _callback, _timeout, _arguments) {
             let timer = new Timer(this, _type, _callback, _timeout, _arguments);
-            this.timers.push(timer);
-            return timer.id;
+            this.timers[++this.idTimerNext] = timer;
+            return this.idTimerNext;
+        }
+        deleteTimer(_id) {
+            this.timers[_id].clear();
+            delete this.timers[_id];
         }
     }
     Time.gameTime = new Time();
@@ -4876,33 +5024,40 @@ var Fudge;
         /**
          * Starts the loop with the given mode and fps
          * @param _mode
-         * @param _fps
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
          */
-        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 30) {
+        static start(_mode = LOOP_MODE.FRAME_REQUEST, _fps = 60, _syncWithAnimationFrame = false) {
             Loop.stop();
             Loop.timeStartGame = Fudge.Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fps = _fps;
+            Loop.timeLastFrameGame = Loop.timeStartGame;
+            Loop.timeLastFrameReal = Loop.timeStartReal;
+            Loop.fpsDesired = (_mode == LOOP_MODE.FRAME_REQUEST) ? 60 : _fps;
+            Loop.framesToAverage = Loop.fpsDesired;
+            Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
             Loop.mode = _mode;
+            Loop.syncWithAnimationFrame = _syncWithAnimationFrame;
             let log = `Loop starting in mode ${Loop.mode}`;
             if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
                 log += ` with attempted ${_fps} fps`;
             Fudge.Debug.log(log);
             switch (_mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    this.loopFrame();
+                    Loop.loopFrame();
                     break;
                 case LOOP_MODE.TIME_REAL:
-                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / this.fps);
-                    this.loopReal();
+                    Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopGame, 1000 / this.fps);
-                    this.loopGame();
+                    Loop.idIntervall = Fudge.Time.game.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 default:
                     break;
             }
+            Loop.running = true;
         }
         /**
          * Stops the loop
@@ -4912,45 +5067,125 @@ var Fudge;
                 return;
             switch (Loop.mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    window.cancelAnimationFrame(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
+                    // TODO: DANGER! id changes internally in game when time is scaled!
                     Fudge.Time.game.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 default:
                     break;
             }
             Fudge.Debug.log("Loop stopped!");
         }
+        static getFpsGameAverage() {
+            return 1000 / Loop.timeLastFrameGameAvg;
+        }
+        static getFpsRealAverage() {
+            return 1000 / Loop.timeLastFrameRealAvg;
+        }
         static loop() {
             let time;
             time = performance.now();
-            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeFrameReal = time - Loop.timeLastFrameReal;
             Loop.timeLastFrameReal = time;
             time = Fudge.Time.game.get();
-            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeFrameGame = time - Loop.timeLastFrameGame;
             Loop.timeLastFrameGame = time;
+            Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
+            Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
             let event = new Event("loopFrame" /* LOOP_FRAME */);
             Loop.targetStatic.dispatchEvent(event);
         }
         static loopFrame() {
             Loop.loop();
-            Loop.idIntervall = window.requestAnimationFrame(Loop.loopFrame);
+            Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
         }
-        static loopReal() {
-            Loop.loop();
-        }
-        static loopGame() {
-            Loop.loop();
+        static loopTime() {
+            if (Loop.syncWithAnimationFrame)
+                Loop.idRequest = window.requestAnimationFrame(Loop.loop);
+            else
+                Loop.loop();
         }
     }
+    /** The gametime the loop was started, overwritten at each start */
+    Loop.timeStartGame = 0;
+    /** The realtime the loop was started, overwritten at each start */
+    Loop.timeStartReal = 0;
+    /** The gametime elapsed since the last loop cycle */
+    Loop.timeFrameGame = 0;
+    /** The realtime elapsed since the last loop cycle */
+    Loop.timeFrameReal = 0;
+    Loop.timeLastFrameGame = 0;
+    Loop.timeLastFrameReal = 0;
+    Loop.timeLastFrameGameAvg = 0;
+    Loop.timeLastFrameRealAvg = 0;
     Loop.running = false;
     Loop.mode = LOOP_MODE.FRAME_REQUEST;
     Loop.idIntervall = 0;
-    Loop.fps = 30;
+    Loop.idRequest = 0;
+    Loop.fpsDesired = 30;
+    Loop.framesToAverage = 30;
+    Loop.syncWithAnimationFrame = false;
     Fudge.Loop = Loop;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends Fudge.EventTargetStatic {
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static load() {
+            let selector;
+            selector = document.createElement("input");
+            selector.setAttribute("type", "file");
+            selector.setAttribute("multiple", "true");
+            selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
+            selector.click();
+        }
+        // TODO: refactor to async function to be handled using promise, instead of using event target
+        static save(_toSave) {
+            for (let filename in _toSave) {
+                let content = _toSave[filename];
+                let blob = new Blob([content], { type: "text/plain" });
+                let url = window.URL.createObjectURL(blob);
+                //*/ using anchor element for download
+                let downloader;
+                downloader = document.createElement("a");
+                downloader.setAttribute("href", url);
+                downloader.setAttribute("download", filename);
+                document.body.appendChild(downloader);
+                downloader.click();
+                document.body.removeChild(downloader);
+                window.URL.revokeObjectURL(url);
+            }
+            let event = new CustomEvent("fileSaved" /* FILE_SAVED */, { detail: { mapFilenameToContent: _toSave } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async handleFileSelect(_event) {
+            let fileList = _event.target.files;
+            if (fileList.length == 0)
+                return;
+            let loaded = {};
+            await FileIoBrowserLocal.loadFiles(fileList, loaded);
+            let event = new CustomEvent("fileLoaded" /* FILE_LOADED */, { detail: { mapFilenameToContent: loaded } });
+            FileIoBrowserLocal.targetStatic.dispatchEvent(event);
+        }
+        static async loadFiles(_fileList, _loaded) {
+            for (let filename in _fileList) {
+                let file = _fileList[filename];
+                const content = await new Response(file).text();
+                _loaded[filename] = content;
+            }
+        }
+    }
+    Fudge.FileIoBrowserLocal = FileIoBrowserLocal;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

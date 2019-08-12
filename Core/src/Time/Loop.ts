@@ -15,33 +15,44 @@ namespace Fudge {
      */
     export class Loop extends EventTargetStatic {
         /** The gametime the loop was started, overwritten at each start */
-        public static timeStartGame: number;
+        public static timeStartGame: number = 0;
         /** The realtime the loop was started, overwritten at each start */
-        public static timeStartReal: number;
+        public static timeStartReal: number = 0;
         /** The gametime elapsed since the last loop cycle */
-        public static timeFrameGame: number;
+        public static timeFrameGame: number = 0;
         /** The realtime elapsed since the last loop cycle */
-        public static timeFrameReal: number;
+        public static timeFrameReal: number = 0;
 
-        private static timeLastFrameGame: number;
-        private static timeLastFrameReal: number;
+        private static timeLastFrameGame: number = 0;
+        private static timeLastFrameReal: number = 0;
+        private static timeLastFrameGameAvg: number = 0;
+        private static timeLastFrameRealAvg: number = 0;
         private static running: boolean = false;
         private static mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST;
         private static idIntervall: number = 0;
-        private static fps: number = 30;
+        private static idRequest: number = 0;
+        private static fpsDesired: number = 30;
+        private static framesToAverage: number = 30;
+        private static syncWithAnimationFrame: boolean = false;
 
         /**
          * Starts the loop with the given mode and fps
          * @param _mode 
-         * @param _fps 
+         * @param _fps Is only applicable in TIME-modes
+         * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
          */
-        public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 30): void {
+        public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 60, _syncWithAnimationFrame: boolean = false): void {
             Loop.stop();
 
             Loop.timeStartGame = Time.game.get();
             Loop.timeStartReal = performance.now();
-            Loop.fps = _fps;
+            Loop.timeLastFrameGame = Loop.timeStartGame;
+            Loop.timeLastFrameReal = Loop.timeStartReal;
+            Loop.fpsDesired = (_mode == LOOP_MODE.FRAME_REQUEST) ? 60 : _fps;
+            Loop.framesToAverage = Loop.fpsDesired;
+            Loop.timeLastFrameGameAvg = Loop.timeLastFrameRealAvg = 1000 / Loop.fpsDesired;
             Loop.mode = _mode;
+            Loop.syncWithAnimationFrame = _syncWithAnimationFrame;
 
             let log: string = `Loop starting in mode ${Loop.mode}`;
             if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
@@ -50,19 +61,21 @@ namespace Fudge {
 
             switch (_mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    this.loopFrame();
+                    Loop.loopFrame();
                     break;
                 case LOOP_MODE.TIME_REAL:
-                    Loop.idIntervall = window.setInterval(Loop.loopReal, 1000 / this.fps);
-                    this.loopReal();
+                    Loop.idIntervall = window.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Time.game.setInterval(Loop.loopGame, 1000 / this.fps);
-                    this.loopGame();
+                    Loop.idIntervall = Time.game.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.loopTime();
                     break;
                 default:
                     break;
             }
+
+            Loop.running = true;
         }
 
         /**
@@ -74,13 +87,16 @@ namespace Fudge {
 
             switch (Loop.mode) {
                 case LOOP_MODE.FRAME_REQUEST:
-                    window.cancelAnimationFrame(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_REAL:
                     window.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
+                    // TODO: DANGER! id changes internally in game when time is scaled!
                     Time.game.clearInterval(Loop.idIntervall);
+                    window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 default:
                     break;
@@ -89,15 +105,25 @@ namespace Fudge {
             Debug.log("Loop stopped!");
         }
 
+        public static getFpsGameAverage(): number {
+            return 1000 / Loop.timeLastFrameGameAvg;
+        }
+        public static getFpsRealAverage(): number {
+            return 1000 / Loop.timeLastFrameRealAvg;
+        }
+
         private static loop(): void {
             let time: number;
             time = performance.now();
-            this.timeFrameReal = time - Loop.timeLastFrameReal;
+            Loop.timeFrameReal = time - Loop.timeLastFrameReal;
             Loop.timeLastFrameReal = time;
 
             time = Time.game.get();
-            this.timeFrameGame = time - Loop.timeLastFrameGame;
+            Loop.timeFrameGame = time - Loop.timeLastFrameGame;
             Loop.timeLastFrameGame = time;
+
+            Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
+            Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
 
             let event: Event = new Event(EVENT.LOOP_FRAME);
             Loop.targetStatic.dispatchEvent(event);
@@ -105,13 +131,14 @@ namespace Fudge {
 
         private static loopFrame(): void {
             Loop.loop();
-            Loop.idIntervall = window.requestAnimationFrame(Loop.loopFrame);
+            Loop.idRequest = window.requestAnimationFrame(Loop.loopFrame);
         }
-        private static loopReal(): void {
-            Loop.loop();
-        }
-        private static loopGame(): void {
-            Loop.loop();
+
+        private static loopTime(): void {
+            if (Loop.syncWithAnimationFrame)
+                Loop.idRequest = window.requestAnimationFrame(Loop.loop);
+            else
+                Loop.loop();
         }
     }
 

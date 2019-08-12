@@ -46,9 +46,9 @@ namespace NodeResource {
         console.groupEnd();
 
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
+        // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
         ƒ.Time.game.setScale(10);
-
         ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
 
         function update(_event: Event): void {

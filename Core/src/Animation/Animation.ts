@@ -7,6 +7,22 @@ namespace Fudge {
   }
 
   /**
+  * Holds information about Animation Labels
+  * @author Lukas Scheuerle, HFU, 2019
+  */
+  export interface AnimationLabel {
+    [name: string]: number;
+  }
+
+  /**
+  * Holds information about Animation Event Triggers
+  * @author Lukas Scheuerle, HFU, 2019
+  */
+  export interface AnimationEventTrigger {
+    [name: string]: number;
+  }
+
+  /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
    * @author Lukas Scheuerle, HFU, 2019
@@ -16,6 +32,7 @@ namespace Fudge {
     name: string;
     totalTime: number = 0;
     labels: AnimationLabel = {};
+    events: AnimationEventTrigger = {};
     fps: number = 60;
     sps: number = 10;
     animationStructure: AnimationStructure = {};
@@ -50,23 +67,31 @@ namespace Fudge {
         idResource: this.idResource,
         name: this.name,
         labels: {},
+        events: {},
         fps: this.fps,
         sps: this.sps
       };
       for (let name in this.labels) {
         s.labels[name] = this.labels[name];
       }
+      for (let name in this.events) {
+        s.events[name] = this.events[name];
+      }
       s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
       return s;
     }
     deserialize(_serialization: Serialization): Serializable {
-      this.idResource = _serialization.idResource,
+      this.idResource = _serialization.idResource;
       this.name = _serialization.name;
       this.fps = _serialization.fps;
       this.sps = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
         this.labels[name] = _serialization.labels[name];
+      }
+      this.events = {};
+      for (let name in _serialization.events) {
+        this.events[name] = _serialization.events[name];
       }
 
       this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
