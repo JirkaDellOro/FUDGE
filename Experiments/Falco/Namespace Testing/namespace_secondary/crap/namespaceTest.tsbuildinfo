@@ -1,11 +1,9 @@
 {
   "bundle": {
-    "commonSourceDirectory": "D:/Thesis/Namespace Testing/namespace_secondary/",
+    "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/Experiments/Falco/Namespace Testing/namespace_secondary/",
     "sourceFiles": [
-      "D:/Thesis/Namespace Testing/namespace_secondary/NamespaceFile1.ts",
-      "D:/Thesis/Namespace Testing/namespace_secondary/NamespaceFile2.ts",
-      "D:/Thesis/Namespace Testing/namespace_secondary/main.ts",
-      "D:/Thesis/Namespace Testing/namespace_secondary/renderer.ts"
+      "c:/Users/jirka/Documents/HFU/FUDGE/Experiments/Falco/Namespace Testing/namespace_secondary/NamespaceFile1.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Experiments/Falco/Namespace Testing/namespace_secondary/NamespaceFile2.ts"
     ],
     "js": {
       "sections": [
@@ -17,7 +15,7 @@
         },
         {
           "pos": 15,
-          "end": 2385,
+          "end": 365,
           "kind": "text"
         }
       ],
@@ -51,5 +49,5 @@
       ]
     }
   },
-  "version": "3.5.3"
+  "version": "3.5.1"
 }
