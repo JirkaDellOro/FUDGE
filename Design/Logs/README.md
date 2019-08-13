@@ -2,6 +2,14 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed 
 
+# August 12th 2019 ❇❇❇
+## Birth of FUDGE
+
+[Namespaces, Versioning, Build referencing](190813_Namespaces_Packaging.jpg) all were discussed and resulted in [this wiki page](https://github.com/JirkaDellOro/FUDGE/wiki/Project-Structure,-Namespaces,-Versioning-and-Releases).
+
+In addition, it was decided that the compiled FUDGE code is to be included in the standalone executable of the editor and that the users may decide themselves whether they want to include or reference the fudge code in their game.
+
+
 # August 8th 2019
 [Whiteboard](190808_Whiteboard.jpg)
 
