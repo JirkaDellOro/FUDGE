@@ -6,7 +6,7 @@ namespace FileIo {
     function init(): void {
         document.querySelector("button").addEventListener("click", handleStart);
     }
-    function handleStart(): void {
+    async function handleStart(): Promise<void> {
         let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         // ƒ.ResourceManager.register(material);
 
@@ -22,10 +22,6 @@ namespace FileIo {
 
         // let result: ƒ.Resources = testFileIo(node);
         testFileIo(node);
-        console.group("Comparison");
-        // Compare.compare(node, instance); 
-        // Compare.compare(ƒ.ResourceManager.resources, result);
-        console.groupEnd();
     }
 
     async function testFileIo(_branch: ƒ.Node): Promise<void> {
@@ -50,28 +46,32 @@ namespace FileIo {
         console.groupEnd();
 
         console.group("Load");
-        let loaded: string;
-        function handleLoad(_event: CustomEvent): void {
-            map = _event.detail.mapFilenameToContent;
-            console.log(map);
-            loaded = map["TestFileIo.ƒ"];
-            console.log(loaded);
-            ƒ.FileIoBrowserLocal.removeEventListener(ƒ.EVENT.FILE_LOADED, handleLoad);
-        }
         ƒ.FileIoBrowserLocal.addEventListener(ƒ.EVENT.FILE_LOADED, handleLoad);
         await ƒ.FileIoBrowserLocal.load();
         console.groupEnd();
 
-        while (!loaded);
 
-        console.group("Parsed");
-        let deserialization: ƒ.Serialization = ƒ.Serializer.parse(loaded);
-        console.log(deserialization);
-        console.groupEnd();
+        function handleLoad(_event: CustomEvent): void {
+            map = _event.detail.mapFilenameToContent;
+            console.log("Map", map);
+            for (let filename in map) {
 
-        console.group("Reconstructed");
-        let reconstruction: ƒ.Resources = ƒ.ResourceManager.deserialize(serialization);
-        console.log(reconstruction);
-        console.groupEnd();
+                let content: string = map[filename];
+                ƒ.FileIoBrowserLocal.removeEventListener(ƒ.EVENT.FILE_LOADED, handleLoad);
+                console.group("Parsed");
+                let deserialization: ƒ.Serialization = ƒ.Serializer.parse(content);
+                console.log(deserialization);
+                console.groupEnd();
+
+                console.group("Reconstructed");
+                let reconstruction: ƒ.Serializable = ƒ.Serializer.deserialize(serialization);
+                console.log(reconstruction);
+                console.groupEnd();
+
+                console.group("Comparison");
+                Compare.compare(_branch, reconstruction);
+                console.groupEnd();
+            }
+        }
     }
 }

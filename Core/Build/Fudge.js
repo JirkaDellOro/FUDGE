@@ -5146,12 +5146,13 @@ var Fudge;
     class FileIoBrowserLocal extends Fudge.EventTargetStatic {
         // TODO: refactor to async function to be handled using promise, instead of using event target
         static load() {
-            let selector;
-            selector = document.createElement("input");
-            selector.setAttribute("type", "file");
-            selector.setAttribute("multiple", "true");
-            selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
-            selector.click();
+            FileIoBrowserLocal.selector = document.createElement("input");
+            FileIoBrowserLocal.selector.type = "file";
+            FileIoBrowserLocal.selector.multiple = true;
+            FileIoBrowserLocal.selector.hidden = true;
+            FileIoBrowserLocal.selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
+            document.body.appendChild(FileIoBrowserLocal.selector);
+            FileIoBrowserLocal.selector.click();
         }
         // TODO: refactor to async function to be handled using promise, instead of using event target
         static save(_toSave) {
@@ -5173,7 +5174,10 @@ var Fudge;
             FileIoBrowserLocal.targetStatic.dispatchEvent(event);
         }
         static async handleFileSelect(_event) {
+            console.log("-------------------------------- handleFileSelect");
+            document.body.removeChild(FileIoBrowserLocal.selector);
             let fileList = _event.target.files;
+            console.log(fileList, fileList.length);
             if (fileList.length == 0)
                 return;
             let loaded = {};
@@ -5182,10 +5186,9 @@ var Fudge;
             FileIoBrowserLocal.targetStatic.dispatchEvent(event);
         }
         static async loadFiles(_fileList, _loaded) {
-            for (let filename in _fileList) {
-                let file = _fileList[filename];
+            for (let file of _fileList) {
                 const content = await new Response(file).text();
-                _loaded[filename] = content;
+                _loaded[file.name] = content;
             }
         }
     }

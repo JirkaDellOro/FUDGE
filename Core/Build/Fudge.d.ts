@@ -2162,6 +2162,7 @@ declare namespace Fudge {
      * Saves to the download-path given by the browser, loads from the player's choice.
      */
     class FileIoBrowserLocal extends EventTargetStatic {
+        private static selector;
         static load(): void;
         static save(_toSave: MapFilenameToContent): void;
         static handleFileSelect(_event: Event): Promise<void>;

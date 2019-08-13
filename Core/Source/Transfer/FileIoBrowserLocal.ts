@@ -7,14 +7,16 @@ namespace Fudge {
      * Saves to the download-path given by the browser, loads from the player's choice.
      */
     export class FileIoBrowserLocal extends EventTargetStatic {
+        private static selector: HTMLInputElement;
         // TODO: refactor to async function to be handled using promise, instead of using event target
         public static load(): void {
-            let selector: HTMLInputElement;
-            selector = document.createElement("input");
-            selector.setAttribute("type", "file");
-            selector.setAttribute("multiple", "true");
-            selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
-            selector.click();
+            FileIoBrowserLocal.selector = document.createElement("input");
+            FileIoBrowserLocal.selector.type = "file";
+            FileIoBrowserLocal.selector.multiple = true;
+            FileIoBrowserLocal.selector.hidden = true;
+            FileIoBrowserLocal.selector.addEventListener("change", FileIoBrowserLocal.handleFileSelect);
+            document.body.appendChild(FileIoBrowserLocal.selector);
+            FileIoBrowserLocal.selector.click();
         }
 
         // TODO: refactor to async function to be handled using promise, instead of using event target
@@ -39,7 +41,10 @@ namespace Fudge {
         }
 
         public static async handleFileSelect(_event: Event): Promise<void> {
+            console.log("-------------------------------- handleFileSelect");
+            document.body.removeChild(FileIoBrowserLocal.selector);
             let fileList: FileList = (<HTMLInputElement>_event.target).files;
+            console.log(fileList, fileList.length);
             if (fileList.length == 0)
                 return;
 
@@ -51,10 +56,9 @@ namespace Fudge {
         }
 
         public static async loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void> {
-            for (let filename in _fileList) {
-                let file: File = _fileList[filename];
+            for (let file of _fileList) {
                 const content: string = await new Response(file).text();
-                _loaded[filename] = content;
+                _loaded[file.name] = content;
             }
         }
     }
