@@ -59,4 +59,4 @@ var AnimatorComponentTest;
         console.log("event!");
     }
 })(AnimatorComponentTest || (AnimatorComponentTest = {}));
-//# sourceMappingURL=AnimatorComponent.js.map
+//# sourceMappingURL=AnimatorComponentTest.js.map

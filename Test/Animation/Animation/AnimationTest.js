@@ -67,4 +67,4 @@ var AnimationTest;
         console.log("event!");
     }
 })(AnimationTest || (AnimationTest = {}));
-//# sourceMappingURL=Animation.js.map
+//# sourceMappingURL=AnimationTest.js.map
