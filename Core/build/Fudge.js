@@ -4335,8 +4335,11 @@ var Fudge;
                             if (this.components[componentName][+i]) {
                                 let componentToMutate = this.components[componentName][+i];
                                 let mutatorArray = mutatorOfComponent[componentName];
-                                let mutatorToGive = mutatorArray[+i][("ƒ." + componentName)];
-                                componentToMutate.mutate(mutatorToGive);
+                                let mutatorWithComponentName = mutatorArray[+i];
+                                for (let cname in mutatorWithComponentName) { // trick used to get the only entry in the list
+                                    let mutatorToGive = mutatorWithComponentName[cname];
+                                    componentToMutate.mutate(mutatorToGive);
+                                }
                             }
                         }
                     }

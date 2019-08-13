@@ -1,0 +1,53 @@
+{
+  "bundle": {
+    "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/Test/Electron/Namespaces/Module/",
+    "sourceFiles": [
+      "c:/Users/jirka/Documents/HFU/FUDGE/Test/Electron/Namespaces/Module/NamespaceModule1.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/Test/Electron/Namespaces/Module/NamespaceModule2.ts"
+    ],
+    "js": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 13,
+          "kind": "prologue",
+          "data": "use strict"
+        },
+        {
+          "pos": 15,
+          "end": 565,
+          "kind": "text"
+        }
+      ],
+      "sources": {
+        "prologues": [
+          {
+            "file": 0,
+            "text": "",
+            "directives": [
+              {
+                "pos": -1,
+                "end": -1,
+                "expression": {
+                  "pos": -1,
+                  "end": -1,
+                  "text": "use strict"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "dts": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 194,
+          "kind": "text"
+        }
+      ]
+    }
+  },
+  "version": "3.5.1"
+}
