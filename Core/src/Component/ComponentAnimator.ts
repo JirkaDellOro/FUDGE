@@ -95,14 +95,14 @@ namespace Fudge {
       time = this.calculateCurrentTime(time, direction);
 
       this.updateAnimation(time, direction);
-      //TODO: fix backwards
+      //TODO: fix backwards and PINGPONG
       this.checkEventBetween(this.lastTime, time);
       this.lastTime = time;
     }
 
     private updateAnimationRastered(): void {
       let time: number = this.time.get();
-      //TODO: fix backwards
+      //TODO: fix backwards and PINGPONG
       let direction: number = this.calculateDirection(time);
       time = this.calculateCurrentTime(time, direction);
       let timePerFrame: number = 1000 / this.animation.fps;
@@ -121,7 +121,7 @@ namespace Fudge {
       let direction: number = this.calculateDirection(time);
       time = time % this.animation.totalTime;
 
-      //TODO: fix backwards
+      //TODO: fix backwards and PINGPONG
       // if(direction < 0) {
       //   let newTime: number = this.animation.totalTime
       // }
