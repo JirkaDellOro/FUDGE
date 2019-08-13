@@ -1,3 +1,4 @@
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 var Scenes;
 (function (Scenes) {
     var ƒ = Fudge;

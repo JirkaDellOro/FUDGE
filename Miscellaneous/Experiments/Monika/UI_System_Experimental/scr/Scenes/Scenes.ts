@@ -1,3 +1,5 @@
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
+
 namespace Scenes {
     import ƒ = Fudge;
 

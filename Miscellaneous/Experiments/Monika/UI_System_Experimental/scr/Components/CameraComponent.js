@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../UI/MutableUI.ts"/>
 var UI;
 (function (UI) {
@@ -14,6 +14,7 @@ var UI;
                     this.mutator[target.id] = target.checked;
                 }
                 else {
+                    console.log(formData);
                     for (let entry of formData) {
                         if (entry[0] == target.id) {
                             this.mutator[entry[0]] = entry[1];
@@ -23,7 +24,7 @@ var UI;
                 this.mutable.mutate(this.mutator);
             };
             this.root = document.createElement("form");
-            UI.UIGenerator.createFromMutator(_camera, this.root);
+            UI.UIGenerator.createFromMutable(_camera, this.root);
             this.root.addEventListener("input", this.updateUI);
             container.getElement().html(this.root);
         }

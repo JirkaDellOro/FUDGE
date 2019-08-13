@@ -1,13 +1,12 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 var UI;
 (function (UI) {
     class UIGenerator {
-        static createFromMutator(_mutable, element) {
+        static createFromMutable(_mutable, _element) {
             let name = _mutable.constructor.name;
             let _types;
             let mutator = _mutable.getMutator();
-            let _parent = UIGenerator.createFieldset(name, element);
-            let data;
+            let _parent = UIGenerator.createFieldset(name, _element);
             _types = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in _types) {
                 let type = _types[key];
@@ -34,12 +33,14 @@ var UI;
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
+                        case "Object":
+                            let subMutable = _mutable[key];
+                            this.createFromMutable(subMutable, _parent);
                         default:
                             break;
                     }
                 }
             }
-            return data;
         }
         static createDropdown(_id, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
@@ -80,7 +81,7 @@ var UI;
             label.innerText = params._value;
             if (!params._cssClass == undefined)
                 label.classList.add(params._cssClass);
-            label.id = _id;
+            label.id = "_" + _id;
             _parent.appendChild(label);
             return label;
         }

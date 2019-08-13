@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../UI/MutableUI.ts"/>
 var UI;
 (function (UI) {
@@ -27,7 +27,7 @@ var UI;
             let testdiv = document.createElement("div");
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
-            UI.UIGenerator.createFromMutator(_camera, this.root);
+            UI.UIGenerator.createFromMutable(_camera, this.root);
             this.root.addEventListener("input", this.updateUI);
             container.getElement().html(this.root);
         }

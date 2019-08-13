@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 namespace UI {
     import ƒ = Fudge;
     export abstract class MutableUI {
@@ -27,24 +27,18 @@ namespace UI {
         }
 
         protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement) {
-            let children: HTMLCollection = _root.children;
-            for (let child of children) {
-                if (child.children.length > 0) {
-                    this.fillById(_mutator, <HTMLInputElement>child);
-                }
-                for (let key in _mutator) {
-                    if (child.id == key) {
-                        let type: string = child.getAttribute("type");
-                        if (type == "checkbox") {
-                            let checkbox: HTMLInputElement = <HTMLInputElement>child;
-                            checkbox.checked = <boolean>_mutator[key];
-                        }
-                        else {
-                            let input: HTMLInputElement = <HTMLInputElement>child;
-                            input.value = <string>_mutator[key];
-                        }
-                    }
-                }
+            let mutatorTypes: ƒ.MutatorAttributeTypes = this.mutable.getMutatorAttributeTypes(this.mutator);
+            for(let key in this.mutator)
+            {  
+                let element:HTMLInputElement = this.root.querySelector("#"+key);
+                console.log(key);
+                console.log(element);
+                // switch(mutatorTypes[key]){
+                //     case "Boolean":
+
+                //         break;
+                // }
+                
             }
         }
     }

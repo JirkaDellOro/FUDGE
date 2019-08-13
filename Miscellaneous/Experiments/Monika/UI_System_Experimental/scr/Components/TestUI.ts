@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../UI/MutableUI.ts"/>
 
 namespace UI {
@@ -13,7 +13,7 @@ namespace UI {
             let testdiv:HTMLElement = document.createElement("div");
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
-            UIGenerator.createFromMutator(<ƒ.Mutable>_camera, this.root);
+            UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
             this.root.addEventListener("input", this.updateUI);
             container.getElement().html(this.root);
         }

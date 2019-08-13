@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 var UI;
 (function (UI) {
     class MutableUI {
@@ -19,24 +19,15 @@ var UI;
             this.root.addEventListener("input", this.updateUI);
         }
         fillById(_mutator, _root) {
-            let children = _root.children;
-            for (let child of children) {
-                if (child.children.length > 0) {
-                    this.fillById(_mutator, child);
-                }
-                for (let key in _mutator) {
-                    if (child.id == key) {
-                        let type = child.getAttribute("type");
-                        if (type == "checkbox") {
-                            let checkbox = child;
-                            checkbox.checked = _mutator[key];
-                        }
-                        else {
-                            let input = child;
-                            input.value = _mutator[key];
-                        }
-                    }
-                }
+            let mutatorTypes = this.mutable.getMutatorAttributeTypes(this.mutator);
+            for (let key in this.mutator) {
+                let element = this.root.querySelector("#" + key);
+                console.log(key);
+                console.log(element);
+                // switch(mutatorTypes[key]){
+                //     case "Boolean":
+                //         break;
+                // }
             }
         }
     }

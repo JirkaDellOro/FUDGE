@@ -1,14 +1,13 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 namespace UI {
     import ƒ = Fudge;
 
     export class UIGenerator {
-        public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement):FormData {
+        public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement) {
             let name: string = _mutable.constructor.name;
             let _types: ƒ.MutatorAttributeTypes;
             let mutator: ƒ.Mutator = _mutable.getMutator();
-            let _parent = UIGenerator.createFieldset(name, element);
-            let data:FormData;
+            let _parent = UIGenerator.createFieldset(name, _element);
             _types = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in _types) {
                 let type: Object = _types[key];
@@ -24,8 +23,7 @@ namespace UI {
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
                             let num_value: number = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable});
-
+                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -36,14 +34,18 @@ namespace UI {
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value })
                             break;
+                        case "Object":
+                            let subMutable: ƒ.Mutable = _mutable[key];
+                            this.createFromMutable(subMutable, _parent)
                         default:
                             break;
                     }
                 }
             }
-            return data;
         }
-        public static createDropdown(_id:string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string):HTMLSelectElement {
+
+        public static create
+        public static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
             let dropdown: HTMLSelectElement = document.createElement("select");
             dropdown.id = _id;
             dropdown.name = _id;
@@ -85,7 +87,7 @@ namespace UI {
             label.innerText = params._value;
             if (!params._cssClass == undefined)
                 label.classList.add(params._cssClass);
-            label.id = _id;
+            label.id = "_" + _id;
             _parent.appendChild(label);
 
             return label;
@@ -116,14 +118,14 @@ namespace UI {
             return valueInput;
         }
 
-        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?:ƒ.Mutable } = {}):HTMLSpanElement {
+        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?: ƒ.Mutable } = {}): HTMLSpanElement {
 
             if (params._value == undefined)
                 params._value = 0;
             let stepper: HTMLSpanElement = new Stepper(_id, { value: params._value });
             // if(params._mutable != null)
             //     stepper.addEventListener("input", function(_event:Event){
-                    
+
             //         let mutator:ƒ.Mutator =  params._mutable.getMutator();
             //         let stepperValueHolder:HTMLInputElement = <HTMLInputElement>stepper.firstChild;
             //         let inputValue:String = stepperValueHolder.value;

@@ -1,4 +1,4 @@
-/// <reference path="../../../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../UI/MutableUI.ts"/>
 
 namespace UI {
@@ -8,7 +8,7 @@ namespace UI {
         public constructor(container: any, state: any, _camera: ƒ.ComponentCamera) {
             super(_camera);
             this.root = document.createElement("form");
-            UIGenerator.createFromMutator(<ƒ.Mutable>_camera, this.root);
+            UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
             this.root.addEventListener("input", this.updateUI);
             container.getElement().html(this.root);
         }
@@ -21,6 +21,7 @@ namespace UI {
                 this.mutator[target.id] = target.checked;
             }
             else {
+                console.log(formData);
                 for (let entry of formData) {
                     if (entry[0] == target.id) {
                         this.mutator[entry[0]] = entry[1];
