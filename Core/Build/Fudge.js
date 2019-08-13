@@ -225,7 +225,7 @@ var Fudge;
             let types = {};
             for (let attribute in _mutator) {
                 let type = null;
-                if (_mutator[attribute])
+                if (_mutator[attribute] != undefined)
                     type = _mutator[attribute].constructor.name;
                 types[attribute] = type;
             }
