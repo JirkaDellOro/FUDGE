@@ -2,7 +2,7 @@
   "name": "electron-fileio-test",
   "version": "0.0.0",
   "description": "A minimal Electron application",
-  "main": "Main.js",
+  "main": "MainTest.js",
   "scripts": {
     "start": "electron ."
   },
@@ -10,5 +10,8 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/electron": "^1.6.10"
   }
 }
