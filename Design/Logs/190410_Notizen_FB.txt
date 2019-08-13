@@ -1,6 +1,0 @@
-- Verschiedene Technologien vorgestellt
-- Diskutiert welches für was gut ist
-- Auswahl letztlich auf Websocket für Signaling/TCP und WebRTC für UDP gefallen
-- DGram fällt weg weil Node zwingend erforderlich ist und Unterstützung gering
-- Server Sent events als mögliche Alternative für TCP, aber nur für Nischenspiele brauchbar
-- 

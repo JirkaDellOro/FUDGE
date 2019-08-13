@@ -1,0 +1,15 @@
+Ziel
+#Generating and Closing AudioContext
+#Multiple AC at the same time
+#
+
+
+
+
+TODO
+#TS version
+
+
+
+Probleme
+#

@@ -1,6 +1,6 @@
 {
     "mode": "file",
-    "out": "../reference",
+    "out": "../../Documentation/Reference",
     "name": "Fudge Core",
     "readme": "none",
     "excludePrivate": "true",

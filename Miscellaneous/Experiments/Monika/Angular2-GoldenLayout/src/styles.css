@@ -1,0 +1,7 @@
+/* Add application styles & imports to this file! */
+*{
+  color:white;
+}
+button, input{
+  color:black;
+}

@@ -1,4 +1,0 @@
-- Bugfiiiiiixes, besonders Guidelines nicht beachtet, TSlinter Probleme, TSConfig geändert
-- Eigentlich hauptsächlich nur Bugfixes betrieben
-- TypeScript umgebaut damit es besser funktioniert
-- TSLinst configuration geändert, z.b. Zeilenlänge, VariablenName etc.

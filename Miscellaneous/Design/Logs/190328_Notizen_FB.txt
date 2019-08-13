@@ -1,0 +1,6 @@
+- Besprochen wie Fudge aufgebaut ist
+- Node.js nutzbar, auf dem Server in jedem Fall
+- Electron zur Laufzeit nicht verfügbar
+- Server Komponenten im Rahmen
+
+- Mögliche Technologien besprchen, WebRTC, Datagram, Websockets, 

@@ -1,5 +1,0 @@
-- Namespace Error-> Kann nach compiling nicht gefunden werden
-- Einiges ausprobiert, vermtulich liegt es daran das man ///<reference> und impot nicht zeitgleich verwenden kann (Import macht es zu einem Modul)
-- Kooperation mit Monika wegen NameSpace problemem
-- Selbst experimente durchführen mit minimaler Komplexität um namespace error einzugrenzen
-- Wenigstens funktionieren die Messages mit dem Namespace...

@@ -1197,13 +1197,13 @@ var Fudge;
             let direction = this.calculateDirection(time);
             time = this.calculateCurrentTime(time, direction);
             this.updateAnimation(time, direction);
-            //TODO: fix backwards
+            //TODO: fix backwards and PINGPONG
             this.checkEventBetween(this.lastTime, time);
             this.lastTime = time;
         }
         updateAnimationRastered() {
             let time = this.time.get();
-            //TODO: fix backwards
+            //TODO: fix backwards and PINGPONG
             let direction = this.calculateDirection(time);
             time = this.calculateCurrentTime(time, direction);
             let timePerFrame = 1000 / this.animation.fps;
@@ -1220,7 +1220,7 @@ var Fudge;
             let time = this.lastFrameTime + timePerFrame;
             let direction = this.calculateDirection(time);
             time = time % this.animation.totalTime;
-            //TODO: fix backwards
+            //TODO: fix backwards and PINGPONG
             // if(direction < 0) {
             //   let newTime: number = this.animation.totalTime
             // }

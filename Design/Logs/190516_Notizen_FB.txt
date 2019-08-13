@@ -1,5 +1,0 @@
-- F unktionierendenCode v4on der Vorwoche gezeigt, einfahe Chat und videoübertragung
-- immernoch auf TypeScript umstellen, noch nicht ollständig, TsLinter verwenden
-- Wochenplanung vorgenommen, vor allem Fokus erstmal auf P2P Verbindungen mehrerer Kandidaten
-- Authoritative Server im Anschluss
-- 

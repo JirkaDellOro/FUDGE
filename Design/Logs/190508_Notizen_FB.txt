@@ -1,5 +1,0 @@
-- WebRTC implementation von einfachem Chat gezeigt, hat nicht funktioniert, bekam random error und Wifi war down
-- Coding guidelines umsetzen!
-- TypeScript verwenden für die Kommunikation statt JavaScript
-- Diagram für MessageObjekte gezeigt, mitsamt Interface für die Basisklasse
-- CODING GUIDELINES!

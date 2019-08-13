@@ -1,0 +1,25 @@
+@startuml
+|Mutable|
+|Component|
+|Component Pivot|
+|Component Transfer|
+|Caller|
+start
+|Component Transfer|
+:getMutatorForAnim;
+|Mutable|
+:getMutatorForAnimation;
+:getMutator collects all primitives and mutables;
+|Component Transfer|
+:reduceMutator delete worldMatrix;
+|Component|
+:reduceMutator delete singleton;
+|Mutable|
+:replace references of mutables with references to copies -> getMutator;
+|Component Pivot|
+:getMutator of Matrix;
+|Mutable|
+:mutator;
+|Caller|
+stop
+@enduml

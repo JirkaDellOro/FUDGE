@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Web Audio API Test 2</title>
+    <script src="scripts/Selector.js"></script>
+</head>
+
+<body>
+    <div>
+        <h1>Web Audio API Test 2</h1>
+    </div>
+    <br><br>
+    <div>
+        <p>Suche dir einen Song aus!</p>
+    </div>
+    <div>
+        <select id="soundOptions">
+            <option value="mario" selected>Mario</option>
+            <option value="hypnotic">Hypnotic</option>
+            <option value="trancyvenia">Trancyvenia</option>
+        </select>
+        <br><br>
+        <button>Play</button>
+        <p id="soundSelectionField"></p>
+    </div>
+    <br><br>
+    <br><br>
+    <div>
+        Stelle hier noch die Lautstärke ein!
+    </div>
+    <br><br>
+    <div id="volume">
+        <input type="range" min="0" max="1" value="0.5" step="0.1" id="volumeSlider">
+        <br>
+        <p id="volumeOutput"></p>
+    </div>
+</body>
+
+</html>
