@@ -37,7 +37,7 @@ var FileIo;
         console.groupEnd();
         console.group("Save");
         let map = { "TestFileIo.ƒ": json };
-        ƒ.FileIoBrowserLocal.save(map);
+        await ƒ.FileIoBrowserLocal.save(map);
         console.log(map);
         console.groupEnd();
         console.group("Load");

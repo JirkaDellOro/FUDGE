@@ -1,8 +1,8 @@
 /// <reference path="MainNamespace.ts" />
-/// <reference path="./../Build/Module.d.ts" />
+// / <reference path="./../Build/Module.d.ts" />
 var MainNamespace;
 /// <reference path="MainNamespace.ts" />
-/// <reference path="./../Build/Module.d.ts" />
+// / <reference path="./../Build/Module.d.ts" />
 (function (MainNamespace) {
     let classMain = new MainNamespace.ClassMain();
     let classModule1 = new NamespaceModule.ClassModule1();

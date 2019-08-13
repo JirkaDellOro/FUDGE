@@ -1,5 +1,6 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
 var MoniUI;
+/// <reference path="../../../../Core/build/Fudge.d.ts"/>
 (function (MoniUI) {
     class MutableUI {
         constructor(mutable) {

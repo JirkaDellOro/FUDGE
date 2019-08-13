@@ -2,6 +2,9 @@
 // <reference path="../../../Core/build/Fudge.d.ts"/>
 // console.log(Fudge);
 var UI;
+// <reference path="../../../Core/src/Transfer/Serializer.ts"/>
+// <reference path="../../../Core/build/Fudge.d.ts"/>
+// console.log(Fudge);
 (function (UI) {
     let myLayout;
     let savedState;

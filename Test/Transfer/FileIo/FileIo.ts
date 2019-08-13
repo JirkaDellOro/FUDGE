@@ -45,7 +45,7 @@ namespace FileIo {
 
         console.group("Save");
         let map: ƒ.MapFilenameToContent = { "TestFileIo.ƒ": json };
-        ƒ.FileIoBrowserLocal.save(map);
+        await ƒ.FileIoBrowserLocal.save(map);
         console.log(map);
         console.groupEnd();
 

@@ -1,5 +1,6 @@
 var NamespaceModule;
 (function (NamespaceModule) {
+    // @ts-ignore:
     class ClassModule2 {
         constructor() {
             console.log(this.constructor.name, this);
