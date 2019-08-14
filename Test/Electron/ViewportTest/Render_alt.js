@@ -1,10 +1,10 @@
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
-/// <reference path="../../@types/golden-layout/index.d.ts"/>
+/// <reference types="../../@types/golden-layout"/>
 var ElectronViewport;
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
-/// <reference path="../../@types/golden-layout/index.d.ts"/>
+/// <reference types="../../@types/golden-layout"/>
 (function (ElectronViewport) {
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
@@ -18,15 +18,15 @@ var ElectronViewport;
     function init() {
         let config = {
             content: [{
-                    type: 'row',
+                    type: "row",
                     content: [{
-                            type: 'component',
-                            componentName: 'Inspector',
-                            title: "Inspector",
+                            type: "component",
+                            componentName: "Inspector",
+                            title: "Inspector"
                         },
                         {
-                            type: 'component',
-                            componentName: 'Viewport',
+                            type: "component",
+                            componentName: "Viewport",
                             title: "Viewport",
                         }
                     ]
@@ -34,8 +34,8 @@ var ElectronViewport;
         };
         initViewport();
         myLayout = new GoldenLayout(config);
-        myLayout.registerComponent('Viewport', createViewportComponent);
-        myLayout.registerComponent('Inspector', createInspectorComponent);
+        myLayout.registerComponent("Viewport", createViewportComponent);
+        myLayout.registerComponent("Inspector", createInspectorComponent);
         myLayout.init();
     }
     function initViewport() {
@@ -60,12 +60,12 @@ var ElectronViewport;
     }
     function createInspectorComponent(container, state) {
         console.log(branch.getChildren()[0].name);
-        let lbl_name = document.createElement("label");
-        lbl_name.innerHTML = "Node Name";
-        let txt_name = document.createElement("input");
-        txt_name.value = branch.getChildren()[0].name;
-        container.getElement().append(lbl_name);
-        container.getElement().append(txt_name);
+        let lblName = document.createElement("label");
+        lblName.innerHTML = "Node Name";
+        let txtName = document.createElement("input");
+        txtName.value = branch.getChildren()[0].name;
+        container.getElement().append(lblName);
+        container.getElement().append(txtName);
     }
     function animate(_event) {
         branch.cmpTransform.local.rotateY(1);
