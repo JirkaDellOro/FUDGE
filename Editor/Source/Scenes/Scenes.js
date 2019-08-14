@@ -1,6 +1,5 @@
 ///<reference types="../../../Core/Build/Fudge"/>
 var Scenes;
-///<reference types="../../../Core/Build/Fudge"/>
 (function (Scenes) {
     var ƒ = Fudge;
     function createAxisCross() {
