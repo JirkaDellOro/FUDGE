@@ -161,6 +161,5 @@ namespace MarixMutatorTest {
                 input.value = vector[dimension].toFixed(2);
             }
         }
-
     }
 }
