@@ -1,5 +1,6 @@
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
+/// <reference types="../../@types/golden-layout"/>
 
 namespace ElectronViewport {
     import ƒ = Fudge;
@@ -14,18 +15,18 @@ namespace ElectronViewport {
     let camera: ƒ.Node;
     window.addEventListener("load", init);
 
-    function init() {
+    function init(): void {
         let config: GoldenLayout.Config = {
             content: [{
-                type: 'row',
+                type: "row",
                 content: [{
-                    type: 'component',
-                    componentName: 'Inspector',
-                    title: "Inspector",
+                    type: "component",
+                    componentName: "Inspector",
+                    title: "Inspector"
                 },
                 {
-                    type: 'component',
-                    componentName: 'Viewport',
+                    type: "component",
+                    componentName: "Viewport",
                     title: "Viewport",
                 }
                 ]
@@ -35,13 +36,13 @@ namespace ElectronViewport {
         initViewport()
         myLayout = new GoldenLayout(config);
 
-        myLayout.registerComponent('Viewport', createViewportComponent);
-        myLayout.registerComponent('Inspector', createInspectorComponent);
+        myLayout.registerComponent("Viewport", createViewportComponent);
+        myLayout.registerComponent("Inspector", createInspectorComponent);
 
         myLayout.init();
     }
 
-    function initViewport() {
+    function initViewport(): void {
         // create asset
         branch = Scenes.createAxisCross();
 
@@ -62,18 +63,18 @@ namespace ElectronViewport {
         viewPort.draw();
     }
 
-    function createViewportComponent(container: any, state: any) {
+    function createViewportComponent(container: GoldenLayout.Container, state: Object): void {
         container.getElement().append(canvas);
     }
 
-    function createInspectorComponent(container: any, state: any) {
+    function createInspectorComponent(container: GoldenLayout.Container, state: Object): void {
         console.log(branch.getChildren()[0].name);
-        let lbl_name:HTMLElement = document.createElement("label");
-        lbl_name.innerHTML = "Node Name";
-        let txt_name:HTMLInputElement = document.createElement("input");
-        txt_name.value = <string>branch.getChildren()[0].name;
-        container.getElement().append(lbl_name);
-        container.getElement().append(txt_name);
+        let lblName: HTMLElement = document.createElement("label");
+        lblName.innerHTML = "Node Name";
+        let txtName: HTMLInputElement = document.createElement("input");
+        txtName.value = <string>branch.getChildren()[0].name;
+        container.getElement().append(lblName);
+        container.getElement().append(txtName);
     }
 
     function animate(_event: Event): void {
@@ -83,7 +84,7 @@ namespace ElectronViewport {
         viewPort.draw();
     }
 
-    function addCubeNode() {
+    function addCubeNode(): void {
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
         let clrCoffee: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
@@ -97,7 +98,7 @@ namespace ElectronViewport {
         // let clrCream: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
         // let coatCream: ƒ.CoatColored = new ƒ.CoatColored(clrCream);
         // let mtrCream: ƒ.Material = new ƒ.Material("Caramel", ƒ.ShaderUniColor, coatCream);
-        
+
         let nodeCubeCoffee: ƒ.Node = new ƒ.Node("Cube");
         // let nodeCubeCaramel: ƒ.Node = new ƒ.Node("Cube");
         // let nodeCubeCream: ƒ.Node = new ƒ.Node("Cube");

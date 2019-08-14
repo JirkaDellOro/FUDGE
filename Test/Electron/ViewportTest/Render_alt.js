@@ -1,8 +1,10 @@
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
+/// <reference path="../../@types/golden-layout/index.d.ts"/>
 var ElectronViewport;
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
+/// <reference path="../../@types/golden-layout/index.d.ts"/>
 (function (ElectronViewport) {
     var ƒ = Fudge;
     window.addEventListener("DOMContentLoaded", init);
