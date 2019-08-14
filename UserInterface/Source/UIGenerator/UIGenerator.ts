@@ -5,11 +5,11 @@ namespace Fudge {
         import ƒ = Fudge;
 
         export class UIGenerator {
-            public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement) {
-                let name: string = _mutable.constructor.name;
+            public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void {
+                let name: string = _name || _mutable.constructor.name;
                 let _types: ƒ.MutatorAttributeTypes;
                 let mutator: ƒ.Mutator = _mutable.getMutator();
-                let _parent = UIGenerator.createFieldset(name, _element);
+                let _parent: HTMLElement = UIGenerator.createFoldableFieldset(name, _element);
                 _types = _mutable.getMutatorAttributeTypes(mutator);
                 for (let key in _types) {
                     let type: Object = _types[key];
@@ -24,8 +24,8 @@ namespace Fudge {
                             case "Number":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
                                 // UIGenerator.createTextElement(key, _parent, { _value: value })
-                                let num_value: number = parseInt(value);
-                                UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
+                                let numValue: number = parseInt(value);
+                                UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable });
                                 break;
                             case "Boolean":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -34,11 +34,11 @@ namespace Fudge {
                                 break;
                             case "String":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
-                                UIGenerator.createTextElement(key, _parent, { _value: value })
+                                UIGenerator.createTextElement(key, _parent, { _value: value });
                                 break;
                             case "Object":
                                 let subMutable: ƒ.Mutable = (<any>_mutable)[key];
-                                this.createFromMutable(subMutable, _parent)
+                                this.createFromMutable(subMutable, _parent, key);
                             default:
                                 break;
                         }
@@ -65,6 +65,7 @@ namespace Fudge {
 
             public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
                 let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
+                cntfieldset.id = _legend;
                 let legend: HTMLLegendElement = document.createElement("legend");
                 legend.innerHTML = _legend;
                 cntfieldset.appendChild(legend);
@@ -72,9 +73,11 @@ namespace Fudge {
                 return cntfieldset;
             }
 
-            public static createFoldableFieldset(_legend: string, _parent: HTMLElement) {
-                let cntFoldFieldset: UserInterface.FoldableFieldSet = new UserInterface.FoldableFieldSet(_legend);
+            public static createFoldableFieldset(_legend: string, _parent: HTMLElement): HTMLFieldSetElement {
+                let cntFoldFieldset: HTMLFieldSetElement = new UserInterface.FoldableFieldSet(_legend);
+                cntFoldFieldset.id = _legend;
                 _parent.appendChild(cntFoldFieldset);
+                return cntFoldFieldset;
             }
 
             public static createLabelElement(_id: string, _parent: HTMLElement, params: { _value?: string, _cssClass?: string } = {}): HTMLElement {

@@ -64,6 +64,7 @@ namespace UI {
 
         public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
             let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
+            fieldset.id = _legend;
             let legend: HTMLLegendElement = document.createElement("legend");
             legend.innerHTML = _legend;
             let toggleButton: HTMLButtonElement = document.createElement("button");

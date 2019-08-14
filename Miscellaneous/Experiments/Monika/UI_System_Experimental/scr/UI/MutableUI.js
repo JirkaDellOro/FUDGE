@@ -5,7 +5,7 @@ var UI;
         constructor(mutable) {
             this.timeUpdate = 190;
             this.mutateOnInput = (_e) => {
-                this.updateMutator(this.mutable, this.root);
+                this.mutator = this.updateMutator(this.mutable, this.root);
                 this.mutable.mutate(this.mutator);
             };
             this.refreshUI = (_e) => {
@@ -22,6 +22,7 @@ var UI;
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
+                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
@@ -44,12 +45,13 @@ var UI;
                                 break;
                             case "Object":
                                 let fieldset = _root.querySelector("#" + key);
-                                this.updateMutator(_mutable[key], fieldset);
+                                mutator[key] = this.updateMutator(_mutable[key], fieldset);
                                 break;
                         }
                     }
                 }
             }
+            return mutator;
         }
         updateUI(_mutable, _root) {
             let mutator = _mutable.getMutator();

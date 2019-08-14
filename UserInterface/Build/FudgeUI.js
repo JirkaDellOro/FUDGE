@@ -47,7 +47,8 @@ var Fudge;
             }
         }
         UserInterface.Stepper = Stepper;
-        customElements.define("ui-stepper", Stepper, { extends: "span" });
+        customElements.define("ui-stepper", Stepper, { extends: "input" });
+        customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
     })(UserInterface = Fudge.UserInterface || (Fudge.UserInterface = {}));
 })(Fudge || (Fudge = {}));
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
@@ -59,11 +60,11 @@ var Fudge;
     let UserInterface;
     (function (UserInterface) {
         class UIGenerator {
-            static createFromMutable(_mutable, _element) {
-                let name = _mutable.constructor.name;
+            static createFromMutable(_mutable, _element, _name) {
+                let name = _name || _mutable.constructor.name;
                 let _types;
                 let mutator = _mutable.getMutator();
-                let _parent = UIGenerator.createFieldset(name, _element);
+                let _parent = UIGenerator.createFoldableFieldset(name, _element);
                 _types = _mutable.getMutatorAttributeTypes(mutator);
                 for (let key in _types) {
                     let type = _types[key];
@@ -78,8 +79,8 @@ var Fudge;
                             case "Number":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
                                 // UIGenerator.createTextElement(key, _parent, { _value: value })
-                                let num_value = parseInt(value);
-                                UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
+                                let numValue = parseInt(value);
+                                UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable });
                                 break;
                             case "Boolean":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -92,7 +93,7 @@ var Fudge;
                                 break;
                             case "Object":
                                 let subMutable = _mutable[key];
-                                this.createFromMutable(subMutable, _parent);
+                                this.createFromMutable(subMutable, _parent, key);
                             default:
                                 break;
                         }
@@ -117,6 +118,7 @@ var Fudge;
             }
             static createFieldset(_legend, _parent, _cssClass) {
                 let cntfieldset = document.createElement("fieldset");
+                cntfieldset.id = _legend;
                 let legend = document.createElement("legend");
                 legend.innerHTML = _legend;
                 cntfieldset.appendChild(legend);
@@ -125,7 +127,9 @@ var Fudge;
             }
             static createFoldableFieldset(_legend, _parent) {
                 let cntFoldFieldset = new UserInterface.FoldableFieldSet(_legend);
+                cntFoldFieldset.id = _legend;
                 _parent.appendChild(cntFoldFieldset);
+                return cntFoldFieldset;
             }
             static createLabelElement(_id, _parent, params = {}) {
                 let label = document.createElement("label");
@@ -178,48 +182,91 @@ var Fudge;
     let UserInterface;
     (function (UserInterface) {
         class MutableUI {
-            constructor(_mutable) {
+            constructor(mutable) {
                 this.timeUpdate = 190;
-                this.updateUI = (_e) => {
-                    let formData = new FormData(this.root);
-                    let mutatorTypes = this.mutable.getMutatorAttributeTypes(this.mutator);
-                    for (let key in this.mutator) {
-                        let value = this.mutator[key].toString();
-                        let type = mutatorTypes[key].toString();
-                        switch (type) {
-                            case "Boolean":
-                                if (!formData.get(key))
-                                    this.mutator[key] = false;
-                                else
-                                    this.mutator[key] = true;
-                                break;
-                            default:
-                                if (formData.get(key) != value)
-                                    this.mutator[key] = formData.get(key);
-                                break;
-                            // case "Number":
-                            //     if(formData.get(key) != value)
-                            //         this.mutator[key] = formData.get(key);
-                            //     break;
-                            // case "String":
-                            //     break;
-                            // case "Object":
-                            //     break;
-                        }
-                    }
+                this.mutateOnInput = (_e) => {
+                    this.mutator = this.updateMutator(this.mutable, this.root);
                     this.mutable.mutate(this.mutator);
                 };
-                this.updateMutator = (_e) => {
+                this.refreshUI = (_e) => {
                     this.mutable.updateMutator(this.mutator);
-                    this.fillById(this.mutator, this.root);
+                    this.updateUI(this.mutable, this.root);
                 };
-                this.root = document.createElement("form");
-                this.mutable = _mutable;
-                this.mutator = _mutable.getMutator();
-                window.setInterval(this.updateMutator, this.timeUpdate);
-                this.root.addEventListener("input", this.updateUI);
+                this.root = document.createElement("div");
+                this.mutable = mutable;
+                this.mutator = mutable.getMutator();
+                window.setInterval(this.refreshUI, this.timeUpdate);
+                this.root.addEventListener("input", this.mutateOnInput);
             }
-            fillById(_mutator, _root) {
+            updateMutator(_mutable, _root) {
+                let mutator = _mutable.getMutator();
+                let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+                for (let key in mutator) {
+                    console.log(this.root.querySelector("#" + key));
+                    if (this.root.querySelector("#" + key) != null) {
+                        let type = mutatorTypes[key];
+                        if (type instanceof Object) {
+                            let selectElement = _root.querySelector("#" + key);
+                            selectElement.value = mutator[key];
+                        }
+                        else {
+                            switch (type) {
+                                case "Boolean":
+                                    let checkbox = _root.querySelector("#" + key);
+                                    mutator[key] = checkbox.checked;
+                                    break;
+                                case "String":
+                                    let textfield = _root.querySelector("#" + key);
+                                    mutator[key] = textfield.value;
+                                    break;
+                                case "Number":
+                                    let stepper = _root.querySelector("#" + key);
+                                    mutator[key] = stepper.value;
+                                    break;
+                                case "Object":
+                                    let fieldset = _root.querySelector("#" + key);
+                                    let subMutable = _mutable[key];
+                                    mutator[key] = this.updateMutator(subMutable, fieldset);
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return mutator;
+            }
+            updateUI(_mutable, _root) {
+                let mutator = _mutable.getMutator();
+                let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+                for (let key in mutator) {
+                    if (this.root.querySelector("#" + key) != null) {
+                        let type = mutatorTypes[key];
+                        if (type instanceof Object) {
+                            let selectElement = _root.querySelector("#" + key);
+                            selectElement.value = mutator[key];
+                        }
+                        else {
+                            switch (type) {
+                                case "Boolean":
+                                    let checkbox = _root.querySelector("#" + key);
+                                    checkbox.checked = mutator[key];
+                                    break;
+                                case "String":
+                                    let textfield = _root.querySelector("#" + key);
+                                    textfield.value = mutator[key];
+                                    break;
+                                case "Number":
+                                    let stepper = _root.querySelector("#" + key);
+                                    stepper.value = mutator[key];
+                                    break;
+                                case "Object":
+                                    let fieldset = _root.querySelector("#" + key);
+                                    let subMutable = _mutable[key];
+                                    this.updateUI(subMutable, fieldset);
+                                    break;
+                            }
+                        }
+                    }
+                }
             }
         }
         UserInterface.MutableUI = MutableUI;

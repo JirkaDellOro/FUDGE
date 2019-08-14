@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+<<<<<<< Updated upstream
+    <title>UI Test Eviroment</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.js">
+    </script>
+    <script type="text/javascript" src="https://golden-layout.com/files/latest/js/goldenlayout.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://golden-layout.com/files/latest/css/goldenlayout-base.css" />
+    <link type="text/css" rel="stylesheet" href="goldenlayout-purple-theme.css" />
+    <script type="text/javascript" src="../../../../Core/build/Fudge.js"></script>
+    <script type="text/javascript" src="Scenes/Scenes.js"></script>
+    <script type="text/javascript" src="UI/UIElements.js"></script>
+    <script src="UI/MutableUI.js"></script>
+    <script src="UI/UIGenerator.js"></script>
+    <script src="Components/SimpleComponent.js"></script>
+    <script src="UI/MutableUI.js"></script>
+    <script type="text/javascript" src="Components/TestRectMapping.js"></script>
+=======
+    <title>RectMapping</title>
+    <script type="text/javascript" src="../../../Core/build/Fudge.js"></script>
+    <script type="text/javascript" src="../../Scenes/Scenes.js"></script>
+    <script type="text/javascript" src="../../UI-Elements/UI.js"></script>
+    <script type="text/javascript" src="TestRectMapping.js"></script>
+>>>>>>> Stashed changes
+
+    <style type="text/css">
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            display: block;
+            position: absolute;
+            width: 300px;
+            height: 300px;
+        }
+
+        input[type=number] {
+            width: 4em;
+            margin-right: 1em;
+        }
+
+        div {
+            width: 30em;
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            background-color: beige;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="viewport"></canvas>
+    <div name="menu">
+    </div>
+</body>

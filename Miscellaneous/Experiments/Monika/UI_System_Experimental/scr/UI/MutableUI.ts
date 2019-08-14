@@ -16,7 +16,7 @@ namespace UI {
         }
 
         protected mutateOnInput = (_e: Event) => {
-            this.updateMutator(this.mutable, this.root);
+            this.mutator = this.updateMutator(this.mutable, this.root);
             this.mutable.mutate(this.mutator);
 
         }
@@ -26,10 +26,11 @@ namespace UI {
             this.updateUI(this.mutable, this.root);
         }
 
-        protected updateMutator(_mutable:ƒ.Mutable, _root){
+        protected updateMutator(_mutable:ƒ.Mutable, _root:HTMLElement):ƒ.Mutator{     
             let mutator:ƒ.Mutator = _mutable.getMutator();
             let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
+                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type: Object = mutatorTypes[key];
                     if (type instanceof Object) {
@@ -52,12 +53,13 @@ namespace UI {
                                 break;
                             case "Object":
                                 let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#"+key);
-                                this.updateMutator(<ƒ.Mutable>_mutable[key], fieldset);
+                                mutator[key] = this.updateMutator(<ƒ.Mutable>_mutable[key], fieldset);
                                 break;
                         }
                     }
                 }
             }
+            return mutator;
         }
 
         protected updateUI(_mutable:ƒ.Mutable, _root: HTMLElement) {

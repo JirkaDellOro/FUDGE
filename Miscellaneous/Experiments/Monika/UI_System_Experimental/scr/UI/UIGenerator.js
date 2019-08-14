@@ -60,6 +60,7 @@ var UI;
         }
         static createFieldset(_legend, _parent, _cssClass) {
             let fieldset = document.createElement("fieldset");
+            fieldset.id = _legend;
             let legend = document.createElement("legend");
             legend.innerHTML = _legend;
             let toggleButton = document.createElement("button");

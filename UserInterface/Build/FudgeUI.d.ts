@@ -19,10 +19,10 @@ declare namespace Fudge {
     namespace UserInterface {
         import ƒ = Fudge;
         class UIGenerator {
-            static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement): void;
+            static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void;
             static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
             static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
-            static createFoldableFieldset(_legend: string, _parent: HTMLElement): void;
+            static createFoldableFieldset(_legend: string, _parent: HTMLElement): HTMLFieldSetElement;
             static createLabelElement(_id: string, _parent: HTMLElement, params?: {
                 _value?: string;
                 _cssClass?: string;
@@ -47,13 +47,14 @@ declare namespace Fudge {
         import ƒ = Fudge;
         abstract class MutableUI {
             protected timeUpdate: number;
-            protected root: HTMLFormElement;
+            protected root: HTMLElement;
             protected mutable: ƒ.Mutable;
             protected mutator: ƒ.Mutator;
-            constructor(_mutable: ƒ.Mutable);
-            protected updateUI: (_e: Event) => void;
-            protected updateMutator: (_e: Event) => void;
-            protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement): void;
+            constructor(mutable: ƒ.Mutable);
+            protected mutateOnInput: (_e: Event) => void;
+            protected refreshUI: (_e: Event) => void;
+            protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement): ƒ.Mutator;
+            protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
         }
     }
 }

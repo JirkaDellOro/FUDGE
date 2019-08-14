@@ -1,8 +1,9 @@
-/// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
-/// <reference path="../UI/MutableUI.ts"/>
+/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 var UI;
 (function (UI) {
-    class TestUI extends UI.MutableUI {
+    var ƒ = Fudge;
+    class TestUI extends ƒ.UserInterface.MutableUI {
         constructor(container, state, _camera) {
             super(_camera);
             this.camera = _camera;
@@ -10,7 +11,7 @@ var UI;
             let testdiv = document.createElement("div");
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
-            UI.UIGenerator.createFromMutable(_camera, this.root);
+            ƒ.UserInterface.UIGenerator.createFromMutable(_camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }
