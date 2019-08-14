@@ -27,13 +27,13 @@ namespace ElectronViewport {
                 {
                     type: "component",
                     componentName: "Viewport",
-                    title: "Viewport",
+                    title: "Viewport"
                 }
                 ]
             }]
         };
 
-        initViewport()
+        initViewport();
         myLayout = new GoldenLayout(config);
 
         myLayout.registerComponent("Viewport", createViewportComponent);
