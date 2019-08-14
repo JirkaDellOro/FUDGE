@@ -1,10 +1,7 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 
-const { app, BrowserWindow, Menu } = require("electron");
-// const { path } = require("path");
-
-
 namespace ElectronFileIo {
+  const { app, BrowserWindow, Menu } = require("electron");
   export let mainWindow: Electron.BrowserWindow;
   //create menu template
   const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [

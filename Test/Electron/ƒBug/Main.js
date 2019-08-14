@@ -1,7 +1,8 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-const { app, BrowserWindow, Menu } = require("electron");
 var ƒBug;
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 (function (ƒBug) {
+    const { app, BrowserWindow, Menu } = require("electron");
     app.addListener("ready", createWindow);
     app.addListener("window-all-closed", function () {
         if (process.platform !== "darwin")

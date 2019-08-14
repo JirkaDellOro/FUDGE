@@ -1,9 +1,9 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 
-const { app, BrowserWindow, Menu } = require("electron");
 
 
 namespace ƒBug {
+  const { app, BrowserWindow, Menu } = require("electron");
   export let mainWindow: Electron.BrowserWindow;
 
   app.addListener("ready", createWindow);

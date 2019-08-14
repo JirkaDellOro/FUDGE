@@ -1,13 +1,8 @@
-// /<reference path="../../Scenes/Scenes.ts"/>
 ///<reference types="../../Core/Build/Fudge"/>
-///<reference types="../../node_modules/@types/node/fs"/>
-/// <reference types="../@types/jquery"/>
-/// <reference types="../@types/golden-layout"/>
 
 namespace EditorScene {
     import ƒ = Fudge;
     const { dialog } = require("electron").remote;
-    const fs: ƒ.General = require("fs");
 
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout: GoldenLayout;

@@ -27,7 +27,7 @@ var ElectronViewport;
                         {
                             type: "component",
                             componentName: "Viewport",
-                            title: "Viewport",
+                            title: "Viewport"
                         }
                     ]
                 }]

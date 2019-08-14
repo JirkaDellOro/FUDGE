@@ -1,9 +1,8 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-const { app, BrowserWindow, Menu } = require("electron");
-// const { path } = require("path");
 var ElectronFileIo;
-// const { path } = require("path");
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 (function (ElectronFileIo) {
+    const { app, BrowserWindow, Menu } = require("electron");
     //create menu template
     const mainMenuTemplate = [
         {

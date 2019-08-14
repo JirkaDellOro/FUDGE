@@ -1,18 +1,9 @@
-// /<reference path="../../Scenes/Scenes.ts"/>
 ///<reference types="../../Core/Build/Fudge"/>
-///<reference types="../../node_modules/@types/node/fs"/>
-/// <reference types="../@types/jquery"/>
-/// <reference types="../@types/golden-layout"/>
 var EditorScene;
-// /<reference path="../../Scenes/Scenes.ts"/>
 ///<reference types="../../Core/Build/Fudge"/>
-///<reference types="../../node_modules/@types/node/fs"/>
-/// <reference types="../@types/jquery"/>
-/// <reference types="../@types/golden-layout"/>
 (function (EditorScene) {
     var ƒ = Fudge;
     const { dialog } = require("electron").remote;
-    const fs = require("fs");
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout;
     let savedState;
