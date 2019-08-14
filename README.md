@@ -14,8 +14,8 @@ Furtwangen University Didactic Game Editor
 - [Viewport.draw](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Viewport.puml&idx=0)    
 
 ## Documentation
-- [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Miscellaneous/Design/Core.puml)
-- [Core Reference](https://jirkadelloro.github.io/FUDGE/Documentation/Core/reference/)
+- [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Documentation/Design/Core.puml)
+- [Core Reference](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Core/)
 
 ## Themen für Abschluss- und Studienarbeiten
 - :pencil: Audiokomponenten 
