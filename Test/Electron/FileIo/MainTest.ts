@@ -1,9 +1,27 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-const { app, BrowserWindow } = require("electron");
+
+const { app, BrowserWindow, Menu } = require("electron");
 // const { path } = require("path");
 
+
 namespace ElectronFileIo {
-  let mainWindow: Electron.BrowserWindow;
+  export let mainWindow: Electron.BrowserWindow;
+  //create menu template
+  const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: "File", submenu: [
+        {
+          label: "Save", click(): void { ElectronFileIo.save(); }
+        },
+        {
+          label: "Open", click(): void { ElectronFileIo.load(); }
+        },
+        {
+          label: "Quit", accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q", click(): void { app.quit(); }
+        }
+      ]
+    }
+  ];
 
   app.addListener("ready", createWindow);
   app.addListener("window-all-closed", function (): void {
@@ -27,5 +45,10 @@ namespace ElectronFileIo {
     mainWindow.addListener("closed", function (): void {
       mainWindow = null;
     });
+
+    //Build menu from template
+    const mainMenu: Electron.Menu = Menu.buildFromTemplate(mainMenuTemplate);
+    //Insert the menu
+    Menu.setApplicationMenu(mainMenu);
   }
 }

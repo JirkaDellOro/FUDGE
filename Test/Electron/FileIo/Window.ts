@@ -10,15 +10,13 @@ namespace ElectronFileIo {
     const { dialog } = require("electron").remote;
     const fs: ƒ.General = require("fs");
     window.addEventListener("DOMContentLoaded", init);
-
     let branch: ƒ.Node;
 
     function init(): void {
         createScene();
-        save(branch);
     }
 
-    function save(_node: ƒ.Node): void {
+    export function save(_node: ƒ.Node = branch): void {
         let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
         let content: string = ƒ.Serializer.stringify(serialization);
 
@@ -29,6 +27,22 @@ namespace ElectronFileIo {
             if (_e)
                 ƒ.Debug.log(_e);
         });
+    }
+
+    export function load(): ƒ.Node {
+
+        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+        dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+
+        // fs.writeFile(filename, content, (_e: Error) => {
+        //     if (_e)
+        //         ƒ.Debug.log(_e);
+        // });
+
+        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+        // let content: string = ƒ.Serializer.stringify(serialization);
+
+        return null;
     }
 
     function createScene(): void {
