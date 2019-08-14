@@ -4,30 +4,84 @@ var UI;
     class MutableUI {
         constructor(mutable) {
             this.timeUpdate = 190;
-            this.updateUI = (_e) => {
-                console.log(_e);
+            this.mutateOnInput = (_e) => {
+                this.updateMutator(this.mutable, this.root);
                 this.mutable.mutate(this.mutator);
             };
-            this.updateMutator = (_e) => {
+            this.refreshUI = (_e) => {
                 this.mutable.updateMutator(this.mutator);
-                this.fillById(this.mutator, this.root);
+                this.updateUI(this.mutable, this.root);
             };
             this.root = document.createElement("div");
             this.mutable = mutable;
             this.mutator = mutable.getMutator();
-            window.setInterval(this.updateMutator, this.timeUpdate);
-            this.root.addEventListener("input", this.updateUI);
+            window.setInterval(this.refreshUI, this.timeUpdate);
+            this.root.addEventListener("input", this.mutateOnInput);
         }
-        fillById(_mutator, _root) {
-            let mutatorTypes = this.mutable.getMutatorAttributeTypes(this.mutator);
-            for (let key in this.mutator) {
-                let element = this.root.querySelector("#" + key);
-                console.log(key);
-                console.log(element);
-                // switch(mutatorTypes[key]){
-                //     case "Boolean":
-                //         break;
-                // }
+        updateMutator(_mutable, _root) {
+            let mutator = _mutable.getMutator();
+            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+            for (let key in mutator) {
+                if (this.root.querySelector("#" + key) != null) {
+                    let type = mutatorTypes[key];
+                    if (type instanceof Object) {
+                        let selectElement = _root.querySelector("#" + key);
+                        selectElement.value = mutator[key];
+                    }
+                    else {
+                        switch (type) {
+                            case "Boolean":
+                                let checkbox = _root.querySelector("#" + key);
+                                mutator[key] = checkbox.checked;
+                                break;
+                            case "String":
+                                let textfield = _root.querySelector("#" + key);
+                                mutator[key] = textfield.value;
+                                break;
+                            case "Number":
+                                let stepper = _root.querySelector("#" + key);
+                                mutator[key] = stepper.value;
+                                break;
+                            case "Object":
+                                let fieldset = _root.querySelector("#" + key);
+                                this.updateMutator(_mutable[key], fieldset);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        updateUI(_mutable, _root) {
+            let mutator = _mutable.getMutator();
+            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+            for (let key in mutator) {
+                if (this.root.querySelector("#" + key) != null) {
+                    let type = mutatorTypes[key];
+                    if (type instanceof Object) {
+                        let selectElement = _root.querySelector("#" + key);
+                        selectElement.value = mutator[key];
+                    }
+                    else {
+                        switch (type) {
+                            case "Boolean":
+                                let checkbox = _root.querySelector("#" + key);
+                                checkbox.checked = mutator[key];
+                                break;
+                            case "String":
+                                let textfield = _root.querySelector("#" + key);
+                                textfield.value = mutator[key];
+                                break;
+                            case "Number":
+                                let stepper = _root.querySelector("#" + key);
+                                stepper.value = mutator[key];
+                                break;
+                            case "Object":
+                                let fieldset = _root.querySelector("#" + key);
+                                this.updateUI(_mutable[key], fieldset);
+                                break;
+                        }
+                    }
+                }
             }
         }
     }

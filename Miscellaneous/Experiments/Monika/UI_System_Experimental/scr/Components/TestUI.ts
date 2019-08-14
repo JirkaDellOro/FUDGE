@@ -14,10 +14,10 @@ namespace UI {
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
             UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
-            this.root.addEventListener("input", this.updateUI);
+            this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }
-        protected updateUI = (_event: Event) => {
+        protected mutateOnInput = (_event: Event) => {
             let target: HTMLInputElement = <HTMLInputElement>_event.target;
             this.mutator = this.mutable.getMutator();
             let formData: FormData = new FormData(this.root);

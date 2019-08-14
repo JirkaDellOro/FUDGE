@@ -59,12 +59,11 @@ var Fudge;
     let UserInterface;
     (function (UserInterface) {
         class UIGenerator {
-            static createFromMutator(_mutable, element) {
+            static createFromMutable(_mutable, _element) {
                 let name = _mutable.constructor.name;
                 let _types;
                 let mutator = _mutable.getMutator();
-                let _parent = UIGenerator.createFieldset(name, element);
-                let data;
+                let _parent = UIGenerator.createFieldset(name, _element);
                 _types = _mutable.getMutatorAttributeTypes(mutator);
                 for (let key in _types) {
                     let type = _types[key];
@@ -78,6 +77,7 @@ var Fudge;
                         switch (type) {
                             case "Number":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                // UIGenerator.createTextElement(key, _parent, { _value: value })
                                 let num_value = parseInt(value);
                                 UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
                                 break;
@@ -90,12 +90,14 @@ var Fudge;
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
                                 UIGenerator.createTextElement(key, _parent, { _value: value });
                                 break;
+                            case "Object":
+                                let subMutable = _mutable[key];
+                                this.createFromMutable(subMutable, _parent);
                             default:
                                 break;
                         }
                     }
                 }
-                return data;
             }
             static createDropdown(_id, _content, _value, _parent, _cssClass) {
                 let dropdown = document.createElement("select");

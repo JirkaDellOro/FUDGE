@@ -5,7 +5,7 @@ var UI;
     class TestUI extends UI.MutableUI {
         constructor(container, state, _camera) {
             super(_camera);
-            this.updateUI = (_event) => {
+            this.mutateOnInput = (_event) => {
                 let target = _event.target;
                 this.mutator = this.mutable.getMutator();
                 let formData = new FormData(this.root);
@@ -28,7 +28,7 @@ var UI;
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
             UI.UIGenerator.createFromMutable(_camera, this.root);
-            this.root.addEventListener("input", this.updateUI);
+            this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }
     }

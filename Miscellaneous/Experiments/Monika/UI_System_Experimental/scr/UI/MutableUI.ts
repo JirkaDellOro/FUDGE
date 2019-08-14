@@ -11,34 +11,86 @@ namespace UI {
             this.root = document.createElement("div");
             this.mutable = mutable;
             this.mutator = mutable.getMutator();
-            window.setInterval(this.updateMutator, this.timeUpdate);
-            this.root.addEventListener("input", this.updateUI);
+            window.setInterval(this.refreshUI, this.timeUpdate);
+            this.root.addEventListener("input", this.mutateOnInput);
         }
 
-        protected updateUI = (_e: Event) => {
-            console.log(_e);
+        protected mutateOnInput = (_e: Event) => {
+            this.updateMutator(this.mutable, this.root);
             this.mutable.mutate(this.mutator);
 
         }
 
-        protected updateMutator = (_e: Event) => {
+        protected refreshUI = (_e: Event) => {
             this.mutable.updateMutator(this.mutator);
-            this.fillById(this.mutator, this.root);
+            this.updateUI(this.mutable, this.root);
         }
 
-        protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement) {
-            let mutatorTypes: ƒ.MutatorAttributeTypes = this.mutable.getMutatorAttributeTypes(this.mutator);
-            for(let key in this.mutator)
-            {  
-                let element:HTMLInputElement = this.root.querySelector("#"+key);
-                console.log(key);
-                console.log(element);
-                // switch(mutatorTypes[key]){
-                //     case "Boolean":
+        protected updateMutator(_mutable:ƒ.Mutable, _root){
+            let mutator:ƒ.Mutator = _mutable.getMutator();
+            let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+            for (let key in mutator) {
+                if (this.root.querySelector("#" + key) != null) {
+                    let type: Object = mutatorTypes[key];
+                    if (type instanceof Object) {
+                        let selectElement: HTMLSelectElement = <HTMLSelectElement>_root.querySelector("#" + key);
+                        selectElement.value = <string>mutator[key];
+                    }
+                    else {
+                        switch (type) {
+                            case "Boolean":
+                                let checkbox: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                mutator[key] = checkbox.checked;
+                                break;
+                            case "String":
+                                let textfield: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                 mutator[key] = textfield.value;
+                                break;
+                            case "Number":
+                                let stepper: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                 mutator[key] = stepper.value;
+                                break;
+                            case "Object":
+                                let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#"+key);
+                                this.updateMutator(<ƒ.Mutable>_mutable[key], fieldset);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
 
-                //         break;
-                // }
-                
+        protected updateUI(_mutable:ƒ.Mutable, _root: HTMLElement) {
+            let mutator:ƒ.Mutator = _mutable.getMutator();
+            let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+            for (let key in mutator) {
+                if (this.root.querySelector("#" + key) != null) {
+                    let type: Object = mutatorTypes[key];
+                    if (type instanceof Object) {
+                        let selectElement: HTMLSelectElement = <HTMLSelectElement>_root.querySelector("#" + key);
+                        selectElement.value = <string>mutator[key];
+                    }
+                    else {
+                        switch (type) {
+                            case "Boolean":
+                                let checkbox: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                checkbox.checked = <boolean>mutator[key];
+                                break;
+                            case "String":
+                                let textfield: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                textfield.value = <string>mutator[key];
+                                break;
+                            case "Number":
+                                let stepper: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
+                                stepper.value = <string>mutator[key];
+                                break;
+                            case "Object":
+                                let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#"+key);
+                                this.updateUI(<ƒ.Mutable>_mutable[key], fieldset);
+                                break;
+                        }
+                    }
+                }
             }
         }
     }

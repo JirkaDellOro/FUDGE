@@ -3,8 +3,8 @@ namespace UI {
     import ƒ = Fudge;
 
     export class UIGenerator {
-        public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement) {
-            let name: string = _mutable.constructor.name;
+        public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?:string) {
+            let name: string = _name || _mutable.constructor.name;
             let _types: ƒ.MutatorAttributeTypes;
             let mutator: ƒ.Mutator = _mutable.getMutator();
             let _parent = UIGenerator.createFieldset(name, _element);
@@ -36,7 +36,7 @@ namespace UI {
                             break;
                         case "Object":
                             let subMutable: ƒ.Mutable = _mutable[key];
-                            this.createFromMutable(subMutable, _parent)
+                            this.createFromMutable(subMutable, _parent, key)
                         default:
                             break;
                     }

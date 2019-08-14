@@ -19,7 +19,7 @@ declare namespace Fudge {
     namespace UserInterface {
         import ƒ = Fudge;
         class UIGenerator {
-            static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement): FormData;
+            static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement): void;
             static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
             static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
             static createFoldableFieldset(_legend: string, _parent: HTMLElement): void;

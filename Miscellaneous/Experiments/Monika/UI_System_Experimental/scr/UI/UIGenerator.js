@@ -2,8 +2,8 @@
 var UI;
 (function (UI) {
     class UIGenerator {
-        static createFromMutable(_mutable, _element) {
-            let name = _mutable.constructor.name;
+        static createFromMutable(_mutable, _element, _name) {
+            let name = _name || _mutable.constructor.name;
             let _types;
             let mutator = _mutable.getMutator();
             let _parent = UIGenerator.createFieldset(name, _element);
@@ -35,7 +35,7 @@ var UI;
                             break;
                         case "Object":
                             let subMutable = _mutable[key];
-                            this.createFromMutable(subMutable, _parent);
+                            this.createFromMutable(subMutable, _parent, key);
                         default:
                             break;
                     }

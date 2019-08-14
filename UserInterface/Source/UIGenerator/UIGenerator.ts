@@ -1,16 +1,15 @@
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../UIElements/UIElements.ts"/>
-namespace Fudge{
+namespace Fudge {
     export namespace UserInterface {
         import ƒ = Fudge;
-    
+
         export class UIGenerator {
-            public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement):FormData {
+            public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement) {
                 let name: string = _mutable.constructor.name;
                 let _types: ƒ.MutatorAttributeTypes;
                 let mutator: ƒ.Mutator = _mutable.getMutator();
-                let _parent = UIGenerator.createFieldset(name, element);
-                let data:FormData;
+                let _parent = UIGenerator.createFieldset(name, _element);
                 _types = _mutable.getMutatorAttributeTypes(mutator);
                 for (let key in _types) {
                     let type: Object = _types[key];
@@ -24,9 +23,9 @@ namespace Fudge{
                         switch (type) {
                             case "Number":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                // UIGenerator.createTextElement(key, _parent, { _value: value })
                                 let num_value: number = parseInt(value);
-                                UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable});
-    
+                                UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
                                 break;
                             case "Boolean":
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -37,14 +36,17 @@ namespace Fudge{
                                 UIGenerator.createLabelElement(key, _parent, { _value: key });
                                 UIGenerator.createTextElement(key, _parent, { _value: value })
                                 break;
+                            case "Object":
+                                let subMutable: ƒ.Mutable = (<any>_mutable)[key];
+                                this.createFromMutable(subMutable, _parent)
                             default:
                                 break;
                         }
                     }
                 }
-                return data;
             }
-            public static createDropdown(_id:string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string):HTMLSelectElement {
+
+            public static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
                 let dropdown: HTMLSelectElement = document.createElement("select");
                 dropdown.id = _id;
                 dropdown.name = _id;
@@ -60,7 +62,7 @@ namespace Fudge{
                 _parent.appendChild(dropdown);
                 return dropdown;
             }
-    
+
             public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
                 let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
                 let legend: HTMLLegendElement = document.createElement("legend");
@@ -70,11 +72,11 @@ namespace Fudge{
                 return cntfieldset;
             }
 
-            public static createFoldableFieldset(_legend:string, _parent:HTMLElement){
+            public static createFoldableFieldset(_legend: string, _parent: HTMLElement) {
                 let cntFoldFieldset: UserInterface.FoldableFieldSet = new UserInterface.FoldableFieldSet(_legend);
                 _parent.appendChild(cntFoldFieldset);
             }
-    
+
             public static createLabelElement(_id: string, _parent: HTMLElement, params: { _value?: string, _cssClass?: string } = {}): HTMLElement {
                 let label: HTMLElement = document.createElement("label");
                 if (params._value == undefined)
@@ -84,10 +86,10 @@ namespace Fudge{
                     label.classList.add(params._cssClass);
                 label.id = "_" + _id;
                 _parent.appendChild(label);
-    
+
                 return label;
             }
-    
+
             public static createTextElement(_id: string, _parent: HTMLElement, params: { _value?: string, _cssClass?: string } = {}): HTMLInputElement {
                 let valueInput: HTMLInputElement = document.createElement("input");
                 if (params._value == undefined)
@@ -98,10 +100,10 @@ namespace Fudge{
                 valueInput.name = _id;
                 valueInput.value = params._value;
                 _parent.appendChild(valueInput);
-    
+
                 return valueInput;
             }
-    
+
             public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
                 let valueInput: HTMLInputElement = document.createElement("input");
                 valueInput.type = "checkbox";
@@ -112,16 +114,16 @@ namespace Fudge{
                 _parent.appendChild(valueInput);
                 return valueInput;
             }
-    
-            public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?:ƒ.Mutable } = {}):HTMLSpanElement {
-    
+
+            public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?: ƒ.Mutable } = {}): HTMLSpanElement {
+
                 if (params._value == undefined)
                     params._value = 0;
                 let stepper: HTMLInputElement = new UserInterface.Stepper(_id, { value: params._value });
                 _parent.appendChild(stepper);
                 return stepper;
             }
-    
+
 
         }
     }
