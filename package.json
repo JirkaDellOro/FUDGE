@@ -1,0 +1,30 @@
+{
+  "name": "fudge",
+  "version": "0.0.0",
+  "description": "Furtwangen University Didactic Game Editor (FUDGE)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JirkaDellOro/FUDGE.git"
+  },
+  "keywords": [
+    "FUDGE"
+  ],
+  "author": "Jirka Dell'Oro-Friedl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JirkaDellOro/FUDGE/issues"
+  },
+  "homepage": "https://github.com/JirkaDellOro/FUDGE#readme",
+  "dependencies": {
+    "@types/node": "^12.7.1",
+    "@types/webaudioapi": "0.0.27",
+    "@types/webgl2": "0.0.5",
+    "@types/ws": "^6.0.2",
+    "electron": "^6.0.2",
+    "websocket": "^1.0.29"
+  }
+}
