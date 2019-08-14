@@ -18,9 +18,8 @@ var ElectronFileIo;
     let branch;
     function init() {
         createScene();
-        save(branch);
     }
-    function save(_node) {
+    function save(_node = branch) {
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
@@ -30,6 +29,19 @@ var ElectronFileIo;
                 ƒ.Debug.log(_e);
         });
     }
+    ElectronFileIo.save = save;
+    function load() {
+        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+        dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        // fs.writeFile(filename, content, (_e: Error) => {
+        //     if (_e)
+        //         ƒ.Debug.log(_e);
+        // });
+        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+        // let content: string = ƒ.Serializer.stringify(serialization);
+        return null;
+    }
+    ElectronFileIo.load = load;
     function createScene() {
         // create asset
         branch = Scenes.createAxisCross();
