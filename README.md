@@ -1,4 +1,4 @@
-# ![Logo](https://jirkadelloro.github.io/FUDGE/Logo/Fudge_48.png) FUDGE 
+# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/Fudge_48.png) FUDGE 
 Furtwangen University Didactic Game Editor  
 
 ## Design
@@ -14,8 +14,8 @@ Furtwangen University Didactic Game Editor
 - [Viewport.draw](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/WebGL_Proposal_Viewport.puml&idx=0)    
 
 ## Documentation
-- [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Design/Core.puml)
-- [Core Reference](https://jirkadelloro.github.io/FUDGE/Core/reference/)
+- [Core Implementation Diagram](http://www.plantuml.com/plantuml/proxy?fmt=svg&cache=no&src=https://jirkadelloro.github.io/FUDGE/Miscellaneous/Design/Core.puml)
+- [Core Reference](https://jirkadelloro.github.io/FUDGE/Documentation/Core/reference/)
 
 ## Themen für Abschluss- und Studienarbeiten
 - :pencil: Audiokomponenten 
