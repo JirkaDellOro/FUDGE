@@ -1,10 +1,10 @@
 {
   "bundle": {
-    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/",
     "sourceFiles": [
-      "e:/DAta/GitHub/FUDGE/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
-      "e:/DAta/GitHub/FUDGE/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
-      "e:/DAta/GitHub/FUDGE/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
+      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
+      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
     ],
     "js": {
       "sections": [
@@ -16,7 +16,7 @@
         },
         {
           "pos": 15,
-          "end": 13649,
+          "end": 12419,
           "kind": "text"
         }
       ],
@@ -50,11 +50,11 @@
         },
         {
           "pos": 54,
-          "end": 2586,
+          "end": 2537,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.5.3"
+  "version": "3.5.1"
 }
