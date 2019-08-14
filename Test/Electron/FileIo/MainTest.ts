@@ -1,3 +1,4 @@
+/*
 ///<reference path="../../node_modules/electron/Electron.d.ts"/>
 const { app, BrowserWindow } = require("electron");
 // const { path } = require("path");
@@ -29,3 +30,4 @@ namespace ElectronFileIo {
     });
   }
 }
+*/

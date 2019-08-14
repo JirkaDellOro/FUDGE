@@ -1,3 +1,4 @@
+/*
 ///<reference path="../../Scenes/Scenes.ts"/>
 ///<reference path="../../../Core/Build/Fudge.d.ts"/>
 ///<reference path="../../node_modules/@types/fs.d.ts"/>
@@ -7,7 +8,7 @@ namespace ElectronFileIo {
     import ƒ = Fudge;
     // import e = Electron;
     const { dialog } = require("electron").remote;
-    const fs = require("fs");
+    const { fs } = require("fs");
     window.addEventListener("DOMContentLoaded", init);
 
     let branch: ƒ.Node;
@@ -24,7 +25,7 @@ namespace ElectronFileIo {
         let filename: string = dialog.showSaveDialogSync(null, { title: "ƒ-Title", buttonLabel: "ƒ-Button", message: "ƒ-Message" });
         console.log("Chosen: ", filename);
 
-        fs.writeFile(filename, "Hello World!", (_e: Error) => {console.log(_e);});
+        fs.writeFile(filename, "Hello World!", (_e: Error) => { console.log(_e); });
         // fileName is a string that contains the path and filename created in the save file dialog.  
         //     fs.writeFile(fileName, content, (err) => {
         //     if (err) {
@@ -56,3 +57,4 @@ namespace ElectronFileIo {
         viewPort.draw();
     }
 }
+*/
