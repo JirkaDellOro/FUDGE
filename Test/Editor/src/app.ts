@@ -1,5 +1,6 @@
 // <reference path="../../../Core/src/Transfer/Serializer.ts"/>
 // <reference path="../../../Core/build/Fudge.d.ts"/>
+/// <reference types="../../@types/golden-layout"/>
 // console.log(Fudge);
 
 namespace UI {
