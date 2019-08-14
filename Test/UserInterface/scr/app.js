@@ -1,5 +1,5 @@
 /// <reference path="../../../Core/Build/Fudge.d.ts"/>
-var ƒ = ƒui;
+var ƒ = Fudge;
 var Test;
 (function (Test) {
     let myLayout;
@@ -57,7 +57,7 @@ var Test;
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
-        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
             branch.cmpTransform.local.rotateY(1);

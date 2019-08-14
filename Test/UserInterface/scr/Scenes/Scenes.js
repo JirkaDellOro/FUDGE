@@ -2,7 +2,7 @@
 var ScenesForUi;
 /// <reference path="../../../../Core/Build/Fudge.d.ts"/>
 (function (ScenesForUi) {
-    var ƒ = ƒui;
+    var ƒ = Fudge;
     function createAxisCross() {
         let clrRed = new ƒ.Color(1, 0, 0, 0.5);
         let clrGreen = new ƒ.Color(0, 1, 0, 0.5);
@@ -125,8 +125,8 @@ var ScenesForUi;
     }
     ScenesForUi.createCanvas = createCanvas;
     function dollyViewportCamera(_viewport) {
-        _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
-        _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
+        _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
+        _viewport.addEventListener("\u0192keydown" /* DOWN */, rotate);
         function rotate(_event) {
             let mtxCamera = _viewport.camera.getContainer().cmpTransform.local;
             let vctCamera = ƒ.Vector3.ZERO();

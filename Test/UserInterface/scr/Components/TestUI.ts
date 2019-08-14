@@ -3,7 +3,8 @@
 
 namespace UI {
     import ƒ = Fudge;
-    export class TestUI extends ƒ.UserInterface.MutableUI {
+    import ƒui = FudgeUserInterface;
+    export class TestUI extends ƒui.UIMutable {
         protected root: HTMLFormElement;
         private camera: ƒ.ComponentCamera;
 
@@ -14,7 +15,7 @@ namespace UI {
             let testdiv: HTMLElement = document.createElement("div");
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
-            ƒ.UserInterface.UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
+            ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }

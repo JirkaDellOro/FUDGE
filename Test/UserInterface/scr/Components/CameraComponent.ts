@@ -3,8 +3,8 @@
 
 namespace UI {
     // import ƒ = Fudge;
-    import ƒui = Fudge_UserInterface;
-    export class CameraUI extends ƒui.MutableUI {
+    import ƒui = FudgeUserInterface;
+    export class CameraUI extends ƒui.UIMutable {
         protected root: HTMLFormElement;
         public constructor(container: GoldenLayout.Container, state: Object, _camera: ƒ.ComponentCamera) {
             super(_camera);

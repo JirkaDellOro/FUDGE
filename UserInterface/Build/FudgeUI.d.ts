@@ -1,5 +1,5 @@
 /// <reference path="../../Core/build/Fudge.d.ts" />
-declare namespace Fudge_UserInterface {
+declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
@@ -16,7 +16,7 @@ declare namespace Fudge_UserInterface {
         });
     }
 }
-declare namespace Fudge_UserInterface {
+declare namespace FudgeUserInterface {
     import ƒ = Fudge;
     class UIGenerator {
         static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void;
@@ -42,7 +42,7 @@ declare namespace Fudge_UserInterface {
         }): HTMLSpanElement;
     }
 }
-declare namespace Fudge_UserInterface {
+declare namespace FudgeUserInterface {
     import ƒ = Fudge;
     abstract class UIMutable {
         protected timeUpdate: number;

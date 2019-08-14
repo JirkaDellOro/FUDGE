@@ -5,8 +5,8 @@ var UI;
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 (function (UI) {
     // import ƒ = Fudge;
-    var ƒui = Fudge_UserInterface;
-    class CameraUI extends ƒui.MutableUI {
+    var ƒui = FudgeUserInterface;
+    class CameraUI extends ƒui.UIMutable {
         constructor(container, state, _camera) {
             super(_camera);
             this.root = document.createElement("form");

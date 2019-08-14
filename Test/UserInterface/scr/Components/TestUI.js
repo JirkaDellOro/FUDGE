@@ -4,8 +4,8 @@ var UI;
 /// <reference path="../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 (function (UI) {
-    var ƒ = Fudge;
-    class TestUI extends ƒ.UserInterface.MutableUI {
+    var ƒui = FudgeUserInterface;
+    class TestUI extends ƒui.UIMutable {
         constructor(container, state, _camera) {
             super(_camera);
             this.camera = _camera;
@@ -13,7 +13,7 @@ var UI;
             let testdiv = document.createElement("div");
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
-            ƒ.UserInterface.UIGenerator.createFromMutable(_camera, this.root);
+            ƒui.UIGenerator.createFromMutable(_camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }

@@ -1,4 +1,4 @@
-/// <reference path="../node_modules/electron/electron.d.ts"/>
+/// <reference path="../../../node_modules/electron/electron.d.ts"/>
 import {app, BrowserWindow, ipcMain, } from 'electron'
 
 const url = require("url")

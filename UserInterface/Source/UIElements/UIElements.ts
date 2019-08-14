@@ -1,4 +1,4 @@
-namespace Fudge_UserInterface {
+namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */

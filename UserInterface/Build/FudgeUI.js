@@ -1,6 +1,6 @@
 "use strict";
-var Fudge_UserInterface;
-(function (Fudge_UserInterface) {
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
     /**
      * <select><option>Hallo</option></select>
      */
@@ -36,7 +36,7 @@ var Fudge_UserInterface;
             this.appendChild(cntLegend);
         }
     }
-    Fudge_UserInterface.FoldableFieldSet = FoldableFieldSet;
+    FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
     class Stepper extends HTMLInputElement {
         constructor(_label, params = {}) {
             super();
@@ -47,16 +47,16 @@ var Fudge_UserInterface;
             this.step = String(params.step) || "1";
         }
     }
-    Fudge_UserInterface.Stepper = Stepper;
+    FudgeUserInterface.Stepper = Stepper;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-})(Fudge_UserInterface || (Fudge_UserInterface = {}));
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../UIElements/UIElements.ts"/>
-var Fudge_UserInterface;
+var FudgeUserInterface;
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../UIElements/UIElements.ts"/>
-(function (Fudge_UserInterface) {
+(function (FudgeUserInterface) {
     class UIGenerator {
         static createFromMutable(_mutable, _element, _name) {
             let name = _name || _mutable.constructor.name;
@@ -127,7 +127,7 @@ var Fudge_UserInterface;
             return cntfieldset;
         }
         static createFoldableFieldset(_legend, _parent) {
-            let cntFoldFieldset = new Fudge_UserInterface.FoldableFieldSet(_legend);
+            let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_legend);
             cntFoldFieldset.id = _legend;
             _parent.appendChild(cntFoldFieldset);
             return cntFoldFieldset;
@@ -168,17 +168,17 @@ var Fudge_UserInterface;
         static createStepperElement(_id, _parent, params = {}) {
             if (params._value == undefined)
                 params._value = 0;
-            let stepper = new Fudge_UserInterface.Stepper(_id, { value: params._value });
+            let stepper = new FudgeUserInterface.Stepper(_id, { value: params._value });
             _parent.appendChild(stepper);
             return stepper;
         }
     }
-    Fudge_UserInterface.UIGenerator = UIGenerator;
-})(Fudge_UserInterface || (Fudge_UserInterface = {}));
+    FudgeUserInterface.UIGenerator = UIGenerator;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
-var Fudge_UserInterface;
+var FudgeUserInterface;
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
-(function (Fudge_UserInterface) {
+(function (FudgeUserInterface) {
     class UIMutable {
         constructor(mutable) {
             this.timeUpdate = 190;
@@ -263,6 +263,6 @@ var Fudge_UserInterface;
             }
         }
     }
-    Fudge_UserInterface.UIMutable = UIMutable;
-})(Fudge_UserInterface || (Fudge_UserInterface = {}));
+    FudgeUserInterface.UIMutable = UIMutable;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 //# sourceMappingURL=FudgeUI.js.map
