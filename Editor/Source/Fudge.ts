@@ -3,7 +3,7 @@
 const { app, BrowserWindow, Menu } = require("electron");
 
 
-namespace ElectronFileIo {
+namespace FudgeEditor {
   export let mainWindow: Electron.BrowserWindow;
 
   app.addListener("ready", createWindow);

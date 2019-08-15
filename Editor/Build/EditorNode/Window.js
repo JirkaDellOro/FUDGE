@@ -1,7 +1,9 @@
-///<reference types="../../Core/Build/Fudge"/>
-var EditorScene;
-///<reference types="../../Core/Build/Fudge"/>
-(function (EditorScene) {
+///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../Examples/Code/Scenes"/>
+var FudgeEditorNode;
+///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../Examples/Code/Scenes"/>
+(function (FudgeEditorNode) {
     var ƒ = Fudge;
     const { dialog } = require("electron").remote;
     window.addEventListener("DOMContentLoaded", initWindow);
@@ -63,5 +65,5 @@ var EditorScene;
         viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
         viewPort.draw();
     }
-})(EditorScene || (EditorScene = {}));
+})(FudgeEditorNode || (FudgeEditorNode = {}));
 //# sourceMappingURL=Window.js.map

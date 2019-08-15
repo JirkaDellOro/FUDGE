@@ -4,7 +4,7 @@
   "description": "Furtwangen University Didactic Game Editor (FUDGE)",
   "main": "../Build/Fudge.js",
   "scripts": {
-    "start": "electron ../Build"
+    "start": "electron ."
   },
   "author": "Jirka Dell'Oro-Friedl",
   "license": "CC0-1.0",

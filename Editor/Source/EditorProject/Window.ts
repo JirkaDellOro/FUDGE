@@ -1,6 +1,7 @@
-///<reference types="../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../Examples/Code/Scenes"/>
 
-namespace EditorScene {
+namespace FudgeEditorScene {
     import ƒ = Fudge;
     const { dialog } = require("electron").remote;
 
