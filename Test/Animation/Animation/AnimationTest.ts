@@ -62,7 +62,7 @@ namespace AnimationTest {
     // if (time > 2000) debugger;
     // animation.update(time);
     time = time % animation.totalTime;
-    let mutator: ƒ.Mutator = animation.getMutated(time, ƒ.ANIMATION_PLAYMODE.LOOP);
+    let mutator: ƒ.Mutator = animation.getMutated(time, 1, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
     // console.log(node.getComponent(ƒ.ComponentMesh).getMutator());
     // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
     // node.getComponent(ƒ.ComponentMesh).mutate(<ƒ.Mutator>(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]));

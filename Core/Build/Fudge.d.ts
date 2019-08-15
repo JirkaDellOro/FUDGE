@@ -183,21 +183,36 @@ declare namespace Fudge {
         name: string;
         totalTime: number;
         labels: AnimationLabel;
-        events: AnimationEventTrigger;
-        fps: number;
-        sps: number;
+        stepsPerSecond: number;
         animationStructure: AnimationStructure;
+        private framesPerSecond;
+        private events;
+        private eventsProcessed;
+        private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
-        getMutated(_time: number, _direction: number): Mutator;
+        getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
+        getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[];
+        setEvent(_name: string, _time: number): void;
+        removeEvent(_name: string): void;
         readonly getLabels: Enumerator;
+        fps: number;
         calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
         private traverseStructureForSerialisation;
         private traverseStructureForDeserialisation;
+        private getCorrectEventList;
         private traverseStructureForMutator;
         private traverseStructureForTime;
+        private getProcessedAnimationStructure;
+        private getProcessedEventTrigger;
+        private traverseStructureForNewStructure;
+        private calculateReverseSequence;
+        private calculateRasteredSequence;
+        private calculateReverseEventTriggers;
+        private calculateRasteredEventTriggers;
+        private checkEventsBetween;
     }
 }
 declare namespace Fudge {
@@ -234,7 +249,7 @@ declare namespace Fudge {
         path2D: Path2D;
         private slopeIn;
         private slopeOut;
-        constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number);
+        constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
         readonly getSlopeIn: number;
         readonly getSlopeOut: number;
         setSlopeIn: number;
@@ -445,13 +460,11 @@ declare namespace Fudge {
      * @author Lukas Scheuerle, HFU, 2019
      */
     enum ANIMATION_PLAYMODE {
-        INHERIT = 0,
-        LOOP = 1,
-        PINGPONG = 2,
-        PLAYONCE = 3,
-        PLAYONCESTOPAFTER = 4,
-        REVERSELOOP = 5,
-        STOP = 6
+        LOOP = 0,
+        PLAYONCE = 1,
+        PLAYONCESTOPAFTER = 2,
+        REVERSELOOP = 3,
+        STOP = 4
     }
     enum ANIMATION_PLAYBACK {
         /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
@@ -469,23 +482,18 @@ declare namespace Fudge {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        time: Time;
+        localTime: Time;
         speedScalesWithGlobalSpeed: boolean;
         private speedScale;
         private lastTime;
-        private lastFrameTime;
         constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
         speed: number;
-        jumpTo(_time: number, _currentTime: number): void;
+        jumpTo(_time: number): void;
         private updateAnimationLoop;
-        private updateAnimationContinous;
-        private updateAnimationRastered;
-        private updateAnimationFramebased;
-        private updateAnimation;
-        private calculateCurrentTime;
+        private executeEvents;
+        private applyPlaymodes;
         private calculateDirection;
         private updateScale;
-        private checkEventBetween;
     }
 }
 declare namespace Fudge {
@@ -2056,6 +2064,10 @@ declare namespace Fudge {
          * Retrieves the current scaling of this time
          */
         getScale(): number;
+        /**
+         * Retrieves the offset of this time
+         */
+        getOffset(): number;
         /**
          * Retrieves the scaled time in milliseconds passed since the last call to this method
          * Automatically reset at every call to set(...) and setScale(...)
