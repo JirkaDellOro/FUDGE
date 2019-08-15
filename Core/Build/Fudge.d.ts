@@ -199,6 +199,7 @@ declare namespace Fudge {
         calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         private traverseStructureForSerialisation;
         private traverseStructureForDeserialisation;
@@ -702,13 +703,15 @@ declare namespace Fudge {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        localTime: Time;
         speedScalesWithGlobalSpeed: boolean;
+        private localTime;
         private speedScale;
         private lastTime;
-        constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
+        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         speed: number;
         jumpTo(_time: number): void;
+        serialize(): Serialization;
+        deserialize(_s: Serialization): Serializable;
         private updateAnimationLoop;
         private executeEvents;
         private applyPlaymodes;

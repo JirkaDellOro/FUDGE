@@ -356,7 +356,7 @@ var Fudge;
         }
         calculateTotalTime() {
             this.totalTime = 0;
-            this.traverseStructureForTime(this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
+            this.traverseStructureForTime(this.animationStructure);
         }
         //#region transfer
         serialize() {
@@ -374,7 +374,7 @@ var Fudge;
             for (let name in this.events) {
                 s.events[name] = this.events[name];
             }
-            s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
+            s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
             return s;
         }
         deserialize(_serialization) {
@@ -390,9 +390,14 @@ var Fudge;
             for (let name in _serialization.events) {
                 this.events[name] = _serialization.events[name];
             }
-            this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, this.traverseStructureForDeserialisation(_serialization.animationStructure, {}));
+            this.eventsProcessed = new Map();
+            this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
+            this.animationStructuresProcessed = new Map();
             this.calculateTotalTime();
             return this;
+        }
+        getMutator() {
+            return this.serialize();
         }
         reduceMutator(_mutator) {
             delete _mutator.totalTime;
@@ -469,6 +474,9 @@ var Fudge;
                 this.calculateTotalTime();
                 let ae = {};
                 switch (_type) {
+                    case ANIMATION_STRUCTURE_TYPE.NORMAL:
+                        ae = this.animationStructure;
+                        break;
                     case ANIMATION_STRUCTURE_TYPE.REVERSE:
                         ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateReverseSequence.bind(this));
                         break;
@@ -1713,7 +1721,7 @@ var Fudge;
     class ComponentAnimator extends Fudge.Component {
         // private lastFrameTime: number = -1;
         // private lastDirection: number = -10;
-        constructor(_animation, _playmode, _playback) {
+        constructor(_animation = new Fudge.Animation(""), _playmode = ANIMATION_PLAYMODE.LOOP, _playback = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
             super();
             this.speedScalesWithGlobalSpeed = true;
             this.speedScale = 1;
@@ -1724,9 +1732,6 @@ var Fudge;
             this.localTime = new Fudge.Time();
             //TODO: update animation total time when loading a different animation?
             this.animation.calculateTotalTime();
-            // this.lastFrameTime = - (1000 / this.animation.fps);
-            // this.lastDirection = this.calculateDirection(0);
-            // this.jumpTo(0);
             //TODO: register updateAnimatioStart() properly into the gameloop
             Fudge.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.updateAnimationLoop.bind(this));
             Fudge.Time.game.addEventListener("timeScaled" /* TIME_SCALED */, this.updateScale.bind(this));
@@ -1743,8 +1748,33 @@ var Fudge;
             let mutator = this.animation.getMutated(_time, this.calculateDirection(_time), this.playback);
             this.getContainer().applyAnimation(mutator);
         }
+        //#region transfer
+        serialize() {
+            let s = super.serialize();
+            s["animation"] = this.animation.serialize();
+            s["playmode"] = this.playmode;
+            s["playback"] = this.playback;
+            s["speedScale"] = this.speedScale;
+            s["speedScalesWithGlobalSpeed"] = this.speedScalesWithGlobalSpeed;
+            s[super.constructor.name] = super.serialize();
+            return s;
+        }
+        deserialize(_s) {
+            this.animation = new Fudge.Animation("");
+            this.animation.deserialize(_s.animation);
+            this.playback = _s.playback;
+            this.playmode = _s.playmode;
+            this.speedScale = _s.speedScale;
+            this.speedScalesWithGlobalSpeed = _s.speedScalesWithGlobalSpeed;
+            super.deserialize(_s[super.constructor.name]);
+            return this;
+        }
+        //#endregion
         //#region updateAnimation
         updateAnimationLoop() {
+            if (this.animation.totalTime == 0)
+                debugger;
+            // return;
             let time = this.localTime.get();
             if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
                 time = this.lastTime + (1000 / this.animation.fps);
@@ -1756,9 +1786,10 @@ var Fudge;
                 this.lastTime = time;
                 time = time % this.animation.totalTime;
                 let mutator = this.animation.getMutated(time, direction, this.playback);
-                this.getContainer().applyAnimation(mutator);
+                if (this.getContainer()) {
+                    this.getContainer().applyAnimation(mutator);
+                }
             }
-            debugger;
         }
         executeEvents(events) {
             for (let i = 0; i < events.length; i++) {
@@ -1783,100 +1814,6 @@ var Fudge;
                     return _time;
             }
         }
-        // private updateAnimationLoop(): void {
-        //   if (this.playmode == ANIMATION_PLAYMODE.STOP)
-        //     return;
-        //   switch (this.playback) {
-        //     case ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS:
-        //       this.updateAnimationContinous();
-        //       break;
-        //     case ANIMATION_PLAYBACK.TIMEBASED_RASTERED_TO_FPS:
-        //       this.updateAnimationRastered();
-        //       break;
-        //     case ANIMATION_PLAYBACK.FRAMEBASED:
-        //       this.updateAnimationFramebased();
-        //       break;
-        //   }
-        // }
-        // private updateAnimationContinous(): void {
-        //   let time: number = this.time.get();
-        //   let direction: number = this.calculateDirection(time);
-        //   time = this.calculateCurrentTime(time, direction);
-        //   if (this.lastTime == time || this.lastDirection == 0 && direction == 0)
-        //     return;
-        //   this.updateAnimation(time);
-        //   if (this.lastTime < time && (direction > 0)
-        //     || this.lastTime > time && (direction < 0)) {
-        //     //no timejump
-        //     this.checkEventBetween(this.lastTime + 1, time);
-        //   } else if (direction == 0) {
-        //     //
-        //   } else {
-        //     //timejump
-        //     console.log("Timejump", this.lastTime, time);
-        //     let min: number = this.lastTime;
-        //     let max: number = time;
-        //     if (min > max) {
-        //       max = this.lastTime;
-        //       min = time;
-        //     }
-        //     this.checkEventBetween(max + 1, this.animation.totalTime);
-        //     this.checkEventBetween(0, min);
-        //   }
-        //   this.lastTime = time;
-        //   this.lastDirection = direction;
-        // }
-        // private updateAnimationRastered(): void {
-        //   let time: number = this.time.get();
-        //   let direction: number = this.calculateDirection(time);
-        //   time = this.calculateCurrentTime(time, direction);
-        //   let timePerFrame: number = 1000 / this.animation.fps;
-        //   time = time - (time % timePerFrame);
-        //   if (time == this.animation.totalTime)
-        //     time = 0;
-        //   if (this.lastFrameTime != time) {
-        //     this.updateAnimation(time);
-        //     this.checkEventBetween(time, time + timePerFrame - 1);
-        //     this.lastFrameTime = time;
-        //   }
-        // }
-        // private updateAnimationFramebased(): void {
-        //   let timePerFrame: number = 1000 / this.animation.fps;
-        //   let direction: number = this.calculateDirection(this.lastTime);
-        //   let time: number = this.lastTime;
-        //   // if (direction == 0) {
-        //   //   if (this.playmode == ANIMATION_PLAYMODE.PLAYONCE || this.playmode == ANIMATION_PLAYMODE.PLAYONCESTOPAFTER) {
-        //   //     return;
-        //   //   }
-        //   // }
-        //   time = (this.lastFrameTime + timePerFrame * direction) % this.animation.totalTime;
-        //   if (time < 0) {
-        //     time += this.animation.totalTime;
-        //   }
-        //   if (this.lastFrameTime == time || direction == 0)
-        //     return;
-        //   this.updateAnimation(time);
-        //   this.checkEventBetween(time, time + timePerFrame - 1);
-        //   this.lastFrameTime = time;
-        //   this.lastTime += timePerFrame;
-        //   this.lastDirection = direction;
-        // }
-        // private updateAnimation(_time: number): void {
-        //   let mutator: Mutator = this.animation.getMutated(_time);
-        //   this.getContainer().applyAnimation(mutator);
-        // }
-        //#endregion
-        // private calculateCurrentTime(_time: number, _direction: number): number {
-        //   if (_direction == 0) {
-        //     if (this.playmode == ANIMATION_PLAYMODE.PLAYONCE) return this.animation.totalTime;
-        //     if (this.playmode == ANIMATION_PLAYMODE.PLAYONCESTOPAFTER) return 0;
-        //   }
-        //   let time: number = _time % this.animation.totalTime;
-        //   if (_direction < 0) {
-        //     time = this.animation.totalTime - time;
-        //   }
-        //   return time;
-        // }
         calculateDirection(_time) {
             switch (this.playmode) {
                 case ANIMATION_PLAYMODE.STOP:

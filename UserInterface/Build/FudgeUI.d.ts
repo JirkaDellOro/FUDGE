@@ -3,13 +3,6 @@ declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
-    class FoldableFieldSet extends HTMLFieldSetElement {
-        constructor(_legend: string);
-        private toggleFoldElement;
-    }
-    class CollapsableList extends HTMLUListElement {
-        constructor();
-    }
     class ToggleButton extends HTMLButtonElement {
         private toggleState;
         constructor(style: string);
@@ -25,6 +18,14 @@ declare namespace FudgeUserInterface {
             step?: number;
             value?: number;
         });
+    }
+    class FoldableFieldSet extends HTMLFieldSetElement {
+        constructor(_legend: string);
+        private toggleFoldElement;
+    }
+    class CollapsableList extends HTMLUListElement {
+        constructor();
+        private toggleFoldElement;
     }
 }
 declare namespace FudgeUserInterface {
