@@ -21,9 +21,8 @@ namespace FudgeUserInterface {
         private toggleFoldElement = (_event: MouseEvent): void => {
             _event.preventDefault();
             if (_event.target != _event.currentTarget) return;
-            let target: HTMLButtonElement = <HTMLButtonElement>_event.target;
             //Get the fieldset the button belongs to
-            let foldTarget: HTMLElement = target.parentElement.parentElement;
+            let foldTarget: HTMLElement = this;
             //Toggle the folding behaviour of the Folding Target
             foldTarget.classList.toggle("foldButton_folded");
             foldTarget.classList.toggle("foldButton_unfolded");
@@ -36,7 +35,42 @@ namespace FudgeUserInterface {
             }
         }
     }
+    export class CollapsableList extends HTMLUListElement {
+        public constructor() {
+            super();
 
+        }
+    }
+
+    export class ToggleButton extends HTMLButtonElement {
+        private toggleState: boolean;
+        
+        public constructor() {
+            super();
+            this.toggleState = true;
+            this.addEventListener("click", this.switchToggleState);
+        }
+        public setToggleState(toggleState: boolean): void {
+            this.toggleState = toggleState;
+            if (this.toggleState == true) {
+                this.classList.add("ToggleOn");
+                this.classList.remove("ToggleOff");
+            }
+            else {
+                this.classList.remove("ToggleOn");
+                this.classList.add("ToggleOff");
+            }
+        }
+        public getToggleState(): boolean {
+            return this.toggleState;
+        }
+        public toggle(): void {
+            this.setToggleState(!this.toggleState);
+        }
+        private switchToggleState = (_event: MouseEvent): void => {
+            this.setToggleState(!this.toggleState);
+        }
+    }
     export class Stepper extends HTMLInputElement {
         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
             super();

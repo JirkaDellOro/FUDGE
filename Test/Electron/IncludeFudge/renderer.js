@@ -6,4 +6,4 @@ var IncludeFudge;
     let node = new ƒ.Node("Node");
     console.log(node);
 })(IncludeFudge || (IncludeFudge = {}));
-//# sourceMappingURL=Renderer.js.map
+//# sourceMappingURL=renderer.js.map

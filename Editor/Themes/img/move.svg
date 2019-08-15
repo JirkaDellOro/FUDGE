@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="183" height="183" viewBox="0 0 183 183" class="undefined">
+<style>
+  .IconMainColor{
+    stroke-width:0.4;
+    stroke:#000;
+  }
+</style>
+  <polygon points="91.4 98.1 132.1 98.1 132.1 110.7 164.4 91.4 132.1 72.2 132.1 84.8 91.4 84.8 91.4 84.8 50.7 84.8 50.7 72.2 18.4 91.4 50.7 110.7 50.7 98.1 " class="IconMainColor"/>
+  <polygon points="98.1 91.4 98.1 50.7 110.7 50.7 91.4 18.4 72.2 50.7 84.8 50.7 84.8 91.4 84.8 91.4 84.8 132.1 72.2 132.1 91.4 164.4 110.7 132.1 98.1 132.1 " class="IconMainColor"/>
+</svg>

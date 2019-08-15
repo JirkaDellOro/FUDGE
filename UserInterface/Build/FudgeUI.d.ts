@@ -7,6 +7,17 @@ declare namespace FudgeUserInterface {
         constructor(_legend: string);
         private toggleFoldElement;
     }
+    class CollapsableList extends HTMLUListElement {
+        constructor();
+    }
+    class ToggleButton extends HTMLButtonElement {
+        private toggleState;
+        constructor();
+        setToggleState(toggleState: boolean): void;
+        getToggleState(): boolean;
+        toggle(): void;
+        private switchToggleState;
+    }
     class Stepper extends HTMLInputElement {
         constructor(_label: string, params?: {
             min?: number;
