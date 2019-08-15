@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Realtime communication with WebRTC</title>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</head>
+
+<body>
+  <h1>Realtime communication with WebRTC</h1>
+  <button id="switch">Switch to Authoritative</button>
+  <div>
+    <button id="start_signalingServerButton">Start up Signaling Server</button>
+    <button id="stop_signalingServerButton">stop Signaling Server</button>
+  </div>
+
+  <div id="peer_to_peer_elements">
+      Enter Signaling server URL:
+    <input id="signaling_uri" type="text" value="localhost:9090"></input>
+    <button id="submit_button">Connect</button>
+    <div>
+      <input id="login_name" type="text"></input>
+      <button id="login_button">Login</button>
+    </div>
+    <div>
+      <input id="connectToUsername" type="text" value="enter username to call">
+      <button id="userConnect">Connect</button>
+      <button id="disconnectBtn">Disconnect</button>
+    </div>
+    <div>
+      <textarea id="chatbox"></textarea>
+      <input id="msgInput" type="text"></input>
+      <button id="sendMessage">Send</button>
+    </div>
+  </div>
+
+  <div id="authoritative_elements" style="display: none">
+    <button id="broadcastButton">Broadcast Message</button>
+    <div id="moveIt" style="height:50px;width:50px;background-color:red; position:absolute; left: 5px">Yo</div>
+    
+  </div>
+  <script>require('./../Build/Scenes/renderer.js')</script>
+</body>
+
+</html>
