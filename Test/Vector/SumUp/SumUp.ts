@@ -1,5 +1,5 @@
-/// <reference path="../../../Core/build/Fudge.d.ts" />
-//import * as ƒ from "../../../Core/build/Fudge";
+/// <reference path="../../../Core/Build/Fudge.d.ts" />
+//import * as ƒ from "../../../Core/Build/Fudge";
 
 namespace SumUp {
     import ƒ = Fudge;

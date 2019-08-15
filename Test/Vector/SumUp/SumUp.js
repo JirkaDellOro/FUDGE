@@ -1,8 +1,8 @@
-/// <reference path="../../../Core/build/Fudge.d.ts" />
-//import * as ƒ from "../../../Core/build/Fudge";
+/// <reference path="../../../Core/Build/Fudge.d.ts" />
+//import * as ƒ from "../../../Core/Build/Fudge";
 var SumUp;
-/// <reference path="../../../Core/build/Fudge.d.ts" />
-//import * as ƒ from "../../../Core/build/Fudge";
+/// <reference path="../../../Core/Build/Fudge.d.ts" />
+//import * as ƒ from "../../../Core/Build/Fudge";
 (function (SumUp) {
     var ƒ = Fudge;
     let v1 = new ƒ.Vector3(1, 0, 0);

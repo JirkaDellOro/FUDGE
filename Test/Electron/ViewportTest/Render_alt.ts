@@ -1,4 +1,4 @@
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
+/// <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 

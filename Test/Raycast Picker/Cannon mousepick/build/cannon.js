@@ -35,7 +35,7 @@ module.exports={
     "engine",
     "3d"
   ],
-  "main": "./build/cannon.js",
+  "main": "./Build/cannon.js",
   "engines": {
     "node": "*"
   },

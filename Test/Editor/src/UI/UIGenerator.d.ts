@@ -1,4 +1,4 @@
-/// <reference path="../../../../Core/build/Fudge.d.ts" />
+/// <reference path="../../../../Core/Build/Fudge.d.ts" />
 declare namespace GoldenLayoutTest {
     import ƒ = Fudge;
     class UIGenerator {
