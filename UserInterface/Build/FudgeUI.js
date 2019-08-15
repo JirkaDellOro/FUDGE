@@ -4,42 +4,6 @@ var FudgeUserInterface;
     /**
      * <select><option>Hallo</option></select>
      */
-    class FoldableFieldSet extends HTMLFieldSetElement {
-        constructor(_legend) {
-            super();
-            this.toggleFoldElement = (_event) => {
-                _event.preventDefault();
-                if (_event.target != _event.currentTarget)
-                    return;
-                //Get the fieldset the button belongs to
-                let children = this.children;
-                //fold or unfold all children that aren't unfoldable
-                for (let child of children) {
-                    if (!child.classList.contains("unfoldable")) {
-                        child.classList.toggle("folded");
-                    }
-                }
-            };
-            let cntLegend = document.createElement("legend");
-            cntLegend.classList.add("unfoldable");
-            let btnfoldButton = new ToggleButton("FoldButton");
-            btnfoldButton.addEventListener("click", this.toggleFoldElement);
-            // btnfoldButton.classList.add("unfoldable");
-            let lblTitle = document.createElement("span");
-            lblTitle.textContent = _legend;
-            // lblTitle.classList.add("unfoldable");
-            cntLegend.appendChild(btnfoldButton);
-            cntLegend.appendChild(lblTitle);
-            this.appendChild(cntLegend);
-        }
-    }
-    FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
-    class CollapsableList extends HTMLUListElement {
-        constructor() {
-            super();
-        }
-    }
-    FudgeUserInterface.CollapsableList = CollapsableList;
     class ToggleButton extends HTMLButtonElement {
         constructor(style) {
             super();
@@ -82,6 +46,58 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.Stepper = Stepper;
+    class FoldableFieldSet extends HTMLFieldSetElement {
+        constructor(_legend) {
+            super();
+            this.toggleFoldElement = (_event) => {
+                _event.preventDefault();
+                if (_event.target != _event.currentTarget)
+                    return;
+                //Get the fieldset the button belongs to
+                let children = this.children;
+                //fold or unfold all children that aren't unfoldable
+                for (let child of children) {
+                    if (!child.classList.contains("unfoldable")) {
+                        child.classList.toggle("folded");
+                    }
+                }
+            };
+            let cntLegend = document.createElement("legend");
+            cntLegend.classList.add("unfoldable");
+            let btnFoldButton = new ToggleButton("FoldButton");
+            btnFoldButton.addEventListener("click", this.toggleFoldElement);
+            // btnfoldButton.classList.add("unfoldable");
+            let lblTitle = document.createElement("span");
+            lblTitle.textContent = _legend;
+            // lblTitle.classList.add("unfoldable");
+            cntLegend.appendChild(btnFoldButton);
+            cntLegend.appendChild(lblTitle);
+            this.appendChild(cntLegend);
+        }
+    }
+    FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
+    class CollapsableList extends HTMLUListElement {
+        constructor() {
+            super();
+            this.toggleFoldElement = (_event) => {
+                _event.preventDefault();
+                if (_event.target != _event.currentTarget)
+                    return;
+                //Get the fieldset the button belongs to
+                let children = this.children;
+                //fold or unfold all children that aren't unfoldable
+                for (let child of children) {
+                    if (!child.classList.contains("unfoldable")) {
+                        child.classList.toggle("folded");
+                    }
+                }
+            };
+            let btnToggleButton = new ToggleButton("FoldButton");
+            btnToggleButton.addEventListener("click", this.toggleFoldElement);
+            this.append(btnToggleButton);
+        }
+    }
+    FudgeUserInterface.CollapsableList = CollapsableList;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
