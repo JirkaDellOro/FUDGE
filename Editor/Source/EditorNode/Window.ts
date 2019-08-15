@@ -15,25 +15,8 @@ namespace FudgeEditorNode {
     let camera: ƒ.Node;
 
     function initWindow(): void {
-        let config: GoldenLayout.Config = {
-            content: [{
-                type: "row",
-                content: [{
-                    type: "component",
-                    componentName: "Inspector",
-                    title: "Inspector"
-                },
-                {
-                    type: "component",
-                    componentName: "Viewport",
-                    title: "Viewport",
-                }
-                ]
-            }]
-        };
-
         createScene();
-        myLayout = new GoldenLayout(config);
+        myLayout = new GoldenLayout(getLayout());
 
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Inspector", createInspectorComponent);
@@ -74,5 +57,25 @@ namespace FudgeEditorNode {
         viewPort = new ƒ.Viewport();
         viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
         viewPort.draw();
+    }
+
+    function getLayout(): GoldenLayout.Config {
+        const config: GoldenLayout.Config = {
+            content: [{
+                type: "row",
+                content: [{
+                    type: "component",
+                    componentName: "Inspector",
+                    title: "Inspector"
+                },
+                {
+                    type: "component",
+                    componentName: "Viewport",
+                    title: "Viewport"
+                }
+                ]
+            }]
+        };
+        return config;
     }
 }

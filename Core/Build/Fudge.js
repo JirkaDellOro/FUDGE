@@ -795,6 +795,382 @@ var Fudge;
     }
     Fudge.AnimationSequence = AnimationSequence;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Describes the [[Audio]] class in which all Audio Data is stored.
+     * Audio will be given to the [[ComponentAudio]] for further usage.
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class Audio {
+        /**
+         * Constructor for the [[Audio]] Class
+         * @param _audioContext from [[AudioSettings]]
+         * @param _gainValue 0 for muted | 1 for max volume
+         */
+        constructor(_audioContext, _audioSessionData, _url, _gainValue, _loop) {
+            this.init(_audioContext, _audioSessionData, _url, _gainValue, _loop);
+        }
+        async init(_audioContext, _audioSessionData, _url, _gainValue, _loop) {
+            // Do everything in constructor
+            // Add url to Audio
+            this.url = _url;
+            console.log("Audio url " + this.url);
+            // Get AudioBuffer
+            const bufferProm = _audioSessionData.urlToBuffer(_audioContext, _url);
+            while (!bufferProm) {
+                console.log("waiting...");
+            }
+            await bufferProm.then(val => {
+                this.audioBuffer = val;
+                console.log("valBuffer " + val);
+            });
+            console.log("Audio audiobuffer " + this.audioBuffer);
+            // // Add local Gain for Audio  and connect 
+            this.localGain = await _audioContext.createGain();
+            this.localGainValue = await _gainValue;
+            //create Audio
+            await this.createAudio(_audioContext, this.audioBuffer);
+        }
+        /**
+         * initBufferSource
+         */
+        initBufferSource(_audioContext) {
+            this.bufferSource = _audioContext.createBufferSource();
+            this.bufferSource.buffer = this.audioBuffer;
+            console.log("bS = " + this.bufferSource);
+            this.bufferSource.connect(_audioContext.destination);
+            this.setLoop();
+            this.addLocalGain();
+            console.log("BufferSource.buffer: " + this.bufferSource.buffer);
+            console.log("AudioBuffer: " + this.audioBuffer);
+        }
+        //#region Getter/Setter LocalGainValue
+        setLocalGainValue(_localGainValue) {
+            this.localGainValue = _localGainValue;
+        }
+        getLocalGainValue() {
+            return this.localGainValue;
+        }
+        //#endregion Getter/Setter LocalGainValue
+        setBufferSource(_buffer) {
+            this.bufferSource.buffer = _buffer;
+        }
+        /**
+         * createAudio builds an [[Audio]] to use with the [[ComponentAudio]]
+         * @param _audioContext from [[AudioSettings]]
+         * @param _audioBuffer from [[AudioSessionData]]
+         */
+        createAudio(_audioContext, _audioBuffer) {
+            console.log("createAudio() " + " | " + " AudioContext: " + _audioContext);
+            this.audioBuffer = _audioBuffer;
+            console.log("aB = " + this.audioBuffer);
+            // AudioBuffersourceNode Setup
+            this.initBufferSource(_audioContext);
+            return this.audioBuffer;
+        }
+        setLoop() {
+            this.bufferSource.loop = this.isLooping;
+        }
+        addLocalGain() {
+            this.bufferSource.connect(this.localGain);
+        }
+    }
+    Fudge.Audio = Audio;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Add an [[AudioFilter]] to an [[Audio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    let FILTER_TYPE;
+    (function (FILTER_TYPE) {
+        FILTER_TYPE["LOWPASS"] = "LOWPASS";
+        FILTER_TYPE["HIGHPASS"] = "HIGHPASS";
+        FILTER_TYPE["BANDPASS"] = "BANDPASS";
+        FILTER_TYPE["LOWSHELF"] = "LOWSHELF";
+        FILTER_TYPE["HIGHSHELF"] = "HIGHSHELF";
+        FILTER_TYPE["PEAKING"] = "PEAKING";
+        FILTER_TYPE["NOTCH"] = "NOTCH";
+        FILTER_TYPE["ALLPASS"] = "ALLPASS";
+    })(FILTER_TYPE || (FILTER_TYPE = {}));
+    class AudioFilter {
+        constructor(_useFilter, _filterType) {
+            this.useFilter = _useFilter;
+            this.filterType = _filterType;
+        }
+        /**
+         * addFilterTo
+         */
+        addFilterToAudio(_audioBuffer, _filterType) {
+            console.log("do nothing for now");
+        }
+    }
+    Fudge.AudioFilter = AudioFilter;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Describes a [[AudioListener]] attached to a [[Node]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioListener {
+        //##TODO AudioListener
+        constructor(_audioContext) {
+            //this.audioListener = _audioContext.listener;
+        }
+        /**
+         * We will call setAudioListenerPosition whenever there is a need to change Positions.
+         * All the position values should be identical to the current Position this is atteched to.
+         */
+        // public setAudioListenerPosition(_position: Vector3): void {
+        //     this.audioListener.positionX.value = _position.x;
+        //     this.audioListener.positionY.value = _position.y;
+        //     this.audioListener.positionZ.value = _position.z;
+        //     this.position = _position;
+        // }
+        /**
+         * getAudioListenerPosition
+         */
+        getAudioListenerPosition() {
+            return this.position;
+        }
+        /**
+         * setAudioListenerOrientation
+         */
+        // public setAudioListenerOrientation(_orientation: Vector3): void {
+        //     this.audioListener.orientationX.value = _orientation.x;
+        //     this.audioListener.orientationY.value = _orientation.y;
+        //     this.audioListener.orientationZ.value = _orientation.z;
+        //     this.orientation = _orientation;
+        // }
+        /**
+         * getAudioListenerOrientation
+         */
+        getAudioListenerOrientation() {
+            return this.orientation;
+        }
+    }
+    Fudge.AudioListener = AudioListener;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     *
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    let PANNING_MODEL_TYPE;
+    (function (PANNING_MODEL_TYPE) {
+        PANNING_MODEL_TYPE["EQUALPOWER"] = "EQUALPOWER";
+        PANNING_MODEL_TYPE["HRFT"] = "HRFT";
+    })(PANNING_MODEL_TYPE || (PANNING_MODEL_TYPE = {}));
+    let DISTANCE_MODEL_TYPE;
+    (function (DISTANCE_MODEL_TYPE) {
+        DISTANCE_MODEL_TYPE["LINEAR"] = "LINEAR";
+        DISTANCE_MODEL_TYPE["INVERSE"] = "INVERSE";
+        DISTANCE_MODEL_TYPE["EXPONENTIAL"] = "EXPONENTIAL";
+    })(DISTANCE_MODEL_TYPE || (DISTANCE_MODEL_TYPE = {}));
+    class AudioLocalisation {
+        /**
+         * Constructor for the [[AudioLocalisation]] Class
+         * @param _audioContext from [[AudioSettings]]
+         */
+        constructor(_audioContext) {
+            this.pannerNode = _audioContext.createPanner();
+        }
+        /**
+        * We will call setPannerPosition whenever there is a need to change Positions.
+        * All the position values should be identical to the current Position this is atteched to.
+        */
+        // public setPannePosition(_position: Vector3): void {
+        //     this.pannerNode.positionX.value = _position.x;
+        //     this.pannerNode.positionY.value = _position.y;
+        //     this.pannerNode.positionZ.value = _position.z;
+        //     this.position = _position;
+        // }
+        /**
+         * getPannerPosition
+         */
+        getPannerPosition() {
+            return this.position;
+        }
+        /**
+         * setPanneOrientation
+         */
+        // public setPannerOrientation(_orientation: Vector3): void {
+        //     this.pannerNode.orientationX.value = _orientation.x;
+        //     this.pannerNode.orientationY.value = _orientation.y;
+        //     this.pannerNode.orientationZ.value = _orientation.z;
+        //     this.orientation = _orientation;
+        // }
+        /**
+         * getPanneOrientation
+         */
+        getPanneOrientation() {
+            return this.orientation;
+        }
+    }
+    Fudge.AudioLocalisation = AudioLocalisation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Describes Data Handler for all Audio Sources
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioSessionData {
+        /**
+         * constructor of the [[AudioSessionData]] class
+         */
+        constructor() {
+            this.dataArray = new Array();
+            this.bufferCounter = 0;
+        }
+        /**
+         * getBufferCounter returns [bufferCounter] to keep track of number of different used sounds
+         */
+        getBufferCounter() {
+            return this.bufferCounter;
+        }
+        /**
+         * Decoding Audio Data
+         * Asynchronous Function to permit the loading of multiple Data Sources at the same time
+         * @param _url URL as String for Data fetching
+         */
+        async urlToBuffer(_audioContext, _url) {
+            console.log("inside urlToBuffer");
+            let initObject = {
+                method: "GET",
+                mode: "same-origin",
+                cache: "no-cache",
+                headers: {
+                    "Content-Type": "audio/mpeg3"
+                },
+                redirect: "follow" // default -> follow
+            };
+            // Check for existing URL in DataArray, if no data inside add new AudioData
+            //this.pushDataArray(_url, null);
+            console.log("length" + this.dataArray.length);
+            if (this.dataArray.length == 0) {
+                try {
+                    // need window to fetch?
+                    const response = await window.fetch(_url, initObject);
+                    const arrayBuffer = await response.arrayBuffer();
+                    const decodedAudio = await _audioContext.decodeAudioData(arrayBuffer);
+                    this.pushDataArray(_url, decodedAudio);
+                    //this.dataArray[this.dataArray.length].buffer = decodedAudio;
+                    console.log("length " + this.dataArray.length);
+                    return decodedAudio;
+                }
+                catch (e) {
+                    this.logErrorFetch(e);
+                    return null;
+                }
+            }
+            else {
+                // If needed URL is inside Array, 
+                // iterate through all existing Data to get needed values
+                for (let x = 0; x < this.dataArray.length; x++) {
+                    console.log("what is happening");
+                    if (this.dataArray[x].url == _url) {
+                        console.log("found existing url");
+                        return this.dataArray[x].buffer;
+                    }
+                }
+                return null;
+            }
+        }
+        /**
+         * pushTuple Source and Decoded Audio Data gets saved for later use
+         * @param _url URL from used Data
+         * @param _audioBuffer AudioBuffer generated from URL
+         */
+        pushDataArray(_url, _audioBuffer) {
+            let data;
+            data = { url: _url, buffer: _audioBuffer, counter: this.bufferCounter };
+            this.dataArray.push(data);
+            console.log("array: " + this.dataArray);
+            //TODO audioBufferHolder obsolete if array working
+            this.setAudioBufferHolder(data);
+            console.log("dataPair " + data.url + " " + data.buffer + " " + data.counter);
+            this.bufferCounter += 1;
+            return this.audioBufferHolder;
+        }
+        /**
+         * iterateArray
+         * Look at saved Data Count
+         */
+        countDataInArray() {
+            console.log("DataArray Length: " + this.dataArray.length);
+        }
+        /**
+         * showDataInArray
+         * Show all Data in Array
+         */
+        showDataInArray() {
+            for (let x = 0; x < this.dataArray.length; x++) {
+                console.log("Array Data: " + this.dataArray[x].url + this.dataArray[x].buffer);
+            }
+        }
+        /**
+         * getAudioBuffer
+         */
+        getAudioBufferHolder() {
+            return this.audioBufferHolder;
+        }
+        /**
+         * setAudioBuffer
+         */
+        setAudioBufferHolder(_audioData) {
+            this.audioBufferHolder = _audioData;
+        }
+        /**
+         * Error Message for Data Fetching
+         * @param e Error
+         */
+        logErrorFetch(e) {
+            console.log("Audio error", e);
+        }
+    }
+    Fudge.AudioSessionData = AudioSessionData;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Describes Global Audio Settings.
+     * Is meant to be used as a Menu option.
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioSettings {
+        //
+        /**
+         * Constructor for master Volume
+         * @param _gainValue
+         */
+        constructor(_gainValue) {
+            this.setAudioContext(new AudioContext({ latencyHint: "interactive", sampleRate: 44100 }));
+            //this.globalAudioContext.resume();
+            console.log("GlobalAudioContext: " + this.globalAudioContext);
+            this.masterGain = this.globalAudioContext.createGain();
+            this.masterGainValue = _gainValue;
+            //this.audioSessionData = new AudioSessionData();
+        }
+        setMasterGainValue(_masterGainValue) {
+            this.masterGainValue = _masterGainValue;
+        }
+        getMasterGainValue() {
+            return this.masterGainValue;
+        }
+        getAudioContext() {
+            return this.globalAudioContext;
+        }
+        setAudioContext(_audioContext) {
+            this.globalAudioContext = _audioContext;
+        }
+    }
+    Fudge.AudioSettings = AudioSettings;
+})(Fudge || (Fudge = {}));
 //<reference path="../Coats/Coat.ts"/>
 var Fudge;
 //<reference path="../Coats/Coat.ts"/>
@@ -1529,6 +1905,52 @@ var Fudge;
         }
     }
     Fudge.ComponentAnimator = ComponentAnimator;
+})(Fudge || (Fudge = {}));
+/// <reference path="Component.ts"/>
+var Fudge;
+/// <reference path="Component.ts"/>
+(function (Fudge) {
+    /**
+     * Attaches a [[ComponentAudio]] to a [[Node]].
+     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class ComponentAudio extends Fudge.Component {
+        constructor(_audio) {
+            super();
+            this.setAudio(_audio);
+        }
+        setLocalisation(_localisation) {
+            this.localisation = _localisation;
+        }
+        /**
+         * playAudio
+         */
+        playAudio(_audioContext) {
+            this.audio.initBufferSource(_audioContext);
+            this.audio.bufferSource.start(_audioContext.currentTime);
+        }
+        /**
+         * Adds an [[Audio]] to the [[ComponentAudio]]
+         * @param _audio Decoded Audio Data as [[Audio]]
+         */
+        setAudio(_audio) {
+            this.audio = _audio;
+        }
+    }
+    Fudge.ComponentAudio = ComponentAudio;
+})(Fudge || (Fudge = {}));
+/// <reference path="Component.ts"/>
+var Fudge;
+/// <reference path="Component.ts"/>
+(function (Fudge) {
+    /**
+     * Attaches a [[AudioListener]] to the node
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class ComponentAudioListener extends Fudge.Component {
+    }
+    Fudge.ComponentAudioListener = ComponentAudioListener;
 })(Fudge || (Fudge = {}));
 /// <reference path="Component.ts"/>
 var Fudge;

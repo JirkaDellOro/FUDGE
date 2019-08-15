@@ -14,24 +14,8 @@ var FudgeEditorNode;
     let viewPort = new ƒ.Viewport();
     let camera;
     function initWindow() {
-        let config = {
-            content: [{
-                    type: "row",
-                    content: [{
-                            type: "component",
-                            componentName: "Inspector",
-                            title: "Inspector"
-                        },
-                        {
-                            type: "component",
-                            componentName: "Viewport",
-                            title: "Viewport",
-                        }
-                    ]
-                }]
-        };
         createScene();
-        myLayout = new GoldenLayout(config);
+        myLayout = new GoldenLayout(getLayout());
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Inspector", createInspectorComponent);
         myLayout.init();
@@ -64,6 +48,25 @@ var FudgeEditorNode;
         viewPort = new ƒ.Viewport();
         viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
         viewPort.draw();
+    }
+    function getLayout() {
+        const config = {
+            content: [{
+                    type: "row",
+                    content: [{
+                            type: "component",
+                            componentName: "Inspector",
+                            title: "Inspector"
+                        },
+                        {
+                            type: "component",
+                            componentName: "Viewport",
+                            title: "Viewport"
+                        }
+                    ]
+                }]
+        };
+        return config;
     }
 })(FudgeEditorNode || (FudgeEditorNode = {}));
 //# sourceMappingURL=Window.js.map
