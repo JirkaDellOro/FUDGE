@@ -92,15 +92,18 @@ var FudgeUserInterface;
                     }
                 }
             };
+            this.classList.add("unfoldable");
             let btnToggleButton = new ToggleButton("FoldButton");
+            btnToggleButton.classList.add("unfoldable");
             btnToggleButton.addEventListener("click", this.toggleFoldElement);
             this.append(btnToggleButton);
         }
     }
     FudgeUserInterface.CollapsableList = CollapsableList;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
-    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
+    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-fold-ul", CollapsableList, { extends: "ul" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../UIElements/UIElements.ts"/>

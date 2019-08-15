@@ -78,7 +78,9 @@ namespace FudgeUserInterface {
     export class CollapsableList extends HTMLUListElement {
         public constructor() {
             super();
+            this.classList.add("unfoldable");
             let btnToggleButton: HTMLButtonElement = new ToggleButton("FoldButton");
+            btnToggleButton.classList.add("unfoldable");
             btnToggleButton.addEventListener("click", this.toggleFoldElement);
             this.append(btnToggleButton);           
         }
@@ -98,7 +100,8 @@ namespace FudgeUserInterface {
     }
 
     customElements.define("ui-stepper", Stepper, { extends: "input" });
-    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
     customElements.define("ui-toggle-button", ToggleButton, {extends: "button"});
+    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-fold-ul", CollapsableList, {extends: "ul"});
 
 }
