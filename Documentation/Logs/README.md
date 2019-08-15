@@ -9,12 +9,22 @@ Included are the project structure as a tree view and the console for debugging 
 
 Scene editor is now called Node editor
 
+# August 14th 2019
+Better photos of the group:
+[:smile:](190814_Gruppenfoto1.jpg) 
+[:smile:](190814_Gruppenfoto2.jpg) 
+[:angry:](190814_Gruppenfoto3.jpg) 
+
 # August 12th 2019 ❇❇❇
 ## Birth of FUDGE
 
 [Namespaces, Versioning, Packaging Build referencing](190813_Namespaces_Packaging.jpg) all were discussed and resulted in [this wiki page](https://github.com/JirkaDellOro/FUDGE/wiki/Project-Structure,-Namespaces,-Versioning-and-Releases).
 
 In addition, it was decided that the compiled FUDGE code is to be included in the standalone executable of the editor.
+
+Photos of the group:
+[:smile:](190812_Gruppenfoto1.jpg) 
+[:angry:](190812_Gruppenfoto2.jpg) 
 
 # August 8th 2019
 [Whiteboard](190808_Whiteboard.jpg)
