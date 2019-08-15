@@ -8,10 +8,10 @@ var ElectronFileIo;
         {
             label: "File", submenu: [
                 {
-                    label: "Save", click() { ElectronFileIo.save(); }
+                    label: "Save", click() { ElectronFileIo.mainWindow.webContents.send("save", null); }
                 },
                 {
-                    label: "Open", click() { ElectronFileIo.load(); }
+                    label: "Open", click() { ElectronFileIo.mainWindow.webContents.send("open", null); }
                 },
                 {
                     label: "Quit", accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q", click() { app.quit(); }

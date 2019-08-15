@@ -3,15 +3,16 @@
 namespace ElectronFileIo {
   const { app, BrowserWindow, Menu } = require("electron");
   export let mainWindow: Electron.BrowserWindow;
+
   //create menu template
   const mainMenuTemplate: Electron.MenuItemConstructorOptions[] = [
     {
       label: "File", submenu: [
         {
-          label: "Save", click(): void { ElectronFileIo.save(); }
+          label: "Save", click(): void { mainWindow.webContents.send("save", null); }
         },
         {
-          label: "Open", click(): void { ElectronFileIo.load(); }
+          label: "Open", click(): void { mainWindow.webContents.send("open", null); }
         },
         {
           label: "Quit", accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q", click(): void { app.quit(); }
