@@ -14,6 +14,7 @@ namespace UI {
             this.root = document.createElement("form");
             let testdiv: HTMLElement = document.createElement("div");
             let toggleButton: HTMLButtonElement = new ƒui.ToggleButton("toggleButton");
+            toggleButton.innerText = "I have a filling";
             testdiv.innerHTML = "I was created manually";
             testdiv.append(toggleButton);
             this.root.append(testdiv);
