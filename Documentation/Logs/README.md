@@ -1,6 +1,13 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
 This readme-file describes in a few words the contents of each log and the major issues discussed 
+# August 15th 2019
+
+In the start up screen the user can open editors, projects and files.
+It was decided that we need a project explorer as main window of FUDGE (If you close this, all the other editors get closed too)
+Included are the project structure as a tree view and the console for debugging as well as project settings, preferences and build options.
+
+Scene editor is now called Node editor
 
 # August 12th 2019 ❇❇❇
 ## Birth of FUDGE
@@ -50,7 +57,7 @@ Changes to the way the AnimationSequence is saved have also been discussed: Inst
 
 # July 25th 2019
 after the presentation of the usertest results it was decided to rename the menu bar item "window" into "layout" and the "editor" menu item into "window".
-To do until big megre: Styleguide and assets for all elements.
+To do until big merge: Styleguide and assets for all elements.
 
 # July 25th 2019
 [Whiteboard](190725_Whiteboard.jpg) | [Notes](190726_NotesOnResourceSerialization.jpg)
