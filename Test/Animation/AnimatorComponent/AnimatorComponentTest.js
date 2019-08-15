@@ -36,23 +36,24 @@ var AnimatorComponentTest;
         animation.setEvent("middleEvent", 2500);
         animation.setEvent("almostEndEvent", 4999);
         animation.setEvent("endEvent", 5000);
-        //#region serialisation
-        // console.group("before");
-        // console.log(animation);
-        // let serialisation: ƒ.Serialization = animation.serialize();
-        // console.log(ƒ.Serializer.stringify(serialisation));
-        // console.groupEnd();
-        // console.group("after");
-        // let animFromSeri: ƒ.Animation = new ƒ.Animation(null);
-        // animFromSeri.deserialize(serialisation);
-        // console.log(animFromSeri);
-        // console.groupEnd();
-        //#endregion
-        let cmpAnimation = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.REVERSELOOP, ƒ.ANIMATION_PLAYBACK.FRAMEBASED);
+        let cmpAnimation = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
         // cmpAnimation.speed = 0.1;
-        node.addComponent(cmpAnimation);
+        // node.addComponent(cmpAnimation);
         // cmpAnimation.speed = 10;
         // cmpAnimation.jumpTo(animation.labels["test"]);
+        // #region serialisation
+        console.group("before");
+        console.log(cmpAnimation);
+        let serialisation = cmpAnimation.serialize();
+        console.log(ƒ.Serializer.stringify(serialisation));
+        console.groupEnd();
+        console.group("after");
+        let animFromSeri = new ƒ.ComponentAnimator();
+        animFromSeri.deserialize(serialisation);
+        console.log(animFromSeri);
+        console.groupEnd();
+        node.addComponent(animFromSeri);
+        // #endregion
         cmpAnimation.addEventListener("startEvent", hndlEv);
         cmpAnimation.addEventListener("almostStartEvent", hndlEv);
         cmpAnimation.addEventListener("middleEvent", hndlEv);

@@ -199,6 +199,7 @@ declare namespace Fudge {
         calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         private traverseStructureForSerialisation;
         private traverseStructureForDeserialisation;
@@ -275,6 +276,226 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
         private regenerateFunctions;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Describes the [[Audio]] class in which all Audio Data is stored.
+     * Audio will be given to the [[ComponentAudio]] for further usage.
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class Audio {
+        url: string;
+        audioBuffer: AudioBuffer;
+        bufferSource: AudioBufferSourceNode;
+        localGain: GainNode;
+        localGainValue: number;
+        isLooping: boolean;
+        /**
+         * Constructor for the [[Audio]] Class
+         * @param _audioContext from [[AudioSettings]]
+         * @param _gainValue 0 for muted | 1 for max volume
+         */
+        constructor(_audioContext: AudioContext, _audioSessionData: AudioSessionData, _url: string, _gainValue: number, _loop: boolean);
+        init(_audioContext: AudioContext, _audioSessionData: AudioSessionData, _url: string, _gainValue: number, _loop: boolean): Promise<void>;
+        /**
+         * initBufferSource
+         */
+        initBufferSource(_audioContext: AudioContext): void;
+        setLocalGainValue(_localGainValue: number): void;
+        getLocalGainValue(): number;
+        setBufferSource(_buffer: AudioBuffer): void;
+        /**
+         * createAudio builds an [[Audio]] to use with the [[ComponentAudio]]
+         * @param _audioContext from [[AudioSettings]]
+         * @param _audioBuffer from [[AudioSessionData]]
+         */
+        private createAudio;
+        private setLoop;
+        private addLocalGain;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Add an [[AudioFilter]] to an [[Audio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    enum FILTER_TYPE {
+        LOWPASS = "LOWPASS",
+        HIGHPASS = "HIGHPASS",
+        BANDPASS = "BANDPASS",
+        LOWSHELF = "LOWSHELF",
+        HIGHSHELF = "HIGHSHELF",
+        PEAKING = "PEAKING",
+        NOTCH = "NOTCH",
+        ALLPASS = "ALLPASS"
+    }
+    class AudioFilter {
+        useFilter: boolean;
+        filterType: FILTER_TYPE;
+        constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
+        /**
+         * addFilterTo
+         */
+        addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Describes a [[AudioListener]] attached to a [[Node]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioListener {
+        audioListener: AudioListener;
+        private position;
+        private orientation;
+        constructor(_audioContext: AudioContext);
+        /**
+         * We will call setAudioListenerPosition whenever there is a need to change Positions.
+         * All the position values should be identical to the current Position this is atteched to.
+         */
+        /**
+         * getAudioListenerPosition
+         */
+        getAudioListenerPosition(): Vector3;
+        /**
+         * setAudioListenerOrientation
+         */
+        /**
+         * getAudioListenerOrientation
+         */
+        getAudioListenerOrientation(): Vector3;
+    }
+}
+declare namespace Fudge {
+    /**
+     *
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    enum PANNING_MODEL_TYPE {
+        EQUALPOWER = "EQUALPOWER",
+        HRFT = "HRFT"
+    }
+    enum DISTANCE_MODEL_TYPE {
+        LINEAR = "LINEAR",
+        INVERSE = "INVERSE",
+        EXPONENTIAL = "EXPONENTIAL"
+    }
+    class AudioLocalisation {
+        pannerNode: PannerNode;
+        panningModel: PANNING_MODEL_TYPE;
+        distanceModel: DISTANCE_MODEL_TYPE;
+        refDistance: number;
+        maxDistance: number;
+        rolloffFactor: number;
+        connerInnerAngle: number;
+        coneOuterAngle: number;
+        coneOuterGain: number;
+        position: Vector3;
+        orientation: Vector3;
+        /**
+         * Constructor for the [[AudioLocalisation]] Class
+         * @param _audioContext from [[AudioSettings]]
+         */
+        constructor(_audioContext: AudioContext);
+        /**
+        * We will call setPannerPosition whenever there is a need to change Positions.
+        * All the position values should be identical to the current Position this is atteched to.
+        */
+        /**
+         * getPannerPosition
+         */
+        getPannerPosition(): Vector3;
+        /**
+         * setPanneOrientation
+         */
+        /**
+         * getPanneOrientation
+         */
+        getPanneOrientation(): Vector3;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Interface to generate Data Pairs of URL and AudioBuffer
+     */
+    interface AudioData {
+        url: string;
+        buffer: AudioBuffer;
+        counter: number;
+    }
+    /**
+     * Describes Data Handler for all Audio Sources
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioSessionData {
+        dataArray: AudioData[];
+        private bufferCounter;
+        private audioBufferHolder;
+        /**
+         * constructor of the [[AudioSessionData]] class
+         */
+        constructor();
+        /**
+         * getBufferCounter returns [bufferCounter] to keep track of number of different used sounds
+         */
+        getBufferCounter(): number;
+        /**
+         * Decoding Audio Data
+         * Asynchronous Function to permit the loading of multiple Data Sources at the same time
+         * @param _url URL as String for Data fetching
+         */
+        urlToBuffer(_audioContext: AudioContext, _url: string): Promise<AudioBuffer>;
+        /**
+         * pushTuple Source and Decoded Audio Data gets saved for later use
+         * @param _url URL from used Data
+         * @param _audioBuffer AudioBuffer generated from URL
+         */
+        pushDataArray(_url: string, _audioBuffer: AudioBuffer): AudioData;
+        /**
+         * iterateArray
+         * Look at saved Data Count
+         */
+        countDataInArray(): void;
+        /**
+         * showDataInArray
+         * Show all Data in Array
+         */
+        showDataInArray(): void;
+        /**
+         * getAudioBuffer
+         */
+        getAudioBufferHolder(): AudioData;
+        /**
+         * setAudioBuffer
+         */
+        setAudioBufferHolder(_audioData: AudioData): void;
+        /**
+         * Error Message for Data Fetching
+         * @param e Error
+         */
+        private logErrorFetch;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Describes Global Audio Settings.
+     * Is meant to be used as a Menu option.
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioSettings {
+        masterGain: GainNode;
+        masterGainValue: number;
+        private globalAudioContext;
+        /**
+         * Constructor for master Volume
+         * @param _gainValue
+         */
+        constructor(_gainValue: number);
+        setMasterGainValue(_masterGainValue: number): void;
+        getMasterGainValue(): number;
+        getAudioContext(): AudioContext;
+        setAudioContext(_audioContext: AudioContext): void;
     }
 }
 declare namespace Fudge {
@@ -482,18 +703,53 @@ declare namespace Fudge {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        localTime: Time;
         speedScalesWithGlobalSpeed: boolean;
+        private localTime;
         private speedScale;
         private lastTime;
-        constructor(_animation: Animation, _playmode: ANIMATION_PLAYMODE, _playback: ANIMATION_PLAYBACK);
+        constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         speed: number;
         jumpTo(_time: number): void;
+        serialize(): Serialization;
+        deserialize(_s: Serialization): Serializable;
         private updateAnimationLoop;
         private executeEvents;
         private applyPlaymodes;
         private calculateDirection;
         private updateScale;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Attaches a [[ComponentAudio]] to a [[Node]].
+     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class ComponentAudio extends Component {
+        audio: Audio;
+        isLocalised: boolean;
+        localisation: AudioLocalisation | null;
+        isFiltered: boolean;
+        filter: AudioFilter | null;
+        constructor(_audio: Audio);
+        setLocalisation(_localisation: AudioLocalisation): void;
+        /**
+         * playAudio
+         */
+        playAudio(_audioContext: AudioContext): void;
+        /**
+         * Adds an [[Audio]] to the [[ComponentAudio]]
+         * @param _audio Decoded Audio Data as [[Audio]]
+         */
+        private setAudio;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Attaches a [[AudioListener]] to the node
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class ComponentAudioListener extends Component {
     }
 }
 declare namespace Fudge {

@@ -121,8 +121,9 @@ namespace Fudge {
 
     calculateTotalTime(): void {
       this.totalTime = 0;
-      this.traverseStructureForTime(this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
+      this.traverseStructureForTime(this.animationStructure);
     }
+
     //#region transfer
     serialize(): Serialization {
       let s: Serialization = {
@@ -139,7 +140,7 @@ namespace Fudge {
       for (let name in this.events) {
         s.events[name] = this.events[name];
       }
-      s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
+      s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
       return s;
     }
     deserialize(_serialization: Serialization): Serializable {
@@ -155,11 +156,17 @@ namespace Fudge {
       for (let name in _serialization.events) {
         this.events[name] = _serialization.events[name];
       }
+      this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, this.traverseStructureForDeserialisation(_serialization.animationStructure, {}));
+      this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
+
+      this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
       this.calculateTotalTime();
       return this;
+    }
+    public getMutator(): Mutator {
+      return this.serialize();
     }
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.totalTime;
@@ -234,6 +241,9 @@ namespace Fudge {
         this.calculateTotalTime();
         let ae: AnimationStructure = {};
         switch (_type) {
+          case ANIMATION_STRUCTURE_TYPE.NORMAL:
+            ae = this.animationStructure;
+            break;
           case ANIMATION_STRUCTURE_TYPE.REVERSE:
             ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateReverseSequence.bind(this));
             break;
