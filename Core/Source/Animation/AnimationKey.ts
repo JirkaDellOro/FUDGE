@@ -19,12 +19,13 @@ namespace Fudge {
     private slopeIn: number = 0;
     private slopeOut: number = 0;
 
-    constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0) {
+    constructor(_time: number = 0, _value: number = 0, _slopeIn: number = 0, _slopeOut: number = 0, _constant: boolean = false) {
       super();
       this.time = _time;
       this.value = _value;
       this.slopeIn = _slopeIn;
       this.slopeOut = _slopeOut;
+      this.constant = _constant;
 
       this.broken = this.slopeIn != -this.slopeOut;
     }
