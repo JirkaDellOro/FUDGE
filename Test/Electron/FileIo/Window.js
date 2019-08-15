@@ -13,51 +13,67 @@ var ElectronFileIo;
     var ƒ = Fudge;
     // import e = Electron;
     const { dialog } = require("electron").remote;
+    const { ipcRenderer } = require("electron");
     const fs = require("fs");
     window.addEventListener("DOMContentLoaded", init);
     let branch;
+    let viewport;
     function init() {
-        createScene();
+        viewport = createScene();
+        ipcRenderer.on("save", (event, arg) => {
+            save(branch);
+        });
+        ipcRenderer.on("open", (event, arg) => {
+            let node = open();
+            displayNode(node);
+        });
+    }
+    function displayNode(_node) {
+        if (!_node)
+            return;
+        ƒ.RenderManager.removeBranch(branch);
+        branch = _node;
+        viewport.setBranch(branch);
+        viewport.draw();
     }
     function save(_node = branch) {
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
         let filename = dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
-        fs.writeFile(filename, content, (_e) => {
-            if (_e)
-                ƒ.Debug.log(_e);
-        });
+        fs.writeFileSync(filename, content);
     }
     ElectronFileIo.save = save;
-    function load() {
-        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
-        // fs.writeFile(filename, content, (_e: Error) => {
-        //     if (_e)
-        //         ƒ.Debug.log(_e);
-        // });
-        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-        // let content: string = ƒ.Serializer.stringify(serialization);
-        return null;
+    function open() {
+        // @ts-ignore
+        let filenames = dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
+        console.groupCollapsed("File content");
+        ƒ.Debug.log(content);
+        console.groupEnd();
+        let serialization = ƒ.Serializer.parse(content);
+        let node = ƒ.Serializer.deserialize(serialization);
+        console.groupCollapsed("Deserialized");
+        console.log(node);
+        console.groupEnd();
+        return node;
     }
-    ElectronFileIo.load = load;
+    ElectronFileIo.open = open;
     function createScene() {
         // create asset
         branch = Scenes.createAxisCross();
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewport
         let camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(1, 45);
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
-        let viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
-        viewPort.draw();
+        let viewport = new ƒ.Viewport();
+        viewport.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewport.draw();
+        return viewport;
     }
 })(ElectronFileIo || (ElectronFileIo = {}));
 //# sourceMappingURL=Window.js.map
