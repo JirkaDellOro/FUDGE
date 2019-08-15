@@ -18,7 +18,7 @@ var ElectronFileIo;
                 nodeIntegration: true //, preload: path.join(__dirname, 'preload.js')
             }
         });
-        ElectronFileIo.mainWindow.loadFile("Fudge.html");
+        ElectronFileIo.mainWindow.loadFile("../Html/Fudge.html");
         ElectronFileIo.mainWindow.webContents.openDevTools();
         ElectronFileIo.mainWindow.addListener("closed", function () {
             ElectronFileIo.mainWindow = null;

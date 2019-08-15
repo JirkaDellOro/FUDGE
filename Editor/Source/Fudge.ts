@@ -23,7 +23,7 @@ namespace ElectronFileIo {
       }
     });
 
-    mainWindow.loadFile("Fudge.html");
+    mainWindow.loadFile("../Html/Fudge.html");
     mainWindow.webContents.openDevTools();
     mainWindow.addListener("closed", function (): void {
       mainWindow = null;
