@@ -2,6 +2,7 @@
 // <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 var ƒ = Fudge;
+var ƒui = FudgeUserInterface;
 var Test;
 (function (Test) {
     let myLayout;

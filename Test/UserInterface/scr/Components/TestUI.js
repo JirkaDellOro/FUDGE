@@ -11,6 +11,8 @@ var UI;
             this.camera = _camera;
             this.root = document.createElement("form");
             let testdiv = document.createElement("div");
+            let toggleButton = new ƒui.ToggleButton();
+            testdiv.append(toggleButton);
             testdiv.innerHTML = "I was created manually";
             this.root.append(testdiv);
             ƒui.UIGenerator.createFromMutable(_camera, this.root);

@@ -3,7 +3,7 @@
 /// <reference types="../../@types/golden-layout"/>
 
 import ƒ = Fudge;
-
+import ƒui = FudgeUserInterface;
 
 namespace Test {
     let myLayout: GoldenLayout;

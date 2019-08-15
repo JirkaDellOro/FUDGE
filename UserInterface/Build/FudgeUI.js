@@ -11,9 +11,8 @@ var FudgeUserInterface;
                 _event.preventDefault();
                 if (_event.target != _event.currentTarget)
                     return;
-                let target = _event.target;
                 //Get the fieldset the button belongs to
-                let foldTarget = target.parentElement.parentElement;
+                let foldTarget = this;
                 //Toggle the folding behaviour of the Folding Target
                 foldTarget.classList.toggle("foldButton_folded");
                 foldTarget.classList.toggle("foldButton_unfolded");
@@ -37,6 +36,40 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
+    class CollapsableList extends HTMLUListElement {
+        constructor() {
+            super();
+        }
+    }
+    FudgeUserInterface.CollapsableList = CollapsableList;
+    class ToggleButton extends HTMLButtonElement {
+        constructor() {
+            super();
+            this.switchToggleState = (_event) => {
+                this.setToggleState(!this.toggleState);
+            };
+            this.toggleState = true;
+            this.addEventListener("click", this.switchToggleState);
+        }
+        setToggleState(toggleState) {
+            this.toggleState = toggleState;
+            if (this.toggleState == true) {
+                this.classList.add("ToggleOn");
+                this.classList.remove("ToggleOff");
+            }
+            else {
+                this.classList.remove("ToggleOn");
+                this.classList.add("ToggleOff");
+            }
+        }
+        getToggleState() {
+            return this.toggleState;
+        }
+        toggle() {
+            this.setToggleState(!this.toggleState);
+        }
+    }
+    FudgeUserInterface.ToggleButton = ToggleButton;
     class Stepper extends HTMLInputElement {
         constructor(_label, params = {}) {
             super();
