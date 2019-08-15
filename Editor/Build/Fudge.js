@@ -1,28 +1,28 @@
 ///<reference path="../../node_modules/electron/Electron.d.ts"/>
 const { app, BrowserWindow, Menu } = require("electron");
-var ElectronFileIo;
-(function (ElectronFileIo) {
+var FudgeEditor;
+(function (FudgeEditor) {
     app.addListener("ready", createWindow);
     app.addListener("window-all-closed", function () {
         if (process.platform !== "darwin")
             app.quit();
     });
     app.addListener("activate", function () {
-        if (ElectronFileIo.mainWindow === null)
+        if (FudgeEditor.mainWindow === null)
             createWindow();
     });
     function createWindow() {
         // Create the browser window.
-        ElectronFileIo.mainWindow = new BrowserWindow({
+        FudgeEditor.mainWindow = new BrowserWindow({
             width: 1400, height: 600, webPreferences: {
                 nodeIntegration: true //, preload: path.join(__dirname, 'preload.js')
             }
         });
-        ElectronFileIo.mainWindow.loadFile("../Html/Fudge.html");
-        ElectronFileIo.mainWindow.webContents.openDevTools();
-        ElectronFileIo.mainWindow.addListener("closed", function () {
-            ElectronFileIo.mainWindow = null;
+        FudgeEditor.mainWindow.loadFile("../Html/Fudge.html");
+        FudgeEditor.mainWindow.webContents.openDevTools();
+        FudgeEditor.mainWindow.addListener("closed", function () {
+            FudgeEditor.mainWindow = null;
         });
     }
-})(ElectronFileIo || (ElectronFileIo = {}));
+})(FudgeEditor || (FudgeEditor = {}));
 //# sourceMappingURL=Fudge.js.map
