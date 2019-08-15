@@ -22,6 +22,13 @@ namespace Fudge {
     [name: string]: number;
   }
 
+  enum ANIMATION_STRUCTURE_TYPE {
+    NORMAL,
+    REVERSE,
+    RASTERED,
+    RASTEREDREVERSE
+  }
+
   /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
@@ -32,24 +39,69 @@ namespace Fudge {
     name: string;
     totalTime: number = 0;
     labels: AnimationLabel = {};
-    events: AnimationEventTrigger = {};
-    fps: number = 60;
-    sps: number = 10;
-    animationStructure: AnimationStructure = {};
+    stepsPerSecond: number = 10;
+    animationStructure: AnimationStructure;
+    private framesPerSecond: number = 60;
+    private events: AnimationEventTrigger = {};
+    private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
+    private animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
     constructor(_name: string, _animStructure: AnimationStructure = {}, _fps: number = 60) {
       super();
       this.name = _name;
       this.animationStructure = _animStructure;
-      this.fps = _fps;
+      this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
+      this.framesPerSecond = _fps;
       this.calculateTotalTime();
     }
 
-    getMutated(_time: number, _direction: number): Mutator {
-      let m: Mutator = {};
 
-      m = this.traverseStructureForMutator(this.animationStructure, m, _time);
+    getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator {
+      let m: Mutator = {};
+      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
+        if (_direction >= 0) {
+          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.NORMAL), m, _time);
+        } else {
+          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), m, _time);
+        }
+      } else {
+        if (_direction >= 0) {
+          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTERED), m, _time);
+        } else {
+          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE), m, _time);
+        }
+      }
+
       return m;
+    }
+
+    getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[] {
+      let eventList: string[] = [];
+      let minSection: number = Math.floor(_min / this.totalTime);
+      let maxSection: number = Math.floor(_max / this.totalTime);
+      _min = _min % this.totalTime;
+      _max = _max % this.totalTime;
+
+      while (minSection <= maxSection) {
+        let eventTriggers: AnimationEventTrigger = this.getCorrectEventList(_direction, _playback);
+        if (minSection == maxSection) {
+          eventList = eventList.concat(this.checkEventsBetween(eventTriggers, _min, _max));
+        } else {
+          eventList = eventList.concat(this.checkEventsBetween(eventTriggers, _min, this.totalTime));
+          _min = 0;
+        }
+        minSection++;
+      }
+
+      return eventList;
+    }
+
+    setEvent(_name: string, _time: number): void {
+      this.events[_name] = _time;
+    }
+
+    removeEvent(_name: string): void {
+      delete this.events[_name];
     }
 
     get getLabels(): Enumerator {
@@ -57,9 +109,19 @@ namespace Fudge {
       return en;
     }
 
+    get fps(): number {
+      return this.framesPerSecond;
+    }
+
+    set fps(_fps: number) {
+      this.framesPerSecond = _fps;
+      this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
+      this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
+    }
+
     calculateTotalTime(): void {
       this.totalTime = 0;
-      this.traverseStructureForTime(this.animationStructure);
+      this.traverseStructureForTime(this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
     }
     //#region transfer
     serialize(): Serialization {
@@ -68,8 +130,8 @@ namespace Fudge {
         name: this.name,
         labels: {},
         events: {},
-        fps: this.fps,
-        sps: this.sps
+        fps: this.framesPerSecond,
+        sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
         s.labels[name] = this.labels[name];
@@ -77,14 +139,14 @@ namespace Fudge {
       for (let name in this.events) {
         s.events[name] = this.events[name];
       }
-      s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
+      s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructuresProcessed.get(ANIMATION_STRUCTURE_TYPE.NORMAL));
       return s;
     }
     deserialize(_serialization: Serialization): Serializable {
       this.idResource = _serialization.idResource;
       this.name = _serialization.name;
-      this.fps = _serialization.fps;
-      this.sps = _serialization.sps;
+      this.framesPerSecond = _serialization.fps;
+      this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
         this.labels[name] = _serialization.labels[name];
@@ -94,7 +156,7 @@ namespace Fudge {
         this.events[name] = _serialization.events[name];
       }
 
-      this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
+      this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, this.traverseStructureForDeserialisation(_serialization.animationStructure, {}));
 
       this.calculateTotalTime();
       return this;
@@ -125,6 +187,22 @@ namespace Fudge {
     }
     //#endregion
 
+    private getCorrectEventList(_direction: number, _playback: ANIMATION_PLAYBACK): AnimationEventTrigger {
+      if (_playback != ANIMATION_PLAYBACK.FRAMEBASED) {
+        if (_direction >= 0) {
+          return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.NORMAL);
+        } else {
+          return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.REVERSE);
+        }
+      } else {
+        if (_direction >= 0) {
+          return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.RASTERED);
+        } else {
+          return this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE);
+        }
+      }
+    }
+
     private traverseStructureForMutator(_structure: AnimationStructure, _newMutator: Mutator, _time: number): Mutator {
       for (let n in _structure) {
         if (_structure[n] instanceof AnimationSequence) {
@@ -149,6 +227,128 @@ namespace Fudge {
           this.traverseStructureForTime(<AnimationStructure>_structure[n]);
         }
       }
+    }
+
+    private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
+      if (!this.animationStructuresProcessed.has(_type)) {
+        this.calculateTotalTime();
+        let ae: AnimationStructure = {};
+        switch (_type) {
+          case ANIMATION_STRUCTURE_TYPE.REVERSE:
+            ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateReverseSequence.bind(this));
+            break;
+          case ANIMATION_STRUCTURE_TYPE.RASTERED:
+            ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateRasteredSequence.bind(this));
+            break;
+          case ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE:
+            ae = this.traverseStructureForNewStructure(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), {}, this.calculateRasteredSequence.bind(this));
+            break;
+          default:
+            return {};
+        }
+        this.animationStructuresProcessed.set(_type, ae);
+      }
+      return this.animationStructuresProcessed.get(_type);
+    }
+
+    private getProcessedEventTrigger(_type: ANIMATION_STRUCTURE_TYPE): AnimationEventTrigger {
+      if (!this.eventsProcessed.has(_type)) {
+        this.calculateTotalTime();
+        let ev: AnimationEventTrigger = {};
+        switch (_type) {
+          case ANIMATION_STRUCTURE_TYPE.NORMAL:
+            ev = this.events;
+            break;
+          case ANIMATION_STRUCTURE_TYPE.REVERSE:
+            ev = this.calculateReverseEventTriggers(this.events);
+            break;
+          case ANIMATION_STRUCTURE_TYPE.RASTERED:
+            ev = this.calculateRasteredEventTriggers(this.events);
+            break;
+          case ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE:
+            ev = this.calculateRasteredEventTriggers(this.getProcessedEventTrigger(ANIMATION_STRUCTURE_TYPE.REVERSE));
+            break;
+          default:
+            return {};
+        }
+        this.eventsProcessed.set(_type, ev);
+      }
+      return this.eventsProcessed.get(_type);
+    }
+
+    private traverseStructureForNewStructure(_oldStructure: AnimationStructure, _newStructure: AnimationStructure, _functionToUse: Function): AnimationStructure {
+      for (let n in _oldStructure) {
+        if (_oldStructure[n] instanceof AnimationSequence) {
+          _newStructure[n] = _functionToUse(_oldStructure[n]);
+        } else {
+          _newStructure[n] = this.traverseStructureForNewStructure(<AnimationStructure>_oldStructure[n], {}, _functionToUse);
+        }
+      }
+      return _newStructure;
+    }
+
+    private calculateReverseSequence(_sequence: AnimationSequence): AnimationSequence {
+      let seq: AnimationSequence = new AnimationSequence();
+      for (let i: number = 0; i < _sequence.keys.length; i++) {
+        let oldKey: AnimationKey = _sequence.keys[i];
+        let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.getSlopeOut, oldKey.getSlopeIn, oldKey.constant);
+        seq.addKey(key);
+      }
+      return seq;
+    }
+
+    private calculateRasteredSequence(_sequence: AnimationSequence): AnimationSequence {
+      let seq: AnimationSequence = new AnimationSequence();
+      let frameTime: number = 1000 / this.framesPerSecond;
+      for (let i: number = 0; i < this.totalTime; i += frameTime) {
+        let key: AnimationKey = new AnimationKey(i, _sequence.evaluate(i), 0, 0, true);
+        seq.addKey(key);
+      }
+      return seq;
+    }
+    // private calculateReverseRasteredSequence(_sequence: AnimationSequence): AnimationSequence {
+    //   let seq: AnimationSequence = new AnimationSequence();
+    //   let frameTime: number = 1000 / this.framesPerSecond;
+    //   for (let i: number = 0; i < _sequence.keys.length; i++) {
+    //     let oldKey: AnimationKey = _sequence.keys[i];
+    //     let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time - frameTime, oldKey.value, oldKey.getSlopeOut, oldKey.getSlopeIn, oldKey.constant);
+    //     seq.addKey(key);
+    //   }
+    //   return seq;
+    // }
+
+    private calculateReverseEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger {
+      let ae: AnimationEventTrigger = {};
+      for (let name in _events) {
+        ae[name] = this.totalTime - _events[name];
+      }
+      return ae;
+    }
+
+    private calculateRasteredEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger {
+      let ae: AnimationEventTrigger = {};
+      let frameTime: number = 1000 / this.framesPerSecond;
+      for (let name in _events) {
+        ae[name] = _events[name] - (_events[name] % frameTime);
+      }
+      return ae;
+    }
+    // private calculateRasteredReverseEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger {
+    //   let ae: AnimationEventTrigger = {};
+    //   let frameTime: number = 1000 / this.framesPerSecond;
+    //   for (let name in _events) {
+    //     ae[name] = this.totalTime - _events[name] + frameTime + (_events[name] % frameTime);
+    //   }
+    //   return ae;
+    // }
+    private checkEventsBetween(_eventTriggers: AnimationEventTrigger, _min: number, _max: number): string[] {
+      let eventsToTrigger: string[] = [];
+      for (let name in _eventTriggers) {
+        if (_min <= _eventTriggers[name] && _eventTriggers[name] < _max) {
+          eventsToTrigger.push(name);
+        }
+      }
+      return eventsToTrigger;
     }
   }
 }

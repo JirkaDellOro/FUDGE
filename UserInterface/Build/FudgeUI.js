@@ -12,11 +12,7 @@ var FudgeUserInterface;
                 if (_event.target != _event.currentTarget)
                     return;
                 //Get the fieldset the button belongs to
-                let foldTarget = this;
-                //Toggle the folding behaviour of the Folding Target
-                foldTarget.classList.toggle("foldButton_folded");
-                foldTarget.classList.toggle("foldButton_unfolded");
-                let children = foldTarget.children;
+                let children = this.children;
                 //fold or unfold all children that aren't unfoldable
                 for (let child of children) {
                     if (!child.classList.contains("unfoldable")) {
@@ -25,11 +21,13 @@ var FudgeUserInterface;
                 }
             };
             let cntLegend = document.createElement("legend");
-            let btnfoldButton = document.createElement("button");
-            btnfoldButton.classList.add("foldButton_unfolded");
+            cntLegend.classList.add("unfoldable");
+            let btnfoldButton = new ToggleButton("FoldButton");
             btnfoldButton.addEventListener("click", this.toggleFoldElement);
+            // btnfoldButton.classList.add("unfoldable");
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
+            // lblTitle.classList.add("unfoldable");
             cntLegend.appendChild(btnfoldButton);
             cntLegend.appendChild(lblTitle);
             this.appendChild(cntLegend);
@@ -46,9 +44,9 @@ var FudgeUserInterface;
         constructor(style) {
             super();
             this.switchToggleState = (_event) => {
-                // this.setToggleState(!this.toggleState);
-                console.log(this);
+                this.setToggleState(!this.toggleState);
             };
+            this.type = "button";
             this.toggleState = true;
             this.classList.add(style);
             this.classList.add("ToggleOn");

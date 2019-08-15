@@ -1,3 +1,4 @@
+/// <reference path="../../Core/Build/Fudge.d.ts"/>
 namespace AudioTest {
     import ƒ = Fudge;
     let out: HTMLOutputElement;
@@ -10,6 +11,11 @@ namespace AudioTest {
         cameraPosition: new ƒ.Vector3(0, 0, 5)
     };
 
+    let audioSettings: ƒ.AudioSettings;
+    let audioSessionData: ƒ.AudioSessionData;
+    let componentAudio: ƒ.ComponentAudio;
+    let audio: ƒ.Audio;
+    let audioTest: ƒ.Audio;
 
     window.addEventListener("load", init);
 
@@ -20,11 +26,45 @@ namespace AudioTest {
         const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
         const mtxBody: ƒ.Matrix4x4 = body.cmpTransform.local;
 
-        /* So sollte die Einbindung der Audio Componente aussehen
-        let audioAsset: ƒ.AudioAsset = new ƒ.AudioAsset(filename); // <- wobei diese Zeile vollständig geraten ist, aber so ähnlich wird es wohl werden
-        let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audioAsset, ...);
-        body.appendChild(cmpAudio);
+
+        //#region Audio Setup
+        /*
+        * Einbindung der Audio Component
+        * 1. AudioSettings anlegen (TODO anlegen innerhalb ƒ)
+        * 2. AudioSessionData anlegen
+        * 3. Audio Source URL anlegen
+        * 4. Audio anlegen mit URL als _arg
+        * 4.1 Audio kommuniziert mit AudioSessionData und wandelt url -> AudioBuffer
+        * 4.2 Audio bekommt Buffer 
+        * 5. ComponentAudio anlegen mit Audio als _arg
+        * 6. ComponentAudio zur Node hinzufügen
         */
+
+        // 1. Audio Settings und Audio Data Handler
+        audioSettings = new ƒ.AudioSettings(1);
+        // 2. Audio Session Data anlegen
+        audioSessionData = new ƒ.AudioSessionData();
+
+        // 3. Used Audio File
+        let audioFileSource: string = "Beep.mp3";
+        let audioSourceTwo: string = "Beep.mp3";
+        
+
+        // 4. Create Audio
+        // 4.1 Audio talks to AudioSession
+        // 4.2 Audio bekommt Buffer
+        audio = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioSourceTwo, 1, false);
+        audioTest = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioFileSource, 1, false);
+        console.log("audio: " + audio + " | " + audioTest);
+        // 5. Create ComponentAudio with Audio
+        componentAudio = new ƒ.ComponentAudio(audio);
+        console.log("cmpAudio: " + componentAudio.audio);
+        // 6. Add [[ComponentAudio]] to [[Node]]
+        body.addComponent(componentAudio);
+
+        //#endregion Audio Setup
+
+
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
         branch.appendChild(body);
@@ -124,6 +164,18 @@ namespace AudioTest {
                     break;
                 case ƒ.KEYBOARD_CODE.E:
                     parameter.frequency *= 1 / 0.8;
+                    break;
+                case ƒ.KEYBOARD_CODE.P:
+                    //play Sound
+                    console.log("pressed p");
+                    componentAudio.playAudio(audioSettings.getAudioContext());
+                    break;
+                case ƒ.KEYBOARD_CODE.L:
+                    //play Sound
+                    console.log("pressed l");
+                    // Look at Data Array
+                    //audioSessionData.countDataInArray();
+                    audioSessionData.showDataInArray();
                     break;
             }
         }

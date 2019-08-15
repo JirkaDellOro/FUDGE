@@ -7,16 +7,21 @@
 .folded{
     display: none
 }
-.toggleButton button{
+button.FoldButton{
     border-style: none;
-    background-color: none;
+    background-color: unset;
+    background-size:     cover;
+    background-repeat:   no-repeat;
+    background-position: center center; 
+    height: 10px;
+    width: auto;
 }
 
-.toggleButton button .ToggleOn{
-    background-image: "img/foldable_open.svg";
+button.FoldButton.ToggleOn {
+    background-image: url("img/foldable_open.svg");
 }
-.toggleButton button .ToggleOff{
-    background-image: "img/foldable_closed.svg";
+button.FoldButton.ToggleOff  {
+    background-image: url("img/foldable_closed.svg");
 }
 
 h2, legend, label {

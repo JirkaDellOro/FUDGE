@@ -131,6 +131,13 @@ namespace Fudge {
         }
 
         /**
+         * Retrieves the offset of this time
+         */
+        public getOffset(): number {
+          return this.offset;
+        }
+
+        /**
          * Retrieves the scaled time in milliseconds passed since the last call to this method
          * Automatically reset at every call to set(...) and setScale(...)
          */

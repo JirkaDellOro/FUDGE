@@ -6,12 +6,13 @@ namespace FudgeUserInterface {
         public constructor(_legend: string) {
             super();
             let cntLegend: HTMLLegendElement = document.createElement("legend");
-
-            let btnfoldButton: HTMLButtonElement = document.createElement("button");
-            btnfoldButton.classList.add("foldButton_unfolded");
+            cntLegend.classList.add("unfoldable");
+            let btnfoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
             btnfoldButton.addEventListener("click", this.toggleFoldElement);
+            // btnfoldButton.classList.add("unfoldable");
             let lblTitle: HTMLSpanElement = document.createElement("span");
             lblTitle.textContent = _legend;
+            // lblTitle.classList.add("unfoldable");
             cntLegend.appendChild(btnfoldButton);
             cntLegend.appendChild(lblTitle);
 
@@ -22,11 +23,7 @@ namespace FudgeUserInterface {
             _event.preventDefault();
             if (_event.target != _event.currentTarget) return;
             //Get the fieldset the button belongs to
-            let foldTarget: HTMLElement = this;
-            //Toggle the folding behaviour of the Folding Target
-            foldTarget.classList.toggle("foldButton_folded");
-            foldTarget.classList.toggle("foldButton_unfolded");
-            let children: HTMLCollection = foldTarget.children;
+            let children: HTMLCollection = this.children;
             //fold or unfold all children that aren't unfoldable
             for (let child of children) {
                 if (!child.classList.contains("unfoldable")) {
@@ -47,6 +44,7 @@ namespace FudgeUserInterface {
         
         public constructor(style: string) {
             super();
+            this.type = "button";
             this.toggleState = true;
             this.classList.add(style);
             this.classList.add("ToggleOn");
@@ -70,8 +68,7 @@ namespace FudgeUserInterface {
             this.setToggleState(!this.toggleState);
         }
         private switchToggleState = (_event: MouseEvent): void => {
-            // this.setToggleState(!this.toggleState);
-            console.log(this);
+            this.setToggleState(!this.toggleState);
         }
     }
     export class Stepper extends HTMLInputElement {
