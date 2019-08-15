@@ -5,7 +5,7 @@
 import ƒ = Fudge;
 import ƒui = FudgeUserInterface;
 
-namespace Test {
+namespace UITest {
     let myLayout: GoldenLayout;
     let savedState: string;
 

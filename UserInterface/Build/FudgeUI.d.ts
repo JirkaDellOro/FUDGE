@@ -12,7 +12,7 @@ declare namespace FudgeUserInterface {
     }
     class ToggleButton extends HTMLButtonElement {
         private toggleState;
-        constructor();
+        constructor(style: string);
         setToggleState(toggleState: boolean): void;
         getToggleState(): boolean;
         toggle(): void;

@@ -45,9 +45,11 @@ namespace FudgeUserInterface {
     export class ToggleButton extends HTMLButtonElement {
         private toggleState: boolean;
         
-        public constructor() {
+        public constructor(style: string) {
             super();
             this.toggleState = true;
+            this.classList.add(style);
+            this.classList.add("ToggleOn");
             this.addEventListener("click", this.switchToggleState);
         }
         public setToggleState(toggleState: boolean): void {
@@ -68,7 +70,8 @@ namespace FudgeUserInterface {
             this.setToggleState(!this.toggleState);
         }
         private switchToggleState = (_event: MouseEvent): void => {
-            this.setToggleState(!this.toggleState);
+            // this.setToggleState(!this.toggleState);
+            console.log(this);
         }
     }
     export class Stepper extends HTMLInputElement {
@@ -83,4 +86,6 @@ namespace FudgeUserInterface {
     }
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-toggle-button", ToggleButton, {extends: "button"});
+
 }

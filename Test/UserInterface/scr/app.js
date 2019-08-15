@@ -3,8 +3,8 @@
 /// <reference types="../../@types/golden-layout"/>
 var ƒ = Fudge;
 var ƒui = FudgeUserInterface;
-var Test;
-(function (Test) {
+var UITest;
+(function (UITest) {
     let myLayout;
     let savedState;
     let canvas;
@@ -78,5 +78,5 @@ var Test;
     function createTestComponent(container, state) {
         return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
-})(Test || (Test = {}));
+})(UITest || (UITest = {}));
 //# sourceMappingURL=app.js.map

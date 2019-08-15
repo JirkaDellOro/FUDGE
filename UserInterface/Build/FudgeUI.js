@@ -43,12 +43,15 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.CollapsableList = CollapsableList;
     class ToggleButton extends HTMLButtonElement {
-        constructor() {
+        constructor(style) {
             super();
             this.switchToggleState = (_event) => {
-                this.setToggleState(!this.toggleState);
+                // this.setToggleState(!this.toggleState);
+                console.log(this);
             };
             this.toggleState = true;
+            this.classList.add(style);
+            this.classList.add("ToggleOn");
             this.addEventListener("click", this.switchToggleState);
         }
         setToggleState(toggleState) {
@@ -83,6 +86,7 @@ var FudgeUserInterface;
     FudgeUserInterface.Stepper = Stepper;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 /// <reference path="../UIElements/UIElements.ts"/>
