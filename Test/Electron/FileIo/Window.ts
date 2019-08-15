@@ -8,12 +8,31 @@ namespace ElectronFileIo {
     import ƒ = Fudge;
     // import e = Electron;
     const { dialog } = require("electron").remote;
+    const { ipcRenderer } = require("electron");
     const fs: ƒ.General = require("fs");
     window.addEventListener("DOMContentLoaded", init);
     let branch: ƒ.Node;
+    let viewport: ƒ.Viewport;
 
     function init(): void {
-        createScene();
+        viewport = createScene();
+        ipcRenderer.on("save", (event, arg) => {
+            save(branch);
+        });
+        ipcRenderer.on("open", (event, arg) => {
+            let node: ƒ.Node = open();
+            displayNode(node);
+        });
+    }
+
+    function displayNode(_node: ƒ.Node): void {
+        if (!_node)
+            return;
+
+        ƒ.RenderManager.removeBranch(branch);
+        branch = _node;
+        viewport.setBranch(branch);
+        viewport.draw();
     }
 
     export function save(_node: ƒ.Node = branch): void {
@@ -23,36 +42,34 @@ namespace ElectronFileIo {
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
         let filename: string = dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
 
-        fs.writeFile(filename, content, (_e: Error) => {
-            if (_e)
-                ƒ.Debug.log(_e);
-        });
+        fs.writeFileSync(filename, content);
     }
 
-    export function load(): ƒ.Node {
+    export function open(): ƒ.Node {
+        // @ts-ignore
+        let filenames: string[] = dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
 
-        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
+        console.groupCollapsed("File content");
+        ƒ.Debug.log(content);
+        console.groupEnd();
 
-        // fs.writeFile(filename, content, (_e: Error) => {
-        //     if (_e)
-        //         ƒ.Debug.log(_e);
-        // });
+        let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
+        let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
 
-        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-        // let content: string = ƒ.Serializer.stringify(serialization);
+        console.groupCollapsed("Deserialized");
+        console.log(node);
+        console.groupEnd();
 
-        return null;
+        return node;
     }
 
-    function createScene(): void {
+    function createScene(): ƒ.Viewport {
         // create asset
         branch = Scenes.createAxisCross();
 
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         // initialize viewport
         let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
@@ -61,8 +78,10 @@ namespace ElectronFileIo {
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
 
-        let viewPort: ƒ.Viewport = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
-        viewPort.draw();
+        let viewport: ƒ.Viewport = new ƒ.Viewport();
+        viewport.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewport.draw();
+
+        return viewport;
     }
 }
