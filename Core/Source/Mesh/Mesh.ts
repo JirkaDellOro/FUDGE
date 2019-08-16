@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Abstract base class for all meshes. 
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates

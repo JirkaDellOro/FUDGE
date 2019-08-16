@@ -1,5 +1,5 @@
 /// <reference path="RenderOperator.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     interface NodeReferences {
         shader: typeof Shader;
         coat: Coat;

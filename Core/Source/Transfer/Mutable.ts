@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings 
      */

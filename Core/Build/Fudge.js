@@ -4453,298 +4453,6 @@ var Fudge;
     }
     Fudge.MeshQuad = MeshQuad;
 })(Fudge || (Fudge = {}));
-/// <reference path="RenderOperator.ts"/>
-var Fudge;
-/// <reference path="RenderOperator.ts"/>
-(function (Fudge) {
-    /**
-     * This class manages the references to render data used by nodes.
-     * Multiple nodes may refer to the same data via their references to shader, coat and mesh
-     */
-    class Reference {
-        constructor(_reference) {
-            this.count = 0;
-            this.reference = _reference;
-        }
-        getReference() {
-            return this.reference;
-        }
-        increaseCounter() {
-            this.count++;
-            return this.count;
-        }
-        decreaseCounter() {
-            if (this.count == 0)
-                throw (new Error("Negative reference counter"));
-            this.count--;
-            return this.count;
-        }
-    }
-    /**
-     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the coat and the mesh used for each node registered.
-     * With these references, the already buffered data is retrieved when rendering.
-     */
-    class RenderManager extends Fudge.RenderOperator {
-        // #region Adding
-        /**
-         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
-         * @param _node
-         */
-        static addNode(_node) {
-            if (this.nodes.get(_node))
-                return;
-            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
-            if (!cmpMaterial)
-                return;
-            let shader = cmpMaterial.material.getShader();
-            this.createReference(this.renderShaders, shader, this.createProgram);
-            let coat = cmpMaterial.material.getCoat();
-            this.createReference(this.renderCoats, coat, this.createParameter);
-            let mesh = _node.getComponent(Fudge.ComponentMesh).mesh;
-            this.createReference(this.renderBuffers, mesh, this.createBuffers);
-            let nodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
-            this.nodes.set(_node, nodeReferences);
-        }
-        /**
-         * Register the node and its valid successors in the branch for rendering using [[addNode]]
-         * @param _node
-         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
-         */
-        static addBranch(_node) {
-            if (_node.isUpdated(RenderManager.timestampUpdate))
-                return false;
-            for (let node of _node.branch)
-                try {
-                    // may fail when some components are missing. TODO: cleanup
-                    this.addNode(node);
-                }
-                catch (_e) {
-                    Fudge.Debug.log(_e);
-                }
-            return true;
-        }
-        // #endregion
-        // #region Removing
-        /**
-         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
-         * @param _node
-         */
-        static removeNode(_node) {
-            let nodeReferences = this.nodes.get(_node);
-            if (!nodeReferences)
-                return;
-            this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
-            this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
-            this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
-            this.nodes.delete(_node);
-        }
-        /**
-         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
-         * @param _node
-         */
-        static removeBranch(_node) {
-            for (let node of _node.branch)
-                this.removeNode(node);
-        }
-        // #endregion
-        // #region Updating
-        /**
-         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
-         * @param _node
-         */
-        static updateNode(_node) {
-            let nodeReferences = this.nodes.get(_node);
-            if (!nodeReferences)
-                return;
-            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
-            let shader = cmpMaterial.material.getShader();
-            if (shader !== nodeReferences.shader) {
-                this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
-                this.createReference(this.renderShaders, shader, this.createProgram);
-                nodeReferences.shader = shader;
-            }
-            let coat = cmpMaterial.material.getCoat();
-            if (coat !== nodeReferences.coat) {
-                this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
-                this.createReference(this.renderCoats, coat, this.createParameter);
-                nodeReferences.coat = coat;
-            }
-            let mesh = (_node.getComponent(Fudge.ComponentMesh)).mesh;
-            if (mesh !== nodeReferences.mesh) {
-                this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
-                this.createReference(this.renderBuffers, mesh, this.createBuffers);
-                nodeReferences.mesh = mesh;
-            }
-        }
-        /**
-         * Update the node and its valid successors in the branch using [[updateNode]]
-         * @param _node
-         */
-        static updateBranch(_node) {
-            for (let node of _node.branch)
-                this.updateNode(node);
-        }
-        // #endregion
-        // #region Lights
-        /**
-         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
-         * RenderManager passes it on to all shaders used that can process light
-         * @param _lights
-         */
-        static setLights(_lights) {
-            // let renderLights: RenderLights = this.createRenderLights(_lights);
-            for (let entry of this.renderShaders) {
-                let renderShader = entry[1].getReference();
-                this.setLightsInShader(renderShader, _lights);
-            }
-            // debugger;
-        }
-        // #endregion
-        // #region Transformation & Rendering
-        /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
-         */
-        static update() {
-            RenderManager.timestampUpdate = performance.now();
-            this.recalculateAllNodeTransforms();
-        }
-        /**
-         * Clear the offscreen renderbuffer with the given [[Color]]
-         * @param _color
-         */
-        static clear(_color = null) {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
-        }
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node
-         * @param _cameraMatrix
-         */
-        static drawBranch(_node, _cmpCamera) {
-            let finalTransform;
-            let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
-            if (cmpMesh)
-                finalTransform = Fudge.Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-            else
-                finalTransform = _node.mtxWorld; // caution, this is a reference...
-            // multiply camera matrix
-            let projection = Fudge.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-            this.drawNode(_node, finalTransform, projection);
-            for (let name in _node.getChildren()) {
-                let childNode = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera); //, world);
-            }
-            Fudge.Recycler.store(projection);
-            if (finalTransform != _node.mtxWorld)
-                Fudge.Recycler.store(finalTransform);
-        }
-        static drawNode(_node, _finalTransform, _projection) {
-            let references = this.nodes.get(_node);
-            if (!references)
-                return; // TODO: deal with partial references
-            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
-            let coatInfo = this.renderCoats.get(references.coat).getReference();
-            let shaderInfo = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
-        }
-        /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
-         */
-        static recalculateAllNodeTransforms() {
-            // inner function to be called in a for each node at the bottom of this function
-            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
-            //     _nodeReferences.doneTransformToWorld = false;
-            // }
-            // inner function to be called in a for each node at the bottom of this function
-            let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
-                // find uppermost ancestor not recalculated yet
-                let ancestor = _node;
-                let parent;
-                while (true) {
-                    parent = ancestor.getParent();
-                    if (!parent)
-                        break;
-                    if (_node.isUpdated(RenderManager.timestampUpdate))
-                        break;
-                    ancestor = parent;
-                }
-                // TODO: check if nodes without meshes must be registered
-                // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
-                let matrix = Fudge.Matrix4x4.IDENTITY;
-                if (parent)
-                    matrix = parent.mtxWorld;
-                // start recursive recalculation of the whole branch starting from the ancestor found
-                this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
-            };
-            // call the functions above for each registered node
-            // this.nodes.forEach(markNodeToBeTransformed);
-            this.nodes.forEach(recalculateBranchContainingNode);
-        }
-        /**
-         * Recursive method receiving a childnode and its parents updated world transform.
-         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
-         * @param _node
-         * @param _world
-         */
-        static recalculateTransformsOfNodeAndChildren(_node, _world) {
-            let world = _world;
-            let cmpTransform = _node.cmpTransform;
-            if (cmpTransform)
-                world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
-            _node.mtxWorld = world;
-            _node.timestampUpdate = RenderManager.timestampUpdate;
-            for (let child of _node.getChildren()) {
-                this.recalculateTransformsOfNodeAndChildren(child, world);
-            }
-        }
-        // #endregion
-        // #region Manage references to render data
-        /**
-         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
-         * @param _in
-         * @param _key
-         * @param _deletor
-         */
-        static removeReference(_in, _key, _deletor) {
-            let reference;
-            reference = _in.get(_key);
-            if (reference.decreaseCounter() == 0) {
-                // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
-                // If data should be used later again, it must then be reconstructed...
-                _deletor(reference.getReference());
-                _in.delete(_key);
-            }
-        }
-        /**
-         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
-         * @param _in
-         * @param _key
-         * @param _creator
-         */
-        static createReference(_in, _key, _creator) {
-            let reference;
-            reference = _in.get(_key);
-            if (reference)
-                reference.increaseCounter();
-            else {
-                let content = _creator(_key);
-                reference = new Reference(content);
-                reference.increaseCounter();
-                _in.set(_key, reference);
-            }
-        }
-    }
-    /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-    RenderManager.renderShaders = new Map();
-    /** Stores references to the vertex array objects and makes them available via the references to coats */
-    RenderManager.renderCoats = new Map();
-    /** Stores references to the vertex buffers and makes them available via the references to meshes */
-    RenderManager.renderBuffers = new Map();
-    RenderManager.nodes = new Map();
-    Fudge.RenderManager = RenderManager;
-})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
@@ -5179,6 +4887,298 @@ var Fudge;
         }
     }
     Fudge.NodeResourceInstance = NodeResourceInstance;
+})(Fudge || (Fudge = {}));
+/// <reference path="RenderOperator.ts"/>
+var Fudge;
+/// <reference path="RenderOperator.ts"/>
+(function (Fudge) {
+    /**
+     * This class manages the references to render data used by nodes.
+     * Multiple nodes may refer to the same data via their references to shader, coat and mesh
+     */
+    class Reference {
+        constructor(_reference) {
+            this.count = 0;
+            this.reference = _reference;
+        }
+        getReference() {
+            return this.reference;
+        }
+        increaseCounter() {
+            this.count++;
+            return this.count;
+        }
+        decreaseCounter() {
+            if (this.count == 0)
+                throw (new Error("Negative reference counter"));
+            this.count--;
+            return this.count;
+        }
+    }
+    /**
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
+     * With these references, the already buffered data is retrieved when rendering.
+     */
+    class RenderManager extends Fudge.RenderOperator {
+        // #region Adding
+        /**
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
+         * @param _node
+         */
+        static addNode(_node) {
+            if (this.nodes.get(_node))
+                return;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            if (!cmpMaterial)
+                return;
+            let shader = cmpMaterial.material.getShader();
+            this.createReference(this.renderShaders, shader, this.createProgram);
+            let coat = cmpMaterial.material.getCoat();
+            this.createReference(this.renderCoats, coat, this.createParameter);
+            let mesh = _node.getComponent(Fudge.ComponentMesh).mesh;
+            this.createReference(this.renderBuffers, mesh, this.createBuffers);
+            let nodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
+            this.nodes.set(_node, nodeReferences);
+        }
+        /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
+         */
+        static addBranch(_node) {
+            if (_node.isUpdated(RenderManager.timestampUpdate))
+                return false;
+            for (let node of _node.branch)
+                try {
+                    // may fail when some components are missing. TODO: cleanup
+                    this.addNode(node);
+                }
+                catch (_e) {
+                    Fudge.Debug.log(_e);
+                }
+            return true;
+        }
+        // #endregion
+        // #region Removing
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
+         * @param _node
+         */
+        static removeNode(_node) {
+            let nodeReferences = this.nodes.get(_node);
+            if (!nodeReferences)
+                return;
+            this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+            this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+            this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+            this.nodes.delete(_node);
+        }
+        /**
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node) {
+            for (let node of _node.branch)
+                this.removeNode(node);
+        }
+        // #endregion
+        // #region Updating
+        /**
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
+         * @param _node
+         */
+        static updateNode(_node) {
+            let nodeReferences = this.nodes.get(_node);
+            if (!nodeReferences)
+                return;
+            let cmpMaterial = _node.getComponent(Fudge.ComponentMaterial);
+            let shader = cmpMaterial.material.getShader();
+            if (shader !== nodeReferences.shader) {
+                this.removeReference(this.renderShaders, nodeReferences.shader, this.deleteProgram);
+                this.createReference(this.renderShaders, shader, this.createProgram);
+                nodeReferences.shader = shader;
+            }
+            let coat = cmpMaterial.material.getCoat();
+            if (coat !== nodeReferences.coat) {
+                this.removeReference(this.renderCoats, nodeReferences.coat, this.deleteParameter);
+                this.createReference(this.renderCoats, coat, this.createParameter);
+                nodeReferences.coat = coat;
+            }
+            let mesh = (_node.getComponent(Fudge.ComponentMesh)).mesh;
+            if (mesh !== nodeReferences.mesh) {
+                this.removeReference(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+                this.createReference(this.renderBuffers, mesh, this.createBuffers);
+                nodeReferences.mesh = mesh;
+            }
+        }
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node) {
+            for (let node of _node.branch)
+                this.updateNode(node);
+        }
+        // #endregion
+        // #region Lights
+        /**
+         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
+         * RenderManager passes it on to all shaders used that can process light
+         * @param _lights
+         */
+        static setLights(_lights) {
+            // let renderLights: RenderLights = this.createRenderLights(_lights);
+            for (let entry of this.renderShaders) {
+                let renderShader = entry[1].getReference();
+                this.setLightsInShader(renderShader, _lights);
+            }
+            // debugger;
+        }
+        // #endregion
+        // #region Transformation & Rendering
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        static update() {
+            RenderManager.timestampUpdate = performance.now();
+            this.recalculateAllNodeTransforms();
+        }
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
+        static clear(_color = null) {
+            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+        }
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * @param _node
+         * @param _cameraMatrix
+         */
+        static drawBranch(_node, _cmpCamera) {
+            let finalTransform;
+            let cmpMesh = _node.getComponent(Fudge.ComponentMesh);
+            if (cmpMesh)
+                finalTransform = Fudge.Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+            else
+                finalTransform = _node.mtxWorld; // caution, this is a reference...
+            // multiply camera matrix
+            let projection = Fudge.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+            this.drawNode(_node, finalTransform, projection);
+            for (let name in _node.getChildren()) {
+                let childNode = _node.getChildren()[name];
+                this.drawBranch(childNode, _cmpCamera); //, world);
+            }
+            Fudge.Recycler.store(projection);
+            if (finalTransform != _node.mtxWorld)
+                Fudge.Recycler.store(finalTransform);
+        }
+        static drawNode(_node, _finalTransform, _projection) {
+            let references = this.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+            let bufferInfo = this.renderBuffers.get(references.mesh).getReference();
+            let coatInfo = this.renderCoats.get(references.coat).getReference();
+            let shaderInfo = this.renderShaders.get(references.shader).getReference();
+            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+        }
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        static recalculateAllNodeTransforms() {
+            // inner function to be called in a for each node at the bottom of this function
+            // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+            //     _nodeReferences.doneTransformToWorld = false;
+            // }
+            // inner function to be called in a for each node at the bottom of this function
+            let recalculateBranchContainingNode = (_nodeReferences, _node, _map) => {
+                // find uppermost ancestor not recalculated yet
+                let ancestor = _node;
+                let parent;
+                while (true) {
+                    parent = ancestor.getParent();
+                    if (!parent)
+                        break;
+                    if (_node.isUpdated(RenderManager.timestampUpdate))
+                        break;
+                    ancestor = parent;
+                }
+                // TODO: check if nodes without meshes must be registered
+                // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
+                let matrix = Fudge.Matrix4x4.IDENTITY;
+                if (parent)
+                    matrix = parent.mtxWorld;
+                // start recursive recalculation of the whole branch starting from the ancestor found
+                this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
+            };
+            // call the functions above for each registered node
+            // this.nodes.forEach(markNodeToBeTransformed);
+            this.nodes.forEach(recalculateBranchContainingNode);
+        }
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node
+         * @param _world
+         */
+        static recalculateTransformsOfNodeAndChildren(_node, _world) {
+            let world = _world;
+            let cmpTransform = _node.cmpTransform;
+            if (cmpTransform)
+                world = Fudge.Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+            _node.mtxWorld = world;
+            _node.timestampUpdate = RenderManager.timestampUpdate;
+            for (let child of _node.getChildren()) {
+                this.recalculateTransformsOfNodeAndChildren(child, world);
+            }
+        }
+        // #endregion
+        // #region Manage references to render data
+        /**
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in
+         * @param _key
+         * @param _deletor
+         */
+        static removeReference(_in, _key, _deletor) {
+            let reference;
+            reference = _in.get(_key);
+            if (reference.decreaseCounter() == 0) {
+                // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
+                // If data should be used later again, it must then be reconstructed...
+                _deletor(reference.getReference());
+                _in.delete(_key);
+            }
+        }
+        /**
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in
+         * @param _key
+         * @param _creator
+         */
+        static createReference(_in, _key, _creator) {
+            let reference;
+            reference = _in.get(_key);
+            if (reference)
+                reference.increaseCounter();
+            else {
+                let content = _creator(_key);
+                reference = new Reference(content);
+                reference.increaseCounter();
+                _in.set(_key, reference);
+            }
+        }
+    }
+    /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+    RenderManager.renderShaders = new Map();
+    /** Stores references to the vertex array objects and makes them available via the references to coats */
+    RenderManager.renderCoats = new Map();
+    /** Stores references to the vertex buffers and makes them available via the references to meshes */
+    RenderManager.renderBuffers = new Map();
+    RenderManager.nodes = new Map();
+    Fudge.RenderManager = RenderManager;
 })(Fudge || (Fudge = {}));
 /// <reference path="../Coat/Coat.ts"/>
 var Fudge;

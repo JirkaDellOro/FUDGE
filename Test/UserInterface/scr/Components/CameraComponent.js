@@ -4,7 +4,7 @@ var UI;
 /// <reference path="../../../../Core/Build/Fudge.d.ts"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 (function (UI) {
-    // import ƒ = Fudge;
+    // import ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class CameraUI extends ƒui.UIMutable {
         constructor(container, state, _camera) {

@@ -1,5 +1,5 @@
 namespace TextureTest {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     window.addEventListener("load", init);
 

@@ -1,5 +1,5 @@
 /// <reference path="../Coat/Coat.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Static superclass for the representation of WebGl shaderprograms. 
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019

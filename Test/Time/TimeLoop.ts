@@ -1,5 +1,5 @@
 namespace TimeLoop {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     window.addEventListener("load", handleLoad);
 
     function handleLoad(_event: Event): void {

@@ -1,6 +1,6 @@
 /// <reference types="../../../core/build/fudge" />
 declare namespace Scenes {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let node: ƒ.Node;
     let camera: ƒ.Node;
     let viewPort: ƒ.Viewport;

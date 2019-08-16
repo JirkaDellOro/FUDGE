@@ -1,6 +1,6 @@
 ///<reference types="../../../Core/Build/Fudge"/>
 namespace Scenes {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export let node: ƒ.Node;
     export let camera: ƒ.Node;

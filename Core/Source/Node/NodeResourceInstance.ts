@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * An instance of a [[NodeResource]].  
      * This node keeps a reference to its resource an can thus optimize serialization

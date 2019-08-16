@@ -3,7 +3,7 @@
 /// <reference types="../../@types/golden-layout"/>
 
 namespace ElectronViewport {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
 
     let myLayout: GoldenLayout;

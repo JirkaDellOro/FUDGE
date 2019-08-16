@@ -1,5 +1,5 @@
 namespace EventPassing {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
     let viewPorts: ƒ.Viewport[] = [];

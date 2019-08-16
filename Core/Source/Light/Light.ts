@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Baseclass for different kinds of lights. 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019

@@ -1,6 +1,6 @@
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /** 
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019

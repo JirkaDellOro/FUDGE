@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
      * ```plaintext

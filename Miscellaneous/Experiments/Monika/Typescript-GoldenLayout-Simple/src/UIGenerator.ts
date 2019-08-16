@@ -1,6 +1,6 @@
 /// <reference path="../../../../Core/build/Fudge.d.ts"/>
 namespace GoldenLayoutTest {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export class UIGenerator {
         public static createFromMutator(mutator: ƒ.Mutator, element: HTMLElement) {

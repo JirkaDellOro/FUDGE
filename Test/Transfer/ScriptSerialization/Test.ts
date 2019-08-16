@@ -1,5 +1,5 @@
 namespace ScriptSerialization {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export class Test extends ƒ.ComponentScript {
         public startPosition: ƒ.Vector3 = ƒ.Vector3.ONE(0);

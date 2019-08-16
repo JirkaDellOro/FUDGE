@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     // tslint:disable-next-line: no-any
     export type General = any;
 

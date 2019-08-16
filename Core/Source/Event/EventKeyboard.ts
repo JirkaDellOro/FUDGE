@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     export class KeyboardEventƒ extends KeyboardEvent {
         constructor(type: string, _event: KeyboardEventƒ) {
             super(type, _event);

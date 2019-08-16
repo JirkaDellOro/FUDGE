@@ -1,6 +1,6 @@
 namespace genStruct {
 
-	import ƒ = Fudge;
+	import ƒ = FudgeCore;
 	document.addEventListener("DOMContentLoaded", init);
 
 	let crc: CanvasRenderingContext2D;

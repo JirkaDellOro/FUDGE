@@ -2,7 +2,7 @@
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 
 namespace UI {
-    // import ƒ = Fudge;
+    // import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     export class CameraUI extends ƒui.UIMutable {
         protected root: HTMLFormElement;

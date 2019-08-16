@@ -1,5 +1,5 @@
 //<reference path="../Coats/Coat.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     type CoatInjection = (this: Coat, _renderShader: RenderShader) => void;
     export class RenderInjector {
         private static coatInjections: { [className: string]: CoatInjection } = {

@@ -1,5 +1,5 @@
 namespace UI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export interface ParamsCamera { aspect?: number; fieldOfView?: number; }
     export interface Size { width: number; height: number; }

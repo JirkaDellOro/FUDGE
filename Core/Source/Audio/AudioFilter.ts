@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Add an [[AudioFilter]] to an [[Audio]]
      * @authors Thomas Dorner, HFU, 2019

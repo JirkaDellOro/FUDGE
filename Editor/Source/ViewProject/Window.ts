@@ -2,7 +2,7 @@
 ///<reference types="../../Examples/Code/Scenes"/>
 
 namespace FudgeEditorProject {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");
     const fs: ƒ.General = require("fs");

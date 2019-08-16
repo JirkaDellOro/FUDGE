@@ -2,7 +2,7 @@
 /// <reference path="../UIElements/UIElements.ts"/>
 
 namespace FudgeUserInterface {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     export class UIGenerator {
         public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void {
             let name: string = _name || _mutable.constructor.name;

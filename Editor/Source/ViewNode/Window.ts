@@ -2,7 +2,7 @@
 ///<reference types="../../Examples/Code/Scenes"/>
 
 namespace FudgeEditorNode {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
 
     window.addEventListener("DOMContentLoaded", initWindow);

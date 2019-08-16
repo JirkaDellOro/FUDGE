@@ -1,6 +1,6 @@
 /// <reference path="../../../../Core/Build/Fudge.d.ts"/>
 namespace MoniUI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export class UIGenerator {
         public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement):FormData {

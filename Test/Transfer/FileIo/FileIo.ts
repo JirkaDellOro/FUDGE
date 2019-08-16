@@ -1,5 +1,5 @@
 namespace FileIo {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(FileIo);
     window.addEventListener("DOMContentLoaded", init);
 

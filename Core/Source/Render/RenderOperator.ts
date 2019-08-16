@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     export interface BufferSpecification {
         size: number;   // The size of the datasample.
         dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)

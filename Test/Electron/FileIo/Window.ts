@@ -5,7 +5,7 @@
 // import * as fs from "fs";
 // import dialog from "electron-remote";
 namespace ElectronFileIo {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     // import e = Electron;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");

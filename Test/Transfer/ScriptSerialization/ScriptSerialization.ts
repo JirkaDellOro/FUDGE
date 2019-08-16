@@ -1,5 +1,5 @@
 namespace ScriptSerialization {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(ScriptSerialization);
     window.addEventListener("DOMContentLoaded", init);
 

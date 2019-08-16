@@ -1,5 +1,5 @@
 /// <reference path="DebugTarget.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Routing to the alert box
      */

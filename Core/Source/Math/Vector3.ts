@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Stores and manipulates a threedimensional vector comprised of the components x, y and z
      * ```plaintext

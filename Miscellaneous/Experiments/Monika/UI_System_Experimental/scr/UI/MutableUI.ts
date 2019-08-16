@@ -1,6 +1,6 @@
 /// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 namespace UI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     export abstract class MutableUI {
         protected timeUpdate: number = 190;
         protected root: HTMLElement;

@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Interface to generate Data Pairs of URL and AudioBuffer
      */

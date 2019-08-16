@@ -1,5 +1,5 @@
 namespace MutateMatrixTest {
-  import ƒ = Fudge;
+  import ƒ = FudgeCore;
   document.addEventListener("DOMContentLoaded", init);
   let cmpTransform: ƒ.ComponentTransform;
   let i: number = 0;

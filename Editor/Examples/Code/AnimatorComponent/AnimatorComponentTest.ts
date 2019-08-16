@@ -1,5 +1,5 @@
 namespace AnimatorComponentTest {
-  import ƒ = Fudge;
+  import ƒ = FudgeCore;
   window.addEventListener("DOMContentLoaded", init);
 
   let node: ƒ.Node;

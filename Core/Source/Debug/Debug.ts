@@ -1,7 +1,7 @@
 /// <reference path="DebugInterfaces.ts"/>
 /// <reference path="DebugAlert.ts"/>
 /// <reference path="DebugConsole.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * The Debug-Class offers functions known from the console-object and additions, 
      * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users

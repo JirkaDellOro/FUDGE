@@ -1,6 +1,6 @@
 /// <reference path="../../../Core/build/Fudge.d.ts"/>
 namespace FudgeUserInterface {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     export abstract class UIMutable {
         protected timeUpdate: number = 190;
         protected root: HTMLElement;

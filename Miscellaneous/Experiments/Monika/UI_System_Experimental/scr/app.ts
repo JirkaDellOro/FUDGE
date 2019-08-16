@@ -1,6 +1,6 @@
 /// <reference path="../../../../../Core/Build/Fudge.d.ts"/>
 
-import ƒ = Fudge;
+import ƒ = FudgeCore;
 
 
 namespace UI {

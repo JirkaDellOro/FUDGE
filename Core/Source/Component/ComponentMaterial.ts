@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Attaches a [[Material]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019

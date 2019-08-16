@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019

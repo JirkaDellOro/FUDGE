@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s 
      */

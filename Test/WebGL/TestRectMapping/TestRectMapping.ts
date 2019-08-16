@@ -1,5 +1,5 @@
 namespace RenderManagerRendering {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     window.addEventListener("load", init);
     let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
     let uiClient: UI.Rectangle;

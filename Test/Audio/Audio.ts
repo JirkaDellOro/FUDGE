@@ -1,6 +1,6 @@
 /// <reference path="../../Core/Build/Fudge.d.ts"/>
 namespace AudioTest {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let out: HTMLOutputElement;
 
     // tslint:disable-next-line: typedef
