@@ -23,13 +23,13 @@ namespace FudgeViewNode {
         myLayout.registerComponent("Inspector", createInspectorComponent);
 
         myLayout.init();
-        ipcRenderer.addListener("update", (_event, _args) => {
+        ipcRenderer.addListener("update", (_event: Electron.IpcRendererEvent) => {
             ƒ.Debug.info("Update");
             ipcRenderer.send("getNode");
         });
-        ipcRenderer.addListener("display", (_event: Electron.IpcRendererEvent, _args: unknown) => {
+        ipcRenderer.addListener("display", (_event: Electron.IpcRendererEvent, _node: ƒ.Node) => {
             ƒ.Debug.info("Display");
-            displayNode(<ƒ.Node>_args);
+            displayNode(_node);
         });
     }
 

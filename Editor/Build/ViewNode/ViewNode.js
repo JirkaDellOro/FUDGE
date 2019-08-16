@@ -20,13 +20,13 @@ var FudgeViewNode;
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Inspector", createInspectorComponent);
         myLayout.init();
-        ipcRenderer.addListener("update", (_event, _args) => {
+        ipcRenderer.addListener("update", (_event) => {
             ƒ.Debug.info("Update");
             ipcRenderer.send("getNode");
         });
-        ipcRenderer.addListener("display", (_event, _args) => {
+        ipcRenderer.addListener("display", (_event, _node) => {
             ƒ.Debug.info("Display");
-            displayNode(_args);
+            displayNode(_node);
         });
     }
     function displayNode(_node) {
