@@ -15,7 +15,7 @@ a {
 /*Toolbar*/
 .ToolContainer{
 }
-.ToolContainer Button {
+button.ToolContainer {
     object-fit: scale-down;
     font-size: 12px;
     /* Set a font size */
@@ -29,10 +29,6 @@ a {
     margin: 2px;
 }
 
-.ToolButton img {
-    height: 100%;
-    width: 100%;
-}
 
 .ToolButton:hover {
     background-blend-mode: multiply;
@@ -62,7 +58,7 @@ a {
   }
 
 /*Scene Tree*/
-.OptionContainer Button {
+Button.OptionContainer {
     cursor: pointer;
     font-size: 12px;
     border-style: solid;
@@ -76,10 +72,10 @@ a {
     display: block;
     width: inherit;
 }
-.OptionContainer Button:hover {
+Button.OptionContainer:hover {
     background-color: #636363;
 }
-.OptionContainer Button:active {
+Button.OptionContainer:active {
     background-color: #9d9d9d;
 }
 .ToggleButton .ToggleOn{
@@ -92,15 +88,15 @@ a {
 
 /*Viewport*/
 /*Ressources*/
-.ressource_explorer{
+.ListContainer{
     display: grid;
     grid-template-columns: 120px 120px 120px 120px 120px 120px;
     margin: 30px;
 }
-.ressource_explorer img{
+img.ListContainer {
     height: 80px;
 }
-.ressource_explorer div{
+div.ListContainer {
     margin-left: 5px;
     color: white;
     font-family: Arial, sans-serif;
@@ -126,7 +122,7 @@ a {
     padding: unset;
 }
 
-.contrButton img {
+img.contrButton {
     height: 100%;
     width: 100%;
 }
@@ -162,7 +158,7 @@ a {
     margin: 2px;
 }
 
-.hide-button img {
+img.hide-button {
     height: 100%;
     width: 100%;
 }
@@ -260,14 +256,14 @@ fieldset{
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.navbar a {
+/*.navbar a {
     float: left;
     font-size: 16px;
     color: white;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
-}
+}*/
 
 .dropdown {
     float: left;
@@ -361,10 +357,3 @@ h2 {
     font-size: 12px;
     color: #999999;
 }
-
-.sketch_canvas {
-    object-fit: scale-down;
-    width: 850px;
-}
-
-
