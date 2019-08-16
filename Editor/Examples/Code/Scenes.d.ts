@@ -1,4 +1,4 @@
-/// <reference types="../../../core/build/fudge" />
+/// <reference types="../../../Core/Build/FudgeCore" />
 declare namespace Scenes {
     import ƒ = FudgeCore;
     let node: ƒ.Node;

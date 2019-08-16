@@ -1,10 +1,10 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 var FudgeEditorProject;
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 (function (FudgeEditorProject) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");
     const fs = require("fs");

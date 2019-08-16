@@ -1,10 +1,10 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 var FudgeEditorNode;
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 (function (FudgeEditorNode) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout;
