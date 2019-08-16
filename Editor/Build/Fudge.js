@@ -36,6 +36,10 @@ var Fudge;
     ipcMain.addListener("openView", function (_event, _type, ..._args) {
         let view = addView(_type);
     });
+    ipcMain.on("getNode", function (_event, ..._args) {
+        console.log("getNode", _event);
+        send(viewProject, "sendNode", _event["sender"].id);
+    });
     app.addListener("ready", createViewProject);
     app.addListener("window-all-closed", function () {
         console.log("Quit");
@@ -47,7 +51,7 @@ var Fudge;
         if (viewProject === null)
             createViewProject();
     });
-    function send(_view, _message, _args) {
+    function send(_view, _message, ..._args) {
         console.log(`Send message to ${_view.type}: ${_message}`);
         _view.window.webContents.send(_message, _args);
     }

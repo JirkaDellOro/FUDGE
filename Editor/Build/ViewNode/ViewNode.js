@@ -5,7 +5,7 @@ var FudgeViewNode;
 ///<reference types="../../Examples/Code/Scenes"/>
 (function (FudgeViewNode) {
     var ƒ = FudgeCore;
-    const { ipcRenderer, remote } = require("electron");
+    const { ipcRenderer } = require("electron");
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout;
     let savedState;
@@ -20,13 +20,13 @@ var FudgeViewNode;
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Inspector", createInspectorComponent);
         myLayout.init();
-        ipcRenderer.on("update", (_event, _args) => {
-            console.log("Update");
-            console.log(remote.getGlobal("views"));
+        ipcRenderer.addListener("update", (_event, _args) => {
+            ƒ.Debug.info("Update");
+            ipcRenderer.send("getNode");
         });
-        ipcRenderer.on("display", (_event, _args) => {
-            console.log("Display Node: I'd love to, don't know how yet!");
-            displayNode(_args[0]);
+        ipcRenderer.addListener("display", (_event, _args) => {
+            ƒ.Debug.info("Display");
+            displayNode(_args);
         });
     }
     function displayNode(_node) {

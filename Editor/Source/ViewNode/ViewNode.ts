@@ -3,7 +3,7 @@
 
 namespace FudgeViewNode {
     import ƒ = FudgeCore;
-    const { ipcRenderer, remote } = require("electron");
+    const { ipcRenderer } = require("electron");
 
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout: GoldenLayout;
@@ -23,13 +23,13 @@ namespace FudgeViewNode {
         myLayout.registerComponent("Inspector", createInspectorComponent);
 
         myLayout.init();
-        ipcRenderer.on("update", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-            console.log("Update");
+        ipcRenderer.addListener("update", (_event, _args) => {
+            ƒ.Debug.info("Update");
             ipcRenderer.send("getNode");
         });
-        ipcRenderer.on("display", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-            console.log("Display Node: I'd love to, don't know how yet!");
-            displayNode(<ƒ.Node>_args[0]);
+        ipcRenderer.addListener("display", (_event: Electron.IpcRendererEvent, _args: unknown) => {
+            ƒ.Debug.info("Display");
+            displayNode(<ƒ.Node>_args);
         });
     }
 

@@ -1,7 +1,5 @@
 ///<reference types="../../node_modules/electron/Electron"/>
 
-import { IpcMainEvent } from "electron";
-
 namespace Fudge {
   //#region Types and Data
   // TODO: enums should be available to all windows and not defined twice
@@ -42,11 +40,11 @@ namespace Fudge {
   //#endregion
 
   //#region Events
-  ipcMain.addListener("openView", function (_event: string, _type: VIEW, ..._args: unknown[]): void {
+  ipcMain.addListener("openView", function (_event: Event, _type: VIEW, ..._args: unknown[]): void {
     let view: View = addView(_type);
   });
-  ipcMain.on("getNode", (_event: IpcMainEvent, ..._args: unknown[]): void => {
-    console.log("getNode");
+  ipcMain.on("getNode", function (_event: Event, ..._args: unknown[]): void {
+    console.log("getNode", _event);
     send(viewProject, "sendNode", _event["sender"].id);
   });
 

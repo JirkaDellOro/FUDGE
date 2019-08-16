@@ -24,7 +24,8 @@ namespace FudgeViewProject {
         ƒ.Debug.log("FudgeViewProject started");
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Save");
-
+            ipcRenderer.send("getNode");
+            ƒ.Debug.log("Save done");
             // save(branch);
         });
         ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -33,7 +34,9 @@ namespace FudgeViewProject {
         });
         ipcRenderer.on("sendNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("SendNode");
-            console.log(_event, _args);
+            let viewNodeId: number = Number(_args[0]);
+            console.log(viewNodeId);
+            ipcRenderer.sendTo(viewNodeId, "display", node);
         });
     }
 

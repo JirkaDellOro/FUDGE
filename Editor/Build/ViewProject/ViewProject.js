@@ -20,13 +20,21 @@ var FudgeViewProject;
     window.addEventListener("DOMContentLoaded", initWindow);
     function initWindow() {
         ƒ.Debug.log("FudgeViewProject started");
-        ipcRenderer.on("save", (event, arg) => {
+        ipcRenderer.on("save", (_event, _args) => {
             ƒ.Debug.log("Save");
+            ipcRenderer.send("getNode");
+            ƒ.Debug.log("Save done");
             // save(branch);
         });
-        ipcRenderer.on("open", (event, arg) => {
+        ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
+        });
+        ipcRenderer.on("sendNode", (_event, _args) => {
+            ƒ.Debug.log("SendNode");
+            let viewNodeId = Number(_args[0]);
+            console.log(viewNodeId);
+            ipcRenderer.sendTo(viewNodeId, "display", node);
         });
     }
     function save(_node) {
