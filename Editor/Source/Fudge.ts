@@ -1,45 +1,45 @@
 ///<reference types="../../node_modules/electron/Electron"/>
-namespace FudgeEditor {
+namespace Fudge {
   const { app, BrowserWindow, Menu } = require("electron");
   var ipcMain: Electron.IpcMain = require("electron").ipcMain;
   
   let editorProject: Electron.BrowserWindow;
-  let editors: Electron.BrowserWindow[] = [];
+  let views: Electron.BrowserWindow[] = [];
   let defaultWidth: number = 800;
   let defaultHeight: number = 600;
   
-  ipcMain.addListener("openEditor", openEditor);
+  ipcMain.addListener("openEditor", openView);
 
-  app.addListener("ready", createEditorProject);
+  app.addListener("ready", createViewProject);
   app.addListener("window-all-closed", function (): void {
     if (process.platform !== "darwin") app.quit();
   });
   app.addListener("activate", function (): void {
-    if (editorProject === null) createEditorProject();
+    if (editorProject === null) createViewProject();
   });
 
-  function openEditor(_event: string, _args: Object): void {
-    console.log("Opening window", _args);
+  function openView(_event: string, _args: Object): void {
+    console.log("Open view", _args);
     switch (_args) {
-      case "EDITOR_NODE":
-        addEditor("../Html/EditorNode.html");
+      case "VIEW_NODE":
+        addEditor("../Html/ViewNode.html");
         break;
       default:
         break;
     }
   }
 
-  function createEditorProject(): void {
-    editorProject = addEditor("../Html/EditorProject.html");
+  function createViewProject(): void {
+    editorProject = addEditor("../Html/ViewProject.html");
     const mainMenu: Electron.Menu = Menu.buildFromTemplate(getMainMenu());
     Menu.setApplicationMenu(mainMenu);
   }
 
   function removeEditor(_event: Electron.Event): void {
     //tslint:disable-next-line
-    let index: number = editors.indexOf(<any>_event.target);
-    editors.splice(index, 1);
-    console.info("Editors", editors.length);
+    let index: number = views.indexOf(<any>_event.target);
+    views.splice(index, 1);
+    console.info("Editors", views.length);
   }
 
   function addEditor(urlToHtmlFile: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
@@ -56,8 +56,8 @@ namespace FudgeEditor {
     window.loadFile(urlToHtmlFile);
     window.addListener("closed", removeEditor);
 
-    editors.push(window);
-    console.info("Editors", editors.length);
+    views.push(window);
+    console.info("View", views.length);
 
     return window;
   }
