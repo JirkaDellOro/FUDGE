@@ -2,7 +2,7 @@
 /// <reference path="../UI/MutableUI.ts"/>
 
 namespace UI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     export class TestUI extends MutableUI {
         private camera: ƒ.ComponentCamera
         protected root: HTMLFormElement;

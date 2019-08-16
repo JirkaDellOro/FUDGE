@@ -1,10 +1,10 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
-var FudgeEditorNode;
-///<reference types="../../../Core/Build/Fudge"/>
+var FudgeViewNode;
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
-(function (FudgeEditorNode) {
-    var ƒ = Fudge;
+(function (FudgeViewNode) {
+    var ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout;
@@ -14,6 +14,7 @@ var FudgeEditorNode;
     let viewPort = new ƒ.Viewport();
     let camera;
     function initWindow() {
+        ƒ.Debug.log("FudgeViewNode started");
         createScene();
         myLayout = new GoldenLayout(getLayout());
         myLayout.registerComponent("Viewport", createViewportComponent);
@@ -68,5 +69,5 @@ var FudgeEditorNode;
         };
         return config;
     }
-})(FudgeEditorNode || (FudgeEditorNode = {}));
-//# sourceMappingURL=Window.js.map
+})(FudgeViewNode || (FudgeViewNode = {}));
+//# sourceMappingURL=ViewNode.js.map

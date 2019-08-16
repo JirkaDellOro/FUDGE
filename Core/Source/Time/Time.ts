@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     enum TIMER_TYPE {
         INTERVAL,
         TIMEOUT

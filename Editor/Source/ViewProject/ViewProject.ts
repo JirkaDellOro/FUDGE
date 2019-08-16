@@ -1,8 +1,8 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 
-namespace FudgeEditorProject {
-    import ƒ = Fudge;
+namespace FudgeViewProject {
+    import ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");
     const fs: ƒ.General = require("fs");
@@ -10,7 +10,7 @@ namespace FudgeEditorProject {
     window.addEventListener("DOMContentLoaded", initWindow);
 
     function initWindow(): void {
-        ƒ.Debug.log("FudgeEditorProject started");
+        ƒ.Debug.log("FudgeViewProject started");
         ipcRenderer.on("save", (event, arg) => {
             ƒ.Debug.log("Save");
 
@@ -19,7 +19,7 @@ namespace FudgeEditorProject {
         ipcRenderer.on("open", (event, arg) => {
             ƒ.Debug.log("Open");
             // let node: ƒ.Node = open();
-            ipcRenderer.send("openEditor", "EDITOR_NODE");
+            ipcRenderer.send("openView", "VIEW_NODE");
             // displayNode(node);
         });
     }

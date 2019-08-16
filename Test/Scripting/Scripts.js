@@ -1,6 +1,6 @@
 var Scripts;
 (function (Scripts) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     class Test extends ƒ.ComponentScript {
         constructor() {

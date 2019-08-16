@@ -1,6 +1,6 @@
 ///<reference path="../Event/Event.ts"/>
 ///<reference path="../Time/Time.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     export enum LOOP_MODE {
         /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",

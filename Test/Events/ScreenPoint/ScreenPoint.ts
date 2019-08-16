@@ -1,5 +1,5 @@
 namespace ScreenPoint {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
     export let viewPort: ƒ.Viewport;

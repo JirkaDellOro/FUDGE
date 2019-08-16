@@ -1,5 +1,5 @@
 /// <reference path="Component.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Attaches a [[ComponentAudio]] to a [[Node]].
      * Only a single [[Audio]] can be used within a single [[ComponentAudio]]

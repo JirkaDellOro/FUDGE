@@ -1,16 +1,16 @@
 ///<reference path="../../Scenes/Scenes.ts"/>
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../node_modules/@types/node/fs"/>
 // import * as fs from "fs";
 // import dialog from "electron-remote";
 var ElectronFileIo;
 ///<reference path="../../Scenes/Scenes.ts"/>
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../node_modules/@types/node/fs"/>
 // import * as fs from "fs";
 // import dialog from "electron-remote";
 (function (ElectronFileIo) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     // import e = Electron;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");

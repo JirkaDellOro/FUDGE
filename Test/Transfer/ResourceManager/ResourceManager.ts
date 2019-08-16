@@ -1,5 +1,5 @@
 namespace ResourceManager {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(ResourceManager);
 
     window.addEventListener("DOMContentLoaded", init);

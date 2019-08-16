@@ -6,7 +6,7 @@
  */
 /*
 namespace NameSpaceTest {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     ƒ.Test.sayHello();
 

@@ -1,0 +1,126 @@
+{
+  "bundle": {
+    "commonSourceDirectory": "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/",
+    "sourceFiles": [
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Animation/Animation.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Animation/AnimationFunction.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Animation/AnimationKey.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Animation/AnimationSequence.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/Audio.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/AudioFilter.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/AudioListener.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/AudioLocalisation.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/AudioSessionData.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Audio/AudioSettings.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Render/RenderInjector.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Render/RenderOperator.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Coat/Coat.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/Component.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentAnimator.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentAudio.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentAudioListener.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentCamera.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentLight.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentMaterial.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentMesh.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentScript.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Component/ComponentTransform.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugInterfaces.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugTarget.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugAlert.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugConsole.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugDialog.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Debug/DebugTextArea.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Engine/Color.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Engine/Material.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Engine/Recycler.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Engine/ResourceManager.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Light/Light.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Event/Event.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Event/EventKeyboard.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Math/Framing.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Math/Matrix3x3.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Math/Matrix4x4.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Mesh/MeshCube.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Mesh/MeshPyramid.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Mesh/MeshQuad.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Node/Node.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Node/NodeResource.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Node/NodeResourceInstance.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Render/RenderManager.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/Shader.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/ShaderFlat.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/ShaderTexture.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/ShaderUniColor.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Texture/Texture.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Time/Time.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Time/Loop.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Transfer/FileIoBrowserLocal.ts"
+    ],
+    "js": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 13,
+          "kind": "prologue",
+          "data": "use strict"
+        },
+        {
+          "pos": 15,
+          "end": 591,
+          "kind": "emitHelpers",
+          "data": "typescript:decorate"
+        },
+        {
+          "pos": 593,
+          "end": 245750,
+          "kind": "text"
+        }
+      ],
+      "sources": {
+        "prologues": [
+          {
+            "file": 0,
+            "text": "",
+            "directives": [
+              {
+                "pos": -1,
+                "end": -1,
+                "expression": {
+                  "pos": -1,
+                  "end": -1,
+                  "text": "use strict"
+                }
+              }
+            ]
+          }
+        ],
+        "helpers": [
+          "typescript:decorate"
+        ]
+      }
+    },
+    "dts": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 32,
+          "kind": "type",
+          "data": "webgl2"
+        },
+        {
+          "pos": 34,
+          "end": 95112,
+          "kind": "text"
+        }
+      ]
+    }
+  },
+  "version": "3.5.1"
+}

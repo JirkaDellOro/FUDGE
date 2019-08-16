@@ -1,6 +1,6 @@
 var ResourceManager;
 (function (ResourceManager) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(ResourceManager);
     window.addEventListener("DOMContentLoaded", init);
     class Resource {

@@ -1,6 +1,6 @@
 /// <reference path="../Light/Light.ts"/>
 /// <reference path="../Component/ComponentLight.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],

@@ -1,5 +1,5 @@
 namespace Mutable {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
 
     let mutator: ƒ.Mutator;

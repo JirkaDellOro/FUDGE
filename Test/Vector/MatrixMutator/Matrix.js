@@ -1,6 +1,6 @@
 var MarixMutatorTest;
 (function (MarixMutatorTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);

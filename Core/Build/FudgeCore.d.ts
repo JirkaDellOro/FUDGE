@@ -1,5 +1,5 @@
 /// <reference types="webgl2" />
-declare namespace Fudge {
+declare namespace FudgeCore {
     type General = any;
     interface Serialization {
         [type: string]: General;
@@ -90,7 +90,7 @@ declare namespace Fudge {
         private static findNamespaceIn;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings
      */
@@ -155,7 +155,7 @@ declare namespace Fudge {
         protected abstract reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface AnimationStructure {
         [attribute: string]: Serialization | AnimationSequence;
     }
@@ -216,7 +216,7 @@ declare namespace Fudge {
         private checkEventsBetween;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Calculates the values between [[AnimationKeys]]
      * @author Lukas Scheuerle, HFU, 2019
@@ -235,7 +235,7 @@ declare namespace Fudge {
         calculate(): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      *
      * @author Lukas Scheuerle, HFU, 2019
@@ -262,7 +262,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      *
      * @author Lukas Scheuerle, HFU, 2019
@@ -278,7 +278,7 @@ declare namespace Fudge {
         private regenerateFunctions;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Describes the [[Audio]] class in which all Audio Data is stored.
      * Audio will be given to the [[ComponentAudio]] for further usage.
@@ -315,7 +315,7 @@ declare namespace Fudge {
         private addLocalGain;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Add an [[AudioFilter]] to an [[Audio]]
      * @authors Thomas Dorner, HFU, 2019
@@ -340,7 +340,7 @@ declare namespace Fudge {
         addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Describes a [[AudioListener]] attached to a [[Node]]
      * @authors Thomas Dorner, HFU, 2019
@@ -367,7 +367,7 @@ declare namespace Fudge {
         getAudioListenerOrientation(): Vector3;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      *
      * @authors Thomas Dorner, HFU, 2019
@@ -415,7 +415,7 @@ declare namespace Fudge {
         getPanneOrientation(): Vector3;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Interface to generate Data Pairs of URL and AudioBuffer
      */
@@ -477,7 +477,7 @@ declare namespace Fudge {
         private logErrorFetch;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Describes Global Audio Settings.
      * Is meant to be used as a Menu option.
@@ -498,7 +498,7 @@ declare namespace Fudge {
         setAudioContext(_audioContext: AudioContext): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     class RenderInjector {
         private static coatInjections;
         static decorateCoat(_constructor: Function): void;
@@ -506,7 +506,7 @@ declare namespace Fudge {
         private static injectRenderDataForCoatTextured;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -611,7 +611,7 @@ declare namespace Fudge {
         private static setAttributeStructure;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
      * [[Material]]s reference [[Coat]] and [[Shader]].
@@ -645,7 +645,7 @@ declare namespace Fudge {
         repetition: boolean;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -675,7 +675,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Holds different playmodes the animation uses to play back its animation.
      * @author Lukas Scheuerle, HFU, 2019
@@ -719,7 +719,7 @@ declare namespace Fudge {
         private updateScale;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a [[ComponentAudio]] to a [[Node]].
      * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
@@ -744,7 +744,7 @@ declare namespace Fudge {
         private setAudio;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a [[AudioListener]] to the node
      * @authors Thomas Dorner, HFU, 2019
@@ -752,7 +752,7 @@ declare namespace Fudge {
     class ComponentAudioListener extends Component {
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     enum FIELD_OF_VIEW {
         HORIZONTAL = 0,
         VERTICAL = 1,
@@ -811,7 +811,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -822,7 +822,7 @@ declare namespace Fudge {
         getLight(): Light;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a [[Material]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -834,7 +834,7 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a [[Mesh]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -847,7 +847,7 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Base class for scripts the user writes
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -858,7 +858,7 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -873,7 +873,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * The filters corresponding to debug activities, more to come
      */
@@ -890,7 +890,7 @@ declare namespace Fudge {
         [filter: number]: Function;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Base class for the different DebugTargets, mainly for technical purpose of inheritance
      */
@@ -899,7 +899,7 @@ declare namespace Fudge {
         static mergeArguments(_message: Object, ..._args: Object[]): string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Routing to the alert box
      */
@@ -908,7 +908,7 @@ declare namespace Fudge {
         static createDelegate(_headline: string): Function;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Routing to the standard-console
      */
@@ -916,7 +916,7 @@ declare namespace Fudge {
         static delegates: MapDebugFilterToDelegate;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * The Debug-Class offers functions known from the console-object and additions,
      * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
@@ -969,14 +969,14 @@ declare namespace Fudge {
         private static delegate;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Routing to a HTMLDialogElement
      */
     class DebugDialog extends DebugTarget {
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
      */
@@ -986,7 +986,7 @@ declare namespace Fudge {
         static createDelegate(_headline: string): Function;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
@@ -1000,7 +1000,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1039,7 +1039,7 @@ declare namespace Fudge {
         deserialize(_serialization: Serialization): Serializable;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
      * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
@@ -1067,7 +1067,7 @@ declare namespace Fudge {
         static dumpAll(): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface SerializableResource extends Serializable {
         idResource: string;
     }
@@ -1123,7 +1123,7 @@ declare namespace Fudge {
         private static deserializeResource;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Baseclass for different kinds of lights.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1177,7 +1177,7 @@ declare namespace Fudge {
     class LightSpot extends Light {
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
@@ -1309,7 +1309,7 @@ declare namespace Fudge {
         private createSceneGraph;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface MapEventTypeToListener {
         [eventType: string]: EventListener[];
     }
@@ -1394,7 +1394,7 @@ declare namespace Fudge {
         static dispatchEvent(_event: Event): boolean;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     class KeyboardEventƒ extends KeyboardEvent {
         constructor(type: string, _event: KeyboardEventƒ);
     }
@@ -1576,7 +1576,7 @@ declare namespace Fudge {
         SLEEP = "Sleep"
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface Rectangle {
         x: number;
         y: number;
@@ -1654,7 +1654,7 @@ declare namespace Fudge {
         getMutator(): Mutator;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D
      * transformations. Could be removed after applying full 2D compatibility to Mat4).
@@ -1675,7 +1675,7 @@ declare namespace Fudge {
         private rotation;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Stores a 4x4 transformation matrix and provides operations for it.
      * ```plaintext
@@ -1803,7 +1803,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Stores and manipulates a threedimensional vector comprised of the components x, y and z
      * ```plaintext
@@ -1866,7 +1866,7 @@ declare namespace Fudge {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
@@ -1891,7 +1891,7 @@ declare namespace Fudge {
         protected abstract createFaceNormals(): Float32Array;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
      * ```plaintext
@@ -1911,7 +1911,7 @@ declare namespace Fudge {
         protected createFaceNormals(): Float32Array;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
@@ -1931,7 +1931,7 @@ declare namespace Fudge {
         protected createFaceNormals(): Float32Array;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
      * ```plaintext
@@ -1950,102 +1950,7 @@ declare namespace Fudge {
         protected createFaceNormals(): Float32Array;
     }
 }
-declare namespace Fudge {
-    /**
-     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the coat and the mesh used for each node registered.
-     * With these references, the already buffered data is retrieved when rendering.
-     */
-    abstract class RenderManager extends RenderOperator {
-        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static renderShaders;
-        /** Stores references to the vertex array objects and makes them available via the references to coats */
-        private static renderCoats;
-        /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static renderBuffers;
-        private static nodes;
-        private static timestampUpdate;
-        /**
-         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
-         * @param _node
-         */
-        static addNode(_node: Node): void;
-        /**
-         * Register the node and its valid successors in the branch for rendering using [[addNode]]
-         * @param _node
-         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
-         */
-        static addBranch(_node: Node): boolean;
-        /**
-         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
-         * @param _node
-         */
-        static removeNode(_node: Node): void;
-        /**
-         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
-         * @param _node
-         */
-        static removeBranch(_node: Node): void;
-        /**
-         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
-         * @param _node
-         */
-        static updateNode(_node: Node): void;
-        /**
-         * Update the node and its valid successors in the branch using [[updateNode]]
-         * @param _node
-         */
-        static updateBranch(_node: Node): void;
-        /**
-         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
-         * RenderManager passes it on to all shaders used that can process light
-         * @param _lights
-         */
-        static setLights(_lights: MapLightTypeToLightList): void;
-        /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
-         */
-        static update(): void;
-        /**
-         * Clear the offscreen renderbuffer with the given [[Color]]
-         * @param _color
-         */
-        static clear(_color?: Color): void;
-        /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node
-         * @param _cameraMatrix
-         */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
-        private static drawNode;
-        /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
-         */
-        private static recalculateAllNodeTransforms;
-        /**
-         * Recursive method receiving a childnode and its parents updated world transform.
-         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
-         * @param _node
-         * @param _world
-         */
-        private static recalculateTransformsOfNodeAndChildren;
-        /**
-         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
-         * @param _in
-         * @param _key
-         * @param _deletor
-         */
-        private static removeReference;
-        /**
-         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
-         * @param _in
-         * @param _key
-         * @param _creator
-         */
-        private static createReference;
-    }
-}
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
@@ -2178,7 +2083,7 @@ declare namespace Fudge {
         private getBranchGenerator;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
      */
@@ -2186,7 +2091,7 @@ declare namespace Fudge {
         idResource: string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * An instance of a [[NodeResource]].
      * This node keeps a reference to its resource an can thus optimize serialization
@@ -2208,7 +2113,102 @@ declare namespace Fudge {
         private set;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
+    /**
+     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
+     * Stores the references to the shader, the coat and the mesh used for each node registered.
+     * With these references, the already buffered data is retrieved when rendering.
+     */
+    abstract class RenderManager extends RenderOperator {
+        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
+        private static renderShaders;
+        /** Stores references to the vertex array objects and makes them available via the references to coats */
+        private static renderCoats;
+        /** Stores references to the vertex buffers and makes them available via the references to meshes */
+        private static renderBuffers;
+        private static nodes;
+        private static timestampUpdate;
+        /**
+         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
+         * @param _node
+         */
+        static addNode(_node: Node): void;
+        /**
+         * Register the node and its valid successors in the branch for rendering using [[addNode]]
+         * @param _node
+         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
+         */
+        static addBranch(_node: Node): boolean;
+        /**
+         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
+         * @param _node
+         */
+        static removeNode(_node: Node): void;
+        /**
+         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
+         * @param _node
+         */
+        static removeBranch(_node: Node): void;
+        /**
+         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
+         * @param _node
+         */
+        static updateNode(_node: Node): void;
+        /**
+         * Update the node and its valid successors in the branch using [[updateNode]]
+         * @param _node
+         */
+        static updateBranch(_node: Node): void;
+        /**
+         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
+         * RenderManager passes it on to all shaders used that can process light
+         * @param _lights
+         */
+        static setLights(_lights: MapLightTypeToLightList): void;
+        /**
+         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         */
+        static update(): void;
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         * @param _color
+         */
+        static clear(_color?: Color): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * @param _node
+         * @param _cameraMatrix
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
+        private static drawNode;
+        /**
+         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
+         */
+        private static recalculateAllNodeTransforms;
+        /**
+         * Recursive method receiving a childnode and its parents updated world transform.
+         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * @param _node
+         * @param _world
+         */
+        private static recalculateTransformsOfNodeAndChildren;
+        /**
+         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+         * @param _in
+         * @param _key
+         * @param _deletor
+         */
+        private static removeReference;
+        /**
+         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+         * @param _in
+         * @param _key
+         * @param _creator
+         */
+        private static createReference;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -2220,7 +2220,7 @@ declare namespace Fudge {
         static getFragmentShaderSource(): string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -2231,7 +2231,7 @@ declare namespace Fudge {
         static getFragmentShaderSource(): string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Textured shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -2242,7 +2242,7 @@ declare namespace Fudge {
         static getFragmentShaderSource(): string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -2253,7 +2253,7 @@ declare namespace Fudge {
         static getFragmentShaderSource(): string;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -2283,7 +2283,7 @@ declare namespace Fudge {
     class TextureHTML extends TextureCanvas {
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
@@ -2370,7 +2370,7 @@ declare namespace Fudge {
         private deleteTimer;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     enum LOOP_MODE {
         /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
@@ -2421,7 +2421,7 @@ declare namespace Fudge {
         private static loopTime;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     interface MapFilenameToContent {
         [filename: string]: string;
     }

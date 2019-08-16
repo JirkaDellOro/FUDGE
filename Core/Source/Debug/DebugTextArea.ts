@@ -1,5 +1,5 @@
 /// <reference path="DebugTarget.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
      */

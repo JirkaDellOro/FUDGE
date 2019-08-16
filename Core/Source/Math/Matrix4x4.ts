@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
 
   /**
    * Stores a 4x4 transformation matrix and provides operations for it.

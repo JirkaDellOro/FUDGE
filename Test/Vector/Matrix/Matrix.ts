@@ -1,5 +1,5 @@
 namespace MarixTest {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let coSys: ƒ.Node;
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     window.addEventListener("load", init);

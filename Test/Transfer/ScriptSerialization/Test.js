@@ -1,6 +1,6 @@
 var ScriptSerialization;
 (function (ScriptSerialization) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     class Test extends ƒ.ComponentScript {
         constructor() {
             super();

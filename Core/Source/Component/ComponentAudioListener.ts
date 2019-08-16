@@ -1,5 +1,5 @@
 /// <reference path="Component.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Attaches a [[AudioListener]] to the node
      * @authors Thomas Dorner, HFU, 2019

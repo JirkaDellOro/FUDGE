@@ -1,7 +1,7 @@
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 
-namespace Fudge {
+namespace FudgeCore {
   /**
    * Calculates the values between [[AnimationKeys]]
    * @author Lukas Scheuerle, HFU, 2019

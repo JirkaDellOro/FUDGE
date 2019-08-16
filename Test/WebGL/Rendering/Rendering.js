@@ -1,6 +1,6 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         // create asset

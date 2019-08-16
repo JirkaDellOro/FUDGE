@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Describes a [[AudioListener]] attached to a [[Node]]
      * @authors Thomas Dorner, HFU, 2019

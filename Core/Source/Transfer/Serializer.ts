@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     // tslint:disable-next-line: no-any
     export type General = any;
 
@@ -44,7 +44,7 @@ namespace Fudge {
      */
     export abstract class Serializer {
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
-        private static namespaces: NamespaceRegister = { "ƒ": Fudge };
+        private static namespaces: NamespaceRegister = { "ƒ": FudgeCore };
 
         /**
          * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within

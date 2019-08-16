@@ -1,6 +1,6 @@
 var TestDebug;
 (function (TestDebug) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let test = { n: 10, t: "Text", b: true, o: {} };

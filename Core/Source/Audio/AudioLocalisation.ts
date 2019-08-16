@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * 
      * @authors Thomas Dorner, HFU, 2019

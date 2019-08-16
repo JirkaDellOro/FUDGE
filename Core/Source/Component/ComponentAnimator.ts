@@ -1,5 +1,5 @@
 /// <reference path="Component.ts"/>
-namespace Fudge {
+namespace FudgeCore {
   /**
    * Holds different playmodes the animation uses to play back its animation.
    * @author Lukas Scheuerle, HFU, 2019

@@ -1,5 +1,5 @@
 namespace NodeResource {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export class AnimateSatellite extends ƒ.ComponentScript {
         // tpo: test performance optimization

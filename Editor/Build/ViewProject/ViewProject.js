@@ -1,16 +1,16 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
-var FudgeEditorProject;
-///<reference types="../../../Core/Build/Fudge"/>
+var FudgeViewProject;
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
-(function (FudgeEditorProject) {
-    var ƒ = Fudge;
+(function (FudgeViewProject) {
+    var ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
     const { ipcRenderer } = require("electron");
     const fs = require("fs");
     window.addEventListener("DOMContentLoaded", initWindow);
     function initWindow() {
-        ƒ.Debug.log("FudgeEditorProject started");
+        ƒ.Debug.log("FudgeViewProject started");
         ipcRenderer.on("save", (event, arg) => {
             ƒ.Debug.log("Save");
             // save(branch);
@@ -18,7 +18,7 @@ var FudgeEditorProject;
         ipcRenderer.on("open", (event, arg) => {
             ƒ.Debug.log("Open");
             // let node: ƒ.Node = open();
-            ipcRenderer.send("openEditor", "EDITOR_NODE");
+            ipcRenderer.send("openView", "VIEW_NODE");
             // displayNode(node);
         });
     }
@@ -37,7 +37,7 @@ var FudgeEditorProject;
         let filename = dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
-    FudgeEditorProject.save = save;
+    FudgeViewProject.save = save;
     function open() {
         // @ts-ignore
         let filenames = dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
@@ -52,6 +52,6 @@ var FudgeEditorProject;
         console.groupEnd();
         return node;
     }
-    FudgeEditorProject.open = open;
-})(FudgeEditorProject || (FudgeEditorProject = {}));
-//# sourceMappingURL=Window.js.map
+    FudgeViewProject.open = open;
+})(FudgeViewProject || (FudgeViewProject = {}));
+//# sourceMappingURL=ViewProject.js.map

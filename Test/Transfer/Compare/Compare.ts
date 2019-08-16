@@ -1,5 +1,5 @@
 namespace Compare {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export function compare(_object1: Object, _object2: Object, _level: number = 0, _checked: Object[] = []): boolean {
         if (_checked.indexOf(_object1) >= 0 || _checked.indexOf(_object2) >= 0)

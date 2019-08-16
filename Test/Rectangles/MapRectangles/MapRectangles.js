@@ -1,6 +1,6 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let map = new ƒ.FramingComplex();
     let uiResult;
     let frame = { x: 0, y: 0, width: 100, height: 100 };

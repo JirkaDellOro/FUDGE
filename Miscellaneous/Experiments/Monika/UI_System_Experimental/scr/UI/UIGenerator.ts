@@ -1,6 +1,6 @@
 /// <reference path="../../../../../../Core/Build/Fudge.d.ts"/>
 namespace UI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export class UIGenerator {
         public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?:string) {

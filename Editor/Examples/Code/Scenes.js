@@ -1,8 +1,8 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 var Scenes;
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 (function (Scenes) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     function createAxisCross() {
         let clrRed = new ƒ.Color(1, 0, 0, 0.5);
         let clrGreen = new ƒ.Color(0, 1, 0, 0.5);

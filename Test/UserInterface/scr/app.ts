@@ -2,7 +2,7 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 
-import ƒ = Fudge;
+import ƒ = FudgeCore;
 import ƒui = FudgeUserInterface;
 
 namespace UITest {

@@ -1,6 +1,6 @@
 var FileIo;
 (function (FileIo) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(FileIo);
     window.addEventListener("DOMContentLoaded", init);
     function init() {

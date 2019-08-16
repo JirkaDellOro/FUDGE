@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Describes the [[Audio]] class in which all Audio Data is stored.
      * Audio will be given to the [[ComponentAudio]] for further usage.

@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Baseclass for different kinds of textures. 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019

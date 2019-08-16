@@ -1,5 +1,5 @@
 // <reference path="DebugAlert.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     /**
      * The filters corresponding to debug activities, more to come
      */

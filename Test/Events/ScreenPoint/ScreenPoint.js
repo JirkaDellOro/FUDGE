@@ -1,6 +1,6 @@
 var ScreenPoint;
 (function (ScreenPoint) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let canvas;
     let camera;
     window.addEventListener("DOMContentLoaded", init);

@@ -1,7 +1,7 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 
 namespace ScenesForUi {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
 
     export let node: ƒ.Node;
     export let camera: ƒ.Node;

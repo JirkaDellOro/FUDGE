@@ -1,6 +1,6 @@
 var AnimationTest;
 (function (AnimationTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
     let cmpMesh;

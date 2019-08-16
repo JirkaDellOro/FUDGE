@@ -1,7 +1,7 @@
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 
-namespace Fudge {
+namespace FudgeCore {
   interface AnimationStructure {
     [attribute: string]: Serialization | AnimationSequence;
   }

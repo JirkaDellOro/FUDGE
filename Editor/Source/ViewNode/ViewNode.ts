@@ -1,8 +1,8 @@
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 
-namespace FudgeEditorNode {
-    import ƒ = Fudge;
+namespace FudgeViewNode {
+    import ƒ = FudgeCore;
     const { dialog } = require("electron").remote;
 
     window.addEventListener("DOMContentLoaded", initWindow);
@@ -15,6 +15,7 @@ namespace FudgeEditorNode {
     let camera: ƒ.Node;
 
     function initWindow(): void {
+        ƒ.Debug.log("FudgeViewNode started");
         createScene();
         myLayout = new GoldenLayout(getLayout());
 

@@ -1,5 +1,5 @@
 /// <reference path="Component.ts"/>
-namespace Fudge {
+namespace FudgeCore {
     export enum FIELD_OF_VIEW {
         HORIZONTAL, VERTICAL, DIAGONAL
     }

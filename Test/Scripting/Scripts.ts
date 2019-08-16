@@ -1,5 +1,5 @@
 namespace Scripts {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
 
     class Test extends ƒ.ComponentScript {

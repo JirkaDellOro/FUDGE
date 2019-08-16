@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.  
      * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance

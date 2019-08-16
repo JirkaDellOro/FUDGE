@@ -1,5 +1,5 @@
 namespace RenderManagerRendering {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let map: ƒ.FramingComplex = new ƒ.FramingComplex();
     let uiResult: UI.Rectangle;
     let frame: ƒ.Rectangle = { x: 0, y: 0, width: 100, height: 100 };

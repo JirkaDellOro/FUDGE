@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
 
     /**
      * Simple class for 3x3 matrix operations (This class can only handle 2D

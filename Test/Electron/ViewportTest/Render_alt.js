@@ -1,12 +1,12 @@
-/// <reference path="../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 var ElectronViewport;
-/// <reference path="../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../Scenes/Scenes.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 (function (ElectronViewport) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let myLayout;
     let savedState;

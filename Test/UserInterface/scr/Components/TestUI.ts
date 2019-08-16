@@ -1,8 +1,8 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 
 namespace UI {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     export class TestUI extends ƒui.UIMutable {
         protected root: HTMLFormElement;

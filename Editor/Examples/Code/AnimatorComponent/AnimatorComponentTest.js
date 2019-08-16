@@ -1,6 +1,8 @@
+///<reference types="../../../../Core/Build/FudgeCore"/>
 var AnimatorComponentTest;
+///<reference types="../../../../Core/Build/FudgeCore"/>
 (function (AnimatorComponentTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
     let startTime = Date.now();

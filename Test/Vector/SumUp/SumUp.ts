@@ -1,8 +1,8 @@
-/// <reference path="../../../Core/Build/Fudge.d.ts" />
+/// <reference types="../../../Core/Build/FudgeCore" />
 //import * as ƒ from "../../../Core/Build/Fudge";
 
 namespace SumUp {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     
     let v1: ƒ.Vector3 = new ƒ.Vector3(1, 0, 0);
     let v2: ƒ.Vector3 = new ƒ.Vector3(0, 1, 0);

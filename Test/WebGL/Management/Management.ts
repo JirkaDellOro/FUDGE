@@ -1,5 +1,5 @@
 namespace RenderManagerManagement {
-    import ƒ = Fudge;
+    import ƒ = FudgeCore;
     let delegate: EventListener = addNodes;
     window.addEventListener("DOMContentLoaded", init);
     window.addEventListener("click", hndClick);

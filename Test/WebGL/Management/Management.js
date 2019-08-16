@@ -1,6 +1,6 @@
 var RenderManagerManagement;
 (function (RenderManagerManagement) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let delegate = addNodes;
     window.addEventListener("DOMContentLoaded", init);
     window.addEventListener("click", hndClick);

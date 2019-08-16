@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeCore {
     /**
      * Describes Global Audio Settings.
      * Is meant to be used as a Menu option.

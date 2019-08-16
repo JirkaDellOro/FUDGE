@@ -1,6 +1,6 @@
 var MutateMatrixTest;
 (function (MutateMatrixTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     document.addEventListener("DOMContentLoaded", init);
     let cmpTransform;
     let i = 0;
