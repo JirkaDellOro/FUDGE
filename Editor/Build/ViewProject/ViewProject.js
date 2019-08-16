@@ -4,10 +4,19 @@ var FudgeViewProject;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 (function (FudgeViewProject) {
+    let VIEW;
+    (function (VIEW) {
+        VIEW["PROJECT"] = "viewProject";
+        VIEW["NODE"] = "viewNode";
+        VIEW["ANIMATION"] = "viewAnimation";
+        VIEW["SKETCH"] = "viewSketch";
+        VIEW["MESH"] = "viewMesh";
+    })(VIEW || (VIEW = {}));
     var ƒ = FudgeCore;
-    const { dialog } = require("electron").remote;
-    const { ipcRenderer } = require("electron");
+    const { ipcRenderer, remote } = require("electron");
     const fs = require("fs");
+    // At this point of time, the project is just a single node
+    let node = null;
     window.addEventListener("DOMContentLoaded", initWindow);
     function initWindow() {
         ƒ.Debug.log("FudgeViewProject started");
@@ -17,30 +26,20 @@ var FudgeViewProject;
         });
         ipcRenderer.on("open", (event, arg) => {
             ƒ.Debug.log("Open");
-            // let node: ƒ.Node = open();
-            ipcRenderer.send("openView", "VIEW_NODE");
-            // displayNode(node);
+            node = open();
         });
     }
-    // function displayNode(_node: ƒ.Node): void {
-    //     if (!_node)
-    //         return;
-    //     ƒ.RenderManager.removeBranch(branch);
-    //     branch = _node;
-    //     viewport.setBranch(branch);
-    //     viewport.draw();
-    // }
     function save(_node) {
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename = dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
+        let filename = remote.dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
     FudgeViewProject.save = save;
     function open() {
         // @ts-ignore
-        let filenames = dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let filenames = remote.dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         console.groupCollapsed("File content");
         ƒ.Debug.log(content);

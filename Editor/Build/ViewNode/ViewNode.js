@@ -5,13 +5,13 @@ var FudgeViewNode;
 ///<reference types="../../Examples/Code/Scenes"/>
 (function (FudgeViewNode) {
     var ƒ = FudgeCore;
-    const { dialog } = require("electron").remote;
+    const { ipcRenderer, remote } = require("electron");
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout;
     let savedState;
     let branch;
     let canvas;
-    let viewPort = new ƒ.Viewport();
+    let viewport = new ƒ.Viewport();
     let camera;
     function initWindow() {
         ƒ.Debug.log("FudgeViewNode started");
@@ -20,6 +20,23 @@ var FudgeViewNode;
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Inspector", createInspectorComponent);
         myLayout.init();
+        ipcRenderer.on("update", (_event, _args) => {
+            console.log("Update");
+            console.log(remote.getGlobal("views"));
+        });
+        ipcRenderer.on("display", (_event, _args) => {
+            console.log("Display Node: I'd love to, don't know how yet!");
+            displayNode(_args[0]);
+        });
+    }
+    function displayNode(_node) {
+        if (!_node)
+            return;
+        ƒ.Debug.log("Trying to display node: ", _node);
+        ƒ.RenderManager.removeBranch(branch);
+        branch = _node;
+        viewport.setBranch(branch);
+        viewport.draw();
     }
     function createViewportComponent(container, state) {
         container.getElement().append(canvas);
@@ -32,23 +49,6 @@ var FudgeViewNode;
         txtName.value = branch.getChildren()[0].name;
         container.getElement().append(lblName);
         container.getElement().append(txtName);
-    }
-    function createScene() {
-        // create asset
-        branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
-        // initialize viewport
-        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
-        cmpCamera.projectCentral(1, 45);
-        canvas = Scenes.createCanvas();
-        document.body.appendChild(canvas);
-        viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
-        viewPort.draw();
     }
     function getLayout() {
         const config = {
@@ -68,6 +68,24 @@ var FudgeViewNode;
                 }]
         };
         return config;
+    }
+    // TODO: remove this. Only here for testing in order not to start with an empty viewport
+    function createScene() {
+        // create asset
+        branch = Scenes.createAxisCross();
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.update();
+        // initialize viewport
+        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera.projectCentral(1, 45);
+        canvas = Scenes.createCanvas();
+        document.body.appendChild(canvas);
+        viewport = new ƒ.Viewport();
+        viewport.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewport.draw();
     }
 })(FudgeViewNode || (FudgeViewNode = {}));
 //# sourceMappingURL=ViewNode.js.map

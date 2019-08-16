@@ -3,7 +3,7 @@
 
 namespace FudgeViewNode {
     import ƒ = FudgeCore;
-    const { dialog } = require("electron").remote;
+    const { ipcRenderer, remote } = require("electron");
 
     window.addEventListener("DOMContentLoaded", initWindow);
     let myLayout: GoldenLayout;
@@ -11,7 +11,7 @@ namespace FudgeViewNode {
 
     let branch: ƒ.Node;
     let canvas: HTMLCanvasElement;
-    let viewPort: ƒ.Viewport = new ƒ.Viewport();
+    let viewport: ƒ.Viewport = new ƒ.Viewport();
     let camera: ƒ.Node;
 
     function initWindow(): void {
@@ -23,6 +23,24 @@ namespace FudgeViewNode {
         myLayout.registerComponent("Inspector", createInspectorComponent);
 
         myLayout.init();
+        ipcRenderer.on("update", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+            console.log("Update");
+            ipcRenderer.send("getNode");
+        });
+        ipcRenderer.on("display", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+            console.log("Display Node: I'd love to, don't know how yet!");
+            displayNode(<ƒ.Node>_args[0]);
+        });
+    }
+
+    function displayNode(_node: ƒ.Node): void {
+        if (!_node)
+            return;
+        ƒ.Debug.log("Trying to display node: ", _node);
+        ƒ.RenderManager.removeBranch(branch);
+        branch = _node;
+        viewport.setBranch(branch);
+        viewport.draw();
     }
 
     function createViewportComponent(container: GoldenLayout.Container, state: Object): void {
@@ -39,26 +57,6 @@ namespace FudgeViewNode {
         container.getElement().append(txtName);
     }
 
-    function createScene(): void {
-        // create asset
-        branch = Scenes.createAxisCross();
-
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
-
-        // initialize viewport
-        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
-        cmpCamera.projectCentral(1, 45);
-        canvas = Scenes.createCanvas();
-        document.body.appendChild(canvas);
-
-        viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
-        viewPort.draw();
-    }
 
     function getLayout(): GoldenLayout.Config {
         const config: GoldenLayout.Config = {
@@ -78,5 +76,27 @@ namespace FudgeViewNode {
             }]
         };
         return config;
+    }
+
+    // TODO: remove this. Only here for testing in order not to start with an empty viewport
+    function createScene(): void {
+        // create asset
+        branch = Scenes.createAxisCross();
+
+        // initialize RenderManager and transmit content
+        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.addBranch(branch);
+        ƒ.RenderManager.update();
+
+        // initialize viewport
+        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera.projectCentral(1, 45);
+        canvas = Scenes.createCanvas();
+        document.body.appendChild(canvas);
+
+        viewport = new ƒ.Viewport();
+        viewport.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewport.draw();
     }
 }
