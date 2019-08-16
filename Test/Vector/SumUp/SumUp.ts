@@ -1,4 +1,4 @@
-/// <reference path="../../../Core/Build/Fudge.d.ts" />
+/// <reference types="../../../Core/Build/FudgeCore" />
 //import * as ƒ from "../../../Core/Build/Fudge";
 
 namespace SumUp {

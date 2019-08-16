@@ -1,4 +1,4 @@
-/// <reference path="../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
 namespace AudioTest {
     import ƒ = FudgeCore;
     let out: HTMLOutputElement;

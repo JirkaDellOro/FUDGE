@@ -1,6 +1,6 @@
 var TimeLoop;
 (function (TimeLoop) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("load", handleLoad);
     function handleLoad(_event) {
         console.log("Start");

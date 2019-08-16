@@ -1,6 +1,6 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 var MoniUI;
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 (function (MoniUI) {
     class UIGenerator {
         static createFromMutator(_mutable, element) {
@@ -23,8 +23,8 @@ var MoniUI;
                         case "Number":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
-                            let num_value = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable });
+                            let numValue = parseInt(value);
+                            UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable });
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });

@@ -1,4 +1,4 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 
 namespace UI {

@@ -1,6 +1,6 @@
 var AnimatorComponentTest;
 (function (AnimatorComponentTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
     let startTime = Date.now();

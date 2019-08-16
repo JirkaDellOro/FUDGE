@@ -1,14 +1,14 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 namespace MoniUI {
     import ƒ = FudgeCore;
 
     export class UIGenerator {
-        public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement):FormData {
+        public static createFromMutator(_mutable: ƒ.Mutable, element: HTMLFormElement): FormData {
             let name: string = _mutable.constructor.name;
             let _types: ƒ.MutatorAttributeTypes;
             let mutator: ƒ.Mutator = _mutable.getMutator();
-            let _parent = UIGenerator.createFieldset(name, element);
-            let data:FormData;
+            let _parent: HTMLFieldSetElement = UIGenerator.createFieldset(name, element);
+            let data: FormData;
             _types = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in _types) {
                 let type: Object = _types[key];
@@ -23,8 +23,8 @@ namespace MoniUI {
                         case "Number":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
-                            let num_value: number = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: num_value, _mutable: _mutable});
+                            let numValue: number = parseInt(value);
+                            UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable});
 
                             break;
                         case "Boolean":
@@ -34,7 +34,7 @@ namespace MoniUI {
                             break;
                         case "String":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
-                            UIGenerator.createTextElement(key, _parent, { _value: value })
+                            UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
                         default:
                             break;
@@ -43,7 +43,7 @@ namespace MoniUI {
             }
             return data;
         }
-        public static createDropdown(_id:string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string):HTMLSelectElement {
+        public static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
             let dropdown: HTMLSelectElement = document.createElement("select");
             dropdown.id = _id;
             dropdown.name = _id;
@@ -116,7 +116,7 @@ namespace MoniUI {
             return valueInput;
         }
 
-        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?:ƒ.Mutable } = {}):HTMLSpanElement {
+        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?: ƒ.Mutable } = {}): HTMLSpanElement {
 
             if (params._value == undefined)
                 params._value = 0;
@@ -138,7 +138,7 @@ namespace MoniUI {
             _event.preventDefault();
             if (_event.target != _event.currentTarget) return;
             let target: HTMLElement = <HTMLElement>_event.target;
-            let foldTarget = target.parentElement.parentElement;
+            let foldTarget: HTMLElement = target.parentElement.parentElement;
             let foldToggle: Boolean;
             //Toggle the folding behaviour of the Folding Target
             foldTarget.classList.contains("fieldset_folded") ? foldToggle = false : foldToggle = true;

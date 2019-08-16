@@ -1,8 +1,8 @@
-/// <reference path="../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
 var AudioTest;
-/// <reference path="../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../Core/Build/FudgeCore"/>
 (function (AudioTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let out;
     // tslint:disable-next-line: typedef
     let parameter = {

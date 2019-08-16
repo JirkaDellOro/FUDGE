@@ -1,7 +1,7 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 var UI;
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 (function (UI) {
     var ƒui = FudgeUserInterface;

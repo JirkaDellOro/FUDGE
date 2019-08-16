@@ -1,4 +1,4 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
 namespace MoniUI {
     import ƒ = FudgeCore;
     export abstract class MutableUI {
@@ -26,7 +26,7 @@ namespace MoniUI {
             this.fillById(this.mutator, this.root);
         }
 
-        protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement) {
+        protected fillById(_mutator: ƒ.Mutator, _root: HTMLElement): void {
             let children: HTMLCollection = _root.children;
             for (let child of children) {
                 if (child.children.length > 0) {

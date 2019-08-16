@@ -1,8 +1,8 @@
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
-/// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 var UI;
-/// <reference path="../../../../Core/Build/Fudge.d.ts"/>
-/// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
+/// <reference types="../../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 (function (UI) {
     // import ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;

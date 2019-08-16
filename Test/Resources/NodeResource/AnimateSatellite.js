@@ -1,6 +1,6 @@
 var NodeResource;
 (function (NodeResource) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     class AnimateSatellite extends ƒ.ComponentScript {
         constructor() {
             super();

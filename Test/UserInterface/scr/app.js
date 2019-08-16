@@ -1,7 +1,7 @@
 // <reference path="../../../Core/src/Transfer/Serializer.ts"/>
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
-var ƒ = Fudge;
+var ƒ = FudgeCore;
 var ƒui = FudgeUserInterface;
 var UITest;
 (function (UITest) {

@@ -1,6 +1,6 @@
 var Mutable;
 (function (Mutable) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let mutator;
     let angle = 0;

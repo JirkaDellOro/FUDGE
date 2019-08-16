@@ -1,6 +1,6 @@
 var Iterator;
 (function (Iterator) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
     let child;

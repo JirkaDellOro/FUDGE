@@ -1,6 +1,6 @@
 var EventPassing;
 (function (EventPassing) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     let canvas;
     let camera;
     let viewPorts = [];

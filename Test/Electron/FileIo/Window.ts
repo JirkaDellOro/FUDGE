@@ -1,5 +1,5 @@
 ///<reference path="../../Scenes/Scenes.ts"/>
-///<reference types="../../../Core/Build/Fudge"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../node_modules/@types/node/fs"/>
 
 // import * as fs from "fs";

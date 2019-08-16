@@ -1,6 +1,6 @@
 var ScriptSerialization;
 (function (ScriptSerialization) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(ScriptSerialization);
     window.addEventListener("DOMContentLoaded", init);
     function init() {

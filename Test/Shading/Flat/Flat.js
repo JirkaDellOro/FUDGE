@@ -1,6 +1,6 @@
 var TextureTest;
 (function (TextureTest) {
-    var ƒ = Fudge;
+    var ƒ = FudgeCore;
     window.addEventListener("load", init);
     function init(_event) {
         let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
