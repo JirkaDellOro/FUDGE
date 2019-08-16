@@ -1,4 +1,4 @@
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     export abstract class UIMutable {

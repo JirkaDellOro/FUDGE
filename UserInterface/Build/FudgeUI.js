@@ -1,4 +1,72 @@
 "use strict";
+/// <reference types="../../../Core/Build/FudgeCore"/>
+var FudgeUserInterface;
+/// <reference types="../../../Core/Build/FudgeCore"/>
+(function (FudgeUserInterface) {
+    class CollapsableListElement extends HTMLUListElement {
+        constructor(_node, _name, _unfolded = false) {
+            super();
+            this.node = _node;
+            let cntHeader = document.createElement("li");
+            let buttonState;
+            if (this.node.getChildren().length != 0)
+                buttonState = "FoldButton";
+            else
+                buttonState = "invisible";
+            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
+            btnToggle.setToggleState(_unfolded);
+            cntHeader.appendChild(btnToggle);
+            let lblName = document.createElement("span");
+            lblName.textContent = _name;
+            cntHeader.appendChild(lblName);
+            this.appendChild(cntHeader);
+            this.header = cntHeader;
+        }
+        collapse() {
+            while (this.lastChild != this.firstChild) {
+                if (this.lastChild != this.header) {
+                    this.removeChild(this.lastChild);
+                }
+            }
+        }
+    }
+    class UINodeList {
+        constructor(_node, _listContainer) {
+            this.toggleCollapse = (_event) => {
+                _event.preventDefault();
+                let target = _event.target;
+                if (target.nodeName == "BUTTON") {
+                    let targetParent = target.parentElement.parentElement;
+                    if (targetParent.children.length > 1)
+                        targetParent.collapse();
+                    else {
+                        let nodeToExpand = targetParent.node;
+                        let newList = this.BuildListFromNode(nodeToExpand);
+                        console.log(newList);
+                        targetParent.replaceWith(newList);
+                    }
+                }
+            };
+            this.listRoot = document.createElement("ul");
+            let rootElement = this.BuildListFromNode(_node);
+            this.listRoot.appendChild(rootElement);
+            _listContainer.appendChild(this.listRoot);
+            this.listRoot.addEventListener("click", this.toggleCollapse);
+        }
+        BuildListFromNode(_node) {
+            let listRoot = new CollapsableListElement(_node, _node.name, true);
+            let nodeChildren = _node.getChildren();
+            for (let child of nodeChildren) {
+                let hasChildren = (child.getChildren().length != 0 ? true : false);
+                let listItem = new CollapsableListElement(child, child.name, hasChildren);
+                listRoot.appendChild(listItem);
+            }
+            return listRoot;
+        }
+    }
+    FudgeUserInterface.UINodeList = UINodeList;
+    customElements.define("ui-collapse-list", CollapsableListElement, { extends: "ul" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
@@ -76,40 +144,13 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
-    class CollapsableList extends HTMLUListElement {
-        constructor() {
-            super();
-            this.toggleFoldElement = (_event) => {
-                _event.preventDefault();
-                if (_event.target != _event.currentTarget)
-                    return;
-                //Get the fieldset the button belongs to
-                let children = this.children;
-                //fold or unfold all children that aren't unfoldable
-                for (let child of children) {
-                    if (!child.classList.contains("unfoldable")) {
-                        child.classList.toggle("folded");
-                    }
-                }
-            };
-            this.classList.add("unfoldable");
-            let btnToggleButton = new ToggleButton("FoldButton");
-            btnToggleButton.classList.add("unfoldable");
-            btnToggleButton.addEventListener("click", this.toggleFoldElement);
-            this.append(btnToggleButton);
-        }
-    }
-    FudgeUserInterface.CollapsableList = CollapsableList;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-    customElements.define("ui-fold-ul", CollapsableList, { extends: "ul" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
-/// <reference path="../UIElements/UIElements.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
-/// <reference path="../UIElements/UIElements.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     class UIGenerator {
         static createFromMutable(_mutable, _element, _name) {
@@ -229,9 +270,9 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.UIGenerator = UIGenerator;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     class UIMutable {
         constructor(mutable) {

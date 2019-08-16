@@ -1,10 +1,11 @@
 {
   "bundle": {
-    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "E:/DAta/GitHub/FUDGE/UserInterface/Source/",
     "sourceFiles": [
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
+      "E:/DAta/GitHub/FUDGE/UserInterface/Source/NodeList/UINodeList.ts",
+      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
+      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
+      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
     ],
     "js": {
       "sections": [
@@ -16,7 +17,7 @@
         },
         {
           "pos": 15,
-          "end": 14480,
+          "end": 16270,
           "kind": "text"
         }
       ],
@@ -44,13 +45,13 @@
       "sections": [
         {
           "pos": 0,
-          "end": 52,
-          "kind": "reference",
-          "data": "../../Core/build/Fudge.d.ts"
+          "end": 55,
+          "kind": "type",
+          "data": "../../../core/build/fudgecore"
         },
         {
-          "pos": 54,
-          "end": 2931,
+          "pos": 57,
+          "end": 3153,
           "kind": "text"
         }
       ]

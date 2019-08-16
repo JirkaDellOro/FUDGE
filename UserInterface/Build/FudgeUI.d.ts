@@ -1,4 +1,15 @@
-/// <reference types="../../Core/build/FudgeCore" />
+/// <reference types="../../core/build/fudgecore" />
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UINodeList {
+        nodeRoot: ƒ.Node;
+        listRoot: HTMLElement;
+        selectedEntry: HTMLElement;
+        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
+        private BuildListFromNode;
+        private toggleCollapse;
+    }
+}
 declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
@@ -21,10 +32,6 @@ declare namespace FudgeUserInterface {
     }
     class FoldableFieldSet extends HTMLFieldSetElement {
         constructor(_legend: string);
-        private toggleFoldElement;
-    }
-    class CollapsableList extends HTMLUListElement {
-        constructor();
         private toggleFoldElement;
     }
 }
