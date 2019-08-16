@@ -1,7 +1,7 @@
-/// <reference path="../../../Core/build/Fudge.d.ts"/>
-/// <reference path="../UIElements/UIElements.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 
 namespace FudgeUserInterface {
+
     import ƒ = FudgeCore;
     export class UIGenerator {
         public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void {

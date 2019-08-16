@@ -1,12 +1,14 @@
 // <reference path="../../../Core/src/Transfer/Serializer.ts"/>
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 var ƒ = FudgeCore;
 var ƒui = FudgeUserInterface;
 var UITest;
 (function (UITest) {
     let myLayout;
     let savedState;
+    let branch;
     let canvas;
     let viewPort = new ƒ.Viewport();
     let camera;
@@ -31,6 +33,11 @@ var UITest;
                             type: "component",
                             componentName: "Viewport",
                             title: "Viewport"
+                        },
+                        {
+                            type: "component",
+                            componentName: "TreeView",
+                            title: "TreeView"
                         }
                     ]
                 }]
@@ -40,11 +47,12 @@ var UITest;
         myLayout.registerComponent("Inspector", createCameraComponent);
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Manual", createTestComponent);
+        myLayout.registerComponent("TreeView", createTreeComponent);
         myLayout.init();
     }
     function initViewport() {
         // create asset
-        let branch = ScenesForUi.createAxisCross();
+        branch = ScenesForUi.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
@@ -77,6 +85,11 @@ var UITest;
     }
     function createTestComponent(container, state) {
         return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    }
+    function createTreeComponent(container, state) {
+        let listContainer = document.createElement("div");
+        let treeController = new ƒui.UINodeList(branch, listContainer);
+        container.getElement().html(listContainer);
     }
 })(UITest || (UITest = {}));
 //# sourceMappingURL=app.js.map

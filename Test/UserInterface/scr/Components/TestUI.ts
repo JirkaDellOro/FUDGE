@@ -12,12 +12,6 @@ namespace UI {
             super(_camera);
             this.camera = _camera;
             this.root = document.createElement("form");
-            let testdiv: HTMLElement = document.createElement("div");
-            let toggleButton: HTMLButtonElement = new ƒui.ToggleButton("toggleButton");
-            toggleButton.innerText = "I have a filling";
-            testdiv.innerHTML = "I was created manually";
-            testdiv.append(toggleButton);
-            this.root.append(testdiv);
             ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);

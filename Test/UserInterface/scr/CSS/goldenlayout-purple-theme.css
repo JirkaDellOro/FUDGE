@@ -7,6 +7,12 @@
 .folded{
     display: none
 }
+button.invisible{
+    border-style: none;
+    background-color: unset;
+    height: 10px;
+    width: auto;
+}
 button.FoldButton{
     border-style: none;
     background-color: unset;
@@ -24,7 +30,7 @@ button.FoldButton.ToggleOff  {
     background-image: url("img/foldable_closed.svg");
 }
 
-h2, legend, label {
+h2, legend, label, span {
     font-family: Arial, sans-serif;
     font-size: .8em;
     padding:0 .5em;

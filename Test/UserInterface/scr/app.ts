@@ -1,6 +1,7 @@
 // <reference path="../../../Core/src/Transfer/Serializer.ts"/>
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 
 import ƒ = FudgeCore;
 import ƒui = FudgeUserInterface;
@@ -9,6 +10,7 @@ namespace UITest {
     let myLayout: GoldenLayout;
     let savedState: string;
 
+    let branch: ƒ.Node;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
     let camera: ƒ.Node;
@@ -34,8 +36,12 @@ namespace UITest {
                     type: "component",
                     componentName: "Viewport",
                     title: "Viewport"
+                },
+                {
+                    type: "component",
+                    componentName: "TreeView",
+                    title: "TreeView"
                 }
-
                 ]
             }]
         };
@@ -46,12 +52,13 @@ namespace UITest {
         myLayout.registerComponent("Inspector", createCameraComponent);
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Manual", createTestComponent);
+        myLayout.registerComponent("TreeView", createTreeComponent);
 
         myLayout.init();
     }
     function initViewport(): void {
         // create asset
-        let branch: ƒ.Node = ScenesForUi.createAxisCross();
+        branch = ScenesForUi.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
 
         // initialize RenderManager and transmit content
@@ -88,5 +95,10 @@ namespace UITest {
     }
     function createTestComponent(container: GoldenLayout.Container, state: Object): UI.TestUI {
         return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    }
+    function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
+        let listContainer: HTMLElement = document.createElement("div");
+        let treeController: ƒui.UINodeList = new ƒui.UINodeList(branch, listContainer);
+        container.getElement().html(listContainer);
     }
 }

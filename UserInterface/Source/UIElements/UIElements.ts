@@ -75,33 +75,9 @@ namespace FudgeUserInterface {
             }
         }
     }
-    export class CollapsableList extends HTMLUListElement {
-        public constructor() {
-            super();
-            this.classList.add("unfoldable");
-            let btnToggleButton: HTMLButtonElement = new ToggleButton("FoldButton");
-            btnToggleButton.classList.add("unfoldable");
-            btnToggleButton.addEventListener("click", this.toggleFoldElement);
-            this.append(btnToggleButton);           
-        }
-
-        private toggleFoldElement = (_event: MouseEvent): void => {
-            _event.preventDefault();
-            if (_event.target != _event.currentTarget) return;
-            //Get the fieldset the button belongs to
-            let children: HTMLCollection = this.children;
-            //fold or unfold all children that aren't unfoldable
-            for (let child of children) {
-                if (!child.classList.contains("unfoldable")) {
-                    child.classList.toggle("folded");
-                }
-            }
-        }
-    }
 
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, {extends: "button"});
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-    customElements.define("ui-fold-ul", CollapsableList, {extends: "ul"});
 
 }
