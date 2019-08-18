@@ -3,15 +3,19 @@ Furtwangen University Didactic Game Editor
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
-[Core](Core), [UserInterface](UserInterface), [Network](Network)
+- [Core](Core)
+- [UserInterface](UserInterface)
+- [Network](Network)
 
 ## Design
 The documentation of planning FUDGE and the decisions made
-[Design](Documentation/Design), [Logs](Documentation/Logs)
+- [Design](Documentation/Design)
+- [Logs](Documentation/Logs)
 
 ## Reference
 The generated API-References, the Guidelines on how to work with FUDGE and how to extend and further develop it.
-[Core-API](Documentation/Reference/Core), [UserInterface-API](Documentation/Reference/UserInterface)
+- [Core-API](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core)
+- [UserInterface-API](https:///JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface)
 - [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
 
 ## Themen für Abschluss- und Studienarbeiten
