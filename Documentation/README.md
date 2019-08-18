@@ -9,19 +9,3 @@ Documentation
 ## API-Reference
 - [Core](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Core/)
 - [User Interface](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/UserInterface/)
-
-## Themen für Abschluss- und Studienarbeiten
-- :pencil: Audiokomponenten 
-- :pencil: Physikengine 
-- :pencil: Modeller
-- Shader
-- Primitve 3D-Modelle und 2D-Shapes 
-- :pencil: Cameratransformation, Axonometrien und VR
-- Spritesheet
-- Partikelsysteme
-- Licht und Schatten
-- Diegetische User-Interface
-- Laufzeit-Aufzeichnung für Replay
-- Grapheditor/Wiring z.B. für Shader und Animation
-- Input-Manager
-- Selection-Sets zum Speichern temporärer Gruppierungen
