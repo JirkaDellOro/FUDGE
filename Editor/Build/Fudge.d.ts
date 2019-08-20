@@ -1,13 +1,26 @@
-/// <reference types="../../../core/build/fudgecore" />
+/// <reference types="golden-layout" />
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    function save(_node: ƒ.Node): void;
-    function open(): ƒ.Node;
+    enum VIEW {
+        PROJECT = "viewProject",
+        NODE = "viewNode",
+        ANIMATION = "viewAnimation",
+        SKETCH = "viewSketch",
+        MESH = "viewMesh",
+        DATA = "viewData"
+    }
+    class Container {
+        static goldenLayout: GoldenLayout;
+        constructor();
+        getLayout(): GoldenLayout.Config;
+    }
 }
-declare namespace FudgeViewNode {
+declare namespace Fudge {
 }
-declare namespace FudgeViewProject {
-    import ƒ = FudgeCore;
-    function save(_node: ƒ.Node): void;
-    function open(): ƒ.Node;
+declare namespace Fudge {
+    function createViewData(container: GoldenLayout.Container, state: Object): void;
+    class ViewData {
+        static goldenLayout: GoldenLayout;
+        constructor(container: GoldenLayout.Container, state: Object);
+        static getLayout(): GoldenLayout.Config;
+    }
 }
