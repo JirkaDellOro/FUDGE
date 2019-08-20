@@ -1,6 +1,13 @@
 This folder contains the logs of the core-developer meetings. Filenames must start with the date in the form yymmdd.
 
-This readme-file describes in a few words the contents of each log and the major issues discussed 
+This readme-file describes in a few words the contents of each log and the major issues discussed  
+
+# August 19th 2019
+
+In Cologne, during devcom/gamecom, Lukas & Jirka discuss the design of the multiview editor in a single-window-applikation after multiwindow was discarded. Foundation now is a single instance of GoldenLayout. Introduction of a general view container that hosts a ViewData by default. More views may be added to the container by the user or as preset configurations. ViewData (aka Inspector in Unity or Properties in Animation) always displays the properties of the element currently selected in the container, independent of the view it was selected in.  
+[Scribble](190819_Editor.png)  
+The user can open new containers, thus basically configuring editors for simultaneously working on different parts of a project.  
+
 # August 15th 2019
 
 In the start up screen the user can open editors, projects and files.
