@@ -2,7 +2,7 @@
   "name": "fudge",
   "version": "0.0.0",
   "description": "Furtwangen University Didactic Game Editor (FUDGE)",
-  "main": "../Build/Fudge.js",
+  "main": "../Build/Main.js",
   "scripts": {
     "start": "electron ."
   },

@@ -6,7 +6,7 @@ var FudgeViewNode;
 (function (FudgeViewNode) {
     var ƒ = FudgeCore;
     const { ipcRenderer } = require("electron");
-    window.addEventListener("DOMContentLoaded", initWindow);
+    window.addEventListener("load", initWindow);
     let myLayout;
     let savedState;
     let branch;

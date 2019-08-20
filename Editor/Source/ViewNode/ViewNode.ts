@@ -5,7 +5,7 @@ namespace FudgeViewNode {
     import ƒ = FudgeCore;
     const { ipcRenderer } = require("electron");
 
-    window.addEventListener("DOMContentLoaded", initWindow);
+    window.addEventListener("load", initWindow);
     let myLayout: GoldenLayout;
     let savedState: string;
 

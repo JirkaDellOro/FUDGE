@@ -4,7 +4,7 @@
 
 namespace ElectronViewport {
     import ƒ = FudgeCore;
-    window.addEventListener("DOMContentLoaded", init);
+    // window.addEventListener("DOMContentLoaded", init);
 
     let myLayout: GoldenLayout;
     let savedState: string;
