@@ -1,5 +1,5 @@
-///<reference types="../../Core/Build/FudgeCore"/>
-///<reference types="../Examples/Code/Scenes"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
 
@@ -8,7 +8,8 @@ namespace Fudge {
         NODE = "viewNode",
         ANIMATION = "viewAnimation",
         SKETCH = "viewSketch",
-        MESH = "viewMesh"
+        MESH = "viewMesh",
+        DATA = "viewData"
     }
 
     import ƒ = FudgeCore;
@@ -24,7 +25,7 @@ namespace Fudge {
     function initWindow(): void {
         ƒ.Debug.log("Fudge started");
         goldenLayout = new GoldenLayout(getLayout());
-        goldenLayout.registerComponent("ViewData", createViewComponent);
+        goldenLayout.registerComponent(VIEW.DATA, createViewData);
         goldenLayout.init();
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -49,14 +50,14 @@ namespace Fudge {
         const config: GoldenLayout.Config = {
             content: [{
                 type: "component",
-                componentName: "ViewData",
+                componentName: VIEW.DATA,
                 title: "Data"
             }]
         };
         return config;
     }
 
-    function createViewComponent(container: GoldenLayout.Container, state: Object): void {
+    function createViewData(container: GoldenLayout.Container, state: Object): void {
         let lblName: HTMLElement = document.createElement("label");
         lblName.innerHTML = "Node Name";
         let txtName: HTMLInputElement = document.createElement("input");
