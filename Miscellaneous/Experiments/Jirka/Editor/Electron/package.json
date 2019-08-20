@@ -1,0 +1,17 @@
+{
+  "name": "fudge",
+  "version": "0.0.0",
+  "description": "Furtwangen University Didactic Game Editor (FUDGE)",
+  "main": "../Build/Fudge.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Jirka Dell'Oro-Friedl",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/electron": "^1.6.10"
+  }
+}

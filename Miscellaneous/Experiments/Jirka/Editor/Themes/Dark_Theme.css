@@ -1,0 +1,359 @@
+a {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: white;
+}
+
+.dropdown-content {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: black;
+}
+
+
+/*SCENEEDITOR*/
+/*Toolbar*/
+.ToolContainer{
+}
+button.ToolContainer {
+    object-fit: scale-down;
+    font-size: 12px;
+    /* Set a font size */
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+    /* Mouse pointer on hover */
+    background-color: #9d9d9d;
+    border: none;
+    padding: 4px 4px 4px 4px;
+    margin: 2px;
+}
+
+
+.ToolButton:hover {
+    background-blend-mode: multiply;
+    background-color: #757575;
+}
+
+.ToolButton:focus {
+    
+    background-color: #505050;
+}
+
+ /*tooltips*/
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5px;
+    margin-top: 20px; 
+    position: fixed;
+    z-index: 1000;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }
+
+/*Scene Tree*/
+Button.OptionContainer {
+    cursor: pointer;
+    font-size: 12px;
+    border-style: solid;
+    border-width: 1px;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    align-self: center;
+    background-color: #9d9d9d;
+    font-family: inherit;
+    display: block;
+    width: inherit;
+}
+Button.OptionContainer:hover {
+    background-color: #636363;
+}
+Button.OptionContainer:active {
+    background-color: #9d9d9d;
+}
+.ToggleButton .ToggleOn{
+
+}
+.ToggleButton .ToggleOff{
+
+}
+
+
+/*Viewport*/
+/*Ressources*/
+.ListContainer{
+    display: grid;
+    grid-template-columns: 120px 120px 120px 120px 120px 120px;
+    margin: 30px;
+}
+img.ListContainer {
+    height: 80px;
+}
+div.ListContainer {
+    margin-left: 5px;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+/*Inspector*/
+
+
+/*ANIMATION EDITOR*/
+
+/*event, keyframe, label tools*/
+.contrButton {
+    object-fit: scale-down;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    /* Mouse pointer on hover */
+    background-color: #9d9d9d;
+    border: none;
+    margin: 1px;
+    padding: unset;
+}
+
+img.contrButton {
+    height: 100%;
+    width: 100%;
+}
+
+.contrButton:hover {
+    background-blend-mode: multiply;
+    background-color: #757575;
+}
+.contrButton:active {
+    background-blend-mode: multiply;
+    background-color: #505050;
+}
+.fake-buttons {
+    height: 20px;
+}
+
+#Invisibutton {
+    background: none;
+    border: none;
+}
+/*ehemals .fold_button*/
+.ToggleButtonFold{
+    height: 15px;
+}
+
+
+.hide-button {
+    object-fit: scale-down;
+    background: none;
+    border: none;
+    height: 10px;
+    width: 35px;
+    margin: 2px;
+}
+
+img.hide-button {
+    height: 100%;
+    width: 100%;
+}
+
+/*.TextButton {
+    object-fit: scale-down;
+    font-size: 16px;
+     Set a font size 
+    cursor: pointer;
+     Mouse pointer on hover 
+    background-color: #9d9d9d;
+    border: none;
+    margin: 2px;
+}*/
+.fieldset_header{
+    display: inherit;
+    margin: 10px;
+}
+fieldset{
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    margin: 20px;
+}
+.fieldset_container{
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.column1row1{
+    grid-column: 1;
+    grid-row: 1;
+}
+.column2row1{
+    grid-column: 2;
+    grid-row: 1;
+}
+.column1{
+    grid-column: 1;
+}
+.column2{
+    grid-column: 2;
+}
+.column3{
+    grid-column: 3;
+}
+.column4{
+    grid-column: 4;
+}
+.column5{
+    grid-column: 5;
+}
+.column6{
+    grid-column: 6;
+}
+.column1-6{
+    grid-column: 1 / span 6;
+}
+
+.fieldset_content {
+    display: grid;
+    grid-auto-columns: auto auto auto;
+    margin: 10px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    grid-gap: 1px;
+}
+.fieldset_transform {
+    display: grid;
+    grid-template-columns: 15px 75px 15px 75px 15px 75px;
+    margin: 10px;
+}
+.fieldset_transform input
+{
+    width: 75%;
+}
+.fieldset_mesh{
+    display: grid;
+    grid-template-columns: 45px 150px;
+    margin: 10px;
+}
+.fieldset_material{
+    display: grid;
+    grid-template-columns: 62px 100px 120px;
+    margin: 10px;
+}
+.fieldset_content label {
+    margin: 5px;
+    margin-right: 2px;
+}
+
+.navbar {
+    overflow: hidden;
+    background-color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/*.navbar a {
+    float: left;
+    font-size: 16px;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}*/
+
+.dropdown {
+    float: left;
+    overflow: hidden;
+}
+
+.dropdown .dropbutton {
+    cursor: pointer;
+    font-size: 12px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    background-color: inherit;
+    font-family: inherit;
+    margin: 0;
+}
+
+.navbar a:hover, .dropdown:hover .dropbutton, .dropbutton:focus {
+    background-color: #ddd;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    max-width: fit-content;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+}
+
+.dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.add_dropdown {
+    display: inline-block;
+    overflow: hidden;
+    width: inherit;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.add_dropdown .dropbutton {
+    cursor: pointer;
+    font-size: 12px;
+    border: solid;
+    border-width: 1px;
+    outline: none;
+    color: white;
+    padding: 5px 10px;
+    align-self: center;
+    background-color: #9d9d9d;
+    font-family: inherit;
+    display: block;
+    width: inherit;
+}
+.add_dropdown:hover {
+background-color: #636363;
+}
+.add_dropdown:active {
+background-color: #9d9d9d;
+}
+/*.addnodebutton_dropdown{
+background-color: #636363:
+}
+*/
+
+.add_dropdown:hover .dropbutton, .dropbutton:focus {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
+.folded {
+    display: none;
+}
+
+h2 {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #999999;
+}
