@@ -33,6 +33,7 @@ var Fudge;
         // HACK!
         ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("UpdateViewNode");
+            panel.viewContainers[0].emit("setRoot", node);
         });
     }
     function openViewNode() {
@@ -217,6 +218,7 @@ var Fudge;
             Fudge.Panel.goldenLayout.emit("registerView", _container);
             _container.on("setRoot", (_node) => {
                 ƒ.Debug.log("Set root", _node);
+                this.setRoot(_node);
             });
         }
         /**

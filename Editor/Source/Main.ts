@@ -2,13 +2,15 @@
 
 namespace Main {
   //#region Types and Data
+  //#region Types and Data
   enum MENU {
     QUIT,
     PROJECT_SAVE,
     PROJECT_OPEN,
     VIEW_NODE_OPEN,
     NODE_DELETE,
-    NODE_UPDATE
+    NODE_UPDATE,
+    DEVTOOLS_OPEN
   }
 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
@@ -74,6 +76,9 @@ namespace Main {
       case MENU.NODE_UPDATE:
         send(_window, "updateNode", null);
         break;
+      case MENU.DEVTOOLS_OPEN:
+        _window.webContents.openDevTools();
+        break;
       case MENU.QUIT:
         app.quit();
         break;
@@ -104,6 +109,13 @@ namespace Main {
           },
           {
             label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
+          }
+        ]
+      },
+      {
+        label: "Debug", submenu: [
+          {
+            label: "DevTool", id: String(MENU.DEVTOOLS_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12"
           }
         ]
       }

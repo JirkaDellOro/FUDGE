@@ -3,6 +3,7 @@ var Main;
 ///<reference types="../../node_modules/electron/Electron"/>
 (function (Main) {
     //#region Types and Data
+    //#region Types and Data
     let MENU;
     (function (MENU) {
         MENU[MENU["QUIT"] = 0] = "QUIT";
@@ -11,6 +12,7 @@ var Main;
         MENU[MENU["VIEW_NODE_OPEN"] = 3] = "VIEW_NODE_OPEN";
         MENU[MENU["NODE_DELETE"] = 4] = "NODE_DELETE";
         MENU[MENU["NODE_UPDATE"] = 5] = "NODE_UPDATE";
+        MENU[MENU["DEVTOOLS_OPEN"] = 6] = "DEVTOOLS_OPEN";
     })(MENU || (MENU = {}));
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
@@ -68,6 +70,9 @@ var Main;
             case MENU.NODE_UPDATE:
                 send(_window, "updateNode", null);
                 break;
+            case MENU.DEVTOOLS_OPEN:
+                _window.webContents.openDevTools();
+                break;
             case MENU.QUIT:
                 app.quit();
                 break;
@@ -97,6 +102,13 @@ var Main;
                     },
                     {
                         label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
+                    }
+                ]
+            },
+            {
+                label: "Debug", submenu: [
+                    {
+                        label: "DevTool", id: String(MENU.DEVTOOLS_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12"
                     }
                 ]
             }

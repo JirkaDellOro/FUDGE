@@ -42,6 +42,7 @@ namespace Fudge {
 
             _container.on("setRoot", (_node: ƒ.Node): void => {
                 ƒ.Debug.log("Set root", _node);
+                this.setRoot(_node);
             });
         }
 

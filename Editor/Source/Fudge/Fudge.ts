@@ -36,6 +36,7 @@ namespace Fudge {
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
+            panel.viewContainers[0].emit("setRoot", node);
         });
     }
 
