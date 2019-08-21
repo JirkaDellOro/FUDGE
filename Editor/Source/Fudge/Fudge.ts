@@ -15,7 +15,7 @@ namespace Fudge {
     // TODO: At this point of time, there is just a single panel. Support multiple panels
     let panel: Panel;
 
-    window.addEventListener("DOMContentLoaded", initWindow);
+    window.addEventListener("load", initWindow);
 
     function initWindow(): void {
         ƒ.Debug.log("Fudge started");

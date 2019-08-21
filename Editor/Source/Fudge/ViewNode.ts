@@ -18,6 +18,7 @@ namespace Fudge {
             let canvas: HTMLCanvasElement;
             let camera: ƒ.Node;
 
+            // TODO: delete example scene
             branch = Scenes.createAxisCross();
 
             // initialize RenderManager and transmit content
@@ -25,6 +26,7 @@ namespace Fudge {
             ƒ.RenderManager.update();
 
             // initialize viewport
+            // TODO: create camera/canvas here without "Scenes"
             camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
             let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);

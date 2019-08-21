@@ -14,7 +14,7 @@ var Fudge;
     let node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels
     let panel;
-    window.addEventListener("DOMContentLoaded", initWindow);
+    window.addEventListener("load", initWindow);
     function initWindow() {
         ƒ.Debug.log("Fudge started");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
@@ -200,11 +200,13 @@ var Fudge;
             let branch;
             let canvas;
             let camera;
+            // TODO: delete example scene
             branch = Scenes.createAxisCross();
             // initialize RenderManager and transmit content
             ƒ.RenderManager.addBranch(branch);
             ƒ.RenderManager.update();
             // initialize viewport
+            // TODO: create camera/canvas here without "Scenes"
             camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
             let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
