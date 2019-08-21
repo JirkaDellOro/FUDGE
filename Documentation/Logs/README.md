@@ -165,6 +165,10 @@ Discussion on Keyboard shortcuts for the 2D/3D Editor
 Pre-Disussion about UI structure between Monika and Lea
 [Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190411_UI%20Dicussion%20Monika%20Lea.jpg)
 
+We will use Golden Layout. PhosphorJS is only useful for single page applications, wcDocker doesn´t support pop-in and is frankly confusing to use after collapsing some panels (where do they go, can´t put them back). Docspawns and gridsters websites doesn´t exist anymore. jQuery Layout and ExtJS don´t support reordering windows, as well as Isotope. Also ExtJS wants a sign-up and only has a license for one year, afterwards fees start at 495$.
+Isotope only allows filtering and sorting of its contents, it has no draggable interactions just like Masonry.
+
+
 # Apr 10th 2019
 Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).
 All Members showed off what they were working on: [WebAudioAPI Overview](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard4.jpg), [Animator Thoughts and Proposals](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard3.jpg).
