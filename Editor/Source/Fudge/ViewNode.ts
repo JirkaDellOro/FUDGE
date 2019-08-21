@@ -1,102 +1,80 @@
-// ///<reference types="../../../Core/Build/FudgeCore"/>
-// ///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Examples/Code/Scenes"/>
+///<reference path="View.ts"/>
 
-// namespace FudgeViewNode {
-//     import ƒ = FudgeCore;
-//     const { ipcRenderer } = require("electron");
+namespace Fudge {
+    import ƒ = FudgeCore;
 
-//     window.addEventListener("load", initWindow);
-//     let myLayout: GoldenLayout;
-//     let savedState: string;
+    /**
+     * View displaying a Node and the hierarchical relation to its parents and children.  
+     * Consists of a viewport and a tree-control. 
+     */
+    export class ViewNode extends View {
+        public viewport: ƒ.Viewport = new ƒ.Viewport();
 
-//     let branch: ƒ.Node;
-//     let canvas: HTMLCanvasElement;
-//     let viewport: ƒ.Viewport = new ƒ.Viewport();
-//     let camera: ƒ.Node;
+        constructor(_container: GoldenLayout.Container, _state: Object) {
+            super(_container, _state);
+            let branch: ƒ.Node;
+            let canvas: HTMLCanvasElement;
+            let camera: ƒ.Node;
 
-//     function initWindow(): void {
-//         ƒ.Debug.log("FudgeViewNode started");
-//         createScene();
-//         myLayout = new GoldenLayout(getLayout());
+            branch = Scenes.createAxisCross();
 
-//         myLayout.registerComponent("Viewport", createViewportComponent);
-//         myLayout.registerComponent("Inspector", createInspectorComponent);
+            // initialize RenderManager and transmit content
+            ƒ.RenderManager.addBranch(branch);
+            ƒ.RenderManager.update();
 
-//         myLayout.init();
-//         ipcRenderer.addListener("update", (_event: Electron.IpcRendererEvent) => {
-//             ƒ.Debug.info("Update");
-//             ipcRenderer.send("getNode");
-//         });
-//         ipcRenderer.addListener("display", (_event: Electron.IpcRendererEvent, _node: ƒ.Node) => {
-//             ƒ.Debug.info("Display");
-//             displayNode(_node);
-//         });
-//     }
+            // initialize viewport
+            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera.projectCentral(1, 45);
+            canvas = Scenes.createCanvas();
+            document.body.appendChild(canvas);
 
-//     function displayNode(_node: ƒ.Node): void {
-//         if (!_node)
-//             return;
-//         ƒ.Debug.log("Trying to display node: ", _node);
-//         ƒ.RenderManager.removeBranch(branch);
-//         branch = _node;
-//         viewport.setBranch(branch);
-//         viewport.draw();
-//     }
+            this.viewport = new ƒ.Viewport();
+            this.viewport.initialize("ViewNode_Viewport", branch, cmpCamera, canvas);
+            this.viewport.draw();
 
-//     function createViewportComponent(container: GoldenLayout.Container, state: Object): void {
-//         container.getElement().append(canvas);
-//     }
+            _container.getElement().append(canvas);
 
-//     function createInspectorComponent(container: GoldenLayout.Container, state: Object): void {
-//         console.log(branch.getChildren()[0].name);
-//         let lblName: HTMLElement = document.createElement("label");
-//         lblName.innerHTML = "Node Name";
-//         let txtName: HTMLInputElement = document.createElement("input");
-//         txtName.value = <string>branch.getChildren()[0].name;
-//         container.getElement().append(lblName);
-//         container.getElement().append(txtName);
-//     }
+            // TODO: if each Panel creates its own instance of GoldenLayout, containers may emit directly to their LayoutManager and no registration is required
+            Panel.goldenLayout.emit("registerView", _container);
 
+            _container.on("setRoot", (_node: ƒ.Node): void => {
+                ƒ.Debug.log("Set root", _node);
+            });
+        }
 
-//     function getLayout(): GoldenLayout.Config {
-//         const config: GoldenLayout.Config = {
-//             content: [{
-//                 type: "row",
-//                 content: [{
-//                     type: "component",
-//                     componentName: "Inspector",
-//                     title: "Inspector"
-//                 },
-//                 {
-//                     type: "component",
-//                     componentName: "Viewport",
-//                     title: "Viewport"
-//                 }
-//                 ]
-//             }]
-//         };
-//         return config;
-//     }
+        /**
+         * Set the root node for display in this view
+         * @param _node 
+         */
+        public setRoot(_node: ƒ.Node): void {
+            if (!_node)
+                return;
+            ƒ.Debug.log("Trying to display node: ", _node);
+            // ƒ.RenderManager.removeBranch(this.viewport. this.viewport.getBranch());
+            this.viewport.setBranch(_node);
+            this.viewport.draw();
+        }
 
-//     // TODO: remove this. Only here for testing in order not to start with an empty viewport
-//     function createScene(): void {
-//         // create asset
-//         branch = Scenes.createAxisCross();
-
-//         // initialize RenderManager and transmit content
-//         ƒ.RenderManager.initialize();
-//         ƒ.RenderManager.addBranch(branch);
-//         ƒ.RenderManager.update();
-
-//         // initialize viewport
-//         camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-//         let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
-//         cmpCamera.projectCentral(1, 45);
-//         canvas = Scenes.createCanvas();
-//         document.body.appendChild(canvas);
-
-//         viewport = new ƒ.Viewport();
-//         viewport.initialize("TestViewport", branch, cmpCamera, canvas);
-//         viewport.draw();
-//     } 
-// }
+        // TODO: This layout should be used to create a ViewNode, since it contains not only a viewport, but also a tree
+        public getLayout(): GoldenLayout.Config {
+            const config: GoldenLayout.Config = {
+                content: [{
+                    type: "row",
+                    content: [{
+                        type: "component",
+                        componentName: "ComponentTree",
+                        title: "Graph"
+                    }, {
+                        type: "component",
+                        componentName: "ComponentViewport",
+                        title: "Viewport"
+                    }]
+                }]
+            };
+            return config;
+        }
+    }
+}

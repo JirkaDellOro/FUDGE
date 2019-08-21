@@ -34,34 +34,25 @@ var Main;
         _window.webContents.send(_message, _args);
     }
     //#endregion
-    //#region View
+    //#region Window
     function createFudge() {
         console.log("createFudge");
         fudge = addWindow("../Html/Fudge.html");
         const menu = Menu.buildFromTemplate(getMenuFudge());
         fudge.setMenu(menu);
     }
-    // function removeWindow(_event: Electron.Event): void {
-    //   console.log("RemoveView");
-    //   let window: Electron.BrowserWindow = _event["sender"];
-    //   if (window == fudge)
-    //     app.emit("window-all-closed");
-    // }
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
             width: width, height: height, webPreferences: {
                 nodeIntegration: true
             }
         });
-        // window.once("focus", setMenu);
-        // window.addListener("closed", removeWindow);
         window.webContents.openDevTools();
         window.loadFile(_url);
         return window;
     }
     // #endregion
     //#region Menus  
-    // TODO: break up this function in subfunctions for the various views
     function menuSelect(_item, _window, _event) {
         console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
         switch (Number(_item.id)) {
@@ -70,6 +61,12 @@ var Main;
                 break;
             case MENU.PROJECT_SAVE:
                 send(_window, "save", null);
+                break;
+            case MENU.VIEW_NODE_OPEN:
+                send(_window, "openViewNode", null);
+                break;
+            case MENU.NODE_UPDATE:
+                send(_window, "updateNode", null);
                 break;
             case MENU.QUIT:
                 app.quit();
@@ -97,29 +94,10 @@ var Main;
                 label: "View", submenu: [
                     {
                         label: "Node", id: String(MENU.VIEW_NODE_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+N"
-                    }
-                ]
-            }
-        ];
-        return menu;
-    }
-    function getMenuNode() {
-        const menu = [
-            {
-                label: "Node", submenu: [
-                    {
-                        label: "Update", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+U"
                     },
                     {
-                        label: "Delete", id: String(MENU.NODE_DELETE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+D"
+                        label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
                     }
-                    // ,
-                    // {
-                    //   label: "Delete Node (Del)", click(): void { send(viewProject, "open", null); }
-                    // },
-                    // {
-                    //   label: "Convert to Ressource (Ctrl+R)", click(): void { send(viewProject, "open", null); }
-                    // }
                 ]
             }
         ];

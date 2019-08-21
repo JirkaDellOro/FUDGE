@@ -1,38 +1,31 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+///<reference path="View.ts"/>
 
 namespace Fudge {
+    /**
+     * View displaying all information of any selected entity and offering simple controls for manipulation
+     */
+    export class ViewData extends View {
 
-    export function createViewData(container: GoldenLayout.Container, state: Object): void {
-        let lblName: HTMLElement = document.createElement("label");
-        lblName.innerHTML = "Node Name";
-        let txtName: HTMLInputElement = document.createElement("input");
-        txtName.value = "Hallo";
-        container.getElement().append(lblName);
-        container.getElement().append(txtName);
-    }
-
-    export class ViewData {
-        public static goldenLayout: GoldenLayout;
-
-        constructor (container: GoldenLayout.Container, state: Object) {
+        // TODO: adept view to selected object, update when selection changes etc.
+        constructor(_container: GoldenLayout.Container, _state: Object) {
+            super(_container, _state);
             let lblName: HTMLElement = document.createElement("label");
             lblName.innerHTML = "Node Name";
             let txtName: HTMLInputElement = document.createElement("input");
             txtName.value = "Hallo";
-            container.getElement().append(lblName);
-            container.getElement().append(txtName);
-        }
+            _container.getElement().append(lblName);
+            _container.getElement().append(txtName);
 
-        public static getLayout(): GoldenLayout.Config {
-            const config: GoldenLayout.Config = {
-                content: [{
-                    type: "component",
-                    componentName: VIEW.DATA,
-                    title: "Data"
-                }]
-            };
-            return config;
+            // TEST: button to emit message to panel. Should work when each panel holds a unique instance of GoldenLayout
+            let btnMessage: HTMLButtonElement = document.createElement("button");
+            btnMessage.innerText = "Send to panel";
+            _container.getElement().append(btnMessage);
+            btnMessage.addEventListener("click", (_event: MouseEvent) => {
+                // each container holds a reference to the layout manager, which is a GoldenLayout instance
+                _container.layoutManager.emit("clickOnButtonInDataView");
+            });
         }
     }
 }

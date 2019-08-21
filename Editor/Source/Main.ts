@@ -35,20 +35,13 @@ namespace Main {
   }
   //#endregion
 
-  //#region View
+  //#region Window
   function createFudge(): void {
     console.log("createFudge");
     fudge = addWindow("../Html/Fudge.html");
     const menu: Electron.Menu = Menu.buildFromTemplate(getMenuFudge());
     fudge.setMenu(menu);
   }
-
-  // function removeWindow(_event: Electron.Event): void {
-  //   console.log("RemoveView");
-  //   let window: Electron.BrowserWindow = _event["sender"];
-  //   if (window == fudge)
-  //     app.emit("window-all-closed");
-  // }
 
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
     let window: Electron.BrowserWindow = new BrowserWindow({
@@ -57,8 +50,6 @@ namespace Main {
       }
     });
 
-    // window.once("focus", setMenu);
-    // window.addListener("closed", removeWindow);
     window.webContents.openDevTools();
     window.loadFile(_url);
 
@@ -68,7 +59,6 @@ namespace Main {
 
   //#region Menus  
 
-  // TODO: break up this function in subfunctions for the various views
   function menuSelect(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.KeyboardEvent): void {
     console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
     switch (Number(_item.id)) {
@@ -77,6 +67,12 @@ namespace Main {
         break;
       case MENU.PROJECT_SAVE:
         send(_window, "save", null);
+        break;
+      case MENU.VIEW_NODE_OPEN:
+        send(_window, "openViewNode", null);
+        break;
+      case MENU.NODE_UPDATE:
+        send(_window, "updateNode", null);
         break;
       case MENU.QUIT:
         app.quit();
@@ -105,30 +101,10 @@ namespace Main {
         label: "View", submenu: [
           {
             label: "Node", id: String(MENU.VIEW_NODE_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+N"
-          }
-        ]
-      }
-    ];
-    return menu;
-  }
-
-  function getMenuNode(): Electron.MenuItemConstructorOptions[] {
-    const menu: Electron.MenuItemConstructorOptions[] = [
-      {
-        label: "Node", submenu: [
-          {
-            label: "Update", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+U"
           },
           {
-            label: "Delete", id: String(MENU.NODE_DELETE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+D"
+            label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
           }
-          // ,
-          // {
-          //   label: "Delete Node (Del)", click(): void { send(viewProject, "open", null); }
-          // },
-          // {
-          //   label: "Convert to Ressource (Ctrl+R)", click(): void { send(viewProject, "open", null); }
-          // }
         ]
       }
     ];
