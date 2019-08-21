@@ -106,13 +106,13 @@ Monika: is communication via multiple windows (editors) possible in electron?
         inspector values can annd should be broken down into exponentials -> num, to exponential
 
 # July 18th 2019
-The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_NotizenLS))
-Also talked and re-capped the Jobs the FUDGE UI need to do, as well as discussing a rough design for how Gizmos should be handled internally in the FUDGE Core and how a KeyManager could function for FUDGE ([2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_ViewportEditor_Keymanager_FUDGEUI.txt))([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190718_Whiteboard.JPG))
+The clickdummy for the usertest was presented by Lea Stegk and Monika Galkewitsch, desired changes are listed in the log.([1](190718_NotizenLS))
+Also talked and re-capped the Jobs the FUDGE UI need to do, as well as discussing a rough design for how Gizmos should be handled internally in the FUDGE Core and how a KeyManager could function for FUDGE ([2](190718_ViewportEditor_Keymanager_FUDGEUI.txt))([Whiteboard](190718_Whiteboard.JPG))
 
 # July 11th 2019
-Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Experiments/Lea/FUDGE%20UI.mm))
+Presentation Mindmap as list of FUDGE functions ([Mindmap](https://github.com/JirkaDellOro/FUDGE/blob/master/Miscellaneous/Experiments/Lea/FUDGE%20UI.mm))
 Should the inspector be there / paired per editor? Singleton? Selectable? 
-([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190711_Whiteboard_saving.jpg))
+([Whiteboard](190711_Whiteboard_saving.jpg))
 +Rough overview over tasks for the usertest
 
 # June 26th 2019
@@ -127,7 +127,7 @@ Clarified details about the UX Usertest
 -> Excercises people will have to do for the Usertest? - Creation of simple 2D/3D objects in scene editor -> animation editor ->            scripting
 
 Clarifying Structure of UI Components
-([Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190626_Whiteboard_full.JPG))
+([Whiteboard](190626_Whiteboard_full.JPG))
 
 # June 19th 2019
 Presentation moodboard by Lea: Preferred are simple HTML elements, flat design (no dropshadows for buttons), icons are used for easily identifiable elements that won´t be extended, labeled buttons for elements that can´t be touched
@@ -140,13 +140,13 @@ Discussion about creation of a prototype for usertests (tool: Adobe XD?, methods
 Discussion over the structure of the UI System.
 
 # May 2nd 2019
-Discussion on the requirements the UI System has to fullfil. ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190502_UI_System_Discussion))
+Discussion on the requirements the UI System has to fullfil. ([1](190502_UI_System_Discussion))
 
 # Apr 16th 2019
-Upload Doodles for Vector Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_VE_Doodle.jpg)) as well as Animation Editor ([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_AE_Doodle1.jpg), [2](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190416_AE_Doodle2.jpg)).
+Upload Doodles for Vector Editor ([1](190416_VE_Doodle.jpg)) as well as Animation Editor ([1](190416_AE_Doodle1.jpg), [2](190416_AE_Doodle2.jpg)).
 
 # Apr 15th 2019
-Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190415_Whiteboard_VE_UI_Discussion.jpg)
+Discussion on Basic Usage Scheme on the example of the Vector Edtior. [Whiteboard](190415_Whiteboard_VE_UI_Discussion.jpg)
 
 Toolbesprechung Vektoreditor
 
@@ -164,25 +164,25 @@ Freeform kann über on/off toggle automatisch geschlossen werden
 # Apr 11th 2019
 Discussion on Keyboard shortcuts for the 2D/3D Editor
 
-[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190411%2016.23.21.jpg)
+[Results](190411%2016.23.21.jpg)
 
 Pre-Disussion about UI structure between Monika and Lea
-[Results](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190411_UI%20Dicussion%20Monika%20Lea.jpg)
+[Results](190411_UI%20Dicussion%20Monika%20Lea.jpg)
 
 We will use Golden Layout. PhosphorJS is only useful for single page applications, wcDocker doesn´t support pop-in and is frankly confusing to use after collapsing some panels (where do they go, can´t put them back). Docspawns and gridsters websites doesn´t exist anymore. jQuery Layout and ExtJS don´t support reordering windows, as well as Isotope. Also ExtJS wants a sign-up and only has a license for one year, afterwards fees start at 495$.
 Isotope only allows filtering and sorting of its contents, it has no draggable interactions just like Masonry.
 
 
 # Apr 10th 2019
-Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).
-All Members showed off what they were working on: [WebAudioAPI Overview](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard4.jpg), [Animator Thoughts and Proposals](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Whiteboard3.jpg).
+Presentation of [Transfer.Mutable](https://jirkadelloro.github.io/FUDGE/Core/reference/classes/fudge.mutable.html), its workflow and [how to use it](190410_Whiteboard1.jpg). Also, there was discussion about [how to handle multiple Viewports on one Canvas as well as Events on those Viewports/Canvas](190410_Whiteboard2.jpg) and how to implement them ([proposal](http://Link_missing)).
+All Members showed off what they were working on: [WebAudioAPI Overview](190410_Whiteboard4.jpg), [Animator Thoughts and Proposals](190410_Whiteboard3.jpg).
 
-[Animation Editor Work](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190410_Notizen_LS.md)
+[Animation Editor Work](190410_Notizen_LS.md)
 
 # Mar 27th 2019
 Interfaces for Animation and UI (and more?) compatibility/accessability. init/change (name is subject to change) function that handles changes on an object by using a generic JS Object.  
-[Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Whiteboard.jpg)  
-[Relevant for VectorEditor and Animator](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190327_Notizen_LS.md)
+[Whiteboard](190327_Whiteboard.jpg)  
+[Relevant for VectorEditor and Animator](190327_Notizen_LS.md)
 
 # Mar 20th 2019
 Die Möglichkeit, Szenen zu speichern und zu laden muss gegeben werden
@@ -192,38 +192,38 @@ Gibt es Bedarf, FUDGE auf Node laufen zu lassen?
 
 DOM Eventsteuerung
 
-Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)([1](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190319%20Protokoll%20LM))
+Ansatzstelle Serialisation (Jede Komponente verfügt über serialize/deserialize)([1](190319%20Protokoll%20LM))
 
 # Mar 18th 2019
 Presentation of the Core as it stands, general thoughts about it.  
-[Relevant for Animator and VectorEditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190318_Notizen_LS.md)
+[Relevant for Animator and VectorEditor](190318_Notizen_LS.md)
 
 # Feb 20th 2019
 Discussion on UI  
-[Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190220_Whiteboard_UI.jpg)
+[Whiteboard](190220_Whiteboard_UI.jpg)
 
 # Jan 15th 2019  
-[Overview WebXR, ARCore etc,](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190115-WebXR-ARCore-WebGL-JS_KF.jpg)  
-[PhoneGap CLI table and some notes to WebXR](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190115_Notizen_KF.md)  
+[Overview WebXR, ARCore etc,](190115-WebXR-ARCore-WebGL-JS_KF.jpg)  
+[PhoneGap CLI table and some notes to WebXR](190115_Notizen_KF.md)  
 
 # Jan 8th 2019
-[Datenstrukturplanung Vektoreditor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/190108_Notizen_LS.md)
+[Datenstrukturplanung Vektoreditor](190108_Notizen_LS.md)
 # Dec 18th 2018
-[error with the child_process.spawn and child_process.exec](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_KF.txt)  
-[First prototype of the vectoreditor, problems with it and further plans with it](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181218_Notizen_LS.md)
+[error with the child_process.spawn and child_process.exec](181218_Notizen_KF.txt)  
+[First prototype of the vectoreditor, problems with it and further plans with it](181218_Notizen_LS.md)
 # Dec 11th 2018
 Issue with a Typescript error [#10](https://github.com/JirkaDellOro/FUDGE/issues/10)  
 # Dec 4th 2018
-[General thoughts about the Engine and the Animator (and Lukas' Jobs)](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Notizen_LS.md)  
-[General Information about about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181204_Protokoll_TD)  
-[Objects in WebXR](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181129_WebXR.png)  
+[General thoughts about the Engine and the Animator (and Lukas' Jobs)](181204_Notizen_LS.md)  
+[General Information about about Meeting Contents](181204_Protokoll_TD)  
+[Objects in WebXR](181129_WebXR.png)  
 # Nov 27th 2018
-[Some Information about Meeting Contents](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181127_Protokoll_TD)
+[Some Information about Meeting Contents](181127_Protokoll_TD)
 # Nov 20th 2018
-[General contents of the meeting](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181120_Notizen_KF.txt)
+[General contents of the meeting](181120_Notizen_KF.txt)
 # Nov 13th 2018
-[General thoughts about the Engine, the Animator and the 2D Vector Editor](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_LS.md)  
-[Some more general information about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/181113_Notizen_KF.txt)
+[General thoughts about the Engine, the Animator and the 2D Vector Editor](181113_Notizen_LS.md)  
+[Some more general information about the Engine](181113_Notizen_KF.txt)
 # Sep 13th 2018
-First meeting. Basic structure for scenetree and components. [Whiteboard](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Whiteboard_Scenetree.jpg)  
-[General information about the Engine](https://github.com/JirkaDellOro/FUDGE/blob/master/Design/Logs/180913_Notizen_KF.txt)
+First meeting. Basic structure for scenetree and components. [Whiteboard](180913_Whiteboard_Scenetree.jpg)  
+[General information about the Engine](180913_Notizen_KF.txt)
