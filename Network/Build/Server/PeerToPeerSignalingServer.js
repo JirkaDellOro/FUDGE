@@ -123,12 +123,12 @@ PeerToPeerSignalingServer.startUpServer = (_serverPort) => {
     else {
         PeerToPeerSignalingServer.websocketServer = new ws_1.default.Server({ port: _serverPort });
     }
-    PeerToPeerSignalingServer.serverEventHandler();
+    PeerToPeerSignalingServer.addServerEventHandling();
 };
 PeerToPeerSignalingServer.closeDownServer = () => {
     PeerToPeerSignalingServer.websocketServer.close();
 };
-PeerToPeerSignalingServer.serverEventHandler = () => {
+PeerToPeerSignalingServer.addServerEventHandling = () => {
     // tslint:disable-next-line: no-any
     PeerToPeerSignalingServer.websocketServer.on("connection", (_websocketClient) => {
         console.log("User connected to P2P SignalingServer");

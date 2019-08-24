@@ -2,9 +2,9 @@ import * as FudgeNetwork from "./../ModuleCollector";
 import { PeerMessageSimpleText } from "../NetworkMessages";
 
 let asMode: boolean = false;
-const test: FudgeNetwork.NetworkConnectionManager = new FudgeNetwork.NetworkConnectionManager();
+const test: FudgeNetwork.NetworkClientManager = new FudgeNetwork.NetworkClientManager();
 
- 
+
 FudgeNetwork.UiElementHandler.getAllUiElements();
 FudgeNetwork.UiElementHandler.startSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectToSignalingServer);
@@ -116,7 +116,7 @@ function turnOffSignalingServer(): void {
     switchButton.hidden = false;
 }
 function connectToSignalingServer(): void {
-    test.signalingServerUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
+    test.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
     test.connectToSpecifiedSignalingServer();
 
     addKeypressListener();

@@ -10,7 +10,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("./../ModuleCollector"));
 const NetworkMessages_1 = require("../NetworkMessages");
 let asMode = false;
-const test = new FudgeNetwork.NetworkConnectionManager();
+const test = new FudgeNetwork.NetworkClientManager();
 FudgeNetwork.UiElementHandler.getAllUiElements();
 FudgeNetwork.UiElementHandler.startSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectToSignalingServer);
@@ -107,7 +107,7 @@ function turnOffSignalingServer() {
     switchButton.hidden = false;
 }
 function connectToSignalingServer() {
-    test.signalingServerUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
+    test.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
     test.connectToSpecifiedSignalingServer();
     addKeypressListener();
 }

@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
 
+
 export class PeerToPeerSignalingServer {
     public static websocketServer: WebSocket.Server;
     public static connectedClientsCollection: FudgeNetwork.Client[] = new Array();
@@ -14,13 +15,13 @@ export class PeerToPeerSignalingServer {
             PeerToPeerSignalingServer.websocketServer = new WebSocket.Server({ port: _serverPort });
 
         }
-        PeerToPeerSignalingServer.serverEventHandler();
+        PeerToPeerSignalingServer.addServerEventHandling();
     }
 
     public static closeDownServer = () => {
         PeerToPeerSignalingServer.websocketServer.close();
     }
-    public static serverEventHandler = (): void => {
+    public static addServerEventHandling = (): void => {
         // tslint:disable-next-line: no-any
         PeerToPeerSignalingServer.websocketServer.on("connection", (_websocketClient: any) => {
             console.log("User connected to P2P SignalingServer");

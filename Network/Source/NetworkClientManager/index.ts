@@ -1,1 +1,2 @@
-export * from "./NetworkConnectionManager";
+export * from "./NetworkClientManager";
+export * from "./NetworkClientTemplates";
