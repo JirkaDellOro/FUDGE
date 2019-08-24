@@ -1,4 +1,5 @@
 export * from "./AuthoritativeServerEntity";
 export * from "./AuthoritativeSignalingServer";
-export * from "./PeerToPeerSignalingServer";
+export * from "./SinglePeerSignalingServer";
+export * from "./PureWebSocketServer";
 export * from "./ServerInterfaces";

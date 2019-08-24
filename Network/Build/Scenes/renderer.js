@@ -10,7 +10,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("./../ModuleCollector"));
 const NetworkMessages_1 = require("../NetworkMessages");
 let asMode = false;
-const test = new FudgeNetwork.NetworkClientManager();
+const networkClient = new FudgeNetwork.NetworkClientManager();
+const peerToPeerSignalingServer = new FudgeNetwork.SinglePeerSignalingServer();
+const authoritativeSignalingServer = new FudgeNetwork.AuthoritativeSignalingServer();
+const pureWebSocketClient = new FudgeNetwork.PureWebSocketClientManager();
 FudgeNetwork.UiElementHandler.getAllUiElements();
 FudgeNetwork.UiElementHandler.startSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectToSignalingServer);
@@ -24,10 +27,10 @@ function addKeypressListener() {
     let browser = FudgeNetwork.UiElementHandler.electronWindow;
     browser.addEventListener("keydown", (event) => {
         if (event.keyCode == 27) {
-            test.sendDisconnectRequest();
+            networkClient.sendDisconnectRequest();
         }
         else {
-            test.sendKeyPress(event.keyCode);
+            networkClient.sendKeyPress(event.keyCode);
         }
     });
 }
@@ -36,7 +39,7 @@ function createLoginRequestWithUsername() {
     if (FudgeNetwork.UiElementHandler.loginNameInput) {
         chosenUserName = FudgeNetwork.UiElementHandler.loginNameInput.value;
         console.log("Username:" + chosenUserName);
-        test.checkChosenUsernameAndCreateLoginRequest(chosenUserName);
+        networkClient.checkChosenUsernameAndCreateLoginRequest(chosenUserName);
     }
     else {
         console.error("UI element missing: Loginname Input field");
@@ -46,7 +49,7 @@ function connectToOtherPeer() {
     let userNameToConnectTo = "";
     if (FudgeNetwork.UiElementHandler.usernameToConnectTo) {
         userNameToConnectTo = FudgeNetwork.UiElementHandler.usernameToConnectTo.value;
-        test.checkUsernameToConnectToAndInitiateConnection(userNameToConnectTo);
+        networkClient.checkUsernameToConnectToAndInitiateConnection(userNameToConnectTo);
     }
     else {
         console.error("Missing Ui Element: Username to connect to");
@@ -54,12 +57,12 @@ function connectToOtherPeer() {
 }
 function sendMessageViaPeerConnectionChannel() {
     let messageToSend = FudgeNetwork.UiElementHandler.msgInput.value;
-    FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + test.ownUserName + ": " + messageToSend;
-    test.sendMessageViaDirectPeerConnection(messageToSend);
+    FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + networkClient.localUserName + ": " + messageToSend;
+    networkClient.sendMessageToSingularPeer(messageToSend);
 }
 function broadcastMessageToClients() {
-    let stringifiedMessage = JSON.stringify(new NetworkMessages_1.PeerMessageSimpleText(test.getOwnClientId(), "Test"));
-    FudgeNetwork.AuthoritativeSignalingServer.authoritativeServerEntity.broadcastMessageToAllConnectedClients(stringifiedMessage);
+    let stringifiedMessage = JSON.stringify(new NetworkMessages_1.PeerMessageSimpleText(networkClient.getLocalClientId(), "Test"));
+    authoritativeSignalingServer.getAuthoritativeServerEntity().broadcastMessageToAllConnectedClients(stringifiedMessage);
 }
 function switchServerMode() {
     let switchbutton = FudgeNetwork.UiElementHandler.switchModeButton;
@@ -79,10 +82,10 @@ function switchServerMode() {
 function startingUpSignalingServer() {
     console.log("Turning server ONLINE");
     if (asMode) {
-        FudgeNetwork.AuthoritativeSignalingServer.startUpServer(9090);
+        authoritativeSignalingServer.startUpServer(9090);
     }
     else {
-        FudgeNetwork.PeerToPeerSignalingServer.startUpServer(9090);
+        peerToPeerSignalingServer.startUpServer(9090);
     }
     let startSignalingButton = FudgeNetwork.UiElementHandler.startSignalingButton;
     startSignalingButton.hidden = true;
@@ -94,10 +97,10 @@ function startingUpSignalingServer() {
 function turnOffSignalingServer() {
     console.log("Turning server offline");
     if (asMode) {
-        FudgeNetwork.AuthoritativeSignalingServer.closeDownServer();
+        authoritativeSignalingServer.closeDownServer();
     }
     else {
-        FudgeNetwork.PeerToPeerSignalingServer.closeDownServer();
+        peerToPeerSignalingServer.closeDownServer();
     }
     let startSignalingButton = FudgeNetwork.UiElementHandler.startSignalingButton;
     startSignalingButton.hidden = false;
@@ -107,8 +110,8 @@ function turnOffSignalingServer() {
     switchButton.hidden = false;
 }
 function connectToSignalingServer() {
-    test.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
-    test.connectToSpecifiedSignalingServer();
+    networkClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
+    networkClient.connectToSignalingServer();
     addKeypressListener();
 }
 // Changing HTML pages restarts the renderer process, causing connection loss on networking
