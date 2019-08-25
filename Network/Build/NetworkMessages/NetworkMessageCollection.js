@@ -77,6 +77,35 @@ class NetworkMessageMessageToClient {
     }
 }
 exports.NetworkMessageMessageToClient = NetworkMessageMessageToClient;
+class NetworkMessageClientReady {
+    constructor(_originatorId) {
+        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+        this.originatorId = _originatorId;
+    }
+}
+exports.NetworkMessageClientReady = NetworkMessageClientReady;
+class NetworkMessageServerSendMeshClientArray {
+    constructor(_candidateArray) {
+        this.messageType = FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT;
+        this.originatorId = "SERVER";
+        this.candidateArray = _candidateArray;
+    }
+}
+exports.NetworkMessageServerSendMeshClientArray = NetworkMessageServerSendMeshClientArray;
+class NetworkMessageClientMeshReady {
+    constructor(_originatorId) {
+        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+        this.originatorId = _originatorId;
+    }
+}
+exports.NetworkMessageClientMeshReady = NetworkMessageClientMeshReady;
+class NetworkMessageClientIsMeshConnected {
+    constructor(_originatorId) {
+        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED;
+        this.originatorId = _originatorId;
+    }
+}
+exports.NetworkMessageClientIsMeshConnected = NetworkMessageClientIsMeshConnected;
 class PeerMessageSimpleText {
     constructor(_originatorId, _messageData) {
         this.messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TEXT_MESSAGE;

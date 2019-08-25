@@ -19,24 +19,19 @@ export interface ClientManagerWebSocket extends ClientTemplate {
 }
 
 export interface ClientManagerMeshClient extends ClientManagerWebSocket {
-    localPeerConnectionCollection: RTCPeerConnection[];
+    remoteMeshClients: FudgeNetwork.Client[];
 
     readonly configuration: Object;
-    peerConnectionCollection: RTCPeerConnection[];
     isInitiator: boolean;
 
-    sendMessageToSingularPeer(_messageToSend: string, _peerId: string): void;
-    sendDisconnectRequest(): void;
-    createRTCPeerConnectionAndAddEventListeners(): void;
     beginPeerConnectionNegotiation(_userNameForOffer: string): void;
-    createNegotiationOfferAndSendToPeer(_userNameForOffer: string): void;
-    answerNegotiationOffer(_remoteIdToAnswerTo: string): void;
+    createNegotiationOfferAndSendToPeer(_currentlyNegotiatingPeer: FudgeNetwork.Client): void;
+    answerNegotiationOffer(_remoteMeshClient: FudgeNetwork.Client): void;
     sendIceCandidatesToPeer(_candidate: Object): void;
     receiveNegotiationOfferAndSetRemoteDescription(_offerMessage: FudgeNetwork.NetworkMessageRtcOffer): void;
-    receiveAnswerAndSetRemoteDescription(_localhostId: string, _answer: RTCSessionDescriptionInit): void;
+    receiveAnswerAndSetRemoteDescription(_rtcAnswer: FudgeNetwork.NetworkMessageRtcAnswer): void;
     addReceivedCandidateToPeerConnection(_receivedIceMessage: FudgeNetwork.NetworkMessageIceCandidate): void;
     receiveDataChannelAndEstablishConnection(_event: any): void;
-    sendMessageToServerViaDataChannel(_messageToSend: string): void;
     dataChannelMessageHandler(_messageEvent: MessageEvent): void;
 }
 export interface ClientManagerSinglePeer extends ClientManagerWebSocket {

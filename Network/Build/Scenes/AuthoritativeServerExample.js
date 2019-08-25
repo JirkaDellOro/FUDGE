@@ -10,8 +10,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("./../ModuleCollector"));
 const NetworkMessages_1 = require("../NetworkMessages");
 let isServer = false;
-const networkClient = new FudgeNetwork.AuthoritativeClientManager();
-const authoritativeSignalingServer = new FudgeNetwork.AuthoritativeSignalingServer();
+const networkClient = new FudgeNetwork.ClientManagerAuthoritativeStructure();
+const authoritativeSignalingServer = new FudgeNetwork.FudgeServerAuthoritativeSignaling();
 FudgeNetwork.UiElementHandler.getAuthoritativeUiElements();
 FudgeNetwork.UiElementHandler.authoritativeServerStartSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.authoritativeServerStopSignalingButton.addEventListener("click", turnOffSignalingServer);
@@ -70,7 +70,7 @@ function switchServerMode() {
 }
 function startingUpSignalingServer() {
     console.log("Turning server ONLINE");
-    authoritativeSignalingServer.startUpServer(9090);
+    authoritativeSignalingServer.startUpServer(8080);
     let startSignalingButton = FudgeNetwork.UiElementHandler.authoritativeServerStartSignalingButton;
     startSignalingButton.hidden = true;
     let stopSignalingButton = FudgeNetwork.UiElementHandler.authoritativeServerStopSignalingButton;

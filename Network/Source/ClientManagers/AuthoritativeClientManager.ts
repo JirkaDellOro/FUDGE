@@ -1,6 +1,6 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class AuthoritativeClientManager implements FudgeNetwork.ClientManagerSinglePeer {
+export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientManagerSinglePeer {
     public signalingServerConnectionUrl: string = "ws://localhost:8080";
     public localUserName: string;
     public localClientID: string;

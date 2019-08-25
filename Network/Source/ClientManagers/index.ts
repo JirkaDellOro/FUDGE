@@ -1,4 +1,5 @@
 export * from "./NetworkClientManager";
 export * from "./NetworkClientTemplates";
-export * from "./PureWebSocketClientManager";
+export * from "./ClientManagerPureWebSocket";
 export * from "./AuthoritativeClientManager";
+export * from "./ClientManagerFullMeshStructure"

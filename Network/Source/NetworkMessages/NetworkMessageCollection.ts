@@ -103,6 +103,45 @@ export class NetworkMessageMessageToClient implements NetworkMessageMessageBase 
     }
 }
 
+export class NetworkMessageClientReady implements NetworkMessageMessageBase {
+    messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+    originatorId: string;
+
+    constructor(_originatorId: string) {
+        this.originatorId = _originatorId;
+    }
+}
+
+export class NetworkMessageServerSendMeshClientArray implements NetworkMessageMessageBase {
+    messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT;
+    originatorId: string = "SERVER";
+
+    candidateArray: FudgeNetwork.Client[];
+
+    constructor(_candidateArray: FudgeNetwork.Client[]) {
+        this.candidateArray = _candidateArray;
+    }
+}
+
+export class NetworkMessageClientMeshReady implements NetworkMessageMessageBase {
+    messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+    originatorId: string;
+
+    constructor(_originatorId: string) {
+        this.originatorId = _originatorId;
+    }
+}
+
+export class NetworkMessageClientIsMeshConnected implements NetworkMessageMessageBase {
+    messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED;
+    originatorId: string;
+
+    constructor(_originatorId: string) {
+        this.originatorId = _originatorId;
+    }
+
+
+}
 
 
 export interface PeerMessageTemplate {

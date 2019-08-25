@@ -1,6 +1,6 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class PureWebSocketClientManager implements FudgeNetwork.ClientManagerWebSocket {
+export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWebSocket {
 
     public signalingServerConnectionUrl: string = "ws://localhost:8080";
     public localUserName: string;

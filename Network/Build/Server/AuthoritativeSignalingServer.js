@@ -25,12 +25,12 @@ class AuthoritativeSignalingServer {
             }
             this.setAuthoritativeServerEntity(new FudgeNetwork.AuthoritativeServerEntity());
             this.authoritativeServerEntity.signalingServer = this;
-            this.serverEventHandler();
+            this.addServerEventHandling();
         };
         this.closeDownServer = () => {
             this.websocketServer.close();
         };
-        this.serverEventHandler = () => {
+        this.addServerEventHandling = () => {
             // tslint:disable-next-line: no-any
             this.websocketServer.on("connection", (_websocketClient) => {
                 console.log("User connected to autho-SignalingServer");
@@ -40,7 +40,7 @@ class AuthoritativeSignalingServer {
                 this.connectedClientsCollection.push(freshlyConnectedClient);
                 this.authoritativeServerEntity.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
                 _websocketClient.on("message", (_message) => {
-                    this.serverHandleMessageType(_message, _websocketClient);
+                    this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
                 });
                 _websocketClient.addEventListener("close", (error) => {
                     console.error("Error at connection", error);
@@ -122,7 +122,7 @@ class AuthoritativeSignalingServer {
         return this.authoritativeServerEntity;
     }
     // TODO Check if event.type can be used for identification instead => It cannot
-    serverHandleMessageType(_message, _websocketClient) {
+    serverDistributeMessageToAppropriateMethod(_message, _websocketClient) {
         let parsedMessage = { originatorId: " ", messageType: FudgeNetwork.MESSAGE_TYPE.UNDEFINED };
         try {
             parsedMessage = JSON.parse(_message);

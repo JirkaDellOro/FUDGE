@@ -1,9 +1,9 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
-import { UiElementHandler } from "../DataCollectors";
+import { UiElementHandler } from "../DataHandling";
 import { NetworkMessageMessageToServer } from "../NetworkMessages";
 
-export class PureWebSocketServer implements FudgeNetwork.WSServer {
+export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
     public websocketServer!: WebSocket.Server;
     public connectedClientsCollection: FudgeNetwork.Client[] = new Array();
 

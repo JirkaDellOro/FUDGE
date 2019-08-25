@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = __importDefault(require("ws"));
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
 const DataHandling_1 = require("../DataHandling");
-class PureWebSocketServer {
+class FudgeServerWebSocket {
     constructor() {
         this.connectedClientsCollection = new Array();
         this.startUpServer = (_serverPort) => {
@@ -194,4 +194,4 @@ class PureWebSocketServer {
         return parsedMessage;
     }
 }
-exports.PureWebSocketServer = PureWebSocketServer;
+exports.FudgeServerWebSocket = FudgeServerWebSocket;

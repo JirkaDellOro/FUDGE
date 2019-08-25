@@ -1,5 +1,5 @@
 export * from "./NetworkMessages";
-export * from "./DataCollectors";
+export * from "./DataHandling";
 export * from "./ClientManagers";
 export * from "./Server";
 

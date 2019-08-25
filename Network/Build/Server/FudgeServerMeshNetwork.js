@@ -12,10 +12,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = __importDefault(require("ws"));
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
-const DataHandling_1 = require("../DataHandling");
-class PureWebSocketServer {
+class FudgeServerMeshNetwork {
     constructor() {
         this.connectedClientsCollection = new Array();
+        this.peerMeshReadyClientCollection = new Array();
         this.startUpServer = (_serverPort) => {
             console.log(_serverPort);
             if (!_serverPort) {
@@ -71,25 +71,24 @@ class PureWebSocketServer {
             }
             return parsedMessage;
         };
+        this.setClientReadyFlag = (_clientId) => {
+            let clientReady = this.searchUserByUserIdAndReturnUser(_clientId, this.connectedClientsCollection);
+            if (clientReady.isPeerMeshReady) {
+                clientReady.isPeerMeshReady = false;
+            }
+            else {
+                clientReady.isPeerMeshReady = true;
+            }
+        };
         this.createID = () => {
             // Math.random should be random enough because of it's seed
             // convert to base 36 and pick the first few digits after comma
             return "_" + Math.random().toString(36).substr(2, 7);
         };
-        this.stringifyObjectToString = (_objectToStringify) => {
-            return JSON.stringify(_objectToStringify);
-        };
         // TODO Type Websocket not assignable to type WebSocket ?!
         // tslint:disable-next-line: no-any
         this.sendTo = (_connection, _message) => {
-            let stringifiedMessage = "";
-            if (typeof (_message) == "object") {
-                stringifiedMessage = JSON.stringify(_message);
-            }
-            else if (typeof (_message) == "string") {
-                stringifiedMessage = _message;
-            }
-            _connection.send(stringifiedMessage);
+            _connection.send(JSON.stringify(_message));
         };
         // Helper function for searching through a collection, finding objects by key and value, returning
         // Object that has that value
@@ -113,7 +112,7 @@ class PureWebSocketServer {
             return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
         };
         this.searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor, _collectionToSearch) => {
-            return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
+            return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "rtcPeerConnection", _collectionToSearch);
         };
     }
     // TODO Check if event.type can be used for identification instead => It cannot
@@ -123,7 +122,6 @@ class PureWebSocketServer {
             console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
             return;
         }
-        console.log(objectifiedMessage, _message);
         if (objectifiedMessage != null) {
             switch (objectifiedMessage.messageType) {
                 case FudgeNetwork.MESSAGE_TYPE.ID_ASSIGNED:
@@ -132,9 +130,23 @@ class PureWebSocketServer {
                 case FudgeNetwork.MESSAGE_TYPE.LOGIN_REQUEST:
                     this.addUserOnValidLoginRequest(_websocketClient, objectifiedMessage);
                     break;
-                case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
-                    this.displayMessageOnServer(objectifiedMessage);
-                    this.broadcastMessageToAllConnectedClients(_message);
+                case FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION:
+                    this.setClientReadyFlag(objectifiedMessage.originatorId);
+                    if (this.checkIfAllClientsReady()) {
+                        this.sendClientListToClient();
+                    }
+                    break;
+                case FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED:
+                    this.sendClientListToClient();
+                    break;
+                case FudgeNetwork.MESSAGE_TYPE.RTC_OFFER:
+                    this.sendRtcOfferToRequestedClient(_websocketClient, objectifiedMessage);
+                    break;
+                case FudgeNetwork.MESSAGE_TYPE.RTC_ANSWER:
+                    this.answerRtcOfferOfClient(_websocketClient, objectifiedMessage);
+                    break;
+                case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
+                    this.sendIceCandidatesToRelevantPeers(_websocketClient, objectifiedMessage);
                     break;
                 default:
                     console.log("Message type not recognized");
@@ -142,14 +154,27 @@ class PureWebSocketServer {
             }
         }
     }
-    displayMessageOnServer(_objectifiedMessage) {
-        if (DataHandling_1.UiElementHandler.webSocketServerChatBox != null || undefined) {
-            let username = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
-            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + username + ": " + _objectifiedMessage.messageData;
+    sendClientListToClient() {
+        if (this.peerMeshReadyClientCollection.length == 0) {
+            console.log(this.peerMeshReadyClientCollection.length);
+            console.log("All Clients connected");
         }
         else {
-            console.log("To display the message, add appropriate UiElemenHandler object");
+            let clientToSendTo = this.peerMeshReadyClientCollection[0];
+            this.peerMeshReadyClientCollection.splice(0, 1);
+            this.sendTo(clientToSendTo.clientConnection, new FudgeNetwork.NetworkMessageServerSendMeshClientArray(this.peerMeshReadyClientCollection));
         }
+    }
+    checkIfAllClientsReady() {
+        let allReady = true;
+        this.connectedClientsCollection.forEach(_client => {
+            if (!_client.isPeerMeshReady) {
+                allReady = false;
+                return allReady;
+            }
+        });
+        this.peerMeshReadyClientCollection = Object.assign([], this.connectedClientsCollection);
+        return allReady;
     }
     //#region MessageHandler
     addUserOnValidLoginRequest(_websocketConnection, _messageData) {
@@ -173,12 +198,40 @@ class PureWebSocketServer {
             console.error("Unhandled Exception: Unable to create or send LoginResponse", error);
         }
     }
-    broadcastMessageToAllConnectedClients(_messageToBroadcast) {
-        let clientArray = Array.from(this.websocketServer.clients);
-        clientArray.forEach(_client => {
-            this.sendTo(_client, _messageToBroadcast);
-        });
+    sendRtcOfferToRequestedClient(_websocketClient, _messageData) {
+        console.log("Sending offer to: ", _messageData.userNameToConnectTo);
+        const requestedClient = this.searchForPropertyValueInCollection(_messageData.userNameToConnectTo, "userName", this.connectedClientsCollection);
+        if (requestedClient != null) {
+            const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer(_messageData.originatorId, requestedClient.userName, _messageData.offer);
+            try {
+                this.sendTo(requestedClient.clientConnection, offerMessage);
+            }
+            catch (error) {
+                console.error("Unhandled Exception: Unable to relay Offer to Client", error);
+            }
+        }
+        else {
+            console.error("User to connect to doesn't exist under that Name");
+        }
     }
+    answerRtcOfferOfClient(_websocketClient, _messageData) {
+        console.log("Sending answer to: ", _messageData.targetId);
+        const clientToSendAnswerTo = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
+        if (clientToSendAnswerTo != null) {
+            // TODO Probable source of error, need to test
+            if (clientToSendAnswerTo.clientConnection != null)
+                this.sendTo(clientToSendAnswerTo.clientConnection, _messageData);
+        }
+    }
+    sendIceCandidatesToRelevantPeers(_websocketClient, _messageData) {
+        const clientToShareCandidatesWith = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
+        if (clientToShareCandidatesWith != null) {
+            const candidateToSend = new FudgeNetwork.NetworkMessageIceCandidate(_messageData.originatorId, clientToShareCandidatesWith.id, _messageData.candidate);
+            this.sendTo(clientToShareCandidatesWith.clientConnection, candidateToSend);
+        }
+    }
+    //#endregion
+    //#region Helperfunctions
     searchForClientWithId(_idToFind) {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
     }
@@ -194,4 +247,4 @@ class PureWebSocketServer {
         return parsedMessage;
     }
 }
-exports.PureWebSocketServer = PureWebSocketServer;
+exports.FudgeServerMeshNetwork = FudgeServerMeshNetwork;

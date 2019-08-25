@@ -9,8 +9,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("./../ModuleCollector"));
 let isServer = false;
-const pureWebSocketClient = new FudgeNetwork.PureWebSocketClientManager();
-const pureWebSocketServer = new FudgeNetwork.PureWebSocketServer();
+const pureWebSocketClient = new FudgeNetwork.ClientManagerWebSocketOnly();
+const pureWebSocketServer = new FudgeNetwork.FudgeServerWebSocket();
 FudgeNetwork.UiElementHandler.getPureWebSocketUiElements();
 FudgeNetwork.UiElementHandler.startSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectToSignalingServer);

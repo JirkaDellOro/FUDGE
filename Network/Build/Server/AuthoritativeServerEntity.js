@@ -23,7 +23,7 @@ class AuthoritativeServerEntity {
         this.collectClientCreatePeerConnectionAndCreateOffer = (_freshlyConnectedClient) => {
             let newPeerConnection = new RTCPeerConnection(this.configuration);
             newPeerConnection.addEventListener("icecandidate", this.sendNewIceCandidatesToPeer);
-            _freshlyConnectedClient.peerConnection = newPeerConnection;
+            _freshlyConnectedClient.rtcPeerConnection = newPeerConnection;
             this.authServerPeerConnectedClientCollection.push(_freshlyConnectedClient);
             this.initiateConnectionByCreatingDataChannelAndCreatingOffer(_freshlyConnectedClient);
         };
@@ -36,7 +36,7 @@ class AuthoritativeServerEntity {
             if (_receivedIceMessage.candidate) {
                 let client = this.searchUserByUserIdAndReturnUser(_receivedIceMessage.originatorId, this.authServerPeerConnectedClientCollection);
                 console.log("server received candidates from: ", client);
-                await client.peerConnection.addIceCandidate(_receivedIceMessage.candidate);
+                await client.rtcPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
             }
         };
         this.parseMessageToJson = (_messageToParse) => {
@@ -55,13 +55,13 @@ class AuthoritativeServerEntity {
             let clientToConnect = this.searchUserByWebsocketConnectionAndReturnUser(_websocketClient, this.authServerPeerConnectedClientCollection);
             console.log(clientToConnect);
             let descriptionAnswer = new RTCSessionDescription(_answer.answer);
-            clientToConnect.peerConnection.setRemoteDescription(descriptionAnswer);
+            clientToConnect.rtcPeerConnection.setRemoteDescription(descriptionAnswer);
             console.log("Remote Description set");
         };
         this.broadcastMessageToAllConnectedClients = (_messageToBroadcast) => {
             this.authServerPeerConnectedClientCollection.forEach(client => {
-                if (client.dataChannel.readyState == "open") {
-                    client.dataChannel.send(_messageToBroadcast);
+                if (client.rtcDataChannel.readyState == "open") {
+                    client.rtcDataChannel.send(_messageToBroadcast);
                 }
                 else {
                     console.error("Connection closed abnormally for: ", client);
@@ -90,19 +90,19 @@ class AuthoritativeServerEntity {
         };
         this.initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect) => {
             console.log("Initiating connection to : " + _clientToConnect);
-            let newDataChannel = _clientToConnect.peerConnection.createDataChannel(_clientToConnect.id);
-            _clientToConnect.dataChannel = newDataChannel;
+            let newDataChannel = _clientToConnect.rtcPeerConnection.createDataChannel(_clientToConnect.id);
+            _clientToConnect.rtcDataChannel = newDataChannel;
             newDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
             // newDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
             newDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-            _clientToConnect.peerConnection.createOffer()
+            _clientToConnect.rtcPeerConnection.createOffer()
                 .then(async (offer) => {
-                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.peerConnection.signalingState);
+                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
                 return offer;
             })
                 .then(async (offer) => {
-                await _clientToConnect.peerConnection.setLocalDescription(offer);
-                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.peerConnection.signalingState);
+                await _clientToConnect.rtcPeerConnection.setLocalDescription(offer);
+                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
             })
                 .then(() => {
                 this.createOfferMessageAndSendToRemote(_clientToConnect);
@@ -113,12 +113,12 @@ class AuthoritativeServerEntity {
         };
         this.createOfferMessageAndSendToRemote = (_clientToConnect) => {
             console.log("Sending offer now");
-            const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.peerConnection.localDescription);
+            const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection.localDescription);
             this.signalingServer.sendToId(_clientToConnect.id, offerMessage);
         };
         this.disconnectClientByOwnCommand = (_commandMessage) => {
             let clientToDisconnect = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-            clientToDisconnect.dataChannel.close();
+            clientToDisconnect.rtcDataChannel.close();
         };
         this.handleKeyInputFromClient = (_commandMessage) => {
             console.log(_commandMessage);

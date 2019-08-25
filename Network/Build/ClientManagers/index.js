@@ -4,5 +4,6 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./NetworkClientManager"));
-__export(require("./PureWebSocketClientManager"));
+__export(require("./ClientManagerPureWebSocket"));
 __export(require("./AuthoritativeClientManager"));
+__export(require("./ClientManagerFullMeshStructure"));
