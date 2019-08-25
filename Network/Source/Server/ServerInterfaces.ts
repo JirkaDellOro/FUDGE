@@ -1,7 +1,7 @@
 import * as FudgeNetwork from "./../ModuleCollector";
 import WebSocket from "ws";
 
-export interface SignalingServer {
+export interface WSServer {
     websocketServer: WebSocket.Server;
     connectedClientsCollection: FudgeNetwork.Client[];
 
@@ -9,9 +9,13 @@ export interface SignalingServer {
     closeDownServer(): void;
     addServerEventHandling(): void;
     serverDistributeMessageToAppropriateMethod(_message: string, _websocketClient: WebSocket): void;
-
+}
+export interface SignalingServer extends WSServer {
     sendRtcOfferToRequestedClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcOffer): void;
     answerRtcOfferOfClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcAnswer): void;
     sendIceCandidatesToRelevantPeers(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageIceCandidate): void;
+}
+
+export interface MeshNetworkSignalingServer {
 
 }
