@@ -1,8 +1,8 @@
 import * as FudgeNetwork from "./../ModuleCollector";
 
 let isServer: boolean = false;
-const pureWebSocketClient: FudgeNetwork.PureWebSocketClientManager = new FudgeNetwork.PureWebSocketClientManager();
-const pureWebSocketServer: FudgeNetwork.PureWebSocketServer = new FudgeNetwork.PureWebSocketServer();
+const pureWebSocketClient: FudgeNetwork.ClientManagerWebSocketOnly = new FudgeNetwork.ClientManagerWebSocketOnly();
+const pureWebSocketServer: FudgeNetwork.FudgeServerWebSocket = new FudgeNetwork.FudgeServerWebSocket();
 
 
 FudgeNetwork.UiElementHandler.getPureWebSocketUiElements();

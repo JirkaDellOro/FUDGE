@@ -4,8 +4,8 @@ import { PeerMessageSimpleText } from "../NetworkMessages";
 let asMode: boolean = false;
 const networkClient: FudgeNetwork.NetworkClientManager = new FudgeNetwork.NetworkClientManager();
 const peerToPeerSignalingServer: FudgeNetwork.SinglePeerSignalingServer = new FudgeNetwork.SinglePeerSignalingServer();
-const authoritativeSignalingServer: FudgeNetwork.AuthoritativeSignalingServer = new FudgeNetwork.AuthoritativeSignalingServer();
-const pureWebSocketClient: FudgeNetwork.PureWebSocketClientManager = new FudgeNetwork.PureWebSocketClientManager();
+const authoritativeSignalingServer: FudgeNetwork.FudgeServerAuthoritativeSignaling = new FudgeNetwork.FudgeServerAuthoritativeSignaling();
+const pureWebSocketClient: FudgeNetwork.ClientManagerWebSocketOnly = new FudgeNetwork.ClientManagerWebSocketOnly();
 
 
 

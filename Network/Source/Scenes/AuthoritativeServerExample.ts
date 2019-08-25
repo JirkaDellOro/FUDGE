@@ -2,8 +2,8 @@ import * as FudgeNetwork from "./../ModuleCollector";
 import { PeerMessageSimpleText } from "../NetworkMessages";
 
 let isServer: boolean = false;
-const networkClient: FudgeNetwork.AuthoritativeClientManager = new FudgeNetwork.AuthoritativeClientManager();
-const authoritativeSignalingServer: FudgeNetwork.AuthoritativeSignalingServer = new FudgeNetwork.AuthoritativeSignalingServer();
+const networkClient: FudgeNetwork.ClientManagerAuthoritativeStructure = new FudgeNetwork.ClientManagerAuthoritativeStructure();
+const authoritativeSignalingServer: FudgeNetwork.FudgeServerAuthoritativeSignaling = new FudgeNetwork.FudgeServerAuthoritativeSignaling();
 
 FudgeNetwork.UiElementHandler.getAuthoritativeUiElements();
 FudgeNetwork.UiElementHandler.authoritativeServerStartSignalingButton.addEventListener("click", startingUpSignalingServer);
@@ -74,7 +74,7 @@ function switchServerMode(): void {
 
 function startingUpSignalingServer(): void {
     console.log("Turning server ONLINE");
-    authoritativeSignalingServer.startUpServer(9090);
+    authoritativeSignalingServer.startUpServer(8080);
 
     let startSignalingButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.authoritativeServerStartSignalingButton as HTMLButtonElement;
     startSignalingButton.hidden = true;
