@@ -8,7 +8,7 @@ export class AuthoritativeSignalingServer {
     public startUpServer = (_serverPort?: number) => {
         console.log(_serverPort);
         if (!_serverPort) {
-            this.websocketServer = new WebSocket.Server({ port: 9090 });
+            this.websocketServer = new WebSocket.Server({ port: 8080 });
         }
         else {
             this.websocketServer = new WebSocket.Server({ port: _serverPort });
@@ -93,7 +93,7 @@ export class AuthoritativeSignalingServer {
                     break;
 
                 case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
-                    this.sendIceCandidatesToRelevantPeers(messageData);
+                    this.handDownIceCandidatesToAuthEntity(messageData);
                     break;
 
                 default:
@@ -141,8 +141,7 @@ export class AuthoritativeSignalingServer {
 
     }
 
-    public sendIceCandidatesToRelevantPeers(_messageData: FudgeNetwork.NetworkMessageIceCandidate): void {
-        const clientToShareCandidatesWith: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
+    public handDownIceCandidatesToAuthEntity(_messageData: FudgeNetwork.NetworkMessageIceCandidate): void {
         this.authoritativeServerEntity.addIceCandidateToServerConnection(_messageData);
     }
 

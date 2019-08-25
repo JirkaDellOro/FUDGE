@@ -21,35 +21,63 @@ export abstract class UiElementHandler {
     public static signalingElements: HTMLElement;
     public static serverElements: HTMLElement;
 
-    public static chatBoxServer: HTMLElement;
-    public static msgInputServer: HTMLInputElement;
-    public static sendMessageAsServer: HTMLElement;
-    public static getAllUiElements(): void {
+    public static webSocketServerChatBox: HTMLElement;
+    public static webSocketServerMessageInput: HTMLInputElement;
+    public static webSocketServerSendMessageButton: HTMLElement;
+
+
+    public static authoritativeSwitchToServerOrClientModeButton: HTMLElement;
+    public static authoritativeServerElements: HTMLElement;
+    public static authoritativeServerStartSignalingButton: HTMLElement;
+    public static authoritativeServerStopSignalingButton: HTMLElement;
+    public static authoritativeServerBroadcastButton: HTMLElement;
+    public static authoritativeServerMessageInput: HTMLInputElement;
+    public static authoritativeServerMovingDiv: HTMLElement;
+    public static authoritativeClientElements: HTMLElement;
+    public static authoritativeClientSignalingUrlInput: HTMLInputElement;
+    public static authoritativeClientConnectToServerButton: HTMLElement;
+    public static authoritativeClientLoginNameInput: HTMLInputElement;
+    public static authoritativeClientLoginButton: HTMLElement;
+    public static authoritativeClientChatArea: HTMLInputElement;
+    public static authoritativeClientMessageInput: HTMLInputElement;
+    public static authoritativeClientSendMessageButton: HTMLElement;
+
+
+    public static getFundamentalDOMElements(): void {
         UiElementHandler.electronWindow = document;
-        UiElementHandler.moveableBoxElement = document.getElementById("moveIt") as HTMLElement;
-        UiElementHandler.switchModeButton = document.getElementById("switch") as HTMLElement;
-        UiElementHandler.authoritativeElements = document.getElementById("authoritative_elements") as HTMLElement;
-        UiElementHandler.stopSignalingServer = document.getElementById("stop_signalingServerButton") as HTMLElement;
-        UiElementHandler.signalingUrl = document.getElementById("signaling_uri") as HTMLInputElement;
-        UiElementHandler.signalingSubmit = document.getElementById("submit_button") as HTMLElement;
-        UiElementHandler.loginNameInput = document.getElementById("login_name") as HTMLInputElement;
-        UiElementHandler.loginButton = document.getElementById("login_button") as HTMLElement;
-        console.log("UI ELEMENT HANDLER LOGIC: ", UiElementHandler.loginButton);
-        UiElementHandler.msgInput = document.getElementById("msgInput") as HTMLInputElement;
-        UiElementHandler.chatbox = document.getElementById("chatbox") as HTMLInputElement;
-        UiElementHandler.sendMsgButton = document.getElementById("sendMessage") as HTMLElement;
-        UiElementHandler.connectToUserButton = document.getElementById("userConnect") as HTMLElement;
-        UiElementHandler.usernameToConnectTo = document.getElementById("connectToUsername") as HTMLInputElement;
-        UiElementHandler.disconnectButton = document.getElementById("disconnectBtn") as HTMLElement;
-        UiElementHandler.startSignalingButton = document.getElementById("start_signalingServerButton") as HTMLElement;
-        UiElementHandler.peerToPeerHtmlElements = document.getElementById("peer_to_peer_elements") as HTMLElement;
-        UiElementHandler.broadcastButton = document.getElementById("broadcastButton") as HTMLElement;
+
+
+    }
+    public static getAuthoritativeUiElements(): void {
+        UiElementHandler.getFundamentalDOMElements();
+
+        UiElementHandler.authoritativeSwitchToServerOrClientModeButton = document.getElementById("switch") as HTMLElement;
+
+        UiElementHandler.authoritativeServerElements = document.getElementById("authoritative_elements") as HTMLElement;
+        UiElementHandler.authoritativeServerStartSignalingButton = document.getElementById("start_signalingServerButton") as HTMLElement;
+        UiElementHandler.authoritativeServerStopSignalingButton = document.getElementById("stop_signalingServerButton") as HTMLElement;
+        UiElementHandler.authoritativeServerBroadcastButton = document.getElementById("broadcastButton") as HTMLElement;
+        UiElementHandler.authoritativeServerMessageInput = document.getElementById("auth_server_input") as HTMLInputElement;
+        UiElementHandler.authoritativeServerMovingDiv = document.getElementById("moveIt") as HTMLElement;
+        UiElementHandler.authoritativeServerMovingDiv.style.position = "relative";
+        UiElementHandler.authoritativeServerMovingDiv.style.left = "0px";
+        UiElementHandler.authoritativeServerMovingDiv.style.top = "0px";
+
+        UiElementHandler.authoritativeClientElements = document.getElementById("auth_client_elements") as HTMLElement;
+        UiElementHandler.authoritativeClientSignalingUrlInput = document.getElementById("signaling_uri") as HTMLInputElement;
+        UiElementHandler.authoritativeClientConnectToServerButton = document.getElementById("submit_button") as HTMLElement;
+        UiElementHandler.authoritativeClientChatArea = document.getElementById("auth_client_chatbox") as HTMLInputElement;
+        UiElementHandler.authoritativeClientMessageInput = document.getElementById("auth_client_message_input") as HTMLInputElement;
+        UiElementHandler.authoritativeClientSendMessageButton = document.getElementById("auth_client_send_message_button") as HTMLElement;
     }
 
     public static getPureWebSocketUiElements(): void {
-        UiElementHandler.chatBoxServer = document.getElementById("chatboxServer") as HTMLElement;
-        UiElementHandler.msgInputServer = document.getElementById("msgInputServer") as HTMLInputElement;
-        UiElementHandler.sendMessageAsServer = document.getElementById("sendMessageAsServer") as HTMLElement;
+        UiElementHandler.getFundamentalDOMElements();
+
+
+        UiElementHandler.webSocketServerChatBox = document.getElementById("chatboxServer") as HTMLElement;
+        UiElementHandler.webSocketServerMessageInput = document.getElementById("msgInputServer") as HTMLInputElement;
+        UiElementHandler.webSocketServerSendMessageButton = document.getElementById("sendMessageAsServer") as HTMLElement;
         UiElementHandler.switchModeButton = document.getElementById("switch") as HTMLElement;
         UiElementHandler.serverElements = document.getElementById("server_elements") as HTMLElement;
         UiElementHandler.signalingElements = document.getElementById("signaling_elements") as HTMLElement;
@@ -64,4 +92,27 @@ export abstract class UiElementHandler {
         UiElementHandler.sendMsgButton = document.getElementById("sendMessage") as HTMLElement;
     }
 
+
+
+    public static getAllUiElements(): void {
+        UiElementHandler.getFundamentalDOMElements();
+
+        UiElementHandler.moveableBoxElement = document.getElementById("moveIt") as HTMLElement;
+        UiElementHandler.switchModeButton = document.getElementById("switch") as HTMLElement;
+        UiElementHandler.authoritativeElements = document.getElementById("authoritative_elements") as HTMLElement;
+        UiElementHandler.stopSignalingServer = document.getElementById("stop_signalingServerButton") as HTMLElement;
+        UiElementHandler.signalingUrl = document.getElementById("signaling_uri") as HTMLInputElement;
+        UiElementHandler.signalingSubmit = document.getElementById("submit_button") as HTMLElement;
+        UiElementHandler.loginNameInput = document.getElementById("login_name") as HTMLInputElement;
+        UiElementHandler.loginButton = document.getElementById("login_button") as HTMLElement;
+        UiElementHandler.msgInput = document.getElementById("msgInput") as HTMLInputElement;
+        UiElementHandler.chatbox = document.getElementById("chatbox") as HTMLInputElement;
+        UiElementHandler.sendMsgButton = document.getElementById("sendMessage") as HTMLElement;
+        UiElementHandler.connectToUserButton = document.getElementById("userConnect") as HTMLElement;
+        UiElementHandler.usernameToConnectTo = document.getElementById("connectToUsername") as HTMLInputElement;
+        UiElementHandler.disconnectButton = document.getElementById("disconnectBtn") as HTMLElement;
+        UiElementHandler.startSignalingButton = document.getElementById("start_signalingServerButton") as HTMLElement;
+        UiElementHandler.peerToPeerHtmlElements = document.getElementById("peer_to_peer_elements") as HTMLElement;
+        UiElementHandler.broadcastButton = document.getElementById("broadcastButton") as HTMLElement;
+    }
 }

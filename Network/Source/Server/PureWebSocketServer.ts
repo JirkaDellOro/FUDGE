@@ -1,5 +1,7 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
+import { UiElementHandler } from "../DataCollectors";
+import { NetworkMessageMessageToServer } from "../NetworkMessages";
 
 export class PureWebSocketServer implements FudgeNetwork.WSServer {
     public websocketServer!: WebSocket.Server;
@@ -87,7 +89,7 @@ export class PureWebSocketServer implements FudgeNetwork.WSServer {
                     break;
 
                 case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
-                    this.broadcastMessageToAllConnectedClients(objectifiedMessage);
+                    this.displayMessageOnServer(<NetworkMessageMessageToServer>objectifiedMessage);
                     this.broadcastMessageToAllConnectedClients(_message);
                     break;
 
@@ -96,6 +98,15 @@ export class PureWebSocketServer implements FudgeNetwork.WSServer {
                     break;
 
             }
+        }
+    }
+    displayMessageOnServer(_objectifiedMessage: FudgeNetwork.NetworkMessageMessageToServer) {
+        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
+            let username: string = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
+            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + username + ": " + _objectifiedMessage.messageData;
+        }
+        else {
+            console.log("To display the message, add appropriate UiElemenHandler object");
         }
     }
 
@@ -122,6 +133,7 @@ export class PureWebSocketServer implements FudgeNetwork.WSServer {
     }
 
     public broadcastMessageToAllConnectedClients(_messageToBroadcast: string | Object) {
+
         let clientArray = Array.from(this.websocketServer.clients);
 
         clientArray.forEach(_client => {

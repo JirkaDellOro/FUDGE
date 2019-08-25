@@ -10,6 +10,8 @@ var MESSAGE_TYPE;
     MESSAGE_TYPE["RTC_ANSWER"] = "answer";
     MESSAGE_TYPE["ICE_CANDIDATE"] = "candidate";
     MESSAGE_TYPE["SERVER_ASSIGNMENT_REQUEST"] = "server_assignment_request";
+    MESSAGE_TYPE["CLIENT_TO_SERVER_MESSAGE"] = "client_to_server_message";
+    MESSAGE_TYPE["SERVER_TO_CLIENT_MESSAGE"] = "server_to_client_message";
     MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "server_command";
     MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peer_text_message";
     MESSAGE_TYPE["SERVER_TO_PEER_MESSAGE"] = "server_to_peer_message";

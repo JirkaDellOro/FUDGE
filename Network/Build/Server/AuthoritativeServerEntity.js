@@ -12,6 +12,7 @@ class AuthoritativeServerEntity {
     constructor() {
         this.authServerPeerConnectedClientCollection = new Array();
         this.peerConnectionBufferCollection = new Array();
+        this.movementSpeed = 3;
         // tslint:disable-next-line: typedef
         this.configuration = {
             iceServers: [
@@ -74,19 +75,6 @@ class AuthoritativeServerEntity {
             // let message: NetworkMessages.IceCandidate = new NetworkMessages.IceCandidate("SERVER", this.remoteClientId, candidate);
             // this.sendMessage(message);
         };
-        // tslint:disable-next-line: no-any
-        this.dataChannelStatusChangeHandler = (event) => {
-            console.log("Server Datachannel opened");
-        };
-        this.dataChannelMessageHandler = (_message) => {
-            console.log("Message received", _message);
-            // tslint:disable-next-line: no-any
-            let parsedMessage = JSON.parse(_message.data);
-            switch (parsedMessage.messageType) {
-                case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
-                    this.handleServerCommands(parsedMessage);
-            }
-        };
         this.handleServerCommands = (_commandMessage) => {
             switch (_commandMessage.commandType) {
                 case FudgeNetwork.SERVER_COMMAND_TYPE.DISCONNECT_CLIENT:
@@ -98,16 +86,6 @@ class AuthoritativeServerEntity {
                 default:
                     console.log("No idea what message this is", _commandMessage);
                     break;
-            }
-        };
-        this.disconnectClientByOwnCommand = (_commandMessage) => {
-            let clientToDisconnect = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-            clientToDisconnect.dataChannel.close();
-        };
-        this.handleKeyInputFromClient = (_commandMessage) => {
-            console.log(_commandMessage);
-            if (FudgeNetwork.UiElementHandler.moveableBoxElement) {
-                FudgeNetwork.UiElementHandler.moveableBoxElement.textContent = _commandMessage.pressedKey + "";
             }
         };
         this.initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect) => {
@@ -137,6 +115,56 @@ class AuthoritativeServerEntity {
             console.log("Sending offer now");
             const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.peerConnection.localDescription);
             this.signalingServer.sendToId(_clientToConnect.id, offerMessage);
+        };
+        this.disconnectClientByOwnCommand = (_commandMessage) => {
+            let clientToDisconnect = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
+            clientToDisconnect.dataChannel.close();
+        };
+        this.handleKeyInputFromClient = (_commandMessage) => {
+            console.log(_commandMessage);
+            let movingBox = FudgeNetwork.UiElementHandler.authoritativeServerMovingDiv;
+            if (movingBox) {
+                switch (+_commandMessage.pressedKey) {
+                    case 37:
+                        if (movingBox.style.left != null) {
+                            let previousLeft = parseInt(movingBox.style.left);
+                            movingBox.style.left = previousLeft - this.movementSpeed + "px";
+                        }
+                        break;
+                    case 38:
+                        if (movingBox.style.top != null) {
+                            let previousTop = parseInt(movingBox.style.top);
+                            movingBox.style.top = previousTop - this.movementSpeed + "px";
+                        }
+                        break;
+                    case 39:
+                        if (movingBox.style.left != null) {
+                            let previousLeft = parseInt(movingBox.style.left);
+                            movingBox.style.left = previousLeft + this.movementSpeed + "px";
+                        }
+                        break;
+                    case 40:
+                        if (movingBox.style.top != null) {
+                            let previousTop = parseInt(movingBox.style.top);
+                            movingBox.style.top = previousTop + this.movementSpeed + "px";
+                        }
+                        break;
+                }
+                movingBox.textContent = _commandMessage.pressedKey + "";
+            }
+        };
+        // tslint:disable-next-line: no-any
+        this.dataChannelStatusChangeHandler = (event) => {
+            console.log("Server Datachannel opened");
+        };
+        this.dataChannelMessageHandler = (_message) => {
+            console.log("Message received", _message);
+            // tslint:disable-next-line: no-any
+            let parsedMessage = JSON.parse(_message.data);
+            switch (parsedMessage.messageType) {
+                case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
+                    this.handleServerCommands(parsedMessage);
+            }
         };
         // Helper function for searching through a collection, finding objects by key and value, returning
         // Object that has that value

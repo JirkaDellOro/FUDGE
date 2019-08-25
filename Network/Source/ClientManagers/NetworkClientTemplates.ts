@@ -7,7 +7,7 @@ export interface ClientTemplate {
     getLocalUserName(): string;
 }
 
-export interface WebSocketClientManager extends ClientTemplate {
+export interface ClientManagerWebSocket extends ClientTemplate {
     signalingServerConnectionUrl: string;
     webSocketConnectionToSignalingServer: WebSocket;
 
@@ -18,7 +18,7 @@ export interface WebSocketClientManager extends ClientTemplate {
 
 }
 
-export interface MeshNetworkPeerConnectionManager extends WebSocketClientManager {
+export interface ClientManagerMeshClient extends ClientManagerWebSocket {
     localPeerConnectionCollection: RTCPeerConnection[];
 
     readonly configuration: Object;
@@ -39,7 +39,7 @@ export interface MeshNetworkPeerConnectionManager extends WebSocketClientManager
     sendMessageToServerViaDataChannel(_messageToSend: string): void;
     dataChannelMessageHandler(_messageEvent: MessageEvent): void;
 }
-export interface SinglePeerConnectionClientManager extends WebSocketClientManager {
+export interface ClientManagerSinglePeer extends ClientManagerWebSocket {
     // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
     readonly configuration: Object;
     ownPeerConnection: RTCPeerConnection;

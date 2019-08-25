@@ -6,6 +6,7 @@ export class AuthoritativeServerEntity {
     public authServerPeerConnectedClientCollection: FudgeNetwork.Client[] = new Array();
     public peerConnectionBufferCollection: RTCDataChannel[] = new Array();
 
+    private movementSpeed = 3;
 
     // tslint:disable-next-line: typedef
     public configuration = {
@@ -32,6 +33,7 @@ export class AuthoritativeServerEntity {
         // convert to base 36 and pick the first few digits after comma
         return "_" + Math.random().toString(36).substr(2, 7);
     }
+
     public addIceCandidateToServerConnection = async (_receivedIceMessage: FudgeNetwork.NetworkMessageIceCandidate) => {
         if (_receivedIceMessage.candidate) {
             let client: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_receivedIceMessage.originatorId, this.authServerPeerConnectedClientCollection);
@@ -42,7 +44,6 @@ export class AuthoritativeServerEntity {
 
     public parseMessageToJson = (_messageToParse: string): FudgeNetwork.NetworkMessageMessageBase => {
         let parsedMessage: FudgeNetwork.NetworkMessageMessageBase = { originatorId: " ", messageType: FudgeNetwork.MESSAGE_TYPE.UNDEFINED };
-
         try {
             parsedMessage = JSON.parse(_messageToParse);
         } catch (error) {
@@ -82,22 +83,6 @@ export class AuthoritativeServerEntity {
 
     }
 
-    // tslint:disable-next-line: no-any
-    private dataChannelStatusChangeHandler = (event: any) => {
-        console.log("Server Datachannel opened");
-    }
-
-    private dataChannelMessageHandler = (_message: MessageEvent) => {
-        console.log("Message received", _message);
-        // tslint:disable-next-line: no-any
-        let parsedMessage: FudgeNetwork.PeerMessageTemplate = JSON.parse(_message.data);
-
-        switch (parsedMessage.messageType) {
-            case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
-                this.handleServerCommands(parsedMessage);
-        }
-    }
-
     private handleServerCommands = (_commandMessage: FudgeNetwork.PeerMessageTemplate) => {
         switch (_commandMessage.commandType) {
             case FudgeNetwork.SERVER_COMMAND_TYPE.DISCONNECT_CLIENT:
@@ -114,17 +99,6 @@ export class AuthoritativeServerEntity {
     }
 
 
-    private disconnectClientByOwnCommand = (_commandMessage: FudgeNetwork.PeerMessageDisconnectClient) => {
-        let clientToDisconnect: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-        clientToDisconnect.dataChannel.close();
-    }
-
-    private handleKeyInputFromClient = (_commandMessage: FudgeNetwork.PeerMessageKeysInput) => {
-        console.log(_commandMessage);
-        if (FudgeNetwork.UiElementHandler.moveableBoxElement) {
-            FudgeNetwork.UiElementHandler.moveableBoxElement.textContent = _commandMessage.pressedKey + "";
-        }
-    }
 
 
     private initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect: FudgeNetwork.Client): void => {
@@ -159,7 +133,64 @@ export class AuthoritativeServerEntity {
 
 
 
+    private disconnectClientByOwnCommand = (_commandMessage: FudgeNetwork.PeerMessageDisconnectClient) => {
+        let clientToDisconnect: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
+        clientToDisconnect.dataChannel.close();
+    }
 
+    private handleKeyInputFromClient = (_commandMessage: FudgeNetwork.PeerMessageKeysInput) => {
+        console.log(_commandMessage);
+        let movingBox = FudgeNetwork.UiElementHandler.authoritativeServerMovingDiv;
+        if (movingBox) {
+            switch (+_commandMessage.pressedKey) {
+                case 37:
+                    if (movingBox.style.left != null) {
+                        let previousLeft = parseInt(movingBox.style.left);
+                        movingBox.style.left = previousLeft - this.movementSpeed + "px";
+                    }
+                    break;
+                case 38:
+
+                    if (movingBox.style.top != null) {
+                        let previousTop = parseInt(movingBox.style.top);
+                        movingBox.style.top = previousTop - this.movementSpeed + "px";
+                    }
+                    break;
+
+                case 39:
+                    if (movingBox.style.left != null) {
+                        let previousLeft = parseInt(movingBox.style.left);
+                        movingBox.style.left = previousLeft + this.movementSpeed + "px";
+                    }
+                    break;
+
+                case 40:
+                    if (movingBox.style.top != null) {
+                        let previousTop = parseInt(movingBox.style.top);
+                        movingBox.style.top = previousTop + this.movementSpeed + "px";
+                    }
+                    break;
+            }
+            movingBox.textContent = _commandMessage.pressedKey + "";
+        }
+    }
+
+
+    // tslint:disable-next-line: no-any
+    private dataChannelStatusChangeHandler = (event: any) => {
+        console.log("Server Datachannel opened");
+    }
+
+    private dataChannelMessageHandler = (_message: MessageEvent) => {
+        console.log("Message received", _message);
+        // tslint:disable-next-line: no-any
+        let parsedMessage: FudgeNetwork.PeerMessageTemplate = JSON.parse(_message.data);
+
+        switch (parsedMessage.messageType) {
+            case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
+                this.handleServerCommands(parsedMessage);
+        }
+    }
 
 
     // Helper function for searching through a collection, finding objects by key and value, returning

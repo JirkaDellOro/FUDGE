@@ -11,14 +11,14 @@ FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectT
 FudgeNetwork.UiElementHandler.loginButton.addEventListener("click", createLoginRequestWithUsername);
 FudgeNetwork.UiElementHandler.switchModeButton.addEventListener("click", switchServerMode);
 FudgeNetwork.UiElementHandler.sendMsgButton.addEventListener("click", sendMessageToServer);
-FudgeNetwork.UiElementHandler.sendMessageAsServer.addEventListener("click", broadcastMessageToClients);
+FudgeNetwork.UiElementHandler.webSocketServerSendMessageButton.addEventListener("click", broadcastMessageToClients);
 
 
 FudgeNetwork.UiElementHandler.signalingElements.style.display = "block";
 FudgeNetwork.UiElementHandler.serverElements.style.display = "none";
 
 function broadcastMessageToClients() {
-    let messageToBroadcast = new FudgeNetwork.NetworkMessageMessageToClient(FudgeNetwork.UiElementHandler.msgInputServer.value);
+    let messageToBroadcast = new FudgeNetwork.NetworkMessageMessageToClient(FudgeNetwork.UiElementHandler.webSocketServerMessageInput.value);
     pureWebSocketServer.broadcastMessageToAllConnectedClients(messageToBroadcast);
 }
 function startingUpSignalingServer(): void {

@@ -1,6 +1,6 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class PureWebSocketClientManager implements FudgeNetwork.WebSocketClientManager {
+export class PureWebSocketClientManager implements FudgeNetwork.ClientManagerWebSocket {
 
     public signalingServerConnectionUrl: string = "ws://localhost:8080";
     public localUserName: string;
@@ -95,6 +95,10 @@ export class PureWebSocketClientManager implements FudgeNetwork.WebSocketClientM
 
             case FudgeNetwork.MESSAGE_TYPE.LOGIN_RESPONSE:
                 this.loginValidAddUser(objectifiedMessage.originatorId, objectifiedMessage.loginSuccess, objectifiedMessage.originatorUsername);
+                break;
+
+            case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+                console.log("BroadcastMessage received, requires further handling", _receivedMessage);
                 break;
 
             case FudgeNetwork.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE:
