@@ -1,5 +1,5 @@
 import * as FudgeNetwork from "../ModuleCollector";
-export interface ClientTemplate {
+export interface ClientManagerTemplate {
     localUserName?: string;
     localClientID: string;
 
@@ -7,7 +7,7 @@ export interface ClientTemplate {
     getLocalUserName(): string;
 }
 
-export interface ClientManagerWebSocket extends ClientTemplate {
+export interface ClientManagerWebSocketTemplate extends ClientManagerTemplate {
     signalingServerConnectionUrl: string;
     webSocketConnectionToSignalingServer: WebSocket;
 
@@ -18,15 +18,15 @@ export interface ClientManagerWebSocket extends ClientTemplate {
 
 }
 
-export interface ClientManagerMeshClient extends ClientManagerWebSocket {
-    remoteMeshClients: FudgeNetwork.Client[];
+export interface ClientManagerMeshTemplate extends ClientManagerWebSocketTemplate {
+    remoteMeshClients: FudgeNetwork.ClientDataType[];
 
     readonly configuration: Object;
     isInitiator: boolean;
 
     beginPeerConnectionNegotiation(_userNameForOffer: string): void;
-    createNegotiationOfferAndSendToPeer(_currentlyNegotiatingPeer: FudgeNetwork.Client): void;
-    answerNegotiationOffer(_remoteMeshClient: FudgeNetwork.Client): void;
+    createNegotiationOfferAndSendToPeer(_currentlyNegotiatingPeer: FudgeNetwork.ClientDataType): void;
+    answerNegotiationOffer(_remoteMeshClient: FudgeNetwork.ClientDataType): void;
     sendIceCandidatesToPeer(_candidate: Object): void;
     receiveNegotiationOfferAndSetRemoteDescription(_offerMessage: FudgeNetwork.NetworkMessageRtcOffer): void;
     receiveAnswerAndSetRemoteDescription(_rtcAnswer: FudgeNetwork.NetworkMessageRtcAnswer): void;
@@ -34,7 +34,7 @@ export interface ClientManagerMeshClient extends ClientManagerWebSocket {
     receiveDataChannelAndEstablishConnection(_event: any): void;
     dataChannelMessageHandler(_messageEvent: MessageEvent): void;
 }
-export interface ClientManagerSinglePeer extends ClientManagerWebSocket {
+export interface ClientManagerSinglePeerTemplate extends ClientManagerWebSocketTemplate {
     // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
     readonly configuration: Object;
     ownPeerConnection: RTCPeerConnection;

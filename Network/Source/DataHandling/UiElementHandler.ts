@@ -79,11 +79,10 @@ export abstract class UiElementHandler {
         UiElementHandler.authoritativeServerStopSignalingButton = document.getElementById("stop_signalingServerButton") as HTMLElement;
         UiElementHandler.authoritativeServerBroadcastButton = document.getElementById("broadcastButton") as HTMLElement;
         UiElementHandler.authoritativeServerMessageInput = document.getElementById("auth_server_input") as HTMLInputElement;
-        UiElementHandler.authoritativeServerMovingDiv = document.getElementById("moveIt") as HTMLElement;
-        UiElementHandler.authoritativeServerMovingDiv.style.position = "relative";
-        UiElementHandler.authoritativeServerMovingDiv.style.left = "0px";
-        UiElementHandler.authoritativeServerMovingDiv.style.top = "0px";
-
+        // UiElementHandler.authoritativeServerMovingDiv = document.getElementById("moveIt") as HTMLElement;
+        // UiElementHandler.authoritativeServerMovingDiv.style.position = "relative";
+        // UiElementHandler.authoritativeServerMovingDiv.style.left = "0px";
+        // UiElementHandler.authoritativeServerMovingDiv.style.top = "0px";
         UiElementHandler.authoritativeClientElements = document.getElementById("auth_client_elements") as HTMLElement;
         UiElementHandler.authoritativeClientSignalingUrlInput = document.getElementById("signaling_uri") as HTMLInputElement;
         UiElementHandler.authoritativeClientConnectToServerButton = document.getElementById("submit_button") as HTMLElement;
@@ -136,4 +135,16 @@ export abstract class UiElementHandler {
         UiElementHandler.peerToPeerHtmlElements = document.getElementById("peer_to_peer_elements") as HTMLElement;
         UiElementHandler.broadcastButton = document.getElementById("broadcastButton") as HTMLElement;
     }
+
+
+    private static colorList: string[] = ["#ff1100", "#ffe600", "#aaff00", "#26ff00", "#00ffd9", "#0059ff", "#d900ff", "#ff0084"]
+    private static colorListIndex: number = 0;
+    public static addMovingDivForAuth(): HTMLElement {
+        let movingDiv = document.createElement('div');
+        movingDiv.style.cssText = "style=height:50px;width:50px;background-color:" + this.colorList[this.colorListIndex] + "; position:relative; left: 0px; top: 0px;";
+        this.colorListIndex++;
+        document.body.appendChild(movingDiv);
+        return movingDiv;
+    }
+
 }

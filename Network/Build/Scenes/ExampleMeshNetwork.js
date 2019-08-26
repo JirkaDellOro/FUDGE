@@ -7,7 +7,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const FudgeNetwork = __importStar(require("./../ModuleCollector"));
+const FudgeNetwork = __importStar(require("../ModuleCollector"));
 let isServer = false;
 const meshClientManager = new FudgeNetwork.ClientManagerFullMeshStructure();
 const meshServer = new FudgeNetwork.FudgeServerMeshNetwork();

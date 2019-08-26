@@ -1,11 +1,16 @@
-import * as FudgeNetwork from "../ModuleCollector";
-
-let asMode: boolean = false;
-const networkClient: FudgeNetwork.ClientManagerSinglePeer = new FudgeNetwork.ClientManagerSinglePeer();
-const peerToPeerSignalingServer: FudgeNetwork.FudgeServerSinglePeer = new FudgeNetwork.FudgeServerSinglePeer();
-
-
-
+"use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const FudgeNetwork = __importStar(require("../ModuleCollector"));
+let asMode = false;
+const networkClient = new FudgeNetwork.ClientManagerSinglePeer();
+const peerToPeerSignalingServer = new FudgeNetwork.FudgeServerSinglePeer();
 FudgeNetwork.UiElementHandler.getAllUiElements();
 FudgeNetwork.UiElementHandler.startSignalingButton.addEventListener("click", startingUpSignalingServer);
 FudgeNetwork.UiElementHandler.signalingSubmit.addEventListener("click", connectToSignalingServer);
@@ -13,11 +18,8 @@ FudgeNetwork.UiElementHandler.loginButton.addEventListener("click", createLoginR
 FudgeNetwork.UiElementHandler.connectToUserButton.addEventListener("click", connectToOtherPeer);
 FudgeNetwork.UiElementHandler.sendMsgButton.addEventListener("click", sendMessageViaPeerConnectionChannel);
 FudgeNetwork.UiElementHandler.stopSignalingServer.addEventListener("click", turnOffSignalingServer);
-
-
-
-function createLoginRequestWithUsername(): void {
-    let chosenUserName: string = "";
+function createLoginRequestWithUsername() {
+    let chosenUserName = "";
     if (FudgeNetwork.UiElementHandler.loginNameInput) {
         chosenUserName = FudgeNetwork.UiElementHandler.loginNameInput.value;
         console.log("Username:" + chosenUserName);
@@ -27,9 +29,8 @@ function createLoginRequestWithUsername(): void {
         console.error("UI element missing: Loginname Input field");
     }
 }
-
-function connectToOtherPeer(): void {
-    let userNameToConnectTo: string = "";
+function connectToOtherPeer() {
+    let userNameToConnectTo = "";
     if (FudgeNetwork.UiElementHandler.usernameToConnectTo) {
         userNameToConnectTo = FudgeNetwork.UiElementHandler.usernameToConnectTo.value;
         networkClient.checkUsernameToConnectToAndInitiateConnection(userNameToConnectTo);
@@ -38,44 +39,32 @@ function connectToOtherPeer(): void {
         console.error("Missing Ui Element: Username to connect to");
     }
 }
-
-function sendMessageViaPeerConnectionChannel(): void {
-    let messageToSend: string = FudgeNetwork.UiElementHandler.msgInput.value;
+function sendMessageViaPeerConnectionChannel() {
+    let messageToSend = FudgeNetwork.UiElementHandler.msgInput.value;
     FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + networkClient.localUserName + ": " + messageToSend;
     networkClient.sendMessageToSingularPeer(messageToSend);
 }
-
-
-
-function startingUpSignalingServer(): void {
+function startingUpSignalingServer() {
     console.log("Turning server ONLINE");
-
     peerToPeerSignalingServer.startUpServer(8080);
-
-    let startSignalingButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.startSignalingButton as HTMLButtonElement;
+    let startSignalingButton = FudgeNetwork.UiElementHandler.startSignalingButton;
     startSignalingButton.hidden = true;
-    let stopSignalingButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.stopSignalingServer as HTMLButtonElement;
+    let stopSignalingButton = FudgeNetwork.UiElementHandler.stopSignalingServer;
     stopSignalingButton.hidden = false;
 }
-
-function turnOffSignalingServer(): void {
+function turnOffSignalingServer() {
     peerToPeerSignalingServer.closeDownServer();
-
-
-    let startSignalingButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.startSignalingButton as HTMLButtonElement;
+    let startSignalingButton = FudgeNetwork.UiElementHandler.startSignalingButton;
     startSignalingButton.hidden = false;
-    let stopSignalingButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.stopSignalingServer as HTMLButtonElement;
+    let stopSignalingButton = FudgeNetwork.UiElementHandler.stopSignalingServer;
     stopSignalingButton.hidden = true;
-    let switchButton: HTMLButtonElement = FudgeNetwork.UiElementHandler.switchModeButton as HTMLButtonElement;
+    let switchButton = FudgeNetwork.UiElementHandler.switchModeButton;
     switchButton.hidden = false;
 }
-function connectToSignalingServer(): void {
+function connectToSignalingServer() {
     networkClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
     networkClient.connectToSignalingServer();
 }
-
-
-
 // Changing HTML pages restarts the renderer process, causing connection loss on networking
 // so not doable this way. Single page required or different way to change page (testing only so not that important)
 // const { remote } = require('electron')

@@ -7,7 +7,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const FudgeNetwork = __importStar(require("./../ModuleCollector"));
+const FudgeNetwork = __importStar(require("../ModuleCollector"));
 const NetworkMessages_1 = require("../NetworkMessages");
 let isServer = false;
 const networkClient = new FudgeNetwork.ClientManagerAuthoritativeStructure();
@@ -50,7 +50,7 @@ function sendMessageViaPeerConnectionChannel() {
     networkClient.sendMessageToSingularPeer(messageToSend);
 }
 function broadcastMessageToClients() {
-    let stringifiedMessage = JSON.stringify(new NetworkMessages_1.PeerMessageSimpleText(networkClient.getLocalClientId(), FudgeNetwork.UiElementHandler.authoritativeServerMessageInput.value));
+    let stringifiedMessage = JSON.stringify(new NetworkMessages_1.PeerMessageSimpleText(networkClient.getLocalClientId(), FudgeNetwork.UiElementHandler.authoritativeServerMessageInput.value, networkClient.localUserName));
     authoritativeSignalingServer.getAuthoritativeServerEntity().broadcastMessageToAllConnectedClients(stringifiedMessage);
 }
 function switchServerMode() {

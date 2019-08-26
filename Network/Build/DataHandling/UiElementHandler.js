@@ -23,10 +23,10 @@ class UiElementHandler {
         UiElementHandler.authoritativeServerStopSignalingButton = document.getElementById("stop_signalingServerButton");
         UiElementHandler.authoritativeServerBroadcastButton = document.getElementById("broadcastButton");
         UiElementHandler.authoritativeServerMessageInput = document.getElementById("auth_server_input");
-        UiElementHandler.authoritativeServerMovingDiv = document.getElementById("moveIt");
-        UiElementHandler.authoritativeServerMovingDiv.style.position = "relative";
-        UiElementHandler.authoritativeServerMovingDiv.style.left = "0px";
-        UiElementHandler.authoritativeServerMovingDiv.style.top = "0px";
+        // UiElementHandler.authoritativeServerMovingDiv = document.getElementById("moveIt") as HTMLElement;
+        // UiElementHandler.authoritativeServerMovingDiv.style.position = "relative";
+        // UiElementHandler.authoritativeServerMovingDiv.style.left = "0px";
+        // UiElementHandler.authoritativeServerMovingDiv.style.top = "0px";
         UiElementHandler.authoritativeClientElements = document.getElementById("auth_client_elements");
         UiElementHandler.authoritativeClientSignalingUrlInput = document.getElementById("signaling_uri");
         UiElementHandler.authoritativeClientConnectToServerButton = document.getElementById("submit_button");
@@ -72,5 +72,14 @@ class UiElementHandler {
         UiElementHandler.peerToPeerHtmlElements = document.getElementById("peer_to_peer_elements");
         UiElementHandler.broadcastButton = document.getElementById("broadcastButton");
     }
+    static addMovingDivForAuth() {
+        let movingDiv = document.createElement('div');
+        movingDiv.style.cssText = "style=height:50px;width:50px;background-color:" + this.colorList[this.colorListIndex] + "; position:relative; left: 0px; top: 0px;";
+        this.colorListIndex++;
+        document.body.appendChild(movingDiv);
+        return movingDiv;
+    }
 }
+UiElementHandler.colorList = ["#ff1100", "#ffe600", "#aaff00", "#26ff00", "#00ffd9", "#0059ff", "#d900ff", "#ff0084"];
+UiElementHandler.colorListIndex = 0;
 exports.UiElementHandler = UiElementHandler;

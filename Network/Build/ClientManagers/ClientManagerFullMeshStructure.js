@@ -60,6 +60,7 @@ class ClientManagerFullMeshStructure {
                     this.loginValidAddUser(objectifiedMessage);
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT:
+                    console.log("Received Client Mesh Array: ", _receivedMessage);
                     this.beginnMeshConnection(objectifiedMessage);
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.RTC_OFFER:
@@ -156,7 +157,7 @@ class ClientManagerFullMeshStructure {
         };
         this.receiveNegotiationOfferAndSetRemoteDescription = (_offerMessage) => {
             // DAS IST VON DER ANDEREN SEITE
-            let newlyReceivedClient = new FudgeNetwork.Client(undefined, _offerMessage.originatorId, new RTCPeerConnection(this.configuration));
+            let newlyReceivedClient = new FudgeNetwork.ClientDataType(undefined, _offerMessage.originatorId, new RTCPeerConnection(this.configuration));
             this.remoteMeshClients.push(newlyReceivedClient);
             newlyReceivedClient.rtcPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
             let offerToSet = _offerMessage.offer;
@@ -289,6 +290,7 @@ class ClientManagerFullMeshStructure {
                 // tslint:disable-next-line: no-any
                 let parsedObject = this.parseReceivedMessageAndReturnObject(_messageEvent);
                 FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+                FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
             }
         };
         this.dataChannelStatusChangeHandler = (event) => {
@@ -299,7 +301,7 @@ class ClientManagerFullMeshStructure {
         this.localClientID = "undefined";
         this.isInitiator = false;
         this.remoteMeshClients = new Array();
-        this.currentlyNegotiatingClient = new FudgeNetwork.Client();
+        this.currentlyNegotiatingClient = new FudgeNetwork.ClientDataType();
     }
     beginnMeshConnection(_meshClientMessage) {
         if (_meshClientMessage) {
@@ -324,7 +326,7 @@ class ClientManagerFullMeshStructure {
         this.sendMessageToSignalingServer(connectedToMeshMessage);
     }
     createMeshClientAndAddPeerConnection() {
-        let newMeshClient = new FudgeNetwork.Client();
+        let newMeshClient = new FudgeNetwork.ClientDataType();
         let newClientPeerConnection = new RTCPeerConnection(this.configuration);
         newClientPeerConnection.addEventListener("icecandidate", this.sendIceCandidatesToPeer);
         newMeshClient.rtcPeerConnection = newClientPeerConnection;

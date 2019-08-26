@@ -45,8 +45,8 @@ function createLoginRequestWithUsername(): void {
 
 function sendMessageToServer() {
     console.log("sending message");
-    let messageToSend: FudgeNetwork.NetworkMessageMessageToServer = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value);
-    pureWebSocketClient.sendMessageToSignalingServer(messageToSend);
+    let messageToSend: FudgeNetwork.NetworkMessageMessageToServer = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value, pureWebSocketClient.localUserName);
+    pureWebSocketClient.sendTextMessageToSignalingServer(messageToSend);
 }
 
 function switchServerMode(): void {

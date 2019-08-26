@@ -1,6 +1,6 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientManagerSinglePeer {
+export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientManagerSinglePeerTemplate {
     public signalingServerConnectionUrl: string = "ws://localhost:8080";
     public localUserName: string;
     public localClientID: string;
@@ -297,7 +297,7 @@ export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientM
 
 
     public sendMessageToSingularPeer = (_messageToSend: string) => {
-        let messageObject: FudgeNetwork.PeerMessageSimpleText = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend);
+        let messageObject: FudgeNetwork.PeerMessageSimpleText = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend, this.localUserName);
 
         let stringifiedMessage: string = this.stringifyObjectForNetworkSending(messageObject);
         console.log(stringifiedMessage);
@@ -367,6 +367,7 @@ export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientM
             let parsedObject: any = this.parseReceivedMessageAndReturnObject(_messageEvent);
             if (FudgeNetwork.UiElementHandler.authoritativeClientChatArea) {
                 FudgeNetwork.UiElementHandler.authoritativeClientChatArea.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+                FudgeNetwork.UiElementHandler.authoritativeClientChatArea.scrollTop = FudgeNetwork.UiElementHandler.authoritativeClientChatArea.scrollHeight;
             }
         }
     }

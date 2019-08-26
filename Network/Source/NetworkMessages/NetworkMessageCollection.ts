@@ -84,12 +84,14 @@ export class NetworkMessageIceCandidate implements NetworkMessageMessageBase {
 export class NetworkMessageMessageToServer implements NetworkMessageMessageBase {
     public messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE;
     public originatorId: string;
+    public originatorUserName: string;
 
     public messageData: string;
 
-    constructor(_originatorId: string, _messageData: string) {
+    constructor(_originatorId: string, _messageData: string, _originatorUserName: string) {
         this.originatorId = _originatorId;
         this.messageData = _messageData;
+        this.originatorUserName = _originatorUserName;
     }
 }
 
@@ -116,9 +118,9 @@ export class NetworkMessageServerSendMeshClientArray implements NetworkMessageMe
     messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT;
     originatorId: string = "SERVER";
 
-    candidateArray: FudgeNetwork.Client[];
+    candidateArray: FudgeNetwork.ClientDataType[];
 
-    constructor(_candidateArray: FudgeNetwork.Client[]) {
+    constructor(_candidateArray: FudgeNetwork.ClientDataType[]) {
         this.candidateArray = _candidateArray;
     }
 }
@@ -152,12 +154,14 @@ export interface PeerMessageTemplate {
 
 export class PeerMessageSimpleText implements PeerMessageTemplate {
     originatorId: string;
+    originatorUserName: string;
     messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.PEER_TEXT_MESSAGE;
     commandType: FudgeNetwork.SERVER_COMMAND_TYPE = FudgeNetwork.SERVER_COMMAND_TYPE.UNDEFINED;
     messageData: string;
 
-    constructor(_originatorId: string, _messageData: string) {
+    constructor(_originatorId: string, _messageData: string, _originatorUserName: string) {
         this.originatorId = _originatorId;
+        this.originatorUserName = _originatorUserName;
         this.messageData = _messageData;
     }
 }

@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
-class NetworkClientManager {
+class ClientManagerAuthoritativeStructure {
     constructor() {
         this.signalingServerConnectionUrl = "ws://localhost:8080";
         // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
@@ -98,14 +98,6 @@ class NetworkClientManager {
                 console.log("Login failed, username taken");
             }
         };
-        this.checkUsernameToConnectToAndInitiateConnection = (_chosenUserNameToConnectTo) => {
-            if (_chosenUserNameToConnectTo.length === 0) {
-                console.error("Enter a username 😉");
-                return;
-            }
-            this.remoteClientId = _chosenUserNameToConnectTo;
-            this.beginPeerConnectionNegotiation(this.remoteClientId);
-        };
         this.createRTCPeerConnectionAndAddEventListeners = () => {
             console.log("Creating RTC Connection");
             try {
@@ -170,7 +162,6 @@ class NetworkClientManager {
                 return;
             }
             this.ownPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
-            this.remoteClientId = _offerMessage.originatorId;
             let offerToSet = _offerMessage.offer;
             if (!offerToSet) {
                 return;
@@ -216,7 +207,7 @@ class NetworkClientManager {
         this.sendIceCandidatesToPeer = ({ candidate }) => {
             try {
                 console.log("Sending ICECandidates from: ", this.localClientID);
-                let message = new FudgeNetwork.NetworkMessageIceCandidate(this.localClientID, this.remoteClientId, candidate);
+                let message = new FudgeNetwork.NetworkMessageIceCandidate(this.localClientID, "", candidate);
                 this.sendMessageToSignalingServer(message);
             }
             catch (error) {
@@ -275,7 +266,7 @@ class NetworkClientManager {
             }
         };
         this.sendMessageToSingularPeer = (_messageToSend) => {
-            let messageObject = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend);
+            let messageObject = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend, this.localUserName);
             let stringifiedMessage = this.stringifyObjectForNetworkSending(messageObject);
             console.log(stringifiedMessage);
             if (this.isInitiator && this.ownPeerDataChannel) {
@@ -336,7 +327,10 @@ class NetworkClientManager {
             if (_messageEvent) {
                 // tslint:disable-next-line: no-any
                 let parsedObject = this.parseReceivedMessageAndReturnObject(_messageEvent);
-                FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+                if (FudgeNetwork.UiElementHandler.authoritativeClientChatArea) {
+                    FudgeNetwork.UiElementHandler.authoritativeClientChatArea.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+                    FudgeNetwork.UiElementHandler.authoritativeClientChatArea.scrollTop = FudgeNetwork.UiElementHandler.authoritativeClientChatArea.scrollHeight;
+                }
             }
         };
         this.dataChannelStatusChangeHandler = (event) => {
@@ -345,7 +339,6 @@ class NetworkClientManager {
         };
         this.localUserName = "";
         this.localClientID = "undefined";
-        this.remoteClientId = "";
         this.isInitiator = false;
         this.remoteEventPeerDataChannel = undefined;
         this.createRTCPeerConnectionAndAddEventListeners();
@@ -363,4 +356,4 @@ class NetworkClientManager {
         return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
     }
 }
-exports.NetworkClientManager = NetworkClientManager;
+exports.ClientManagerAuthoritativeStructure = ClientManagerAuthoritativeStructure;
