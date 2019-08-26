@@ -48,7 +48,7 @@ function sendMessageViaPeerConnectionChannel(): void {
 }
 
 function broadcastMessageToClients(): void {
-    let stringifiedMessage: string = JSON.stringify(new PeerMessageSimpleText(networkClient.getLocalClientId(), FudgeNetwork.UiElementHandler.authoritativeServerMessageInput.value));
+    let stringifiedMessage: string = JSON.stringify(new PeerMessageSimpleText(networkClient.getLocalClientId(), FudgeNetwork.UiElementHandler.authoritativeServerMessageInput.value, networkClient.localUserName));
     authoritativeSignalingServer.getAuthoritativeServerEntity().broadcastMessageToAllConnectedClients(stringifiedMessage);
 }
 

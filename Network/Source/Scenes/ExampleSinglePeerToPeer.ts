@@ -15,17 +15,6 @@ FudgeNetwork.UiElementHandler.sendMsgButton.addEventListener("click", sendMessag
 FudgeNetwork.UiElementHandler.stopSignalingServer.addEventListener("click", turnOffSignalingServer);
 
 
-function addKeypressListener(): void {
-    let browser: Document = FudgeNetwork.UiElementHandler.electronWindow;
-    browser.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.keyCode == 27) {
-            networkClient.sendDisconnectRequest();
-        }
-        else {
-            networkClient.sendKeyPress(event.keyCode);
-        }
-    });
-}
 
 function createLoginRequestWithUsername(): void {
     let chosenUserName: string = "";
@@ -83,8 +72,6 @@ function turnOffSignalingServer(): void {
 function connectToSignalingServer(): void {
     networkClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
     networkClient.connectToSignalingServer();
-
-    addKeypressListener();
 }
 
 
