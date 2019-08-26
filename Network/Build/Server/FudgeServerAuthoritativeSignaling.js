@@ -23,8 +23,8 @@ class FudgeServerAuthoritativeSignaling {
             else {
                 this.websocketServer = new ws_1.default.Server({ port: _serverPort });
             }
-            this.setAuthoritativeServerEntity(new FudgeNetwork.AuthoritativeServerEntity());
-            this.authoritativeServerEntity.signalingServer = this;
+            this.setAuthoritativeServerEntity(new FudgeNetwork.FudgeServerAuthoritativeManager());
+            this.authoritativeServerManager.signalingServer = this;
             this.addServerEventHandling();
         };
         this.closeDownServer = () => {
@@ -35,10 +35,10 @@ class FudgeServerAuthoritativeSignaling {
             this.websocketServer.on("connection", (_websocketClient) => {
                 console.log("User connected to autho-SignalingServer");
                 const uniqueIdOnConnection = this.createID();
-                const freshlyConnectedClient = new FudgeNetwork.Client(_websocketClient, uniqueIdOnConnection);
+                const freshlyConnectedClient = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
                 this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
                 this.connectedClientsCollection.push(freshlyConnectedClient);
-                this.authoritativeServerEntity.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
+                this.authoritativeServerManager.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
                 _websocketClient.on("message", (_message) => {
                     this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
                 });
@@ -111,15 +111,15 @@ class FudgeServerAuthoritativeSignaling {
         };
     }
     setAuthoritativeServerEntity(_entity) {
-        if (this.authoritativeServerEntity) {
+        if (this.authoritativeServerManager) {
             console.error("Server Entity already exists, did you try to assign it twice?");
         }
         else {
-            this.authoritativeServerEntity = _entity;
+            this.authoritativeServerManager = _entity;
         }
     }
     getAuthoritativeServerEntity() {
-        return this.authoritativeServerEntity;
+        return this.authoritativeServerManager;
     }
     // TODO Check if event.type can be used for identification instead => It cannot
     serverDistributeMessageToAppropriateMethod(_message, _websocketClient) {
@@ -141,7 +141,7 @@ class FudgeServerAuthoritativeSignaling {
                     this.answerRtcOfferOfClient(_websocketClient, messageData);
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
-                    this.handDownIceCandidatesToAuthEntity(messageData);
+                    this.sendIceCandidatesToRelevantPeer(_websocketClient, messageData);
                     break;
                 default:
                     console.log("Message type not recognized");
@@ -181,10 +181,13 @@ class FudgeServerAuthoritativeSignaling {
     }
     answerRtcOfferOfClient(_websocketClient, _messageData) {
         console.log("Sending answer to AS-Entity");
-        this.authoritativeServerEntity.receiveAnswerAndSetRemoteDescription(_websocketClient, _messageData);
+        this.authoritativeServerManager.receiveAnswerAndSetRemoteDescription(_websocketClient, _messageData);
     }
-    handDownIceCandidatesToAuthEntity(_messageData) {
-        this.authoritativeServerEntity.addIceCandidateToServerConnection(_messageData);
+    sendIceCandidatesToRelevantPeer(_webSocketClient, _messageData) {
+        // _webSocketClient is only needed for two things 
+        // 1) satisfy the interface 
+        // 2) if you intend to split up signaling server and authoritative server
+        this.authoritativeServerManager.addIceCandidateToServerConnection(_messageData);
     }
     //#endregion
     //#region Helperfunctions
@@ -204,4 +207,3 @@ class FudgeServerAuthoritativeSignaling {
     }
 }
 exports.FudgeServerAuthoritativeSignaling = FudgeServerAuthoritativeSignaling;
-// AuthoritativeSignalingServer.startUpServer();

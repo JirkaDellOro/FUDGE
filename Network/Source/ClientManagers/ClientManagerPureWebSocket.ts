@@ -1,6 +1,6 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWebSocket {
+export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWebSocketTemplate {
 
     public signalingServerConnectionUrl: string = "ws://localhost:8080";
     public localUserName: string;
@@ -17,17 +17,6 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
             this.addWebSocketEventListeners();
         } catch (error) {
             console.log("Websocket Generation gescheitert");
-        }
-    }
-
-    public sendMessageToSignalingServer = (_message: Object) => {
-        console.log("Sending Message to Server");
-        let stringifiedMessage: string = this.stringifyObjectForNetworkSending(_message);
-        if (this.webSocketConnectionToSignalingServer.readyState == 1) {
-            this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
-        }
-        else {
-            console.error("Websocket Connection closed unexpectedly");
         }
     }
 
@@ -102,12 +91,19 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
                 break;
 
             case FudgeNetwork.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE:
-                console.log("ServerMessage received: ", _receivedMessage);
+                this.displayServerMessage(_receivedMessage);
                 break;
 
             default:
                 console.error("Unrecognized Messagetype, did you handle it in Client?");
         }
+    }
+
+    private displayServerMessage(_messageToDisplay: any) {
+        // tslint:disable-next-line: no-any
+        let parsedObject: FudgeNetwork.NetworkMessageMessageToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
+        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
     }
 
     private assignIdAndSendConfirmation = (_message: FudgeNetwork.NetworkMessageIdAssigned) => {
@@ -118,6 +114,31 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
             console.error("Unexpected Error: Sending ID Confirmation", error);
         }
     }
+
+    public sendMessageToSignalingServer = (_message: Object) => {
+        console.log("Sending Message to Server");
+        let stringifiedMessage: string = this.stringifyObjectForNetworkSending(_message);
+        if (this.webSocketConnectionToSignalingServer.readyState == 1) {
+            this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
+        }
+        else {
+            console.error("Websocket Connection closed unexpectedly");
+        }
+    }
+
+    public sendTextMessageToSignalingServer = (_message: FudgeNetwork.NetworkMessageMessageToServer) => {
+        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + _message.originatorUserName + ": " + _message.messageData;
+        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+
+        let stringifiedMessage: string = this.stringifyObjectForNetworkSending(_message);
+        if (this.webSocketConnectionToSignalingServer.readyState == 1) {
+            this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
+        }
+        else {
+            console.error("Websocket Connection closed unexpectedly");
+        }
+    }
+
 
 
     private loginValidAddUser = (_assignedId: string, _loginSuccess: boolean, _originatorUserName: string): void => {

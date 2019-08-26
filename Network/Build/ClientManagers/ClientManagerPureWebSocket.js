@@ -20,16 +20,6 @@ class ClientManagerWebSocketOnly {
                 console.log("Websocket Generation gescheitert");
             }
         };
-        this.sendMessageToSignalingServer = (_message) => {
-            console.log("Sending Message to Server");
-            let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
-            if (this.webSocketConnectionToSignalingServer.readyState == 1) {
-                this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
-            }
-            else {
-                console.error("Websocket Connection closed unexpectedly");
-            }
-        };
         this.checkChosenUsernameAndCreateLoginRequest = (_loginName) => {
             if (_loginName.length <= 0) {
                 console.log("Please enter username");
@@ -88,7 +78,7 @@ class ClientManagerWebSocketOnly {
                     console.log("BroadcastMessage received, requires further handling", _receivedMessage);
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE:
-                    console.log("ServerMessage received: ", _receivedMessage);
+                    this.displayServerMessage(_receivedMessage);
                     break;
                 default:
                     console.error("Unrecognized Messagetype, did you handle it in Client?");
@@ -101,6 +91,27 @@ class ClientManagerWebSocketOnly {
             }
             catch (error) {
                 console.error("Unexpected Error: Sending ID Confirmation", error);
+            }
+        };
+        this.sendMessageToSignalingServer = (_message) => {
+            console.log("Sending Message to Server");
+            let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
+            if (this.webSocketConnectionToSignalingServer.readyState == 1) {
+                this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
+            }
+            else {
+                console.error("Websocket Connection closed unexpectedly");
+            }
+        };
+        this.sendTextMessageToSignalingServer = (_message) => {
+            FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + _message.originatorUserName + ": " + _message.messageData;
+            FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+            let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
+            if (this.webSocketConnectionToSignalingServer.readyState == 1) {
+                this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
+            }
+            else {
+                console.error("Websocket Connection closed unexpectedly");
             }
         };
         this.loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
@@ -136,6 +147,12 @@ class ClientManagerWebSocketOnly {
             return stringifiedObject;
         };
         this.localUserName = "";
+    }
+    displayServerMessage(_messageToDisplay) {
+        // tslint:disable-next-line: no-any
+        let parsedObject = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
+        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
     }
     setLocalClientId(_id) {
         if (this.localClientID) {

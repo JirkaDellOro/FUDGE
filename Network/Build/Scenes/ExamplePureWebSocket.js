@@ -7,7 +7,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const FudgeNetwork = __importStar(require("./../ModuleCollector"));
+const FudgeNetwork = __importStar(require("../ModuleCollector"));
 let isServer = false;
 const pureWebSocketClient = new FudgeNetwork.ClientManagerWebSocketOnly();
 const pureWebSocketServer = new FudgeNetwork.FudgeServerWebSocket();
@@ -45,8 +45,8 @@ function createLoginRequestWithUsername() {
 }
 function sendMessageToServer() {
     console.log("sending message");
-    let messageToSend = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value);
-    pureWebSocketClient.sendMessageToSignalingServer(messageToSend);
+    let messageToSend = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value, pureWebSocketClient.localUserName);
+    pureWebSocketClient.sendTextMessageToSignalingServer(messageToSend);
 }
 function switchServerMode() {
     let switchbutton = FudgeNetwork.UiElementHandler.switchModeButton;

@@ -1,11 +1,11 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
 import { UiElementHandler } from "../DataHandling";
-import { NetworkMessageMessageToServer } from "../NetworkMessages";
+import { NetworkMessageMessageToServer, NetworkMessageMessageToClient } from "../NetworkMessages";
 
 export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
     public websocketServer!: WebSocket.Server;
-    public connectedClientsCollection: FudgeNetwork.Client[] = new Array();
+    public connectedClientsCollection: FudgeNetwork.ClientDataType[] = new Array();
 
     public startUpServer = (_serverPort?: number) => {
         console.log(_serverPort);
@@ -30,10 +30,10 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
             try {
                 const uniqueIdOnConnection: string = this.createID();
                 this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
-                const freshlyConnectedClient: FudgeNetwork.Client = new FudgeNetwork.Client(_websocketClient, uniqueIdOnConnection);
+                const freshlyConnectedClient: FudgeNetwork.ClientDataType = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
                 this.connectedClientsCollection.push(freshlyConnectedClient);
             } catch (error) {
-                console.error("Unhandled Exception SERVER: Sending ID to Client", error);
+                console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
             }
 
 
@@ -45,7 +45,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
                 console.error("Error at connection");
                 for (let i: number = 0; i < this.connectedClientsCollection.length; i++) {
                     if (this.connectedClientsCollection[i].clientConnection === _websocketClient) {
-                        console.log("FudgeNetwork.Client found, deleting");
+                        console.log("FudgeNetwork.ClientDataType found, deleting");
                         this.connectedClientsCollection.splice(i, 1);
                         console.log(this.connectedClientsCollection);
                     }
@@ -90,7 +90,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
 
                 case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
                     this.displayMessageOnServer(<NetworkMessageMessageToServer>objectifiedMessage);
-                    this.broadcastMessageToAllConnectedClients(_message);
+                    this.broadcastMessageToAllConnectedClients(<NetworkMessageMessageToClient>objectifiedMessage);
                     break;
 
                 default:
@@ -103,7 +103,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
     displayMessageOnServer(_objectifiedMessage: FudgeNetwork.NetworkMessageMessageToServer) {
         if (UiElementHandler.webSocketServerChatBox != null || undefined) {
             let username: string = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
-            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + username + ": " + _objectifiedMessage.messageData;
+            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + _objectifiedMessage.originatorUserName + ": " + _objectifiedMessage.messageData;
         }
         else {
             console.log("To display the message, add appropriate UiElemenHandler object");
@@ -116,7 +116,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         usernameTaken = this.searchUserByUserNameAndReturnUser(_messageData.loginUserName, this.connectedClientsCollection) != null;
         try {
             if (!usernameTaken) {
-                const clientBeingLoggedIn: FudgeNetwork.Client = this.searchUserByWebsocketConnectionAndReturnUser(_websocketConnection, this.connectedClientsCollection);
+                const clientBeingLoggedIn: FudgeNetwork.ClientDataType = this.searchUserByWebsocketConnectionAndReturnUser(_websocketConnection, this.connectedClientsCollection);
 
                 if (clientBeingLoggedIn != null) {
                     clientBeingLoggedIn.userName = _messageData.loginUserName;
@@ -132,7 +132,13 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         }
     }
 
-    public broadcastMessageToAllConnectedClients(_messageToBroadcast: string | Object) {
+    public broadcastMessageToAllConnectedClients(_messageToBroadcast: FudgeNetwork.NetworkMessageMessageToClient) {
+        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
+            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + "SERVER: " + _messageToBroadcast.messageData;
+        }
+        else {
+            console.log("To display the message, add appropriate UiElemenHandler object");
+        }
 
         let clientArray = Array.from(this.websocketServer.clients);
 
@@ -142,7 +148,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
     }
 
 
-    public searchForClientWithId(_idToFind: string): FudgeNetwork.Client {
+    public searchForClientWithId(_idToFind: string): FudgeNetwork.ClientDataType {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
     }
 
@@ -197,14 +203,14 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         return null;
     }
 
-    private searchUserByUserNameAndReturnUser = (_userNameToSearchFor: string, _collectionToSearch: FudgeNetwork.Client[]): FudgeNetwork.Client => {
+    private searchUserByUserNameAndReturnUser = (_userNameToSearchFor: string, _collectionToSearch: FudgeNetwork.ClientDataType[]): FudgeNetwork.ClientDataType => {
         return this.searchForPropertyValueInCollection(_userNameToSearchFor, "userName", _collectionToSearch);
     }
-    private searchUserByUserIdAndReturnUser = (_userIdToSearchFor: string, _collectionToSearch: FudgeNetwork.Client[]): FudgeNetwork.Client => {
+    private searchUserByUserIdAndReturnUser = (_userIdToSearchFor: string, _collectionToSearch: FudgeNetwork.ClientDataType[]): FudgeNetwork.ClientDataType => {
         return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
     }
 
-    private searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor: WebSocket, _collectionToSearch: FudgeNetwork.Client[]) => {
+    private searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor: WebSocket, _collectionToSearch: FudgeNetwork.ClientDataType[]) => {
         return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
     }
 }

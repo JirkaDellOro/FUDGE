@@ -36,7 +36,7 @@ class FudgeServerMeshNetwork {
                 try {
                     const uniqueIdOnConnection = this.createID();
                     this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
-                    const freshlyConnectedClient = new FudgeNetwork.Client(_websocketClient, uniqueIdOnConnection);
+                    const freshlyConnectedClient = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
                     this.connectedClientsCollection.push(freshlyConnectedClient);
                 }
                 catch (error) {
@@ -79,11 +79,6 @@ class FudgeServerMeshNetwork {
             else {
                 clientReady.isPeerMeshReady = true;
             }
-        };
-        this.createID = () => {
-            // Math.random should be random enough because of it's seed
-            // convert to base 36 and pick the first few digits after comma
-            return "_" + Math.random().toString(36).substr(2, 7);
         };
         // TODO Type Websocket not assignable to type WebSocket ?!
         // tslint:disable-next-line: no-any
@@ -146,7 +141,7 @@ class FudgeServerMeshNetwork {
                     this.answerRtcOfferOfClient(_websocketClient, objectifiedMessage);
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
-                    this.sendIceCandidatesToRelevantPeers(_websocketClient, objectifiedMessage);
+                    this.sendIceCandidatesToRelevantPeer(_websocketClient, objectifiedMessage);
                     break;
                 default:
                     console.log("Message type not recognized");
@@ -223,17 +218,20 @@ class FudgeServerMeshNetwork {
                 this.sendTo(clientToSendAnswerTo.clientConnection, _messageData);
         }
     }
-    sendIceCandidatesToRelevantPeers(_websocketClient, _messageData) {
+    sendIceCandidatesToRelevantPeer(_websocketClient, _messageData) {
         const clientToShareCandidatesWith = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
         if (clientToShareCandidatesWith != null) {
             const candidateToSend = new FudgeNetwork.NetworkMessageIceCandidate(_messageData.originatorId, clientToShareCandidatesWith.id, _messageData.candidate);
             this.sendTo(clientToShareCandidatesWith.clientConnection, candidateToSend);
         }
     }
-    //#endregion
-    //#region Helperfunctions
     searchForClientWithId(_idToFind) {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
+    }
+    createID() {
+        // Math.random should be random enough because of it's seed
+        // convert to base 36 and pick the first few digits after comma
+        return "_" + Math.random().toString(36).substr(2, 7);
     }
     //#endregion
     parseMessageToJson(_messageToParse) {

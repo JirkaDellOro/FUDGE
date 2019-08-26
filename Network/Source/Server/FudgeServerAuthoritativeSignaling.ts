@@ -1,9 +1,10 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
-export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer {
+export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.SignalingServer {
+
     public websocketServer!: WebSocket.Server;
-    public connectedClientsCollection: FudgeNetwork.Client[] = new Array();
-    private authoritativeServerEntity!: FudgeNetwork.AuthoritativeServerEntity;
+    public connectedClientsCollection: FudgeNetwork.ClientDataType[] = new Array();
+    private authoritativeServerManager!: FudgeNetwork.FudgeServerAuthoritativeManager;
 
     public startUpServer = (_serverPort?: number) => {
         console.log(_serverPort);
@@ -14,21 +15,21 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
             this.websocketServer = new WebSocket.Server({ port: _serverPort });
 
         }
-        this.setAuthoritativeServerEntity(new FudgeNetwork.AuthoritativeServerEntity());
-        this.authoritativeServerEntity.signalingServer = this;
+        this.setAuthoritativeServerEntity(new FudgeNetwork.FudgeServerAuthoritativeManager());
+        this.authoritativeServerManager.signalingServer = this;
         this.addServerEventHandling();
     }
 
-    private setAuthoritativeServerEntity(_entity: FudgeNetwork.AuthoritativeServerEntity) {
-        if (this.authoritativeServerEntity) {
+    private setAuthoritativeServerEntity(_entity: FudgeNetwork.FudgeServerAuthoritativeManager) {
+        if (this.authoritativeServerManager) {
             console.error("Server Entity already exists, did you try to assign it twice?");
         }
         else {
-            this.authoritativeServerEntity = _entity;
+            this.authoritativeServerManager = _entity;
         }
     }
-    public getAuthoritativeServerEntity(): FudgeNetwork.AuthoritativeServerEntity {
-        return this.authoritativeServerEntity;
+    public getAuthoritativeServerEntity(): FudgeNetwork.FudgeServerAuthoritativeManager {
+        return this.authoritativeServerManager;
     }
 
     public closeDownServer = () => {
@@ -41,11 +42,11 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
             console.log("User connected to autho-SignalingServer");
 
             const uniqueIdOnConnection: string = this.createID();
-            const freshlyConnectedClient: FudgeNetwork.Client = new FudgeNetwork.Client(_websocketClient, uniqueIdOnConnection);
+            const freshlyConnectedClient: FudgeNetwork.ClientDataType = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
             this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
             this.connectedClientsCollection.push(freshlyConnectedClient);
 
-            this.authoritativeServerEntity.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
+            this.authoritativeServerManager.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
 
 
             _websocketClient.on("message", (_message: string) => {
@@ -93,7 +94,7 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
                     break;
 
                 case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
-                    this.handDownIceCandidatesToAuthEntity(messageData);
+                    this.sendIceCandidatesToRelevantPeer(_websocketClient, messageData);
                     break;
 
                 default:
@@ -112,7 +113,7 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
 
         if (!usernameTaken) {
             console.log("Username available, logging in");
-            const clientBeingLoggedIn: FudgeNetwork.Client = this.searchUserByWebsocketConnectionAndReturnUser(_websocketConnection, this.connectedClientsCollection);
+            const clientBeingLoggedIn: FudgeNetwork.ClientDataType = this.searchUserByWebsocketConnectionAndReturnUser(_websocketConnection, this.connectedClientsCollection);
 
             if (clientBeingLoggedIn != null) {
                 clientBeingLoggedIn.userName = _messageData.loginUserName;
@@ -127,7 +128,7 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
 
     public sendRtcOfferToRequestedClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcOffer): void {
         console.log("Sending offer to: ", _messageData.userNameToConnectTo);
-        const requestedClient: FudgeNetwork.Client = this.searchForPropertyValueInCollection(_messageData.userNameToConnectTo, "userName", this.connectedClientsCollection);
+        const requestedClient: FudgeNetwork.ClientDataType = this.searchForPropertyValueInCollection(_messageData.userNameToConnectTo, "userName", this.connectedClientsCollection);
 
         if (requestedClient != null) {
             const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer(_messageData.originatorId, requestedClient.userName, _messageData.offer);
@@ -137,12 +138,15 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
 
     public answerRtcOfferOfClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcAnswer): void {
         console.log("Sending answer to AS-Entity");
-        this.authoritativeServerEntity.receiveAnswerAndSetRemoteDescription(_websocketClient, _messageData);
+        this.authoritativeServerManager.receiveAnswerAndSetRemoteDescription(_websocketClient, _messageData);
 
     }
 
-    public handDownIceCandidatesToAuthEntity(_messageData: FudgeNetwork.NetworkMessageIceCandidate): void {
-        this.authoritativeServerEntity.addIceCandidateToServerConnection(_messageData);
+    public sendIceCandidatesToRelevantPeer(_webSocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageIceCandidate): void {
+        // _webSocketClient is only needed for two things 
+        // 1) satisfy the interface 
+        // 2) if you intend to split up signaling server and authoritative server
+        this.authoritativeServerManager.addIceCandidateToServerConnection(_messageData);
     }
 
     //#endregion
@@ -151,7 +155,7 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
 
 
 
-    public searchForClientWithId(_idToFind: string): FudgeNetwork.Client {
+    public searchForClientWithId(_idToFind: string): FudgeNetwork.ClientDataType {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
     }
 
@@ -182,7 +186,7 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
     }
 
     public sendToId = (_clientId: string, _message: Object) => {
-        let client: FudgeNetwork.Client = this.searchForClientWithId(_clientId);
+        let client: FudgeNetwork.ClientDataType = this.searchForClientWithId(_clientId);
         let stringifiedObject: string = this.stringifyObjectAndReturnJson(_message);
 
         if (client.clientConnection) {
@@ -207,14 +211,14 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
         return null;
     }
 
-    private searchUserByUserNameAndReturnUser = (_userNameToSearchFor: string, _collectionToSearch: FudgeNetwork.Client[]): FudgeNetwork.Client => {
+    private searchUserByUserNameAndReturnUser = (_userNameToSearchFor: string, _collectionToSearch: FudgeNetwork.ClientDataType[]): FudgeNetwork.ClientDataType => {
         return this.searchForPropertyValueInCollection(_userNameToSearchFor, "userName", _collectionToSearch);
     }
-    private searchUserByUserIdAndReturnUser = (_userIdToSearchFor: string, _collectionToSearch: FudgeNetwork.Client[]): FudgeNetwork.Client => {
+    private searchUserByUserIdAndReturnUser = (_userIdToSearchFor: string, _collectionToSearch: FudgeNetwork.ClientDataType[]): FudgeNetwork.ClientDataType => {
         return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
     }
 
-    private searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor: WebSocket, _collectionToSearch: FudgeNetwork.Client[]) => {
+    private searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor: WebSocket, _collectionToSearch: FudgeNetwork.ClientDataType[]) => {
         return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
     }
 
@@ -228,5 +232,3 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.WSServer 
         return stringifiedObject;
     }
 }
-
-// AuthoritativeSignalingServer.startUpServer();

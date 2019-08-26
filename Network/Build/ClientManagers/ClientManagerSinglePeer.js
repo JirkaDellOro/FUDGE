@@ -8,7 +8,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
-class NetworkClientManager {
+class ClientManagerSinglePeer {
     constructor() {
         this.signalingServerConnectionUrl = "ws://localhost:8080";
         // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
@@ -275,7 +275,7 @@ class NetworkClientManager {
             }
         };
         this.sendMessageToSingularPeer = (_messageToSend) => {
-            let messageObject = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend);
+            let messageObject = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend, this.localUserName);
             let stringifiedMessage = this.stringifyObjectForNetworkSending(messageObject);
             console.log(stringifiedMessage);
             if (this.isInitiator && this.ownPeerDataChannel) {
@@ -287,36 +287,6 @@ class NetworkClientManager {
             }
             else {
                 console.error("Datachannel: Connection unexpectedly lost");
-            }
-        };
-        this.sendDisconnectRequest = () => {
-            try {
-                let dcRequest = new FudgeNetwork.PeerMessageDisconnectClient(this.localClientID);
-                let stringifiedObject = this.stringifyObjectForNetworkSending(dcRequest);
-                this.sendMessageToServerViaDataChannel(stringifiedObject);
-            }
-            catch (error) {
-                console.error("Unexpected Error: Disconnect Request", error);
-            }
-        };
-        this.enableKeyboardPressesForSending = (_keyCode) => {
-            if (_keyCode == 27) {
-                this.sendDisconnectRequest();
-            }
-            else {
-                this.sendKeyPress(_keyCode);
-            }
-        };
-        this.sendKeyPress = (_keyCode) => {
-            try {
-                if (this.remoteEventPeerDataChannel != undefined) {
-                    let keyPressMessage = new FudgeNetwork.PeerMessageKeysInput(this.localClientID, _keyCode);
-                    let stringifiedObject = this.stringifyObjectForNetworkSending(keyPressMessage);
-                    this.sendMessageToServerViaDataChannel(stringifiedObject);
-                }
-            }
-            catch (error) {
-                console.error("Unexpected Error: Send Key Press", error);
             }
         };
         // tslint:disable-next-line: no-any
@@ -335,8 +305,10 @@ class NetworkClientManager {
         this.dataChannelMessageHandler = (_messageEvent) => {
             if (_messageEvent) {
                 // tslint:disable-next-line: no-any
+                console.log(_messageEvent);
                 let parsedObject = this.parseReceivedMessageAndReturnObject(_messageEvent);
-                FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+                FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
+                FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
             }
         };
         this.dataChannelStatusChangeHandler = (event) => {
@@ -363,4 +335,4 @@ class NetworkClientManager {
         return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
     }
 }
-exports.NetworkClientManager = NetworkClientManager;
+exports.ClientManagerSinglePeer = ClientManagerSinglePeer;

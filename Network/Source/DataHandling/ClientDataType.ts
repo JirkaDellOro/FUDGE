@@ -1,4 +1,4 @@
-export class Client {
+export class ClientDataType {
 
     public clientConnection: WebSocket | null;
     public id: string;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Client {
+class ClientDataType {
     constructor(websocketConnection, _remoteId, _rtcPeerConnection, _rtcDataChannel, _rtcMediaStream, _userName) {
         this.id = _remoteId || "";
         this.userName = _userName || "";
@@ -12,4 +12,4 @@ class Client {
         // this.connectedRoom = connectedToRoom || null;
     }
 }
-exports.Client = Client;
+exports.ClientDataType = ClientDataType;

@@ -1,4 +1,4 @@
-export * from "./Client";
+export * from "./ClientDataType";
 export * from "./ServerRoom";
 export * from "./UiElementHandler";
-export * from "./Enumerators/EnumeratorCollection";
+export * from "./Enumerators/MessageTypeEnumerators";
