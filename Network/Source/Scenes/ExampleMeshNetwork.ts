@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "./../ModuleCollector";
+import * as FudgeNetwork from "../ModuleCollector";
 
 let isServer: boolean = false;
 const meshClientManager: FudgeNetwork.ClientManagerFullMeshStructure = new FudgeNetwork.ClientManagerFullMeshStructure();

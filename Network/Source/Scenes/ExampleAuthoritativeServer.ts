@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "./../ModuleCollector";
+import * as FudgeNetwork from "../ModuleCollector";
 import { PeerMessageSimpleText } from "../NetworkMessages";
 
 let isServer: boolean = false;

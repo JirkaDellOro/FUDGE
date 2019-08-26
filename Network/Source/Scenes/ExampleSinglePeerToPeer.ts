@@ -1,8 +1,8 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
 let asMode: boolean = false;
-const networkClient: FudgeNetwork.NetworkClientManager = new FudgeNetwork.NetworkClientManager();
-const peerToPeerSignalingServer: FudgeNetwork.SinglePeerSignalingServer = new FudgeNetwork.SinglePeerSignalingServer();
+const networkClient: FudgeNetwork.ClientManagerSinglePeer = new FudgeNetwork.ClientManagerSinglePeer();
+const peerToPeerSignalingServer: FudgeNetwork.FudgeServerSinglePeer = new FudgeNetwork.FudgeServerSinglePeer();
 
 
 
