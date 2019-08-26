@@ -6,6 +6,7 @@ export class AuthoritativeServerEntity {
     public authServerPeerConnectedClientCollection: FudgeNetwork.Client[] = new Array();
     public peerConnectionBufferCollection: RTCDataChannel[] = new Array();
 
+    private movementSpeed = 3;
 
     // tslint:disable-next-line: typedef
     public configuration = {
@@ -22,7 +23,7 @@ export class AuthoritativeServerEntity {
     public collectClientCreatePeerConnectionAndCreateOffer = (_freshlyConnectedClient: FudgeNetwork.Client) => {
         let newPeerConnection: RTCPeerConnection = new RTCPeerConnection(this.configuration);
         newPeerConnection.addEventListener("icecandidate", this.sendNewIceCandidatesToPeer);
-        _freshlyConnectedClient.peerConnection = newPeerConnection;
+        _freshlyConnectedClient.rtcPeerConnection = newPeerConnection;
         this.authServerPeerConnectedClientCollection.push(_freshlyConnectedClient);
         this.initiateConnectionByCreatingDataChannelAndCreatingOffer(_freshlyConnectedClient);
     }
@@ -32,17 +33,17 @@ export class AuthoritativeServerEntity {
         // convert to base 36 and pick the first few digits after comma
         return "_" + Math.random().toString(36).substr(2, 7);
     }
+
     public addIceCandidateToServerConnection = async (_receivedIceMessage: FudgeNetwork.NetworkMessageIceCandidate) => {
         if (_receivedIceMessage.candidate) {
             let client: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_receivedIceMessage.originatorId, this.authServerPeerConnectedClientCollection);
             console.log("server received candidates from: ", client);
-            await client.peerConnection.addIceCandidate(_receivedIceMessage.candidate);
+            await client.rtcPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
         }
     }
 
     public parseMessageToJson = (_messageToParse: string): FudgeNetwork.NetworkMessageMessageBase => {
         let parsedMessage: FudgeNetwork.NetworkMessageMessageBase = { originatorId: " ", messageType: FudgeNetwork.MESSAGE_TYPE.UNDEFINED };
-
         try {
             parsedMessage = JSON.parse(_messageToParse);
         } catch (error) {
@@ -57,14 +58,14 @@ export class AuthoritativeServerEntity {
         let clientToConnect: FudgeNetwork.Client = this.searchUserByWebsocketConnectionAndReturnUser(_websocketClient, this.authServerPeerConnectedClientCollection);
         console.log(clientToConnect);
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_answer.answer);
-        clientToConnect.peerConnection.setRemoteDescription(descriptionAnswer);
+        clientToConnect.rtcPeerConnection.setRemoteDescription(descriptionAnswer);
         console.log("Remote Description set");
     }
 
     public broadcastMessageToAllConnectedClients = (_messageToBroadcast: string) => {
         this.authServerPeerConnectedClientCollection.forEach(client => {
-            if (client.dataChannel.readyState == "open") {
-                client.dataChannel.send(_messageToBroadcast);
+            if (client.rtcDataChannel.readyState == "open") {
+                client.rtcDataChannel.send(_messageToBroadcast);
             }
             else {
                 console.error("Connection closed abnormally for: ", client);
@@ -80,22 +81,6 @@ export class AuthoritativeServerEntity {
         // let message: NetworkMessages.IceCandidate = new NetworkMessages.IceCandidate("SERVER", this.remoteClientId, candidate);
         // this.sendMessage(message);
 
-    }
-
-    // tslint:disable-next-line: no-any
-    private dataChannelStatusChangeHandler = (event: any) => {
-        console.log("Server Datachannel opened");
-    }
-
-    private dataChannelMessageHandler = (_message: MessageEvent) => {
-        console.log("Message received", _message);
-        // tslint:disable-next-line: no-any
-        let parsedMessage: FudgeNetwork.PeerMessageTemplate = JSON.parse(_message.data);
-
-        switch (parsedMessage.messageType) {
-            case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
-                this.handleServerCommands(parsedMessage);
-        }
     }
 
     private handleServerCommands = (_commandMessage: FudgeNetwork.PeerMessageTemplate) => {
@@ -114,34 +99,23 @@ export class AuthoritativeServerEntity {
     }
 
 
-    private disconnectClientByOwnCommand = (_commandMessage: FudgeNetwork.PeerMessageDisconnectClient) => {
-        let clientToDisconnect: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-        clientToDisconnect.dataChannel.close();
-    }
-
-    private handleKeyInputFromClient = (_commandMessage: FudgeNetwork.PeerMessageKeysInput) => {
-        console.log(_commandMessage);
-        if (FudgeNetwork.UiElementHandler.moveableBoxElement) {
-            FudgeNetwork.UiElementHandler.moveableBoxElement.textContent = _commandMessage.pressedKey + "";
-        }
-    }
 
 
     private initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect: FudgeNetwork.Client): void => {
         console.log("Initiating connection to : " + _clientToConnect);
-        let newDataChannel: RTCDataChannel = _clientToConnect.peerConnection.createDataChannel(_clientToConnect.id);
-        _clientToConnect.dataChannel = newDataChannel;
+        let newDataChannel: RTCDataChannel = _clientToConnect.rtcPeerConnection.createDataChannel(_clientToConnect.id);
+        _clientToConnect.rtcDataChannel = newDataChannel;
         newDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
         // newDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
         newDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-        _clientToConnect.peerConnection.createOffer()
-            .then(async (offer: string) => {
-                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.peerConnection.signalingState);
+        _clientToConnect.rtcPeerConnection.createOffer()
+            .then(async (offer) => {
+                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
                 return offer;
             })
-            .then(async (offer: string) => {
-                await _clientToConnect.peerConnection.setLocalDescription(offer);
-                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.peerConnection.signalingState);
+            .then(async (offer) => {
+                await _clientToConnect.rtcPeerConnection.setLocalDescription(offer);
+                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
             })
             .then(() => {
                 this.createOfferMessageAndSendToRemote(_clientToConnect);
@@ -153,13 +127,70 @@ export class AuthoritativeServerEntity {
 
     private createOfferMessageAndSendToRemote = (_clientToConnect: FudgeNetwork.Client) => {
         console.log("Sending offer now");
-        const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.peerConnection.localDescription);
+        const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection.localDescription);
         this.signalingServer.sendToId(_clientToConnect.id, offerMessage);
     }
 
 
 
+    private disconnectClientByOwnCommand = (_commandMessage: FudgeNetwork.PeerMessageDisconnectClient) => {
+        let clientToDisconnect: FudgeNetwork.Client = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
+        clientToDisconnect.rtcDataChannel.close();
+    }
 
+    private handleKeyInputFromClient = (_commandMessage: FudgeNetwork.PeerMessageKeysInput) => {
+        console.log(_commandMessage);
+        let movingBox = FudgeNetwork.UiElementHandler.authoritativeServerMovingDiv;
+        if (movingBox) {
+            switch (+_commandMessage.pressedKey) {
+                case 37:
+                    if (movingBox.style.left != null) {
+                        let previousLeft = parseInt(movingBox.style.left);
+                        movingBox.style.left = previousLeft - this.movementSpeed + "px";
+                    }
+                    break;
+                case 38:
+
+                    if (movingBox.style.top != null) {
+                        let previousTop = parseInt(movingBox.style.top);
+                        movingBox.style.top = previousTop - this.movementSpeed + "px";
+                    }
+                    break;
+
+                case 39:
+                    if (movingBox.style.left != null) {
+                        let previousLeft = parseInt(movingBox.style.left);
+                        movingBox.style.left = previousLeft + this.movementSpeed + "px";
+                    }
+                    break;
+
+                case 40:
+                    if (movingBox.style.top != null) {
+                        let previousTop = parseInt(movingBox.style.top);
+                        movingBox.style.top = previousTop + this.movementSpeed + "px";
+                    }
+                    break;
+            }
+            movingBox.textContent = _commandMessage.pressedKey + "";
+        }
+    }
+
+
+    // tslint:disable-next-line: no-any
+    private dataChannelStatusChangeHandler = (event: any) => {
+        console.log("Server Datachannel opened");
+    }
+
+    private dataChannelMessageHandler = (_message: MessageEvent) => {
+        console.log("Message received", _message);
+        // tslint:disable-next-line: no-any
+        let parsedMessage: FudgeNetwork.PeerMessageTemplate = JSON.parse(_message.data);
+
+        switch (parsedMessage.messageType) {
+            case FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND:
+                this.handleServerCommands(parsedMessage);
+        }
+    }
 
 
     // Helper function for searching through a collection, finding objects by key and value, returning
