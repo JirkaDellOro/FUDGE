@@ -36,11 +36,11 @@ class FudgeServerWebSocket {
                 try {
                     const uniqueIdOnConnection = this.createID();
                     this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
-                    const freshlyConnectedClient = new FudgeNetwork.Client(_websocketClient, uniqueIdOnConnection);
+                    const freshlyConnectedClient = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
                     this.connectedClientsCollection.push(freshlyConnectedClient);
                 }
                 catch (error) {
-                    console.error("Unhandled Exception SERVER: Sending ID to Client", error);
+                    console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
                 }
                 _websocketClient.on("message", (_message) => {
                     this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
@@ -49,7 +49,7 @@ class FudgeServerWebSocket {
                     console.error("Error at connection");
                     for (let i = 0; i < this.connectedClientsCollection.length; i++) {
                         if (this.connectedClientsCollection[i].clientConnection === _websocketClient) {
-                            console.log("FudgeNetwork.Client found, deleting");
+                            console.log("FudgeNetwork.ClientDataType found, deleting");
                             this.connectedClientsCollection.splice(i, 1);
                             console.log(this.connectedClientsCollection);
                         }
@@ -134,7 +134,7 @@ class FudgeServerWebSocket {
                     break;
                 case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
                     this.displayMessageOnServer(objectifiedMessage);
-                    this.broadcastMessageToAllConnectedClients(_message);
+                    this.broadcastMessageToAllConnectedClients(objectifiedMessage);
                     break;
                 default:
                     console.log("Message type not recognized");
@@ -145,7 +145,7 @@ class FudgeServerWebSocket {
     displayMessageOnServer(_objectifiedMessage) {
         if (DataHandling_1.UiElementHandler.webSocketServerChatBox != null || undefined) {
             let username = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
-            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + username + ": " + _objectifiedMessage.messageData;
+            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + _objectifiedMessage.originatorUserName + ": " + _objectifiedMessage.messageData;
         }
         else {
             console.log("To display the message, add appropriate UiElemenHandler object");
@@ -174,6 +174,12 @@ class FudgeServerWebSocket {
         }
     }
     broadcastMessageToAllConnectedClients(_messageToBroadcast) {
+        if (DataHandling_1.UiElementHandler.webSocketServerChatBox != null || undefined) {
+            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + "SERVER: " + _messageToBroadcast.messageData;
+        }
+        else {
+            console.log("To display the message, add appropriate UiElemenHandler object");
+        }
         let clientArray = Array.from(this.websocketServer.clients);
         clientArray.forEach(_client => {
             this.sendTo(_client, _messageToBroadcast);

@@ -12,10 +12,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = __importDefault(require("ws"));
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
-class FudgeServerMeshNetwork {
+class FudgeServerSinglePeer {
     constructor() {
         this.connectedClientsCollection = new Array();
-        this.peerMeshReadyClientCollection = new Array();
         this.startUpServer = (_serverPort) => {
             console.log(_serverPort);
             if (!_serverPort) {
@@ -71,14 +70,10 @@ class FudgeServerMeshNetwork {
             }
             return parsedMessage;
         };
-        this.setClientReadyFlag = (_clientId) => {
-            let clientReady = this.searchUserByUserIdAndReturnUser(_clientId, this.connectedClientsCollection);
-            if (clientReady.isPeerMeshReady) {
-                clientReady.isPeerMeshReady = false;
-            }
-            else {
-                clientReady.isPeerMeshReady = true;
-            }
+        this.createID = () => {
+            // Math.random should be random enough because of it's seed
+            // convert to base 36 and pick the first few digits after comma
+            return "_" + Math.random().toString(36).substr(2, 7);
         };
         // TODO Type Websocket not assignable to type WebSocket ?!
         // tslint:disable-next-line: no-any
@@ -107,7 +102,7 @@ class FudgeServerMeshNetwork {
             return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
         };
         this.searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor, _collectionToSearch) => {
-            return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "rtcPeerConnection", _collectionToSearch);
+            return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
         };
     }
     // TODO Check if event.type can be used for identification instead => It cannot
@@ -125,15 +120,6 @@ class FudgeServerMeshNetwork {
                 case FudgeNetwork.MESSAGE_TYPE.LOGIN_REQUEST:
                     this.addUserOnValidLoginRequest(_websocketClient, objectifiedMessage);
                     break;
-                case FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION:
-                    this.setClientReadyFlag(objectifiedMessage.originatorId);
-                    if (this.checkIfAllClientsReady()) {
-                        this.sendClientListToClient();
-                    }
-                    break;
-                case FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED:
-                    this.sendClientListToClient();
-                    break;
                 case FudgeNetwork.MESSAGE_TYPE.RTC_OFFER:
                     this.sendRtcOfferToRequestedClient(_websocketClient, objectifiedMessage);
                     break;
@@ -148,28 +134,6 @@ class FudgeServerMeshNetwork {
                     break;
             }
         }
-    }
-    sendClientListToClient() {
-        if (this.peerMeshReadyClientCollection.length == 0) {
-            console.log(this.peerMeshReadyClientCollection.length);
-            console.log("All Clients connected");
-        }
-        else {
-            let clientToSendTo = this.peerMeshReadyClientCollection[0];
-            this.peerMeshReadyClientCollection.splice(0, 1);
-            this.sendTo(clientToSendTo.clientConnection, new FudgeNetwork.NetworkMessageServerSendMeshClientArray(this.peerMeshReadyClientCollection));
-        }
-    }
-    checkIfAllClientsReady() {
-        let allReady = true;
-        this.connectedClientsCollection.forEach(_client => {
-            if (!_client.isPeerMeshReady) {
-                allReady = false;
-                return allReady;
-            }
-        });
-        this.peerMeshReadyClientCollection = Object.assign([], this.connectedClientsCollection);
-        return allReady;
     }
     //#region MessageHandler
     addUserOnValidLoginRequest(_websocketConnection, _messageData) {
@@ -225,13 +189,10 @@ class FudgeServerMeshNetwork {
             this.sendTo(clientToShareCandidatesWith.clientConnection, candidateToSend);
         }
     }
+    //#endregion
+    //#region Helperfunctions
     searchForClientWithId(_idToFind) {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
-    }
-    createID() {
-        // Math.random should be random enough because of it's seed
-        // convert to base 36 and pick the first few digits after comma
-        return "_" + Math.random().toString(36).substr(2, 7);
     }
     //#endregion
     parseMessageToJson(_messageToParse) {
@@ -245,4 +206,16 @@ class FudgeServerMeshNetwork {
         return parsedMessage;
     }
 }
-exports.FudgeServerMeshNetwork = FudgeServerMeshNetwork;
+exports.FudgeServerSinglePeer = FudgeServerSinglePeer;
+// // TODO call this only when starting server via node
+// //   this.startUpServer();
+// function initServerFromCommandLine(): void {
+//     // tslint:disable-next-line: no-any
+//     process.argv.forEach(function (val: any, index: any, array: any): void {
+//         if (val === "NodeServer") {
+//             startUpServer();
+//             return;
+//         }
+//     });
+// }
+// initServerFromCommandLine();

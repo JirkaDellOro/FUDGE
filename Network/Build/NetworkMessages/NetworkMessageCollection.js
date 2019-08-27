@@ -62,10 +62,11 @@ class NetworkMessageIceCandidate {
 }
 exports.NetworkMessageIceCandidate = NetworkMessageIceCandidate;
 class NetworkMessageMessageToServer {
-    constructor(_originatorId, _messageData) {
+    constructor(_originatorId, _messageData, _originatorUserName) {
         this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE;
         this.originatorId = _originatorId;
         this.messageData = _messageData;
+        this.originatorUserName = _originatorUserName;
     }
 }
 exports.NetworkMessageMessageToServer = NetworkMessageMessageToServer;
@@ -107,10 +108,11 @@ class NetworkMessageClientIsMeshConnected {
 }
 exports.NetworkMessageClientIsMeshConnected = NetworkMessageClientIsMeshConnected;
 class PeerMessageSimpleText {
-    constructor(_originatorId, _messageData) {
+    constructor(_originatorId, _messageData, _originatorUserName) {
         this.messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TEXT_MESSAGE;
         this.commandType = FudgeNetwork.SERVER_COMMAND_TYPE.UNDEFINED;
         this.originatorId = _originatorId;
+        this.originatorUserName = _originatorUserName;
         this.messageData = _messageData;
     }
 }

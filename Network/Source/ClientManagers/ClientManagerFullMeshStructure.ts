@@ -1,10 +1,10 @@
 import * as FudgeNetwork from "../ModuleCollector";
 
-export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManagerMeshClient {
-    remoteMeshClients: FudgeNetwork.Client[];
-    currentlyNegotiatingClient: FudgeNetwork.Client;
+export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManagerMeshTemplate {
+    remoteMeshClients: FudgeNetwork.ClientDataType[];
+    currentlyNegotiatingClient: FudgeNetwork.ClientDataType;
 
-    private serverSentMeshClients!: FudgeNetwork.Client[];
+    private serverSentMeshClients!: FudgeNetwork.ClientDataType[];
     establishedDataChannelsWithRemoteIds!: [RTCDataChannel];
 
 
@@ -27,7 +27,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
         this.localClientID = "undefined";
         this.isInitiator = false;
         this.remoteMeshClients = new Array();
-        this.currentlyNegotiatingClient = new FudgeNetwork.Client();
+        this.currentlyNegotiatingClient = new FudgeNetwork.ClientDataType();
     }
 
     // public startUpSignalingServerFile = (_serverFileUri: string): void => {
@@ -74,6 +74,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
                 break;
 
             case FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT:
+                console.log("Received Client Mesh Array: ", _receivedMessage);
                 this.beginnMeshConnection(<FudgeNetwork.NetworkMessageServerSendMeshClientArray>objectifiedMessage)
                 break;
 
@@ -155,15 +156,15 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
         }
     }
 
-    createMeshClientAndAddPeerConnection(): FudgeNetwork.Client {
-        let newMeshClient = new FudgeNetwork.Client();
+    createMeshClientAndAddPeerConnection(): FudgeNetwork.ClientDataType {
+        let newMeshClient = new FudgeNetwork.ClientDataType();
         let newClientPeerConnection: RTCPeerConnection = new RTCPeerConnection(this.configuration);
         newClientPeerConnection.addEventListener("icecandidate", this.sendIceCandidatesToPeer);
         newMeshClient.rtcPeerConnection = newClientPeerConnection;
         return newMeshClient;
     }
 
-    addNewMeshClientToMeshClientCollection(_meshClient: FudgeNetwork.Client) {
+    addNewMeshClientToMeshClientCollection(_meshClient: FudgeNetwork.ClientDataType) {
         this.remoteMeshClients.push(_meshClient);
     }
 
@@ -199,7 +200,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
                 });
         }
     }
-    public createNegotiationOfferAndSendToPeer = (_currentlyNegotiatingPeer: FudgeNetwork.Client) => {
+    public createNegotiationOfferAndSendToPeer = (_currentlyNegotiatingPeer: FudgeNetwork.ClientDataType) => {
         try {
             const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer(this.localClientID, _currentlyNegotiatingPeer.id, _currentlyNegotiatingPeer.rtcPeerConnection.localDescription);
             this.sendMessageToSignalingServer(offerMessage);
@@ -210,7 +211,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
     }
     public receiveNegotiationOfferAndSetRemoteDescription = (_offerMessage: FudgeNetwork.NetworkMessageRtcOffer): void => {
         // DAS IST VON DER ANDEREN SEITE
-        let newlyReceivedClient = new FudgeNetwork.Client(undefined, _offerMessage.originatorId, new RTCPeerConnection(this.configuration));
+        let newlyReceivedClient = new FudgeNetwork.ClientDataType(undefined, _offerMessage.originatorId, new RTCPeerConnection(this.configuration));
         this.remoteMeshClients.push(newlyReceivedClient);
 
         newlyReceivedClient.rtcPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
@@ -230,7 +231,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
         console.log("End of Function Receive offer, Expected 'stable', got:  ", newlyReceivedClient.rtcPeerConnection.signalingState);
     }
 
-    public answerNegotiationOffer = (_remoteMeshClient: FudgeNetwork.Client) => {
+    public answerNegotiationOffer = (_remoteMeshClient: FudgeNetwork.ClientDataType) => {
         let ultimateAnswer: RTCSessionDescription;
         // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
         _remoteMeshClient.rtcPeerConnection.createAnswer()
@@ -349,7 +350,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
 
 
 
-    private searchNegotiatingClientById(_idToSearch: string, arrayToSearch: FudgeNetwork.Client[]): FudgeNetwork.Client | null {
+    private searchNegotiatingClientById(_idToSearch: string, arrayToSearch: FudgeNetwork.ClientDataType[]): FudgeNetwork.ClientDataType | null {
         arrayToSearch.forEach(meshClient => {
             if (meshClient.id === _idToSearch) {
                 return meshClient;
@@ -378,6 +379,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
             // tslint:disable-next-line: no-any
             let parsedObject: any = this.parseReceivedMessageAndReturnObject(_messageEvent);
             FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+            FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
         }
     }
 

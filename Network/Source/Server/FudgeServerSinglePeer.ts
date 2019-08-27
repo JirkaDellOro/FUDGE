@@ -1,9 +1,7 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollector";
-import { UiElementHandler } from "../DataHandling";
-import { NetworkMessageMessageToServer, NetworkMessageMessageToClient } from "../NetworkMessages";
 
-export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
+export class FudgeServerSinglePeer implements FudgeNetwork.SignalingServer {
     public websocketServer!: WebSocket.Server;
     public connectedClientsCollection: FudgeNetwork.ClientDataType[] = new Array();
 
@@ -33,7 +31,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
                 const freshlyConnectedClient: FudgeNetwork.ClientDataType = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
                 this.connectedClientsCollection.push(freshlyConnectedClient);
             } catch (error) {
-                console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
+                console.error("Unhandled Exception SERVER: Sending ID to Client", error);
             }
 
 
@@ -45,7 +43,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
                 console.error("Error at connection");
                 for (let i: number = 0; i < this.connectedClientsCollection.length; i++) {
                     if (this.connectedClientsCollection[i].clientConnection === _websocketClient) {
-                        console.log("FudgeNetwork.ClientDataType found, deleting");
+                        console.log("FudgeNetwork.Client found, deleting");
                         this.connectedClientsCollection.splice(i, 1);
                         console.log(this.connectedClientsCollection);
                     }
@@ -77,7 +75,6 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
             console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
             return;
         }
-        console.log(objectifiedMessage, _message);
         if (objectifiedMessage != null) {
             switch (objectifiedMessage.messageType) {
                 case FudgeNetwork.MESSAGE_TYPE.ID_ASSIGNED:
@@ -88,9 +85,16 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
                     this.addUserOnValidLoginRequest(_websocketClient, <FudgeNetwork.NetworkMessageLoginRequest>objectifiedMessage);
                     break;
 
-                case FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
-                    this.displayMessageOnServer(<NetworkMessageMessageToServer>objectifiedMessage);
-                    this.broadcastMessageToAllConnectedClients(<NetworkMessageMessageToClient>objectifiedMessage);
+                case FudgeNetwork.MESSAGE_TYPE.RTC_OFFER:
+                    this.sendRtcOfferToRequestedClient(_websocketClient, <FudgeNetwork.NetworkMessageRtcOffer>objectifiedMessage);
+                    break;
+
+                case FudgeNetwork.MESSAGE_TYPE.RTC_ANSWER:
+                    this.answerRtcOfferOfClient(_websocketClient, <FudgeNetwork.NetworkMessageRtcAnswer>objectifiedMessage);
+                    break;
+
+                case FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE:
+                    this.sendIceCandidatesToRelevantPeer(_websocketClient, <FudgeNetwork.NetworkMessageIceCandidate>objectifiedMessage);
                     break;
 
                 default:
@@ -98,15 +102,6 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
                     break;
 
             }
-        }
-    }
-    displayMessageOnServer(_objectifiedMessage: FudgeNetwork.NetworkMessageMessageToServer) {
-        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
-            let username: string = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
-            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + _objectifiedMessage.originatorUserName + ": " + _objectifiedMessage.messageData;
-        }
-        else {
-            console.log("To display the message, add appropriate UiElemenHandler object");
         }
     }
 
@@ -132,20 +127,44 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         }
     }
 
-    public broadcastMessageToAllConnectedClients(_messageToBroadcast: FudgeNetwork.NetworkMessageMessageToClient) {
-        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
-            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + "SERVER: " + _messageToBroadcast.messageData;
-        }
-        else {
-            console.log("To display the message, add appropriate UiElemenHandler object");
-        }
+    public sendRtcOfferToRequestedClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcOffer): void {
+        console.log("Sending offer to: ", _messageData.userNameToConnectTo);
+        const requestedClient: FudgeNetwork.ClientDataType = this.searchForPropertyValueInCollection(_messageData.userNameToConnectTo, "userName", this.connectedClientsCollection);
 
-        let clientArray = Array.from(this.websocketServer.clients);
-
-        clientArray.forEach(_client => {
-            this.sendTo(_client, _messageToBroadcast);
-        });
+        if (requestedClient != null) {
+            const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer(_messageData.originatorId, requestedClient.userName, _messageData.offer);
+            try {
+                this.sendTo(requestedClient.clientConnection, offerMessage);
+            } catch (error) {
+                console.error("Unhandled Exception: Unable to relay Offer to Client", error);
+            }
+        } else { console.error("User to connect to doesn't exist under that Name"); }
     }
+
+    public answerRtcOfferOfClient(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageRtcAnswer): void {
+        console.log("Sending answer to: ", _messageData.targetId);
+        const clientToSendAnswerTo: FudgeNetwork.ClientDataType = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
+
+        if (clientToSendAnswerTo != null) {
+            // TODO Probable source of error, need to test
+            if (clientToSendAnswerTo.clientConnection != null)
+                this.sendTo(clientToSendAnswerTo.clientConnection, _messageData);
+        }
+    }
+
+    public sendIceCandidatesToRelevantPeer(_websocketClient: WebSocket, _messageData: FudgeNetwork.NetworkMessageIceCandidate): void {
+        const clientToShareCandidatesWith: FudgeNetwork.ClientDataType = this.searchUserByUserIdAndReturnUser(_messageData.targetId, this.connectedClientsCollection);
+
+        if (clientToShareCandidatesWith != null) {
+            const candidateToSend: FudgeNetwork.NetworkMessageIceCandidate = new FudgeNetwork.NetworkMessageIceCandidate(_messageData.originatorId, clientToShareCandidatesWith.id, _messageData.candidate);
+            this.sendTo(clientToShareCandidatesWith.clientConnection, candidateToSend);
+        }
+    }
+
+    //#endregion
+
+    //#region Helperfunctions
+
 
 
     public searchForClientWithId(_idToFind: string): FudgeNetwork.ClientDataType {
@@ -171,20 +190,10 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         return parsedMessage;
     }
 
-    public stringifyObjectToString = (_objectToStringify: Object): string => {
-        return JSON.stringify(_objectToStringify);
-    }
     // TODO Type Websocket not assignable to type WebSocket ?!
     // tslint:disable-next-line: no-any
-    public sendTo = (_connection: any, _message: Object | string) => {
-        let stringifiedMessage: string = "";
-        if (typeof (_message) == "object") {
-            stringifiedMessage = JSON.stringify(_message);
-        }
-        else if (typeof (_message) == "string") {
-            stringifiedMessage = _message
-        }
-        _connection.send(stringifiedMessage);
+    public sendTo = (_connection: any, _message: Object) => {
+        _connection.send(JSON.stringify(_message));
     }
 
     // Helper function for searching through a collection, finding objects by key and value, returning
@@ -214,3 +223,17 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
         return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
     }
 }
+
+// // TODO call this only when starting server via node
+// //   this.startUpServer();
+// function initServerFromCommandLine(): void {
+//     // tslint:disable-next-line: no-any
+//     process.argv.forEach(function (val: any, index: any, array: any): void {
+//         if (val === "NodeServer") {
+//             startUpServer();
+//             return;
+//         }
+//     });
+// }
+
+// initServerFromCommandLine();
