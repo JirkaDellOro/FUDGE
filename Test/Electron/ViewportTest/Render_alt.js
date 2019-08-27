@@ -7,7 +7,7 @@ var ElectronViewport;
 /// <reference types="../../@types/golden-layout"/>
 (function (ElectronViewport) {
     var ƒ = FudgeCore;
-    window.addEventListener("DOMContentLoaded", init);
+    // window.addEventListener("DOMContentLoaded", init);
     let myLayout;
     let savedState;
     let branch;

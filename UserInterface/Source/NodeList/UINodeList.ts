@@ -18,16 +18,21 @@ namespace FudgeUserInterface {
             cntHeader.appendChild(btnToggle);
             let lblName: HTMLSpanElement = document.createElement("span");
             lblName.textContent = _name;
+            lblName.addEventListener("click", this.selectNode);
             cntHeader.appendChild(lblName);
             this.appendChild(cntHeader);
             this.header = cntHeader;
         }
-        public collapse(): void {
+        public collapse(_event: Event): void {
             while (this.lastChild != this.firstChild) {
                 if (this.lastChild != this.header) {
                     this.removeChild(this.lastChild);
                 }
             }
+        }
+        public selectNode = (_event: MouseEvent): void => {
+            let event: Event = new CustomEvent(UIEVENT.SELECTION, {bubbles: true, detail: this.node});
+            this.dispatchEvent(event);
         }
     }
     export class UINodeList {
@@ -59,11 +64,10 @@ namespace FudgeUserInterface {
             if (target.nodeName == "BUTTON") {
                 let targetParent: HTMLElement = target.parentElement.parentElement;
                 if (targetParent.children.length > 1)
-                    (<CollapsableListElement>targetParent).collapse();
+                    (<CollapsableListElement>targetParent).collapse(_event);
                 else {
                     let nodeToExpand: ƒ.Node = (<CollapsableListElement>targetParent).node;
                     let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
-                    console.log(newList);
                     targetParent.replaceWith(newList);
                 }
             }

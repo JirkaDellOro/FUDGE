@@ -78,6 +78,10 @@ namespace UITest {
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
+        document.body.addEventListener(ƒui.UIEVENT.SELECTION, function(_event: CustomEvent): void { 
+            console.log("Event just in, passing it to GL");
+            myLayout.emit(ƒui.UIEVENT.SELECTION, _event);
+        });
         function animate(_event: Event): void {
 
             branch.cmpTransform.local.rotateY(1);
@@ -95,10 +99,15 @@ namespace UITest {
     }
     function createTestComponent(container: GoldenLayout.Container, state: Object): UI.TestUI {
         return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+        
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
         let treeController: ƒui.UINodeList = new ƒui.UINodeList(branch, listContainer);
+
+        myLayout.on(ƒui.UIEVENT.SELECTION, function (_event){
+            console.log(_event);
+        });
         container.getElement().html(listContainer);
     }
 }
