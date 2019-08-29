@@ -5,15 +5,21 @@ namespace FudgeCore {
    * @author Lukas Scheuerle, HFU, 2019
    */
   export enum ANIMATION_PLAYMODE {
+    /**Plays animation in a loop: it restarts once it hit the end.*/
     LOOP,
+    /**Plays animation once and stops at the last key/frame*/
     PLAYONCE,
+    /**Plays animation once and stops on the first key/frame */
     PLAYONCESTOPAFTER,
+    /**Plays animation like LOOP, but backwards.*/
     REVERSELOOP,
+    /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
     STOP
     //TODO: add an INHERIT and a PINGPONG mode
   }
 
   export enum ANIMATION_PLAYBACK {
+    //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
     /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
     TIMEBASED_CONTINOUS,
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
@@ -23,10 +29,11 @@ namespace FudgeCore {
   }
 
   /**
-   * Holds an [[Animation]] and controls it.
+   * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
    * @authors Lukas Scheuerle, HFU, 2019
    */
   export class ComponentAnimator extends Component {
+    //TODO: add functionality to blend from one animation to another.
     animation: Animation;
     playmode: ANIMATION_PLAYMODE;
     playback: ANIMATION_PLAYBACK;
@@ -35,8 +42,6 @@ namespace FudgeCore {
     private localTime: Time;
     private speedScale: number = 1;
     private lastTime: number = 0;
-    // private lastFrameTime: number = -1;
-    // private lastDirection: number = -10;
 
     constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
       super();
@@ -49,7 +54,6 @@ namespace FudgeCore {
       //TODO: update animation total time when loading a different animation?
       this.animation.calculateTotalTime();
 
-      //TODO: register updateAnimatioStart() properly into the gameloop
       Loop.addEventListener(EVENT.LOOP_FRAME, this.updateAnimationLoop.bind(this));
       Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale.bind(this));
     }
@@ -59,8 +63,11 @@ namespace FudgeCore {
       this.updateScale();
     }
 
+    /**
+     * Jumps to a certain time in the animation to play from there.
+     * @param _time The time to jump to
+     */
     jumpTo(_time: number): void {
-      // _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
       this.localTime.set(_time);
       this.lastTime = _time;
       _time = _time % this.animation.totalTime;
@@ -96,9 +103,13 @@ namespace FudgeCore {
     //#endregion
 
     //#region updateAnimation
+    /**
+     * Updates the Animation.
+     * Gets called every time the Loop fires the LOOP_FRAME Event.
+     */
     private updateAnimationLoop(): void {
-      if (this.animation.totalTime == 0) debugger;
-      // return;
+      if (this.animation.totalTime == 0)
+        return;
       let time: number = this.localTime.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
         time = this.lastTime + (1000 / this.animation.fps);
@@ -117,29 +128,43 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Fires all custom events the Animation should have fired between the last frame and the current frame.
+     * @param events a list of names of custom events to fire
+     */
     private executeEvents(events: string[]): void {
       for (let i: number = 0; i < events.length; i++) {
         this.dispatchEvent(new Event(events[i]));
       }
     }
 
+    /**
+     * Calculates the actual time to use, using the current playmodes.
+     * @param _time the time to apply the playmodes to
+     * @returns the recalculated time
+     */
     private applyPlaymodes(_time: number): number {
       switch (this.playmode) {
         case ANIMATION_PLAYMODE.STOP:
           return this.localTime.getOffset();
         case ANIMATION_PLAYMODE.PLAYONCE:
           if (_time >= this.animation.totalTime)
-            return this.animation.totalTime - 0.01;     //TODO: this might break
+            return this.animation.totalTime - 0.01;     //TODO: this might cause some issues
           else return _time;
         case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
           if (_time >= this.animation.totalTime)
-            return this.animation.totalTime + 0.01;     //TODO: this might break
+            return this.animation.totalTime + 0.01;     //TODO: this might cause some issues
           else return _time;
         default:
           return _time;
       }
     }
 
+    /**
+     * Calculates and returns the direction the animation should currently be playing in.
+     * @param _time the time at which to calculate the direction
+     * @returns 1 if forward, 0 if stop, -1 if backwards
+     */
     private calculateDirection(_time: number): number {
       switch (this.playmode) {
         case ANIMATION_PLAYMODE.STOP:
@@ -161,11 +186,15 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
+     */
     private updateScale(): void {
       let newScale: number = this.speedScale;
       if (this.speedScalesWithGlobalSpeed)
         newScale *= Time.game.getScale();
       this.localTime.setScale(newScale);
     }
+    //#endregion
   }
 }

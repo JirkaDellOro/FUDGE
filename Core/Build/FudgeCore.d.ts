@@ -156,11 +156,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
+     * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
+     */
     interface AnimationStructure {
         [attribute: string]: Serialization | AnimationSequence;
     }
     /**
-    * Holds information about Animation Labels
+    * An associative array mapping names of lables to timestamps.
+    * Labels need to be unique per Animation.
     * @author Lukas Scheuerle, HFU, 2019
     */
     interface AnimationLabel {
@@ -176,6 +181,7 @@ declare namespace FudgeCore {
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
+     * Can be added to a Node and played through [[ComponentAnimator]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class Animation extends Mutable implements SerializableResource {
@@ -190,35 +196,133 @@ declare namespace FudgeCore {
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        /**
+         * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+         * @param _time The time at which the animation currently is at
+         * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
+         * @param _playback The playbackmode the animation is supposed to be calculated with.
+         * @returns a "Mutator" to apply.
+         */
         getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
+        /**
+         * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max.
+         * @param _min The minimum time (inclusive) to check between
+         * @param _max The maximum time (exclusive) to check between
+         * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
+         * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
+         * @returns a list of strings with the names of the custom events to fire.
+         */
         getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[];
+        /**
+         * Adds an Event to the List of events.
+         * @param _name The name of the event (needs to be unique per Animation).
+         * @param _time The timestamp of the event (in milliseconds).
+         */
         setEvent(_name: string, _time: number): void;
+        /**
+         * Removes the event with the given name from the list of events.
+         * @param _name name of the event to remove.
+         */
         removeEvent(_name: string): void;
         readonly getLabels: Enumerator;
         fps: number;
+        /**
+         * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
+         */
         calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Traverses an AnimationStructure and returns the Serialization of said Structure.
+         * @param _structure The Animation Structure at the current level to transform into the Serialization.
+         * @returns the filled Serialization.
+         */
         private traverseStructureForSerialisation;
+        /**
+         * Traverses a Serialization to create a new AnimationStructure.
+         * @param _serialization The serialization to transfer into an AnimationStructure
+         * @returns the newly created AnimationStructure.
+         */
         private traverseStructureForDeserialisation;
+        /**
+         * Finds the list of events to be used with these settings.
+         * @param _direction The direction the animation is playing in.
+         * @param _playback The playbackmode the animation is playing in.
+         * @returns The correct AnimationEventTrigger Object to use
+         */
         private getCorrectEventList;
+        /**
+         * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
+         * @param _structure The strcuture to traverse
+         * @param _time the point in time to write the animation numbers into.
+         * @returns The "Mutator" filled with the correct values at the given time.
+         */
         private traverseStructureForMutator;
+        /**
+         * Traverses the current AnimationStrcuture to find the totalTime of this animation.
+         * @param _structure The structure to traverse
+         */
         private traverseStructureForTime;
+        /**
+         * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+         * @param _type the type of the structure to get
+         * @returns the requested [[AnimationStructure]]
+         */
         private getProcessedAnimationStructure;
+        /**
+         * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+         * @param _type The type of AnimationEventTrigger to get
+         * @returns the requested [[AnimationEventTrigger]]
+         */
         private getProcessedEventTrigger;
+        /**
+         * Traverses an existing structure to apply a recalculation function to the AnimationStructure to store in a new Structure.
+         * @param _oldStructure The old structure to traverse
+         * @param _functionToUse The function to use to recalculated the structure.
+         * @returns A new Animation Structure with the recalulated Animation Sequences.
+         */
         private traverseStructureForNewStructure;
+        /**
+         * Creates a reversed Animation Sequence out of a given Sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns The reversed Sequence
+         */
         private calculateReverseSequence;
+        /**
+         * Creates a rastered [[AnimationSequence]] out of a given sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns the rastered sequence.
+         */
         private calculateRasteredSequence;
+        /**
+         * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the reversed event object
+         */
         private calculateReverseEventTriggers;
+        /**
+         * Creates a rastered [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the rastered event object
+         */
         private calculateRasteredEventTriggers;
+        /**
+         * Checks which events lay between two given times and returns the names of the ones that do.
+         * @param _eventTriggers The event object to check the events inside of
+         * @param _min the minimum of the range to check between (inclusive)
+         * @param _max the maximum of the range to check between (exclusive)
+         * @returns an array of the names of the events in the given range.
+         */
         private checkEventsBetween;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Calculates the values between [[AnimationKeys]]
+     * Calculates the values between [[AnimationKey]]s.
+     * Represented internally by a cubic function (`f(x) = ax³ + bx² + cx + d`).
+     * Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationFunction {
@@ -229,33 +333,53 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        /**
+         * Calculates the value of the function at the given time.
+         * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
+         * @returns the value at the given time
+         */
         evaluate(_time: number): number;
         setKeyIn: AnimationKey;
         setKeyOut: AnimationKey;
+        /**
+         * (Re-)Calculates the parameters of the cubic function.
+         * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
+         * and https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS
+         */
         calculate(): void;
     }
 }
 declare namespace FudgeCore {
     /**
-     *
+     * Holds information about set points in time, their accompanying values as well as their slopes.
+     * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
+     * Saved inside an [[AnimationSequence]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
-        time: number;
-        value: number;
-        constant: boolean;
+        /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
+        /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
         broken: boolean;
-        path2D: Path2D;
+        private time;
+        private value;
+        private constant;
         private slopeIn;
         private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
-        readonly getSlopeIn: number;
-        readonly getSlopeOut: number;
-        setSlopeIn: number;
-        setSlopeOut: number;
-        static sort(_a: AnimationKey, _b: AnimationKey): number;
+        Time: number;
+        Value: number;
+        Constant: boolean;
+        SlopeIn: number;
+        SlopeOut: number;
+        /**
+         * Static comparation function to use in an array sort function to sort the keys by their time.
+         * @param _a the animation key to check
+         * @param _b the animation key to check against
+         * @returns >0 if a>b, 0 if a=b, <0 if a<b
+         */
+        static compare(_a: AnimationKey, _b: AnimationKey): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -264,17 +388,47 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     *
+     * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
+     * Provides functions to modify said keys
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationSequence extends Mutable implements Serializable {
-        keys: AnimationKey[];
+        private keys;
+        /**
+         * Evaluates the sequence at the given point in time.
+         * @param _time the point in time at which to evaluate the sequence in milliseconds.
+         * @returns the value of the sequence at the given time. 0 if there are no keys.
+         */
         evaluate(_time: number): number;
+        /**
+         * Adds a new key to the sequence.
+         * @param _key the key to add
+         */
         addKey(_key: AnimationKey): void;
+        /**
+         * Removes a given key from the sequence.
+         * @param _key the key to remove
+         */
         removeKey(_key: AnimationKey): void;
+        /**
+         * Removes the Animation Key at the given index from the keys.
+         * @param _index the zero-based index at which to remove the key
+         * @returns the removed AnimationKey if successful, null otherwise.
+         */
+        removeKeyAtIndex(_index: number): AnimationKey;
+        /**
+         * Gets a key from the sequence at the desired index.
+         * @param _index the zero-based index at which to get the key
+         * @returns the AnimationKey at the index if it exists, null otherwise.
+         */
+        getKey(_index: number): AnimationKey;
+        readonly length: number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Utility function that (re-)generates all functions in the sequence.
+         */
         private regenerateFunctions;
     }
 }
@@ -681,10 +835,15 @@ declare namespace FudgeCore {
      * @author Lukas Scheuerle, HFU, 2019
      */
     enum ANIMATION_PLAYMODE {
+        /**Plays animation in a loop: it restarts once it hit the end.*/
         LOOP = 0,
+        /**Plays animation once and stops at the last key/frame*/
         PLAYONCE = 1,
+        /**Plays animation once and stops on the first key/frame */
         PLAYONCESTOPAFTER = 2,
+        /**Plays animation like LOOP, but backwards.*/
         REVERSELOOP = 3,
+        /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
         STOP = 4
     }
     enum ANIMATION_PLAYBACK {
@@ -696,7 +855,7 @@ declare namespace FudgeCore {
         FRAMEBASED = 2
     }
     /**
-     * Holds an [[Animation]] and controls it.
+     * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Component {
@@ -709,13 +868,38 @@ declare namespace FudgeCore {
         private lastTime;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         speed: number;
+        /**
+         * Jumps to a certain time in the animation to play from there.
+         * @param _time The time to jump to
+         */
         jumpTo(_time: number): void;
         serialize(): Serialization;
         deserialize(_s: Serialization): Serializable;
+        /**
+         * Updates the Animation.
+         * Gets called every time the Loop fires the LOOP_FRAME Event.
+         */
         private updateAnimationLoop;
+        /**
+         * Fires all custom events the Animation should have fired between the last frame and the current frame.
+         * @param events a list of names of custom events to fire
+         */
         private executeEvents;
+        /**
+         * Calculates the actual time to use, using the current playmodes.
+         * @param _time the time to apply the playmodes to
+         * @returns the recalculated time
+         */
         private applyPlaymodes;
+        /**
+         * Calculates and returns the direction the animation should currently be playing in.
+         * @param _time the time at which to calculate the direction
+         * @returns 1 if forward, 0 if stop, -1 if backwards
+         */
         private calculateDirection;
+        /**
+         * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
+         */
         private updateScale;
     }
 }
