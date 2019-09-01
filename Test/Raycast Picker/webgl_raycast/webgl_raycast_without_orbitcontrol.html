@@ -18,7 +18,8 @@
 	</head>
 <body>
 	<div id="info">Raycast Picker</div>
-    <script src="../three.js-dev/Build/three.js"></script>
+	<div>Click on Object to get infos in console</div>
+    <script src="Build/three.js"></script>
 
     <script>
 
@@ -88,7 +89,8 @@
 		var isDown = false;
 
 		var raycaster = new THREE.Raycaster();
-		var mouseVector = new THREE.Vector3();
+		//var mouseVector = new THREE.Vector3();
+		var mouseVector = new THREE.Vector2();
 
 		function onDocumentMouseMove( event ) {
 
@@ -109,17 +111,17 @@
 					return res && res.object;
 
 				} )[ 0 ];
-				//if selected now
+				//if selected now 
 				if ( res && res.object ) {
 
 					selectedObject = res.object;
 					selectedObject.material.color.set( '#f00' );
+					
 
 					if(isDown){
-
 					
 					
-					selectedObject.position.set(8,5,8);
+					//selectedObject.position.set(8,5,8);
 
 					}
 
@@ -143,6 +145,8 @@
 				if ( res && res.object ) {
 
 					selectedObject = res.object;
+					console.log(selectedObject);
+
 				
 				}
 			}
@@ -162,12 +166,22 @@
 
 		
 
+
+	/*	function getIntersects( point, objects ) {
+
+			mouse.set( ( point.x * 2 ) - 1, - ( point.y * 2 ) + 1 );
+
+			raycaster.setFromCamera( mouse, camera );
+
+			return raycaster.intersectObjects( group, true );
+
+		}*/
 		function getIntersects( x, y ) {
 
 			x = ( x / window.innerWidth ) * 2 - 1;
 			y = - ( y / window.innerHeight ) * 2 + 1;
 
-			mouseVector.set( x, y, 0.5 );
+			mouseVector.set( x, y/* ,0.5 */);
 			raycaster.setFromCamera( mouseVector, camera );
 
 			return raycaster.intersectObject( group, true );
