@@ -190,12 +190,12 @@
         "signature": "affb4f36624b01a65c0401f158ee8b9a5e3acc018c09f3069b8e36092ad36701"
       },
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/viewa/viewa.ts": {
-        "version": "1216b8e5f92644f91f4fb6f09cf6ac29a28fe07c00988bf671c0806b156870fa",
-        "signature": "ddefcbda18d461ed4bf0f9ee0d2a0b592ce29f1ec276644e54b989852c62eee0"
+        "version": "3e8e285647f363d4db5782499a1a3ce01af9e54ff264a266058079a4839ae5a7",
+        "signature": "2f6d84e84d3ff0466dd848bcf64bc899c305cc4bb871e5fd0a8c1bd5fe5e990d"
       },
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/viewb/viewb.ts": {
-        "version": "56c7658e2cb3d3aad859a21932e65ad809f22f75f1ffe76320317a42e5500142",
-        "signature": "9339345c72834b59f212d3f017f618420655af08f563d9a751450f1529686bdf"
+        "version": "1560177cc4f2316754f7f057ca9b8c988ec045b9a869cd5771c4ba3f4baf6124",
+        "signature": "46de85cd563bbde29d8be07ffb7888bd4720133b0c822a484d80221d3f8e83a3"
       },
       "d:/#daten/masterthesis/fudge/node_modules/@types/node/globals.d.ts": {
         "version": "e4461b72726848da76a31153b6b01af5e0be3b08dbfa2ec5741ad302eb20f2ed",
@@ -1392,6 +1392,7 @@
       "c:/users/lukas/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.bigint.d.ts",
       "c:/users/lukas/appdata/roaming/npm/node_modules/typescript/lib/lib.esnext.full.d.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/golden-layout/index.d.ts",
+      "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/eventtest.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/jquery/jquery.d.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/jquery/jquerystatic.d.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/jquery/misc.d.ts",
@@ -1400,7 +1401,6 @@
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/jquery/index.d.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/@types/jquery/dist/jquery.slim.d.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/classes.ts",
-      "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/viewa/viewa.ts",
       "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/viewb/viewb.ts",
       "d:/#daten/masterthesis/fudge/node_modules/@types/node/globals.d.ts",
       "d:/#daten/masterthesis/fudge/node_modules/@types/node/assert.d.ts",
@@ -1448,7 +1448,7 @@
       "d:/#daten/masterthesis/fudge/node_modules/@types/node/ts3.2/index.d.ts",
       "d:/#daten/masterthesis/fudge/node_modules/@types/webgl2/index.d.ts",
       "d:/#daten/masterthesis/fudge/node_modules/@types/ws/index.d.ts",
-      "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/eventtest.ts"
+      "d:/#daten/masterthesis/fudge/miscellaneous/experiments/lukas/html/05_gl_events/views/viewa/viewa.ts"
     ]
   },
   "version": "3.5.3"
