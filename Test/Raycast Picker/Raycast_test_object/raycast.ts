@@ -24,6 +24,7 @@ import { Camera } from './src/cameras/Camera';
     }*/
    public constructor(mouseVector:Vector2, camera:Camera){
        
+       
    }
     
                     
