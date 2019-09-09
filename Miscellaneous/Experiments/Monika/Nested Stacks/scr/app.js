@@ -84,7 +84,7 @@ var UI;
                 }]
         };
         myLayout = new GoldenLayout(config);
-        myLayout.registerComponent('A Tab A', createTabComponent);
+        myLayout.registerComponent('A Tab A', create);
         myLayout.registerComponent('A Tab B', createTabComponent);
         myLayout.registerComponent('A Tab C', createTabComponent);
         myLayout.registerComponent('B Tab A', createTabComponent);
@@ -98,10 +98,13 @@ var UI;
         myLayout.on('stateChanged', function () {
             console.log(root.getActiveContentItem());
         });
+        console.log(root);
         console.log(root.element);
     }
     function createTabComponent(container, state) {
         container.getElement().html("<h2>" + state.label + "</h2>");
+    }
+    function create(container, state) {
     }
 })(UI || (UI = {}));
 //# sourceMappingURL=app.js.map

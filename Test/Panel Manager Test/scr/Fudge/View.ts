@@ -1,5 +1,5 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
+//<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
     import ƒ = FudgeCore;
@@ -28,6 +28,7 @@ namespace Fudge {
 
         constructor(_parent: Panel) {
             ƒ.Debug.info("Create view " + this.constructor.name);
+            this.content = document.createElement("div");
             this.config = this.getLayout();
         }
 
@@ -43,7 +44,7 @@ namespace Fudge {
         }
 
         abstract fillContent(): void; 
-
+        abstract registerToLayout(container: GoldenLayout.Container, state: any): void;
         abstract deconstruct(): void;
     }
 }

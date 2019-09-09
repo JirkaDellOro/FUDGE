@@ -1,5 +1,5 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
+//<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
     import ƒ = FudgeCore;
@@ -28,7 +28,7 @@ namespace Fudge {
                     title: _name
                 };
                 let viewData: ViewData = new ViewData(this);
-                this.addView(viewData);
+                this.addView(viewData, false);
             }
         }
 

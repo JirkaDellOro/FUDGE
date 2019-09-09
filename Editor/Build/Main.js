@@ -3,7 +3,6 @@ var Main;
 ///<reference types="../../node_modules/electron/Electron"/>
 (function (Main) {
     //#region Types and Data
-    //#region Types and Data
     let MENU;
     (function (MENU) {
         MENU[MENU["QUIT"] = 0] = "QUIT";

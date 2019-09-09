@@ -13,7 +13,6 @@ namespace Fudge {
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node: ƒ.Node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels
-    let panel: Panel;
 
     window.addEventListener("load", initWindow);
 
@@ -36,13 +35,14 @@ namespace Fudge {
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
-            panel.viewContainers[0].emit("setRoot", node);
+            
+            // panel[0].viewContainers[0].emit("setRoot", node);
         });
     }
 
     function openViewNode(): void {
-        // HACK... multiple panels must be supported in the future
-        panel = new Panel(VIEW.NODE);
+        let panel: Panel = PanelManager.instance.createEmptyPanel("Empty Test Penal");
+        PanelManager.instance.addPanel(panel);
     }
 
     function save(_node: ƒ.Node): void {
@@ -71,5 +71,15 @@ namespace Fudge {
         console.groupEnd();
 
         return node;
+    }
+
+    function initLayout(): GoldenLayout.Config {
+        const config: GoldenLayout.Config = {
+            content: [{
+                type: "Stack",
+                componentName: "rootStack"
+            }]
+        };
+        return config;
     }
 }

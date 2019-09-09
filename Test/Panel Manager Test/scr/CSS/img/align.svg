@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="183" height="183" viewBox="0 0 183 183" class="undefined">
+<style>
+  .IconSecondaryColor{
+    fill:#FFF;
+  }
+</style>
+      <path d="M18.2 111c48.8 0 96.7 0 146.1 0 0 10.6 0 21.2 0 32.8 -48.2 0-96.5 0-146.1 0C18.2 133.2 18.2 122.9 18.2 111z" class="IconMainColor"/>
+      <path d="M56.9 86.7c0-15.3 0-29 0-43.8 22.5 0 44.6 0 68.2 0 0 14.2 0 28.6 0 43.8C102.8 86.7 80.7 86.7 56.9 86.7z" class="IconMainColor"/>
+  <rect x="79.2" y="18.2" width="21.9" height="146.8" class="IconSecondaryColor"/>
+</svg>
+ 
