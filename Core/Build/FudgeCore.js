@@ -4232,8 +4232,8 @@ var FudgeCore;
     FudgeCore.Matrix4x4 = Matrix4x4;
     //#endregion
 })(FudgeCore || (FudgeCore = {}));
-var Fudge;
-(function (Fudge) {
+var FudgeCore;
+(function (FudgeCore) {
     /**
      * Stores and manipulates a twodimensional vector comprised of the components x and y
      * ```plaintext
@@ -4464,8 +4464,8 @@ var Fudge;
             return new Vector2(this.x, this.y);
         }
     }
-    Fudge.Vector2 = Vector2;
-})(Fudge || (Fudge = {}));
+    FudgeCore.Vector2 = Vector2;
+})(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     /**

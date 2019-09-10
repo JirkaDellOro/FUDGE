@@ -1987,7 +1987,7 @@ declare namespace FudgeCore {
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
-declare namespace Fudge {
+declare namespace FudgeCore {
     /**
      * Stores and manipulates a twodimensional vector comprised of the components x and y
      * ```plaintext
