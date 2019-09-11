@@ -28,9 +28,11 @@ var Fudge;
             // console.log("panel config" + _name);
             // console.log(this.config);
         }
-        addView(_v, _pushToPanelManager = true) {
+        addView(_v, _pushToPanelManager = true, _pushConfig = true) {
             this.views.push(_v);
-            this.config.content.push(_v.config);
+            if (_pushConfig) {
+                this.config.content.push(_v.config);
+            }
             if (_pushToPanelManager) {
                 Fudge.PanelManager.instance.addView(_v);
             }
@@ -61,8 +63,8 @@ var Fudge;
                         };
                         view.config = viewConfig;
                         config.content.push(viewConfig);
-                        this.addView(view, false);
-                        // console.log(view.config.title);
+                        this.addView(view, false, false);
+                        console.log(view.config.title);
                         // console.log(view.config);
                         // console.log(view.content);
                     }

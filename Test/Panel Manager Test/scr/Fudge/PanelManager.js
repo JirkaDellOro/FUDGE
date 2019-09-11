@@ -10,6 +10,7 @@ var Fudge;
         }
         createPanelFromTemplate(_template, _name) {
             let panel = new Fudge.Panel(_name, _template);
+            console.log(panel);
             return panel;
         }
         createEmptyPanel(_name) {

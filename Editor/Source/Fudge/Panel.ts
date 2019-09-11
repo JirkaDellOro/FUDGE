@@ -32,9 +32,11 @@ namespace Fudge {
             }
         }
 
-        addView (_v: View, _pushToPanelManager: boolean = true): void  {
+        addView (_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void  {
             this.views.push(_v);
-            this.config.content.push(_v.config);
+            if ( _pushConfig) {
+                this.config.content.push(_v.config);
+            }
             if (_pushToPanelManager) {
                 PanelManager.instance.addView(_v);
             }

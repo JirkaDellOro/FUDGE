@@ -33,9 +33,11 @@ namespace Fudge {
             // console.log(this.config);
         }
 
-        public addView(_v: View, _pushToPanelManager: boolean = true): void {
+        addView (_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void  {
             this.views.push(_v);
-            this.config.content.push(_v.config);
+            if ( _pushConfig) {
+                this.config.content.push(_v.config);
+            }
             if (_pushToPanelManager) {
                 PanelManager.instance.addView(_v);
             }
@@ -68,8 +70,8 @@ namespace Fudge {
 
                         view.config = viewConfig;
                         config.content.push(viewConfig);
-                        this.addView(view, false);
-                        // console.log(view.config.title);
+                        this.addView(view, false, false);
+                        console.log(view.config.title);
                         // console.log(view.config);
                         // console.log(view.content);
                     }

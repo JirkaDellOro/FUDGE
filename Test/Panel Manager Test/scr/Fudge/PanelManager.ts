@@ -14,6 +14,7 @@ namespace Fudge {
 
     createPanelFromTemplate(_template: PanelTemplate, _name: string): Panel {
       let panel: Panel = new Panel(_name, _template);
+      console.log(panel);
       return panel;
     }
     createEmptyPanel(_name: string): Panel {
