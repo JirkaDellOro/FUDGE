@@ -5,13 +5,13 @@ namespace Fudge {
     import ƒ = FudgeCore;
 
     export enum VIEW {
-        PROJECT = "viewProject",
-        NODE = "viewNode",
-        ANIMATION = "viewAnimation",
-        SKETCH = "viewSketch",
-        MESH = "viewMesh",
-        PORT = "viewPort",
-        DATA = "viewData"
+        // PROJECT = ViewProject,
+        NODE = "ViewNode",
+        // ANIMATION = ViewAnimation,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+        // PORT = ViewPort,
+        DATA = "ViewData"
     }
 
     /**
@@ -20,7 +20,7 @@ namespace Fudge {
      */
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     export abstract class View {
-
+        
         config: GoldenLayout.ComponentConfig;
         parentPanel: Panel;
         content: HTMLElement;
@@ -30,6 +30,7 @@ namespace Fudge {
             ƒ.Debug.info("Create view " + this.constructor.name);
             this.content = document.createElement("div");
             this.config = this.getLayout();
+            this.parentPanel = _parent;
         }
 
         public getLayout(): GoldenLayout.ComponentConfig {
@@ -44,7 +45,6 @@ namespace Fudge {
         }
 
         abstract fillContent(): void; 
-        abstract registerToLayout(container: GoldenLayout.Container, state: any): void;
         abstract deconstruct(): void;
     }
 }

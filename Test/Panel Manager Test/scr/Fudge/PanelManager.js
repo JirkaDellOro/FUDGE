@@ -19,11 +19,12 @@ var Fudge;
         addPanel(_p) {
             this.panels.push(_p);
             for (let view of _p.views) {
-                console.log(view);
+                // console.log(view);
             }
             this.editorLayout.root.contentItems[0].addChild(_p.config);
         }
         addView(_v) {
+            console.log("Add View has been called at PM");
             this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
         }
         init() {
@@ -42,12 +43,9 @@ var Fudge;
                     }]
             };
             this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-            // let welcomePanel: Panel = new Panel("Welcome");
-            // let dataView: ViewData = new ViewData(welcomePanel);
             this.editorLayout.registerComponent("welcome", welcome);
             this.editorLayout.registerComponent("View", registerViewComponent);
             this.editorLayout.init();
-            console.log(this.editorLayout.root);
         }
     }
     PanelManager.instance = new PanelManager();

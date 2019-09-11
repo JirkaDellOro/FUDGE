@@ -13,6 +13,8 @@ var Fudge;
         pm.addPanel(p);
         let testPanel = pm.createEmptyPanel("Test");
         pm.addPanel(testPanel);
+        let templatePanel = pm.createPanelFromTemplate(new Fudge.NodePanelTemplate, "Template");
+        pm.addPanel(templatePanel);
     }
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=app.js.map

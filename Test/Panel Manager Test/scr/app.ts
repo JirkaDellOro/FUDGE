@@ -15,5 +15,7 @@ namespace Fudge {
         pm.addPanel(p);
         let testPanel: Panel = pm.createEmptyPanel("Test");
         pm.addPanel(testPanel);
+        let templatePanel: Panel = pm.createPanelFromTemplate(new NodePanelTemplate, "Template");
+        pm.addPanel(templatePanel);
     }
 }

@@ -10,9 +10,6 @@ var Fudge;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
             super(_parent);
-            this.registerToLayout = (container, state) => {
-                container.getElement().append(this.content);
-            };
             this.fillContent();
         }
         deconstruct() {
@@ -21,8 +18,6 @@ var Fudge;
         fillContent() {
             let lblName = document.createElement("label");
             lblName.innerHTML = "Node Name";
-            let txtName = document.createElement("input");
-            txtName.value = "Hallo";
             // TEST: button to emit message to panel. Should work when each panel holds a unique instance of GoldenLayout
             let btnMessage = document.createElement("button");
             btnMessage.innerText = "Send to panel";

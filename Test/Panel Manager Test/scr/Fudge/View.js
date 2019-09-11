@@ -5,13 +5,13 @@ var Fudge;
     var ƒ = FudgeCore;
     let VIEW;
     (function (VIEW) {
-        VIEW["PROJECT"] = "viewProject";
-        VIEW["NODE"] = "viewNode";
-        VIEW["ANIMATION"] = "viewAnimation";
-        VIEW["SKETCH"] = "viewSketch";
-        VIEW["MESH"] = "viewMesh";
-        VIEW["PORT"] = "viewPort";
-        VIEW["DATA"] = "viewData";
+        // PROJECT = ViewProject,
+        VIEW["NODE"] = "ViewNode";
+        // ANIMATION = ViewAnimation,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+        // PORT = ViewPort,
+        VIEW["DATA"] = "ViewData";
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
     /**
      * Base class for all Views to support generic functionality and communication between
@@ -23,6 +23,7 @@ var Fudge;
             ƒ.Debug.info("Create view " + this.constructor.name);
             this.content = document.createElement("div");
             this.config = this.getLayout();
+            this.parentPanel = _parent;
         }
         getLayout() {
             /* TODO: fix the golden-layout.d.ts to include componentName in ContentItem*/
