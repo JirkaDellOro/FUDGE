@@ -8,8 +8,7 @@ namespace Fudge {
         constructor () {
             super();
             this.config = {
-                    type: "stack",
-                    title: "Node View",
+                    type: "row",
                     content: [
                         {
                             type: "component",
@@ -17,15 +16,21 @@ namespace Fudge {
                             title: "Viewport"
                         },
                         {
-                            type: "component",
-                            componentName: Fudge.VIEW.NODE,
-                            title: "Node Explorer"
-                        },
-                        {
-                            type: "component",
-                            componentName: Fudge.VIEW.DATA,
-                            title: "Inspector"
+                            type: "column",
+                            content: [
+                                {
+                                    type: "component",
+                                    componentName: Fudge.VIEW.NODE,
+                                    title: "Node Explorer"
+                                },
+                                {
+                                    type: "component",
+                                    componentName: Fudge.VIEW.DATA,
+                                    title: "Inspector"
+                                }
+                            ]
                         }
+                        
                     ]
             };
         }

@@ -11,29 +11,44 @@ namespace Fudge {
     private constructor() {
       super();
     }
-
+    /**
+     * Create new Panel from Template Structure
+     * @param _template Template to be used
+     * @param _name Name of the Panel
+     */
     createPanelFromTemplate(_template: PanelTemplate, _name: string): Panel {
       let panel: Panel = new Panel(_name, _template);
       console.log(panel);
       return panel;
     }
+    /**
+     * Creates an Panel with nothing but the default ViewData
+     * @param _name Name of the Panel
+     */
     createEmptyPanel(_name: string): Panel {
       let panel: Panel = new Panel(_name);
       return panel;
     }
+    /**
+     * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
+     * @param _p Panel to be added
+     */
     addPanel(_p: Panel): void {
       this.panels.push(_p);
-      for (let view of _p.views) {
-        // console.log(view);
-      }
       this.editorLayout.root.contentItems[0].addChild(_p.config);
     }
 
+    /**
+     * Add View to PanelManagers View List and add the view to the active panel
+     * @param _v View to be added
+     */
     addView(_v: View): void {
       console.log("Add View has been called at PM");
       this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
     }
-
+    /**
+     * Initialize GoldenLayout Context of the PanelManager Instance
+     */
     public init(): void {
       let config: GoldenLayout.Config = {
         content: [{
@@ -55,10 +70,20 @@ namespace Fudge {
       this.editorLayout.init();
     }
   }
-
+  //TODO: Give these Factory Functions a better home
+  /**
+   * Factory Function for the the "Welcome"-Component 
+   * @param container 
+   * @param state 
+   */
   function welcome(container: GoldenLayout.Container, state: any): void {
     container.getElement().html("<div>Welcome</div>");
   }
+  /**
+   * Factory Function for the generic "View"-Component
+   * @param container 
+   * @param state 
+   */
   function registerViewComponent(container: GoldenLayout.Container, state: any): void {
     container.getElement().html(state.content);
   }

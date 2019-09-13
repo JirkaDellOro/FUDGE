@@ -8,26 +8,43 @@ var Fudge;
             super();
             this.panels = [];
         }
+        /**
+         * Create new Panel from Template Structure
+         * @param _template Template to be used
+         * @param _name Name of the Panel
+         */
         createPanelFromTemplate(_template, _name) {
             let panel = new Fudge.Panel(_name, _template);
             console.log(panel);
             return panel;
         }
+        /**
+         * Creates an Panel with nothing but the default ViewData
+         * @param _name Name of the Panel
+         */
         createEmptyPanel(_name) {
             let panel = new Fudge.Panel(_name);
             return panel;
         }
+        /**
+         * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
+         * @param _p Panel to be added
+         */
         addPanel(_p) {
             this.panels.push(_p);
-            for (let view of _p.views) {
-                // console.log(view);
-            }
             this.editorLayout.root.contentItems[0].addChild(_p.config);
         }
+        /**
+         * Add View to PanelManagers View List and add the view to the active panel
+         * @param _v View to be added
+         */
         addView(_v) {
             console.log("Add View has been called at PM");
             this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
         }
+        /**
+         * Initialize GoldenLayout Context of the PanelManager Instance
+         */
         init() {
             let config = {
                 content: [{
@@ -51,9 +68,20 @@ var Fudge;
     }
     PanelManager.instance = new PanelManager();
     Fudge.PanelManager = PanelManager;
+    //TODO: Give these Factory Functions a better home
+    /**
+     * Factory Function for the the "Welcome"-Component
+     * @param container
+     * @param state
+     */
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
     }
+    /**
+     * Factory Function for the generic "View"-Component
+     * @param container
+     * @param state
+     */
     function registerViewComponent(container, state) {
         container.getElement().html(state.content);
     }

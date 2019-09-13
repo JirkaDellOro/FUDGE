@@ -1,5 +1,5 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
-///<reference types="../../../../Editor/Examples/Code/Scenes"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
 namespace Fudge {

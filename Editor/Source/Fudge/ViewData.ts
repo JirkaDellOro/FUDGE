@@ -1,5 +1,5 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
+//<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
 namespace Fudge {
@@ -19,12 +19,12 @@ namespace Fudge {
         fillContent(): void {
             let lblName: HTMLElement = document.createElement("label");
             lblName.innerHTML = "Node Name";
-            let txtName: HTMLInputElement = document.createElement("input");
-            txtName.value = "Hallo";
 
             // TEST: button to emit message to panel. Should work when each panel holds a unique instance of GoldenLayout
             let btnMessage: HTMLButtonElement = document.createElement("button");
             btnMessage.innerText = "Send to panel";
+            this.content.appendChild(lblName);
+            this.content.appendChild(btnMessage);
         }
     }
 }

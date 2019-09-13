@@ -10,6 +10,11 @@ var Fudge;
      */
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     class Panel extends EventTarget {
+        /**
+         * Constructor for panel Objects. Generates an empty panel with a single ViewData.
+         * @param _name Panel Name
+         * @param _template Optional. Template to be used in the construction of the panel.
+         */
         constructor(_name, _template) {
             super();
             this.views = [];
@@ -25,9 +30,13 @@ var Fudge;
                 let viewData = new Fudge.ViewData(this);
                 this.addView(viewData, false);
             }
-            // console.log("panel config" + _name);
-            // console.log(this.config);
         }
+        /**
+         * Adds given View to the list of views on the panel.
+         * @param _v View to be added
+         * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
+         * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
+         */
         addView(_v, _pushToPanelManager = true, _pushConfig = true) {
             this.views.push(_v);
             if (_pushConfig) {
@@ -37,6 +46,11 @@ var Fudge;
                 Fudge.PanelManager.instance.addView(_v);
             }
         }
+        /**
+         * Allows to construct the view from a template config.
+         * @param template Panel Template to be used for the construction
+         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+         */
         constructFromTemplate(template, _type) {
             let config = {
                 type: _type,
@@ -67,9 +81,6 @@ var Fudge;
                         view.config = viewConfig;
                         config.content.push(viewConfig);
                         this.addView(view, false, false);
-                        console.log(view.config.title);
-                        // console.log(view.config);
-                        // console.log(view.content);
                     }
                     else {
                         config.content.push(this.constructFromTemplate(item, item.type));

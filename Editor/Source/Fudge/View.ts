@@ -1,22 +1,23 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
+//<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
     import ƒ = FudgeCore;
 
     export enum VIEW {
-        PROJECT = "viewProject",
-        NODE = "viewNode",
-        ANIMATION = "viewAnimation",
-        SKETCH = "viewSketch",
-        MESH = "viewMesh",
-        PORT = "viewPort",
-        DATA = "viewData"
+        // PROJECT = ViewProject,
+        NODE = "ViewNode",
+        // ANIMATION = ViewAnimation,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+        PORT = "ViewPort",
+        DATA = "ViewData"
     }
 
     /**
-     * Base class for all Views to support generic functionality and communication between
+     * Base class for all Views to support generic functionality
      * TODO: examine, if this should/could be derived from some GoldenLayout "class"
+     * 
      */
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     export abstract class View {
@@ -28,9 +29,15 @@ namespace Fudge {
 
         constructor(_parent: Panel) {
             ƒ.Debug.info("Create view " + this.constructor.name);
+            this.content = document.createElement("div");
             this.config = this.getLayout();
+            this.parentPanel = _parent;
         }
-
+        /**
+         * Returns GoldenLayout ComponentConfig for the Views GoldenLayout Component.
+         * If not overridden by inherited class, gives generic config with its type as its name.
+         * If you want to use the "View"-Component, add {content: this.content} to componentState.
+         */
         public getLayout(): GoldenLayout.ComponentConfig {
             /* TODO: fix the golden-layout.d.ts to include componentName in ContentItem*/
             const config: GoldenLayout.ComponentConfig = {
@@ -42,8 +49,13 @@ namespace Fudge {
             return config;
         }
 
+        /**
+         * Generates the Views content and pushs it into the views content
+         */
         abstract fillContent(): void; 
-
+        /***
+         * Deconstructor for cleanup purposes
+         */
         abstract deconstruct(): void;
     }
 }

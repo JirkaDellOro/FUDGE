@@ -14,8 +14,9 @@ var Fudge;
         VIEW["DATA"] = "ViewData";
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
     /**
-     * Base class for all Views to support generic functionality and communication between
+     * Base class for all Views to support generic functionality
      * TODO: examine, if this should/could be derived from some GoldenLayout "class"
+     *
      */
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     class View {
@@ -25,6 +26,11 @@ var Fudge;
             this.config = this.getLayout();
             this.parentPanel = _parent;
         }
+        /**
+         * Returns GoldenLayout ComponentConfig for the Views GoldenLayout Component.
+         * If not overridden by inherited class, gives generic config with its type as its name.
+         * If you want to use the "View"-Component, add {content: this.content} to componentState.
+         */
         getLayout() {
             /* TODO: fix the golden-layout.d.ts to include componentName in ContentItem*/
             const config = {

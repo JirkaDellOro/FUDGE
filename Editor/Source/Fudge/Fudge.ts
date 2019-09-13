@@ -18,6 +18,8 @@ namespace Fudge {
 
     function initWindow(): void {
         ƒ.Debug.log("Fudge started");
+        PanelManager.instance.init();
+        console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -36,12 +38,12 @@ namespace Fudge {
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
             
-            // panel[0].viewContainers[0].emit("setRoot", node);
         });
     }
 
     function openViewNode(): void {
-        let panel: Panel = PanelManager.instance.createEmptyPanel("Empty Test Penal");
+        // let panel: Panel = PanelManager.instance.createEmptyPanel("Empty Test Panel");
+        let panel: Panel = PanelManager.instance.createPanelFromTemplate(new NodePanelTemplate, "Node Panel");
         PanelManager.instance.addPanel(panel);
     }
 
@@ -73,13 +75,4 @@ namespace Fudge {
         return node;
     }
 
-    function initLayout(): GoldenLayout.Config {
-        const config: GoldenLayout.Config = {
-            content: [{
-                type: "Stack",
-                componentName: "rootStack"
-            }]
-        };
-        return config;
-    }
 }
