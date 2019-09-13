@@ -2,6 +2,15 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 
+# September 2nd 2019
+Views should deriviate from an (abstract) base class called View. Those are contained within the Panel, which are managed by the PanelManager.  
+Communication of the Views should be done by adding an EventListener to the parent Panel Object (the Class Instance, not the DOM Object) and dispatching the events on the Panel as well. Same structure for Panel Communication: Attach Eventlistener and dispatch events on the PanelManager. [diagrams](190902_Views.svg)  
+Views and Panels contain a `deconstruct()` function to remove the event listeners when they are removed from Fudge to prevent memory leaks.
+
+Maybe views (and panels) will need an ID to know which one has been closed. those IDs can probably be generated in the upper instance. 
+
+PanelTemplates should allow for premade Panels for users to use. As of current state it should consist of a GL.ItemConfig, where the `componentName` (if it's a type: component) describes which View to initiate (probably using an ENUM?). Can be passed to Panel in constructor to override the default construction of the Panel. PanelTemplate could be an interface if it didn't have to register itself into the PanelManager. Maybe explore .json loading instead?
+
 # August 21st 2019
 Jirka coded template for Editor. GLViewContainer renamed to Panel. Scribble updated
 [Scribble](190821_Editor.png)  

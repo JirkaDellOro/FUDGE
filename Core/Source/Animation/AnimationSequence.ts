@@ -3,34 +3,47 @@
 
 namespace FudgeCore {
   /**
-   * 
+   * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
+   * Provides functions to modify said keys
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationSequence extends Mutable implements Serializable {
-    keys: AnimationKey[] = [];
+    private keys: AnimationKey[] = [];
 
+    /**
+     * Evaluates the sequence at the given point in time.
+     * @param _time the point in time at which to evaluate the sequence in milliseconds.
+     * @returns the value of the sequence at the given time. 0 if there are no keys.
+     */
     evaluate(_time: number): number {
-      // console.log(this.keys.length == 1 || this.keys[0].time < _time);
-      if (this.keys.length == 1 || this.keys[0].time >= _time)
-        return this.keys[0].value;
+      if (this.keys.length == 1 || this.keys[0].Time >= _time)
+        return this.keys[0].Value;
 
       if (this.keys.length == 0)
         return 0;
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
-        if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
+        if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {
           return this.keys[i].functionOut.evaluate(_time);
         }
       }
-      return this.keys[this.keys.length - 1].value;
+      return this.keys[this.keys.length - 1].Value;
     }
 
+    /**
+     * Adds a new key to the sequence.
+     * @param _key the key to add
+     */
     addKey(_key: AnimationKey): void {
       this.keys.push(_key);
-      this.keys.sort(AnimationKey.sort);
+      this.keys.sort(AnimationKey.compare);
       this.regenerateFunctions();
     }
 
+    /**
+     * Removes a given key from the sequence.
+     * @param _key the key to remove
+     */
     removeKey(_key: AnimationKey): void {
       for (let i: number = 0; i < this.keys.length; i++) {
         if (this.keys[i] == _key) {
@@ -39,6 +52,36 @@ namespace FudgeCore {
           return;
         }
       }
+    }
+
+    /**
+     * Removes the Animation Key at the given index from the keys.
+     * @param _index the zero-based index at which to remove the key
+     * @returns the removed AnimationKey if successful, null otherwise.
+     */
+    removeKeyAtIndex(_index: number): AnimationKey {
+      if (_index < 0 || _index >= this.keys.length) {
+        return null;
+      }
+      let ak: AnimationKey = this.keys[_index];
+      this.keys.splice(_index, 1);
+      this.regenerateFunctions();
+      return ak;
+    }
+
+    /**
+     * Gets a key from the sequence at the desired index.
+     * @param _index the zero-based index at which to get the key
+     * @returns the AnimationKey at the index if it exists, null otherwise.
+     */
+    getKey(_index: number): AnimationKey {
+      if (_index < 0 || _index >= this.keys.length)
+        return null;
+      return this.keys[_index];
+    }
+
+    get length(): number {
+      return this.keys.length;
     }
 
     //#region transfer
@@ -68,11 +111,15 @@ namespace FudgeCore {
     }
     //#endregion
 
+    /**
+     * Utility function that (re-)generates all functions in the sequence.
+     */
     private regenerateFunctions(): void {
       for (let i: number = 0; i < this.keys.length; i++) {
         let f: AnimationFunction = new AnimationFunction(this.keys[i]);
         this.keys[i].functionOut = f;
         if (i == this.keys.length - 1) {
+          //TODO: check if this is even useful. Maybe update the runcondition to length - 1 instead. Might be redundant if functionIn is removed, see TODO in AnimationKey.
           f.setKeyOut = this.keys[0];
           this.keys[0].functionIn = f;
           break;
