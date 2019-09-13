@@ -37,6 +37,16 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+    const enum UIEVENT {
+        SELECTION = "nodeSelect"
+    }
+    class NodeSelectionEvent extends Event {
+        targetNode: ƒ.Node;
+        constructor(_type: string, _event: NodeSelectionEvent);
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     class UIGenerator {
         static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void;
         static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;

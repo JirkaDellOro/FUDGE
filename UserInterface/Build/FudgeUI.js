@@ -6,6 +6,10 @@ var FudgeUserInterface;
     class CollapsableListElement extends HTMLUListElement {
         constructor(_node, _name, _unfolded = false) {
             super();
+            this.selectNode = (_event) => {
+                let event = new CustomEvent("nodeSelect" /* SELECTION */, { bubbles: true, detail: this.node });
+                this.dispatchEvent(event);
+            };
             this.node = _node;
             let cntHeader = document.createElement("li");
             let buttonState;
@@ -18,11 +22,12 @@ var FudgeUserInterface;
             cntHeader.appendChild(btnToggle);
             let lblName = document.createElement("span");
             lblName.textContent = _name;
+            lblName.addEventListener("click", this.selectNode);
             cntHeader.appendChild(lblName);
             this.appendChild(cntHeader);
             this.header = cntHeader;
         }
-        collapse() {
+        collapse(_event) {
             while (this.lastChild != this.firstChild) {
                 if (this.lastChild != this.header) {
                     this.removeChild(this.lastChild);
@@ -38,11 +43,10 @@ var FudgeUserInterface;
                 if (target.nodeName == "BUTTON") {
                     let targetParent = target.parentElement.parentElement;
                     if (targetParent.children.length > 1)
-                        targetParent.collapse();
+                        targetParent.collapse(_event);
                     else {
                         let nodeToExpand = targetParent.node;
                         let newList = this.BuildListFromNode(nodeToExpand);
-                        console.log(newList);
                         targetParent.replaceWith(newList);
                     }
                 }
@@ -147,6 +151,18 @@ var FudgeUserInterface;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+/// <reference types="../../../Core/Build/FudgeCore"/>
+var FudgeUserInterface;
+/// <reference types="../../../Core/Build/FudgeCore"/>
+(function (FudgeUserInterface) {
+    class NodeSelectionEvent extends Event {
+        constructor(_type, _event) {
+            super(_type, _event);
+            this.targetNode = _event.target;
+        }
+    }
+    FudgeUserInterface.NodeSelectionEvent = NodeSelectionEvent;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;

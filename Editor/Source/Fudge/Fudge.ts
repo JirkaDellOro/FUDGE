@@ -13,12 +13,13 @@ namespace Fudge {
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node: ƒ.Node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels
-    let panel: Panel;
 
     window.addEventListener("load", initWindow);
 
     function initWindow(): void {
         ƒ.Debug.log("Fudge started");
+        PanelManager.instance.init();
+        console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -36,13 +37,14 @@ namespace Fudge {
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
-            panel.viewContainers[0].emit("setRoot", node);
+            
         });
     }
 
     function openViewNode(): void {
-        // HACK... multiple panels must be supported in the future
-        panel = new Panel(VIEW.NODE);
+        // let panel: Panel = PanelManager.instance.createEmptyPanel("Empty Test Panel");
+        let panel: Panel = PanelManager.instance.createPanelFromTemplate(new NodePanelTemplate, "Node Panel");
+        PanelManager.instance.addPanel(panel);
     }
 
     function save(_node: ƒ.Node): void {
@@ -72,4 +74,5 @@ namespace Fudge {
 
         return node;
     }
+
 }

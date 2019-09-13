@@ -2,7 +2,6 @@
 
 namespace Main {
   //#region Types and Data
-  //#region Types and Data
   enum MENU {
     QUIT,
     PROJECT_SAVE,

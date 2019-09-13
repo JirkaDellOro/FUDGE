@@ -1,0 +1,23 @@
+/// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+var ƒ = FudgeCore;
+var ƒui = FudgeUserInterface;
+var Fudge;
+(function (Fudge) {
+    window.addEventListener("DOMContentLoaded", init);
+    let pm = Fudge.PanelManager.instance;
+    function init() {
+        ƒ.RenderManager.initialize();
+        // TODO: At this point of time, the project is just a single node. A project is much more complex...
+        let node = null;
+        console.log("createPanel");
+        pm.init();
+        let p = new Fudge.Panel("myPanel");
+        pm.addPanel(p);
+        let testPanel = pm.createEmptyPanel("Test");
+        pm.addPanel(testPanel);
+        let templatePanel = pm.createPanelFromTemplate(new Fudge.NodePanelTemplate, "Template");
+        pm.addPanel(templatePanel);
+    }
+})(Fudge || (Fudge = {}));
+//# sourceMappingURL=app.js.map

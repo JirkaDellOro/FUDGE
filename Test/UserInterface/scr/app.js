@@ -70,6 +70,10 @@ var UITest;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
+        document.body.addEventListener("nodeSelect" /* SELECTION */, function (_event) {
+            console.log("Event just in, passing it to GL");
+            myLayout.emit("nodeSelect" /* SELECTION */, _event);
+        });
         function animate(_event) {
             branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
@@ -89,6 +93,9 @@ var UITest;
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
         let treeController = new ƒui.UINodeList(branch, listContainer);
+        myLayout.on("nodeSelect" /* SELECTION */, function (_event) {
+            console.log(_event);
+        });
         container.getElement().html(listContainer);
     }
 })(UITest || (UITest = {}));
