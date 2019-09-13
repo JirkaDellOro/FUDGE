@@ -10,7 +10,7 @@ namespace Fudge {
         // ANIMATION = ViewAnimation,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
-        // PORT = ViewPort,
+        PORT = "ViewPort",
         DATA = "ViewData"
     }
 

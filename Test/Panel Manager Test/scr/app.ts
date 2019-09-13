@@ -9,6 +9,10 @@ namespace Fudge {
     let pm: PanelManager = PanelManager.instance;
 
     function init(): void {
+        ƒ.RenderManager.initialize();
+
+        // TODO: At this point of time, the project is just a single node. A project is much more complex...
+        let node: ƒ.Node = null;
         console.log("createPanel");
         pm.init();
         let p: Panel = new Panel("myPanel");

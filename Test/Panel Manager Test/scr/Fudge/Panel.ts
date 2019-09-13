@@ -60,6 +60,9 @@ namespace Fudge {
                             case VIEW.DATA:
                                 view = new ViewData(this);
                                 break;
+                            case VIEW.PORT:
+                                view = new ViewPort(this);
+                                break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {
                             type: "component",

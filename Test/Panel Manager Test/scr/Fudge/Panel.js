@@ -54,6 +54,9 @@ var Fudge;
                             case Fudge.VIEW.DATA:
                                 view = new Fudge.ViewData(this);
                                 break;
+                            case Fudge.VIEW.PORT:
+                                view = new Fudge.ViewPort(this);
+                                break;
                         }
                         let viewConfig = {
                             type: "component",

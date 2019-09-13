@@ -7,6 +7,9 @@ var Fudge;
     window.addEventListener("DOMContentLoaded", init);
     let pm = Fudge.PanelManager.instance;
     function init() {
+        ƒ.RenderManager.initialize();
+        // TODO: At this point of time, the project is just a single node. A project is much more complex...
+        let node = null;
         console.log("createPanel");
         pm.init();
         let p = new Fudge.Panel("myPanel");

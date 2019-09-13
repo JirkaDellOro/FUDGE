@@ -10,7 +10,7 @@ var Fudge;
         // ANIMATION = ViewAnimation,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
-        // PORT = ViewPort,
+        VIEW["PORT"] = "ViewPort";
         VIEW["DATA"] = "ViewData";
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
     /**

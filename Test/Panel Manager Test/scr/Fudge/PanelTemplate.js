@@ -12,7 +12,7 @@ var Fudge;
                 content: [
                     {
                         type: "component",
-                        componentName: Fudge.VIEW.NODE,
+                        componentName: Fudge.VIEW.PORT,
                         title: "Viewport"
                     },
                     {
