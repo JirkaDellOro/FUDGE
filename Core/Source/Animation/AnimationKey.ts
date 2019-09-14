@@ -3,18 +3,23 @@
 
 namespace FudgeCore {
   /**
-   * 
+   * Holds information about set points in time, their accompanying values as well as their slopes. 
+   * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
+   * Saved inside an [[AnimationSequence]].
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationKey extends Mutable implements Serializable {
-    time: number;
-    value: number;
-    constant: boolean = false;
+    // TODO: check if functionIn can be removed
+    /**Don't modify this unless you know what you're doing.*/
     functionIn: AnimationFunction;
+    /**Don't modify this unless you know what you're doing.*/
     functionOut: AnimationFunction;
-
+    
     broken: boolean;
-    path2D: Path2D;
+
+    private time: number;
+    private value: number;
+    private constant: boolean = false;
 
     private slopeIn: number = 0;
     private slopeOut: number = 0;
@@ -28,39 +33,70 @@ namespace FudgeCore {
       this.constant = _constant;
 
       this.broken = this.slopeIn != -this.slopeOut;
+      this.functionOut = new AnimationFunction(this, null);
     }
 
-    get getSlopeIn(): number {
+    get Time(): number {
+      return this.time;
+    }
+
+    set Time(_time: number) {
+      this.time = _time;
+      this.functionIn.calculate();
+      this.functionOut.calculate();
+    }
+
+    get Value(): number {
+      return this.value;
+    }
+
+    set Value(_value: number) {
+      this.value = _value;
+      this.functionIn.calculate();
+      this.functionOut.calculate();
+    }
+    
+    get Constant(): boolean {
+      return this.constant;
+    }
+
+    set Constant(_constant: boolean) {
+      this.constant = _constant;
+      this.functionIn.calculate();
+      this.functionOut.calculate();
+    }
+
+    get SlopeIn(): number {
       return this.slopeIn;
     }
-    get getSlopeOut(): number {
-      return this.slopeOut;
-    }
-
-    set setSlopeIn(_slope: number) {
+    
+    set SlopeIn(_slope: number) {
       this.slopeIn = _slope;
       this.functionIn.calculate();
     }
 
-    set setSlopeOut(_slope: number) {
+    get SlopeOut(): number {
+      return this.slopeOut;
+    }
+
+    set SlopeOut(_slope: number) {
       this.slopeOut = _slope;
       this.functionOut.calculate();
     }
 
-    static sort(_a: AnimationKey, _b: AnimationKey): number {
+    /**
+     * Static comparation function to use in an array sort function to sort the keys by their time.
+     * @param _a the animation key to check
+     * @param _b the animation key to check against
+     * @returns >0 if a>b, 0 if a=b, <0 if a<b
+     */
+    static compare(_a: AnimationKey, _b: AnimationKey): number {
       return _a.time - _b.time;
     }
 
     //#region transfer
     serialize(): Serialization {
       let s: Serialization = {};
-      // s[this.constructor.name] = {
-      //   time : this.time,
-      //   value : this.value,
-      //   slopeIn : this.slopeIn,
-      //   slopeOut : this.slopeOut,
-      //   constant : this.constant
-      // };
       s.time = this.time;
       s.value = this.value;
       s.slopeIn = this.slopeIn;

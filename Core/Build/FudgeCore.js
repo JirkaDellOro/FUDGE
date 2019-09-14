@@ -269,16 +269,25 @@ var FudgeCore;
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 (function (FudgeCore) {
+    /**
+     * Internally used to differentiate between the various generated structures and events.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     let ANIMATION_STRUCTURE_TYPE;
     (function (ANIMATION_STRUCTURE_TYPE) {
+        /**Default: forward, continous */
         ANIMATION_STRUCTURE_TYPE[ANIMATION_STRUCTURE_TYPE["NORMAL"] = 0] = "NORMAL";
+        /**backward, continous */
         ANIMATION_STRUCTURE_TYPE[ANIMATION_STRUCTURE_TYPE["REVERSE"] = 1] = "REVERSE";
+        /**forward, rastered */
         ANIMATION_STRUCTURE_TYPE[ANIMATION_STRUCTURE_TYPE["RASTERED"] = 2] = "RASTERED";
+        /**backward, rastered */
         ANIMATION_STRUCTURE_TYPE[ANIMATION_STRUCTURE_TYPE["RASTEREDREVERSE"] = 3] = "RASTEREDREVERSE";
     })(ANIMATION_STRUCTURE_TYPE || (ANIMATION_STRUCTURE_TYPE = {}));
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
+     * Can be added to a Node and played through [[ComponentAnimator]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class Animation extends FudgeCore.Mutable {
@@ -289,6 +298,7 @@ var FudgeCore;
             this.stepsPerSecond = 10;
             this.framesPerSecond = 60;
             this.events = {};
+            // processed eventlist and animation strucutres for playback.
             this.eventsProcessed = new Map();
             this.animationStructuresProcessed = new Map();
             this.name = _name;
@@ -297,26 +307,41 @@ var FudgeCore;
             this.framesPerSecond = _fps;
             this.calculateTotalTime();
         }
+        /**
+         * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+         * @param _time The time at which the animation currently is at
+         * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
+         * @param _playback The playbackmode the animation is supposed to be calculated with.
+         * @returns a "Mutator" to apply.
+         */
         getMutated(_time, _direction, _playback) {
             let m = {};
             if (_playback == FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
                 if (_direction >= 0) {
-                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.NORMAL), m, _time);
+                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.NORMAL), _time);
                 }
                 else {
-                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), m, _time);
+                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), _time);
                 }
             }
             else {
                 if (_direction >= 0) {
-                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTERED), m, _time);
+                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTERED), _time);
                 }
                 else {
-                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE), m, _time);
+                    m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE), _time);
                 }
             }
             return m;
         }
+        /**
+         * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max.
+         * @param _min The minimum time (inclusive) to check between
+         * @param _max The maximum time (exclusive) to check between
+         * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
+         * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
+         * @returns a list of strings with the names of the custom events to fire.
+         */
         getEventsToFire(_min, _max, _playback, _direction) {
             let eventList = [];
             let minSection = Math.floor(_min / this.totalTime);
@@ -336,13 +361,25 @@ var FudgeCore;
             }
             return eventList;
         }
+        /**
+         * Adds an Event to the List of events.
+         * @param _name The name of the event (needs to be unique per Animation).
+         * @param _time The timestamp of the event (in milliseconds).
+         */
         setEvent(_name, _time) {
             this.events[_name] = _time;
+            this.eventsProcessed.clear();
         }
+        /**
+         * Removes the event with the given name from the list of events.
+         * @param _name name of the event to remove.
+         */
         removeEvent(_name) {
             delete this.events[_name];
+            this.eventsProcessed.clear();
         }
         get getLabels() {
+            //TODO: this actually needs testing
             let en = new Enumerator(this.labels);
             return en;
         }
@@ -351,9 +388,12 @@ var FudgeCore;
         }
         set fps(_fps) {
             this.framesPerSecond = _fps;
-            this.eventsProcessed = new Map();
-            this.animationStructuresProcessed = new Map();
+            this.eventsProcessed.clear();
+            this.animationStructuresProcessed.clear();
         }
+        /**
+         * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
+         */
         calculateTotalTime() {
             this.totalTime = 0;
             this.traverseStructureForTime(this.animationStructure);
@@ -374,7 +414,7 @@ var FudgeCore;
             for (let name in this.events) {
                 s.events[name] = this.events[name];
             }
-            s.animationStructure = this.traverseStructureForSerialisation({}, this.animationStructure);
+            s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
             return s;
         }
         deserialize(_serialization) {
@@ -391,7 +431,7 @@ var FudgeCore;
                 this.events[name] = _serialization.events[name];
             }
             this.eventsProcessed = new Map();
-            this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure, {});
+            this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure);
             this.animationStructuresProcessed = new Map();
             this.calculateTotalTime();
             return this;
@@ -402,30 +442,48 @@ var FudgeCore;
         reduceMutator(_mutator) {
             delete _mutator.totalTime;
         }
-        traverseStructureForSerialisation(_serialization, _structure) {
+        /**
+         * Traverses an AnimationStructure and returns the Serialization of said Structure.
+         * @param _structure The Animation Structure at the current level to transform into the Serialization.
+         * @returns the filled Serialization.
+         */
+        traverseStructureForSerialisation(_structure) {
+            let newSerialization = {};
             for (let n in _structure) {
                 if (_structure[n] instanceof FudgeCore.AnimationSequence) {
-                    _serialization[n] = _structure[n].serialize();
+                    newSerialization[n] = _structure[n].serialize();
                 }
                 else {
-                    _serialization[n] = this.traverseStructureForSerialisation({}, _structure[n]);
+                    newSerialization[n] = this.traverseStructureForSerialisation(_structure[n]);
                 }
             }
-            return _serialization;
+            return newSerialization;
         }
-        traverseStructureForDeserialisation(_serialization, _structure) {
+        /**
+         * Traverses a Serialization to create a new AnimationStructure.
+         * @param _serialization The serialization to transfer into an AnimationStructure
+         * @returns the newly created AnimationStructure.
+         */
+        traverseStructureForDeserialisation(_serialization) {
+            let newStructure = {};
             for (let n in _serialization) {
                 if (_serialization[n].animationSequence) {
                     let animSeq = new FudgeCore.AnimationSequence();
-                    _structure[n] = animSeq.deserialize(_serialization[n]);
+                    newStructure[n] = animSeq.deserialize(_serialization[n]);
                 }
                 else {
-                    _structure[n] = this.traverseStructureForDeserialisation(_serialization[n], {});
+                    newStructure[n] = this.traverseStructureForDeserialisation(_serialization[n]);
                 }
             }
-            return _structure;
+            return newStructure;
         }
         //#endregion
+        /**
+         * Finds the list of events to be used with these settings.
+         * @param _direction The direction the animation is playing in.
+         * @param _playback The playbackmode the animation is playing in.
+         * @returns The correct AnimationEventTrigger Object to use
+         */
         getCorrectEventList(_direction, _playback) {
             if (_playback != FudgeCore.ANIMATION_PLAYBACK.FRAMEBASED) {
                 if (_direction >= 0) {
@@ -444,23 +502,34 @@ var FudgeCore;
                 }
             }
         }
-        traverseStructureForMutator(_structure, _newMutator, _time) {
+        /**
+         * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
+         * @param _structure The strcuture to traverse
+         * @param _time the point in time to write the animation numbers into.
+         * @returns The "Mutator" filled with the correct values at the given time.
+         */
+        traverseStructureForMutator(_structure, _time) {
+            let newMutator = {};
             for (let n in _structure) {
                 if (_structure[n] instanceof FudgeCore.AnimationSequence) {
-                    _newMutator[n] = _structure[n].evaluate(_time);
+                    newMutator[n] = _structure[n].evaluate(_time);
                 }
                 else {
-                    _newMutator[n] = this.traverseStructureForMutator(_structure[n], {}, _time);
+                    newMutator[n] = this.traverseStructureForMutator(_structure[n], _time);
                 }
             }
-            return _newMutator;
+            return newMutator;
         }
+        /**
+         * Traverses the current AnimationStrcuture to find the totalTime of this animation.
+         * @param _structure The structure to traverse
+         */
         traverseStructureForTime(_structure) {
             for (let n in _structure) {
                 if (_structure[n] instanceof FudgeCore.AnimationSequence) {
                     let sequence = _structure[n];
-                    if (sequence.keys.length > 0) {
-                        let sequenceTime = sequence.keys[sequence.keys.length - 1].time;
+                    if (sequence.length > 0) {
+                        let sequenceTime = sequence.getKey(sequence.length - 1).Time;
                         this.totalTime = sequenceTime > this.totalTime ? sequenceTime : this.totalTime;
                     }
                 }
@@ -469,6 +538,11 @@ var FudgeCore;
                 }
             }
         }
+        /**
+         * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+         * @param _type the type of the structure to get
+         * @returns the requested [[AnimationStructure]]
+         */
         getProcessedAnimationStructure(_type) {
             if (!this.animationStructuresProcessed.has(_type)) {
                 this.calculateTotalTime();
@@ -478,13 +552,13 @@ var FudgeCore;
                         ae = this.animationStructure;
                         break;
                     case ANIMATION_STRUCTURE_TYPE.REVERSE:
-                        ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateReverseSequence.bind(this));
+                        ae = this.traverseStructureForNewStructure(this.animationStructure, this.calculateReverseSequence.bind(this));
                         break;
                     case ANIMATION_STRUCTURE_TYPE.RASTERED:
-                        ae = this.traverseStructureForNewStructure(this.animationStructure, {}, this.calculateRasteredSequence.bind(this));
+                        ae = this.traverseStructureForNewStructure(this.animationStructure, this.calculateRasteredSequence.bind(this));
                         break;
                     case ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE:
-                        ae = this.traverseStructureForNewStructure(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), {}, this.calculateRasteredSequence.bind(this));
+                        ae = this.traverseStructureForNewStructure(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), this.calculateRasteredSequence.bind(this));
                         break;
                     default:
                         return {};
@@ -493,6 +567,11 @@ var FudgeCore;
             }
             return this.animationStructuresProcessed.get(_type);
         }
+        /**
+         * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+         * @param _type The type of AnimationEventTrigger to get
+         * @returns the requested [[AnimationEventTrigger]]
+         */
         getProcessedEventTrigger(_type) {
             if (!this.eventsProcessed.has(_type)) {
                 this.calculateTotalTime();
@@ -517,26 +596,43 @@ var FudgeCore;
             }
             return this.eventsProcessed.get(_type);
         }
-        traverseStructureForNewStructure(_oldStructure, _newStructure, _functionToUse) {
+        /**
+         * Traverses an existing structure to apply a recalculation function to the AnimationStructure to store in a new Structure.
+         * @param _oldStructure The old structure to traverse
+         * @param _functionToUse The function to use to recalculated the structure.
+         * @returns A new Animation Structure with the recalulated Animation Sequences.
+         */
+        traverseStructureForNewStructure(_oldStructure, _functionToUse) {
+            let newStructure = {};
             for (let n in _oldStructure) {
                 if (_oldStructure[n] instanceof FudgeCore.AnimationSequence) {
-                    _newStructure[n] = _functionToUse(_oldStructure[n]);
+                    newStructure[n] = _functionToUse(_oldStructure[n]);
                 }
                 else {
-                    _newStructure[n] = this.traverseStructureForNewStructure(_oldStructure[n], {}, _functionToUse);
+                    newStructure[n] = this.traverseStructureForNewStructure(_oldStructure[n], _functionToUse);
                 }
             }
-            return _newStructure;
+            return newStructure;
         }
+        /**
+         * Creates a reversed Animation Sequence out of a given Sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns The reversed Sequence
+         */
         calculateReverseSequence(_sequence) {
             let seq = new FudgeCore.AnimationSequence();
-            for (let i = 0; i < _sequence.keys.length; i++) {
-                let oldKey = _sequence.keys[i];
-                let key = new FudgeCore.AnimationKey(this.totalTime - oldKey.time, oldKey.value, oldKey.getSlopeOut, oldKey.getSlopeIn, oldKey.constant);
+            for (let i = 0; i < _sequence.length; i++) {
+                let oldKey = _sequence.getKey(i);
+                let key = new FudgeCore.AnimationKey(this.totalTime - oldKey.Time, oldKey.Value, oldKey.SlopeOut, oldKey.SlopeIn, oldKey.Constant);
                 seq.addKey(key);
             }
             return seq;
         }
+        /**
+         * Creates a rastered [[AnimationSequence]] out of a given sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns the rastered sequence.
+         */
         calculateRasteredSequence(_sequence) {
             let seq = new FudgeCore.AnimationSequence();
             let frameTime = 1000 / this.framesPerSecond;
@@ -546,16 +642,11 @@ var FudgeCore;
             }
             return seq;
         }
-        // private calculateReverseRasteredSequence(_sequence: AnimationSequence): AnimationSequence {
-        //   let seq: AnimationSequence = new AnimationSequence();
-        //   let frameTime: number = 1000 / this.framesPerSecond;
-        //   for (let i: number = 0; i < _sequence.keys.length; i++) {
-        //     let oldKey: AnimationKey = _sequence.keys[i];
-        //     let key: AnimationKey = new AnimationKey(this.totalTime - oldKey.time - frameTime, oldKey.value, oldKey.getSlopeOut, oldKey.getSlopeIn, oldKey.constant);
-        //     seq.addKey(key);
-        //   }
-        //   return seq;
-        // }
+        /**
+         * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the reversed event object
+         */
         calculateReverseEventTriggers(_events) {
             let ae = {};
             for (let name in _events) {
@@ -563,6 +654,11 @@ var FudgeCore;
             }
             return ae;
         }
+        /**
+         * Creates a rastered [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the rastered event object
+         */
         calculateRasteredEventTriggers(_events) {
             let ae = {};
             let frameTime = 1000 / this.framesPerSecond;
@@ -571,14 +667,13 @@ var FudgeCore;
             }
             return ae;
         }
-        // private calculateRasteredReverseEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger {
-        //   let ae: AnimationEventTrigger = {};
-        //   let frameTime: number = 1000 / this.framesPerSecond;
-        //   for (let name in _events) {
-        //     ae[name] = this.totalTime - _events[name] + frameTime + (_events[name] % frameTime);
-        //   }
-        //   return ae;
-        // }
+        /**
+         * Checks which events lay between two given times and returns the names of the ones that do.
+         * @param _eventTriggers The event object to check the events inside of
+         * @param _min the minimum of the range to check between (inclusive)
+         * @param _max the maximum of the range to check between (exclusive)
+         * @returns an array of the names of the events in the given range.
+         */
         checkEventsBetween(_eventTriggers, _min, _max) {
             let eventsToTrigger = [];
             for (let name in _eventTriggers) {
@@ -598,7 +693,9 @@ var FudgeCore;
 /// <reference path="../Transfer/Mutable.ts"/>
 (function (FudgeCore) {
     /**
-     * Calculates the values between [[AnimationKeys]]
+     * Calculates the values between [[AnimationKey]]s.
+     * Represented internally by a cubic function (`f(x) = ax³ + bx² + cx + d`).
+     * Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationFunction {
@@ -611,11 +708,15 @@ var FudgeCore;
             this.keyOut = _keyOut;
             this.calculate();
         }
+        /**
+         * Calculates the value of the function at the given time.
+         * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
+         * @returns the value at the given time
+         */
         evaluate(_time) {
-            _time -= this.keyIn.time;
+            _time -= this.keyIn.Time;
             let time2 = _time * _time;
             let time3 = time2 * _time;
-            // console.log(this.a * time3 , this.b * time2 , this.c * _time , this.d);
             return this.a * time3 + this.b * time2 + this.c * _time + this.d;
         }
         set setKeyIn(_keyIn) {
@@ -626,21 +727,26 @@ var FudgeCore;
             this.keyOut = _keyOut;
             this.calculate();
         }
+        /**
+         * (Re-)Calculates the parameters of the cubic function.
+         * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
+         * and https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS
+         */
         calculate() {
             if (!this.keyIn) {
                 this.d = this.c = this.b = this.a = 0;
                 return;
             }
-            if (!this.keyOut || this.keyIn.constant) {
-                this.d = this.keyIn.value;
+            if (!this.keyOut || this.keyIn.Constant) {
+                this.d = this.keyIn.Value;
                 this.c = this.b = this.a = 0;
                 return;
             }
-            let x1 = this.keyOut.time - this.keyIn.time;
-            this.d = this.keyIn.value;
-            this.c = this.keyIn.getSlopeOut;
-            this.a = (-x1 * (this.keyIn.getSlopeOut + this.keyOut.getSlopeIn) - 2 * this.keyIn.value + 2 * this.keyOut.value) / -Math.pow(x1, 3);
-            this.b = (this.keyOut.getSlopeIn - this.keyIn.getSlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
+            let x1 = this.keyOut.Time - this.keyIn.Time;
+            this.d = this.keyIn.Value;
+            this.c = this.keyIn.SlopeOut;
+            this.a = (-x1 * (this.keyIn.SlopeOut + this.keyOut.SlopeIn) - 2 * this.keyIn.Value + 2 * this.keyOut.Value) / -Math.pow(x1, 3);
+            this.b = (this.keyOut.SlopeIn - this.keyIn.SlopeOut - 3 * this.a * Math.pow(x1, 2)) / (2 * x1);
         }
     }
     FudgeCore.AnimationFunction = AnimationFunction;
@@ -652,7 +758,9 @@ var FudgeCore;
 /// <reference path="../Transfer/Mutable.ts"/>
 (function (FudgeCore) {
     /**
-     *
+     * Holds information about set points in time, their accompanying values as well as their slopes.
+     * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
+     * Saved inside an [[AnimationSequence]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends FudgeCore.Mutable {
@@ -667,34 +775,58 @@ var FudgeCore;
             this.slopeOut = _slopeOut;
             this.constant = _constant;
             this.broken = this.slopeIn != -this.slopeOut;
+            this.functionOut = new FudgeCore.AnimationFunction(this, null);
         }
-        get getSlopeIn() {
+        get Time() {
+            return this.time;
+        }
+        set Time(_time) {
+            this.time = _time;
+            this.functionIn.calculate();
+            this.functionOut.calculate();
+        }
+        get Value() {
+            return this.value;
+        }
+        set Value(_value) {
+            this.value = _value;
+            this.functionIn.calculate();
+            this.functionOut.calculate();
+        }
+        get Constant() {
+            return this.constant;
+        }
+        set Constant(_constant) {
+            this.constant = _constant;
+            this.functionIn.calculate();
+            this.functionOut.calculate();
+        }
+        get SlopeIn() {
             return this.slopeIn;
         }
-        get getSlopeOut() {
-            return this.slopeOut;
-        }
-        set setSlopeIn(_slope) {
+        set SlopeIn(_slope) {
             this.slopeIn = _slope;
             this.functionIn.calculate();
         }
-        set setSlopeOut(_slope) {
+        get SlopeOut() {
+            return this.slopeOut;
+        }
+        set SlopeOut(_slope) {
             this.slopeOut = _slope;
             this.functionOut.calculate();
         }
-        static sort(_a, _b) {
+        /**
+         * Static comparation function to use in an array sort function to sort the keys by their time.
+         * @param _a the animation key to check
+         * @param _b the animation key to check against
+         * @returns >0 if a>b, 0 if a=b, <0 if a<b
+         */
+        static compare(_a, _b) {
             return _a.time - _b.time;
         }
         //#region transfer
         serialize() {
             let s = {};
-            // s[this.constructor.name] = {
-            //   time : this.time,
-            //   value : this.value,
-            //   slopeIn : this.slopeIn,
-            //   slopeOut : this.slopeOut,
-            //   constant : this.constant
-            // };
             s.time = this.time;
             s.value = this.value;
             s.slopeIn = this.slopeIn;
@@ -727,7 +859,8 @@ var FudgeCore;
 /// <reference path="../Transfer/Mutable.ts"/>
 (function (FudgeCore) {
     /**
-     *
+     * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
+     * Provides functions to modify said keys
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationSequence extends FudgeCore.Mutable {
@@ -735,24 +868,36 @@ var FudgeCore;
             super(...arguments);
             this.keys = [];
         }
+        /**
+         * Evaluates the sequence at the given point in time.
+         * @param _time the point in time at which to evaluate the sequence in milliseconds.
+         * @returns the value of the sequence at the given time. 0 if there are no keys.
+         */
         evaluate(_time) {
-            // console.log(this.keys.length == 1 || this.keys[0].time < _time);
-            if (this.keys.length == 1 || this.keys[0].time >= _time)
-                return this.keys[0].value;
+            if (this.keys.length == 1 || this.keys[0].Time >= _time)
+                return this.keys[0].Value;
             if (this.keys.length == 0)
                 return 0;
             for (let i = 0; i < this.keys.length - 1; i++) {
-                if (this.keys[i].time <= _time && this.keys[i + 1].time > _time) {
+                if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {
                     return this.keys[i].functionOut.evaluate(_time);
                 }
             }
-            return this.keys[this.keys.length - 1].value;
+            return this.keys[this.keys.length - 1].Value;
         }
+        /**
+         * Adds a new key to the sequence.
+         * @param _key the key to add
+         */
         addKey(_key) {
             this.keys.push(_key);
-            this.keys.sort(FudgeCore.AnimationKey.sort);
+            this.keys.sort(FudgeCore.AnimationKey.compare);
             this.regenerateFunctions();
         }
+        /**
+         * Removes a given key from the sequence.
+         * @param _key the key to remove
+         */
         removeKey(_key) {
             for (let i = 0; i < this.keys.length; i++) {
                 if (this.keys[i] == _key) {
@@ -761,6 +906,33 @@ var FudgeCore;
                     return;
                 }
             }
+        }
+        /**
+         * Removes the Animation Key at the given index from the keys.
+         * @param _index the zero-based index at which to remove the key
+         * @returns the removed AnimationKey if successful, null otherwise.
+         */
+        removeKeyAtIndex(_index) {
+            if (_index < 0 || _index >= this.keys.length) {
+                return null;
+            }
+            let ak = this.keys[_index];
+            this.keys.splice(_index, 1);
+            this.regenerateFunctions();
+            return ak;
+        }
+        /**
+         * Gets a key from the sequence at the desired index.
+         * @param _index the zero-based index at which to get the key
+         * @returns the AnimationKey at the index if it exists, null otherwise.
+         */
+        getKey(_index) {
+            if (_index < 0 || _index >= this.keys.length)
+                return null;
+            return this.keys[_index];
+        }
+        get length() {
+            return this.keys.length;
         }
         //#region transfer
         serialize() {
@@ -787,11 +959,15 @@ var FudgeCore;
             //
         }
         //#endregion
+        /**
+         * Utility function that (re-)generates all functions in the sequence.
+         */
         regenerateFunctions() {
             for (let i = 0; i < this.keys.length; i++) {
                 let f = new FudgeCore.AnimationFunction(this.keys[i]);
                 this.keys[i].functionOut = f;
                 if (i == this.keys.length - 1) {
+                    //TODO: check if this is even useful. Maybe update the runcondition to length - 1 instead. Might be redundant if functionIn is removed, see TODO in AnimationKey.
                     f.setKeyOut = this.keys[0];
                     this.keys[0].functionIn = f;
                     break;
@@ -1698,15 +1874,21 @@ var FudgeCore;
      */
     let ANIMATION_PLAYMODE;
     (function (ANIMATION_PLAYMODE) {
+        /**Plays animation in a loop: it restarts once it hit the end.*/
         ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["LOOP"] = 0] = "LOOP";
+        /**Plays animation once and stops at the last key/frame*/
         ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["PLAYONCE"] = 1] = "PLAYONCE";
+        /**Plays animation once and stops on the first key/frame */
         ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["PLAYONCESTOPAFTER"] = 2] = "PLAYONCESTOPAFTER";
+        /**Plays animation like LOOP, but backwards.*/
         ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["REVERSELOOP"] = 3] = "REVERSELOOP";
+        /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
         ANIMATION_PLAYMODE[ANIMATION_PLAYMODE["STOP"] = 4] = "STOP";
         //TODO: add an INHERIT and a PINGPONG mode
     })(ANIMATION_PLAYMODE = FudgeCore.ANIMATION_PLAYMODE || (FudgeCore.ANIMATION_PLAYMODE = {}));
     let ANIMATION_PLAYBACK;
     (function (ANIMATION_PLAYBACK) {
+        //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
         /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
         ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["TIMEBASED_CONTINOUS"] = 0] = "TIMEBASED_CONTINOUS";
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
@@ -1715,12 +1897,10 @@ var FudgeCore;
         ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["FRAMEBASED"] = 2] = "FRAMEBASED";
     })(ANIMATION_PLAYBACK = FudgeCore.ANIMATION_PLAYBACK || (FudgeCore.ANIMATION_PLAYBACK = {}));
     /**
-     * Holds an [[Animation]] and controls it.
+     * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends FudgeCore.Component {
-        // private lastFrameTime: number = -1;
-        // private lastDirection: number = -10;
         constructor(_animation = new FudgeCore.Animation(""), _playmode = ANIMATION_PLAYMODE.LOOP, _playback = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
             super();
             this.speedScalesWithGlobalSpeed = true;
@@ -1732,7 +1912,6 @@ var FudgeCore;
             this.localTime = new FudgeCore.Time();
             //TODO: update animation total time when loading a different animation?
             this.animation.calculateTotalTime();
-            //TODO: register updateAnimatioStart() properly into the gameloop
             FudgeCore.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.updateAnimationLoop.bind(this));
             FudgeCore.Time.game.addEventListener("timeScaled" /* TIME_SCALED */, this.updateScale.bind(this));
         }
@@ -1740,8 +1919,11 @@ var FudgeCore;
             this.speedScale = _s;
             this.updateScale();
         }
+        /**
+         * Jumps to a certain time in the animation to play from there.
+         * @param _time The time to jump to
+         */
         jumpTo(_time) {
-            // _time = this.calculateCurrentTime(_time, this.calculateDirection(_time));
             this.localTime.set(_time);
             this.lastTime = _time;
             _time = _time % this.animation.totalTime;
@@ -1771,10 +1953,13 @@ var FudgeCore;
         }
         //#endregion
         //#region updateAnimation
+        /**
+         * Updates the Animation.
+         * Gets called every time the Loop fires the LOOP_FRAME Event.
+         */
         updateAnimationLoop() {
             if (this.animation.totalTime == 0)
-                debugger;
-            // return;
+                return;
             let time = this.localTime.get();
             if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
                 time = this.lastTime + (1000 / this.animation.fps);
@@ -1791,29 +1976,43 @@ var FudgeCore;
                 }
             }
         }
+        /**
+         * Fires all custom events the Animation should have fired between the last frame and the current frame.
+         * @param events a list of names of custom events to fire
+         */
         executeEvents(events) {
             for (let i = 0; i < events.length; i++) {
                 this.dispatchEvent(new Event(events[i]));
             }
         }
+        /**
+         * Calculates the actual time to use, using the current playmodes.
+         * @param _time the time to apply the playmodes to
+         * @returns the recalculated time
+         */
         applyPlaymodes(_time) {
             switch (this.playmode) {
                 case ANIMATION_PLAYMODE.STOP:
                     return this.localTime.getOffset();
                 case ANIMATION_PLAYMODE.PLAYONCE:
                     if (_time >= this.animation.totalTime)
-                        return this.animation.totalTime - 0.01; //TODO: this might break
+                        return this.animation.totalTime - 0.01; //TODO: this might cause some issues
                     else
                         return _time;
                 case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
                     if (_time >= this.animation.totalTime)
-                        return this.animation.totalTime + 0.01; //TODO: this might break
+                        return this.animation.totalTime + 0.01; //TODO: this might cause some issues
                     else
                         return _time;
                 default:
                     return _time;
             }
         }
+        /**
+         * Calculates and returns the direction the animation should currently be playing in.
+         * @param _time the time at which to calculate the direction
+         * @returns 1 if forward, 0 if stop, -1 if backwards
+         */
         calculateDirection(_time) {
             switch (this.playmode) {
                 case ANIMATION_PLAYMODE.STOP:
@@ -1834,6 +2033,9 @@ var FudgeCore;
                     return 1;
             }
         }
+        /**
+         * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
+         */
         updateScale() {
             let newScale = this.speedScale;
             if (this.speedScalesWithGlobalSpeed)
@@ -4029,6 +4231,240 @@ var FudgeCore;
     }
     FudgeCore.Matrix4x4 = Matrix4x4;
     //#endregion
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Stores and manipulates a twodimensional vector comprised of the components x and y
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     * ```
+     * @authors Lukas Scheuerle, HFU, 2019
+     */
+    class Vector2 {
+        constructor(_x = 0, _y = 0) {
+            this.data = new Float32Array([_x, _y]);
+        }
+        get x() {
+            return this.data[0];
+        }
+        get y() {
+            return this.data[1];
+        }
+        set x(_x) {
+            this.data[0] = _x;
+        }
+        set y(_y) {
+            this.data[1] = _y;
+        }
+        /**
+         * A shorthand for writing `new Vector2(0, 0)`.
+         * @returns A new vector with the values (0, 0)
+         */
+        static get ZERO() {
+            let vector = new Vector2();
+            return vector;
+        }
+        /**
+         * A shorthand for writing `new Vector2(0, 1)`.
+         * @returns A new vector with the values (0, 1)
+         */
+        static get UP() {
+            let vector = new Vector2(0, 1);
+            return vector;
+        }
+        /**
+         * A shorthand for writing `new Vector2(0, -1)`.
+         * @returns A new vector with the values (0, -1)
+         */
+        static get DOWN() {
+            let vector = new Vector2(0, -1);
+            return vector;
+        }
+        /**
+         * A shorthand for writing `new Vector2(1, 0)`.
+         * @returns A new vector with the values (1, 0)
+         */
+        static get RIGHT() {
+            let vector = new Vector2(1, 0);
+            return vector;
+        }
+        /**
+         * A shorthand for writing `new Vector2(-1, 0)`.
+         * @returns A new vector with the values (-1, 0)
+         */
+        static get LEFT() {
+            let vector = new Vector2(-1, 0);
+            return vector;
+        }
+        /**
+         * Normalizes a given vector to the given length without editing the original vector.
+         * @param _vector the vector to normalize
+         * @param _length the length of the resulting vector. defaults to 1
+         * @returns a new vector representing the normalised vector scaled by the given length
+         */
+        static NORMALIZATION(_vector, _length = 1) {
+            let vector = Vector2.ZERO;
+            try {
+                let [x, y] = _vector.data;
+                let factor = _length / Math.hypot(x, y);
+                vector.data = new Float32Array([_vector.x * factor, _vector.y * factor]);
+            }
+            catch (_e) {
+                console.warn(_e);
+            }
+            return vector;
+        }
+        /**
+         * Scales a given vector by a given scale without changing the original vector
+         * @param _vector The vector to scale.
+         * @param _scale The scale to scale with.
+         * @returns A new vector representing the scaled version of the given vector
+         */
+        static SCALE(_vector, _scale) {
+            let vector = new Vector2();
+            return vector;
+        }
+        /**
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
+         * @returns A new vector representing the sum of the given vectors
+         */
+        static SUM(..._vectors) {
+            let result = new Vector2();
+            for (let vector of _vectors)
+                result.data = new Float32Array([result.x + vector.x, result.y + vector.y]);
+            return result;
+        }
+        /**
+         * Subtracts two vectors.
+         * @param _a The vector to subtract from.
+         * @param _b The vector to subtract.
+         * @returns A new vector representing the difference of the given vectors
+         */
+        static DIFFERENCE(_a, _b) {
+            let vector = new Vector2;
+            vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y]);
+            return vector;
+        }
+        /**
+         * Computes the dotproduct of 2 vectors.
+         * @param _a The vector to multiply.
+         * @param _b The vector to multiply by.
+         * @returns A new vector representing the dotproduct of the given vectors
+         */
+        static DOT(_a, _b) {
+            let scalarProduct = _a.x * _b.x + _a.y * _b.y;
+            return scalarProduct;
+        }
+        /**
+         * Returns the magnitude of a given vector.
+         * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
+         * @see Vector2.MAGNITUDESQR
+         * @param _vector The vector to get the magnitude of.
+         * @returns A number representing the magnitude of the given vector.
+         */
+        static MAGNITUDE(_vector) {
+            let magnitude = Math.sqrt(Vector2.MAGNITUDESQR(_vector));
+            return magnitude;
+        }
+        /**
+         * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
+         * @param _vector The vector to get the squared magnitude of.
+         * @returns A number representing the squared magnitude of the given vector.
+         */
+        static MAGNITUDESQR(_vector) {
+            let magnitude = Vector2.DOT(_vector, _vector);
+            return magnitude;
+        }
+        /**
+         * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
+         * which implicitly is on the Z axis. It is also the signed magnitude of the result.
+         * @param _a Vector to compute the cross product on
+         * @param _b Vector to compute the cross product with
+         * @returns A number representing result of the cross product.
+         */
+        static CROSSPRODUCT(_a, _b) {
+            let crossProduct = _a.x * _b.y - _a.y * _b.x;
+            return crossProduct;
+        }
+        /**
+         * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
+         * ```plaintext
+         *    ^                |
+         *    |  =>  <--  =>   v  =>  -->
+         * ```
+         * @param _vector Vector to get the orthogonal equivalent of
+         * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
+         * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
+         */
+        static ORTHOGONAL(_vector, _clockwise = false) {
+            if (_clockwise)
+                return new Vector2(_vector.y, -_vector.x);
+            else
+                return new Vector2(-_vector.y, _vector.x);
+        }
+        /**
+         * Adds the given vector to the executing vector, changing the executor.
+         * @param _addend The vector to add.
+         */
+        add(_addend) {
+            this.data = new Vector2(_addend.x + this.x, _addend.y + this.y).data;
+        }
+        /**
+         * Subtracts the given vector from the executing vector, changing the executor.
+         * @param _subtrahend The vector to subtract.
+         */
+        subtract(_subtrahend) {
+            this.data = new Vector2(this.x - _subtrahend.x, this.y - _subtrahend.y).data;
+        }
+        /**
+         * Scales the Vector by the _scale.
+         * @param _scale The scale to multiply the vector with.
+         */
+        scale(_scale) {
+            this.data = new Vector2(_scale * this.x, _scale * this.y).data;
+        }
+        /**
+         * Normalizes the vector.
+         * @param _length A modificator to get a different length of normalized vector.
+         */
+        normalize(_length = 1) {
+            this.data = Vector2.NORMALIZATION(this, _length).data;
+        }
+        /**
+         * Sets the Vector to the given parameters. Ommitted parameters default to 0.
+         * @param _x new x to set
+         * @param _y new y to set
+         */
+        set(_x = 0, _y = 0) {
+            this.data = new Float32Array([_x, _y]);
+        }
+        /**
+         * Checks whether the given Vector is equal to the executed Vector.
+         * @param _vector The vector to comapre with.
+         * @returns true if the two vectors are equal, otherwise false
+         */
+        equals(_vector) {
+            if (this.data[0] == _vector.data[0] && this.data[1] == _vector.data[1])
+                return true;
+            return false;
+        }
+        /**
+         * @returns An array of the data of the vector
+         */
+        get() {
+            return new Float32Array(this.data);
+        }
+        /**
+         * @returns An deep copy of the vector.
+         */
+        get copy() {
+            return new Vector2(this.x, this.y);
+        }
+    }
+    FudgeCore.Vector2 = Vector2;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {

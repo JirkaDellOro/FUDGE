@@ -4,6 +4,6 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./NetworkMessages"));
-__export(require("./DataCollectors"));
-__export(require("./NetworkClientManager"));
+__export(require("./DataHandling"));
+__export(require("./ClientManagers"));
 __export(require("./Server"));
