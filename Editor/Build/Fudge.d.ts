@@ -1,8 +1,10 @@
 /// <reference types="../@types/golden-layout" />
 /// <reference types="../../../core/build/fudgecore" />
+/// <reference types="../../../userinterface/build/fudgeui" />
 declare namespace Fudge {
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
@@ -11,12 +13,13 @@ declare namespace Fudge {
     class Panel extends EventTarget {
         views: View[];
         config: GoldenLayout.ItemConfig;
+        node: ƒ.Node;
         /**
          * Constructor for panel Objects. Generates an empty panel with a single ViewData.
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name: string, _template?: PanelTemplate);
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
         /**
          * Adds given View to the list of views on the panel.
          * @param _v View to be added
@@ -30,6 +33,7 @@ declare namespace Fudge {
          * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
          */
         constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType;
+        setNode(_node: ƒ.Node): void;
     }
 }
 declare namespace Fudge {
@@ -118,14 +122,19 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
     class ViewNode extends View {
+        branch: ƒ.Node;
+        listController: ƒui.UINodeList;
         constructor(_parent: Panel);
         deconstruct(): void;
         fillContent(): void;
+        setRoot(_node: ƒ.Node): void;
     }
 }
 declare namespace Fudge {

@@ -1,6 +1,8 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 var Fudge;
+///<reference types="../../../../Core/Build/FudgeCore"/>
+//<reference types="../../Examples/Code/Scenes"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     let VIEW;

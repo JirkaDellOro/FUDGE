@@ -2,6 +2,9 @@
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 var Fudge;
+///<reference types="../../../../Core/Build/FudgeCore"/>
+//<reference types="../../Examples/Code/Scenes"/>
+///<reference path="View.ts"/>
 (function (Fudge) {
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
