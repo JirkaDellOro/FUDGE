@@ -68,7 +68,6 @@ var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 (function (Fudge) {
-    // import ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
@@ -81,7 +80,7 @@ var Fudge;
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name, _template) {
+        constructor(_name, _template, _node) {
             super();
             this.views = [];
             this.config = {
@@ -89,6 +88,9 @@ var Fudge;
                 content: [],
                 title: _name
             };
+            if (_node) {
+                this.node = _node;
+            }
             if (_template) {
                 this.config.content[0] = this.constructFromTemplate(_template.config, "row");
             }
@@ -136,6 +138,9 @@ var Fudge;
                                 break;
                             case Fudge.VIEW.PORT:
                                 view = new Fudge.ViewPort(this);
+                                if (this.node) {
+                                    view.setRoot(this.node);
+                                }
                                 break;
                         }
                         let viewConfig = {
@@ -155,6 +160,9 @@ var Fudge;
             }
             console.log(config);
             return config;
+        }
+        setNode(_node) {
+            this.node = _node;
         }
     }
     Fudge.Panel = Panel;
@@ -369,13 +377,17 @@ var Fudge;
     Fudge.ViewData = ViewData;
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 //<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 //<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
@@ -390,8 +402,15 @@ var Fudge;
         }
         fillContent() {
             let element = document.createElement("div");
-            element.innerText = "";
+            this.listController = new ƒui.UINodeList(new ƒ.Node("dummyNode"), element);
             this.content.append(element);
+        }
+        setRoot(_node) {
+            if (!_node)
+                return;
+            // ƒ.Debug.log("Trying to display node: ", _node);
+            this.branch = _node;
+            this.listController.nodeRoot = _node;
         }
     }
     Fudge.ViewNode = ViewNode;

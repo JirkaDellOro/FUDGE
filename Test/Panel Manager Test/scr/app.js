@@ -1,9 +1,10 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../UserInterface/Build/FudgeUI"/>
-var ƒ = FudgeCore;
-var ƒui = FudgeUserInterface;
 var Fudge;
+/// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../UserInterface/Build/FudgeUI"/>
 (function (Fudge) {
+    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let pm = Fudge.PanelManager.instance;
     function init() {

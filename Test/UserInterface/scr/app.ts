@@ -2,11 +2,14 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
+///<reference path="../../Scenes/Scenes.ts"/>
 
-import ƒ = FudgeCore;
-import ƒui = FudgeUserInterface;
+
 
 namespace UITest {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    
     let myLayout: GoldenLayout;
     let savedState: string;
 
@@ -58,7 +61,7 @@ namespace UITest {
     }
     function initViewport(): void {
         // create asset
-        branch = ScenesForUi.createAxisCross();
+        branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
 
         // initialize RenderManager and transmit content
@@ -71,14 +74,14 @@ namespace UITest {
         canvas.height = 800;
         canvas.width = 1200;
         document.body.append(canvas);
-        camera = ScenesForUi.createCamera(new ƒ.Vector3(1, 2, 3));
+        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
-        document.body.addEventListener(ƒui.UIEVENT.SELECTION, function(_event: CustomEvent): void { 
+        document.body.addEventListener(ƒui.UIEVENT.SELECTION, function (_event: CustomEvent): void {
             console.log("Event just in, passing it to GL");
             myLayout.emit(ƒui.UIEVENT.SELECTION, _event);
         });
@@ -99,13 +102,13 @@ namespace UITest {
     }
     function createTestComponent(container: GoldenLayout.Container, state: Object): UI.TestUI {
         return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
-        
+
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
         let treeController: ƒui.UINodeList = new ƒui.UINodeList(branch, listContainer);
 
-        myLayout.on(ƒui.UIEVENT.SELECTION, function (_event){
+        myLayout.on(ƒui.UIEVENT.SELECTION, function (_event) {
             console.log(_event);
         });
         container.getElement().html(listContainer);
