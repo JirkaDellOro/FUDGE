@@ -1,6 +1,8 @@
 /// <reference types="../../../@types/jquery"/>
 /// <reference types="../../../@types/golden-layout"/>
 var Fudge;
+/// <reference types="../../../@types/jquery"/>
+/// <reference types="../../../@types/golden-layout"/>
 (function (Fudge) {
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     class PanelManager extends EventTarget {

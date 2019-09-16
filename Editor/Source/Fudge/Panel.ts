@@ -3,7 +3,7 @@
 //<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
-    // import ƒ = FudgeCore;
+    import ƒ = FudgeCore;
 
     /**
      * Holds various views into the currently processed Fudge-project.  
@@ -14,18 +14,23 @@ namespace Fudge {
     export class Panel extends EventTarget {
         views: View[] = [];
         config: GoldenLayout.ItemConfig;
+        node: ƒ.Node;
+
         /**
          * Constructor for panel Objects. Generates an empty panel with a single ViewData.
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name: string, _template?: PanelTemplate) {
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node) {
             super();
             this.config = {
                 type: "row",
                 content: [],
                 title: _name
             };
+            if (_node) {
+                this.node = _node;
+            }
             if (_template) {
                 this.config.content[0] = this.constructFromTemplate(_template.config, "row");
             }
@@ -40,9 +45,9 @@ namespace Fudge {
          * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
-        addView (_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void  {
+        public addView(_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void {
             this.views.push(_v);
-            if ( _pushConfig) {
+            if (_pushConfig) {
                 this.config.content.push(_v.config);
             }
             if (_pushToPanelManager) {
@@ -54,7 +59,7 @@ namespace Fudge {
          * @param template Panel Template to be used for the construction
          * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
          */
-        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType {
+        public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType {
             let config: GoldenLayout.ItemConfig = {
                 type: _type,
                 content: []
@@ -73,13 +78,16 @@ namespace Fudge {
                                 break;
                             case VIEW.PORT:
                                 view = new ViewPort(this);
+                                if (this.node) {
+                                    (<ViewPort>view.setRoot(this.node))
+                                }
                                 break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {
                             type: "component",
                             title: item.title,
                             componentName: "View",
-                            componentState: { content: view.content}
+                            componentState: { content: view.content }
                         };
 
                         view.config = viewConfig;
@@ -94,6 +102,8 @@ namespace Fudge {
             console.log(config);
             return config;
         }
-        
+        public setNode(_node: ƒ.Node): void {
+            this.node = _node;
+        }
     }
 }

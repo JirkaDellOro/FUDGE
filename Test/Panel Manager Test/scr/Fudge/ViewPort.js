@@ -1,7 +1,10 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
-///<reference types="../../../../Editor/Examples/Code/Scenes"/>
+///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
 var Fudge;
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference path="../../../Scenes/Scenes.ts"/>
+///<reference path="View.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     /**

@@ -2,10 +2,16 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
-var ƒ = FudgeCore;
-var ƒui = FudgeUserInterface;
+///<reference path="../../Scenes/Scenes.ts"/>
 var UITest;
+// <reference path="../../../Core/src/Transfer/Serializer.ts"/>
+// <reference path="../../../Core/Build/Fudge.d.ts"/>
+/// <reference types="../../@types/golden-layout"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
+///<reference path="../../Scenes/Scenes.ts"/>
 (function (UITest) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     let myLayout;
     let savedState;
     let branch;
@@ -52,7 +58,7 @@ var UITest;
     }
     function initViewport() {
         // create asset
-        branch = ScenesForUi.createAxisCross();
+        branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
@@ -63,7 +69,7 @@ var UITest;
         canvas.height = 800;
         canvas.width = 1200;
         document.body.append(canvas);
-        camera = ScenesForUi.createCamera(new ƒ.Vector3(1, 2, 3));
+        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         viewPort.adjustingFrames = false;

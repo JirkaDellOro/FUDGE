@@ -4,7 +4,6 @@ var UI;
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 (function (UI) {
-    // import ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     class CameraUI extends ƒui.UIMutable {
         constructor(container, state, _camera) {

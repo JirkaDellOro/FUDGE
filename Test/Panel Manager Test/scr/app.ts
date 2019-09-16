@@ -1,10 +1,11 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../UserInterface/Build/FudgeUI"/>
 
-import ƒ = FudgeCore;
-import ƒui = FudgeUserInterface;
+
 
 namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     window.addEventListener("DOMContentLoaded", init);
     let pm: PanelManager = PanelManager.instance;
 
