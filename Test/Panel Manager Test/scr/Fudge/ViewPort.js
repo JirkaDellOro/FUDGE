@@ -55,8 +55,8 @@ var FudgeTest;
                 return;
             ƒ.Debug.log("Trying to display node: ", _node);
             // ƒ.RenderManager.removeBranch(this.viewport. this.viewport.getBranch());
-            this.viewport.setBranch(_node);
-            this.viewport.draw();
+            // this.viewport.setBranch(_node);
+            // this.viewport.draw();
         }
     }
     FudgeTest.ViewPort = ViewPort;

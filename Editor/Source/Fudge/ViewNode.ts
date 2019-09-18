@@ -17,23 +17,26 @@ namespace Fudge {
 
         constructor(_parent: Panel) {
             super(_parent);
+            this.branch = new ƒ.Node("dummyNode");
+            
+            this.listController = new ƒui.UINodeList(this.branch, this.content);
+            
             this.fillContent();
         }
         deconstruct(): void {
             //TODO: desconstruct
         }
 
-        fillContent(): void { 
-           let element: HTMLElement = document.createElement("div");
-           this.listController = new ƒui.UINodeList(new ƒ.Node("dummyNode"), element);
-           this.content.append(element);
+        fillContent(): void {
+            this.content.append(this.listController.listRoot);
         }
         public setRoot(_node: ƒ.Node): void {
             if (!_node)
                 return;
             // ƒ.Debug.log("Trying to display node: ", _node);
             this.branch = _node;
-            this.listController.nodeRoot = _node;
+            this.listController.setNodeRoot(_node);
+            this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
         }
     }
 }

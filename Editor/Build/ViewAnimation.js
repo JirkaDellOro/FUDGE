@@ -107,11 +107,11 @@ var Fudge;
                 return;
             if (obj["label"]) {
                 console.log(obj["label"]);
-                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelect" /* SELECTION */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+                this.parentPanel.dispatchEvent(new CustomEvent("selectionEvent" /* SELECTION */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
             }
             else if (obj["event"]) {
                 console.log(obj["event"]);
-                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelect" /* SELECTION */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+                this.parentPanel.dispatchEvent(new CustomEvent("selectionEvent" /* SELECTION */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
             }
         }
         mouseMove(_e) {

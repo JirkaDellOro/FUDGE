@@ -1,5 +1,5 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Build/ViewAnimation"/>
+///<reference types="../../Examples/Code/Scenes"/>
 
 //<reference types="../../Examples/Code/Scenes"/>
 
@@ -10,8 +10,10 @@ namespace Fudge {
      * Holds various views into the currently processed Fudge-project.  
      * There must be only one ViewData in this panel, that displays data for the selected entity  
      * Multiple panels may be created by the user, presets for different processing should be available
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
      */
-    // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
+    
     export class Panel extends EventTarget {
         views: View[] = [];
         config: GoldenLayout.ItemConfig;
@@ -63,6 +65,11 @@ namespace Fudge {
         public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType {
             let config: GoldenLayout.ItemConfig = {
                 type: _type,
+                width: template.width,
+                height: template.height,
+                id: template.id,
+                title: template.title,
+                isClosable: template.isClosable,
                 content: []
             };
             if (template.content.length != 0) {
@@ -73,14 +80,18 @@ namespace Fudge {
                         switch (item.componentName) {
                             case VIEW.NODE:
                                 view = new ViewNode(this);
+                                if (this.node) {
+                                    (<ViewNode>view).setRoot(this.node);
+                                }
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
+
                                 break;
                             case VIEW.PORT:
-                                view = new ViewPort(this);
+                                view = new ViewViewport(this);
                                 if (this.node) {
-                                    (<ViewPort>view.setRoot(this.node))
+                                    // (<ViewViewport>view).setRoot(this.node);
                                 }
                                 break;
                             case VIEW.ANIMATION:
@@ -90,6 +101,10 @@ namespace Fudge {
                         let viewConfig: GoldenLayout.ComponentConfig = {
                             type: "component",
                             title: item.title,
+                            width: item.width,
+                            height: item.height,
+                            id: item.id,
+                            isClosable: item.isClosable,
                             componentName: "View",
                             componentState: { content: view.content }
                         };
@@ -97,6 +112,7 @@ namespace Fudge {
                         view.config = viewConfig;
                         config.content.push(viewConfig);
                         this.addView(view, false, false);
+
                     }
                     else {
                         config.content.push(this.constructFromTemplate(item, item.type));
@@ -106,8 +122,18 @@ namespace Fudge {
             console.log(config);
             return config;
         }
+        //TODO: Remove and make it Event-Oriented
         public setNode(_node: ƒ.Node): void {
             this.node = _node;
+            for (let view of this.views) {
+                //HACK
+                if (view instanceof ViewNode) {
+                    (<ViewNode>view).setRoot(this.node);
+                }
+                else if (view instanceof ViewViewport) {
+                    (<ViewViewport>view).setRoot(this.node);
+                }
+            }
         }
     }
 }

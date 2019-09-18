@@ -1,15 +1,4 @@
-/// <reference types="../../core/build/fudgecore" />
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    class UINodeList {
-        nodeRoot: ƒ.Node;
-        listRoot: HTMLElement;
-        selectedEntry: HTMLElement;
-        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
-        private BuildListFromNode;
-        private toggleCollapse;
-    }
-}
+/// <reference types="../../../core/build/fudgecore" />
 declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
@@ -36,13 +25,12 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
     const enum UIEVENT {
-        SELECTION = "nodeSelect"
-    }
-    class NodeSelectionEvent extends Event {
-        targetNode: ƒ.Node;
-        constructor(_type: string, _event: NodeSelectionEvent);
+        SELECTION = "selectionEvent",
+        COLLAPSE = "collapseEvent",
+        REMOVE = "nodeRemove",
+        HIDE = "nodeHide",
+        UPDATE = "updateEvent"
     }
 }
 declare namespace FudgeUserInterface {
@@ -69,6 +57,62 @@ declare namespace FudgeUserInterface {
             _cssClass?: string;
             _mutable?: ƒ.Mutable;
         }): HTMLSpanElement;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UIAnimationList {
+        listRoot: HTMLElement;
+        mutator: ƒ.Mutator;
+        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
+        BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement;
+        collectMutator: () => ƒ.Mutator;
+        private toggleCollapse;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    abstract class UIListController {
+        abstract listRoot: HTMLElement;
+        protected abstract toggleCollapse(_event: MouseEvent): void;
+    }
+    abstract class CollapsableListElement extends HTMLUListElement {
+        header: HTMLLIElement;
+        content: HTMLElement;
+        constructor();
+        collapse(element: HTMLElement): void;
+    }
+    class CollapsableNodeListElement extends CollapsableListElement {
+        node: ƒ.Node;
+        constructor(_node: ƒ.Node, _name: string, _unfolded?: boolean);
+        selectNode: (_event: MouseEvent) => void;
+        collapseEvent: (_event: MouseEvent) => void;
+    }
+    class CollapsableAnimationListElement extends CollapsableListElement {
+        mutator: ƒ.Mutator;
+        name: string;
+        constructor(_mutator: ƒ.Mutator, _name: string, _unfolded?: boolean);
+        collapseEvent: (_event: MouseEvent) => void;
+        buildContent(_mutator: ƒ.Mutator): void;
+        getMutator(): ƒ.Mutator;
+        setMutator(_mutator: ƒ.Mutator): void;
+        private updateMutator;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UINodeList {
+        listRoot: HTMLElement;
+        selectedEntry: HTMLElement;
+        private nodeRoot;
+        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
+        getNodeRoot(): ƒ.Node;
+        setSelection(_node: ƒ.Node): void;
+        getSelection(): ƒ.Node;
+        setNodeRoot(_node: ƒ.Node): void;
+        toggleCollapse: (_event: MouseEvent) => void;
+        private BuildListFromNode;
+        private selectEntry;
     }
 }
 declare namespace FudgeUserInterface {

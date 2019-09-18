@@ -2,10 +2,12 @@
   "bundle": {
     "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
     "sourceFiles": [
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/NodeList/UINodeList.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
     ],
     "js": {
@@ -18,7 +20,7 @@
         },
         {
           "pos": 15,
-          "end": 16992,
+          "end": 22389,
           "kind": "text"
         }
       ],
@@ -52,7 +54,7 @@
         },
         {
           "pos": 57,
-          "end": 3437,
+          "end": 5130,
           "kind": "text"
         }
       ]
