@@ -3,6 +3,8 @@
 ///<reference path="View.ts"/>
 
 namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -11,6 +13,7 @@ namespace Fudge {
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent: Panel) {
             super(_parent);
+            this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setNode);
             this.fillContent();
         }
         deconstruct(): void {
@@ -25,6 +28,10 @@ namespace Fudge {
             btnMessage.innerText = "Send to panel";
             this.content.appendChild(lblName);
             this.content.appendChild(btnMessage);
+        }
+
+        private setNode(_event: CustomEvent): void {
+            console.log(_event.detail);
         }
     }
 }

@@ -3,11 +3,11 @@
 namespace FudgeUserInterface {
 
     export const enum UIEVENT {
-        SELECTION = "selectionEvent",
-        COLLAPSE = "collapseEvent",
-        REMOVE = "nodeRemove",
-        HIDE = "nodeHide",
-        UPDATE = "updateEvent"
+        SELECTION = "nodeSelectionEvent",
+        COLLAPSE = "listCollapseEvent",
+        REMOVE = "nodeRemoveEvent",
+        HIDE = "nodeHideEvent",
+        UPDATE = "mutatorUpdateEvent"
     }
 
 }
