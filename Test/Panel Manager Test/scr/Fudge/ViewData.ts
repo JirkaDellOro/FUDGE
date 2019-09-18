@@ -2,7 +2,7 @@
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
-namespace Fudge {
+namespace FudgeTest {
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */

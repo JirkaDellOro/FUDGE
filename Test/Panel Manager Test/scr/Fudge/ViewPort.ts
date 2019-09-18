@@ -2,7 +2,7 @@
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
 
-namespace Fudge {
+namespace FudgeTest {
     import ƒ = FudgeCore;
     
 

@@ -1,7 +1,7 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 
-namespace Fudge {
+namespace FudgeTest {
     import ƒ = FudgeCore;
 
     export enum VIEW {
