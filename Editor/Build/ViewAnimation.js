@@ -71,15 +71,19 @@ var Fudge;
             this.canvas.style.top = "0px";
             this.canvas.style.borderLeft = "1px solid black";
             this.crc = this.canvas.getContext("2d");
-            // let toolbar: HTMLDivElement = document.createElement("div");
+            this.hover = document.createElement("span");
+            this.hover.style.background = "black";
+            this.hover.style.color = "white";
+            this.hover.style.position = "absolute";
+            this.hover.style.display = "none";
             this.content.appendChild(this.toolbar);
             this.content.appendChild(attributeList);
             // this.content.appendChild(this.canvasSheet);
             this.content.appendChild(this.canvas);
+            this.content.appendChild(this.hover);
             this.sheet = new Fudge.ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-            this.sheet.redraw();
             this.playbackTime = 1000;
-            this.sheet.drawCursor(3);
+            this.sheet.redraw(this.playbackTime);
             // sheet.translate();
         }
         installListeners() {
@@ -103,9 +107,11 @@ var Fudge;
                 return;
             if (obj["label"]) {
                 console.log(obj["label"]);
+                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelect" /* SELECTION */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
             }
             else if (obj["event"]) {
                 console.log(obj["event"]);
+                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelect" /* SELECTION */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
             }
         }
         mouseMove(_e) {
@@ -174,30 +180,76 @@ var Fudge;
             buttons[6].classList.add("fa", "fa-file", "add-label");
             buttons[7].classList.add("fa", "fa-bookmark", "add-event");
             buttons[8].classList.add("fa", "fa-plus-square", "add-key");
+            buttons[0].id = "start";
+            buttons[1].id = "back";
+            buttons[2].id = "play";
+            buttons[3].id = "pause";
+            buttons[4].id = "forward";
+            buttons[5].id = "end";
+            buttons[6].id = "add-label";
+            buttons[7].id = "add-event";
+            buttons[8].id = "add-key";
             for (let b of buttons) {
                 _tb.appendChild(b);
             }
         }
         toolbarClick(_e) {
             // console.log("click", _e.target);
+            let target = _e.target;
+            switch (target.id) {
+                case "add-label":
+                    this.animation.labels[this.randomNameGenerator()] = this.playbackTime;
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "add-event":
+                    this.animation.setEvent(this.randomNameGenerator(), this.playbackTime);
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "add-key":
+                    break;
+                case "start":
+                    this.playbackTime = 0;
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "back":
+                    this.playbackTime = this.playbackTime -= 1000 / this.animation.stepsPerSecond;
+                    this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "play":
+                    break;
+                case "pause":
+                    break;
+                case "forward":
+                    this.playbackTime = this.playbackTime += 1000 / this.animation.stepsPerSecond;
+                    this.playbackTime = Math.max(this.playbackTime, 0);
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                case "end":
+                    this.playbackTime = this.animation.totalTime;
+                    this.sheet.redraw(this.playbackTime);
+                    break;
+                default:
+                    break;
+            }
         }
         toolbarChange(_e) {
             let target = _e.target;
             switch (target.id) {
                 case "playmode":
-                    console.log("playmode changed to", target.value);
+                    // console.log("playmode changed to", target.value);
                     // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
                     break;
                 case "fps":
-                    console.log("fps changed to", target.value);
+                    // console.log("fps changed to", target.value);
                     if (!isNaN(+target.value))
                         this.animation.fps = +target.value;
                     break;
                 case "sps":
-                    console.log("sps changed to", target.value);
+                    // console.log("sps changed to", target.value);
                     if (!isNaN(+target.value)) {
                         this.animation.stepsPerSecond = +target.value;
-                        this.sheet.redraw();
+                        this.sheet.redraw(this.playbackTime);
                     }
                     // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
                     break;
@@ -205,6 +257,11 @@ var Fudge;
                     console.log("no clue what you changed...");
                     break;
             }
+        }
+        randomNameGenerator() {
+            let attr = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
+            let anim = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion"];
+            return attr[Math.floor(Math.random() * attr.length)] + anim[Math.floor(Math.random() * anim.length)];
         }
     }
     Fudge.ViewAnimation = ViewAnimation;
@@ -233,11 +290,12 @@ var Fudge;
         translate() {
             this.crc2.translate(this.position.x, this.position.y);
         }
-        redraw() {
+        redraw(_time) {
             this.translate();
             this.clear();
             this.drawTimeline();
             this.drawEventsAndLabels();
+            this.drawCursor(_time);
         }
         clear() {
             let maxDistance = 10000;
@@ -279,6 +337,7 @@ var Fudge;
             this.crc2.stroke(timeline);
         }
         drawCursor(_time) {
+            _time *= this.scale.x;
             let cursor = new Path2D();
             cursor.rect(_time - 3, 0, 6, 50);
             cursor.moveTo(_time, 50);
@@ -375,18 +434,12 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
-        redraw() {
-            super.redraw();
-        }
     }
     Fudge.ViewAnimationSheetCurve = ViewAnimationSheetCurve;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetDope extends Fudge.ViewAnimationSheet {
-        redraw() {
-            super.redraw();
-        }
     }
     Fudge.ViewAnimationSheetDope = ViewAnimationSheetDope;
 })(Fudge || (Fudge = {}));

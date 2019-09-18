@@ -9,6 +9,7 @@ declare namespace Fudge {
         private crc;
         private sheet;
         private toolbar;
+        private hover;
         constructor(_parent: Panel);
         openAnimation(): void;
         fillContent(): void;
@@ -21,6 +22,7 @@ declare namespace Fudge {
         private fillToolbar;
         private toolbarClick;
         private toolbarChange;
+        private randomNameGenerator;
     }
 }
 declare namespace Fudge {
@@ -57,7 +59,7 @@ declare namespace Fudge {
         constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: FudgeCore.AnimationSequence[], _scale?: FudgeCore.Vector2, _pos?: FudgeCore.Vector2);
         moveTo(_time: number, _value?: number): void;
         translate(): void;
-        redraw(): void;
+        redraw(_time: number): void;
         clear(): void;
         drawTimeline(): void;
         drawCursor(_time: number): void;
@@ -69,12 +71,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
-        redraw(): void;
     }
 }
 declare namespace Fudge {
     class ViewAnimationSheetDope extends ViewAnimationSheet {
-        redraw(): void;
     }
 }
 declare namespace Fudge {

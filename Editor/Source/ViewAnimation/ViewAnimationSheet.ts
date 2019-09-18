@@ -27,11 +27,12 @@ namespace Fudge {
     translate(): void {
       this.crc2.translate(this.position.x, this.position.y);
     }
-    redraw(): void {
+    redraw(_time: number): void {
       this.translate();
       this.clear();
       this.drawTimeline();
       this.drawEventsAndLabels();
+      this.drawCursor(_time);
     }
     clear(): void {
       let maxDistance: number = 10000;
@@ -62,7 +63,7 @@ namespace Fudge {
           timeline.lineTo(i, timelineHeight - 25);
           this.crc2.fillText(steps.toString(), i - 3, timelineHeight - 28);
           if (Math.round(i) % Math.round(1000 * this.scale.x) == 0)
-          //TODO: make the time display independent of the SPS display. Trying to tie the two together was a stupid idea.
+            //TODO: make the time display independent of the SPS display. Trying to tie the two together was a stupid idea.
             this.crc2.fillText((Math.round(100 * (i / 1000 / this.scale.x)) / 100).toString() + "s", i - 3, 10);
         } else {
           timeline.lineTo(i, timelineHeight - 20);
@@ -73,6 +74,7 @@ namespace Fudge {
     }
 
     drawCursor(_time: number): void {
+      _time *= this.scale.x;
       let cursor: Path2D = new Path2D();
       cursor.rect(_time - 3, 0, 6, 50);
       cursor.moveTo(_time, 50);
