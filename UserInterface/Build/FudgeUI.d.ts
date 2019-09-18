@@ -26,11 +26,11 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     const enum UIEVENT {
-        SELECTION = "selectionEvent",
-        COLLAPSE = "collapseEvent",
-        REMOVE = "nodeRemove",
-        HIDE = "nodeHide",
-        UPDATE = "updateEvent"
+        SELECTION = "nodeSelectionEvent",
+        COLLAPSE = "listCollapseEvent",
+        REMOVE = "nodeRemoveEvent",
+        HIDE = "nodeHideEvent",
+        UPDATE = "mutatorUpdateEvent"
     }
 }
 declare namespace FudgeUserInterface {
@@ -63,8 +63,9 @@ declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class UIAnimationList {
         listRoot: HTMLElement;
-        mutator: ƒ.Mutator;
+        private mutator;
         constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
+        getMutator(): ƒ.Mutator;
         BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement;
         collectMutator: () => ƒ.Mutator;
         private toggleCollapse;
@@ -112,7 +113,6 @@ declare namespace FudgeUserInterface {
         setNodeRoot(_node: ƒ.Node): void;
         toggleCollapse: (_event: MouseEvent) => void;
         private BuildListFromNode;
-        private selectEntry;
     }
 }
 declare namespace FudgeUserInterface {

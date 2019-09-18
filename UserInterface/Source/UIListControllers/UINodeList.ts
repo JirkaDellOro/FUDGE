@@ -13,7 +13,7 @@ namespace FudgeUserInterface {
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
             _listContainer.addEventListener("click", this.toggleCollapse);
-            _listContainer.addEventListener(UIEVENT.SELECTION, this.selectEntry);
+
         }
         public getNodeRoot(): ƒ.Node {
             return this.nodeRoot;
@@ -56,10 +56,6 @@ namespace FudgeUserInterface {
                 listRoot.content.appendChild(listItem);
             }
             return listRoot;
-        }
-        private selectEntry = (_event: Event): void => {
-            this.selectedEntry = (<CollapsableNodeListElement>_event.target);
-            console.log(this.getSelection());
         }
 
 

@@ -2,7 +2,7 @@ namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     export class UIAnimationList {
         listRoot: HTMLElement;
-        mutator: ƒ.Mutator;
+        private mutator: ƒ.Mutator;
         constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement) {
             //TODO: Implementation
             this.mutator = _mutator;
@@ -12,7 +12,9 @@ namespace FudgeUserInterface {
             _listContainer.addEventListener(UIEVENT.COLLAPSE, this.toggleCollapse);
             _listContainer.addEventListener(UIEVENT.UPDATE, this.collectMutator);
         }
-
+        public getMutator(): ƒ.Mutator {
+            return this.mutator;
+        }
         public BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
             let listRoot: HTMLUListElement = document.createElement("ul");
             for (let key in _mutator) {

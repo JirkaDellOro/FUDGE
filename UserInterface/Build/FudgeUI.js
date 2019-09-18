@@ -231,8 +231,11 @@ var FudgeUserInterface;
             this.listRoot = document.createElement("ul");
             this.listRoot = this.BuildFromMutator(this.mutator);
             _listContainer.append(this.listRoot);
-            _listContainer.addEventListener("collapseEvent" /* COLLAPSE */, this.toggleCollapse);
-            _listContainer.addEventListener("updateEvent" /* UPDATE */, this.collectMutator);
+            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.collectMutator);
+        }
+        getMutator() {
+            return this.mutator;
         }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
@@ -273,11 +276,11 @@ var FudgeUserInterface;
         constructor(_node, _name, _unfolded = false) {
             super();
             this.selectNode = (_event) => {
-                let event = new CustomEvent("selectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
+                let event = new CustomEvent("nodeSelectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
                 this.dispatchEvent(event);
             };
             this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
+                let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
                 this.dispatchEvent(event);
             };
             this.node = _node;
@@ -300,13 +303,14 @@ var FudgeUserInterface;
         constructor(_mutator, _name, _unfolded = false) {
             super();
             this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
+                let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
                 this.dispatchEvent(event);
             };
             this.updateMutator = (_event) => {
                 let target = _event.target;
                 this.mutator[target.id] = parseFloat(target.value);
-                let event = new CustomEvent("updateEvent" /* UPDATE */, { bubbles: true, detail: this.mutator });
+                _event.cancelBubble = true;
+                let event = new CustomEvent("mutatorUpdateEvent" /* UPDATE */, { bubbles: true, detail: this.mutator });
                 this.dispatchEvent(event);
             };
             this.mutator = _mutator;
@@ -323,10 +327,16 @@ var FudgeUserInterface;
         }
         buildContent(_mutator) {
             for (let key in _mutator) {
-                let listEntry = document.createElement("li");
-                FudgeUserInterface.UIGenerator.createLabelElement(key, listEntry);
-                FudgeUserInterface.UIGenerator.createStepperElement(key, listEntry, { _value: _mutator[key] });
-                this.content.append(listEntry);
+                if (typeof _mutator[key] == "object") {
+                    let newList = new CollapsableAnimationListElement(_mutator[key], key);
+                    this.content.append(newList);
+                }
+                else {
+                    let listEntry = document.createElement("li");
+                    FudgeUserInterface.UIGenerator.createLabelElement(key, listEntry);
+                    FudgeUserInterface.UIGenerator.createStepperElement(key, listEntry, { _value: _mutator[key] });
+                    this.content.append(listEntry);
+                }
             }
         }
         getMutator() {
@@ -364,17 +374,12 @@ var FudgeUserInterface;
                     }
                 }
             };
-            this.selectEntry = (_event) => {
-                this.selectedEntry = _event.target;
-                console.log(this.getSelection());
-            };
             this.nodeRoot = _node;
             this.listRoot = document.createElement("ul");
             let list = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
             _listContainer.addEventListener("click", this.toggleCollapse);
-            _listContainer.addEventListener("selectionEvent" /* SELECTION */, this.selectEntry);
         }
         getNodeRoot() {
             return this.nodeRoot;
