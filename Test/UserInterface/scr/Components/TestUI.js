@@ -1,9 +1,9 @@
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
-var UI;
+var UITest;
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
-(function (UI) {
+(function (UITest) {
     var ƒui = FudgeUserInterface;
     class TestUI extends ƒui.UIMutable {
         constructor(container, state, _camera) {
@@ -15,6 +15,6 @@ var UI;
             container.getElement().html(this.root);
         }
     }
-    UI.TestUI = TestUI;
-})(UI || (UI = {}));
+    UITest.TestUI = TestUI;
+})(UITest || (UITest = {}));
 //# sourceMappingURL=TestUI.js.map
