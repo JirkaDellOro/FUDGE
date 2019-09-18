@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+//exports.__esModule = true;
 var raycast = /** @class */ (function () {
     //  init();
     // animate();
@@ -19,7 +19,7 @@ var raycast = /** @class */ (function () {
  */
     raycast.prototype.hitTest = function () {
         var selectedObject = null;
-        var intersects = this.getIntersects(screenX, screenY);
+        var intersects = getIntersects(screenX, screenY);
         if (intersects.length > 0) {
             var res = intersects.filter(function (res) {
                 return res && res.object;
@@ -34,20 +34,22 @@ var raycast = /** @class */ (function () {
     /*public static get selectedObject(){
         return selectedObject;
     }*/
-    raycast.prototype.getIntersects = function (x, y) {
-        var mouseVector;
-        var raycaster;
+    var mouseVector = new THREE.Vector2;
+    var raycaster = new THREE.Raycaster;
+
+	function getIntersects( point, objects ) {
         var objects;
         var camera;
-        x = (x / window.innerWidth) * 2 - 1;
-        y = -(y / window.innerHeight) * 2 + 1;
-        mouseVector.set(x, y);
+       // x = (x / window.innerWidth) * 2 - 1;
+      //  y = -(y / window.innerHeight) * 2 + 1;
+      //  mouseVector.set(x, y);
+        mouseVector.set( ( point.x * 2 ) - 1, - ( point.y * 2 ) + 1 );
         raycaster.setFromCamera(mouseVector, camera);
         return raycaster.intersectObject(objects, true);
     };
     return raycast;
 }());
-exports.raycast = raycast;
+//exports.raycast = raycast;
 /* function onDocumentMouseMove( event ) {
 
      event.preventDefault();
