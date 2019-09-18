@@ -2,6 +2,7 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference path="../../Scenes/Scenes.ts"/>
 
 
@@ -9,7 +10,7 @@
 namespace UITest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    
+
     let myLayout: GoldenLayout;
     let savedState: string;
 
@@ -44,6 +45,11 @@ namespace UITest {
                     type: "component",
                     componentName: "TreeView",
                     title: "TreeView"
+                },
+                {
+                    type: "component",
+                    componentName: "AnimationTest",
+                    title: "AnimationTest"
                 }
                 ]
             }]
@@ -56,6 +62,7 @@ namespace UITest {
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Manual", createTestComponent);
         myLayout.registerComponent("TreeView", createTreeComponent);
+        myLayout.registerComponent("AnimationTest", createAnimTreeComponent);
 
         myLayout.init();
     }
@@ -97,11 +104,11 @@ namespace UITest {
         container.getElement().append(canvas);
     }
 
-    function createCameraComponent(container: GoldenLayout.Container, state: Object): UI.CameraUI {
-        return new UI.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
+        return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
-    function createTestComponent(container: GoldenLayout.Container, state: Object): UI.TestUI {
-        return new UI.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TestUI {
+        return new UITest.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
 
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
@@ -111,6 +118,16 @@ namespace UITest {
         myLayout.on(ƒui.UIEVENT.SELECTION, function (_event) {
             console.log(_event);
         });
+        container.getElement().html(listContainer);
+    }
+    function createAnimTreeComponent(container: GoldenLayout.Container, state: Object): void {
+        let listContainer: HTMLElement = document.createElement("div");
+        let testMutator: ƒ.Mutator = {
+            position: { x: 0, y: 1, z: 3 },
+            rotation: { x: 0, y: 0.5, z: 1},
+            scale: { x: 1, y: 2, z: 1}
+        };
+        let treeController: ƒui.UIAnimationList = new ƒui.UIAnimationList(testMutator, listContainer);
         container.getElement().html(listContainer);
     }
 }

@@ -1,7 +1,7 @@
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 
-namespace UI {
+namespace UITest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     export class TestUI extends ƒui.UIMutable {

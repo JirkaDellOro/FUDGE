@@ -9,6 +9,8 @@ declare namespace Fudge {
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
      * Multiple panels may be created by the user, presets for different processing should be available
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
      */
     class Panel extends EventTarget {
         views: View[];
@@ -143,8 +145,9 @@ declare namespace Fudge {
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewPort extends View {
+    class ViewViewport extends View {
         viewport: ƒ.Viewport;
+        canvas: HTMLCanvasElement;
         branch: ƒ.Node;
         constructor(_parent: Panel);
         deconstruct(): void;
@@ -154,5 +157,6 @@ declare namespace Fudge {
          * @param _node
          */
         setRoot(_node: ƒ.Node): void;
+        private animate;
     }
 }

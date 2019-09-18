@@ -1,7 +1,7 @@
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 
-namespace UI {
+namespace UITest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     export class CameraUI extends ƒui.UIMutable {

@@ -21,12 +21,12 @@ var Fudge;
                             {
                                 type: "component",
                                 componentName: Fudge.VIEW.NODE,
-                                title: "Node Explorer"
+                                title: "Node"
                             },
                             {
                                 type: "component",
                                 componentName: Fudge.VIEW.DATA,
-                                title: "Inspector"
+                                title: "Data"
                             }
                         ]
                     }
