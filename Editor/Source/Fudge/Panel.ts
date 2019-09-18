@@ -1,4 +1,5 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 
 //<reference types="../../Examples/Code/Scenes"/>
 
@@ -32,7 +33,7 @@ namespace Fudge {
                 this.node = _node;
             }
             if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, "row");
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
             }
             else {
                 let viewData: ViewData = new ViewData(this);
@@ -81,6 +82,9 @@ namespace Fudge {
                                 if (this.node) {
                                     (<ViewPort>view.setRoot(this.node))
                                 }
+                                break;
+                            case VIEW.ANIMATION:
+                                view = new ViewAnimation(this);
                                 break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {

@@ -191,8 +191,8 @@ declare namespace FudgeCore {
         labels: AnimationLabel;
         stepsPerSecond: number;
         animationStructure: AnimationStructure;
+        events: AnimationEventTrigger;
         private framesPerSecond;
-        private events;
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);

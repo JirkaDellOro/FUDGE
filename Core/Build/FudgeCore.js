@@ -296,8 +296,8 @@ var FudgeCore;
             this.totalTime = 0;
             this.labels = {};
             this.stepsPerSecond = 10;
-            this.framesPerSecond = 60;
             this.events = {};
+            this.framesPerSecond = 60;
             // processed eventlist and animation strucutres for playback.
             this.eventsProcessed = new Map();
             this.animationStructuresProcessed = new Map();

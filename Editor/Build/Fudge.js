@@ -31,6 +31,10 @@ var Fudge;
             ƒ.Debug.log("OpenViewNode");
             openViewNode();
         });
+        ipcRenderer.on("openAnimationPanel", (_event, _args) => {
+            ƒ.Debug.log("Open Animation Panel");
+            openAnimationPanel();
+        });
         // HACK!
         ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("UpdateViewNode");
@@ -38,7 +42,11 @@ var Fudge;
     }
     function openViewNode() {
         // let panel: Panel = PanelManager.instance.createEmptyPanel("Empty Test Panel");
-        let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.NodePanelTemplate, "Node Panel");
+        let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.NodePanelTemplate(), "Node Panel");
+        Fudge.PanelManager.instance.addPanel(panel);
+    }
+    function openAnimationPanel() {
+        let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.ViewAnimationTemplate(), "Animation Panel");
         Fudge.PanelManager.instance.addPanel(panel);
     }
     function save(_node) {
@@ -63,9 +71,11 @@ var Fudge;
     }
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 //<reference types="../../Examples/Code/Scenes"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 //<reference types="../../Examples/Code/Scenes"/>
 (function (Fudge) {
     /**
@@ -92,7 +102,7 @@ var Fudge;
                 this.node = _node;
             }
             if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, "row");
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
             }
             else {
                 let viewData = new Fudge.ViewData(this);
@@ -141,6 +151,9 @@ var Fudge;
                                 if (this.node) {
                                     view.setRoot(this.node);
                                 }
+                                break;
+                            case Fudge.VIEW.ANIMATION:
+                                view = new Fudge.ViewAnimation(this);
                                 break;
                         }
                         let viewConfig = {
@@ -307,7 +320,7 @@ var Fudge;
     (function (VIEW) {
         // PROJECT = ViewProject,
         VIEW["NODE"] = "ViewNode";
-        // ANIMATION = ViewAnimation,
+        VIEW["ANIMATION"] = "ViewAnimation";
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
         VIEW["PORT"] = "ViewPort";
