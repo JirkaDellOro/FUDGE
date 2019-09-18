@@ -18,7 +18,7 @@ namespace Fudge {
         constructor(_parent: Panel) {
             super(_parent);
             this.branch = new ƒ.Node("dummyNode");
-            
+            this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
             
             this.fillContent();
@@ -37,6 +37,9 @@ namespace Fudge {
             this.branch = _node;
             this.listController.setNodeRoot(_node);
             this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
+        }
+        private setSelectedNode = (_event: CustomEvent): void => {
+            this.listController.setSelection(_event.detail);
         }
     }
 }

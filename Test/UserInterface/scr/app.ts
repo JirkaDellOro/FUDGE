@@ -123,9 +123,21 @@ namespace UITest {
     function createAnimTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
         let testMutator: ƒ.Mutator = {
-            position: { x: 0, y: 1, z: 3 },
-            rotation: { x: 0, y: 0.5, z: 1},
-            scale: { x: 1, y: 2, z: 1}
+            component: {
+                transform: {
+                    position: { x: 0, y: 1, z: 3 },
+                    rotation: { x: 0, y: 0.5, z: 1 },
+                    scale: { x: 1, y: 2, z: 1 }
+                }
+            },
+            otherComponent: {
+                transform: {
+                    position: { x: 0, y: 1, z: 3 },
+                    rotation: { x: 0, y: 0.5, z: 1 },
+                    scale: { x: 1, y: 2, z: 1 }
+                }
+            }
+
         };
         let treeController: ƒui.UIAnimationList = new ƒui.UIAnimationList(testMutator, listContainer);
         container.getElement().html(listContainer);

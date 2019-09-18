@@ -76,10 +76,17 @@ namespace FudgeUserInterface {
         }
         public buildContent(_mutator: ƒ.Mutator): void {
             for (let key in _mutator) {
-                let listEntry: HTMLLIElement = document.createElement("li");
-                UIGenerator.createLabelElement(key, listEntry);
-                UIGenerator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
-                this.content.append(listEntry);
+                if (typeof _mutator[key] == "object") {
+                    let newList: CollapsableAnimationListElement = new CollapsableAnimationListElement(<ƒ.Mutator>_mutator[key], key);
+                    this.content.append(newList);
+                }
+                else {
+                    let listEntry: HTMLLIElement = document.createElement("li");
+                    UIGenerator.createLabelElement(key, listEntry);
+                    UIGenerator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
+                    this.content.append(listEntry);
+                }
+
             }
         }
         public getMutator(): ƒ.Mutator {
@@ -93,10 +100,11 @@ namespace FudgeUserInterface {
         private updateMutator = (_event: Event): void => {
             let target: HTMLInputElement = <HTMLInputElement>_event.target;
             this.mutator[target.id] = parseFloat(target.value);
-            let event: Event = new CustomEvent(UIEVENT.UPDATE, {bubbles: true, detail: this.mutator});
+            _event.cancelBubble = true;
+            let event: Event = new CustomEvent(UIEVENT.UPDATE, { bubbles: true, detail: this.mutator });
             this.dispatchEvent(event);
         }
-        
+
     }
     customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
     customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });

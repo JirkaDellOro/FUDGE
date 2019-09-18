@@ -154,6 +154,7 @@ var Fudge;
                                 if (this.node) {
                                     view.setRoot(this.node);
                                 }
+                                view.content.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEvent);
                                 break;
                             case Fudge.VIEW.DATA:
                                 view = new Fudge.ViewData(this);
@@ -202,6 +203,11 @@ var Fudge;
                     view.setRoot(this.node);
                 }
             }
+        }
+        passEvent(_event) {
+            let eventToPass = new CustomEvent(_event.type, { detail: _event.detail });
+            console.log(eventToPass.detail);
+            this.dispatchEvent(eventToPass);
         }
     }
     Fudge.Panel = Panel;
@@ -398,6 +404,7 @@ var Fudge;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
             super(_parent);
+            this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setNode);
             this.fillContent();
         }
         deconstruct() {
@@ -411,6 +418,9 @@ var Fudge;
             btnMessage.innerText = "Send to panel";
             this.content.appendChild(lblName);
             this.content.appendChild(btnMessage);
+        }
+        setNode(_event) {
+            console.log(_event.detail);
         }
     }
     Fudge.ViewData = ViewData;
@@ -434,7 +444,11 @@ var Fudge;
     class ViewNode extends Fudge.View {
         constructor(_parent) {
             super(_parent);
+            this.setSelectedNode = (_event) => {
+                this.listController.setSelection(_event.detail);
+            };
             this.branch = new ƒ.Node("dummyNode");
+            this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
             this.fillContent();
         }

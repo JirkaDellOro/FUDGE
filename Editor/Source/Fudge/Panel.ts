@@ -5,7 +5,7 @@
 
 namespace Fudge {
     import ƒ = FudgeCore;
-
+    import ƒui = FudgeUserInterface;
     /**
      * Holds various views into the currently processed Fudge-project.  
      * There must be only one ViewData in this panel, that displays data for the selected entity  
@@ -83,6 +83,7 @@ namespace Fudge {
                                 if (this.node) {
                                     (<ViewNode>view).setRoot(this.node);
                                 }
+                                view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
@@ -134,6 +135,13 @@ namespace Fudge {
                     (<ViewViewport>view).setRoot(this.node);
                 }
             }
+        }
+
+        private passEvent (_event: CustomEvent): void {
+            
+            let eventToPass: CustomEvent = new CustomEvent(_event.type, {detail: _event.detail});
+            console.log(eventToPass.detail);
+            this.dispatchEvent(eventToPass);
         }
     }
 }

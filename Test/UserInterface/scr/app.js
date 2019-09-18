@@ -84,9 +84,9 @@ var UITest;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
-        document.body.addEventListener("selectionEvent" /* SELECTION */, function (_event) {
+        document.body.addEventListener("nodeSelectionEvent" /* SELECTION */, function (_event) {
             console.log("Event just in, passing it to GL");
-            myLayout.emit("selectionEvent" /* SELECTION */, _event);
+            myLayout.emit("nodeSelectionEvent" /* SELECTION */, _event);
         });
         function animate(_event) {
             branch.cmpTransform.local.rotateY(1);
@@ -107,7 +107,7 @@ var UITest;
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
         let treeController = new ƒui.UINodeList(branch, listContainer);
-        myLayout.on("selectionEvent" /* SELECTION */, function (_event) {
+        myLayout.on("nodeSelectionEvent" /* SELECTION */, function (_event) {
             console.log(_event);
         });
         container.getElement().html(listContainer);
@@ -115,9 +115,20 @@ var UITest;
     function createAnimTreeComponent(container, state) {
         let listContainer = document.createElement("div");
         let testMutator = {
-            position: { x: 0, y: 1, z: 3 },
-            rotation: { x: 0, y: 0.5, z: 1 },
-            scale: { x: 1, y: 2, z: 1 }
+            component: {
+                transform: {
+                    position: { x: 0, y: 1, z: 3 },
+                    rotation: { x: 0, y: 0.5, z: 1 },
+                    scale: { x: 1, y: 2, z: 1 }
+                }
+            },
+            otherComponent: {
+                transform: {
+                    position: { x: 0, y: 1, z: 3 },
+                    rotation: { x: 0, y: 0.5, z: 1 },
+                    scale: { x: 1, y: 2, z: 1 }
+                }
+            }
         };
         let treeController = new ƒui.UIAnimationList(testMutator, listContainer);
         container.getElement().html(listContainer);
