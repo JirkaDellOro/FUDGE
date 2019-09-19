@@ -199,7 +199,7 @@ namespace FudgeCore {
     public getAllComponents(): Component[] {
       let all: Component[] = [];
       for (let type in this.components) {
-        all.concat(all, this.components[type]);
+        all = all.concat(this.components[type]);
       }
       return all;
     }
