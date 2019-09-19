@@ -66,8 +66,9 @@ declare namespace FudgeUserInterface {
         private mutator;
         constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
         getMutator(): ƒ.Mutator;
-        BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement;
+        setMutator(_mutator: ƒ.Mutator): void;
         collectMutator: () => ƒ.Mutator;
+        private BuildFromMutator;
         private toggleCollapse;
     }
 }

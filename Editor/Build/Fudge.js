@@ -146,7 +146,7 @@ var Fudge;
                                 if (this.node) {
                                     view.setRoot(this.node);
                                 }
-                                view.content.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEvent);
+                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case Fudge.VIEW.DATA:
                                 view = new Fudge.ViewData(this);
@@ -192,11 +192,6 @@ var Fudge;
                     view.setRoot(this.node);
                 }
             }
-        }
-        passEvent(_event) {
-            let eventToPass = new CustomEvent(_event.type, { detail: _event.detail });
-            console.log(eventToPass.detail);
-            this.dispatchEvent(eventToPass);
         }
     }
     Fudge.Panel = Panel;
@@ -409,6 +404,7 @@ var Fudge;
             this.content.appendChild(btnMessage);
         }
         setNode(_event) {
+            console.group("Event arrived at" + this);
             console.log(_event.detail);
         }
     }
@@ -436,9 +432,18 @@ var Fudge;
             this.setSelectedNode = (_event) => {
                 this.listController.setSelection(_event.detail);
             };
+            this.passEventToPanel = (_event) => {
+                console.log("Recieved Event, trying to pass it onto the Panel");
+                console.log(_event);
+                let eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
+                _event.cancelBubble = true;
+                this.parentPanel.dispatchEvent(eventToPass);
+            };
             this.branch = new ƒ.Node("dummyNode");
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
+            this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
+            console.log(this.listController.listRoot);
             this.fillContent();
         }
         deconstruct() {
@@ -452,8 +457,10 @@ var Fudge;
                 return;
             // ƒ.Debug.log("Trying to display node: ", _node);
             this.branch = _node;
+            this.listController.listRoot.removeEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
             this.listController.setNodeRoot(_node);
             this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
+            this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
         }
     }
     Fudge.ViewNode = ViewNode;
