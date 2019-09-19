@@ -588,6 +588,13 @@ namespace FudgeCore {
       this.mutator = mutator;
     }
 
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = {};
+      if (_mutator.translation) types.translation = "Vector3";
+      if (_mutator.rotation) types.rotation = "Vector3";
+      if (_mutator.scaling) types.scaling = "Vector3";
+      return types;
+    }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
   //#endregion

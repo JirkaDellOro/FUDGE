@@ -77,14 +77,19 @@ namespace FudgeCore {
         }
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * Does not recurse into objects!
          * @param _mutator 
          */
         public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
             let types: MutatorAttributeTypes = {};
             for (let attribute in _mutator) {
                 let type: string = null;
+                let value: number | boolean | string | object = _mutator[attribute];
                 if (_mutator[attribute] != undefined)
-                    type = _mutator[attribute].constructor.name;
+                    if (typeof (value) == "object")
+                        type = (<General>this)[attribute].constructor.name;
+                    else
+                        type = _mutator[attribute].constructor.name;
                 types[attribute] = type;
             }
             return types;
