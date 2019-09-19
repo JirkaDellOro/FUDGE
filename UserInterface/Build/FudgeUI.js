@@ -239,7 +239,7 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
         }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
@@ -507,5 +507,18 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.UIMutable = UIMutable;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class UINodeData extends FudgeUserInterface.UIMutable {
+        constructor(_mutable, _container) {
+            super(_mutable);
+            this.root = document.createElement("form");
+            FudgeUserInterface.UIGenerator.createFromMutable(_mutable, this.root);
+            this.root.addEventListener("input", this.mutateOnInput);
+            _container.append(this.root);
+        }
+    }
+    FudgeUserInterface.UINodeData = UINodeData;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 //# sourceMappingURL=FudgeUI.js.map

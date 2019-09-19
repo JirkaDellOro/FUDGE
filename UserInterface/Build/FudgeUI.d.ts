@@ -130,3 +130,9 @@ declare namespace FudgeUserInterface {
         protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
     }
 }
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UINodeData extends UIMutable {
+        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
+    }
+}

@@ -9,7 +9,7 @@ namespace Fudge {
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
     export class ViewData extends View {
-
+        private node: ƒ.Node;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent: Panel) {
             super(_parent);
@@ -20,19 +20,38 @@ namespace Fudge {
             //TODO: Deconstruct;
         }
         fillContent(): void {
-            let lblName: HTMLElement = document.createElement("label");
-            lblName.innerHTML = "Node Name";
-
-            // TEST: button to emit message to panel. Should work when each panel holds a unique instance of GoldenLayout
-            let btnMessage: HTMLButtonElement = document.createElement("button");
-            btnMessage.innerText = "Send to panel";
-            this.content.appendChild(lblName);
-            this.content.appendChild(btnMessage);
+            if (this.node) {
+                let cntHeader: HTMLElement = document.createElement("span");
+                let lblNodeName: HTMLElement = document.createElement("label");
+                lblNodeName.textContent = "Name";
+                cntHeader.append(lblNodeName);
+                let txtNodeName: HTMLInputElement = document.createElement("input");
+                txtNodeName.value = this.node.name;
+                cntHeader.append(txtNodeName);
+                let cntComponents: HTMLDivElement = document.createElement("div");
+                let nodeComponents: ƒ.Component[] = this.node.getComponents(ƒ.Component);
+                console.group("Components of the node");
+                for (let nodeComponent of nodeComponents) {
+                    console.log(nodeComponent);
+                }
+                console.groupEnd();
+                // let uiComponents: ƒui.UINodeData = new ƒui.UINodeData()
+                this.content.append(cntHeader);
+            }
+            else {
+                let cntEmpty: HTMLDivElement = document.createElement("div");
+                this.content.append(cntEmpty);
+            }
         }
 
-        private setNode(_event: CustomEvent): void {
-            console.group("Event arrived at" + this);
-            console.log(_event.detail);
+        private setNode = (_event: CustomEvent): void => {
+            console.log(this.content);
+            this.node = _event.detail;
+            while (this.content.firstChild != null) {
+                this.content.removeChild(this.content.lastChild);
+            }
+            this.fillContent();
+            console.log(this.content);
         }
     }
 }
