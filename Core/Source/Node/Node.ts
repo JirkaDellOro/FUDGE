@@ -172,7 +172,7 @@ namespace FudgeCore {
                 let mutatorArray: Mutator[] = (<Array<Mutator>>mutatorOfComponent[componentName]);
                 let mutatorWithComponentName: Mutator = <Mutator>mutatorArray[+i];
                 for (let cname in mutatorWithComponentName) {   // trick used to get the only entry in the list
-                  let mutatorToGive: Mutator = <Mutator> mutatorWithComponentName[cname];
+                  let mutatorToGive: Mutator = <Mutator>mutatorWithComponentName[cname];
                   componentToMutate.mutate(mutatorToGive);
                 }
               }
@@ -187,14 +187,25 @@ namespace FudgeCore {
           for (let childNode of childNodes) {
             childNode.applyAnimation(<Mutator>(<Array<Mutator>>_mutator.children)[i]["ƒ.Node"]);
           }
-        } 
+        }
       }
     }
     // #endregion
 
     // #region Components
     /**
-     * Returns a clone of the list of components of the given class attached this node. 
+     * Returns a list of all components attached to this node, independent of type. 
+     */
+    public getAllComponents(): Component[] {
+      let all: Component[] = [];
+      for (let type in this.components) {
+        all.concat(this.components[type]);
+      }
+      return all;
+    }
+
+    /**
+     * Returns a clone of the list of components of the given class attached to this node. 
      * @param _class The class of the components to be found.
      */
     public getComponents<T extends Component>(_class: typeof Component): T[] {
