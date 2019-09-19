@@ -239,7 +239,9 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            let hule = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(hule);
+            this.listRoot = hule;
         }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");

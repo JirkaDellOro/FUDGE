@@ -18,7 +18,9 @@ namespace FudgeUserInterface {
         
         public setMutator(_mutator: ƒ.Mutator): void {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            let hule: HTMLUListElement = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(hule);
+            this.listRoot = hule;
         }
 
         public collectMutator = (): ƒ.Mutator => {
