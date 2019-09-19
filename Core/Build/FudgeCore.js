@@ -5070,7 +5070,7 @@ var FudgeCore;
         getAllComponents() {
             let all = [];
             for (let type in this.components) {
-                all.concat(this.components[type]);
+                all.concat(all, this.components[type]);
             }
             return all;
         }
