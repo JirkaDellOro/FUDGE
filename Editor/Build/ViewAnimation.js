@@ -25,9 +25,9 @@ var Fudge;
             seq1.addKey(new FudgeCore.AnimationKey(2000, 0));
             let seq2 = new FudgeCore.AnimationSequence();
             // seq2.addKey(new FudgeCore.AnimationKey(0, 0));
-            seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 2));
+            seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 0.02));
             seq2.addKey(new FudgeCore.AnimationKey(1000, 5));
-            seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -2));
+            seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
             this.animation = new FudgeCore.Animation("TestAnimation", {
                 components: {
                     ComponentTransform: [
@@ -108,7 +108,10 @@ var Fudge;
             // console.log(_e);
         }
         mouseDown(_e) {
-            //console.log(_e);
+            if (_e.offsetY < 50) {
+                this.setTime(_e.offsetX / this.sheet.scale.x);
+                return;
+            }
             let obj = this.sheet.getObjectAtPoint(_e.offsetX, _e.offsetY);
             if (!obj)
                 return;
@@ -120,9 +123,19 @@ var Fudge;
                 console.log(obj["event"]);
                 this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
             }
+            else if (obj["key"]) {
+                console.log(obj["key"]);
+                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: obj["key"] }));
+            }
         }
         mouseMove(_e) {
-            // console.log(_e);
+            _e.preventDefault();
+            if (_e.buttons != 1)
+                return;
+            if (_e.offsetY < 50) {
+                this.setTime(_e.offsetX / this.sheet.scale.x);
+                return;
+            }
         }
         mouseUp(_e) {
             // console.log(_e);
@@ -285,6 +298,11 @@ var Fudge;
             // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
             this.controller.setMutator(_m);
         }
+        setTime(_time, updateDisplay = true) {
+            this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
+            if (updateDisplay)
+                this.updateDisplay();
+        }
         playAnimation() {
             requestAnimationFrame(this.playAnimation.bind(this));
             if (!this.playing)
@@ -328,6 +346,7 @@ var Fudge;
             this.crc2.translate(this.position.x, this.position.y);
         }
         redraw(_time) {
+            this.mapElementsToSequences();
             this.translate();
             this.clear();
             this.drawTimeline();
@@ -404,6 +423,25 @@ var Fudge;
                 }
             }
             return null;
+        }
+        mapElementsToSequences() {
+            this.sequences = [];
+            // this.traverseAnimationStructure(this.view.animation.animationStructure, this.view.controller.listRoot);
+            // console.log(this.view.animation.animationStructure);
+            console.log(this.view.controller.listRoot.firstElementChild);
+        }
+        traverseAnimationStructure(_animStruct, _currentHTML) {
+            let tmp = 0;
+            for (let i in _animStruct) {
+                if (_animStruct[i] instanceof FudgeCore.AnimationSequence) {
+                    //
+                }
+                else {
+                    let children = _currentHTML.childNodes;
+                    console.log(children);
+                    // this.traverseAnimationStructure(<FudgeCore.AnimationStructure>_animStruct[i], _currentHTML.children)
+                }
+            }
         }
         drawEventsAndLabels() {
             let maxDistance = 10000;

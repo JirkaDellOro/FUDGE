@@ -28,6 +28,7 @@ namespace Fudge {
       this.crc2.translate(this.position.x, this.position.y);
     }
     redraw(_time: number): void {
+      this.mapElementsToSequences();
       this.translate();
       this.clear();
       this.drawTimeline();
@@ -106,6 +107,26 @@ namespace Fudge {
         }
       }
       return null;
+    }
+
+    private mapElementsToSequences(): void {
+      this.sequences = [];
+      // this.traverseAnimationStructure(this.view.animation.animationStructure, this.view.controller.listRoot);
+      // console.log(this.view.animation.animationStructure);
+      console.log((<FudgeUserInterface.CollapsableAnimationListElement>this.view.controller.listRoot.firstElementChild));
+    }
+
+    private traverseAnimationStructure(_animStruct: FudgeCore.AnimationStructure, _currentHTML: HTMLElement): void {
+      let tmp: number = 0;
+      for (let i in _animStruct) {
+        if (_animStruct[i] instanceof FudgeCore.AnimationSequence) {
+          //
+        } else {
+          let children: NodeListOf<ChildNode> = _currentHTML.childNodes;
+          console.log(children);
+          // this.traverseAnimationStructure(<FudgeCore.AnimationStructure>_animStruct[i], _currentHTML.children)
+        }
+      }
     }
 
     private drawEventsAndLabels(): void {

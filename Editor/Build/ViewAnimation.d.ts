@@ -6,13 +6,13 @@ declare namespace Fudge {
         animation: FudgeCore.Animation;
         cmpAnimator: FudgeCore.ComponentAnimator;
         playbackTime: number;
+        controller: FudgeUserInterface.UIAnimationList;
         private canvas;
         private attributeList;
         private crc;
         private sheet;
         private toolbar;
         private hover;
-        private controller;
         private time;
         private playing;
         constructor(_parent: Panel);
@@ -29,6 +29,7 @@ declare namespace Fudge {
         private toolbarChange;
         private changeAttribute;
         private updateDisplay;
+        private setTime;
         private playAnimation;
         private randomNameGenerator;
     }
@@ -36,7 +37,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     interface ViewAnimationKey {
         path2D: Path2D;
-        animationKey: FudgeCore.AnimationKey;
+        key: FudgeCore.AnimationKey;
         sequence: ViewAnimationSequence;
     }
     interface ViewAnimationSequence {
@@ -73,6 +74,8 @@ declare namespace Fudge {
         drawCursor(_time: number): void;
         initAnimation(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
+        private mapElementsToSequences;
+        private traverseAnimationStructure;
         private drawEventsAndLabels;
         private calculateDisplay;
     }

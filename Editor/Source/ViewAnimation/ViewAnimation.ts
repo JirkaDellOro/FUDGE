@@ -8,13 +8,13 @@ namespace Fudge {
     animation: FudgeCore.Animation;
     cmpAnimator: FudgeCore.ComponentAnimator;
     playbackTime: number;
+    controller: FudgeUserInterface.UIAnimationList;
     private canvas: HTMLCanvasElement;
     private attributeList: HTMLDivElement;
     private crc: CanvasRenderingContext2D;
     private sheet: ViewAnimationSheet;
     private toolbar: HTMLDivElement;
     private hover: HTMLSpanElement;
-    private controller: FudgeUserInterface.UIAnimationList;
     private time: FudgeCore.Time = new FudgeCore.Time();
     private playing: boolean = false;
 
@@ -37,9 +37,9 @@ namespace Fudge {
       seq1.addKey(new FudgeCore.AnimationKey(2000, 0));
       let seq2: FudgeCore.AnimationSequence = new FudgeCore.AnimationSequence();
       // seq2.addKey(new FudgeCore.AnimationKey(0, 0));
-      seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 2));
+      seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 0.02));
       seq2.addKey(new FudgeCore.AnimationKey(1000, 5));
-      seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -2));
+      seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
       this.animation = new FudgeCore.Animation("TestAnimation", {
         components: {
           ComponentTransform: [
@@ -131,7 +131,10 @@ namespace Fudge {
       // console.log(_e);
     }
     mouseDown(_e: MouseEvent): void {
-      //console.log(_e);
+      if (_e.offsetY < 50) {
+        this.setTime(_e.offsetX / this.sheet.scale.x);
+        return;
+      }
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_e.offsetX, _e.offsetY);
       if (!obj) return;
       if (obj["label"]) {
@@ -142,9 +145,18 @@ namespace Fudge {
         console.log(obj["event"]);
         this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
       }
+      else if (obj["key"]) {
+        console.log(obj["key"]);
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"]}));
+      }
     }
     mouseMove(_e: MouseEvent): void {
-      // console.log(_e);
+      _e.preventDefault();
+      if (_e.buttons != 1) return;
+      if (_e.offsetY < 50) {
+        this.setTime(_e.offsetX / this.sheet.scale.x);
+        return;
+      }
     }
     mouseUp(_e: MouseEvent): void {
       // console.log(_e);
@@ -323,6 +335,11 @@ namespace Fudge {
       // this.controller.BuildFromMutator(_m);
       // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
       this.controller.setMutator(_m);
+    }
+
+    private setTime(_time: number, updateDisplay: boolean = true): void {
+      this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
+      if (updateDisplay) this.updateDisplay();
     }
 
     private playAnimation(): void {

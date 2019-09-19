@@ -3,7 +3,7 @@
 namespace Fudge {
   export interface ViewAnimationKey {
     path2D: Path2D;
-    animationKey: FudgeCore.AnimationKey;
+    key: FudgeCore.AnimationKey;
     sequence: ViewAnimationSequence;
   }
 
