@@ -5065,7 +5065,17 @@ var FudgeCore;
         // #endregion
         // #region Components
         /**
-         * Returns a clone of the list of components of the given class attached this node.
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents() {
+            let all = [];
+            for (let type in this.components) {
+                all.concat(this.components[type]);
+            }
+            return all;
+        }
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
          * @param _class The class of the components to be found.
          */
         getComponents(_class) {

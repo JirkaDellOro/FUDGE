@@ -2363,7 +2363,11 @@ declare namespace FudgeCore {
          */
         applyAnimation(_mutator: Mutator): void;
         /**
-         * Returns a clone of the list of components of the given class attached this node.
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents(): Component[];
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
          * @param _class The class of the components to be found.
          */
         getComponents<T extends Component>(_class: typeof Component): T[];
