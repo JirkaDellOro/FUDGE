@@ -4,12 +4,17 @@ declare namespace Fudge {
     class ViewAnimation extends Fudge.View {
         node: FudgeCore.Node;
         animation: FudgeCore.Animation;
+        cmpAnimator: FudgeCore.ComponentAnimator;
         playbackTime: number;
         private canvas;
+        private attributeList;
         private crc;
         private sheet;
         private toolbar;
         private hover;
+        private controller;
+        private time;
+        private playing;
         constructor(_parent: Panel);
         openAnimation(): void;
         fillContent(): void;
@@ -22,6 +27,9 @@ declare namespace Fudge {
         private fillToolbar;
         private toolbarClick;
         private toolbarChange;
+        private changeAttribute;
+        private updateDisplay;
+        private playAnimation;
         private randomNameGenerator;
     }
 }

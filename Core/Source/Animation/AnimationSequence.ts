@@ -16,11 +16,11 @@ namespace FudgeCore {
      * @returns the value of the sequence at the given time. 0 if there are no keys.
      */
     evaluate(_time: number): number {
+      if (this.keys.length == 0)
+        return 0; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
       if (this.keys.length == 1 || this.keys[0].Time >= _time)
         return this.keys[0].Value;
 
-      if (this.keys.length == 0)
-        return 0;
 
       for (let i: number = 0; i < this.keys.length - 1; i++) {
         if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {

@@ -873,11 +873,23 @@ declare namespace FudgeCore {
          * @param _time The time to jump to
          */
         jumpTo(_time: number): void;
+        /**
+         * Returns the current time of the animation, modulated for animation length.
+         */
+        getCurrentTime(): number;
+        /**
+         * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
+         * @param _time the (unscaled) time to update the animation with.
+         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         */
+        updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
         deserialize(_s: Serialization): Serializable;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
+         * Uses the built-in time unless a different time is specified.
+         * May also be called from updateAnimation().
          */
         private updateAnimationLoop;
         /**

@@ -1,19 +1,27 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../Build/Fudge"/>
+
 namespace Fudge {
   export class ViewAnimation extends Fudge.View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
+    cmpAnimator: FudgeCore.ComponentAnimator;
     playbackTime: number;
     private canvas: HTMLCanvasElement;
+    private attributeList: HTMLDivElement;
     private crc: CanvasRenderingContext2D;
     private sheet: ViewAnimationSheet;
     private toolbar: HTMLDivElement;
     private hover: HTMLSpanElement;
+    private controller: FudgeUserInterface.UIAnimationList;
+    private time: FudgeCore.Time = new FudgeCore.Time();
+    private playing: boolean = false;
 
     constructor(_parent: Panel) {
       super(_parent);
+      this.playbackTime = 500;
+
       this.openAnimation();
       this.fillContent();
       this.installListeners();
@@ -21,6 +29,7 @@ namespace Fudge {
 
     openAnimation(): void {
       //TODO replace with file opening dialoge
+
       let seq1: FudgeCore.AnimationSequence = new FudgeCore.AnimationSequence();
       seq1.addKey(new FudgeCore.AnimationKey(0, 0));
       seq1.addKey(new FudgeCore.AnimationKey(500, 45));
@@ -55,6 +64,9 @@ namespace Fudge {
       this.animation.labels["Two"] = 750;
       this.animation.setEvent("EventOne", 500);
       this.animation.setEvent("EventTwo", 1000);
+
+      this.node = new FudgeCore.Node("Testnode");
+      this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
     }
 
     fillContent(): void {
@@ -68,10 +80,13 @@ namespace Fudge {
       this.fillToolbar(this.toolbar);
 
 
-      let attributeList: HTMLDivElement = document.createElement("div");
-      attributeList.id = "attributeList";
-      attributeList.style.width = "300px";
+      this.attributeList = document.createElement("div");
+      this.attributeList.id = "attributeList";
+      this.attributeList.style.width = "300px";
+      this.attributeList.addEventListener(FudgeUserInterface.UIEVENT.UPDATE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
+      this.controller = new FudgeUserInterface.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+
 
       this.canvas = document.createElement("canvas");
       this.canvas.width = 1500;
@@ -88,13 +103,12 @@ namespace Fudge {
       this.hover.style.display = "none";
 
       this.content.appendChild(this.toolbar);
-      this.content.appendChild(attributeList);
+      this.content.appendChild(this.attributeList);
       // this.content.appendChild(this.canvasSheet);
       this.content.appendChild(this.canvas);
       this.content.appendChild(this.hover);
 
       this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-      this.playbackTime = 1000;
       this.sheet.redraw(this.playbackTime);
       // sheet.translate();
     }
@@ -106,6 +120,7 @@ namespace Fudge {
       this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
       this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
       this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
+      requestAnimationFrame(this.playAnimation.bind(this));
     }
 
     deconstruct(): void {
@@ -235,27 +250,29 @@ namespace Fudge {
           break;
         case "start":
           this.playbackTime = 0;
-          this.sheet.redraw(this.playbackTime);
+          this.updateDisplay();
           break;
         case "back":
           this.playbackTime = this.playbackTime -= 1000 / this.animation.stepsPerSecond;
-          this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
-          this.sheet.redraw(this.playbackTime);
+          this.playbackTime = Math.max(this.playbackTime, 0);
+          this.updateDisplay();
           break;
         case "play":
-
+          this.time.set(this.playbackTime);
+          this.playing = true;
           break;
         case "pause":
-
+          this.playing = false;
           break;
         case "forward":
           this.playbackTime = this.playbackTime += 1000 / this.animation.stepsPerSecond;
-          this.playbackTime = Math.max(this.playbackTime, 0);
-          this.sheet.redraw(this.playbackTime);
+          this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
+          this.updateDisplay();
           break;
         case "end":
           this.playbackTime = this.animation.totalTime;
           this.sheet.redraw(this.playbackTime);
+          this.updateDisplay();
           break;
         default:
 
@@ -268,7 +285,7 @@ namespace Fudge {
 
       switch (target.id) {
         case "playmode":
-          // console.log("playmode changed to", target.value);
+          this.cmpAnimator.playmode = FudgeCore.ANIMATION_PLAYMODE[target.value];
           // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
           break;
         case "fps":
@@ -282,18 +299,47 @@ namespace Fudge {
             this.animation.stepsPerSecond = +target.value;
             this.sheet.redraw(this.playbackTime);
           }
-          // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
           break;
         default:
           console.log("no clue what you changed...");
           break;
       }
     }
+
+    private changeAttribute(_e: Event): void {
+      console.log(_e);
+      console.log(this.controller.getMutator());
+      // console.log("1", this.controller.getMutator());
+      // console.log("2", this.controller.collectMutator());
+      // this.controller.BuildFromMutator(this.animation.getMutated(this.playbackTime, 1, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
+    }
+
+    private updateDisplay(_m: FudgeCore.Mutator = null): void {
+      this.sheet.redraw(this.playbackTime);
+      if (!_m)
+        _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
+      // this.attributeList.innerHTML = "";
+      // this.attributeList.appendChild(
+      // this.controller.BuildFromMutator(_m);
+      // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
+      this.controller.setMutator(_m);
+    }
+
+    private playAnimation(): void {
+      requestAnimationFrame(this.playAnimation.bind(this));
+      if (!this.playing) return;
+      let t: number = this.time.get();
+      let m: FudgeCore.Mutator = {};
+      [m, t] = this.cmpAnimator.updateAnimation(t);
+      this.playbackTime = t;
+      this.updateDisplay(m);
+    }
+
     private randomNameGenerator(): string {
       let attr: string[] = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
-      let anim: string[] = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion"];
+      let anim: string[] = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion", "penguin", "pterodactyl"];
 
-      return attr[Math.floor(Math.random() * attr.length)] + anim[Math.floor(Math.random() * anim.length)];
+      return attr[Math.floor(Math.random() * attr.length)] + "-" + anim[Math.floor(Math.random() * anim.length)];
     }
   }
 
