@@ -20,6 +20,8 @@ namespace FudgeUserInterface {
         }
         public setSelection(_node: ƒ.Node): void {
             //TODO: Select Appropriate Entry
+            console.log("got node");
+            console.log(_node);
         }
         
         public getSelection(): ƒ.Node {

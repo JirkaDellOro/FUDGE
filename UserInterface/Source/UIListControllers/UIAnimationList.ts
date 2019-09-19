@@ -15,13 +15,10 @@ namespace FudgeUserInterface {
         public getMutator(): ƒ.Mutator {
             return this.mutator;
         }
-        public BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
-            let listRoot: HTMLUListElement = document.createElement("ul");
-            for (let key in _mutator) {
-                let listElement: CollapsableAnimationListElement = new CollapsableAnimationListElement((<ƒ.Mutator>this.mutator[key]), key);
-                listRoot.append(listElement);
-            }
-            return listRoot;
+        
+        public setMutator(_mutator: ƒ.Mutator): void {
+            this.mutator = _mutator;
+            this.listRoot = this.BuildFromMutator(this.mutator);
         }
 
         public collectMutator = (): ƒ.Mutator => {
@@ -31,6 +28,15 @@ namespace FudgeUserInterface {
             }
             console.log(this.mutator);
             return this.mutator;
+        }
+
+        private BuildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
+            let listRoot: HTMLUListElement = document.createElement("ul");
+            for (let key in _mutator) {
+                let listElement: CollapsableAnimationListElement = new CollapsableAnimationListElement((<ƒ.Mutator>this.mutator[key]), key);
+                listRoot.append(listElement);
+            }
+            return listRoot;
         }
 
         private toggleCollapse = (_event: Event): void => {

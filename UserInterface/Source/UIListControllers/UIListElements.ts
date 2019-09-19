@@ -45,7 +45,12 @@ namespace FudgeUserInterface {
             this.header.appendChild(lblName);
         }
         public selectNode = (_event: MouseEvent): void => {
+            console.log(_event, this);
+            
             let event: Event = new CustomEvent(UIEVENT.SELECTION, { bubbles: true, detail: this.node });
+            console.group("selection was made, dispatching event to bubble up");
+            console.log(event);
+            console.groupEnd();
             this.dispatchEvent(event);
         }
         public collapseEvent = (_event: MouseEvent): void => {

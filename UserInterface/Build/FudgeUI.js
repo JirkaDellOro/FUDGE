@@ -237,6 +237,10 @@ var FudgeUserInterface;
         getMutator() {
             return this.mutator;
         }
+        setMutator(_mutator) {
+            this.mutator = _mutator;
+            this.listRoot = this.BuildFromMutator(this.mutator);
+        }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
             for (let key in _mutator) {
@@ -276,7 +280,11 @@ var FudgeUserInterface;
         constructor(_node, _name, _unfolded = false) {
             super();
             this.selectNode = (_event) => {
+                console.log(_event, this);
                 let event = new CustomEvent("nodeSelectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
+                console.group("selection was made, dispatching event to bubble up");
+                console.log(event);
+                console.groupEnd();
                 this.dispatchEvent(event);
             };
             this.collapseEvent = (_event) => {
@@ -386,6 +394,8 @@ var FudgeUserInterface;
         }
         setSelection(_node) {
             //TODO: Select Appropriate Entry
+            console.log("got node");
+            console.log(_node);
         }
         getSelection() {
             return this.selectedEntry.node;

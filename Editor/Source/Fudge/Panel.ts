@@ -83,7 +83,7 @@ namespace Fudge {
                                 if (this.node) {
                                     (<ViewNode>view).setRoot(this.node);
                                 }
-                                view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
+                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
@@ -137,11 +137,11 @@ namespace Fudge {
             }
         }
 
-        private passEvent (_event: CustomEvent): void {
-            
-            let eventToPass: CustomEvent = new CustomEvent(_event.type, {detail: _event.detail});
-            console.log(eventToPass.detail);
-            this.dispatchEvent(eventToPass);
-        }
+        // private passEvent (_event: CustomEvent): void {
+        //     let eventToPass: CustomEvent = new CustomEvent(_event.type, {bubbles: false, detail: _event.detail});
+        //     _event.cancelBubble = true;
+        //     console.log(eventToPass);
+        //     this.dispatchEvent
+        // }
     }
 }

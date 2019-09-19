@@ -31,6 +31,7 @@ namespace Fudge {
         }
 
         private setNode(_event: CustomEvent): void {
+            console.group("Event arrived at" + this);
             console.log(_event.detail);
         }
     }

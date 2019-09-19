@@ -36,7 +36,6 @@ declare namespace Fudge {
          */
         constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType;
         setNode(_node: ƒ.Node): void;
-        private passEvent;
     }
 }
 declare namespace Fudge {
@@ -141,6 +140,7 @@ declare namespace Fudge {
         fillContent(): void;
         setRoot(_node: ƒ.Node): void;
         private setSelectedNode;
+        private passEventToPanel;
     }
 }
 declare namespace Fudge {
