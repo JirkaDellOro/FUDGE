@@ -17,6 +17,7 @@ var MutatorTypes;
             console.log(types);
             console.groupEnd();
         }
+        // Test branch protection
     }
 })(MutatorTypes || (MutatorTypes = {}));
 //# sourceMappingURL=MutatorTypes.js.map

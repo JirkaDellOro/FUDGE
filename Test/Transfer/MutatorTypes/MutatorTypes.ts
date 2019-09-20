@@ -18,5 +18,6 @@ namespace MutatorTypes {
             console.log(types);
             console.groupEnd();
         }
+        // Test branch protection
     }
 }
