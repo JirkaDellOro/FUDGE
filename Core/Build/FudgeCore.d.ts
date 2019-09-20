@@ -135,6 +135,7 @@ declare namespace FudgeCore {
         getMutatorForUserInterface(): MutatorForUserInterface;
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * Does not recurse into objects!
          * @param _mutator
          */
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1054,6 +1055,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Serializable;
         mutate(_mutator: Mutator): void;
         getMutator(): Mutator;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1984,6 +1986,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

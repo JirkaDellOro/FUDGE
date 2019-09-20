@@ -219,14 +219,19 @@ var FudgeCore;
         }
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * Does not recurse into objects!
          * @param _mutator
          */
         getMutatorAttributeTypes(_mutator) {
             let types = {};
             for (let attribute in _mutator) {
                 let type = null;
+                let value = _mutator[attribute];
                 if (_mutator[attribute] != undefined)
-                    type = _mutator[attribute].constructor.name;
+                    if (typeof (value) == "object")
+                        type = this[attribute].constructor.name;
+                    else
+                        type = _mutator[attribute].constructor.name;
                 types[attribute] = type;
             }
             return types;
@@ -2382,6 +2387,10 @@ var FudgeCore;
         getMutator() {
             return this.local.getMutator();
         }
+        getMutatorAttributeTypes(_mutator) {
+            let types = this.local.getMutatorAttributeTypes(_mutator);
+            return types;
+        }
         reduceMutator(_mutator) {
             delete _mutator.world;
             super.reduceMutator(_mutator);
@@ -4226,6 +4235,16 @@ var FudgeCore;
             matrix.scale(mutator.scaling);
             this.set(matrix);
             this.mutator = mutator;
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = {};
+            if (_mutator.translation)
+                types.translation = "Vector3";
+            if (_mutator.rotation)
+                types.rotation = "Vector3";
+            if (_mutator.scaling)
+                types.scaling = "Vector3";
+            return types;
         }
         reduceMutator(_mutator) { }
     }

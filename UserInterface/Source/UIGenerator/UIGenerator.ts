@@ -1,4 +1,4 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 
 namespace FudgeUserInterface {
 

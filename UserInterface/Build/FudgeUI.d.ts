@@ -1,4 +1,4 @@
-/// <reference types="../../../core/build/fudgecore" />
+/// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>

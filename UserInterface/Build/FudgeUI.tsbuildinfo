@@ -1,6 +1,6 @@
 {
   "bundle": {
-    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/",
     "sourceFiles": [
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
@@ -49,9 +49,9 @@
       "sections": [
         {
           "pos": 0,
-          "end": 55,
-          "kind": "type",
-          "data": "../../../core/build/fudgecore"
+          "end": 56,
+          "kind": "reference",
+          "data": "../../Core/Build/FudgeCore.d.ts"
         },
         {
           "pos": 57,
@@ -61,5 +61,5 @@
       ]
     }
   },
-  "version": "3.5.3"
+  "version": "3.5.1"
 }

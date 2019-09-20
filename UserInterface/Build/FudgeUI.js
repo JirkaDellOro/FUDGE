@@ -80,10 +80,10 @@ var FudgeUserInterface;
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
-/// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     class UIGenerator {
         static createFromMutable(_mutable, _element, _name) {
@@ -374,9 +374,9 @@ var FudgeUserInterface;
     customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
     customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     class UINodeList {
         constructor(_node, _listContainer) {
@@ -432,9 +432,9 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.UINodeList = UINodeList;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     class UIMutable {
         constructor(mutable) {
