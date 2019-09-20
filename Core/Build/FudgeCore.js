@@ -3723,12 +3723,36 @@ var FudgeCore;
                 0, 0, 1, 0,
                 0, 0, 0, 1
             ]);
+            this.resetCache();
         }
         get translation() {
-            return new FudgeCore.Vector3(this.data[12], this.data[13], this.data[14]);
+            if (!this.vectors.translation)
+                this.vectors.translation = new FudgeCore.Vector3(this.data[12], this.data[13], this.data[14]);
+            return this.vectors.translation;
         }
         set translation(_translation) {
             this.data.set(_translation.get(), 12);
+            // no full cache reset required
+            this.vectors.translation = _translation;
+            this.mutator = null;
+        }
+        get rotation() {
+            if (!this.vectors.rotation)
+                this.vectors.rotation = this.getEulerAngles();
+            return this.vectors.rotation;
+        }
+        set rotation(_rotation) {
+            this.mutate({ "rotation": _rotation });
+            this.resetCache();
+        }
+        get scaling() {
+            if (!this.vectors.scaling)
+                this.vectors.scaling = new FudgeCore.Vector3(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+            return this.vectors.scaling;
+        }
+        set scaling(_scaling) {
+            this.mutate({ "scaling": _scaling });
+            this.resetCache();
         }
         //#region STATICS
         static get IDENTITY() {
@@ -4094,6 +4118,7 @@ var FudgeCore;
          */
         translateX(_x) {
             this.data[12] += _x;
+            this.mutator = null;
         }
         /**
          * Translate the transformation along the y-axis.
@@ -4101,6 +4126,7 @@ var FudgeCore;
          */
         translateY(_y) {
             this.data[13] += _y;
+            this.mutator = null;
         }
         /**
          * Translate the transformation along the z-axis.
@@ -4108,6 +4134,7 @@ var FudgeCore;
          */
         translateZ(_z) {
             this.data[14] += _z;
+            this.mutator = null;
         }
         //#endregion
         //#region Scaling
@@ -4129,14 +4156,12 @@ var FudgeCore;
         //#region Transformation
         multiply(_matrix) {
             this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
+            this.mutator = null;
         }
         //#endregion
         //#region Transfer
-        getVectorRepresentation() {
-            // extract translation vector
-            // let translation: Vector3 = this.translation;  // already defined
-            // extract scaling vector and divide matrix by
-            let scaling = new FudgeCore.Vector3(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
+        getEulerAngles() {
+            let scaling = this.scaling;
             let s0 = this.data[0] / scaling.x;
             let s1 = this.data[1] / scaling.x;
             let s2 = this.data[2] / scaling.x;
@@ -4166,12 +4191,12 @@ var FudgeCore;
             }
             let rotation = new FudgeCore.Vector3(x1, y1, z1);
             rotation.scale(180 / Math.PI);
-            return [this.translation, rotation, scaling];
+            return rotation;
         }
         set(_to) {
             // this.data = _to.get();
             this.data.set(_to.data);
-            this.mutator = null;
+            this.resetCache();
         }
         get() {
             return new Float32Array(this.data);
@@ -4188,53 +4213,45 @@ var FudgeCore;
         getMutator() {
             if (this.mutator)
                 return this.mutator;
-            let vectors = this.getVectorRepresentation();
             let mutator = {
-                translation: vectors[0].getMutator(),
-                rotation: vectors[1].getMutator(),
-                scaling: vectors[2].getMutator()
+                translation: this.translation.getMutator(),
+                rotation: this.rotation.getMutator(),
+                scaling: this.scaling.getMutator()
             };
-            // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
+            // cache mutator
+            this.mutator = mutator;
             return mutator;
         }
         mutate(_mutator) {
-            let mutator = this.getMutator();
-            let oldTranslation = mutator["translation"];
-            let oldRotation = mutator["rotation"];
-            let oldScaling = mutator["scaling"];
+            let oldTranslation = this.translation;
+            let oldRotation = this.rotation;
+            let oldScaling = this.scaling;
             let newTranslation = _mutator["translation"];
             let newRotation = _mutator["rotation"];
             let newScaling = _mutator["scaling"];
+            let vectors = { translation: null, rotation: null, scaling: null };
             if (newTranslation) {
-                mutator["translation"] = {
-                    x: newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
-                    y: newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
-                    z: newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
-                };
+                vectors.translation = new FudgeCore.Vector3(newTranslation.x != undefined ? newTranslation.x : oldTranslation.x, newTranslation.y != undefined ? newTranslation.y : oldTranslation.y, newTranslation.z != undefined ? newTranslation.z : oldTranslation.z);
             }
             if (newRotation) {
-                mutator["rotation"] = {
-                    x: newRotation.x != undefined ? newRotation.x : oldRotation.x,
-                    y: newRotation.y != undefined ? newRotation.y : oldRotation.y,
-                    z: newRotation.z != undefined ? newRotation.z : oldRotation.z
-                };
+                vectors.rotation = new FudgeCore.Vector3(newRotation.x != undefined ? newRotation.x : oldRotation.x, newRotation.y != undefined ? newRotation.y : oldRotation.y, newRotation.z != undefined ? newRotation.z : oldRotation.z);
             }
             if (newScaling) {
-                mutator["scaling"] = {
-                    x: newScaling.x != undefined ? newScaling.x : oldScaling.x,
-                    y: newScaling.y != undefined ? newScaling.y : oldScaling.y,
-                    z: newScaling.z != undefined ? newScaling.z : oldScaling.z
-                };
+                vectors.scaling = new FudgeCore.Vector3(newScaling.x != undefined ? newScaling.x : oldScaling.x, newScaling.y != undefined ? newScaling.y : oldScaling.y, newScaling.z != undefined ? newScaling.z : oldScaling.z);
             }
+            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
             let matrix = Matrix4x4.IDENTITY;
-            matrix.translate(mutator.translation);
-            // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
-            matrix.rotateZ(mutator.rotation.z);
-            matrix.rotateY(mutator.rotation.y);
-            matrix.rotateX(mutator.rotation.x);
-            matrix.scale(mutator.scaling);
+            if (vectors.translation)
+                matrix.translate(vectors.translation);
+            if (vectors.rotation) {
+                matrix.rotateZ(vectors.rotation.z);
+                matrix.rotateY(vectors.rotation.y);
+                matrix.rotateX(vectors.rotation.x);
+            }
+            if (vectors.scaling)
+                matrix.scale(vectors.scaling);
             this.set(matrix);
-            this.mutator = mutator;
+            this.vectors = vectors;
         }
         getMutatorAttributeTypes(_mutator) {
             let types = {};
@@ -4247,6 +4264,10 @@ var FudgeCore;
             return types;
         }
         reduceMutator(_mutator) { }
+        resetCache() {
+            this.vectors = { translation: null, rotation: null, scaling: null };
+            this.mutator = null;
+        }
     }
     FudgeCore.Matrix4x4 = Matrix4x4;
     //#endregion

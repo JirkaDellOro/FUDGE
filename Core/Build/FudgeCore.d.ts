@@ -1862,22 +1862,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Stores a 4x4 transformation matrix and provides operations for it.
-     * ```plaintext
-     * [ 0, 1, 2, 3 ] <- row vector x
-     * [ 4, 5, 6, 7 ] <- row vector y
-     * [ 8, 9,10,11 ] <- row vector z
-     * [12,13,14,15 ] <- translation
-     *            ^  homogeneous column
-     * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
     class Matrix4x4 extends Mutable implements Serializable {
         private data;
         private mutator;
+        private vectors;
         constructor();
         translation: Vector3;
+        rotation: Vector3;
+        scaling: Vector3;
         static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -1979,7 +1971,7 @@ declare namespace FudgeCore {
         scaleY(_by: number): void;
         scaleZ(_by: number): void;
         multiply(_matrix: Matrix4x4): void;
-        getVectorRepresentation(): Vector3[];
+        getEulerAngles(): Vector3;
         set(_to: Matrix4x4): void;
         get(): Float32Array;
         serialize(): Serialization;
@@ -1988,6 +1980,7 @@ declare namespace FudgeCore {
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
     }
 }
 declare namespace FudgeCore {
