@@ -18,6 +18,6 @@ namespace MutatorTypes {
             console.log(types);
             console.groupEnd();
         }
-        // Test branch protection
+        // Test push to development branch and merge to master
     }
 }

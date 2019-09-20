@@ -1,4 +1,5 @@
 namespace AnimationTest {
+  //TEST
   import ƒ = FudgeCore;
   window.addEventListener("DOMContentLoaded", init);
 
