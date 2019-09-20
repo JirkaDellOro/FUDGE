@@ -110,10 +110,11 @@ declare namespace FudgeCore {
         readonly forUserInterface: null;
     }
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime.
-     *
-     * TODO: write more... Mutables must provide the properties of their mutators, even if calculated only
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTarget {
         /**
