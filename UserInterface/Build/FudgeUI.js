@@ -86,12 +86,11 @@ var FudgeUserInterface;
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     class UIGenerator {
-        static createFromMutable(_mutable, _element, _name) {
+        static createFromMutable(_mutable, _element, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let mutatorTypes;
-            let mutator = _mutable.getMutator();
+            let mutator = _mutator || _mutable.getMutator();
+            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let parent = UIGenerator.createFoldableFieldset(name, _element);
-            mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
         static createFromMutator(_mutator, _mutatorTypes, _parent, _mutable) {
@@ -120,14 +119,11 @@ var FudgeUserInterface;
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
-                        case "Object":
-                            let subMutable;
-                            if (_mutable[key])
-                                subMutable = _mutable[key];
-                            else
-                                subMutable = _mutator[key];
-                            UIGenerator.createFromMutable(subMutable, _parent, key);
+                        // Some other complex subclass of Mutable
                         default:
+                            let subMutable;
+                            subMutable = _mutable[key];
+                            UIGenerator.createFromMutable(subMutable, _parent, key, _mutator[key]);
                             break;
                     }
                 }

@@ -111,7 +111,9 @@ declare namespace FudgeCore {
     }
     /**
      * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * thus providing and using interfaces created at runtime.
+     *
+     * TODO: write more... Mutables must provide the properties of their mutators, even if calculated only
      */
     abstract class Mutable extends EventTarget {
         /**
