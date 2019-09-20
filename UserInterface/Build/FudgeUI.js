@@ -121,7 +121,11 @@ var FudgeUserInterface;
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
                         case "Object":
-                            let subMutable = _mutable[key];
+                            let subMutable;
+                            if (_mutable[key])
+                                subMutable = _mutable[key];
+                            else
+                                subMutable = _mutator[key];
                             UIGenerator.createFromMutable(subMutable, _parent, key);
                         default:
                             break;
@@ -354,6 +358,16 @@ var FudgeUserInterface;
             this.collapse(this.content);
             this.mutator = _mutator;
             this.buildContent(_mutator);
+        }
+        collapse(element) {
+            let desiredResult = null;
+            if (element.firstChild == this.header)
+                desiredResult = element.firstChild;
+            while (element.lastChild != desiredResult) {
+                if (element.lastChild != this.header) {
+                    element.removeChild(element.lastChild);
+                }
+            }
         }
     }
     FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;

@@ -102,7 +102,9 @@ var UITest;
         return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
     function createTestComponent(container, state) {
-        return new UITest.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+        let transform = new ƒ.ComponentTransform();
+        console.log(transform);
+        return new UITest.TestUI.TransformUI(container, state, transform);
     }
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");

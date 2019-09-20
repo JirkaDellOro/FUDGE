@@ -381,7 +381,7 @@ var Fudge;
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 (function (Fudge) {
-    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -414,13 +414,14 @@ var Fudge;
                 txtNodeName.value = this.node.name;
                 cntHeader.append(txtNodeName);
                 let cntComponents = document.createElement("div");
-                let nodeComponents = this.node.getComponents(ƒ.Component);
+                let nodeComponents = this.node.getAllComponents();
                 console.group("Components of the node");
+                console.log(nodeComponents);
                 for (let nodeComponent of nodeComponents) {
-                    console.log(nodeComponent);
+                    console.log(nodeComponent.getMutator());
+                    let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
                 }
                 console.groupEnd();
-                // let uiComponents: ƒui.UINodeData = new ƒui.UINodeData()
                 this.content.append(cntHeader);
             }
             else {

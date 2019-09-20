@@ -29,13 +29,15 @@ namespace Fudge {
                 txtNodeName.value = this.node.name;
                 cntHeader.append(txtNodeName);
                 let cntComponents: HTMLDivElement = document.createElement("div");
-                let nodeComponents: ƒ.Component[] = this.node.getComponents(ƒ.Component);
+                let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
                 console.group("Components of the node");
+                console.log(nodeComponents);
                 for (let nodeComponent of nodeComponents) {
-                    console.log(nodeComponent);
+                    console.log(nodeComponent.getMutator());
+                    let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(nodeComponent, this.content);
                 }
                 console.groupEnd();
-                // let uiComponents: ƒui.UINodeData = new ƒui.UINodeData()
+                
                 this.content.append(cntHeader);
             }
             else {
