@@ -15,10 +15,10 @@ namespace FudgeUserInterface {
         public getMutator(): ƒ.Mutator {
             return this.mutator;
         }
-        
+
         public setMutator(_mutator: ƒ.Mutator): void {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
         }
 
         public collectMutator = (): ƒ.Mutator => {

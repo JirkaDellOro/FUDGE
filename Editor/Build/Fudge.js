@@ -381,6 +381,7 @@ var Fudge;
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 (function (Fudge) {
+    var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -388,6 +389,15 @@ var Fudge;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
             super(_parent);
+            this.setNode = (_event) => {
+                console.log(this.content);
+                this.node = _event.detail;
+                while (this.content.firstChild != null) {
+                    this.content.removeChild(this.content.lastChild);
+                }
+                this.fillContent();
+                console.log(this.content);
+            };
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setNode);
             this.fillContent();
         }
@@ -395,17 +405,29 @@ var Fudge;
             //TODO: Deconstruct;
         }
         fillContent() {
-            let lblName = document.createElement("label");
-            lblName.innerHTML = "Node Name";
-            // TEST: button to emit message to panel. Should work when each panel holds a unique instance of GoldenLayout
-            let btnMessage = document.createElement("button");
-            btnMessage.innerText = "Send to panel";
-            this.content.appendChild(lblName);
-            this.content.appendChild(btnMessage);
-        }
-        setNode(_event) {
-            console.group("Event arrived at" + this);
-            console.log(_event.detail);
+            if (this.node) {
+                let cntHeader = document.createElement("span");
+                let lblNodeName = document.createElement("label");
+                lblNodeName.textContent = "Name";
+                cntHeader.append(lblNodeName);
+                let txtNodeName = document.createElement("input");
+                txtNodeName.value = this.node.name;
+                cntHeader.append(txtNodeName);
+                let cntComponents = document.createElement("div");
+                let nodeComponents = this.node.getAllComponents();
+                console.group("Components of the node");
+                console.log(nodeComponents);
+                for (let nodeComponent of nodeComponents) {
+                    console.log(nodeComponent.getMutator());
+                    let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
+                }
+                console.groupEnd();
+                this.content.append(cntHeader);
+            }
+            else {
+                let cntEmpty = document.createElement("div");
+                this.content.append(cntEmpty);
+            }
         }
     }
     Fudge.ViewData = ViewData;

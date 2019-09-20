@@ -12,7 +12,7 @@ namespace FudgeUserInterface {
             mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
-        
+
         public static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
             for (let key in _mutatorTypes) {
                 let type: Object = _mutatorTypes[key];
@@ -40,7 +40,13 @@ namespace FudgeUserInterface {
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
                         case "Object":
-                            let subMutable: ƒ.Mutable = (<ƒ.General>_mutable)[key];
+                            let subMutable: ƒ.Mutable;
+                            
+                            if ((<ƒ.General>_mutable)[key])
+                                subMutable = (<ƒ.General>_mutable)[key];
+                            else
+                                subMutable = <ƒ.Mutable>_mutator[key];
+
                             UIGenerator.createFromMutable(subMutable, _parent, key);
                         default:
                             break;

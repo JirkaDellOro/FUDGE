@@ -98,6 +98,7 @@ declare namespace FudgeUserInterface {
         buildContent(_mutator: ƒ.Mutator): void;
         getMutator(): ƒ.Mutator;
         setMutator(_mutator: ƒ.Mutator): void;
+        collapse(element: HTMLElement): void;
         private updateMutator;
     }
 }
@@ -128,5 +129,11 @@ declare namespace FudgeUserInterface {
         protected refreshUI: (_e: Event) => void;
         protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement): ƒ.Mutator;
         protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UINodeData extends UIMutable {
+        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
     }
 }

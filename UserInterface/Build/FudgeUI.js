@@ -121,7 +121,11 @@ var FudgeUserInterface;
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
                         case "Object":
-                            let subMutable = _mutable[key];
+                            let subMutable;
+                            if (_mutable[key])
+                                subMutable = _mutable[key];
+                            else
+                                subMutable = _mutator[key];
                             UIGenerator.createFromMutable(subMutable, _parent, key);
                         default:
                             break;
@@ -239,7 +243,7 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
         }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
@@ -354,6 +358,16 @@ var FudgeUserInterface;
             this.collapse(this.content);
             this.mutator = _mutator;
             this.buildContent(_mutator);
+        }
+        collapse(element) {
+            let desiredResult = null;
+            if (element.firstChild == this.header)
+                desiredResult = element.firstChild;
+            while (element.lastChild != desiredResult) {
+                if (element.lastChild != this.header) {
+                    element.removeChild(element.lastChild);
+                }
+            }
         }
     }
     FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;
@@ -507,5 +521,18 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.UIMutable = UIMutable;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class UINodeData extends FudgeUserInterface.UIMutable {
+        constructor(_mutable, _container) {
+            super(_mutable);
+            this.root = document.createElement("form");
+            FudgeUserInterface.UIGenerator.createFromMutable(_mutable, this.root);
+            this.root.addEventListener("input", this.mutateOnInput);
+            _container.append(this.root);
+        }
+    }
+    FudgeUserInterface.UINodeData = UINodeData;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 //# sourceMappingURL=FudgeUI.js.map
