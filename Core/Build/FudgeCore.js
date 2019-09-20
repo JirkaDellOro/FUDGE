@@ -2384,16 +2384,16 @@ var FudgeCore;
             this.local.deserialize(_serialization.local);
             return this;
         }
-        mutate(_mutator) {
-            this.local.mutate(_mutator);
-        }
-        getMutator() {
-            return this.local.getMutator();
-        }
-        getMutatorAttributeTypes(_mutator) {
-            let types = this.local.getMutatorAttributeTypes(_mutator);
-            return types;
-        }
+        // public mutate(_mutator: Mutator): void {
+        //     this.local.mutate(_mutator);
+        // }
+        // public getMutator(): Mutator { 
+        //     return this.local.getMutator();
+        // }
+        // public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+        //     let types: MutatorAttributeTypes = this.local.getMutatorAttributeTypes(_mutator);
+        //     return types;
+        // }
         reduceMutator(_mutator) {
             delete _mutator.world;
             super.reduceMutator(_mutator);
