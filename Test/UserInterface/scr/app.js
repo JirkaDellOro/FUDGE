@@ -57,9 +57,9 @@ var UITest;
         };
         initViewport();
         myLayout = new GoldenLayout(config);
-        myLayout.registerComponent("Inspector", createAnimTreeComponent);
+        myLayout.registerComponent("Inspector", createCameraComponent);
         myLayout.registerComponent("Viewport", createViewportComponent);
-        myLayout.registerComponent("Manual", createAnimTreeComponent);
+        myLayout.registerComponent("Manual", createTestComponent);
         myLayout.registerComponent("TreeView", createTreeComponent);
         myLayout.registerComponent("AnimationTest", createAnimTreeComponent);
         myLayout.init();
@@ -98,14 +98,13 @@ var UITest;
     function createViewportComponent(container, state) {
         container.getElement().append(canvas);
     }
-    // function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
-    //     return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
-    // }
-    // function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TestUI {
-    //     let transform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-    //     console.log(transform);
-    //     return new TestUI.TransformUI(container, state, transform);
-    // }
+    function createCameraComponent(container, state) {
+        return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    }
+    function createTestComponent(container, state) {
+        let Components = branch.getAllComponents();
+        return new UITest.TransformUI(container, state, Components[0]);
+    }
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
         let treeController = new ƒui.UINodeList(branch, listContainer);

@@ -1,5 +1,6 @@
 namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+
     export abstract class UIListController {
         abstract listRoot: HTMLElement;
         protected abstract toggleCollapse(_event: MouseEvent): void;
@@ -109,16 +110,6 @@ namespace FudgeUserInterface {
             this.mutator = _mutator;
             this.buildContent(_mutator);
         }
-        // public collapse(element: HTMLElement): void {
-        //     let desiredResult: Object = null;
-        //     if (element.firstChild == this.header)
-        //         desiredResult = element.firstChild;
-        //     while (element.lastChild != desiredResult) {
-        //         if (element.lastChild != this.header) {
-        //             element.removeChild(element.lastChild);
-        //         }
-        //     }
-        // }
         private updateMutator = (_event: Event): void => {
             let target: HTMLInputElement = <HTMLInputElement>_event.target;
             this.mutator[target.id] = parseFloat(target.value);

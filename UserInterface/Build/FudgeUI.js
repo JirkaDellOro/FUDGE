@@ -322,16 +322,6 @@ var FudgeUserInterface;
                 let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
                 this.dispatchEvent(event);
             };
-            // public collapse(element: HTMLElement): void {
-            //     let desiredResult: Object = null;
-            //     if (element.firstChild == this.header)
-            //         desiredResult = element.firstChild;
-            //     while (element.lastChild != desiredResult) {
-            //         if (element.lastChild != this.header) {
-            //             element.removeChild(element.lastChild);
-            //         }
-            //     }
-            // }
             this.updateMutator = (_event) => {
                 let target = _event.target;
                 this.mutator[target.id] = parseFloat(target.value);
