@@ -16,14 +16,21 @@ namespace FudgeUserInterface {
         }
 
         public collapse(element: HTMLElement): void {
-            let desiredResult: Object = null;
-            if (element.firstChild == this.header)
-                desiredResult = element.firstChild;
-            while (element.lastChild != desiredResult) {
-                if (element.lastChild != this.header) {
-                    element.removeChild(element.lastChild);
-                }
-            }
+            // let desiredResult: Object = null;
+            // if (element.firstChild == this.header)
+            //     desiredResult = element.firstChild;
+            // while (element.lastChild != desiredResult) {
+            //     if (element.lastChild != this.header) {
+            //         element.removeChild(element.lastChild);
+            //     }
+            // }
+            // let children: HTMLCollection = element.children;
+            // for (let child of children) {
+            //     if (child != this.header) {
+            //         child.classList.toggle("folded");
+            //     }
+            // }
+            (<CollapsableListElement>element).content.classList.toggle("folded");
         }
     }
     export class CollapsableNodeListElement extends CollapsableListElement {
@@ -102,16 +109,16 @@ namespace FudgeUserInterface {
             this.mutator = _mutator;
             this.buildContent(_mutator);
         }
-        public collapse(element: HTMLElement): void {
-            let desiredResult: Object = null;
-            if (element.firstChild == this.header)
-                desiredResult = element.firstChild;
-            while (element.lastChild != desiredResult) {
-                if (element.lastChild != this.header) {
-                    element.removeChild(element.lastChild);
-                }
-            }
-        }
+        // public collapse(element: HTMLElement): void {
+        //     let desiredResult: Object = null;
+        //     if (element.firstChild == this.header)
+        //         desiredResult = element.firstChild;
+        //     while (element.lastChild != desiredResult) {
+        //         if (element.lastChild != this.header) {
+        //             element.removeChild(element.lastChild);
+        //         }
+        //     }
+        // }
         private updateMutator = (_event: Event): void => {
             let target: HTMLInputElement = <HTMLInputElement>_event.target;
             this.mutator[target.id] = parseFloat(target.value);
@@ -119,8 +126,6 @@ namespace FudgeUserInterface {
             let event: Event = new CustomEvent(UIEVENT.UPDATE, { bubbles: true, detail: this.mutator });
             this.dispatchEvent(event);
         }
-        
-
     }
     customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
     customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });

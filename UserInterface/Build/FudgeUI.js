@@ -219,12 +219,13 @@ var FudgeUserInterface;
                 _event.preventDefault();
                 console.log(this.listRoot);
                 let target = _event.target;
-                if (target.content.children.length != 0) {
-                    target.collapse(target.content);
-                }
-                else {
-                    target.buildContent(target.mutator);
-                }
+                target.collapse(target);
+                // if (target.content.children.length != 0) {
+                //     target.collapse(target.content);
+                // }
+                // else {
+                //     target.buildContent(target.mutator);
+                // }
             };
             //TODO: Implementation
             this.mutator = _mutator;
@@ -266,14 +267,21 @@ var FudgeUserInterface;
             this.appendChild(this.content);
         }
         collapse(element) {
-            let desiredResult = null;
-            if (element.firstChild == this.header)
-                desiredResult = element.firstChild;
-            while (element.lastChild != desiredResult) {
-                if (element.lastChild != this.header) {
-                    element.removeChild(element.lastChild);
-                }
-            }
+            // let desiredResult: Object = null;
+            // if (element.firstChild == this.header)
+            //     desiredResult = element.firstChild;
+            // while (element.lastChild != desiredResult) {
+            //     if (element.lastChild != this.header) {
+            //         element.removeChild(element.lastChild);
+            //     }
+            // }
+            // let children: HTMLCollection = element.children;
+            // for (let child of children) {
+            //     if (child != this.header) {
+            //         child.classList.toggle("folded");
+            //     }
+            // }
+            element.content.classList.toggle("folded");
         }
     }
     class CollapsableNodeListElement extends CollapsableListElement {
@@ -314,6 +322,16 @@ var FudgeUserInterface;
                 let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
                 this.dispatchEvent(event);
             };
+            // public collapse(element: HTMLElement): void {
+            //     let desiredResult: Object = null;
+            //     if (element.firstChild == this.header)
+            //         desiredResult = element.firstChild;
+            //     while (element.lastChild != desiredResult) {
+            //         if (element.lastChild != this.header) {
+            //             element.removeChild(element.lastChild);
+            //         }
+            //     }
+            // }
             this.updateMutator = (_event) => {
                 let target = _event.target;
                 this.mutator[target.id] = parseFloat(target.value);
@@ -354,16 +372,6 @@ var FudgeUserInterface;
             this.collapse(this.content);
             this.mutator = _mutator;
             this.buildContent(_mutator);
-        }
-        collapse(element) {
-            let desiredResult = null;
-            if (element.firstChild == this.header)
-                desiredResult = element.firstChild;
-            while (element.lastChild != desiredResult) {
-                if (element.lastChild != this.header) {
-                    element.removeChild(element.lastChild);
-                }
-            }
         }
     }
     FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;

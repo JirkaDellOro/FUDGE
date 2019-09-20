@@ -98,7 +98,6 @@ declare namespace FudgeUserInterface {
         buildContent(_mutator: ƒ.Mutator): void;
         getMutator(): ƒ.Mutator;
         setMutator(_mutator: ƒ.Mutator): void;
-        collapse(element: HTMLElement): void;
         private updateMutator;
     }
 }

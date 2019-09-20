@@ -43,12 +43,13 @@ namespace FudgeUserInterface {
             _event.preventDefault();
             console.log(this.listRoot);
             let target: CollapsableAnimationListElement = <CollapsableAnimationListElement>_event.target;
-            if (target.content.children.length != 0) {
-                target.collapse(target.content);
-            }
-            else {
-                target.buildContent(target.mutator);
-            }
+            target.collapse(target);
+            // if (target.content.children.length != 0) {
+            //     target.collapse(target.content);
+            // }
+            // else {
+            //     target.buildContent(target.mutator);
+            // }
         }
 
     }

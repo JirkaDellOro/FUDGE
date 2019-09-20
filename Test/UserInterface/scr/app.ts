@@ -58,9 +58,9 @@ namespace UITest {
 
         initViewport();
         myLayout = new GoldenLayout(config);
-        myLayout.registerComponent("Inspector", createCameraComponent);
+        myLayout.registerComponent("Inspector", createAnimTreeComponent);
         myLayout.registerComponent("Viewport", createViewportComponent);
-        myLayout.registerComponent("Manual", createTestComponent);
+        myLayout.registerComponent("Manual", createAnimTreeComponent);
         myLayout.registerComponent("TreeView", createTreeComponent);
         myLayout.registerComponent("AnimationTest", createAnimTreeComponent);
 
@@ -104,16 +104,16 @@ namespace UITest {
         container.getElement().append(canvas);
     }
 
-    function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
-        return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
-    }
+    // function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
+    //     return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    // }
     
-    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TestUI {
-        let transform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-        console.log(transform);
-        return new TestUI.TransformUI(container, state, transform);
+    // function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TestUI {
+    //     let transform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
+    //     console.log(transform);
+    //     return new TestUI.TransformUI(container, state, transform);
 
-    }
+    // }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
         let treeController: ƒui.UINodeList = new ƒui.UINodeList(branch, listContainer);
