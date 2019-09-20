@@ -18,8 +18,6 @@ var Fudge;
     function initWindow() {
         ƒ.Debug.log("Fudge started");
         Fudge.PanelManager.instance.init();
-        let panel = new Fudge.Panel("Test");
-        Fudge.PanelManager.instance.addPanel(panel);
         console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
         ipcRenderer.on("save", (_event, _args) => {
@@ -148,12 +146,16 @@ var Fudge;
                                 if (this.node) {
                                     view.setRoot(this.node);
                                 }
+                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case Fudge.VIEW.DATA:
                                 view = new Fudge.ViewData(this);
                                 break;
                             case Fudge.VIEW.PORT:
                                 view = new Fudge.ViewViewport(this);
+                                if (this.node) {
+                                    // (<ViewViewport>view).setRoot(this.node);
+                                }
                                 break;
                         }
                         let viewConfig = {

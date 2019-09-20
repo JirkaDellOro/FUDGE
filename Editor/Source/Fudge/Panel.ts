@@ -83,6 +83,7 @@ namespace Fudge {
                                 if (this.node) {
                                     (<ViewNode>view).setRoot(this.node);
                                 }
+                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
@@ -90,6 +91,9 @@ namespace Fudge {
                                 break;
                             case VIEW.PORT:
                                 view = new ViewViewport(this);
+                                if (this.node) {
+                                    // (<ViewViewport>view).setRoot(this.node);
+                                }
                                 break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {
@@ -130,5 +134,11 @@ namespace Fudge {
             }
         }
 
+        // private passEvent (_event: CustomEvent): void {
+        //     let eventToPass: CustomEvent = new CustomEvent(_event.type, {bubbles: false, detail: _event.detail});
+        //     _event.cancelBubble = true;
+        //     console.log(eventToPass);
+        //     this.dispatchEvent
+        // }
     }
 }
