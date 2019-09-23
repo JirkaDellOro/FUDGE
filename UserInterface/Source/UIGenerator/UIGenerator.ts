@@ -1,18 +1,18 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 
 namespace FudgeUserInterface {
 
     import ƒ = FudgeCore;
     export class UIGenerator {
-        public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void {
+        public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void {
             let name: string = _name || _mutable.constructor.name;
-            let mutatorTypes: ƒ.MutatorAttributeTypes;
-            let mutator: ƒ.Mutator = _mutable.getMutator();
+            let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+            let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
             let parent: HTMLElement = UIGenerator.createFoldableFieldset(name, _element);
-            mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+
             UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
-        
+
         public static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
             for (let key in _mutatorTypes) {
                 let type: Object = _mutatorTypes[key];
@@ -39,10 +39,13 @@ namespace FudgeUserInterface {
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
-                        case "Object":
-                            let subMutable: ƒ.Mutable = (<ƒ.General>_mutable)[key];
-                            UIGenerator.createFromMutable(subMutable, _parent, key);
+                        // Some other complex subclass of Mutable
                         default:
+                            let subMutable: ƒ.Mutable;
+
+                            subMutable = (<ƒ.General>_mutable)[key];
+
+                            UIGenerator.createFromMutable(subMutable, _parent, key, <ƒ.Mutator>_mutator[key]);
                             break;
                     }
                 }

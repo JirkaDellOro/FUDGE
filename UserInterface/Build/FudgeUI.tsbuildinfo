@@ -8,7 +8,8 @@
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
       "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UINodeData.ts"
     ],
     "js": {
       "sections": [
@@ -20,7 +21,7 @@
         },
         {
           "pos": 15,
-          "end": 22969,
+          "end": 24909,
           "kind": "text"
         }
       ],
@@ -48,13 +49,13 @@
       "sections": [
         {
           "pos": 0,
-          "end": 55,
-          "kind": "type",
-          "data": "../../../core/build/fudgecore"
+          "end": 56,
+          "kind": "reference",
+          "data": "../../Core/Build/FudgeCore.d.ts"
         },
         {
-          "pos": 57,
-          "end": 5173,
+          "pos": 58,
+          "end": 5629,
           "kind": "text"
         }
       ]

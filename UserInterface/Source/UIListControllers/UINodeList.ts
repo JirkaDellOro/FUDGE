@@ -1,4 +1,4 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     export class UINodeList {

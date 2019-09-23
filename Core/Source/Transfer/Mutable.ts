@@ -19,8 +19,11 @@ namespace FudgeCore {
     export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null; }
 
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     export abstract class Mutable extends EventTarget {
         /**
@@ -77,14 +80,19 @@ namespace FudgeCore {
         }
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * Does not recurse into objects!
          * @param _mutator 
          */
         public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
             let types: MutatorAttributeTypes = {};
             for (let attribute in _mutator) {
                 let type: string = null;
+                let value: number | boolean | string | object = _mutator[attribute];
                 if (_mutator[attribute] != undefined)
-                    type = _mutator[attribute].constructor.name;
+                    if (typeof (value) == "object")
+                        type = (<General>this)[attribute].constructor.name;
+                    else
+                        type = _mutator[attribute].constructor.name;
                 types[attribute] = type;
             }
             return types;

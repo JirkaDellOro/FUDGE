@@ -1,5 +1,6 @@
 var AnimationTest;
 (function (AnimationTest) {
+    //TEST
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
