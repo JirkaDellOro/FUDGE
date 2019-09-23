@@ -12,10 +12,6 @@ namespace FudgeCore {
         bottom: number;
     }
 
-    export interface Point { //TODO: replace by Vector2
-        x: number;
-        y: number;
-    }
     /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle 
@@ -26,14 +22,14 @@ namespace FudgeCore {
          * @param _pointInFrame The point in the frame given
          * @param _rectFrame The frame the point is relative to
          */
-        public abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        public abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
 
         /**
          * Maps a point in a given rectangle back to a calculated frame of origin
          * @param _point The point in the rectangle
          * @param _rect The rectangle the point is relative to
          */
-        public abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        public abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
 
         /**
          * Takes a rectangle as the frame and creates a new rectangle according to the framing
@@ -42,7 +38,7 @@ namespace FudgeCore {
         public abstract getRect(_rectFrame: Rectangle): Rectangle;
         protected reduceMutator(_mutator: Mutator): void {/** */ }
     }
-    
+
     /**
      * The resulting rectangle has a fixed width and height and display should scale to fit the frame
      * Points are scaled in the same ratio
@@ -56,19 +52,19 @@ namespace FudgeCore {
             this.height = _height;
         }
 
-        public getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point {
-            let result: Point = {
-                x: this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width,
-                y: this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height
-            };
+        public getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width,
+                this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height
+            );
             return result;
         }
 
-        public getPointInverse(_point: Point, _rect: Rectangle): Point {
-            let result: Point = {
-                x: _point.x * _rect.width / this.width + _rect.x,
-                y: _point.y * _rect.height / this.height + _rect.y
-            };
+        public getPointInverse(_point: Vector2, _rect: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                _point.x * _rect.width / this.width + _rect.x,
+                _point.y * _rect.height / this.height + _rect.y
+            );
             return result;
         }
 
@@ -89,19 +85,19 @@ namespace FudgeCore {
             this.normHeight = _normHeight;
         }
 
-        public getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point {
-            let result: Point = {
-                x: this.normWidth * (_pointInFrame.x - _rectFrame.x),
-                y: this.normHeight * (_pointInFrame.y - _rectFrame.y)
-            };
+        public getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                this.normWidth * (_pointInFrame.x - _rectFrame.x),
+                this.normHeight * (_pointInFrame.y - _rectFrame.y)
+            );
             return result;
         }
 
-        public getPointInverse(_point: Point, _rect: Rectangle): Point {
-            let result: Point = {
-                x: _point.x / this.normWidth + _rect.x,
-                y: _point.y / this.normHeight + _rect.y
-            };
+        public getPointInverse(_point: Vector2, _rect: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                _point.x / this.normWidth + _rect.x,
+                _point.y / this.normHeight + _rect.y
+            );
             return result;
         }
 
@@ -118,18 +114,18 @@ namespace FudgeCore {
         public margin: Border = { left: 0, top: 0, right: 0, bottom: 0 };
         public padding: Border = { left: 0, top: 0, right: 0, bottom: 0 };
 
-        public getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point {
-            let result: Point = {
-                x: _pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width,
-                y: _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height
-            };
+        public getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                _pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width,
+                _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height
+            );
             return result;
         }
-        public getPointInverse(_point: Point, _rect: Rectangle): Point {
-            let result: Point = {
-                x: _point.x + this.padding.left + this.margin.left * _rect.width,
-                y: _point.y + this.padding.top + this.margin.top * _rect.height
-            };
+        public getPointInverse(_point: Vector2, _rect: Rectangle): Vector2 {
+            let result: Vector2 = new Vector2(
+                _point.x + this.padding.left + this.margin.left * _rect.width,
+                _point.y + this.padding.top + this.margin.top * _rect.height
+            );
             return result;
         }
 
@@ -147,7 +143,7 @@ namespace FudgeCore {
         }
 
         public getMutator(): Mutator {
-            return {margin: this.margin, padding: this.padding};
+            return { margin: this.margin, padding: this.padding };
         }
     }
 }

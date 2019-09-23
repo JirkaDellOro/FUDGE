@@ -3107,6 +3107,18 @@ var FudgeCore;
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
         }
         // #endregion
+        //#region Points
+        getCameraPointFromScreen(_screen) {
+            let result;
+            let rect;
+            rect = this.getClientRectangle();
+            result = this.frameClientToCanvas.getPoint(_screen, rect);
+            rect = this.getCanvasRectangle();
+            result = this.frameCanvasToDestination.getPoint(result, rect);
+            //TODO: when Source and Destination deviate, do further transformation 
+            return result;
+        }
+        //#endregion
         // #region Events (passing from canvas to viewport and from there into branch)
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
@@ -3506,17 +3518,11 @@ var FudgeCore;
             this.height = _height;
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width,
-                y: this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height
-            };
+            let result = new FudgeCore.Vector2(this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width, this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height);
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x * _rect.width / this.width + _rect.x,
-                y: _point.y * _rect.height / this.height + _rect.y
-            };
+            let result = new FudgeCore.Vector2(_point.x * _rect.width / this.width + _rect.x, _point.y * _rect.height / this.height + _rect.y);
             return result;
         }
         getRect(_rectFrame) {
@@ -3539,17 +3545,11 @@ var FudgeCore;
             this.normHeight = _normHeight;
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: this.normWidth * (_pointInFrame.x - _rectFrame.x),
-                y: this.normHeight * (_pointInFrame.y - _rectFrame.y)
-            };
+            let result = new FudgeCore.Vector2(this.normWidth * (_pointInFrame.x - _rectFrame.x), this.normHeight * (_pointInFrame.y - _rectFrame.y));
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x / this.normWidth + _rect.x,
-                y: _point.y / this.normHeight + _rect.y
-            };
+            let result = new FudgeCore.Vector2(_point.x / this.normWidth + _rect.x, _point.y / this.normHeight + _rect.y);
             return result;
         }
         getRect(_rectFrame) {
@@ -3568,17 +3568,11 @@ var FudgeCore;
             this.padding = { left: 0, top: 0, right: 0, bottom: 0 };
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: _pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width,
-                y: _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height
-            };
+            let result = new FudgeCore.Vector2(_pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width, _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height);
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x + this.padding.left + this.margin.left * _rect.width,
-                y: _point.y + this.padding.top + this.margin.top * _rect.height
-            };
+            let result = new FudgeCore.Vector2(_point.x + this.padding.left + this.margin.left * _rect.width, _point.y + this.padding.top + this.margin.top * _rect.height);
             return result;
         }
         getRect(_rectFrame) {

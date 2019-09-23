@@ -151,6 +151,18 @@ namespace FudgeCore {
         }
         // #endregion
 
+        //#region Points
+        public getCameraPointFromScreen(_screen: Vector2): Vector2 {
+            let result: Vector2;
+            let rect: Rectangle;
+            rect = this.getClientRectangle();
+            result = this.frameClientToCanvas.getPoint(_screen, rect);
+            rect = this.getCanvasRectangle();
+            result = this.frameCanvasToDestination.getPoint(result, rect);
+            //TODO: when Source and Destination deviate, do further transformation 
+            return result;
+        }
+        //#endregion
 
         // #region Events (passing from canvas to viewport and from there into branch)
         /**

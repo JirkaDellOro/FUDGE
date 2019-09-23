@@ -1427,6 +1427,7 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        getCameraPointFromScreen(_screen: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -1776,10 +1777,6 @@ declare namespace FudgeCore {
         right: number;
         bottom: number;
     }
-    interface Point {
-        x: number;
-        y: number;
-    }
     /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
@@ -1790,13 +1787,13 @@ declare namespace FudgeCore {
          * @param _pointInFrame The point in the frame given
          * @param _rectFrame The frame the point is relative to
          */
-        abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         /**
          * Maps a point in a given rectangle back to a calculated frame of origin
          * @param _point The point in the rectangle
          * @param _rect The rectangle the point is relative to
          */
-        abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         /**
          * Takes a rectangle as the frame and creates a new rectangle according to the framing
          * @param _rectFrame
@@ -1812,8 +1809,8 @@ declare namespace FudgeCore {
         width: number;
         height: number;
         setSize(_width: number, _height: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1824,8 +1821,8 @@ declare namespace FudgeCore {
         normWidth: number;
         normHeight: number;
         setScale(_normWidth: number, _normHeight: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1835,8 +1832,8 @@ declare namespace FudgeCore {
     class FramingComplex extends Framing {
         margin: Border;
         padding: Border;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
         getMutator(): Mutator;
     }

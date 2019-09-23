@@ -5,7 +5,7 @@ var ScreenToRay;
     let uiMaps = {};
     let uiClient;
     let canvas;
-    let viewPort = new ƒ.Viewport();
+    let viewport = new ƒ.Viewport();
     let camera;
     let uiCamera;
     let mouse = new ƒ.Vector2();
@@ -21,22 +21,22 @@ var ScreenToRay;
         canvas = document.getElementsByTagName("canvas")[0];
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewport.initialize(canvas.id, branch, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
         let menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
-        appendUIScale(menu, "DestinationToSource", viewPort.frameDestinationToSource);
-        appendUIComplex(menu, "CanvasToDestination", viewPort.frameCanvasToDestination);
-        appendUIScale(menu, "ClientToCanvas", viewPort.frameClientToCanvas);
+        appendUIScale(menu, "DestinationToSource", viewport.frameDestinationToSource);
+        appendUIComplex(menu, "CanvasToDestination", viewport.frameCanvasToDestination);
+        appendUIScale(menu, "ClientToCanvas", viewport.frameClientToCanvas);
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
         menu.appendChild(uiClient);
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
-        viewPort.adjustingFrames = true;
+        viewport.adjustingFrames = true;
         logMutatorInfo("Camera", cmpCamera);
         for (let name in uiMaps) {
             logMutatorInfo(name, uiMaps[name].framing);
@@ -49,12 +49,13 @@ var ScreenToRay;
             ƒ.RenderManager.update();
             // prepare and draw viewport
             //viewPort.prepare();
-            viewPort.draw();
+            viewport.draw();
             computeRay();
         }
     }
     function computeRay() {
-        //
+        let posCamera = viewport.getCameraPointFromScreen(mouse);
+        console.info(posCamera.get());
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
@@ -138,19 +139,19 @@ var ScreenToRay;
                 case "ClientToCanvas": {
                     let uiMap = uiMaps[name];
                     uiMap.ui.set(uiMap.framing);
-                    uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
+                    uiMap.ui.set({ Result: viewport.getCanvasRectangle() });
                     break;
                 }
                 case "CanvasToDestination": {
                     let uiMap = uiMaps[name];
                     uiMap.ui.set({ Margin: uiMap.framing.margin, Padding: uiMap.framing.padding });
-                    uiMap.ui.set({ Result: viewPort.rectDestination });
+                    uiMap.ui.set({ Result: viewport.rectDestination });
                     break;
                 }
                 case "DestinationToSource": {
                     let uiMap = uiMaps[name];
                     uiMap.ui.set(uiMap.framing);
-                    uiMap.ui.set({ Result: viewPort.rectSource });
+                    uiMap.ui.set({ Result: viewport.rectSource });
                     break;
                 }
             }
