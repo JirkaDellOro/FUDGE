@@ -70,7 +70,9 @@ declare namespace FudgeUserInterface {
         setMutator(_mutator: ƒ.Mutator): void;
         collectMutator: () => ƒ.Mutator;
         getElementIndex(): ƒ.Mutator;
-        updateEntry(_entry: CollapsableAnimationListElement, _value: number): void;
+        updateMutator(_update: ƒ.Mutator): void;
+        private updateEntry;
+        private updateMutatorEntry;
         private buildFromMutator;
         private toggleCollapse;
     }

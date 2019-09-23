@@ -239,8 +239,36 @@ var FudgeUserInterface;
         getElementIndex() {
             return this.index;
         }
-        updateEntry(_entry, _value) {
-            //TODO: everything
+        updateMutator(_update) {
+            this.mutator = this.updateMutatorEntry(_update, this.mutator);
+            this.updateEntry(this.mutator, this.index);
+        }
+        updateEntry(_update, _index) {
+            for (let key in _update) {
+                if (typeof _update[key] == "object") {
+                    this.updateEntry(_update[key], _index[key]);
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    let element = _index[key];
+                    element.value = _update[key];
+                }
+            }
+        }
+        updateMutatorEntry(_update, _toUpdate) {
+            let updatedMutator = _toUpdate;
+            for (let key in _update) {
+                if (typeof updatedMutator[key] == "object") {
+                    if (typeof updatedMutator[key] == "object") {
+                        updatedMutator[key] = this.updateMutatorEntry(_update[key], updatedMutator[key]);
+                    }
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    if (typeof updatedMutator[key] == "string" || "number") {
+                        updatedMutator[key] = _update[key];
+                    }
+                }
+            }
+            return updatedMutator;
         }
         buildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");

@@ -35,11 +35,39 @@ namespace FudgeUserInterface {
         public getElementIndex(): ƒ.Mutator {
             return this.index;
         }
-
-        public updateEntry(_entry: CollapsableAnimationListElement, _value: number): void {
-            //TODO: everything
+        public updateMutator(_update: ƒ.Mutator): void {
+            this.mutator = this.updateMutatorEntry(_update, this.mutator);
+            this.updateEntry(this.mutator, this.index);
         }
 
+        private updateEntry(_update: ƒ.Mutator, _index: ƒ.Mutator): void {
+            for (let key in _update) {
+                if (typeof _update[key] == "object") {
+                    this.updateEntry(<ƒ.Mutator>_update[key], <ƒ.Mutator>_index[key]);
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    let element: HTMLInputElement = <HTMLInputElement>_index[key];
+                    element.value = <string>_update[key];
+                }
+            }
+        }
+
+        private updateMutatorEntry(_update: ƒ.Mutator, _toUpdate: ƒ.Mutator): ƒ.Mutator {
+            let updatedMutator: ƒ.Mutator = _toUpdate;
+            for (let key in _update) {
+                if (typeof updatedMutator[key] == "object") {
+                    if (typeof updatedMutator[key] == "object") {
+                        updatedMutator[key] = this.updateMutatorEntry(<ƒ.Mutator>_update[key], <ƒ.Mutator>updatedMutator[key]);
+                    }
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    if (typeof updatedMutator[key] == "string" || "number") {
+                        updatedMutator[key] = _update[key];
+                    }
+                }
+            }
+            return updatedMutator;
+        }
         private buildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
             let listRoot: HTMLUListElement = document.createElement("ul");
             for (let key in _mutator) {
