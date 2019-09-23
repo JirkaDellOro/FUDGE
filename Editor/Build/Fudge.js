@@ -410,6 +410,7 @@ var Fudge;
                 let lblNodeName = document.createElement("label");
                 lblNodeName.textContent = "Name";
                 cntHeader.append(lblNodeName);
+                this.content.append(cntHeader);
                 let txtNodeName = document.createElement("input");
                 txtNodeName.value = this.node.name;
                 cntHeader.append(txtNodeName);
@@ -418,11 +419,9 @@ var Fudge;
                 console.group("Components of the node");
                 console.log(nodeComponents);
                 for (let nodeComponent of nodeComponents) {
-                    console.log(nodeComponent.getMutator());
                     let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
                 }
                 console.groupEnd();
-                this.content.append(cntHeader);
             }
             else {
                 let cntEmpty = document.createElement("div");

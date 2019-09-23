@@ -28,7 +28,7 @@ namespace FudgeUserInterface {
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
                             let numValue: number = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable });
+                            UIGenerator.createStepperElement(key, _parent, { _value: numValue});
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -42,9 +42,7 @@ namespace FudgeUserInterface {
                         // Some other complex subclass of Mutable
                         default:
                             let subMutable: ƒ.Mutable;
-
                             subMutable = (<ƒ.General>_mutable)[key];
-
                             UIGenerator.createFromMutable(subMutable, _parent, key, <ƒ.Mutator>_mutator[key]);
                             break;
                     }
@@ -124,7 +122,7 @@ namespace FudgeUserInterface {
             return valueInput;
         }
 
-        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string, _mutable?: ƒ.Mutable } = {}): HTMLSpanElement {
+        public static createStepperElement(_id: string, _parent: HTMLElement, params: { _value?: number, _min?: number, _max?: number, _cssClass?: string} = {}): HTMLSpanElement {
             if (params._value == undefined)
                 params._value = 0;
             let stepper: HTMLInputElement = new Stepper(_id, { value: params._value });
