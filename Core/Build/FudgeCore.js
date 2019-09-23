@@ -2154,6 +2154,9 @@ var FudgeCore;
         getFieldOfView() {
             return this.fieldOfView;
         }
+        getDirection() {
+            return this.direction;
+        }
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -2191,6 +2194,28 @@ var FudgeCore;
         projectOrthographic(_left = 0, _right = FudgeCore.RenderManager.getCanvas().clientWidth, _bottom = FudgeCore.RenderManager.getCanvas().clientHeight, _top = 0) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+        }
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle() {
+            let sinFov = Math.sin(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let sinHorizontal = 0;
+            let sinVertical = 0;
+            if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
+                let aspect = Math.sqrt(this.aspectRatio);
+                sinHorizontal = sinFov * aspect;
+                sinVertical = sinFov / aspect;
+            }
+            else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+                sinVertical = sinFov;
+                sinHorizontal = sinVertical * this.aspectRatio;
+            }
+            else { //FOV_DIRECTION.HORIZONTAL
+                sinHorizontal = sinFov;
+                sinVertical = sinHorizontal / this.aspectRatio;
+            }
+            return { x: 0, y: 0, width: sinHorizontal * 2, height: sinVertical * 2 };
         }
         //#region Transfer
         serialize() {
@@ -3108,15 +3133,27 @@ var FudgeCore;
         }
         // #endregion
         //#region Points
-        getCameraPointFromScreen(_screen) {
+        pointClientToSource(_client) {
             let result;
             let rect;
             rect = this.getClientRectangle();
-            result = this.frameClientToCanvas.getPoint(_screen, rect);
+            result = this.frameClientToCanvas.getPoint(_client, rect);
             rect = this.getCanvasRectangle();
             result = this.frameCanvasToDestination.getPoint(result, rect);
-            //TODO: when Source and Destination deviate, do further transformation 
+            result = this.frameDestinationToSource.getPoint(result, this.rectSource);
+            //TODO: when Source, Render and RenderViewport deviate, continue transformation 
             return result;
+        }
+        pointSourceToRender(_source) {
+            let projectionRectangle = this.camera.getProjectionRectangle();
+            let point = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+            return point;
+        }
+        pointClientToRender(_client) {
+            let point = this.pointClientToSource(_client);
+            point = this.pointSourceToRender(point);
+            //TODO: when Render and RenderViewport deviate, continue transformation 
+            return point;
         }
         //#endregion
         // #region Events (passing from canvas to viewport and from there into branch)

@@ -49,6 +49,10 @@ namespace FudgeCore {
             return this.fieldOfView;
         }
 
+        public getDirection(): FIELD_OF_VIEW {
+            return this.direction;
+        }
+
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -87,6 +91,32 @@ namespace FudgeCore {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
+
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        public getProjectionRectangle(): Rectangle {
+            let sinFov: number = Math.sin(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let sinHorizontal: number = 0;
+            let sinVertical: number = 0;
+
+            if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
+                let aspect: number = Math.sqrt(this.aspectRatio);
+                sinHorizontal = sinFov * aspect;
+                sinVertical = sinFov / aspect;
+            }
+            else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+                sinVertical = sinFov;
+                sinHorizontal = sinVertical * this.aspectRatio;
+            }
+            else {//FOV_DIRECTION.HORIZONTAL
+                sinHorizontal = sinFov;
+                sinVertical = sinHorizontal / this.aspectRatio;
+            }
+
+            return { x: 0, y: 0, width: sinHorizontal * 2, height: sinVertical * 2 };
+        }
+
         //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {

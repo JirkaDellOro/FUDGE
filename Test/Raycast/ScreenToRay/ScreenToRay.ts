@@ -55,8 +55,6 @@ namespace ScreenToRay {
             update();
             branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
-            // prepare and draw viewport
-            //viewPort.prepare();
             viewport.draw();
 
             computeRay();
@@ -65,12 +63,23 @@ namespace ScreenToRay {
     }
 
     function computeRay(): void {
-        let posCamera: ƒ.Vector2 = viewport.getCameraPointFromScreen(mouse);
-        console.info(posCamera.get());
+        let rect: ƒ.Rectangle = viewport.getClientRectangle();
+        let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
+        let posRender: ƒ.Vector2 = viewport.pointClientToRender(posMouse);
+
+        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        let rectProjection: ƒ.Rectangle = cmpCamera.getProjectionRectangle();
+
+        let posProjection: ƒ.Vector2 = new ƒ.Vector2(
+            posRender.x * rectProjection.width / 2 * rectProjection.width,
+            posRender.y * rectProjection.height / 2 * rectProjection.height
+        );
+        ƒ.Debug.info("Point", posProjection.get());
+        // the ray is starting at (0,0) and goes through point posProjection with unlimited length
     }
+
     function setCursorPosition(_event: MouseEvent): void {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
-        ƒ.Debug.info(mouse.get());
     }
 
     function logMutatorInfo(_title: string, _mutable: ƒ.Mutable): void {
@@ -141,7 +150,7 @@ namespace ScreenToRay {
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
         let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
-        cmpCamera.projectCentral(params.aspect, params.fieldOfView);
+        cmpCamera.projectCentral(params.aspect, params.fieldOfView); //, ƒ.FIELD_OF_VIEW.HORIZONTAL);
     }
 
     function setClient(_uiRectangle: UI.Rectangle): void {

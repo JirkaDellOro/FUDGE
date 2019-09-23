@@ -973,6 +973,7 @@ declare namespace FudgeCore {
         getBackgroundEnabled(): boolean;
         getAspect(): number;
         getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -993,6 +994,10 @@ declare namespace FudgeCore {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle(): Rectangle;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1427,7 +1432,9 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
-        getCameraPointFromScreen(_screen: Vector2): Vector2;
+        pointClientToSource(_client: Vector2): Vector2;
+        pointSourceToRender(_source: Vector2): Vector2;
+        pointClientToRender(_client: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */

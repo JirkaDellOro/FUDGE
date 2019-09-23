@@ -1,4 +1,5 @@
 namespace FudgeCore {
+    //TODO: Rectangle as class with comfort methods
     export interface Rectangle {
         x: number;
         y: number;
