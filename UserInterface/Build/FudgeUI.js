@@ -220,17 +220,11 @@ var FudgeUserInterface;
                 console.log(this.listRoot);
                 let target = _event.target;
                 target.collapse(target);
-                // if (target.content.children.length != 0) {
-                //     target.collapse(target.content);
-                // }
-                // else {
-                //     target.buildContent(target.mutator);
-                // }
             };
-            //TODO: Implementation
             this.mutator = _mutator;
             this.listRoot = document.createElement("ul");
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.index = {};
+            this.listRoot = this.buildFromMutator(this.mutator);
             _listContainer.append(this.listRoot);
             _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
             _listContainer.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.collectMutator);
@@ -240,13 +234,21 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
+            this.listRoot.replaceWith(this.buildFromMutator(this.mutator));
         }
-        BuildFromMutator(_mutator) {
+        getElementIndex() {
+            return this.index;
+        }
+        updateEntry(_entry, _value) {
+            //TODO: everything
+        }
+        buildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
             for (let key in _mutator) {
                 let listElement = new FudgeUserInterface.CollapsableAnimationListElement(this.mutator[key], key);
                 listRoot.append(listElement);
+                this.index[key] = listElement.getElementIndex();
+                console.log(this.index);
             }
             return listRoot;
         }
@@ -267,20 +269,6 @@ var FudgeUserInterface;
             this.appendChild(this.content);
         }
         collapse(element) {
-            // let desiredResult: Object = null;
-            // if (element.firstChild == this.header)
-            //     desiredResult = element.firstChild;
-            // while (element.lastChild != desiredResult) {
-            //     if (element.lastChild != this.header) {
-            //         element.removeChild(element.lastChild);
-            //     }
-            // }
-            // let children: HTMLCollection = element.children;
-            // for (let child of children) {
-            //     if (child != this.header) {
-            //         child.classList.toggle("folded");
-            //     }
-            // }
             element.content.classList.toggle("folded");
         }
     }
@@ -331,6 +319,7 @@ var FudgeUserInterface;
             };
             this.mutator = _mutator;
             this.name = _name;
+            this.index = {};
             let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
             btnToggle.setToggleState(_unfolded);
             btnToggle.addEventListener("click", this.collapseEvent);
@@ -346,12 +335,14 @@ var FudgeUserInterface;
                 if (typeof _mutator[key] == "object") {
                     let newList = new CollapsableAnimationListElement(_mutator[key], key);
                     this.content.append(newList);
+                    this.index[key] = newList.getElementIndex();
                 }
                 else {
                     let listEntry = document.createElement("li");
                     FudgeUserInterface.UIGenerator.createLabelElement(key, listEntry);
-                    FudgeUserInterface.UIGenerator.createStepperElement(key, listEntry, { _value: _mutator[key] });
+                    let inputEntry = FudgeUserInterface.UIGenerator.createStepperElement(key, listEntry, { _value: _mutator[key] });
                     this.content.append(listEntry);
+                    this.index[key] = inputEntry;
                 }
             }
         }
@@ -362,6 +353,9 @@ var FudgeUserInterface;
             this.collapse(this.content);
             this.mutator = _mutator;
             this.buildContent(_mutator);
+        }
+        getElementIndex() {
+            return this.index;
         }
     }
     FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;

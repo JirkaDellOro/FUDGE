@@ -64,11 +64,14 @@ declare namespace FudgeUserInterface {
     class UIAnimationList {
         listRoot: HTMLElement;
         private mutator;
+        private index;
         constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
         getMutator(): ƒ.Mutator;
         setMutator(_mutator: ƒ.Mutator): void;
         collectMutator: () => ƒ.Mutator;
-        private BuildFromMutator;
+        getElementIndex(): ƒ.Mutator;
+        updateEntry(_entry: CollapsableAnimationListElement, _value: number): void;
+        private buildFromMutator;
         private toggleCollapse;
     }
 }
@@ -93,11 +96,13 @@ declare namespace FudgeUserInterface {
     class CollapsableAnimationListElement extends CollapsableListElement {
         mutator: ƒ.Mutator;
         name: string;
+        index: ƒ.Mutator;
         constructor(_mutator: ƒ.Mutator, _name: string, _unfolded?: boolean);
         collapseEvent: (_event: MouseEvent) => void;
         buildContent(_mutator: ƒ.Mutator): void;
         getMutator(): ƒ.Mutator;
         setMutator(_mutator: ƒ.Mutator): void;
+        getElementIndex(): ƒ.Mutator;
         private updateMutator;
     }
 }

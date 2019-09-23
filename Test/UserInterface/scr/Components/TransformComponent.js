@@ -11,7 +11,7 @@ var UITest;
             this.root = document.createElement("form");
             ƒui.UIGenerator.createFromMutable(_component, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
-            this.root.querySelector("#_r").textContent = "Red";
+            // this.root.querySelector("#_r").textContent = "Red";
             container.getElement().html(this.root);
         }
     }
