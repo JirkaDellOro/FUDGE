@@ -166,8 +166,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     class Mutable extends EventTarget {
         /**
@@ -1449,7 +1452,7 @@ var FudgeCore;
          * Return a reference to the offscreen-canvas
          */
         static getCanvas() {
-            return RenderOperator.crc3.canvas;
+            return RenderOperator.crc3.canvas; // TODO: enable OffscreenCanvas
         }
         /**
          * Return a reference to the rendering context
@@ -2169,6 +2172,7 @@ var FudgeCore;
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction) {
             this.aspectRatio = _aspect;
@@ -2381,16 +2385,16 @@ var FudgeCore;
             this.local.deserialize(_serialization.local);
             return this;
         }
-        mutate(_mutator) {
-            this.local.mutate(_mutator);
-        }
-        getMutator() {
-            return this.local.getMutator();
-        }
-        getMutatorAttributeTypes(_mutator) {
-            let types = this.local.getMutatorAttributeTypes(_mutator);
-            return types;
-        }
+        // public mutate(_mutator: Mutator): void {
+        //     this.local.mutate(_mutator);
+        // }
+        // public getMutator(): Mutator { 
+        //     return this.local.getMutator();
+        // }
+        // public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+        //     let types: MutatorAttributeTypes = this.local.getMutatorAttributeTypes(_mutator);
+        //     return types;
+        // }
         reduceMutator(_mutator) {
             delete _mutator.world;
             super.reduceMutator(_mutator);
@@ -4019,7 +4023,8 @@ var FudgeCore;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
             let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;

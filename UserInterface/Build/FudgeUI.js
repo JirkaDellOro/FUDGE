@@ -86,12 +86,11 @@ var FudgeUserInterface;
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     class UIGenerator {
-        static createFromMutable(_mutable, _element, _name) {
+        static createFromMutable(_mutable, _element, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let mutatorTypes;
-            let mutator = _mutable.getMutator();
+            let mutator = _mutator || _mutable.getMutator();
+            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let parent = UIGenerator.createFoldableFieldset(name, _element);
-            mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
         static createFromMutator(_mutator, _mutatorTypes, _parent, _mutable) {
@@ -120,10 +119,11 @@ var FudgeUserInterface;
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             UIGenerator.createTextElement(key, _parent, { _value: value });
                             break;
-                        case "Object":
-                            let subMutable = _mutable[key];
-                            UIGenerator.createFromMutable(subMutable, _parent, key);
+                        // Some other complex subclass of Mutable
                         default:
+                            let subMutable;
+                            subMutable = _mutable[key];
+                            UIGenerator.createFromMutable(subMutable, _parent, key, _mutator[key]);
                             break;
                     }
                 }
@@ -219,12 +219,13 @@ var FudgeUserInterface;
                 _event.preventDefault();
                 console.log(this.listRoot);
                 let target = _event.target;
-                if (target.content.children.length != 0) {
-                    target.collapse(target.content);
-                }
-                else {
-                    target.buildContent(target.mutator);
-                }
+                target.collapse(target);
+                // if (target.content.children.length != 0) {
+                //     target.collapse(target.content);
+                // }
+                // else {
+                //     target.buildContent(target.mutator);
+                // }
             };
             //TODO: Implementation
             this.mutator = _mutator;
@@ -239,7 +240,7 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
         }
         BuildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
@@ -266,14 +267,21 @@ var FudgeUserInterface;
             this.appendChild(this.content);
         }
         collapse(element) {
-            let desiredResult = null;
-            if (element.firstChild == this.header)
-                desiredResult = element.firstChild;
-            while (element.lastChild != desiredResult) {
-                if (element.lastChild != this.header) {
-                    element.removeChild(element.lastChild);
-                }
-            }
+            // let desiredResult: Object = null;
+            // if (element.firstChild == this.header)
+            //     desiredResult = element.firstChild;
+            // while (element.lastChild != desiredResult) {
+            //     if (element.lastChild != this.header) {
+            //         element.removeChild(element.lastChild);
+            //     }
+            // }
+            // let children: HTMLCollection = element.children;
+            // for (let child of children) {
+            //     if (child != this.header) {
+            //         child.classList.toggle("folded");
+            //     }
+            // }
+            element.content.classList.toggle("folded");
         }
     }
     class CollapsableNodeListElement extends CollapsableListElement {
@@ -507,5 +515,18 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.UIMutable = UIMutable;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class UINodeData extends FudgeUserInterface.UIMutable {
+        constructor(_mutable, _container) {
+            super(_mutable);
+            this.root = document.createElement("form");
+            FudgeUserInterface.UIGenerator.createFromMutable(_mutable, this.root);
+            this.root.addEventListener("input", this.mutateOnInput);
+            _container.append(this.root);
+        }
+    }
+    FudgeUserInterface.UINodeData = UINodeData;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 //# sourceMappingURL=FudgeUI.js.map

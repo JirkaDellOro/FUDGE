@@ -110,8 +110,11 @@ declare namespace FudgeCore {
         readonly forUserInterface: null;
     }
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTarget {
         /**
@@ -979,6 +982,7 @@ declare namespace FudgeCore {
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
@@ -1053,9 +1057,6 @@ declare namespace FudgeCore {
         constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        mutate(_mutator: Mutator): void;
-        getMutator(): Mutator;
-        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1918,7 +1919,8 @@ declare namespace FudgeCore {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**

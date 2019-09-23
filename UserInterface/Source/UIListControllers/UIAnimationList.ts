@@ -15,10 +15,10 @@ namespace FudgeUserInterface {
         public getMutator(): ƒ.Mutator {
             return this.mutator;
         }
-        
+
         public setMutator(_mutator: ƒ.Mutator): void {
             this.mutator = _mutator;
-            this.listRoot = this.BuildFromMutator(this.mutator);
+            this.listRoot.replaceWith(this.BuildFromMutator(this.mutator));
         }
 
         public collectMutator = (): ƒ.Mutator => {
@@ -43,12 +43,13 @@ namespace FudgeUserInterface {
             _event.preventDefault();
             console.log(this.listRoot);
             let target: CollapsableAnimationListElement = <CollapsableAnimationListElement>_event.target;
-            if (target.content.children.length != 0) {
-                target.collapse(target.content);
-            }
-            else {
-                target.buildContent(target.mutator);
-            }
+            target.collapse(target);
+            // if (target.content.children.length != 0) {
+            //     target.collapse(target.content);
+            // }
+            // else {
+            //     target.buildContent(target.mutator);
+            // }
         }
 
     }

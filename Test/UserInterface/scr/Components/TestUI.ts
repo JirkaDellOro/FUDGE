@@ -12,7 +12,7 @@ namespace UITest {
             super(_camera);
             this.camera = _camera;
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
+            ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>this.camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }

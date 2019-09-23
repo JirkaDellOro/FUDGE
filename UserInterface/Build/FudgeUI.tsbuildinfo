@@ -1,14 +1,15 @@
 {
   "bundle": {
-    "commonSourceDirectory": "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
     "sourceFiles": [
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
-      "c:/Users/jirka/Documents/HFU/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UINodeData.ts"
     ],
     "js": {
       "sections": [
@@ -20,7 +21,7 @@
         },
         {
           "pos": 15,
-          "end": 22982,
+          "end": 24047,
           "kind": "text"
         }
       ],
@@ -54,11 +55,11 @@
         },
         {
           "pos": 58,
-          "end": 5174,
+          "end": 5383,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.5.1"
+  "version": "3.5.3"
 }

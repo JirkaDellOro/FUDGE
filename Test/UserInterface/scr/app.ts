@@ -107,8 +107,10 @@ namespace UITest {
     function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
         return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
-    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TestUI {
-        return new UITest.TestUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+    
+    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TransformUI {
+        let Components: ƒ.Component[] = branch.getAllComponents();
+        return new UITest.TransformUI(container, state, Components[0]);
 
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {

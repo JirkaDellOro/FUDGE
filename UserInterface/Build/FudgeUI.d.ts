@@ -36,7 +36,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class UIGenerator {
-        static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string): void;
+        static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void;
         static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
         static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
@@ -128,5 +128,11 @@ declare namespace FudgeUserInterface {
         protected refreshUI: (_e: Event) => void;
         protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement): ƒ.Mutator;
         protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class UINodeData extends UIMutable {
+        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
     }
 }
