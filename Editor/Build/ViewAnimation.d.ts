@@ -73,6 +73,7 @@ declare namespace Fudge {
         drawTimeline(): void;
         drawCursor(_time: number): void;
         initAnimation(): void;
+        abstract drawKeys(): void;
         getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent;
         private mapElementsToSequences;
         private traverseAnimationStructure;
@@ -82,10 +83,15 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
+        drawKeys(): void;
     }
 }
 declare namespace Fudge {
     class ViewAnimationSheetDope extends ViewAnimationSheet {
+        drawKeys(): Promise<void>;
+        private traverseStructures;
+        private drawSequence;
+        private drawKey;
     }
 }
 declare namespace Fudge {

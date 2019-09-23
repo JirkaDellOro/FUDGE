@@ -296,7 +296,7 @@ var Fudge;
             // this.attributeList.appendChild(
             // this.controller.BuildFromMutator(_m);
             // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
-            this.controller.setMutator(_m);
+            this.controller.updateMutator(_m);
         }
         setTime(_time, updateDisplay = true) {
             this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
@@ -352,6 +352,7 @@ var Fudge;
             this.drawTimeline();
             this.drawEventsAndLabels();
             this.drawCursor(_time);
+            this.drawKeys();
         }
         clear() {
             let maxDistance = 10000;
@@ -509,12 +510,65 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
+        drawKeys() {
+            //
+        }
     }
     Fudge.ViewAnimationSheetCurve = ViewAnimationSheetCurve;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetDope extends Fudge.ViewAnimationSheet {
+        async drawKeys() {
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            let inputMutator = this.view.controller.getElementIndex();
+            // console.log(inputMutator);
+            await delay(1);
+            // console.log(inputMutator.components["ComponentTransform"][0]["ƒ.ComponentTransform"]["rotation"]["y"].getBoundingClientRect());
+            // }, 1000);
+            this.traverseStructures(this.view.animation.animationStructure, inputMutator);
+        }
+        traverseStructures(_animation, _inputs) {
+            for (let i in _animation) {
+                if (_animation[i] instanceof FudgeCore.AnimationSequence) {
+                    this.drawSequence(_animation[i], _inputs[i]);
+                }
+                else {
+                    this.traverseStructures(_animation[i], _inputs[i]);
+                }
+            }
+        }
+        drawSequence(_sequence, _input) {
+            let rect = _input.getBoundingClientRect();
+            let y = rect.top - this.view.content.getBoundingClientRect().top + rect.height / 2;
+            let height = rect.height;
+            let width = rect.height;
+            let line = new Path2D();
+            line.moveTo(0, y);
+            line.lineTo(this.crc2.canvas.width, y);
+            this.crc2.strokeStyle = "black";
+            this.crc2.stroke(line);
+            console.log("sequence", _sequence);
+            for (let i = 0; i < _sequence.length; i++) {
+                let k = _sequence.getKey(i);
+                console.log(k);
+                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2), sequence: { sequence: _sequence, element: _input } });
+            }
+        }
+        drawKey(_x, _y, _h, _w) {
+            let key = new Path2D();
+            key.moveTo(_x - _w, _y);
+            key.lineTo(_x, _y + _h);
+            key.lineTo(_x + _w, _y);
+            key.lineTo(_x, _y - _h);
+            key.closePath();
+            this.crc2.fillStyle = "red";
+            this.crc2.strokeStyle = "black";
+            this.crc2.lineWidth = 1;
+            this.crc2.fill(key);
+            this.crc2.stroke(key);
+            return key;
+        }
     }
     Fudge.ViewAnimationSheetDope = ViewAnimationSheetDope;
 })(Fudge || (Fudge = {}));

@@ -334,7 +334,7 @@ namespace Fudge {
       // this.attributeList.appendChild(
       // this.controller.BuildFromMutator(_m);
       // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
-      this.controller.setMutator(_m);
+      this.controller.updateMutator(_m);
     }
 
     private setTime(_time: number, updateDisplay: boolean = true): void {

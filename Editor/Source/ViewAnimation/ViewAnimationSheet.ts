@@ -34,6 +34,7 @@ namespace Fudge {
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(_time);
+      this.drawKeys();
     }
     clear(): void {
       let maxDistance: number = 10000;
@@ -89,6 +90,8 @@ namespace Fudge {
     initAnimation(): void {
       //;
     }
+
+    abstract drawKeys(): void;
 
     getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
       for (let l of this.labels) {
