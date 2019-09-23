@@ -1,5 +1,5 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var TestRectMapping;
+(function (TestRectMapping) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
     let uiMaps = {};
@@ -150,5 +150,5 @@ var RenderManagerRendering;
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(TestRectMapping || (TestRectMapping = {}));
 //# sourceMappingURL=TestRectMapping.js.map

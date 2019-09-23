@@ -350,7 +350,8 @@ namespace FudgeCore {
      * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
      * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
      * @param _near The near clipspace border on the z-axis.
-     * @param _far The far clipspace borer on the z-axis.
+     * @param _far The far clipspace border on the z-axis.
+     * @param _direction The plane on which the fieldOfView-Angle is given 
      */
     public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
       let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
