@@ -14,8 +14,7 @@ var EventPassing;
         let posCameras = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList = document.getElementsByTagName("canvas");
         for (let i = 0; i < canvasList.length; i++) {
-            let camera = Scenes.createCamera(posCameras[i]);
-            let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+            let cmpCamera = Scenes.createCamera(posCameras[i]);
             cmpCamera.projectCentral(1, 45);
             let viewport = new ƒ.Viewport();
             viewport.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);

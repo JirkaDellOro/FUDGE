@@ -122,7 +122,7 @@ namespace Scenes {
         return cmpCamera;
         // camera.addComponent(cmpCamera);
         // camera.addComponent(cmpTransform);
-        // // let camera: ƒ.Node = new ƒ.Node("Camera");
+        // // let cmpCamera: ƒ.ComponentCamera = new ƒ.Node("Camera");
         // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
     }
 

@@ -10,8 +10,7 @@ var ElectronViewport;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewport
-        let camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);

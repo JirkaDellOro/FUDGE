@@ -12,8 +12,8 @@ namespace MarixMutatorTest {
 
         ƒ.RenderManager.initialize();
 
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
 
         update();
         displayVectors(coSys.cmpTransform.local);
