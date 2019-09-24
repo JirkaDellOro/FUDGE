@@ -37,16 +37,16 @@ namespace ScreenPoint {
 
     function hndEvent(_event: ƒ.PointerEventƒ | ƒ.DragDropEventƒ): void {
         console.group(`${_event.type} on ${viewPort.name}`);
-        let pointClient: ƒ.Point = { x: _event.pointerX, y: _event.pointerY };
+        let pointClient: ƒ.Vector2 = <ƒ.Vector2>{ x: _event.pointerX, y: _event.pointerY };
         calculate(pointClient);
         console.groupEnd();
     }
 
-    export function calculate(_point: ƒ.Point): void {
-        let pointCanvas: ƒ.Point;
-        let pointDestination: ƒ.Point;
-        let pointCanvasInverse: ƒ.Point;
-        let pointInverse: ƒ.Point;
+    export function calculate(_point: ƒ.Vector2): void {
+        let pointCanvas: ƒ.Vector2;
+        let pointDestination: ƒ.Vector2;
+        let pointCanvasInverse: ƒ.Vector2;
+        let pointInverse: ƒ.Vector2;
         let rectFrame: ƒ.Rectangle;
 
         rectFrame = viewPort.getClientRectangle();

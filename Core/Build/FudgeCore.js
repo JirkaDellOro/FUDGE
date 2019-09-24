@@ -1452,7 +1452,7 @@ var FudgeCore;
          * Return a reference to the offscreen-canvas
          */
         static getCanvas() {
-            return RenderOperator.crc3.canvas;
+            return RenderOperator.crc3.canvas; // TODO: enable OffscreenCanvas
         }
         /**
          * Return a reference to the rendering context
@@ -2172,6 +2172,9 @@ var FudgeCore;
         getFieldOfView() {
             return this.fieldOfView;
         }
+        getDirection() {
+            return this.direction;
+        }
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -2190,6 +2193,7 @@ var FudgeCore;
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect = this.aspectRatio, _fieldOfView = this.fieldOfView, _direction = this.direction) {
             this.aspectRatio = _aspect;
@@ -2208,6 +2212,28 @@ var FudgeCore;
         projectOrthographic(_left = 0, _right = FudgeCore.RenderManager.getCanvas().clientWidth, _bottom = FudgeCore.RenderManager.getCanvas().clientHeight, _top = 0) {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = FudgeCore.Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+        }
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle() {
+            let tanFov = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let tanHorizontal = 0;
+            let tanVertical = 0;
+            if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
+                let aspect = Math.sqrt(this.aspectRatio);
+                tanHorizontal = tanFov * aspect;
+                tanVertical = tanFov / aspect;
+            }
+            else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+                tanVertical = tanFov;
+                tanHorizontal = tanVertical * this.aspectRatio;
+            }
+            else { //FOV_DIRECTION.HORIZONTAL
+                tanHorizontal = tanFov;
+                tanVertical = tanHorizontal / this.aspectRatio;
+            }
+            return { x: 0, y: 0, width: tanHorizontal * 2, height: tanVertical * 2 };
         }
         //#region Transfer
         serialize() {
@@ -3124,6 +3150,30 @@ var FudgeCore;
             this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
         }
         // #endregion
+        //#region Points
+        pointClientToSource(_client) {
+            let result;
+            let rect;
+            rect = this.getClientRectangle();
+            result = this.frameClientToCanvas.getPoint(_client, rect);
+            rect = this.getCanvasRectangle();
+            result = this.frameCanvasToDestination.getPoint(result, rect);
+            result = this.frameDestinationToSource.getPoint(result, this.rectSource);
+            //TODO: when Source, Render and RenderViewport deviate, continue transformation 
+            return result;
+        }
+        pointSourceToRender(_source) {
+            let projectionRectangle = this.camera.getProjectionRectangle();
+            let point = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+            return point;
+        }
+        pointClientToRender(_client) {
+            let point = this.pointClientToSource(_client);
+            point = this.pointSourceToRender(point);
+            //TODO: when Render and RenderViewport deviate, continue transformation 
+            return point;
+        }
+        //#endregion
         // #region Events (passing from canvas to viewport and from there into branch)
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
@@ -3523,17 +3573,11 @@ var FudgeCore;
             this.height = _height;
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width,
-                y: this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height
-            };
+            let result = new FudgeCore.Vector2(this.width * (_pointInFrame.x - _rectFrame.x) / _rectFrame.width, this.height * (_pointInFrame.y - _rectFrame.y) / _rectFrame.height);
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x * _rect.width / this.width + _rect.x,
-                y: _point.y * _rect.height / this.height + _rect.y
-            };
+            let result = new FudgeCore.Vector2(_point.x * _rect.width / this.width + _rect.x, _point.y * _rect.height / this.height + _rect.y);
             return result;
         }
         getRect(_rectFrame) {
@@ -3556,17 +3600,11 @@ var FudgeCore;
             this.normHeight = _normHeight;
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: this.normWidth * (_pointInFrame.x - _rectFrame.x),
-                y: this.normHeight * (_pointInFrame.y - _rectFrame.y)
-            };
+            let result = new FudgeCore.Vector2(this.normWidth * (_pointInFrame.x - _rectFrame.x), this.normHeight * (_pointInFrame.y - _rectFrame.y));
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x / this.normWidth + _rect.x,
-                y: _point.y / this.normHeight + _rect.y
-            };
+            let result = new FudgeCore.Vector2(_point.x / this.normWidth + _rect.x, _point.y / this.normHeight + _rect.y);
             return result;
         }
         getRect(_rectFrame) {
@@ -3585,17 +3623,11 @@ var FudgeCore;
             this.padding = { left: 0, top: 0, right: 0, bottom: 0 };
         }
         getPoint(_pointInFrame, _rectFrame) {
-            let result = {
-                x: _pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width,
-                y: _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height
-            };
+            let result = new FudgeCore.Vector2(_pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width, _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height);
             return result;
         }
         getPointInverse(_point, _rect) {
-            let result = {
-                x: _point.x + this.padding.left + this.margin.left * _rect.width,
-                y: _point.y + this.padding.top + this.margin.top * _rect.height
-            };
+            let result = new FudgeCore.Vector2(_point.x + this.padding.left + this.margin.left * _rect.width, _point.y + this.padding.top + this.margin.top * _rect.height);
             return result;
         }
         getRect(_rectFrame) {
@@ -4040,7 +4072,8 @@ var FudgeCore;
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
             let fieldOfViewInRadians = _fieldOfViewInDegrees * Math.PI / 180;
@@ -4303,8 +4336,9 @@ var FudgeCore;
      * ```
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    class Vector2 {
+    class Vector2 extends FudgeCore.Mutable {
         constructor(_x = 0, _y = 0) {
+            super();
             this.data = new Float32Array([_x, _y]);
         }
         get x() {
@@ -4519,11 +4553,18 @@ var FudgeCore;
             return new Float32Array(this.data);
         }
         /**
-         * @returns An deep copy of the vector.
+         * @returns A deep copy of the vector.
          */
         get copy() {
             return new Vector2(this.x, this.y);
         }
+        getMutator() {
+            let mutator = {
+                x: this.data[0], y: this.data[1]
+            };
+            return mutator;
+        }
+        reduceMutator(_mutator) { }
     }
     FudgeCore.Vector2 = Vector2;
 })(FudgeCore || (FudgeCore = {}));
@@ -4587,9 +4628,9 @@ var FudgeCore;
             let result = new Vector3();
             let m = _matrix.get();
             let [x, y, z] = _vector.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
-            result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];
-            result.z = m[2] * x + m[6] * y + m[10] * z; // + m[14];
+            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
             return result;
         }
         static NORMALIZATION(_vector, _length = 1) {
@@ -5395,6 +5436,17 @@ var FudgeCore;
         }
     }
     FudgeCore.NodeResourceInstance = NodeResourceInstance;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Ray {
+        constructor(_direction = FudgeCore.Vector3.Z(-1), _origin = FudgeCore.Vector3.ZERO(), _length = 1) {
+            this.origin = _origin;
+            this.direction = _direction;
+            this.length = _length;
+        }
+    }
+    FudgeCore.Ray = Ray;
 })(FudgeCore || (FudgeCore = {}));
 /// <reference path="RenderOperator.ts"/>
 var FudgeCore;

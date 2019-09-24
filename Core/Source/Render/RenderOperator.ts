@@ -71,7 +71,7 @@ namespace FudgeCore {
          * Return a reference to the offscreen-canvas
          */
         public static getCanvas(): HTMLCanvasElement {
-            return RenderOperator.crc3.canvas;
+            return <HTMLCanvasElement>RenderOperator.crc3.canvas; // TODO: enable OffscreenCanvas
         }
         /**
          * Return a reference to the rendering context
@@ -83,7 +83,7 @@ namespace FudgeCore {
          * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
          */
         public static getCanvasRect(): Rectangle {
-            let canvas: HTMLCanvasElement = RenderOperator.crc3.canvas;
+            let canvas: HTMLCanvasElement = <HTMLCanvasElement>RenderOperator.crc3.canvas;
             return { x: 0, y: 0, width: canvas.width, height: canvas.height };
         }
         /**

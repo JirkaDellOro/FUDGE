@@ -49,6 +49,10 @@ namespace FudgeCore {
             return this.fieldOfView;
         }
 
+        public getDirection(): FIELD_OF_VIEW {
+            return this.direction;
+        }
+
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -67,6 +71,7 @@ namespace FudgeCore {
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given 
          */
         public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void {
             this.aspectRatio = _aspect;
@@ -86,6 +91,32 @@ namespace FudgeCore {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
+
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        public getProjectionRectangle(): Rectangle {
+            let tanFov: number = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let tanHorizontal: number = 0;
+            let tanVertical: number = 0;
+
+            if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
+                let aspect: number = Math.sqrt(this.aspectRatio);
+                tanHorizontal = tanFov * aspect;
+                tanVertical = tanFov / aspect;
+            }
+            else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+                tanVertical = tanFov;
+                tanHorizontal = tanVertical * this.aspectRatio;
+            }
+            else {//FOV_DIRECTION.HORIZONTAL
+                tanHorizontal = tanFov;
+                tanVertical = tanHorizontal / this.aspectRatio;
+            }
+
+            return { x: 0, y: 0, width: tanHorizontal * 2, height: tanVertical * 2 };
+        }
+
         //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {
