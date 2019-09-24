@@ -101,9 +101,6 @@ namespace Fudge {
     }
 
     getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
-      console.log(_x, _y);
-      _x = _x / this.scale.x - this.position.x;
-      _y = _y / this.scale.y - this.position.y / this.scale.y;
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
           return l;
@@ -114,6 +111,8 @@ namespace Fudge {
           return e;
         }
       }
+      _x = _x / this.scale.x - this.position.x;
+      _y = _y / this.scale.y - this.position.y / this.scale.y;
       for (let k of this.keys) {
         if (this.crc2.isPointInPath(k.path2D, _x, _y)) {
           return k;

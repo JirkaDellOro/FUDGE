@@ -81,8 +81,11 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ViewAnimationSheetCurve extends ViewAnimationSheet {
+        drawKeys(): void;
         protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
         protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D;
+        private drawYScale;
+        private calcScaleSize;
         private randomColor;
     }
 }

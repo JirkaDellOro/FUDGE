@@ -1,6 +1,11 @@
 namespace Fudge {
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
 
+    drawKeys(): void {
+      this.drawYScale();
+      super.drawKeys();
+    }
+
     protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void {
       if (_sequence.length <= 0)
         return;
@@ -30,7 +35,32 @@ namespace Fudge {
       return super.drawKey(_x, _y, _h, _w, _c);
     }
 
-    private randomColor(): string{
+    private drawYScale(): void {
+      let pixelPerValue: number = this.calcScaleSize();
+      let valuePerPixel: number = 1 / pixelPerValue;
+
+      this.crc2.strokeStyle = "black";
+      this.crc2.lineWidth = 1 / this.scale.y;
+      let line: Path2D = new Path2D;
+      line.moveTo(0, 0);
+      line.lineTo(100000, 0);
+      this.crc2.stroke(line);
+    }
+
+    private calcScaleSize(): number {
+      let min: number = 10;
+      let max: number = 50;
+      let pixelPerValue: number = this.scale.y;
+      while (pixelPerValue < min) {
+        pixelPerValue *= 10;
+      }
+      while (pixelPerValue > max) {
+        pixelPerValue /= 2;
+      }
+      return pixelPerValue;
+    }
+
+    private randomColor(): string {
       return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
     }
 

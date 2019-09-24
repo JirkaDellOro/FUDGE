@@ -416,9 +416,6 @@ var Fudge;
             this.traverseStructures(this.view.animation.animationStructure, inputMutator);
         }
         getObjectAtPoint(_x, _y) {
-            console.log(_x, _y);
-            _x = _x / this.scale.x - this.position.x;
-            _y = _y / this.scale.y - this.position.y / this.scale.y;
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
                     return l;
@@ -429,6 +426,8 @@ var Fudge;
                     return e;
                 }
             }
+            _x = _x / this.scale.x - this.position.x;
+            _y = _y / this.scale.y - this.position.y / this.scale.y;
             for (let k of this.keys) {
                 if (this.crc2.isPointInPath(k.path2D, _x, _y)) {
                     return k;
@@ -526,6 +525,10 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
+        drawKeys() {
+            this.drawYScale();
+            super.drawKeys();
+        }
         drawSequence(_sequence, _input) {
             if (_sequence.length <= 0)
                 return;
@@ -549,6 +552,28 @@ var Fudge;
         }
         drawKey(_x, _y, _h, _w, _c) {
             return super.drawKey(_x, _y, _h, _w, _c);
+        }
+        drawYScale() {
+            let pixelPerValue = this.calcScaleSize();
+            let valuePerPixel = 1 / pixelPerValue;
+            this.crc2.strokeStyle = "black";
+            this.crc2.lineWidth = 1 / this.scale.y;
+            let line = new Path2D;
+            line.moveTo(0, 0);
+            line.lineTo(100000, 0);
+            this.crc2.stroke(line);
+        }
+        calcScaleSize() {
+            let min = 10;
+            let max = 50;
+            let pixelPerValue = this.scale.y;
+            while (pixelPerValue < min) {
+                pixelPerValue *= 10;
+            }
+            while (pixelPerValue > max) {
+                pixelPerValue /= 2;
+            }
+            return pixelPerValue;
         }
         randomColor() {
             return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
