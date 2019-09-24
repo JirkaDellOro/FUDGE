@@ -18,6 +18,7 @@ namespace UITest {
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
     let camera: ƒ.Node;
+    let counter: number;
     window.addEventListener("load", init);
 
     function init(): void {
@@ -67,6 +68,7 @@ namespace UITest {
         myLayout.init();
     }
     function initViewport(): void {
+        counter = 0;
         // create asset
         branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
@@ -93,7 +95,6 @@ namespace UITest {
             myLayout.emit(ƒui.UIEVENT.SELECTION, _event);
         });
         function animate(_event: Event): void {
-
             branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
@@ -107,11 +108,14 @@ namespace UITest {
     function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
         return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
     }
-    
-    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TransformUI {
-        let Components: ƒ.Component[] = branch.getAllComponents();
-        return new UITest.TransformUI(container, state, Components[0]);
 
+    function createTestComponent(container: GoldenLayout.Container, state: Object): void {
+        let content: HTMLElement = document.createElement("div");
+        let components: ƒ.Component[] = branch.getAllComponents();
+        for (let component of components) {
+            let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(component, content);
+        }
+        container.getElement().append(content);
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");

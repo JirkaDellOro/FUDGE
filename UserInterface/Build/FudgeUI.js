@@ -1,9 +1,6 @@
 "use strict";
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    /**
-     * <select><option>Hallo</option></select>
-     */
     class ToggleButton extends HTMLButtonElement {
         constructor(style) {
             super();
@@ -76,9 +73,28 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
+    class DropDown extends HTMLDivElement {
+        constructor(_contentList) {
+            super();
+        }
+    }
+    FudgeUserInterface.DropDown = DropDown;
+    class DropDownButton extends HTMLButtonElement {
+        constructor() {
+            super();
+        }
+    }
+    class DropDownContent extends HTMLDivElement {
+        constructor() {
+            super();
+        }
+    }
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-dropdown", DropDown, { extends: "div" });
+    customElements.define("ui-dropdown-button", DropDownButton, { extends: "button" });
+    customElements.define("ui-dropdown-content", DropDownContent, { extends: "div" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
@@ -524,9 +540,11 @@ var FudgeUserInterface;
                                 break;
                             case "Number":
                                 let stepper = _root.querySelector("#" + key);
-                                stepper.value = mutator[key];
+                                if (document.activeElement != stepper) {
+                                    stepper.value = mutator[key];
+                                }
                                 break;
-                            case "Object":
+                            default:
                                 let fieldset = _root.querySelector("#" + key);
                                 let subMutable = _mutable[key];
                                 this.updateUI(subMutable, fieldset);

@@ -82,9 +82,11 @@ namespace FudgeUserInterface {
                                 break;
                             case "Number":
                                 let stepper: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
-                                stepper.value = <string>mutator[key];
+                                if (document.activeElement != stepper) {
+                                    stepper.value = <string>mutator[key];
+                                }
                                 break;
-                            case "Object":
+                            default:
                                 let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#" + key);
                                 let subMutable: ƒ.Mutable = (<any>_mutable)[key];
                                 this.updateUI(subMutable, fieldset);
