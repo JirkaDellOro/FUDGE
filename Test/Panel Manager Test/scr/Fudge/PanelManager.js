@@ -1,9 +1,9 @@
 /// <reference types="../../../@types/jquery"/>
 /// <reference types="../../../@types/golden-layout"/>
-var Fudge;
+var FudgeTest;
 /// <reference types="../../../@types/jquery"/>
 /// <reference types="../../../@types/golden-layout"/>
-(function (Fudge) {
+(function (FudgeTest) {
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     class PanelManager extends EventTarget {
         constructor() {
@@ -16,7 +16,7 @@ var Fudge;
          * @param _name Name of the Panel
          */
         createPanelFromTemplate(_template, _name) {
-            let panel = new Fudge.Panel(_name, _template);
+            let panel = new FudgeTest.Panel(_name, _template);
             console.log(panel);
             return panel;
         }
@@ -25,7 +25,7 @@ var Fudge;
          * @param _name Name of the Panel
          */
         createEmptyPanel(_name) {
-            let panel = new Fudge.Panel(_name);
+            let panel = new FudgeTest.Panel(_name);
             return panel;
         }
         /**
@@ -69,7 +69,7 @@ var Fudge;
         }
     }
     PanelManager.instance = new PanelManager();
-    Fudge.PanelManager = PanelManager;
+    FudgeTest.PanelManager = PanelManager;
     //TODO: Give these Factory Functions a better home
     /**
      * Factory Function for the the "Welcome"-Component
@@ -87,5 +87,5 @@ var Fudge;
     function registerViewComponent(container, state) {
         container.getElement().html(state.content);
     }
-})(Fudge || (Fudge = {}));
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=PanelManager.js.map

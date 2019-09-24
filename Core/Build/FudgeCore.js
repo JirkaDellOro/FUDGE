@@ -304,8 +304,8 @@ var FudgeCore;
             this.totalTime = 0;
             this.labels = {};
             this.stepsPerSecond = 10;
-            this.framesPerSecond = 60;
             this.events = {};
+            this.framesPerSecond = 60;
             // processed eventlist and animation strucutres for playback.
             this.eventsProcessed = new Map();
             this.animationStructuresProcessed = new Map();
@@ -882,10 +882,10 @@ var FudgeCore;
          * @returns the value of the sequence at the given time. 0 if there are no keys.
          */
         evaluate(_time) {
+            if (this.keys.length == 0)
+                return 0; //TODO: shouldn't return 0 but something indicating no change, like null. probably needs to be changed in Node as well to ignore non-numeric values in the applyAnimation function
             if (this.keys.length == 1 || this.keys[0].Time >= _time)
                 return this.keys[0].Value;
-            if (this.keys.length == 0)
-                return 0;
             for (let i = 0; i < this.keys.length - 1; i++) {
                 if (this.keys[i].Time <= _time && this.keys[i + 1].Time > _time) {
                     return this.keys[i].functionOut.evaluate(_time);
@@ -1938,6 +1938,20 @@ var FudgeCore;
             let mutator = this.animation.getMutated(_time, this.calculateDirection(_time), this.playback);
             this.getContainer().applyAnimation(mutator);
         }
+        /**
+         * Returns the current time of the animation, modulated for animation length.
+         */
+        getCurrentTime() {
+            return this.localTime.get() % this.animation.totalTime;
+        }
+        /**
+         * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
+         * @param _time the (unscaled) time to update the animation with.
+         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         */
+        updateAnimation(_time) {
+            return this.updateAnimationLoop(null, _time);
+        }
         //#region transfer
         serialize() {
             let s = super.serialize();
@@ -1964,11 +1978,13 @@ var FudgeCore;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
+         * Uses the built-in time unless a different time is specified.
+         * May also be called from updateAnimation().
          */
-        updateAnimationLoop() {
+        updateAnimationLoop(_e, _time) {
             if (this.animation.totalTime == 0)
-                return;
-            let time = this.localTime.get();
+                return [null, 0];
+            let time = _time || this.localTime.get();
             if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
                 time = this.lastTime + (1000 / this.animation.fps);
             }
@@ -1982,7 +1998,9 @@ var FudgeCore;
                 if (this.getContainer()) {
                     this.getContainer().applyAnimation(mutator);
                 }
+                return [mutator, time];
             }
+            return [null, time];
         }
         /**
          * Fires all custom events the Animation should have fired between the last frame and the current frame.

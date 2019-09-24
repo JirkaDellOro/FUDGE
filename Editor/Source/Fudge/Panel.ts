@@ -95,6 +95,9 @@ namespace Fudge {
                                     // (<ViewViewport>view).setRoot(this.node);
                                 }
                                 break;
+                            case VIEW.ANIMATION:
+                                view = new ViewAnimation(this);
+                                break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {
                             type: "component",

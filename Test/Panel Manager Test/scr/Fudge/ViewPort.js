@@ -1,17 +1,17 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
-var Fudge;
+var FudgeTest;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
-(function (Fudge) {
+(function (FudgeTest) {
     var ƒ = FudgeCore;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewPort extends Fudge.View {
+    class ViewPort extends FudgeTest.View {
         constructor(_parent) {
             super(_parent);
             this.fillContent();
@@ -59,6 +59,6 @@ var Fudge;
             // this.viewport.draw();
         }
     }
-    Fudge.ViewPort = ViewPort;
-})(Fudge || (Fudge = {}));
+    FudgeTest.ViewPort = ViewPort;
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=ViewPort.js.map

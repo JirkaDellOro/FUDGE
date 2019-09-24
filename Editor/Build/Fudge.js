@@ -33,6 +33,10 @@ var Fudge;
             ƒ.Debug.log("OpenViewNode");
             openViewNode();
         });
+        ipcRenderer.on("openAnimationPanel", (_event, _args) => {
+            ƒ.Debug.log("Open Animation Panel");
+            openAnimationPanel();
+        });
         // HACK!
         ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("UpdateViewNode");
@@ -42,6 +46,10 @@ var Fudge;
         node = Scenes.createAxisCross();
         panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.NodePanelTemplate, "Node Panel");
         panel.setNode(node);
+        Fudge.PanelManager.instance.addPanel(panel);
+    }
+    function openAnimationPanel() {
+        let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.ViewAnimationTemplate(), "Animation Panel");
         Fudge.PanelManager.instance.addPanel(panel);
     }
     function save(_node) {
@@ -156,6 +164,9 @@ var Fudge;
                                 if (this.node) {
                                     // (<ViewViewport>view).setRoot(this.node);
                                 }
+                                break;
+                            case Fudge.VIEW.ANIMATION:
+                                view = new Fudge.ViewAnimation(this);
                                 break;
                         }
                         let viewConfig = {
@@ -336,7 +347,7 @@ var Fudge;
     (function (VIEW) {
         // PROJECT = ViewProject,
         VIEW["NODE"] = "ViewNode";
-        // ANIMATION = ViewAnimation,
+        VIEW["ANIMATION"] = "ViewAnimation";
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
         VIEW["PORT"] = "ViewPort";

@@ -1,4 +1,4 @@
-namespace Fudge {
+namespace FudgeTest {
     // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     export abstract class PanelTemplate {
         public config: GoldenLayout.ItemConfig;
@@ -12,7 +12,7 @@ namespace Fudge {
                     content: [
                         {
                             type: "component",
-                            componentName: Fudge.VIEW.PORT,
+                            componentName: FudgeTest.VIEW.PORT,
                             title: "Viewport"
                         },
                         {
