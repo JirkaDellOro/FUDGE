@@ -88,7 +88,8 @@ var Fudge;
             // this.content.appendChild(this.canvasSheet);
             this.content.appendChild(this.canvas);
             this.content.appendChild(this.hover);
-            this.sheet = new Fudge.ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
+            // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
+            this.sheet = new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
             this.sheet.redraw(this.playbackTime);
             // sheet.translate();
         }
@@ -127,6 +128,7 @@ var Fudge;
                 console.log(obj["key"]);
                 this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: obj["key"] }));
             }
+            console.log(obj);
         }
         mouseMove(_e) {
             _e.preventDefault();
@@ -321,8 +323,6 @@ var Fudge;
     }
     Fudge.ViewAnimation = ViewAnimation;
 })(Fudge || (Fudge = {}));
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Build/Fudge"/>
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheet {
@@ -344,24 +344,28 @@ var Fudge;
         }
         translate() {
             this.crc2.translate(this.position.x, this.position.y);
+            this.crc2.scale(this.scale.x, this.scale.y);
         }
         redraw(_time) {
-            this.mapElementsToSequences();
-            this.translate();
             this.clear();
+            this.translate();
+            this.drawKeys();
             this.drawTimeline();
             this.drawEventsAndLabels();
             this.drawCursor(_time);
-            this.drawKeys();
         }
         clear() {
+            this.crc2.resetTransform();
             let maxDistance = 10000;
             this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
         }
         drawTimeline() {
+            this.crc2.resetTransform();
             let timelineHeight = 50;
             let maxDistance = 10000;
             let timeline = new Path2D();
+            this.crc2.fillStyle = "#7a7a7a";
+            this.crc2.fillRect(0, 0, maxDistance, timelineHeight + 30);
             timeline.moveTo(0, timelineHeight);
             //TODO make this use some actually sensible numbers, maybe 2x the animation length
             timeline.lineTo(maxDistance, timelineHeight);
@@ -404,10 +408,17 @@ var Fudge;
             this.crc2.stroke(cursor);
             this.crc2.fill(cursor);
         }
-        initAnimation() {
-            //;
+        drawKeys() {
+            let inputMutator = this.view.controller.getElementIndex();
+            //TODO: stop recreating the sequence elements all the time
+            this.sequences = [];
+            this.keys = [];
+            this.traverseStructures(this.view.animation.animationStructure, inputMutator);
         }
         getObjectAtPoint(_x, _y) {
+            console.log(_x, _y);
+            _x = _x / this.scale.x - this.position.x;
+            _y = _y / this.scale.y - this.position.y / this.scale.y;
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
                     return l;
@@ -425,24 +436,29 @@ var Fudge;
             }
             return null;
         }
-        mapElementsToSequences() {
-            this.sequences = [];
-            // this.traverseAnimationStructure(this.view.animation.animationStructure, this.view.controller.listRoot);
-            // console.log(this.view.animation.animationStructure);
-            console.log(this.view.controller.listRoot.firstElementChild);
-        }
-        traverseAnimationStructure(_animStruct, _currentHTML) {
-            let tmp = 0;
-            for (let i in _animStruct) {
-                if (_animStruct[i] instanceof FudgeCore.AnimationSequence) {
-                    //
+        traverseStructures(_animation, _inputs) {
+            for (let i in _animation) {
+                if (_animation[i] instanceof FudgeCore.AnimationSequence) {
+                    this.drawSequence(_animation[i], _inputs[i]);
                 }
                 else {
-                    let children = _currentHTML.childNodes;
-                    console.log(children);
-                    // this.traverseAnimationStructure(<FudgeCore.AnimationStructure>_animStruct[i], _currentHTML.children)
+                    this.traverseStructures(_animation[i], _inputs[i]);
                 }
             }
+        }
+        drawKey(_x, _y, _h, _w, _c) {
+            let key = new Path2D();
+            key.moveTo(_x - _w, _y);
+            key.lineTo(_x, _y + _h);
+            key.lineTo(_x + _w, _y);
+            key.lineTo(_x, _y - _h);
+            key.closePath();
+            this.crc2.fillStyle = _c;
+            this.crc2.strokeStyle = "black";
+            this.crc2.lineWidth = 1;
+            this.crc2.fill(key);
+            this.crc2.stroke(key);
+            return key;
         }
         drawEventsAndLabels() {
             let maxDistance = 10000;
@@ -510,8 +526,32 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
-        drawKeys() {
-            //
+        drawSequence(_sequence, _input) {
+            if (_sequence.length <= 0)
+                return;
+            let rect = _input.getBoundingClientRect();
+            let height = rect.height / this.scale.y;
+            let width = rect.height / this.scale.x;
+            let line = new Path2D();
+            line.moveTo(0, _sequence.getKey(0).Value);
+            //TODO: stop recreating the sequence element all the time
+            //TODO: get color from input element or former sequence element.
+            let seq = { color: this.randomColor(), element: _input, sequence: _sequence };
+            this.sequences.push(seq);
+            for (let i = 0; i < _sequence.length; i++) {
+                let k = _sequence.getKey(i);
+                this.keys.push({ key: k, path2D: this.drawKey(k.Time, k.Value, height / 2, width / 2, seq.color), sequence: seq });
+                line.lineTo(k.Time, k.Value);
+            }
+            line.lineTo(this.view.animation.totalTime, _sequence.getKey(_sequence.length - 1).Value);
+            this.crc2.strokeStyle = seq.color;
+            this.crc2.stroke(line);
+        }
+        drawKey(_x, _y, _h, _w, _c) {
+            return super.drawKey(_x, _y, _h, _w, _c);
+        }
+        randomColor() {
+            return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
         }
     }
     Fudge.ViewAnimationSheetCurve = ViewAnimationSheetCurve;
@@ -520,23 +560,15 @@ var Fudge;
 (function (Fudge) {
     class ViewAnimationSheetDope extends Fudge.ViewAnimationSheet {
         async drawKeys() {
-            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+            //TODO: Fix that for some reason the first time this is called the rects return all 0s.
+            //TODO: possible optimisation: only regenerate if necessary, otherwise load a saved image. (might lead to problems with the keys not being clickable anymore though)
+            // const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
             let inputMutator = this.view.controller.getElementIndex();
             // console.log(inputMutator);
-            await delay(1);
+            // await delay(1);
             // console.log(inputMutator.components["ComponentTransform"][0]["ƒ.ComponentTransform"]["rotation"]["y"].getBoundingClientRect());
             // }, 1000);
             this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-        }
-        traverseStructures(_animation, _inputs) {
-            for (let i in _animation) {
-                if (_animation[i] instanceof FudgeCore.AnimationSequence) {
-                    this.drawSequence(_animation[i], _inputs[i]);
-                }
-                else {
-                    this.traverseStructures(_animation[i], _inputs[i]);
-                }
-            }
         }
         drawSequence(_sequence, _input) {
             let rect = _input.getBoundingClientRect();
@@ -548,26 +580,12 @@ var Fudge;
             line.lineTo(this.crc2.canvas.width, y);
             this.crc2.strokeStyle = "black";
             this.crc2.stroke(line);
-            console.log("sequence", _sequence);
+            let seq = { color: "red", element: _input, sequence: _sequence };
+            this.sequences.push(seq);
             for (let i = 0; i < _sequence.length; i++) {
                 let k = _sequence.getKey(i);
-                console.log(k);
-                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2), sequence: { sequence: _sequence, element: _input } });
+                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2, seq.color), sequence: seq });
             }
-        }
-        drawKey(_x, _y, _h, _w) {
-            let key = new Path2D();
-            key.moveTo(_x - _w, _y);
-            key.lineTo(_x, _y + _h);
-            key.lineTo(_x + _w, _y);
-            key.lineTo(_x, _y - _h);
-            key.closePath();
-            this.crc2.fillStyle = "red";
-            this.crc2.strokeStyle = "black";
-            this.crc2.lineWidth = 1;
-            this.crc2.fill(key);
-            this.crc2.stroke(key);
-            return key;
         }
     }
     Fudge.ViewAnimationSheetDope = ViewAnimationSheetDope;

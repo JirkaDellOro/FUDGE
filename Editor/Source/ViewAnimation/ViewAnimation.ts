@@ -3,6 +3,28 @@
 ///<reference types="../../Build/Fudge"/>
 
 namespace Fudge {
+  export interface ViewAnimationKey {
+    key: FudgeCore.AnimationKey;
+    path2D: Path2D;
+    sequence: ViewAnimationSequence;
+  }
+
+  export interface ViewAnimationSequence {
+    color: string;
+    element: HTMLElement;
+    sequence: FudgeCore.AnimationSequence;
+  }
+
+  export interface ViewAnimationEvent {
+    event: string;
+    path2D: Path2D;
+  }
+  export interface ViewAnimationLabel {
+    label: string;
+    path2D: Path2D;
+  }
+
+
   export class ViewAnimation extends Fudge.View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
@@ -108,7 +130,8 @@ namespace Fudge {
       this.content.appendChild(this.canvas);
       this.content.appendChild(this.hover);
 
-      this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
+      // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
+      this.sheet = new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
       this.sheet.redraw(this.playbackTime);
       // sheet.translate();
     }
@@ -149,6 +172,7 @@ namespace Fudge {
         console.log(obj["key"]);
         this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"]}));
       }
+      console.log(obj);
     }
     mouseMove(_e: MouseEvent): void {
       _e.preventDefault();

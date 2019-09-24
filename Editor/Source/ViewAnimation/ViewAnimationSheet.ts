@@ -26,24 +26,28 @@ namespace Fudge {
     }
     translate(): void {
       this.crc2.translate(this.position.x, this.position.y);
+      this.crc2.scale(this.scale.x, this.scale.y);
     }
     redraw(_time: number): void {
-      this.mapElementsToSequences();
-      this.translate();
       this.clear();
+      this.translate();
+      this.drawKeys();
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(_time);
-      this.drawKeys();
     }
     clear(): void {
+      this.crc2.resetTransform();
       let maxDistance: number = 10000;
       this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
     }
     drawTimeline(): void {
+      this.crc2.resetTransform();
       let timelineHeight: number = 50;
       let maxDistance: number = 10000;
       let timeline: Path2D = new Path2D();
+      this.crc2.fillStyle = "#7a7a7a";
+      this.crc2.fillRect(0, 0, maxDistance, timelineHeight + 30);
       timeline.moveTo(0, timelineHeight);
       //TODO make this use some actually sensible numbers, maybe 2x the animation length
       timeline.lineTo(maxDistance, timelineHeight);
@@ -87,13 +91,19 @@ namespace Fudge {
       this.crc2.fill(cursor);
     }
 
-    initAnimation(): void {
-      //;
+    drawKeys(): void {
+      let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
+
+      //TODO: stop recreating the sequence elements all the time
+      this.sequences = [];
+      this.keys = [];
+      this.traverseStructures(this.view.animation.animationStructure, inputMutator);
     }
 
-    abstract drawKeys(): void;
-
     getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+      console.log(_x, _y);
+      _x = _x / this.scale.x - this.position.x;
+      _y = _y / this.scale.y - this.position.y / this.scale.y;
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
           return l;
@@ -112,24 +122,34 @@ namespace Fudge {
       return null;
     }
 
-    private mapElementsToSequences(): void {
-      this.sequences = [];
-      // this.traverseAnimationStructure(this.view.animation.animationStructure, this.view.controller.listRoot);
-      // console.log(this.view.animation.animationStructure);
-      console.log((<FudgeUserInterface.CollapsableAnimationListElement>this.view.controller.listRoot.firstElementChild));
-    }
 
-    private traverseAnimationStructure(_animStruct: FudgeCore.AnimationStructure, _currentHTML: HTMLElement): void {
-      let tmp: number = 0;
-      for (let i in _animStruct) {
-        if (_animStruct[i] instanceof FudgeCore.AnimationSequence) {
-          //
+    protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
+      for (let i in _animation) {
+        if (_animation[i] instanceof FudgeCore.AnimationSequence) {
+          this.drawSequence(<FudgeCore.AnimationSequence>_animation[i], <HTMLInputElement>_inputs[i]);
         } else {
-          let children: NodeListOf<ChildNode> = _currentHTML.childNodes;
-          console.log(children);
-          // this.traverseAnimationStructure(<FudgeCore.AnimationStructure>_animStruct[i], _currentHTML.children)
+          this.traverseStructures(<FudgeCore.AnimationStructure>_animation[i], <FudgeCore.Mutator>_inputs[i]);
         }
       }
+    }
+
+    protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
+
+
+    protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
+      let key: Path2D = new Path2D();
+      key.moveTo(_x - _w, _y);
+      key.lineTo(_x, _y + _h);
+      key.lineTo(_x + _w, _y);
+      key.lineTo(_x, _y - _h);
+      key.closePath();
+
+      this.crc2.fillStyle = _c;
+      this.crc2.strokeStyle = "black";
+      this.crc2.lineWidth = 1;
+      this.crc2.fill(key);
+      this.crc2.stroke(key);
+      return key;
     }
 
     private drawEventsAndLabels(): void {
