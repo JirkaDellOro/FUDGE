@@ -98,9 +98,9 @@ namespace ScreenToRay {
 
     function computeRay(): ƒ.Ray {
         let rect: ƒ.Rectangle = viewport.getClientRectangle();
-        let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
-        posMouse.y *= -1;
-
+        // let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
+        // posMouse.y *= -1;
+        let posMouse: ƒ.Vector2 = mouse.copy;
         setUiPoint("Client", posMouse);
 
         let posRender: ƒ.Vector2 = viewport.pointClientToRender(posMouse);
@@ -127,6 +127,8 @@ namespace ScreenToRay {
             (2 * posRender.y / rectRender.height) * rectProjection.height / 2
         );
 
+        posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
+        posProjection.y *= -1;
 
         // let overflow: ƒ.Vector2 = new ƒ.Vector2();
         // if (posProjection.x > 1) { posProjection.x -= 1, overflow.x = 90; }

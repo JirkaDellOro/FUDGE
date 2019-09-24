@@ -246,7 +246,7 @@ namespace FudgeCore {
     }
 
     /**
-     * @returns An deep copy of the vector.
+     * @returns A deep copy of the vector.
      */
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);

@@ -81,8 +81,9 @@ var ScreenToRay;
     }
     function computeRay() {
         let rect = viewport.getClientRectangle();
-        let posMouse = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
-        posMouse.y *= -1;
+        // let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
+        // posMouse.y *= -1;
+        let posMouse = mouse.copy;
         setUiPoint("Client", posMouse);
         let posRender = viewport.pointClientToRender(posMouse);
         setUiPoint("Render", posRender);
@@ -100,6 +101,8 @@ var ScreenToRay;
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         let rectProjection = cmpCamera.getProjectionRectangle();
         let posProjection = new ƒ.Vector2((2 * posRender.x / rectRender.width) * rectProjection.width / 2, (2 * posRender.y / rectRender.height) * rectProjection.height / 2);
+        posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
+        posProjection.y *= -1;
         // let overflow: ƒ.Vector2 = new ƒ.Vector2();
         // if (posProjection.x > 1) { posProjection.x -= 1, overflow.x = 90; }
         // if (posProjection.x < -1) { posProjection.x += 1; overflow.x = -90; }

@@ -4535,7 +4535,7 @@ var FudgeCore;
             return new Float32Array(this.data);
         }
         /**
-         * @returns An deep copy of the vector.
+         * @returns A deep copy of the vector.
          */
         get copy() {
             return new Vector2(this.x, this.y);

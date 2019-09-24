@@ -2132,7 +2132,7 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * @returns An deep copy of the vector.
+         * @returns A deep copy of the vector.
          */
         readonly copy: Vector2;
         getMutator(): Mutator;
