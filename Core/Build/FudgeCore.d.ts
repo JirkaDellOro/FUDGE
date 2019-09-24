@@ -973,6 +973,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        pivot: Matrix4x4;
         private projection;
         private transform;
         private fieldOfView;

@@ -2145,7 +2145,7 @@ var FudgeCore;
     class ComponentCamera extends FudgeCore.Component {
         constructor() {
             super(...arguments);
-            // TODO: a ComponentPivot might be interesting to ease behaviour scripting
+            this.pivot = FudgeCore.Matrix4x4.IDENTITY;
             //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
             this.projection = PROJECTION.CENTRAL;
             this.transform = new FudgeCore.Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
@@ -2244,6 +2244,7 @@ var FudgeCore;
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
+                pivot: this.pivot.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
@@ -2255,6 +2256,7 @@ var FudgeCore;
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
+            this.pivot.deserialize(_serialization.pivot);
             super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:
