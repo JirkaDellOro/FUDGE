@@ -96,25 +96,25 @@ namespace FudgeCore {
          * Return the calculated normed dimension of the projection space
          */
         public getProjectionRectangle(): Rectangle {
-            let sinFov: number = Math.sin(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
-            let sinHorizontal: number = 0;
-            let sinVertical: number = 0;
+            let tanFov: number = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let tanHorizontal: number = 0;
+            let tanVertical: number = 0;
 
             if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
                 let aspect: number = Math.sqrt(this.aspectRatio);
-                sinHorizontal = sinFov * aspect;
-                sinVertical = sinFov / aspect;
+                tanHorizontal = tanFov * aspect;
+                tanVertical = tanFov / aspect;
             }
             else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
-                sinVertical = sinFov;
-                sinHorizontal = sinVertical * this.aspectRatio;
+                tanVertical = tanFov;
+                tanHorizontal = tanVertical * this.aspectRatio;
             }
             else {//FOV_DIRECTION.HORIZONTAL
-                sinHorizontal = sinFov;
-                sinVertical = sinHorizontal / this.aspectRatio;
+                tanHorizontal = tanFov;
+                tanVertical = tanHorizontal / this.aspectRatio;
             }
 
-            return { x: 0, y: 0, width: sinHorizontal * 2, height: sinVertical * 2 };
+            return { x: 0, y: 0, width: tanHorizontal * 2, height: tanVertical * 2 };
         }
 
         //#region Transfer

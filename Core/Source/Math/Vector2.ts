@@ -7,10 +7,11 @@ namespace FudgeCore {
    * ```
    * @authors Lukas Scheuerle, HFU, 2019
    */
-  export class Vector2 {
+  export class Vector2 extends Mutable {
     private data: Float32Array;
 
     public constructor(_x: number = 0, _y: number = 0) {
+      super();
       this.data = new Float32Array([_x, _y]);
     }
 
@@ -250,5 +251,13 @@ namespace FudgeCore {
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);
     }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = {
+          x: this.data[0], y: this.data[1]
+      };
+      return mutator;
+  }
+    protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 }

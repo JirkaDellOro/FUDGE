@@ -3,11 +3,17 @@ namespace ScreenToRay {
     window.addEventListener("load", init);
     let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
     let uiClient: UI.Rectangle;
+    let menu: HTMLDivElement;
+
     let canvas: HTMLCanvasElement;
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let camera: ƒ.Node;
     let uiCamera: UI.Camera;
+
     let mouse: ƒ.Vector2 = new ƒ.Vector2();
+    let viewportRay: ƒ.Viewport = new ƒ.Viewport();
+    let cameraRay: ƒ.Node;
+    let canvasRay: HTMLCanvasElement;
 
     function init(): void {
         // create asset
@@ -20,13 +26,20 @@ namespace ScreenToRay {
         ƒ.RenderManager.update();
 
         // initialize viewports
-        canvas = document.getElementsByTagName("canvas")[0];
+        canvas = document.querySelector("canvas#viewport");
         camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         viewport.initialize(canvas.id, branch, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
 
-        let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
+        canvasRay = document.querySelector("canvas#ray");
+        cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+        let cmpCameraRay: ƒ.ComponentCamera = cameraRay.getComponent(ƒ.ComponentCamera);
+        cmpCameraRay.projectCentral(1, 45);
+        viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
+        viewportRay.adjustingFrames = true;
+
+        menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
         menu.appendChild(uiCamera);
@@ -38,6 +51,13 @@ namespace ScreenToRay {
         uiClient = new UI.Rectangle("ClientRectangle");
         uiClient.addEventListener("input", hndChangeOnClient);
         menu.appendChild(uiClient);
+
+        menu.appendChild(new UI.Point("Client"));
+        menu.appendChild(new UI.Point("Canvas"));
+        menu.appendChild(new UI.Point("Destination"));
+        menu.appendChild(new UI.Point("Source"));
+        menu.appendChild(new UI.Point("Render"));
+        menu.appendChild(new UI.Point("Projection"));
 
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
@@ -53,19 +73,50 @@ namespace ScreenToRay {
         ƒ.Loop.start();
         function animate(_event: Event): void {
             update();
-            branch.cmpTransform.local.rotateY(1);
+            // branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             viewport.draw();
 
-            computeRay();
+            adjustRayCamera();
         }
+    }
+
+    function adjustRayCamera(): void {
+        let ray: ƒ.Ray = computeRay();
+        // ray.direction.x *= 5;
+        // ray.direction.y *= 5;
+        ray.direction.transform(camera.cmpTransform.local);
+        cameraRay.cmpTransform.local.lookAt(ray.direction);
+        viewportRay.draw();
+
+        let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");
+        crcRay.translate(crcRay.canvas.width / 2, crcRay.canvas.height / 2);
+        crcRay.strokeStyle = "white";
+        crcRay.strokeRect(-10, -10, 20, 20);
 
     }
 
     function computeRay(): ƒ.Ray {
         let rect: ƒ.Rectangle = viewport.getClientRectangle();
         let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
+        posMouse.y *= -1;
+
+        setUiPoint("Client", posMouse);
+
         let posRender: ƒ.Vector2 = viewport.pointClientToRender(posMouse);
+        setUiPoint("Render", posRender);
+
+        let result: ƒ.Vector2;
+        rect = viewport.getClientRectangle();
+        result = viewport.frameClientToCanvas.getPoint(posMouse, rect);
+        setUiPoint("Canvas", result);
+        rect = viewport.getCanvasRectangle();
+        result = viewport.frameCanvasToDestination.getPoint(result, rect);
+        setUiPoint("Destination", result);
+        result = viewport.frameDestinationToSource.getPoint(result, viewport.rectSource);
+        setUiPoint("Source", result);
+        //TODO: when Source, Render and RenderViewport deviate, continue transformation 
+
         let rectRender: ƒ.Rectangle = viewport.frameSourceToRender.getRect(viewport.rectSource);
 
         let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
@@ -90,7 +141,8 @@ namespace ScreenToRay {
         // angleProjection.add(overflow);
 
         // the ray is starting at (0,0) and goes in the direction of posProjection with unlimited length
-        ƒ.Debug.info("Point", posProjection.get());
+        // ƒ.Debug.info("Point", posProjection.get());
+        setUiPoint("Projection", posProjection);
 
         let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
         return ray;
@@ -98,6 +150,12 @@ namespace ScreenToRay {
 
     function setCursorPosition(_event: MouseEvent): void {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
+    }
+
+    function setUiPoint(_name: string, _point: ƒ.Vector2): void {
+        let uiPoint: UI.Point;
+        uiPoint = menu.querySelector("fieldset[name=" + _name + "]");
+        uiPoint.set(_point.getMutator());
     }
 
     function logMutatorInfo(_title: string, _mutable: ƒ.Mutable): void {

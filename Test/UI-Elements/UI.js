@@ -92,6 +92,16 @@ var UI;
         }
     }
     UI.Camera = Camera;
+    class Point extends FieldSet {
+        constructor(_name = "Point") {
+            super(_name);
+            this.values = { x: 0, y: 0 };
+            this.appendChild(new Stepper("x", { value: 0 }));
+            this.appendChild(new Stepper("y", { value: 0 }));
+            super.disable({ x: true, y: true });
+        }
+    }
+    UI.Point = Point;
     class FramingScaled extends FieldSet {
         constructor(_name = "FramingScaled") {
             super(_name);
@@ -147,5 +157,6 @@ var UI;
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
+    customElements.define("ui-point", Point, { extends: "fieldset" });
 })(UI || (UI = {}));
 //# sourceMappingURL=UI.js.map

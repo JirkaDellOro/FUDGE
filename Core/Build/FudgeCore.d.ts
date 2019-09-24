@@ -1998,7 +1998,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    class Vector2 {
+    class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
         x: number;
@@ -2135,6 +2135,8 @@ declare namespace FudgeCore {
          * @returns An deep copy of the vector.
          */
         readonly copy: Vector2;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {

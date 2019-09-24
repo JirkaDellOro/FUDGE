@@ -2199,23 +2199,23 @@ var FudgeCore;
          * Return the calculated normed dimension of the projection space
          */
         getProjectionRectangle() {
-            let sinFov = Math.sin(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
-            let sinHorizontal = 0;
-            let sinVertical = 0;
+            let tanFov = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let tanHorizontal = 0;
+            let tanVertical = 0;
             if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
                 let aspect = Math.sqrt(this.aspectRatio);
-                sinHorizontal = sinFov * aspect;
-                sinVertical = sinFov / aspect;
+                tanHorizontal = tanFov * aspect;
+                tanVertical = tanFov / aspect;
             }
             else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
-                sinVertical = sinFov;
-                sinHorizontal = sinVertical * this.aspectRatio;
+                tanVertical = tanFov;
+                tanHorizontal = tanVertical * this.aspectRatio;
             }
             else { //FOV_DIRECTION.HORIZONTAL
-                sinHorizontal = sinFov;
-                sinVertical = sinHorizontal / this.aspectRatio;
+                tanHorizontal = tanFov;
+                tanVertical = tanHorizontal / this.aspectRatio;
             }
-            return { x: 0, y: 0, width: sinHorizontal * 2, height: sinVertical * 2 };
+            return { x: 0, y: 0, width: tanHorizontal * 2, height: tanVertical * 2 };
         }
         //#region Transfer
         serialize() {
@@ -4318,8 +4318,9 @@ var FudgeCore;
      * ```
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    class Vector2 {
+    class Vector2 extends FudgeCore.Mutable {
         constructor(_x = 0, _y = 0) {
+            super();
             this.data = new Float32Array([_x, _y]);
         }
         get x() {
@@ -4539,6 +4540,13 @@ var FudgeCore;
         get copy() {
             return new Vector2(this.x, this.y);
         }
+        getMutator() {
+            let mutator = {
+                x: this.data[0], y: this.data[1]
+            };
+            return mutator;
+        }
+        reduceMutator(_mutator) { }
     }
     FudgeCore.Vector2 = Vector2;
 })(FudgeCore || (FudgeCore = {}));
@@ -4602,9 +4610,9 @@ var FudgeCore;
             let result = new Vector3();
             let m = _matrix.get();
             let [x, y, z] = _vector.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
-            result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];
-            result.z = m[2] * x + m[6] * y + m[10] * z; // + m[14];
+            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
             return result;
         }
         static NORMALIZATION(_vector, _length = 1) {
@@ -5416,7 +5424,7 @@ var FudgeCore;
     class Ray {
         constructor(_direction = FudgeCore.Vector3.Z(-1), _origin = FudgeCore.Vector3.ZERO(), _length = 1) {
             this.origin = _origin;
-            this.direction = this.direction;
+            this.direction = _direction;
             this.length = _length;
         }
     }
