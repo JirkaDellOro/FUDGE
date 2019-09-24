@@ -5411,6 +5411,17 @@ var FudgeCore;
     }
     FudgeCore.NodeResourceInstance = NodeResourceInstance;
 })(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Ray {
+        constructor(_direction = FudgeCore.Vector3.Z(-1), _origin = FudgeCore.Vector3.ZERO(), _length = 1) {
+            this.origin = _origin;
+            this.direction = this.direction;
+            this.length = _length;
+        }
+    }
+    FudgeCore.Ray = Ray;
+})(FudgeCore || (FudgeCore = {}));
 /// <reference path="RenderOperator.ts"/>
 var FudgeCore;
 /// <reference path="RenderOperator.ts"/>

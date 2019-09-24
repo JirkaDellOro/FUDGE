@@ -55,11 +55,24 @@ var ScreenToRay;
         let rect = viewport.getClientRectangle();
         let posMouse = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
         let posRender = viewport.pointClientToRender(posMouse);
+        let rectRender = viewport.frameSourceToRender.getRect(viewport.rectSource);
         let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         let rectProjection = cmpCamera.getProjectionRectangle();
-        let posProjection = new ƒ.Vector2(posRender.x * rectProjection.width / 2 * rectProjection.width, posRender.y * rectProjection.height / 2 * rectProjection.height);
+        let posProjection = new ƒ.Vector2((2 * posRender.x / rectRender.width) * rectProjection.width / 2, (2 * posRender.y / rectRender.height) * rectProjection.height / 2);
+        // let overflow: ƒ.Vector2 = new ƒ.Vector2();
+        // if (posProjection.x > 1) { posProjection.x -= 1, overflow.x = 90; }
+        // if (posProjection.x < -1) { posProjection.x += 1; overflow.x = -90; }
+        // if (posProjection.y > 1) { posProjection.y -= 1, overflow.y = 90; }
+        // if (posProjection.y < -1) { posProjection.y += 1; overflow.y = -90; }
+        // let angleProjection: ƒ.Vector2 = new ƒ.Vector2(
+        //     Math.asin(posProjection.x) * 180 / Math.PI,
+        //     Math.asin(posProjection.y) * 180 / Math.PI
+        // );
+        // angleProjection.add(overflow);
+        // the ray is starting at (0,0) and goes in the direction of posProjection with unlimited length
         ƒ.Debug.info("Point", posProjection.get());
-        // the ray is starting at (0,0) and goes through point posProjection with unlimited length
+        let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
+        return ray;
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);

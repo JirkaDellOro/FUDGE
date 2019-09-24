@@ -2452,6 +2452,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Ray {
+        origin: Vector3;
+        direction: Vector3;
+        length: number;
+        constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
+    }
+}
+declare namespace FudgeCore {
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
