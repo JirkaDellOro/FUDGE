@@ -118,6 +118,7 @@ declare namespace Fudge {
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
     class ViewData extends View {
+        private node;
         constructor(_parent: Panel);
         deconstruct(): void;
         fillContent(): void;

@@ -26,7 +26,7 @@ namespace MarixTest {
             function (): void {
                 let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
 
-                anim = local.getVectorRepresentation();
+                anim = [local.translation, local.rotation, local.scaling];
                 // anim[2].x += 1;
                 // anim[2].y += 1;
                 // anim[2].z += 1;
@@ -105,7 +105,7 @@ namespace MarixTest {
 
     function setTransform(_vectors: ƒ.Vector3[]): void {
         let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY;
-        matrix.translate(_vectors[0]); 
+        matrix.translate(_vectors[0]);
         matrix.rotateZ(_vectors[1].z);
         matrix.rotateY(_vectors[1].y);
         matrix.rotateX(_vectors[1].x);
@@ -164,7 +164,7 @@ namespace MarixTest {
         }
     }
     function displayVectors(_matrix: ƒ.Matrix4x4): void {
-        let vectors: ƒ.Vector3[] = _matrix.getVectorRepresentation();
+        let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling]
         for (let transform of ["t", "r", "s"]) {
             let vector: ƒ.Vector3 = vectors.shift();
             for (let dimension of ["x", "y", "z"]) {

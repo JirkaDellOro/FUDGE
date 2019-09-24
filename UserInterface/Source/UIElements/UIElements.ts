@@ -2,6 +2,7 @@ namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
+    import ƒ = FudgeCore;
     export class ToggleButton extends HTMLButtonElement {
         private toggleState: boolean;
         
@@ -76,8 +77,27 @@ namespace FudgeUserInterface {
         }
     }
 
+    export class DropDown extends HTMLDivElement {
+        
+        public constructor (_contentList: ƒ.Mutator) {
+            super();
+        }
+    }
+    class DropDownButton extends HTMLButtonElement {
+        public constructor () {
+            super();
+        }
+    }
+    class DropDownContent extends HTMLDivElement {
+        public constructor () {
+            super();
+        }
+    }
+
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, {extends: "button"});
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-
+    customElements.define("ui-dropdown", DropDown, { extends: "div" });
+    customElements.define("ui-dropdown-button", DropDownButton, { extends: "button" });
+    customElements.define("ui-dropdown-content", DropDownContent, { extends: "div" });
 }

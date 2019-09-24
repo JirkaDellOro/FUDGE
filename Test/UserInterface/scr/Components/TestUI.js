@@ -10,7 +10,7 @@ var UITest;
             super(_camera);
             this.camera = _camera;
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(_camera, this.root);
+            ƒui.UIGenerator.createFromMutable(this.camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }
