@@ -7,7 +7,7 @@ var ScreenToRay;
     let menu;
     let canvas;
     let viewport = new ƒ.Viewport();
-    let camera;
+    let cmpCamera;
     let uiCamera;
     let mouse = new ƒ.Vector2();
     let viewportRay = new ƒ.Viewport();
@@ -23,13 +23,12 @@ var ScreenToRay;
         ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewport.initialize(canvas.id, branch, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
         canvasRay = document.querySelector("canvas#ray");
         cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCameraRay = cameraRay.getComponent(ƒ.ComponentCamera);
+        let cmpCameraRay = cameraRay;
         cmpCameraRay.projectCentral(1, 45);
         viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
@@ -71,8 +70,8 @@ var ScreenToRay;
         let ray = computeRay();
         // ray.direction.x *= 5;
         // ray.direction.y *= 5;
-        ray.direction.transform(camera.cmpTransform.local);
-        cameraRay.cmpTransform.local.lookAt(ray.direction);
+        ray.direction.transform(cmpCamera.pivot);
+        cameraRay.pivot.lookAt(ray.direction);
         viewportRay.draw();
         let crcRay = canvasRay.getContext("2d");
         crcRay.translate(crcRay.canvas.width / 2, crcRay.canvas.height / 2);
@@ -98,7 +97,6 @@ var ScreenToRay;
         setUiPoint("Source", result);
         //TODO: when Source, Render and RenderViewport deviate, continue transformation 
         let rectRender = viewport.frameSourceToRender.getRect(viewport.rectSource);
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         let rectProjection = cmpCamera.getProjectionRectangle();
         let posProjection = new ƒ.Vector2((2 * posRender.x / rectRender.width) * rectProjection.width / 2, (2 * posRender.y / rectRender.height) * rectProjection.height / 2);
         posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
@@ -188,7 +186,6 @@ var ScreenToRay;
     }
     function setCamera() {
         let params = uiCamera.get();
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView); //, ƒ.FIELD_OF_VIEW.HORIZONTAL);
     }
     function setClient(_uiRectangle) {
@@ -224,7 +221,6 @@ var ScreenToRay;
         }
         let clientRect = canvas.getBoundingClientRect();
         uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 })(ScreenToRay || (ScreenToRay = {}));

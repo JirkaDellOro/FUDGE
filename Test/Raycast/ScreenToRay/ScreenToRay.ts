@@ -7,12 +7,12 @@ namespace ScreenToRay {
 
     let canvas: HTMLCanvasElement;
     let viewport: ƒ.Viewport = new ƒ.Viewport();
-    let camera: ƒ.Node;
+    let cmpCamera: ƒ.ComponentCamera;
     let uiCamera: UI.Camera;
 
     let mouse: ƒ.Vector2 = new ƒ.Vector2();
     let viewportRay: ƒ.Viewport = new ƒ.Viewport();
-    let cameraRay: ƒ.Node;
+    let cameraRay: ƒ.ComponentCamera;
     let canvasRay: HTMLCanvasElement;
 
     function init(): void {
@@ -27,14 +27,13 @@ namespace ScreenToRay {
 
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewport.initialize(canvas.id, branch, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
 
         canvasRay = document.querySelector("canvas#ray");
         cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCameraRay: ƒ.ComponentCamera = cameraRay.getComponent(ƒ.ComponentCamera);
+        let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
         cmpCameraRay.projectCentral(1, 45);
         viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
@@ -85,8 +84,8 @@ namespace ScreenToRay {
         let ray: ƒ.Ray = computeRay();
         // ray.direction.x *= 5;
         // ray.direction.y *= 5;
-        ray.direction.transform(camera.cmpTransform.local);
-        cameraRay.cmpTransform.local.lookAt(ray.direction);
+        ray.direction.transform(cmpCamera.pivot);
+        cameraRay.pivot.lookAt(ray.direction);
         viewportRay.draw();
 
         let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");
@@ -118,8 +117,6 @@ namespace ScreenToRay {
         //TODO: when Source, Render and RenderViewport deviate, continue transformation 
 
         let rectRender: ƒ.Rectangle = viewport.frameSourceToRender.getRect(viewport.rectSource);
-
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         let rectProjection: ƒ.Rectangle = cmpCamera.getProjectionRectangle();
 
         let posProjection: ƒ.Vector2 = new ƒ.Vector2(
@@ -227,7 +224,6 @@ namespace ScreenToRay {
 
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView); //, ƒ.FIELD_OF_VIEW.HORIZONTAL);
     }
 
@@ -267,7 +263,6 @@ namespace ScreenToRay {
         let clientRect: ClientRect = canvas.getBoundingClientRect();
         uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
 
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

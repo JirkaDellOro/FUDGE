@@ -58,13 +58,14 @@ namespace FudgeCore {
          * @returns the world-projection-matrix
          */
         public get ViewProjectionMatrix(): Matrix4x4 {
+            let world: Matrix4x4 = this.pivot;
             try {
-                let cmpTransform: ComponentTransform = this.getContainer().cmpTransform;
-                let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
-            } catch {
-                return this.transform;
+                world = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+            } catch (_error) {
+                // no container node or no world transformation found -> continue with pivot only
             }
+            let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(world); 
+            return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
         }
 
         /**
@@ -126,6 +127,7 @@ namespace FudgeCore {
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
+                pivot: this.pivot.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
@@ -138,6 +140,7 @@ namespace FudgeCore {
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
+            this.pivot.deserialize(_serialization.pivot);
             super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:

@@ -2180,14 +2180,15 @@ var FudgeCore;
          * @returns the world-projection-matrix
          */
         get ViewProjectionMatrix() {
+            let world = this.pivot;
             try {
-                let cmpTransform = this.getContainer().cmpTransform;
-                let viewMatrix = FudgeCore.Matrix4x4.INVERSION(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return FudgeCore.Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
+                world = FudgeCore.Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
             }
-            catch {
-                return this.transform;
+            catch (_error) {
+                // no container node or no world transformation found -> continue with pivot only
             }
+            let viewMatrix = FudgeCore.Matrix4x4.INVERSION(world);
+            return FudgeCore.Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
         }
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
