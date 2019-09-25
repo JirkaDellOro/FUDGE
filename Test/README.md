@@ -17,7 +17,7 @@ In der Konsole soll ein Mutator bis 20 hochzählen und es sollen keine Fehler au
   Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
 
 - [RectMapping](WebGL/TestRectMapping/index.html)  
-Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](..Documentation/Design/Framing.svg)
+Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)
 ## Resources
 - [NodeResource](Resources/NodeResource/index.html)   
 Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.
