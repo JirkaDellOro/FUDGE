@@ -151,6 +151,33 @@ namespace FudgeCore {
         }
         // #endregion
 
+        //#region Points
+        public pointClientToSource(_client: Vector2): Vector2 {
+            let result: Vector2;
+            let rect: Rectangle;
+            rect = this.getClientRectangle();
+            result = this.frameClientToCanvas.getPoint(_client, rect);
+            rect = this.getCanvasRectangle();
+            result = this.frameCanvasToDestination.getPoint(result, rect);
+            result = this.frameDestinationToSource.getPoint(result, this.rectSource);
+            //TODO: when Source, Render and RenderViewport deviate, continue transformation 
+            return result;
+        }
+
+        public pointSourceToRender(_source: Vector2): Vector2 {
+            let projectionRectangle: Rectangle = this.camera.getProjectionRectangle();
+            let point: Vector2 = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+            return point;
+        }
+
+        public pointClientToRender(_client: Vector2): Vector2 {
+            let point: Vector2 = this.pointClientToSource(_client);
+            point = this.pointSourceToRender(point);    
+            //TODO: when Render and RenderViewport deviate, continue transformation 
+            return point;
+        }
+
+        //#endregion
 
         // #region Events (passing from canvas to viewport and from there into branch)
         /**

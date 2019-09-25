@@ -17,7 +17,8 @@ namespace UITest {
     let branch: ƒ.Node;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    let camera: ƒ.Node;
+    let cmpCamera: ƒ.ComponentCamera;
+    let counter: number;
     window.addEventListener("load", init);
 
     function init(): void {
@@ -67,6 +68,7 @@ namespace UITest {
         myLayout.init();
     }
     function initViewport(): void {
+        counter = 0;
         // create asset
         branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
@@ -81,8 +83,7 @@ namespace UITest {
         canvas.height = 800;
         canvas.width = 1200;
         document.body.append(canvas);
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
@@ -93,7 +94,6 @@ namespace UITest {
             myLayout.emit(ƒui.UIEVENT.SELECTION, _event);
         });
         function animate(_event: Event): void {
-
             branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             // prepare and draw viewport
@@ -105,13 +105,16 @@ namespace UITest {
     }
 
     function createCameraComponent(container: GoldenLayout.Container, state: Object): UITest.CameraUI {
-        return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+        return new UITest.CameraUI(container, state, cmpCamera);
     }
-    
-    function createTestComponent(container: GoldenLayout.Container, state: Object): UITest.TransformUI {
-        let Components: ƒ.Component[] = branch.getAllComponents();
-        return new UITest.TransformUI(container, state, Components[0]);
 
+    function createTestComponent(container: GoldenLayout.Container, state: Object): void {
+        let content: HTMLElement = document.createElement("div");
+        let components: ƒ.Component[] = branch.getAllComponents();
+        for (let component of components) {
+            let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(component, content);
+        }
+        container.getElement().append(content);
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");

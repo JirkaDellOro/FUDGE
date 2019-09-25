@@ -973,6 +973,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        pivot: Matrix4x4;
         private projection;
         private transform;
         private fieldOfView;
@@ -985,6 +986,7 @@ declare namespace FudgeCore {
         getBackgroundEnabled(): boolean;
         getAspect(): number;
         getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -994,6 +996,7 @@ declare namespace FudgeCore {
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
@@ -1004,6 +1007,10 @@ declare namespace FudgeCore {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle(): Rectangle;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1438,6 +1445,9 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        pointClientToSource(_client: Vector2): Vector2;
+        pointSourceToRender(_source: Vector2): Vector2;
+        pointClientToRender(_client: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -1787,10 +1797,6 @@ declare namespace FudgeCore {
         right: number;
         bottom: number;
     }
-    interface Point {
-        x: number;
-        y: number;
-    }
     /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
@@ -1801,13 +1807,13 @@ declare namespace FudgeCore {
          * @param _pointInFrame The point in the frame given
          * @param _rectFrame The frame the point is relative to
          */
-        abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         /**
          * Maps a point in a given rectangle back to a calculated frame of origin
          * @param _point The point in the rectangle
          * @param _rect The rectangle the point is relative to
          */
-        abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         /**
          * Takes a rectangle as the frame and creates a new rectangle according to the framing
          * @param _rectFrame
@@ -1823,8 +1829,8 @@ declare namespace FudgeCore {
         width: number;
         height: number;
         setSize(_width: number, _height: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1835,8 +1841,8 @@ declare namespace FudgeCore {
         normWidth: number;
         normHeight: number;
         setScale(_normWidth: number, _normHeight: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1846,8 +1852,8 @@ declare namespace FudgeCore {
     class FramingComplex extends Framing {
         margin: Border;
         padding: Border;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
         getMutator(): Mutator;
     }
@@ -1930,7 +1936,8 @@ declare namespace FudgeCore {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
@@ -2004,7 +2011,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    class Vector2 {
+    class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
         x: number;
@@ -2138,9 +2145,11 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * @returns An deep copy of the vector.
+         * @returns A deep copy of the vector.
          */
         readonly copy: Vector2;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2455,6 +2464,14 @@ declare namespace FudgeCore {
          * @param _nodeResource
          */
         private set;
+    }
+}
+declare namespace FudgeCore {
+    class Ray {
+        origin: Vector3;
+        direction: Vector3;
+        length: number;
+        constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
     }
 }
 declare namespace FudgeCore {

@@ -1,9 +1,6 @@
 "use strict";
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    /**
-     * <select><option>Hallo</option></select>
-     */
     class ToggleButton extends HTMLButtonElement {
         constructor(style) {
             super();
@@ -76,9 +73,28 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
+    class DropDown extends HTMLDivElement {
+        constructor(_contentList) {
+            super();
+        }
+    }
+    FudgeUserInterface.DropDown = DropDown;
+    class DropDownButton extends HTMLButtonElement {
+        constructor() {
+            super();
+        }
+    }
+    class DropDownContent extends HTMLDivElement {
+        constructor() {
+            super();
+        }
+    }
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    customElements.define("ui-dropdown", DropDown, { extends: "div" });
+    customElements.define("ui-dropdown-button", DropDownButton, { extends: "button" });
+    customElements.define("ui-dropdown-content", DropDownContent, { extends: "div" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
@@ -108,7 +124,7 @@ var FudgeUserInterface;
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
                             // UIGenerator.createTextElement(key, _parent, { _value: value })
                             let numValue = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: numValue, _mutable: _mutable });
+                            UIGenerator.createStepperElement(key, _parent, { _value: numValue });
                             break;
                         case "Boolean":
                             UIGenerator.createLabelElement(key, _parent, { _value: key });
@@ -471,9 +487,9 @@ var FudgeUserInterface;
             window.setInterval(this.refreshUI, this.timeUpdate);
             this.root.addEventListener("input", this.mutateOnInput);
         }
-        updateMutator(_mutable, _root) {
-            let mutator = _mutable.getMutator();
-            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+        updateMutator(_mutable, _root, _mutator, _types) {
+            let mutator = _mutator || _mutable.getMutator();
+            let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
                 console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
@@ -493,9 +509,10 @@ var FudgeUserInterface;
                             case "Number":
                                 mutator[key] = input.value;
                                 break;
-                            case "Object":
-                                let subMutable = _mutable[key];
-                                mutator[key] = this.updateMutator(subMutable, element);
+                            default:
+                                let subMutator = mutator[key];
+                                let subTypes = mutatorTypes[key];
+                                mutator[key] = this.updateMutator(_mutable, element, subMutator, subTypes);
                                 break;
                         }
                     }
@@ -525,9 +542,11 @@ var FudgeUserInterface;
                                 break;
                             case "Number":
                                 let stepper = _root.querySelector("#" + key);
-                                stepper.value = mutator[key];
+                                if (document.activeElement != stepper) {
+                                    stepper.value = mutator[key];
+                                }
                                 break;
-                            case "Object":
+                            default:
                                 let fieldset = _root.querySelector("#" + key);
                                 let subMutable = _mutable[key];
                                 this.updateUI(subMutable, fieldset);

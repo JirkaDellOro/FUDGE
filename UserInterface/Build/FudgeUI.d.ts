@@ -3,6 +3,7 @@ declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
+    import ƒ = FudgeCore;
     class ToggleButton extends HTMLButtonElement {
         private toggleState;
         constructor(style: string);
@@ -22,6 +23,9 @@ declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
         constructor(_legend: string);
         private toggleFoldElement;
+    }
+    class DropDown extends HTMLDivElement {
+        constructor(_contentList: ƒ.Mutator);
     }
 }
 declare namespace FudgeUserInterface {
@@ -55,7 +59,6 @@ declare namespace FudgeUserInterface {
             _min?: number;
             _max?: number;
             _cssClass?: string;
-            _mutable?: ƒ.Mutable;
         }): HTMLSpanElement;
     }
 }
@@ -133,7 +136,7 @@ declare namespace FudgeUserInterface {
         constructor(mutable: ƒ.Mutable);
         protected mutateOnInput: (_e: Event) => void;
         protected refreshUI: (_e: Event) => void;
-        protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement): ƒ.Mutator;
+        protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
     }
 }

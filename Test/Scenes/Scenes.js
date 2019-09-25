@@ -75,7 +75,7 @@ var Scenes;
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.local.scaleX(2);
-        Scenes.camera = createCamera();
+        Scenes.cmpCamera = createCamera();
         let child = new ƒ.Node("Child");
         Scenes.node.appendChild(child);
     }
@@ -85,22 +85,22 @@ var Scenes;
             _canvas = document.createElement("canvas");
             document.body.appendChild(_canvas);
         }
-        Scenes.viewPort = new ƒ.Viewport();
-        Scenes.viewPort.initialize("TestViewport", Scenes.node, Scenes.camera.getComponent(ƒ.ComponentCamera), _canvas);
+        Scenes.viewport = new ƒ.Viewport();
+        Scenes.viewport.initialize("TestViewport", Scenes.node, Scenes.cmpCamera, _canvas);
         // viewPort.drawScene();
-        Scenes.viewPort.showSceneGraph();
+        Scenes.viewport.showSceneGraph();
     }
     Scenes.createViewport = createViewport;
     function createCamera(_translation = new ƒ.Vector3(1, 1, 10), _lookAt = new ƒ.Vector3()) {
-        let camera = new ƒ.Node("Camera");
-        let cmpTransform = new ƒ.ComponentTransform();
-        cmpTransform.local.translate(_translation);
-        cmpTransform.local.lookAt(_lookAt);
-        camera.addComponent(cmpTransform);
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
-        camera.addComponent(cmpCamera);
-        return camera;
+        cmpCamera.pivot.translate(_translation);
+        cmpCamera.pivot.lookAt(_lookAt);
+        return cmpCamera;
+        // camera.addComponent(cmpCamera);
+        // camera.addComponent(cmpTransform);
+        // // let cmpCamera: ƒ.ComponentCamera = new ƒ.Node("Camera");
+        // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
     }
     Scenes.createCamera = createCamera;
     function createCompleteMeshNode(_name, _material, _mesh) {

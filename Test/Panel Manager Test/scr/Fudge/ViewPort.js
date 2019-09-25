@@ -22,7 +22,7 @@ var FudgeTest;
         fillContent() {
             this.branch = new ƒ.Node("Dummy Node");
             let canvas;
-            let camera;
+            let cmpCamera;
             // TODO: delete example scene
             this.branch = Scenes.createAxisCross();
             // initialize RenderManager and transmit content
@@ -30,8 +30,7 @@ var FudgeTest;
             ƒ.RenderManager.update();
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-            let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
             cmpCamera.projectCentral(1, 45);
             canvas = Scenes.createCanvas();
             document.body.appendChild(canvas);

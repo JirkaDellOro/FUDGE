@@ -13,7 +13,7 @@ var ElectronViewport;
     let branch;
     let canvas;
     let viewPort = new ƒ.Viewport();
-    let camera;
+    let cmpCamera;
     window.addEventListener("load", init);
     function init() {
         let config = {
@@ -46,8 +46,7 @@ var ElectronViewport;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewport
-        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
         canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);

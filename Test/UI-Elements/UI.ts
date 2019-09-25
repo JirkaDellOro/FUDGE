@@ -103,6 +103,16 @@ namespace UI {
         }
     }
 
+    export class Point extends FieldSet<{ x: number, y: number }> {
+        constructor(_name: string = "Point") {
+            super(_name);
+            this.values = { x: 0, y: 0 };
+            this.appendChild(new Stepper("x", { value: 0 }));
+            this.appendChild(new Stepper("y", { value: 0 }));
+            super.disable({ x: true, y: true });
+        }
+    }
+
     export class FramingScaled extends FieldSet<Size> {
         result: UI.Rectangle;
 
@@ -163,4 +173,5 @@ namespace UI {
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
+    customElements.define("ui-point", Point, { extends: "fieldset" });
 }

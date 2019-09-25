@@ -37,7 +37,7 @@ var Scripts;
     function init() {
         Scenes.createMiniScene();
         Scenes.createViewport();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
         let node = Scenes.node;
         let child = node.getChildren()[0];
         let test = new Test();

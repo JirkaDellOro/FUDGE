@@ -12,8 +12,8 @@ namespace MarixTest {
 
         ƒ.RenderManager.initialize();
 
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
 
         update();
         displayVectors(coSys.cmpTransform.local);
@@ -164,7 +164,7 @@ namespace MarixTest {
         }
     }
     function displayVectors(_matrix: ƒ.Matrix4x4): void {
-        let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling]
+        let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling];
         for (let transform of ["t", "r", "s"]) {
             let vector: ƒ.Vector3 = vectors.shift();
             for (let dimension of ["x", "y", "z"]) {
