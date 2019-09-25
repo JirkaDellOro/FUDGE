@@ -20,12 +20,12 @@ var FudgeTest;
                         content: [
                             {
                                 type: "component",
-                                componentName: Fudge.VIEW.NODE,
+                                componentName: FudgeTest.VIEW.NODE,
                                 title: "Node"
                             },
                             {
                                 type: "component",
-                                componentName: Fudge.VIEW.DATA,
+                                componentName: FudgeTest.VIEW.DATA,
                                 title: "Data"
                             }
                         ]
