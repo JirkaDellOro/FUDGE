@@ -120,6 +120,29 @@ namespace FudgeCore {
                 this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
             );
         }
+
+        /**
+        * Draw this viewport for RayCast
+        */
+        public drawForRayCast(): void {
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+
+            RenderManager.clear(Color.BLACK);
+            if (RenderManager.addBranch(this.branch))
+                // branch has not yet been processed fully by rendermanager -> update all registered nodes
+                RenderManager.update();
+            RenderManager.drawBranchForRayCast(this.branch, this.camera);
+
+            this.crc2.imageSmoothingEnabled = false;
+            this.crc2.drawImage(
+                RenderManager.getCanvas(),
+                this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+                this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+            );
+        }
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -172,7 +195,7 @@ namespace FudgeCore {
 
         public pointClientToRender(_client: Vector2): Vector2 {
             let point: Vector2 = this.pointClientToSource(_client);
-            point = this.pointSourceToRender(point);    
+            point = this.pointSourceToRender(point);
             //TODO: when Render and RenderViewport deviate, continue transformation 
             return point;
         }

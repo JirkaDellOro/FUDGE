@@ -19,13 +19,14 @@ namespace FudgeCore {
 
         private static injectRenderDataForCoatColored(this: Coat, _renderShader: RenderShader): void {
             let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_color"];
-            let { r, g, b, a } = (<CoatColored>this).color;
-            let color: Float32Array = new Float32Array([r, g, b, a]);
+            // let { r, g, b, a } = (<CoatColored>this).color;
+            // let color: Float32Array = new Float32Array([r, g, b, a]);
+            let color: Float32Array = (<CoatColored>this).color.getArray();
             RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
         }
 
         private static injectRenderDataForCoatTextured(this: Coat, _renderShader: RenderShader): void {
-            let crc3: WebGLRenderingContext = RenderOperator.getRenderingContext();
+            let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
             if (this.renderData) {
                 // buffers exist
                 crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);

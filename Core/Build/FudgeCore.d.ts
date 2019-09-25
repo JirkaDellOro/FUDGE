@@ -701,6 +701,7 @@ declare namespace FudgeCore {
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
+        private static renderShaderRayCast;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -749,9 +750,18 @@ declare namespace FudgeCore {
          * @param _renderShader
          * @param _renderBuffers
          * @param _renderCoat
+         * @param _world
          * @param _projection
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        /**
+         * Draw a buffer with a special shader that uses an id instead of a color
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _world
+         * @param _projection
+         */
+        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -1200,8 +1210,17 @@ declare namespace FudgeCore {
         g: number;
         b: number;
         a: number;
-        constructor(_r: number, _g: number, _b: number, _a: number);
+        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
+        static readonly BLACK: Color;
+        static readonly WHITE: Color;
+        static readonly RED: Color;
+        static readonly GREEN: Color;
+        static readonly BLUE: Color;
+        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
+        setArrayNormRGBA(_color: Float32Array): void;
+        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1437,6 +1456,10 @@ declare namespace FudgeCore {
          * Draw this viewport
          */
         draw(): void;
+        /**
+        * Draw this viewport for RayCast
+        */
+        drawForRayCast(): void;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2489,6 +2512,7 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
+        private static nodesIndexed;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2527,7 +2551,7 @@ declare namespace FudgeCore {
          */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update(): void;
         /**
@@ -2536,12 +2560,19 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node
-         * @param _cameraMatrix
+         * @param _cmpCamera
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        /**
+         * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void;
         private static drawNode;
+        private static drawNodeForRayCast;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -2588,6 +2619,16 @@ declare namespace FudgeCore {
      */
     class ShaderFlat extends Shader {
         static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

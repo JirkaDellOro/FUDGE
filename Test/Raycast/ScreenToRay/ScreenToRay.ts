@@ -74,10 +74,20 @@ namespace ScreenToRay {
             update();
             // branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
-            viewport.draw();
+            viewport.drawForRayCast();
 
             adjustRayCamera();
+
+            let color: ƒ.Color = getPixelColor(mouse);
+            ƒ.Debug.log(color);
         }
+    }
+
+    function getPixelColor(_pos: ƒ.Vector2): ƒ.Color {
+        let color: ƒ.Color = new ƒ.Color(1, 1, 1, 1);
+        let crc2: CanvasRenderingContext2D = canvas.getContext("2d");
+        color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
+        return color;
     }
 
     function adjustRayCamera(): void {
@@ -86,13 +96,13 @@ namespace ScreenToRay {
         // ray.direction.y *= 5;
         ray.direction.transform(cmpCamera.pivot);
         cameraRay.pivot.lookAt(ray.direction);
+        cameraRay.projectCentral(1, 10);
         viewportRay.draw();
 
         let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");
         crcRay.translate(crcRay.canvas.width / 2, crcRay.canvas.height / 2);
         crcRay.strokeStyle = "white";
         crcRay.strokeRect(-10, -10, 20, 20);
-
     }
 
     function computeRay(): ƒ.Ray {

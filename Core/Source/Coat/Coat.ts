@@ -15,7 +15,7 @@ namespace FudgeCore {
             super.mutate(_mutator);
         }
 
-        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderExtender*/ }
+        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderInjector*/ }
         
         //#region Transfer
         public serialize(): Serialization {
