@@ -25,7 +25,17 @@ namespace Fudge {
       for (let i: number = 0; i < _sequence.length; i++) {
         let k: FudgeCore.AnimationKey = _sequence.getKey(i);
         this.keys.push({ key: k, path2D: this.drawKey(k.Time, k.Value, height / 2, width / 2, seq.color), sequence: seq });
-        line.lineTo(k.Time, k.Value);
+        if (i == 0) {
+          line.lineTo(k.Time, k.Value);
+        } else {
+          let prevK: FudgeCore.AnimationKey = _sequence.getKey(i - 1);
+          let factor: number = (k.Time - prevK.Time) / 3;
+          let startTangentBezier: FudgeCore.Vector2 = new FudgeCore.Vector2(1, prevK.SlopeOut);
+          startTangentBezier = FudgeCore.Vector2.SUM(FudgeCore.Vector2.SCALE(FudgeCore.Vector2.NORMALIZATION(startTangentBezier), factor * Math.max(1, Math.abs(prevK.SlopeOut))), new FudgeCore.Vector2(prevK.Time, prevK.Value));
+          let endTangentBezier: FudgeCore.Vector2 = new FudgeCore.Vector2(-1, -k.SlopeIn);
+          endTangentBezier = FudgeCore.Vector2.SUM(FudgeCore.Vector2.SCALE(FudgeCore.Vector2.NORMALIZATION(endTangentBezier), factor * Math.max(1, Math.abs(k.SlopeIn))), new FudgeCore.Vector2(k.Time, k.Value));
+          line.bezierCurveTo(startTangentBezier.x, startTangentBezier.y, endTangentBezier.x, endTangentBezier.y, k.Time, k.Value);
+        }
       }
       line.lineTo(this.view.animation.totalTime, _sequence.getKey(_sequence.length - 1).Value);
 

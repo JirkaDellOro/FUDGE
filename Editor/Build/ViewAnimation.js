@@ -411,6 +411,7 @@ var Fudge;
             this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
         }
         drawTimeline() {
+            this.crc2.strokeStyle = "black";
             this.crc2.resetTransform();
             let timelineHeight = 50;
             let maxDistance = 10000;
@@ -597,7 +598,18 @@ var Fudge;
             for (let i = 0; i < _sequence.length; i++) {
                 let k = _sequence.getKey(i);
                 this.keys.push({ key: k, path2D: this.drawKey(k.Time, k.Value, height / 2, width / 2, seq.color), sequence: seq });
-                line.lineTo(k.Time, k.Value);
+                if (i == 0) {
+                    line.lineTo(k.Time, k.Value);
+                }
+                else {
+                    let prevK = _sequence.getKey(i - 1);
+                    let factor = (k.Time - prevK.Time) / 3;
+                    let startTangentBezier = new FudgeCore.Vector2(1, prevK.SlopeOut);
+                    startTangentBezier = FudgeCore.Vector2.SUM(FudgeCore.Vector2.SCALE(FudgeCore.Vector2.NORMALIZATION(startTangentBezier), factor * Math.max(1, Math.abs(prevK.SlopeOut))), new FudgeCore.Vector2(prevK.Time, prevK.Value));
+                    let endTangentBezier = new FudgeCore.Vector2(-1, -k.SlopeIn);
+                    endTangentBezier = FudgeCore.Vector2.SUM(FudgeCore.Vector2.SCALE(FudgeCore.Vector2.NORMALIZATION(endTangentBezier), factor * Math.max(1, Math.abs(k.SlopeIn))), new FudgeCore.Vector2(k.Time, k.Value));
+                    line.bezierCurveTo(startTangentBezier.x, startTangentBezier.y, endTangentBezier.x, endTangentBezier.y, k.Time, k.Value);
+                }
             }
             line.lineTo(this.view.animation.totalTime, _sequence.getKey(_sequence.length - 1).Value);
             this.crc2.strokeStyle = seq.color;

@@ -42,6 +42,7 @@ namespace Fudge {
       this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
     }
     drawTimeline(): void {
+      this.crc2.strokeStyle = "black";
       this.crc2.resetTransform();
       let timelineHeight: number = 50;
       let maxDistance: number = 10000;
