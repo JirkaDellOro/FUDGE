@@ -35,6 +35,8 @@ namespace Fudge {
     private attributeList: HTMLDivElement;
     private crc: CanvasRenderingContext2D;
     private sheet: ViewAnimationSheet;
+    private sheets: ViewAnimationSheet[] = [];
+    private sheetIndex: number = 0;
     private toolbar: HTMLDivElement;
     private hover: HTMLSpanElement;
     private time: FudgeCore.Time = new FudgeCore.Time();
@@ -130,9 +132,20 @@ namespace Fudge {
       this.content.appendChild(this.canvas);
       this.content.appendChild(this.hover);
 
-      // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-      this.sheet = new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
+      let sheetButton: HTMLButtonElement = document.createElement("button");
+      sheetButton.innerText = "next Sheet";
+      sheetButton.style.position = "absolute";
+      sheetButton.style.bottom = "0";
+      sheetButton.style.right = "0";
+      sheetButton.addEventListener("click", this.nextSheet.bind(this));
+      this.content.appendChild(sheetButton);
+
+      this.sheets.push(new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
+      this.sheets.push(new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
+      this.sheet = this.sheets[this.sheetIndex];
       this.sheet.redraw(this.playbackTime);
+      this.addKeyButtons(this.controller.getElementIndex());
+
       // sheet.translate();
     }
 
@@ -143,6 +156,7 @@ namespace Fudge {
       this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
       this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
       this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
+      this.attributeList.addEventListener("click", this.attributeListClick.bind(this));
       requestAnimationFrame(this.playAnimation.bind(this));
     }
 
@@ -170,7 +184,7 @@ namespace Fudge {
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"]}));
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"] }));
       }
       console.log(obj);
     }
@@ -243,7 +257,6 @@ namespace Fudge {
       buttons.push(document.createElement("button"));
       buttons.push(document.createElement("button"));
       buttons.push(document.createElement("button"));
-      buttons.push(document.createElement("button"));
       buttons[0].classList.add("fa", "fa-fast-backward", "start");
       buttons[1].classList.add("fa", "fa-backward", "back");
       buttons[2].classList.add("fa", "fa-play", "play");
@@ -252,7 +265,6 @@ namespace Fudge {
       buttons[5].classList.add("fa", "fa-fast-forward", "end");
       buttons[6].classList.add("fa", "fa-file", "add-label");
       buttons[7].classList.add("fa", "fa-bookmark", "add-event");
-      buttons[8].classList.add("fa", "fa-plus-square", "add-key");
       buttons[0].id = "start";
       buttons[1].id = "back";
       buttons[2].id = "play";
@@ -261,7 +273,6 @@ namespace Fudge {
       buttons[5].id = "end";
       buttons[6].id = "add-label";
       buttons[7].id = "add-event";
-      buttons[8].id = "add-key";
 
       for (let b of buttons) {
         _tb.appendChild(b);
@@ -342,6 +353,29 @@ namespace Fudge {
       }
     }
 
+    private attributeListClick(_e: MouseEvent): void {
+      if (_e.target instanceof HTMLButtonElement && _e.target.classList.contains("add-key")) {
+        let inputElement: HTMLInputElement = _e.target.parentElement.querySelector("input");
+        let sequence: FudgeCore.AnimationSequence = this.findSequenceToAddKeyTo(this.controller.getElementIndex(), this.animation.animationStructure, inputElement);
+        sequence.addKey(new FudgeCore.AnimationKey(this.playbackTime, sequence.evaluate(this.playbackTime)));
+        this.sheet.redraw(this.playbackTime);
+      }
+    }
+
+    private findSequenceToAddKeyTo(_elementIndex: FudgeCore.Mutator, _sequenceIndex: FudgeCore.AnimationStructure, _input: HTMLElement): FudgeCore.AnimationSequence {
+      let result: FudgeCore.AnimationSequence = null;
+      for (let key in _elementIndex) {
+        if (_elementIndex[key] instanceof HTMLInputElement) {
+          if (_elementIndex[key] == _input) {
+            result = result || <FudgeCore.AnimationSequence>_sequenceIndex[key];
+          }
+        } else {
+          result = result || this.findSequenceToAddKeyTo(<FudgeCore.Mutator>_elementIndex[key], <FudgeCore.AnimationStructure>_sequenceIndex[key], _input);
+        }
+      }
+      return result;
+    }
+
     private changeAttribute(_e: Event): void {
       console.log(_e);
       console.log(this.controller.getMutator());
@@ -374,6 +408,26 @@ namespace Fudge {
       [m, t] = this.cmpAnimator.updateAnimation(t);
       this.playbackTime = t;
       this.updateDisplay(m);
+    }
+
+    private addKeyButtons(_m: FudgeCore.Mutator): void {
+      for (let key in _m) {
+        if (_m[key] instanceof HTMLInputElement) {
+          let input: HTMLInputElement = <HTMLInputElement>_m[key];
+          let button: HTMLButtonElement = document.createElement("button");
+          button.classList.add("fa", "fa-plus-square", "add-key");
+          input.parentElement.appendChild(button);
+        } else {
+          this.addKeyButtons(<FudgeCore.Mutator>_m[key]);
+        }
+      }
+    }
+
+    private nextSheet(): void {
+      this.sheetIndex++;
+      if (this.sheetIndex + 1 > this.sheets.length) this.sheetIndex = 0;
+      this.sheet = this.sheets[this.sheetIndex];
+      this.sheet.redraw(this.playbackTime);
     }
 
     private randomNameGenerator(): string {

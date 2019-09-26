@@ -28,6 +28,8 @@ declare namespace Fudge {
         private attributeList;
         private crc;
         private sheet;
+        private sheets;
+        private sheetIndex;
         private toolbar;
         private hover;
         private time;
@@ -44,10 +46,14 @@ declare namespace Fudge {
         private fillToolbar;
         private toolbarClick;
         private toolbarChange;
+        private attributeListClick;
+        private findSequenceToAddKeyTo;
         private changeAttribute;
         private updateDisplay;
         private setTime;
         private playAnimation;
+        private addKeyButtons;
+        private nextSheet;
         private randomNameGenerator;
     }
 }

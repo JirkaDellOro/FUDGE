@@ -9,6 +9,8 @@ var Fudge;
     class ViewAnimation extends Fudge.View {
         constructor(_parent) {
             super(_parent);
+            this.sheets = [];
+            this.sheetIndex = 0;
             this.time = new FudgeCore.Time();
             this.playing = false;
             this.playbackTime = 500;
@@ -88,9 +90,18 @@ var Fudge;
             // this.content.appendChild(this.canvasSheet);
             this.content.appendChild(this.canvas);
             this.content.appendChild(this.hover);
-            // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
-            this.sheet = new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
+            let sheetButton = document.createElement("button");
+            sheetButton.innerText = "next Sheet";
+            sheetButton.style.position = "absolute";
+            sheetButton.style.bottom = "0";
+            sheetButton.style.right = "0";
+            sheetButton.addEventListener("click", this.nextSheet.bind(this));
+            this.content.appendChild(sheetButton);
+            this.sheets.push(new Fudge.ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
+            this.sheets.push(new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
+            this.sheet = this.sheets[this.sheetIndex];
             this.sheet.redraw(this.playbackTime);
+            this.addKeyButtons(this.controller.getElementIndex());
             // sheet.translate();
         }
         installListeners() {
@@ -100,6 +111,7 @@ var Fudge;
             this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
             this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
             this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
+            this.attributeList.addEventListener("click", this.attributeListClick.bind(this));
             requestAnimationFrame(this.playAnimation.bind(this));
         }
         deconstruct() {
@@ -192,7 +204,6 @@ var Fudge;
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
-            buttons.push(document.createElement("button"));
             buttons[0].classList.add("fa", "fa-fast-backward", "start");
             buttons[1].classList.add("fa", "fa-backward", "back");
             buttons[2].classList.add("fa", "fa-play", "play");
@@ -201,7 +212,6 @@ var Fudge;
             buttons[5].classList.add("fa", "fa-fast-forward", "end");
             buttons[6].classList.add("fa", "fa-file", "add-label");
             buttons[7].classList.add("fa", "fa-bookmark", "add-event");
-            buttons[8].classList.add("fa", "fa-plus-square", "add-key");
             buttons[0].id = "start";
             buttons[1].id = "back";
             buttons[2].id = "play";
@@ -210,7 +220,6 @@ var Fudge;
             buttons[5].id = "end";
             buttons[6].id = "add-label";
             buttons[7].id = "add-event";
-            buttons[8].id = "add-key";
             for (let b of buttons) {
                 _tb.appendChild(b);
             }
@@ -283,6 +292,28 @@ var Fudge;
                     break;
             }
         }
+        attributeListClick(_e) {
+            if (_e.target instanceof HTMLButtonElement && _e.target.classList.contains("add-key")) {
+                let inputElement = _e.target.parentElement.querySelector("input");
+                let sequence = this.findSequenceToAddKeyTo(this.controller.getElementIndex(), this.animation.animationStructure, inputElement);
+                sequence.addKey(new FudgeCore.AnimationKey(this.playbackTime, sequence.evaluate(this.playbackTime)));
+                this.sheet.redraw(this.playbackTime);
+            }
+        }
+        findSequenceToAddKeyTo(_elementIndex, _sequenceIndex, _input) {
+            let result = null;
+            for (let key in _elementIndex) {
+                if (_elementIndex[key] instanceof HTMLInputElement) {
+                    if (_elementIndex[key] == _input) {
+                        result = result || _sequenceIndex[key];
+                    }
+                }
+                else {
+                    result = result || this.findSequenceToAddKeyTo(_elementIndex[key], _sequenceIndex[key], _input);
+                }
+            }
+            return result;
+        }
         changeAttribute(_e) {
             console.log(_e);
             console.log(this.controller.getMutator());
@@ -314,6 +345,26 @@ var Fudge;
             [m, t] = this.cmpAnimator.updateAnimation(t);
             this.playbackTime = t;
             this.updateDisplay(m);
+        }
+        addKeyButtons(_m) {
+            for (let key in _m) {
+                if (_m[key] instanceof HTMLInputElement) {
+                    let input = _m[key];
+                    let button = document.createElement("button");
+                    button.classList.add("fa", "fa-plus-square", "add-key");
+                    input.parentElement.appendChild(button);
+                }
+                else {
+                    this.addKeyButtons(_m[key]);
+                }
+            }
+        }
+        nextSheet() {
+            this.sheetIndex++;
+            if (this.sheetIndex + 1 > this.sheets.length)
+                this.sheetIndex = 0;
+            this.sheet = this.sheets[this.sheetIndex];
+            this.sheet.redraw(this.playbackTime);
         }
         randomNameGenerator() {
             let attr = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
@@ -532,6 +583,8 @@ var Fudge;
         drawSequence(_sequence, _input) {
             if (_sequence.length <= 0)
                 return;
+            if (_input.getBoundingClientRect().height <= 0)
+                return;
             let rect = _input.getBoundingClientRect();
             let height = rect.height / this.scale.y;
             let width = rect.height / this.scale.x;
@@ -554,18 +607,24 @@ var Fudge;
             return super.drawKey(_x, _y, _h, _w, _c);
         }
         drawYScale() {
+            //TODO: make this actually look reasonable
             let pixelPerValue = this.calcScaleSize();
             let valuePerPixel = 1 / pixelPerValue;
+            // console.log(pixelPerValue);
             this.crc2.strokeStyle = "black";
             this.crc2.lineWidth = 1 / this.scale.y;
             let line = new Path2D;
             line.moveTo(0, 0);
-            line.lineTo(100000, 0);
+            line.lineTo(10000, 0);
+            for (let i = 0; i < 2000; i = i + pixelPerValue) {
+                line.moveTo(0, i);
+                line.lineTo(10000, i);
+            }
             this.crc2.stroke(line);
         }
         calcScaleSize() {
             let min = 10;
-            let max = 50;
+            let max = 25;
             let pixelPerValue = this.scale.y;
             while (pixelPerValue < min) {
                 pixelPerValue *= 10;
@@ -599,17 +658,17 @@ var Fudge;
             let rect = _input.getBoundingClientRect();
             let y = rect.top - this.view.content.getBoundingClientRect().top + rect.height / 2;
             let height = rect.height;
-            let width = rect.height;
+            let width = rect.height / this.scale.x;
             let line = new Path2D();
             line.moveTo(0, y);
-            line.lineTo(this.crc2.canvas.width, y);
+            line.lineTo(10000, y);
             this.crc2.strokeStyle = "black";
             this.crc2.stroke(line);
             let seq = { color: "red", element: _input, sequence: _sequence };
             this.sequences.push(seq);
             for (let i = 0; i < _sequence.length; i++) {
                 let k = _sequence.getKey(i);
-                this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2, seq.color), sequence: seq });
+                this.keys.push({ key: k, path2D: this.drawKey(k.Time, y, height / 2, width / 2, seq.color), sequence: seq });
             }
         }
     }

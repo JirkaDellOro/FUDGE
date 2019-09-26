@@ -9,6 +9,8 @@ namespace Fudge {
     protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void {
       if (_sequence.length <= 0)
         return;
+      if (_input.getBoundingClientRect().height <= 0)
+        return;
       let rect: DOMRect | ClientRect = _input.getBoundingClientRect();
       let height: number = rect.height / this.scale.y;
       let width: number = rect.height / this.scale.x;
@@ -36,20 +38,26 @@ namespace Fudge {
     }
 
     private drawYScale(): void {
+      //TODO: make this actually look reasonable
       let pixelPerValue: number = this.calcScaleSize();
       let valuePerPixel: number = 1 / pixelPerValue;
 
+      // console.log(pixelPerValue);
       this.crc2.strokeStyle = "black";
       this.crc2.lineWidth = 1 / this.scale.y;
       let line: Path2D = new Path2D;
       line.moveTo(0, 0);
-      line.lineTo(100000, 0);
+      line.lineTo(10000, 0);
+      for (let i: number = 0; i < 2000; i = i + pixelPerValue) {
+        line.moveTo(0, i);
+        line.lineTo(10000, i);
+      }
       this.crc2.stroke(line);
     }
 
     private calcScaleSize(): number {
       let min: number = 10;
-      let max: number = 50;
+      let max: number = 25;
       let pixelPerValue: number = this.scale.y;
       while (pixelPerValue < min) {
         pixelPerValue *= 10;
