@@ -4421,7 +4421,7 @@ var FudgeCore;
          * @returns A new vector representing the scaled version of the given vector
          */
         static SCALE(_vector, _scale) {
-            let vector = new Vector2();
+            let vector = new Vector2(_vector.x * _scale, _vector.y * _scale);
             return vector;
         }
         /**
