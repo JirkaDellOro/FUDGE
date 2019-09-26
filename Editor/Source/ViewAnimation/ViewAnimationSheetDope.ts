@@ -16,10 +16,10 @@ namespace Fudge {
       let rect: DOMRect | ClientRect = _input.getBoundingClientRect();
       let y: number = rect.top - this.view.content.getBoundingClientRect().top + rect.height / 2;
       let height: number = rect.height;
-      let width: number = rect.height;
+      let width: number = rect.height / this.scale.x;
       let line: Path2D = new Path2D();
       line.moveTo(0, y);
-      line.lineTo(this.crc2.canvas.width, y);
+      line.lineTo(10000, y);
       this.crc2.strokeStyle = "black";
       this.crc2.stroke(line);
       let seq: ViewAnimationSequence = { color: "red", element: _input, sequence: _sequence };
@@ -27,7 +27,7 @@ namespace Fudge {
 
       for (let i: number = 0; i < _sequence.length; i++) {
         let k: FudgeCore.AnimationKey = _sequence.getKey(i);
-        this.keys.push({ key: k, path2D: this.drawKey(k.Time * this.scale.x, y, height / 2, width / 2, seq.color), sequence: seq });
+        this.keys.push({ key: k, path2D: this.drawKey(k.Time, y, height / 2, width / 2, seq.color), sequence: seq });
       }
     }
 
