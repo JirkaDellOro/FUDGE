@@ -1,9 +1,11 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -49,7 +51,9 @@ var Fudge;
         Fudge.PanelManager.instance.addPanel(panel);
     }
     function openAnimationPanel() {
+        node = Scenes.createAxisCross();
         let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.ViewAnimationTemplate(), "Animation Panel");
+        panel.setNode(node);
         Fudge.PanelManager.instance.addPanel(panel);
     }
     function save(_node) {
@@ -74,10 +78,12 @@ var Fudge;
     }
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
 (function (Fudge) {
@@ -201,6 +207,10 @@ var Fudge;
                 }
                 else if (view instanceof Fudge.ViewViewport) {
                     view.setRoot(this.node);
+                    console.log("ViewPort set root");
+                }
+                else if (view instanceof Fudge.ViewAnimation) {
+                    view.openAnimation(this.node);
                 }
             }
         }

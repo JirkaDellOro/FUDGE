@@ -1,4 +1,5 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 
 //<reference types="../../Examples/Code/Scenes"/>
@@ -133,6 +134,9 @@ namespace Fudge {
                 }
                 else if (view instanceof ViewViewport) {
                     (<ViewViewport>view).setRoot(this.node);
+                    console.log("ViewPort set root");
+                } else if (view instanceof ViewAnimation) {
+                  (<ViewAnimation>view).openAnimation(this.node);
                 }
             }
         }

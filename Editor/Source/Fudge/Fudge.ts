@@ -1,5 +1,6 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../Build/ViewAnimation"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 
 namespace Fudge {
@@ -55,10 +56,12 @@ namespace Fudge {
         panel = PanelManager.instance.createPanelFromTemplate(new NodePanelTemplate, "Node Panel");
         panel.setNode(node);
         PanelManager.instance.addPanel(panel);
-    }
-
+      }
+      
     function openAnimationPanel(): void {
+      node = Scenes.createAxisCross();
       let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+      panel.setNode(node);
       PanelManager.instance.addPanel(panel);
     }
 
