@@ -1,21 +1,22 @@
 "use strict";
 
-
 class Raycast {
+    
     constructor() {
-    }
-    hitTest() {
 
+    }
+
+    
+    getRaycast() {
         var selectedObject = null;
         var intersects = getIntersects(screenX, screenY);
         if (intersects.length > 0) {
-            var res = intersects.filter(function (res) {
-                return res && res.object;
+            var raycastHit = intersects.filter(function (raycastHit) {
+                return raycastHit;
             })[0];
             //if selected now
-            if (res && res.object) {
-                selectedObject = res.object;
-                //console.log(selectedObject);
+            if (raycastHit) {
+                selectedObject = raycastHit.object;
                 return selectedObject;
             }
         }
@@ -25,11 +26,9 @@ class Raycast {
 function getIntersects() {
     var raycaster = new THREE.Raycaster;
     var mouseVector = new THREE.Vector2;
-    var x = (x / window.innerWidth) * 2 - 1;
-    var y = - (y / window.innerHeight) * 2 + 1;
-
-    mouseVector.set((event.layerX / window.innerWidth) * 2 - 1, -(event.layerY / window.innerHeight) * 2 + 1 /* ,0.5 */);
-    console.log(mouseVector);
+ 
+    mouseVector.set((event.layerX / window.innerWidth) * 2 - 1, -(event.layerY / window.innerHeight) * 2 + 1);
+    //console.log(mouseVector);
     raycaster.setFromCamera(mouseVector, camera);
     return raycaster.intersectObject(getObjects(), true);
 }
