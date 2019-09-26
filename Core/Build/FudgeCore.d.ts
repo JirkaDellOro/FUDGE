@@ -2504,6 +2504,7 @@ declare namespace FudgeCore {
      * With these references, the already buffered data is retrieved when rendering.
      */
     abstract class RenderManager extends RenderOperator {
+        static rayCastTargets: WebGLTexture[];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -2573,6 +2574,7 @@ declare namespace FudgeCore {
         static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void;
         private static drawNode;
         private static drawNodeForRayCast;
+        private static getRayCastTexture;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */

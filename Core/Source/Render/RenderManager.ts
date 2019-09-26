@@ -41,6 +41,7 @@ namespace FudgeCore {
      * With these references, the already buffered data is retrieved when rendering.
      */
     export abstract class RenderManager extends RenderOperator {
+        public static rayCastTargets: WebGLTexture[] = [];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -207,6 +208,8 @@ namespace FudgeCore {
          * @param _cmpCamera 
          */
         public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            if (_drawNode == RenderManager.drawNode)
+                RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, null);
             let finalTransform: Matrix4x4;
 
             let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
@@ -236,6 +239,7 @@ namespace FudgeCore {
          * @param _cmpCamera 
          */
         public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            RenderManager.rayCastTargets = [];
             RenderManager.nodesIndexed = [];
             if (!RenderManager.renderShaders.get(ShaderRayCast))
                 RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
@@ -253,7 +257,20 @@ namespace FudgeCore {
             RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
 
-        private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
+        private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba
+            // TODO: look into SSBOs!
+            let target: WebGLTexture = RenderManager.getRayCastTexture();
+
+            const framebuffer: WebGLFramebuffer = RenderManager.crc3.createFramebuffer();
+            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            // attach the texture as the first color attachment
+            const attachmentPoint: number = RenderManager.crc3.COLOR_ATTACHMENT0;
+            RenderManager.crc3.framebufferTexture2D(RenderManager.crc3.FRAMEBUFFER, attachmentPoint, RenderManager.crc3.TEXTURE_2D, target, 0);
+            // render to our targetTexture by binding the framebuffer
+            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+
+            // set render target
+
             let references: NodeReferences = RenderManager.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
@@ -262,6 +279,33 @@ namespace FudgeCore {
 
             let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
             RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
+            // make texture available to onscreen-display
+            RenderManager.rayCastTargets.push(target);
+            // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
+        }
+
+        private static getRayCastTexture(): WebGLTexture {
+            // create to render to
+            const targetTextureWidth: number = RenderManager.getViewportRectangle().width;
+            const targetTextureHeight: number = RenderManager.getViewportRectangle().height;
+            const targetTexture: WebGLTexture = RenderManager.crc3.createTexture();
+            RenderManager.crc3.bindTexture(RenderManager.crc3.TEXTURE_2D, targetTexture);
+
+            {
+                const internalFormat: number = RenderManager.crc3.RGBA;
+                const format: number = RenderManager.crc3.RGBA;
+                const type: number = RenderManager.crc3.UNSIGNED_BYTE;
+                RenderManager.crc3.texImage2D(
+                    RenderManager.crc3.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null
+                );
+
+                // set the filtering so we don't need mips
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_MIN_FILTER, RenderManager.crc3.LINEAR);
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_S, RenderManager.crc3.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_T, RenderManager.crc3.CLAMP_TO_EDGE);
+            }
+
+            return targetTexture;
         }
 
         /**

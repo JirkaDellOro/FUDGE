@@ -56,13 +56,26 @@ var ScreenToRay;
         for (let name in uiMaps) {
             logMutatorInfo(name, uiMaps[name].framing);
         }
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
-        ƒ.Loop.start();
+        // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
+        // ƒ.Loop.start();
+        animate(null);
+        ƒ.Debug.log(ƒ.RenderManager.rayCastTargets);
+        let t = ƒ.RenderManager.rayCastTargets[0];
+        // canvas.getContext("2d").drawImage(t.getImageData(),
+        //     this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+        //     this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+        // );
+        // ƒ.RenderManager.getRenderingContext().copyTexImage2D
+        let data = new Uint8Array(canvas.width * canvas.height * 4);
+        let crc3 = ƒ.RenderManager.getRenderingContext();
+        crc3.readPixels(0, 0, canvas.width, canvas.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+        ƒ.Debug.log(data);
         function animate(_event) {
             update();
             // branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
-            viewport.drawForRayCast();
+            // viewport.drawForRayCast();
+            viewport.draw();
             adjustRayCamera();
             let color = getPixelColor(mouse);
             ƒ.Debug.log(color);

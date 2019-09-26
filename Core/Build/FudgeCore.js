@@ -5692,6 +5692,8 @@ var FudgeCore;
          * @param _cmpCamera
          */
         static drawBranch(_node, _cmpCamera, _drawNode = RenderManager.drawNode) {
+            if (_drawNode == RenderManager.drawNode)
+                RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, null);
             let finalTransform;
             let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
             if (cmpMesh)
@@ -5715,6 +5717,7 @@ var FudgeCore;
          * @param _cmpCamera
          */
         static drawBranchForRayCast(_node, _cmpCamera) {
+            RenderManager.rayCastTargets = [];
             RenderManager.nodesIndexed = [];
             if (!RenderManager.renderShaders.get(FudgeCore.ShaderRayCast))
                 RenderManager.createReference(RenderManager.renderShaders, FudgeCore.ShaderRayCast, RenderManager.createProgram);
@@ -5730,12 +5733,43 @@ var FudgeCore;
             RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
         static drawNodeForRayCast(_node, _finalTransform, _projection) {
+            // TODO: look into SSBOs!
+            let target = RenderManager.getRayCastTexture();
+            const framebuffer = RenderManager.crc3.createFramebuffer();
+            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            // attach the texture as the first color attachment
+            const attachmentPoint = RenderManager.crc3.COLOR_ATTACHMENT0;
+            RenderManager.crc3.framebufferTexture2D(RenderManager.crc3.FRAMEBUFFER, attachmentPoint, RenderManager.crc3.TEXTURE_2D, target, 0);
+            // render to our targetTexture by binding the framebuffer
+            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            // set render target
             let references = RenderManager.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
             RenderManager.nodesIndexed.push(_node);
             let bufferInfo = RenderManager.renderBuffers.get(references.mesh).getReference();
             RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
+            // make texture available to onscreen-display
+            RenderManager.rayCastTargets.push(target);
+            // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
+        }
+        static getRayCastTexture() {
+            // create to render to
+            const targetTextureWidth = RenderManager.getViewportRectangle().width;
+            const targetTextureHeight = RenderManager.getViewportRectangle().height;
+            const targetTexture = RenderManager.crc3.createTexture();
+            RenderManager.crc3.bindTexture(RenderManager.crc3.TEXTURE_2D, targetTexture);
+            {
+                const internalFormat = RenderManager.crc3.RGBA;
+                const format = RenderManager.crc3.RGBA;
+                const type = RenderManager.crc3.UNSIGNED_BYTE;
+                RenderManager.crc3.texImage2D(RenderManager.crc3.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null);
+                // set the filtering so we don't need mips
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_MIN_FILTER, RenderManager.crc3.LINEAR);
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_S, RenderManager.crc3.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_T, RenderManager.crc3.CLAMP_TO_EDGE);
+            }
+            return targetTexture;
         }
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
@@ -5824,6 +5858,7 @@ var FudgeCore;
             }
         }
     }
+    RenderManager.rayCastTargets = [];
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.renderShaders = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
