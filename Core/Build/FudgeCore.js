@@ -1813,9 +1813,6 @@ var FudgeCore;
      * A [[Coat]] providing a texture and additional data for texturing
      */
     let CoatTextured = class CoatTextured extends Coat {
-        /**
-         * A [[Coat]] providing a texture and additional data for texturing
-         */
         constructor() {
             super(...arguments);
             this.texture = null;

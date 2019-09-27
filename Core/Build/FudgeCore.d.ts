@@ -1,4 +1,3 @@
-/// <reference types="webgl2" />
 declare namespace FudgeCore {
     type General = any;
     interface Serialization {
@@ -488,7 +487,7 @@ declare namespace FudgeCore {
         NOTCH = "NOTCH",
         ALLPASS = "ALLPASS"
     }
-    class AudioFilter {
+    export class AudioFilter {
         useFilter: boolean;
         filterType: FILTER_TYPE;
         constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
@@ -497,6 +496,7 @@ declare namespace FudgeCore {
          */
         addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -539,7 +539,7 @@ declare namespace FudgeCore {
         INVERSE = "INVERSE",
         EXPONENTIAL = "EXPONENTIAL"
     }
-    class AudioLocalisation {
+    export class AudioLocalisation {
         pannerNode: PannerNode;
         panningModel: PANNING_MODEL_TYPE;
         distanceModel: DISTANCE_MODEL_TYPE;
@@ -572,6 +572,7 @@ declare namespace FudgeCore {
          */
         getPanneOrientation(): Vector3;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -586,7 +587,7 @@ declare namespace FudgeCore {
      * Describes Data Handler for all Audio Sources
      * @authors Thomas Dorner, HFU, 2019
      */
-    class AudioSessionData {
+    export class AudioSessionData {
         dataArray: AudioData[];
         private bufferCounter;
         private audioBufferHolder;
@@ -634,6 +635,7 @@ declare namespace FudgeCore {
          */
         private logErrorFetch;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
