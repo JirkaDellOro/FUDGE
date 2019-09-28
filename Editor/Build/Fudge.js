@@ -390,13 +390,11 @@ var Fudge;
         constructor(_parent) {
             super(_parent);
             this.setNode = (_event) => {
-                console.log(this.content);
                 this.node = _event.detail;
                 while (this.content.firstChild != null) {
                     this.content.removeChild(this.content.lastChild);
                 }
                 this.fillContent();
-                console.log(this.content);
             };
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setNode);
             this.fillContent();
@@ -421,7 +419,6 @@ var Fudge;
                 for (let nodeComponent of nodeComponents) {
                     let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
                 }
-                console.groupEnd();
             }
             else {
                 let cntEmpty = document.createElement("div");
@@ -433,11 +430,13 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 (function (Fudge) {
@@ -450,28 +449,60 @@ var Fudge;
     class ViewNode extends Fudge.View {
         constructor(_parent) {
             super(_parent);
+            this.createNode = (_event) => {
+                let node = new ƒ.Node("");
+                console.log("Event came in with Signature: " + _event.detail);
+                switch (_event.detail) {
+                    case "AddNode." + ƒui.NODEMENU.BOX:
+                        console.log("Create Box Node");
+                        let targetNode = this.selectedNode || this.branch;
+                        // node.name = "Box";
+                        let mesh = new ƒ.MeshCube();
+                        // let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
+                        let clrRed = new ƒ.Color(1, 0, 0, 1);
+                        let coatRed = new ƒ.CoatColored(clrRed);
+                        let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+                        // let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrRed);
+                        // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
+                        // node.addComponent(cmpMesh);
+                        // node.addComponent(cmpMaterial);
+                        // node.addComponent(cmpTransform);
+                        node = Scenes.createCompleteMeshNode("Box", mtrRed, mesh);
+                        targetNode.appendChild(node);
+                        let event = new Event("childAdd" /* CHILD_APPEND */);
+                        targetNode.dispatchEvent(event);
+                        this.setRoot(this.branch);
+                        break;
+                }
+            };
             this.setSelectedNode = (_event) => {
                 this.listController.setSelection(_event.detail);
+                this.selectedNode = _event.detail;
             };
             this.passEventToPanel = (_event) => {
-                console.log("Recieved Event, trying to pass it onto the Panel");
-                console.log(_event);
                 let eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
                 _event.cancelBubble = true;
                 this.parentPanel.dispatchEvent(eventToPass);
             };
-            this.branch = new ƒ.Node("dummyNode");
+            this.branch = new ƒ.Node("Node");
+            this.selectedNode = null;
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
             this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
-            console.log(this.listController.listRoot);
             this.fillContent();
         }
         deconstruct() {
             //TODO: desconstruct
         }
         fillContent() {
+            let mutator = {};
+            for (let member in ƒui.NODEMENU) {
+                ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
+            }
+            let menu = new ƒui.DropMenu("AddNode", mutator, { _text: "Add Node" });
+            menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.createNode);
             this.content.append(this.listController.listRoot);
+            this.content.append(menu);
         }
         setRoot(_node) {
             if (!_node)

@@ -73,3 +73,53 @@ ul.tree li > a:not(:last-child):before {
 ul.tree li.open > a:not(:last-child):before {
     content: '-';
 }
+
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .dropbtn:hover, .dropbtn:focus {
+    background-color: #3e8e41;
+  }
+  
+  .dropdown {
+    position: relative;
+    display: inline-block;
+    width: max-content;
+    height: max-content;
+  }
+  
+  .dropdown-content {
+    position: sticky;
+    background-color: #f1f1f1;
+    width: max-content;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    right: 0;
+    z-index: 1;
+  }
+  .submenu-content {
+    float: right;
+    position: sticky;
+    background-color: #f1f1f1;
+    width: max-content;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    right: 0;
+    z-index: 1;
+  }
+  .dropdown-content button {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    background: none;
+    border: none;
+  }
+  
+  .dropdown a:hover {background-color: #ddd;}

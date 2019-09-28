@@ -24,8 +24,15 @@ declare namespace FudgeUserInterface {
         constructor(_legend: string);
         private toggleFoldElement;
     }
-    class DropDown extends HTMLDivElement {
-        constructor(_contentList: ƒ.Mutator);
+    class DropMenu extends HTMLDivElement {
+        name: string;
+        private content;
+        private signature;
+        constructor(_name: string, _contentList: ƒ.Mutator, params: {
+            _parentSignature?: string;
+            _text?: string;
+        });
+        private toggleFoldContent;
     }
 }
 declare namespace FudgeUserInterface {
@@ -34,7 +41,8 @@ declare namespace FudgeUserInterface {
         COLLAPSE = "listCollapseEvent",
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
-        UPDATE = "mutatorUpdateEvent"
+        UPDATE = "mutatorUpdateEvent",
+        DROPMENUCLICK = "dropMenuClick"
     }
 }
 declare namespace FudgeUserInterface {
@@ -121,9 +129,26 @@ declare namespace FudgeUserInterface {
         getNodeRoot(): ƒ.Node;
         setSelection(_node: ƒ.Node): void;
         getSelection(): ƒ.Node;
+        updateList: (_event: Event) => void;
         setNodeRoot(_node: ƒ.Node): void;
-        toggleCollapse: (_event: MouseEvent) => void;
+        toggleCollapse: (_event: Event) => void;
         private BuildListFromNode;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * <select><option>Hallo</option></select>
+     */
+    import ƒ = FudgeCore;
+    enum NODEMENU {
+        EMPTY = "Primitive.Empty Node",
+        BOX = "Primitive.Box Mesh Node",
+        PYRAMID = "Primitive.Pyramid Mesh Node",
+        PLANE = "Primitive.Plane Mesh Node",
+        TEST = "DeleteMe.Test.DeleteMe"
+    }
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
     }
 }
 declare namespace FudgeUserInterface {

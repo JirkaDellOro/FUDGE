@@ -7,7 +7,8 @@ namespace FudgeUserInterface {
         COLLAPSE = "listCollapseEvent",
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
-        UPDATE = "mutatorUpdateEvent"
+        UPDATE = "mutatorUpdateEvent",
+        DROPMENUCLICK = "dropMenuClick"
     }
 
 }

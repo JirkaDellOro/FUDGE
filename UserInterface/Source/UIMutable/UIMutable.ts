@@ -30,7 +30,6 @@ namespace FudgeUserInterface {
             let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
             let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type: Object = mutatorTypes[key];
                     if (type instanceof Object) {

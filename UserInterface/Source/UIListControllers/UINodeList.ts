@@ -8,11 +8,13 @@ namespace FudgeUserInterface {
 
         constructor(_node: ƒ.Node, _listContainer: HTMLElement) {
             this.nodeRoot = _node;
+            this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_APPEND, this.updateList);
+            this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.updateList);
             this.listRoot = document.createElement("ul");
             let list: HTMLUListElement = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
-            _listContainer.addEventListener("click", this.toggleCollapse);
+            _listContainer.addEventListener(UIEVENT.COLLAPSE, this.toggleCollapse);
 
         }
         public getNodeRoot(): ƒ.Node {
@@ -20,31 +22,32 @@ namespace FudgeUserInterface {
         }
         public setSelection(_node: ƒ.Node): void {
             //TODO: Select Appropriate Entry
-            console.log("got node");
-            console.log(_node);
         }
         
         public getSelection(): ƒ.Node {
             return (<CollapsableNodeListElement>this.selectedEntry).node;
         }
+
+        public updateList = (_event: Event): void => {
+            this.setNodeRoot(this.nodeRoot);
+        }
         public setNodeRoot(_node: ƒ.Node): void {
             this.nodeRoot = _node;
             this.listRoot = this.BuildListFromNode(this.nodeRoot);
-            // this.listRoot.addEventListener("click", this.toggleCollapse);
         }
-        public toggleCollapse = (_event: MouseEvent): void => {
+        public toggleCollapse = (_event: Event): void => {
             _event.preventDefault();
-            let target: HTMLElement = <HTMLElement>_event.target;
-            if (target.nodeName == "BUTTON") {
-                let targetParent: HTMLElement = target.parentElement.parentElement;
-                if (targetParent.children.length > 1)
-                    (<CollapsableNodeListElement>targetParent).collapse(targetParent);
+            
+            if (event.target instanceof CollapsableNodeListElement) {
+                let target: CollapsableNodeListElement = <CollapsableNodeListElement>_event.target;
+                if (target.content.children.length > 1)
+                    target.collapse(target);
                 else {
-                    let nodeToExpand: ƒ.Node = (<CollapsableNodeListElement>targetParent).node;
+                    let nodeToExpand: ƒ.Node = (<CollapsableNodeListElement>target).node;
                     let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
                     // if (targetParent == this.listRoot)
                         // newList.addEventListener("click", this.toggleCollapse);
-                    targetParent.replaceWith(newList);
+                    target.replaceWith(newList);
                 }
             }
         }

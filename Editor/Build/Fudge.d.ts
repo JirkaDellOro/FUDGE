@@ -134,11 +134,13 @@ declare namespace Fudge {
      */
     class ViewNode extends View {
         branch: ƒ.Node;
+        selectedNode: ƒ.Node;
         listController: ƒui.UINodeList;
         constructor(_parent: Panel);
         deconstruct(): void;
         fillContent(): void;
         setRoot(_node: ƒ.Node): void;
+        private createNode;
         private setSelectedNode;
         private passEventToPanel;
     }

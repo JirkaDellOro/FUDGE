@@ -81,9 +81,11 @@ namespace FudgeUserInterface {
 
         private toggleCollapse = (_event: Event): void => {
             _event.preventDefault();
-            console.log(this.listRoot);
-            let target: CollapsableAnimationListElement = <CollapsableAnimationListElement>_event.target;
-            target.collapse(target);
+            console.log(_event.target instanceof CollapsableAnimationListElement);
+            if (_event.target instanceof CollapsableAnimationListElement) {
+                let target: CollapsableAnimationListElement = <CollapsableAnimationListElement>_event.target;
+                target.collapse(target);
+            }
         }
 
     }

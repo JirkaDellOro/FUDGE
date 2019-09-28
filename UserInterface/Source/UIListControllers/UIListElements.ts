@@ -34,6 +34,7 @@ namespace FudgeUserInterface {
                 buttonState = "invisible";
             let btnToggle: HTMLButtonElement = new ToggleButton(buttonState);
             (<ToggleButton>btnToggle).setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
             this.header.appendChild(btnToggle);
             let lblName: HTMLSpanElement = document.createElement("span");
             lblName.textContent = _name;

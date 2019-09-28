@@ -36,7 +36,6 @@ namespace Fudge {
                 for (let nodeComponent of nodeComponents) {
                     let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(nodeComponent, this.content);
                 }
-                console.groupEnd();
 
             }
             else {
@@ -46,13 +45,11 @@ namespace Fudge {
         }
 
         private setNode = (_event: CustomEvent): void => {
-            console.log(this.content);
             this.node = _event.detail;
             while (this.content.firstChild != null) {
                 this.content.removeChild(this.content.lastChild);
             }
             this.fillContent();
-            console.log(this.content);
         }
     }
 }
