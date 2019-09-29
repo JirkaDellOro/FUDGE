@@ -1,7 +1,11 @@
 namespace Fudge {
+  /**
+   * Curve View visualisation of an Animation for the Animation View. 
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export class ViewAnimationSheetCurve extends ViewAnimationSheet {
 
-    drawKeys(): void {
+    protected drawKeys(): void {
       this.drawYScale();
       super.drawKeys();
     }
@@ -19,7 +23,7 @@ namespace Fudge {
 
       //TODO: stop recreating the sequence element all the time
       //TODO: get color from input element or former sequence element.
-      let seq: ViewAnimationSequence = { color: this.randomColor(), element: _input, sequence: _sequence };
+      let seq: ViewAnimationSequence = { color: this.randomPastellColor(), element: _input, sequence: _sequence };
       this.sequences.push(seq);
 
       for (let i: number = 0; i < _sequence.length; i++) {
@@ -43,10 +47,9 @@ namespace Fudge {
       this.crc2.stroke(line);
     }
 
-    protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
-      return super.drawKey(_x, _y, _h, _w, _c);
-    }
-
+    /**
+     * draws a scale for the y axis.
+     */
     private drawYScale(): void {
       //TODO: make this actually look reasonable
       let pixelPerValue: number = this.calcScaleSize();
@@ -65,6 +68,9 @@ namespace Fudge {
       this.crc2.stroke(line);
     }
 
+    /**
+     * attempts to calculate the optimal spacing and scale of the y scale visualisation
+     */
     private calcScaleSize(): number {
       let min: number = 10;
       let max: number = 25;
@@ -78,7 +84,10 @@ namespace Fudge {
       return pixelPerValue;
     }
 
-    private randomColor(): string {
+    /**
+     * generates a random pastell-like color using hsl ([0, 360), 80%, 80%)
+     */
+    private randomPastellColor(): string {
       return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
     }
 

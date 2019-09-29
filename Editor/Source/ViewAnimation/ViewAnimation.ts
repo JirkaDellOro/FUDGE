@@ -3,28 +3,45 @@
 ///<reference types="../../Build/Fudge"/>
 
 namespace Fudge {
+  /**
+   * Combines the key, its sequence and the visual representation of that key.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export interface ViewAnimationKey {
     key: FudgeCore.AnimationKey;
     path2D: Path2D;
     sequence: ViewAnimationSequence;
   }
-
+  /**
+   * Combines the Sequence, corresponding HTMLElement and color to display.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export interface ViewAnimationSequence {
     color: string;
     element: HTMLElement;
     sequence: FudgeCore.AnimationSequence;
   }
-
+  /**
+   * Combines the visual representation of an event and the event itself.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export interface ViewAnimationEvent {
     event: string;
     path2D: Path2D;
   }
+  /**
+   * Combines the visual representation of a label and the label itself.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export interface ViewAnimationLabel {
     label: string;
     path2D: Path2D;
   }
 
-
+  /**
+   * Creates, manipulates and administers an Animation View
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export class ViewAnimation extends Fudge.View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
@@ -44,16 +61,17 @@ namespace Fudge {
 
     constructor(_parent: Panel) {
       super(_parent);
-      this.playbackTime = 500;
+      this.playbackTime = 0;
 
-      this.openAnimation();
-      this.fillContent();
-      this.installListeners();
+      // this.openAnimation();
     }
 
-    openAnimation(): void {
-      //TODO replace with file opening dialoge
-
+    /**
+     * Opens the Animation attached to a given Node. Creates a new Node if no Node given.
+     * @param _node The node that should be animated/has an animation that should be changed
+     */
+    openAnimation(_node: FudgeCore.Node = null): void {
+      //TODO: Remove dummy animation, replace with empty animation.
       let seq1: FudgeCore.AnimationSequence = new FudgeCore.AnimationSequence();
       seq1.addKey(new FudgeCore.AnimationKey(0, 0));
       seq1.addKey(new FudgeCore.AnimationKey(500, 45));
@@ -64,7 +82,7 @@ namespace Fudge {
       seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 0.02));
       seq2.addKey(new FudgeCore.AnimationKey(1000, 5));
       seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
-      this.animation = new FudgeCore.Animation("TestAnimation", {
+      this.animation = new FudgeCore.Animation("TestAnimation"/*, {
         components: {
           ComponentTransform: [
             {
@@ -83,19 +101,29 @@ namespace Fudge {
             }
           ]
         }
-      }, 60);
+      }*/);
       this.animation.labels["One"] = 200;
       this.animation.labels["Two"] = 750;
       this.animation.setEvent("EventOne", 500);
       this.animation.setEvent("EventTwo", 1000);
+      //End of dummy animation
 
-      this.node = new FudgeCore.Node("Testnode");
-      this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
+      this.node = _node || new FudgeCore.Node("Testnode");
+      this.cmpAnimator = this.node.getComponent(FudgeCore.ComponentAnimator);
+      if (!this.cmpAnimator) {
+        this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
+        this.node.addComponent(this.cmpAnimator);
+      }
+      this.animation = this.cmpAnimator.animation;
+
+      console.log("node", this.node);
+
+
+      this.fillContent();
+      this.installListeners();
     }
 
     fillContent(): void {
-      // this.content = document.createElement("span");
-      // this.content.id = "TESTID";
       this.toolbar = document.createElement("div");
       this.toolbar.id = "toolbar";
       this.toolbar.style.width = "300px";
@@ -103,14 +131,11 @@ namespace Fudge {
       this.toolbar.style.borderBottom = "1px solid black";
       this.fillToolbar(this.toolbar);
 
-
       this.attributeList = document.createElement("div");
       this.attributeList.id = "attributeList";
       this.attributeList.style.width = "300px";
       this.attributeList.addEventListener(FudgeUserInterface.UIEVENT.UPDATE, this.changeAttribute.bind(this));
-      //TODO: Add Moni's custom Element here
       this.controller = new FudgeUserInterface.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
-
 
       this.canvas = document.createElement("canvas");
       this.canvas.width = 1500;
@@ -128,7 +153,6 @@ namespace Fudge {
 
       this.content.appendChild(this.toolbar);
       this.content.appendChild(this.attributeList);
-      // this.content.appendChild(this.canvasSheet);
       this.content.appendChild(this.canvas);
       this.content.appendChild(this.hover);
 
@@ -140,35 +164,51 @@ namespace Fudge {
       sheetButton.addEventListener("click", this.nextSheet.bind(this));
       this.content.appendChild(sheetButton);
 
-      this.sheets.push(new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
-      this.sheets.push(new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
+      this.sheets.push(new ViewAnimationSheetDope(this, this.crc, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
+      this.sheets.push(new ViewAnimationSheetCurve(this, this.crc, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
       this.sheet = this.sheets[this.sheetIndex];
       this.sheet.redraw(this.playbackTime);
       this.addKeyButtons(this.controller.getElementIndex());
-
-      // sheet.translate();
     }
 
+    /**
+     * adds all Listeners needed for the ViewAnimation to work.
+     */
     installListeners(): void {
-      this.canvas.addEventListener("click", this.mouseClick.bind(this));
-      this.canvas.addEventListener("mousedown", this.mouseDown.bind(this));
-      this.canvas.addEventListener("mousemove", this.mouseMove.bind(this));
-      this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
-      this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
-      this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
-      this.attributeList.addEventListener("click", this.attributeListClick.bind(this));
+      this.canvas.addEventListener("click", this.mouseClickOnCanvas.bind(this));
+      this.canvas.addEventListener("mousedown", this.mouseDownOnCanvas.bind(this));
+      this.canvas.addEventListener("mousemove", this.mouseMoveOnCanvas.bind(this));
+      this.canvas.addEventListener("mouseup", this.mouseUpOnCanvas.bind(this));
+      this.toolbar.addEventListener("click", this.mouseClickOnToolbar.bind(this));
+      this.toolbar.addEventListener("change", this.changeOnToolbar.bind(this));
+      this.attributeList.addEventListener("click", this.mouseClickOnAttributeList.bind(this));
       requestAnimationFrame(this.playAnimation.bind(this));
     }
 
     deconstruct(): void {
-      //
+      this.canvas.removeEventListener("click", this.mouseClickOnCanvas.bind(this));
+      this.canvas.removeEventListener("mousedown", this.mouseDownOnCanvas.bind(this));
+      this.canvas.removeEventListener("mousemove", this.mouseMoveOnCanvas.bind(this));
+      this.canvas.removeEventListener("mouseup", this.mouseUpOnCanvas.bind(this));
+      this.toolbar.removeEventListener("click", this.mouseClickOnToolbar.bind(this));
+      this.toolbar.removeEventListener("change", this.changeOnToolbar.bind(this));
+      this.attributeList.removeEventListener("click", this.mouseClickOnAttributeList.bind(this));
     }
 
-    mouseClick(_e: MouseEvent): void {
-      // console.log(_e);
+    /**
+     * Handles mouseclicks onto the canvas.
+     * @param _e The MouseEvent resulting in this call.
+     */
+    private mouseClickOnCanvas(_e: MouseEvent): void {
+      // TODO: check if it'd be better to use this instead of mousedown in some occasions.
     }
-    mouseDown(_e: MouseEvent): void {
+    /**
+     * handles mousedown events onto the canvas. Currently causes a key/label/event to be selected.
+     * @param _e The MouseEvenet resulting in this call.
+     */
+    private mouseDownOnCanvas(_e: MouseEvent): void {
       if (_e.offsetY < 50) {
+        //TODO adjust time to fit into the sps
         this.setTime(_e.offsetX / this.sheet.scale.x);
         return;
       }
@@ -188,19 +228,32 @@ namespace Fudge {
       }
       console.log(obj);
     }
-    mouseMove(_e: MouseEvent): void {
+    /**
+     * handles mousemove on the canvas. currently only checks for a change of the replaytime but could be expanded to handle/propagate key manipulation/dragging.
+     * @param _e The MouseEvent resulting in this call
+     */
+    private mouseMoveOnCanvas(_e: MouseEvent): void {
       _e.preventDefault();
       if (_e.buttons != 1) return;
       if (_e.offsetY < 50) {
+        //TODO: adjust time to fit into the sps
         this.setTime(_e.offsetX / this.sheet.scale.x);
         return;
       }
+      //TODO: handle key/label/event dragging
     }
-    mouseUp(_e: MouseEvent): void {
-      // console.log(_e);
-      //
+    /**
+     * handles mouseup events on the canvas. currently does nothing but may be needed in the future.
+     * @param _e The MouseEvent resulting in this call
+     */
+    private mouseUpOnCanvas(_e: MouseEvent): void {
+      // probably needed to handle key/label/event dragging
     }
 
+    /**
+     * Fills the toolbar with all its input elements / buttons / etc.
+     * @param _tb the HtmlElement to add the toolbarelements to
+     */
     private fillToolbar(_tb: HTMLElement): void {
 
       let playmode: HTMLSelectElement = document.createElement("select");
@@ -257,6 +310,7 @@ namespace Fudge {
       buttons.push(document.createElement("button"));
       buttons.push(document.createElement("button"));
       buttons.push(document.createElement("button"));
+      //TODO: change this to the actual icons and stop using these placeholder icons
       buttons[0].classList.add("fa", "fa-fast-backward", "start");
       buttons[1].classList.add("fa", "fa-backward", "back");
       buttons[2].classList.add("fa", "fa-play", "play");
@@ -277,11 +331,13 @@ namespace Fudge {
       for (let b of buttons) {
         _tb.appendChild(b);
       }
-
     }
 
-    private toolbarClick(_e: MouseEvent): void {
-      // console.log("click", _e.target);
+    /**
+     * Handles a click on the toolbar, checks which button it was and executed the corresponding code.
+     * @param _e the MouseEvent reuslting in this call
+     */
+    private mouseClickOnToolbar(_e: MouseEvent): void {
       let target: HTMLInputElement = <HTMLInputElement>_e.target;
       switch (target.id) {
         case "add-label":
@@ -293,7 +349,7 @@ namespace Fudge {
           this.sheet.redraw(this.playbackTime);
           break;
         case "add-key":
-
+            //TODO: add this back in once/if the button is moved back up from the individual lines.
           break;
         case "start":
           this.playbackTime = 0;
@@ -327,21 +383,22 @@ namespace Fudge {
       }
     }
 
-    private toolbarChange(_e: MouseEvent): void {
+    /**
+     * Handles changes of the input elements on the toolbar and reacts accordingly.
+     * @param _e The ChangeEvent on one of the input elements of the Toolbar
+     */
+    private changeOnToolbar(_e: Event): void {
       let target: HTMLInputElement = <HTMLInputElement>_e.target;
 
       switch (target.id) {
         case "playmode":
           this.cmpAnimator.playmode = FudgeCore.ANIMATION_PLAYMODE[target.value];
-          // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
           break;
         case "fps":
-          // console.log("fps changed to", target.value);
           if (!isNaN(+target.value))
             this.animation.fps = +target.value;
           break;
         case "sps":
-          // console.log("sps changed to", target.value);
           if (!isNaN(+target.value)) {
             this.animation.stepsPerSecond = +target.value;
             this.sheet.redraw(this.playbackTime);
@@ -353,7 +410,11 @@ namespace Fudge {
       }
     }
 
-    private attributeListClick(_e: MouseEvent): void {
+    /**
+     * Handles mouseClicks onto the attribute list. Currently only checks for the "add key" button to be clicked and adds a key.
+     * @param _e the MouseEvent that resulted in this call
+     */
+    private mouseClickOnAttributeList(_e: MouseEvent): void {
       if (_e.target instanceof HTMLButtonElement && _e.target.classList.contains("add-key")) {
         let inputElement: HTMLInputElement = _e.target.parentElement.querySelector("input");
         let sequence: FudgeCore.AnimationSequence = this.findSequenceToAddKeyTo(this.controller.getElementIndex(), this.animation.animationStructure, inputElement);
@@ -362,6 +423,13 @@ namespace Fudge {
       }
     }
 
+    /**
+     * Runs recursively through the given structures looking for the clicked input Element to return the corresponding AnimationSequence.
+     * @param _elementIndex The Mutator structure that holds the HTML Input Elements. Needs have the same structure as _squenceIndex
+     * @param _sequenceIndex The AnimationStructure of the current animation
+     * @param _input the InputElement to search for
+     * @returns the corresponding AnimationSequence to the given input element
+     */
     private findSequenceToAddKeyTo(_elementIndex: FudgeCore.Mutator, _sequenceIndex: FudgeCore.AnimationStructure, _input: HTMLElement): FudgeCore.AnimationSequence {
       let result: FudgeCore.AnimationSequence = null;
       for (let key in _elementIndex) {
@@ -376,14 +444,19 @@ namespace Fudge {
       return result;
     }
 
+    /**
+     * Handle the change Event from the attributeList and apply it to the sequence in question. 
+     * Needed to allow for manipulation of the value of the keys inside the editor without going through ViewData. 
+     * @param _e ChangeEvent from the Attribute List that carries information on what was changed
+     */
     private changeAttribute(_e: Event): void {
-      console.log(_e);
-      console.log(this.controller.getMutator());
-      // console.log("1", this.controller.getMutator());
-      // console.log("2", this.controller.collectMutator());
-      // this.controller.BuildFromMutator(this.animation.getMutated(this.playbackTime, 1, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
+      //TODO
     }
 
+    /**
+     * Updates everything to have a consistent display of the animation view
+     * @param _m Mutator from the Animation to update the display with.
+     */
     private updateDisplay(_m: FudgeCore.Mutator = null): void {
       this.sheet.redraw(this.playbackTime);
       if (!_m)
@@ -395,11 +468,20 @@ namespace Fudge {
       this.controller.updateMutator(_m);
     }
 
+    /**
+     * Allows you to set the playback time. Will clamp the time between 0 and animation.totalTime. 
+     * @param _time the time to set the playback time to.
+     * @param updateDisplay should the display also be updated? Default: true
+     */
     private setTime(_time: number, updateDisplay: boolean = true): void {
+      //TODO: check if it makes sense to not clamp the time to the max of animation.totalTime.
       this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
       if (updateDisplay) this.updateDisplay();
     }
 
+    /**
+     * Gets called every animation frame. If the animation is currently supposed to be playing, play it.
+     */
     private playAnimation(): void {
       requestAnimationFrame(this.playAnimation.bind(this));
       if (!this.playing) return;
@@ -410,11 +492,16 @@ namespace Fudge {
       this.updateDisplay(m);
     }
 
+    /**
+     * Adds the "add key" buttons to the list.
+     * @param _m the Mutator containing the htmlInputElements from the attribute List.
+     */
     private addKeyButtons(_m: FudgeCore.Mutator): void {
       for (let key in _m) {
         if (_m[key] instanceof HTMLInputElement) {
           let input: HTMLInputElement = <HTMLInputElement>_m[key];
           let button: HTMLButtonElement = document.createElement("button");
+          //TODO: change this to the actual icons
           button.classList.add("fa", "fa-plus-square", "add-key");
           input.parentElement.appendChild(button);
         } else {
@@ -423,6 +510,9 @@ namespace Fudge {
       }
     }
 
+    /**
+     * Swaps the sheets to the next one in the list. currently there are only 2 sheets. Might be obsolete once there is a specific sheet selector.
+     */
     private nextSheet(): void {
       this.sheetIndex++;
       if (this.sheetIndex + 1 > this.sheets.length) this.sheetIndex = 0;
@@ -430,8 +520,11 @@ namespace Fudge {
       this.sheet.redraw(this.playbackTime);
     }
 
+    /**
+     * A small generator that creates "attribute-animal" strings to initialize new Events and Labels with.
+     */
     private randomNameGenerator(): string {
-      let attr: string[] = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
+      let attr: string[] = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold", "brown", "sluggish", "lazy", "hardworking", "amazing", "father", "mother", "baby"];
       let anim: string[] = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion", "penguin", "pterodactyl"];
 
       return attr[Math.floor(Math.random() * attr.length)] + "-" + anim[Math.floor(Math.random() * anim.length)];

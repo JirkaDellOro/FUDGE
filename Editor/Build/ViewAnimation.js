@@ -6,6 +6,10 @@ var Fudge;
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../Build/Fudge"/>
 (function (Fudge) {
+    /**
+     * Creates, manipulates and administers an Animation View
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     class ViewAnimation extends Fudge.View {
         constructor(_parent) {
             super(_parent);
@@ -13,13 +17,15 @@ var Fudge;
             this.sheetIndex = 0;
             this.time = new FudgeCore.Time();
             this.playing = false;
-            this.playbackTime = 500;
-            this.openAnimation();
-            this.fillContent();
-            this.installListeners();
+            this.playbackTime = 0;
+            // this.openAnimation();
         }
-        openAnimation() {
-            //TODO replace with file opening dialoge
+        /**
+         * Opens the Animation attached to a given Node. Creates a new Node if no Node given.
+         * @param _node The node that should be animated/has an animation that should be changed
+         */
+        openAnimation(_node = null) {
+            //TODO: Remove dummy animation, replace with empty animation.
             let seq1 = new FudgeCore.AnimationSequence();
             seq1.addKey(new FudgeCore.AnimationKey(0, 0));
             seq1.addKey(new FudgeCore.AnimationKey(500, 45));
@@ -30,36 +36,43 @@ var Fudge;
             seq2.addKey(new FudgeCore.AnimationKey(500, 0, 0, 0.02));
             seq2.addKey(new FudgeCore.AnimationKey(1000, 5));
             seq2.addKey(new FudgeCore.AnimationKey(1500, 0, -0.02));
-            this.animation = new FudgeCore.Animation("TestAnimation", {
-                components: {
-                    ComponentTransform: [
-                        {
-                            "ƒ.ComponentTransform": {
-                                position: {
-                                    x: new FudgeCore.AnimationSequence(),
-                                    y: seq2,
-                                    z: new FudgeCore.AnimationSequence()
-                                },
-                                rotation: {
-                                    x: new FudgeCore.AnimationSequence(),
-                                    y: seq1,
-                                    z: new FudgeCore.AnimationSequence()
-                                }
-                            }
-                        }
-                    ]
-                }
-            }, 60);
+            this.animation = new FudgeCore.Animation("TestAnimation" /*, {
+              components: {
+                ComponentTransform: [
+                  {
+                    "ƒ.ComponentTransform": {
+                      position: {
+                        x: new FudgeCore.AnimationSequence(),
+                        y: seq2,
+                        z: new FudgeCore.AnimationSequence()
+                      },
+                      rotation: {
+                        x: new FudgeCore.AnimationSequence(),
+                        y: seq1,
+                        z: new FudgeCore.AnimationSequence()
+                      }
+                    }
+                  }
+                ]
+              }
+            }*/);
             this.animation.labels["One"] = 200;
             this.animation.labels["Two"] = 750;
             this.animation.setEvent("EventOne", 500);
             this.animation.setEvent("EventTwo", 1000);
-            this.node = new FudgeCore.Node("Testnode");
-            this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
+            //End of dummy animation
+            this.node = _node || new FudgeCore.Node("Testnode");
+            this.cmpAnimator = this.node.getComponent(FudgeCore.ComponentAnimator);
+            if (!this.cmpAnimator) {
+                this.cmpAnimator = new FudgeCore.ComponentAnimator(this.animation);
+                this.node.addComponent(this.cmpAnimator);
+            }
+            this.animation = this.cmpAnimator.animation;
+            console.log("node", this.node);
+            this.fillContent();
+            this.installListeners();
         }
         fillContent() {
-            // this.content = document.createElement("span");
-            // this.content.id = "TESTID";
             this.toolbar = document.createElement("div");
             this.toolbar.id = "toolbar";
             this.toolbar.style.width = "300px";
@@ -70,7 +83,6 @@ var Fudge;
             this.attributeList.id = "attributeList";
             this.attributeList.style.width = "300px";
             this.attributeList.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.changeAttribute.bind(this));
-            //TODO: Add Moni's custom Element here
             this.controller = new FudgeUserInterface.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
             this.canvas = document.createElement("canvas");
             this.canvas.width = 1500;
@@ -87,7 +99,6 @@ var Fudge;
             this.hover.style.display = "none";
             this.content.appendChild(this.toolbar);
             this.content.appendChild(this.attributeList);
-            // this.content.appendChild(this.canvasSheet);
             this.content.appendChild(this.canvas);
             this.content.appendChild(this.hover);
             let sheetButton = document.createElement("button");
@@ -97,31 +108,48 @@ var Fudge;
             sheetButton.style.right = "0";
             sheetButton.addEventListener("click", this.nextSheet.bind(this));
             this.content.appendChild(sheetButton);
-            this.sheets.push(new Fudge.ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
-            this.sheets.push(new Fudge.ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
+            this.sheets.push(new Fudge.ViewAnimationSheetDope(this, this.crc, new FudgeCore.Vector2(0.5, 1), new FudgeCore.Vector2(0, 0)));
+            this.sheets.push(new Fudge.ViewAnimationSheetCurve(this, this.crc, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200)));
             this.sheet = this.sheets[this.sheetIndex];
             this.sheet.redraw(this.playbackTime);
             this.addKeyButtons(this.controller.getElementIndex());
-            // sheet.translate();
         }
+        /**
+         * adds all Listeners needed for the ViewAnimation to work.
+         */
         installListeners() {
-            this.canvas.addEventListener("click", this.mouseClick.bind(this));
-            this.canvas.addEventListener("mousedown", this.mouseDown.bind(this));
-            this.canvas.addEventListener("mousemove", this.mouseMove.bind(this));
-            this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
-            this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
-            this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
-            this.attributeList.addEventListener("click", this.attributeListClick.bind(this));
+            this.canvas.addEventListener("click", this.mouseClickOnCanvas.bind(this));
+            this.canvas.addEventListener("mousedown", this.mouseDownOnCanvas.bind(this));
+            this.canvas.addEventListener("mousemove", this.mouseMoveOnCanvas.bind(this));
+            this.canvas.addEventListener("mouseup", this.mouseUpOnCanvas.bind(this));
+            this.toolbar.addEventListener("click", this.mouseClickOnToolbar.bind(this));
+            this.toolbar.addEventListener("change", this.changeOnToolbar.bind(this));
+            this.attributeList.addEventListener("click", this.mouseClickOnAttributeList.bind(this));
             requestAnimationFrame(this.playAnimation.bind(this));
         }
         deconstruct() {
-            //
+            this.canvas.removeEventListener("click", this.mouseClickOnCanvas.bind(this));
+            this.canvas.removeEventListener("mousedown", this.mouseDownOnCanvas.bind(this));
+            this.canvas.removeEventListener("mousemove", this.mouseMoveOnCanvas.bind(this));
+            this.canvas.removeEventListener("mouseup", this.mouseUpOnCanvas.bind(this));
+            this.toolbar.removeEventListener("click", this.mouseClickOnToolbar.bind(this));
+            this.toolbar.removeEventListener("change", this.changeOnToolbar.bind(this));
+            this.attributeList.removeEventListener("click", this.mouseClickOnAttributeList.bind(this));
         }
-        mouseClick(_e) {
-            // console.log(_e);
+        /**
+         * Handles mouseclicks onto the canvas.
+         * @param _e The MouseEvent resulting in this call.
+         */
+        mouseClickOnCanvas(_e) {
+            // TODO: check if it'd be better to use this instead of mousedown in some occasions.
         }
-        mouseDown(_e) {
+        /**
+         * handles mousedown events onto the canvas. Currently causes a key/label/event to be selected.
+         * @param _e The MouseEvenet resulting in this call.
+         */
+        mouseDownOnCanvas(_e) {
             if (_e.offsetY < 50) {
+                //TODO adjust time to fit into the sps
                 this.setTime(_e.offsetX / this.sheet.scale.x);
                 return;
             }
@@ -142,19 +170,32 @@ var Fudge;
             }
             console.log(obj);
         }
-        mouseMove(_e) {
+        /**
+         * handles mousemove on the canvas. currently only checks for a change of the replaytime but could be expanded to handle/propagate key manipulation/dragging.
+         * @param _e The MouseEvent resulting in this call
+         */
+        mouseMoveOnCanvas(_e) {
             _e.preventDefault();
             if (_e.buttons != 1)
                 return;
             if (_e.offsetY < 50) {
+                //TODO: adjust time to fit into the sps
                 this.setTime(_e.offsetX / this.sheet.scale.x);
                 return;
             }
+            //TODO: handle key/label/event dragging
         }
-        mouseUp(_e) {
-            // console.log(_e);
-            //
+        /**
+         * handles mouseup events on the canvas. currently does nothing but may be needed in the future.
+         * @param _e The MouseEvent resulting in this call
+         */
+        mouseUpOnCanvas(_e) {
+            // probably needed to handle key/label/event dragging
         }
+        /**
+         * Fills the toolbar with all its input elements / buttons / etc.
+         * @param _tb the HtmlElement to add the toolbarelements to
+         */
         fillToolbar(_tb) {
             let playmode = document.createElement("select");
             playmode.id = "playmode";
@@ -204,6 +245,7 @@ var Fudge;
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
             buttons.push(document.createElement("button"));
+            //TODO: change this to the actual icons and stop using these placeholder icons
             buttons[0].classList.add("fa", "fa-fast-backward", "start");
             buttons[1].classList.add("fa", "fa-backward", "back");
             buttons[2].classList.add("fa", "fa-play", "play");
@@ -224,8 +266,11 @@ var Fudge;
                 _tb.appendChild(b);
             }
         }
-        toolbarClick(_e) {
-            // console.log("click", _e.target);
+        /**
+         * Handles a click on the toolbar, checks which button it was and executed the corresponding code.
+         * @param _e the MouseEvent reuslting in this call
+         */
+        mouseClickOnToolbar(_e) {
             let target = _e.target;
             switch (target.id) {
                 case "add-label":
@@ -237,6 +282,7 @@ var Fudge;
                     this.sheet.redraw(this.playbackTime);
                     break;
                 case "add-key":
+                    //TODO: add this back in once/if the button is moved back up from the individual lines.
                     break;
                 case "start":
                     this.playbackTime = 0;
@@ -268,20 +314,21 @@ var Fudge;
                     break;
             }
         }
-        toolbarChange(_e) {
+        /**
+         * Handles changes of the input elements on the toolbar and reacts accordingly.
+         * @param _e The ChangeEvent on one of the input elements of the Toolbar
+         */
+        changeOnToolbar(_e) {
             let target = _e.target;
             switch (target.id) {
                 case "playmode":
                     this.cmpAnimator.playmode = FudgeCore.ANIMATION_PLAYMODE[target.value];
-                    // console.log(FudgeCore.ANIMATION_PLAYMODE[target.value]);
                     break;
                 case "fps":
-                    // console.log("fps changed to", target.value);
                     if (!isNaN(+target.value))
                         this.animation.fps = +target.value;
                     break;
                 case "sps":
-                    // console.log("sps changed to", target.value);
                     if (!isNaN(+target.value)) {
                         this.animation.stepsPerSecond = +target.value;
                         this.sheet.redraw(this.playbackTime);
@@ -292,7 +339,11 @@ var Fudge;
                     break;
             }
         }
-        attributeListClick(_e) {
+        /**
+         * Handles mouseClicks onto the attribute list. Currently only checks for the "add key" button to be clicked and adds a key.
+         * @param _e the MouseEvent that resulted in this call
+         */
+        mouseClickOnAttributeList(_e) {
             if (_e.target instanceof HTMLButtonElement && _e.target.classList.contains("add-key")) {
                 let inputElement = _e.target.parentElement.querySelector("input");
                 let sequence = this.findSequenceToAddKeyTo(this.controller.getElementIndex(), this.animation.animationStructure, inputElement);
@@ -300,6 +351,13 @@ var Fudge;
                 this.sheet.redraw(this.playbackTime);
             }
         }
+        /**
+         * Runs recursively through the given structures looking for the clicked input Element to return the corresponding AnimationSequence.
+         * @param _elementIndex The Mutator structure that holds the HTML Input Elements. Needs have the same structure as _squenceIndex
+         * @param _sequenceIndex The AnimationStructure of the current animation
+         * @param _input the InputElement to search for
+         * @returns the corresponding AnimationSequence to the given input element
+         */
         findSequenceToAddKeyTo(_elementIndex, _sequenceIndex, _input) {
             let result = null;
             for (let key in _elementIndex) {
@@ -314,13 +372,18 @@ var Fudge;
             }
             return result;
         }
+        /**
+         * Handle the change Event from the attributeList and apply it to the sequence in question.
+         * Needed to allow for manipulation of the value of the keys inside the editor without going through ViewData.
+         * @param _e ChangeEvent from the Attribute List that carries information on what was changed
+         */
         changeAttribute(_e) {
-            console.log(_e);
-            console.log(this.controller.getMutator());
-            // console.log("1", this.controller.getMutator());
-            // console.log("2", this.controller.collectMutator());
-            // this.controller.BuildFromMutator(this.animation.getMutated(this.playbackTime, 1, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS));
+            //TODO
         }
+        /**
+         * Updates everything to have a consistent display of the animation view
+         * @param _m Mutator from the Animation to update the display with.
+         */
         updateDisplay(_m = null) {
             this.sheet.redraw(this.playbackTime);
             if (!_m)
@@ -331,11 +394,20 @@ var Fudge;
             // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
             this.controller.updateMutator(_m);
         }
+        /**
+         * Allows you to set the playback time. Will clamp the time between 0 and animation.totalTime.
+         * @param _time the time to set the playback time to.
+         * @param updateDisplay should the display also be updated? Default: true
+         */
         setTime(_time, updateDisplay = true) {
+            //TODO: check if it makes sense to not clamp the time to the max of animation.totalTime.
             this.playbackTime = Math.min(this.animation.totalTime, Math.max(0, _time));
             if (updateDisplay)
                 this.updateDisplay();
         }
+        /**
+         * Gets called every animation frame. If the animation is currently supposed to be playing, play it.
+         */
         playAnimation() {
             requestAnimationFrame(this.playAnimation.bind(this));
             if (!this.playing)
@@ -346,11 +418,16 @@ var Fudge;
             this.playbackTime = t;
             this.updateDisplay(m);
         }
+        /**
+         * Adds the "add key" buttons to the list.
+         * @param _m the Mutator containing the htmlInputElements from the attribute List.
+         */
         addKeyButtons(_m) {
             for (let key in _m) {
                 if (_m[key] instanceof HTMLInputElement) {
                     let input = _m[key];
                     let button = document.createElement("button");
+                    //TODO: change this to the actual icons
                     button.classList.add("fa", "fa-plus-square", "add-key");
                     input.parentElement.appendChild(button);
                 }
@@ -359,6 +436,9 @@ var Fudge;
                 }
             }
         }
+        /**
+         * Swaps the sheets to the next one in the list. currently there are only 2 sheets. Might be obsolete once there is a specific sheet selector.
+         */
         nextSheet() {
             this.sheetIndex++;
             if (this.sheetIndex + 1 > this.sheets.length)
@@ -366,8 +446,11 @@ var Fudge;
             this.sheet = this.sheets[this.sheetIndex];
             this.sheet.redraw(this.playbackTime);
         }
+        /**
+         * A small generator that creates "attribute-animal" strings to initialize new Events and Labels with.
+         */
         randomNameGenerator() {
-            let attr = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold"];
+            let attr = ["red", "blue", "green", "pink", "yellow", "purple", "orange", "fast", "slow", "quick", "boring", "questionable", "king", "queen", "smart", "gold", "brown", "sluggish", "lazy", "hardworking", "amazing", "father", "mother", "baby"];
             let anim = ["cow", "fish", "elephant", "cat", "dog", "bat", "chameleon", "caterpillar", "crocodile", "hamster", "horse", "panda", "giraffe", "lukas", "koala", "jellyfish", "lion", "lizard", "platypus", "scorpion", "penguin", "pterodactyl"];
             return attr[Math.floor(Math.random() * attr.length)] + "-" + anim[Math.floor(Math.random() * anim.length)];
         }
@@ -376,43 +459,58 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * baseclass for different ways of visualising animations inside the ViewAnimation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     class ViewAnimationSheet {
-        //TODO stop using hardcoded colors
-        constructor(_view, _crc, _seq, _scale = new FudgeCore.Vector2(1, 1), _pos = new FudgeCore.Vector2()) {
+        //TODO rotate the y axis so positive values are up and negative are down. Might be easily doable by just changing scale.y to a negative number instead of a positive one.
+        /**
+         *
+         * @param _view View this sheet is attached to
+         * @param _crc The Canvas Rendering Context the sheet should draw onto
+         * @param _scale The scale at which the sheet should render. Defaults to (1, 1)
+         * @param _pos The position from which to start drawing. Defaults to (0, 0)
+         * @author Lukas Scheuerle, HFU, 2019
+         */
+        constructor(_view, _crc, _scale = new FudgeCore.Vector2(1, 1), _pos = new FudgeCore.Vector2()) {
             this.keys = [];
             this.sequences = [];
             this.labels = [];
             this.events = [];
             this.view = _view;
             this.crc2 = _crc;
-            this.seq = _seq;
             this.scale = _scale;
             this.position = _pos;
         }
+        /**
+         * Sets the position of the sheet
+         * @param _time the time to move to
+         * @param _value the value to move to. Default: unchanged
+         */
         moveTo(_time, _value = this.position.y) {
             this.position.x = _time;
             this.position.y = _value;
         }
-        translate() {
-            this.crc2.translate(this.position.x, this.position.y);
-            this.crc2.scale(this.scale.x, this.scale.y);
-        }
+        /**
+         * Redraws the entire display of the animation.
+         * @param _time the time at which to draw the cursor.
+         */
         redraw(_time) {
             this.clear();
-            this.translate();
+            this.transform();
             this.drawKeys();
             this.drawTimeline();
             this.drawEventsAndLabels();
             this.drawCursor(_time);
         }
-        clear() {
-            this.crc2.resetTransform();
-            let maxDistance = 10000;
-            this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
-        }
+        /**
+         * Draws the timeline at the top of the canvas
+         */
         drawTimeline() {
             this.crc2.strokeStyle = "black";
             this.crc2.resetTransform();
+            //TODO stop using hardcoded values
             let timelineHeight = 50;
             let maxDistance = 10000;
             let timeline = new Path2D();
@@ -429,7 +527,6 @@ var Fudge;
             // [stepsPerSecond, stepsPerDisplayText] = this.calculateDisplay(pixelPerSecond);
             let pixelPerStep = pixelPerSecond / stepsPerSecond;
             let steps = 0;
-            // console.log(pixelPerSecond, pixelPerStep);
             this.crc2.strokeStyle = "black";
             this.crc2.fillStyle = "black";
             for (let i = 0; i < maxDistance; i += pixelPerStep) {
@@ -449,25 +546,14 @@ var Fudge;
             }
             this.crc2.stroke(timeline);
         }
-        drawCursor(_time) {
-            _time *= this.scale.x;
-            let cursor = new Path2D();
-            cursor.rect(_time - 3, 0, 6, 50);
-            cursor.moveTo(_time, 50);
-            cursor.lineTo(_time, this.crc2.canvas.height);
-            this.crc2.strokeStyle = "red";
-            this.crc2.fillStyle = "red";
-            this.crc2.stroke(cursor);
-            this.crc2.fill(cursor);
-        }
-        drawKeys() {
-            let inputMutator = this.view.controller.getElementIndex();
-            //TODO: stop recreating the sequence elements all the time
-            this.sequences = [];
-            this.keys = [];
-            this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-        }
+        /**
+         * Get the Object that is below a certain position
+         * @param _x x position
+         * @param _y y position
+         * @returns The object at the given position. null if there is nothing of interest.
+         */
         getObjectAtPoint(_x, _y) {
+            //Timeline
             for (let l of this.labels) {
                 if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
                     return l;
@@ -478,6 +564,7 @@ var Fudge;
                     return e;
                 }
             }
+            //Keys
             _x = _x / this.scale.x - this.position.x;
             _y = _y / this.scale.y - this.position.y / this.scale.y;
             for (let k of this.keys) {
@@ -487,6 +574,18 @@ var Fudge;
             }
             return null;
         }
+        /**
+         * Translates and scales the canvas to the saved position and scale
+         */
+        transform() {
+            this.crc2.translate(this.position.x, this.position.y);
+            this.crc2.scale(this.scale.x, this.scale.y);
+        }
+        /**
+         * Traverses the animation structure to call for [drawSequence()] on the sequences inside the animation structure.
+         * @param _animation the animation structure to traverse
+         * @param _inputs the input strucutre to traverse. should have the same structure as _animation.
+         */
         traverseStructures(_animation, _inputs) {
             for (let i in _animation) {
                 if (_animation[i] instanceof FudgeCore.AnimationSequence) {
@@ -497,6 +596,20 @@ var Fudge;
                 }
             }
         }
+        /**
+         * Draws a key as a diamond shape.
+         * ```
+         *   /\
+         *  /  \
+         *  \  /
+         *   \/
+         * ```
+         * @param _x x position to draw the key at (center)
+         * @param _y y position to draw the key at (center)
+         * @param _h height to draw the key with
+         * @param _w width to draw the key with
+         * @param _c the color to draw the key with
+         */
         drawKey(_x, _y, _h, _w, _c) {
             let key = new Path2D();
             key.moveTo(_x - _w, _y);
@@ -511,7 +624,23 @@ var Fudge;
             this.crc2.stroke(key);
             return key;
         }
+        /**
+         * Starts the traversation of the structures to redraw all sequences and subsequently all keys
+         */
+        drawKeys() {
+            //TODO: Fix that for some reason the first time this is called the rects of the input elements return all 0s and thus the sheet isn't properly drawn.
+            //TODO: possible optimisation: only regenerate if necessary, otherwise load a saved image. (might lead to problems with the keys not being clickable anymore though)
+            let inputMutator = this.view.controller.getElementIndex();
+            //TODO: stop recreating the sequence elements all the time
+            this.sequences = [];
+            this.keys = [];
+            this.traverseStructures(this.view.animation.animationStructure, inputMutator);
+        }
+        /**
+         * (re)-draws all events and labels on top of the timeline
+         */
         drawEventsAndLabels() {
+            //TODO stop using hardcoded values
             let maxDistance = 10000;
             let labelDisplayHeight = 30 + 50;
             let line = new Path2D();
@@ -559,6 +688,29 @@ var Fudge;
                 this.crc2.stroke(p);
             }
         }
+        /**
+         * resets the transform and clears the canvas.
+         */
+        clear() {
+            this.crc2.resetTransform();
+            let maxDistance = 10000;
+            this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
+        }
+        /**
+         * draws the cursor on top of the canvas at the given time
+         * @param _time the time to draw the cursor at
+         */
+        drawCursor(_time) {
+            _time *= this.scale.x;
+            let cursor = new Path2D();
+            cursor.rect(_time - 3, 0, 6, 50);
+            cursor.moveTo(_time, 50);
+            cursor.lineTo(_time, this.crc2.canvas.height);
+            this.crc2.strokeStyle = "red";
+            this.crc2.fillStyle = "red";
+            this.crc2.stroke(cursor);
+            this.crc2.fill(cursor);
+        }
         calculateDisplay(_ppS) {
             // let minPixelPerStep: number = 10;
             // let maxPixelPerStep: number = 50;
@@ -576,6 +728,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Curve View visualisation of an Animation for the Animation View.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     class ViewAnimationSheetCurve extends Fudge.ViewAnimationSheet {
         drawKeys() {
             this.drawYScale();
@@ -593,7 +749,7 @@ var Fudge;
             line.moveTo(0, _sequence.getKey(0).Value);
             //TODO: stop recreating the sequence element all the time
             //TODO: get color from input element or former sequence element.
-            let seq = { color: this.randomColor(), element: _input, sequence: _sequence };
+            let seq = { color: this.randomPastellColor(), element: _input, sequence: _sequence };
             this.sequences.push(seq);
             for (let i = 0; i < _sequence.length; i++) {
                 let k = _sequence.getKey(i);
@@ -615,9 +771,9 @@ var Fudge;
             this.crc2.strokeStyle = seq.color;
             this.crc2.stroke(line);
         }
-        drawKey(_x, _y, _h, _w, _c) {
-            return super.drawKey(_x, _y, _h, _w, _c);
-        }
+        /**
+         * draws a scale for the y axis.
+         */
         drawYScale() {
             //TODO: make this actually look reasonable
             let pixelPerValue = this.calcScaleSize();
@@ -634,6 +790,9 @@ var Fudge;
             }
             this.crc2.stroke(line);
         }
+        /**
+         * attempts to calculate the optimal spacing and scale of the y scale visualisation
+         */
         calcScaleSize() {
             let min = 10;
             let max = 25;
@@ -646,7 +805,10 @@ var Fudge;
             }
             return pixelPerValue;
         }
-        randomColor() {
+        /**
+         * generates a random pastell-like color using hsl ([0, 360), 80%, 80%)
+         */
+        randomPastellColor() {
             return "hsl(" + Math.random() * 360 + ", 80%, 80%)";
         }
     }
@@ -654,18 +816,11 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    /**
+     * Dopesheet Visualisation of an Animation for the Animation Editor.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     class ViewAnimationSheetDope extends Fudge.ViewAnimationSheet {
-        async drawKeys() {
-            //TODO: Fix that for some reason the first time this is called the rects return all 0s.
-            //TODO: possible optimisation: only regenerate if necessary, otherwise load a saved image. (might lead to problems with the keys not being clickable anymore though)
-            // const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-            let inputMutator = this.view.controller.getElementIndex();
-            // console.log(inputMutator);
-            // await delay(1);
-            // console.log(inputMutator.components["ComponentTransform"][0]["ƒ.ComponentTransform"]["rotation"]["y"].getBoundingClientRect());
-            // }, 1000);
-            this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-        }
         drawSequence(_sequence, _input) {
             let rect = _input.getBoundingClientRect();
             let y = rect.top - this.view.content.getBoundingClientRect().top + rect.height / 2;
@@ -690,6 +845,10 @@ var Fudge;
 var Fudge;
 ///<reference types="../../Build/Fudge"/>
 (function (Fudge) {
+    /**
+     * A Template to create an Animation Editor with.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
     class ViewAnimationTemplate extends Fudge.PanelTemplate {
         constructor() {
             super();

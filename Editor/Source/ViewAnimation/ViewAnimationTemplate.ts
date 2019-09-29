@@ -1,6 +1,10 @@
 ///<reference types="../../Build/Fudge"/>
 
 namespace Fudge {
+  /**
+   * A Template to create an Animation Editor with.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export class ViewAnimationTemplate extends PanelTemplate {
     constructor() {
       super();

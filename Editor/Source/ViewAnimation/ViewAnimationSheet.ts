@@ -1,7 +1,10 @@
 namespace Fudge {
+  /**
+   * baseclass for different ways of visualising animations inside the ViewAnimation.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
   export abstract class ViewAnimationSheet {
     view: ViewAnimation;
-    seq: FudgeCore.AnimationSequence[];
     crc2: CanvasRenderingContext2D;
     scale: FudgeCore.Vector2;
     protected position: FudgeCore.Vector2;
@@ -11,39 +14,51 @@ namespace Fudge {
     protected labels: ViewAnimationLabel[] = [];
     protected events: ViewAnimationEvent[] = [];
 
-    //TODO stop using hardcoded colors
+    //TODO rotate the y axis so positive values are up and negative are down. Might be easily doable by just changing scale.y to a negative number instead of a positive one.
 
-    constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _seq: FudgeCore.AnimationSequence[], _scale: FudgeCore.Vector2 = new FudgeCore.Vector2(1, 1), _pos: FudgeCore.Vector2 = new FudgeCore.Vector2()) {
+    /**
+     * 
+     * @param _view View this sheet is attached to
+     * @param _crc The Canvas Rendering Context the sheet should draw onto
+     * @param _scale The scale at which the sheet should render. Defaults to (1, 1)
+     * @param _pos The position from which to start drawing. Defaults to (0, 0)
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    constructor(_view: ViewAnimation, _crc: CanvasRenderingContext2D, _scale: FudgeCore.Vector2 = new FudgeCore.Vector2(1, 1), _pos: FudgeCore.Vector2 = new FudgeCore.Vector2()) {
       this.view = _view;
       this.crc2 = _crc;
-      this.seq = _seq;
       this.scale = _scale;
       this.position = _pos;
     }
+
+    /**
+     * Sets the position of the sheet
+     * @param _time the time to move to
+     * @param _value the value to move to. Default: unchanged
+     */
     moveTo(_time: number, _value: number = this.position.y): void {
       this.position.x = _time;
       this.position.y = _value;
     }
-    translate(): void {
-      this.crc2.translate(this.position.x, this.position.y);
-      this.crc2.scale(this.scale.x, this.scale.y);
-    }
+    /**
+     * Redraws the entire display of the animation.
+     * @param _time the time at which to draw the cursor.
+     */
     redraw(_time: number): void {
       this.clear();
-      this.translate();
+      this.transform();
       this.drawKeys();
       this.drawTimeline();
       this.drawEventsAndLabels();
       this.drawCursor(_time);
     }
-    clear(): void {
-      this.crc2.resetTransform();
-      let maxDistance: number = 10000;
-      this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
-    }
+    /**
+     * Draws the timeline at the top of the canvas
+     */
     drawTimeline(): void {
       this.crc2.strokeStyle = "black";
       this.crc2.resetTransform();
+      //TODO stop using hardcoded values
       let timelineHeight: number = 50;
       let maxDistance: number = 10000;
       let timeline: Path2D = new Path2D();
@@ -60,7 +75,6 @@ namespace Fudge {
       // [stepsPerSecond, stepsPerDisplayText] = this.calculateDisplay(pixelPerSecond);
       let pixelPerStep: number = pixelPerSecond / stepsPerSecond;
       let steps: number = 0;
-      // console.log(pixelPerSecond, pixelPerStep);
       this.crc2.strokeStyle = "black";
       this.crc2.fillStyle = "black";
       for (let i: number = 0; i < maxDistance; i += pixelPerStep) {
@@ -80,28 +94,14 @@ namespace Fudge {
       this.crc2.stroke(timeline);
     }
 
-    drawCursor(_time: number): void {
-      _time *= this.scale.x;
-      let cursor: Path2D = new Path2D();
-      cursor.rect(_time - 3, 0, 6, 50);
-      cursor.moveTo(_time, 50);
-      cursor.lineTo(_time, this.crc2.canvas.height);
-      this.crc2.strokeStyle = "red";
-      this.crc2.fillStyle = "red";
-      this.crc2.stroke(cursor);
-      this.crc2.fill(cursor);
-    }
-
-    drawKeys(): void {
-      let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
-
-      //TODO: stop recreating the sequence elements all the time
-      this.sequences = [];
-      this.keys = [];
-      this.traverseStructures(this.view.animation.animationStructure, inputMutator);
-    }
-
+    /**
+     * Get the Object that is below a certain position
+     * @param _x x position
+     * @param _y y position
+     * @returns The object at the given position. null if there is nothing of interest.
+     */
     getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+      //Timeline
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
           return l;
@@ -112,6 +112,7 @@ namespace Fudge {
           return e;
         }
       }
+      //Keys
       _x = _x / this.scale.x - this.position.x;
       _y = _y / this.scale.y - this.position.y / this.scale.y;
       for (let k of this.keys) {
@@ -121,8 +122,19 @@ namespace Fudge {
       }
       return null;
     }
-
-
+    
+    /**
+     * Translates and scales the canvas to the saved position and scale
+     */
+    protected transform(): void {
+      this.crc2.translate(this.position.x, this.position.y);
+      this.crc2.scale(this.scale.x, this.scale.y);
+    }
+    /**
+     * Traverses the animation structure to call for [drawSequence()] on the sequences inside the animation structure.
+     * @param _animation the animation structure to traverse
+     * @param _inputs the input strucutre to traverse. should have the same structure as _animation.
+     */
     protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
       for (let i in _animation) {
         if (_animation[i] instanceof FudgeCore.AnimationSequence) {
@@ -133,9 +145,27 @@ namespace Fudge {
       }
     }
 
+    /**
+     * Draws the sequence to the canvas.
+     * @param _sequence Sequence to draw the keys from
+     * @param _input The corresponding input element
+     */
     protected abstract drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void;
 
-
+    /**
+     * Draws a key as a diamond shape.
+     * ```
+     *   /\
+     *  /  \
+     *  \  /
+     *   \/
+     * ```
+     * @param _x x position to draw the key at (center)
+     * @param _y y position to draw the key at (center)
+     * @param _h height to draw the key with
+     * @param _w width to draw the key with
+     * @param _c the color to draw the key with
+     */
     protected drawKey(_x: number, _y: number, _h: number, _w: number, _c: string): Path2D {
       let key: Path2D = new Path2D();
       key.moveTo(_x - _w, _y);
@@ -152,7 +182,25 @@ namespace Fudge {
       return key;
     }
 
+    /**
+     * Starts the traversation of the structures to redraw all sequences and subsequently all keys
+     */
+    protected drawKeys(): void {
+      //TODO: Fix that for some reason the first time this is called the rects of the input elements return all 0s and thus the sheet isn't properly drawn.
+      //TODO: possible optimisation: only regenerate if necessary, otherwise load a saved image. (might lead to problems with the keys not being clickable anymore though)
+      let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
+
+      //TODO: stop recreating the sequence elements all the time
+      this.sequences = [];
+      this.keys = [];
+      this.traverseStructures(this.view.animation.animationStructure, inputMutator);
+    }
+
+    /**
+     * (re)-draws all events and labels on top of the timeline
+     */
     private drawEventsAndLabels(): void {
+      //TODO stop using hardcoded values
       let maxDistance: number = 10000;
       let labelDisplayHeight: number = 30 + 50;
       let line: Path2D = new Path2D();
@@ -200,6 +248,31 @@ namespace Fudge {
         // this.crc2.fill(p);
         this.crc2.stroke(p);
       }
+    }
+
+    /**
+     * resets the transform and clears the canvas.
+     */
+    private clear(): void {
+      this.crc2.resetTransform();
+      let maxDistance: number = 10000;
+      this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
+    }
+    
+    /**
+     * draws the cursor on top of the canvas at the given time
+     * @param _time the time to draw the cursor at
+     */
+    private drawCursor(_time: number): void {
+      _time *= this.scale.x;
+      let cursor: Path2D = new Path2D();
+      cursor.rect(_time - 3, 0, 6, 50);
+      cursor.moveTo(_time, 50);
+      cursor.lineTo(_time, this.crc2.canvas.height);
+      this.crc2.strokeStyle = "red";
+      this.crc2.fillStyle = "red";
+      this.crc2.stroke(cursor);
+      this.crc2.fill(cursor);
     }
 
     private calculateDisplay(_ppS: number): [number, number] {
