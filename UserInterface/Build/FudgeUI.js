@@ -105,6 +105,13 @@ var FudgeUserInterface;
             this.toggleFoldContent = (_event) => {
                 this.content.classList.toggle("folded");
             };
+            this.collapseMenu = (_event) => {
+                if (!(this.contains(_event.target))) {
+                    if (!this.content.classList.contains("folded")) {
+                        this.toggleFoldContent(_event);
+                    }
+                }
+            };
             let button = document.createElement("button");
             button.name = _name;
             if (params._text) {
@@ -114,6 +121,7 @@ var FudgeUserInterface;
                 button.textContent = _name;
             }
             button.addEventListener("click", this.toggleFoldContent);
+            window.addEventListener("click", this.collapseMenu);
             let isSubmenu = (params._parentSignature != null);
             if (params._parentSignature) {
                 this.signature = params._parentSignature + "." + _name;
@@ -378,11 +386,7 @@ var FudgeUserInterface;
         constructor(_node, _name, _unfolded = false) {
             super();
             this.selectNode = (_event) => {
-                console.log(_event, this);
                 let event = new CustomEvent("nodeSelectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
-                console.group("selection was made, dispatching event to bubble up");
-                console.log(event);
-                console.groupEnd();
                 this.dispatchEvent(event);
             };
             this.collapseEvent = (_event) => {
@@ -532,7 +536,6 @@ var FudgeUserInterface;
         NODEMENU["BOX"] = "Primitive.Box Mesh Node";
         NODEMENU["PYRAMID"] = "Primitive.Pyramid Mesh Node";
         NODEMENU["PLANE"] = "Primitive.Plane Mesh Node";
-        NODEMENU["TEST"] = "DeleteMe.Test.DeleteMe";
     })(NODEMENU = FudgeUserInterface.NODEMENU || (FudgeUserInterface.NODEMENU = {}));
     class MultiLevelMenuManager {
         static buildFromSignature(_signature, _mutator) {

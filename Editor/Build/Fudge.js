@@ -27,7 +27,9 @@ var Fudge;
         ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
-            panel.setNode(node);
+            if (panel instanceof Fudge.NodePanel) {
+                panel.setNode(node);
+            }
         });
         ipcRenderer.on("openViewNode", (_event, _args) => {
             ƒ.Debug.log("OpenViewNode");
@@ -40,9 +42,8 @@ var Fudge;
     }
     function openViewNode() {
         node = Scenes.createAxisCross();
-        panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.NodePanelTemplate, "Node Panel");
-        panel.setNode(node);
-        Fudge.PanelManager.instance.addPanel(panel);
+        let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);
+        Fudge.PanelManager.instance.addPanel(nodePanel);
     }
     function save(_node) {
         let serialization = ƒ.Serializer.serialize(_node);
@@ -67,12 +68,15 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
 (function (Fudge) {
+    var ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
@@ -86,7 +90,7 @@ var Fudge;
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name, _template, _node) {
+        constructor(_name) {
             super();
             this.views = [];
             this.config = {
@@ -94,16 +98,6 @@ var Fudge;
                 content: [],
                 title: _name
             };
-            if (_node) {
-                this.node = _node;
-            }
-            if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
-            }
-            else {
-                let viewData = new Fudge.ViewData(this);
-                this.addView(viewData, false);
-            }
         }
         /**
          * Adds given View to the list of views on the panel.
@@ -120,11 +114,44 @@ var Fudge;
                 Fudge.PanelManager.instance.addView(_v);
             }
         }
+    }
+    Fudge.Panel = Panel;
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    class NodePanel extends Panel {
+        constructor(_name, _template, _node) {
+            super(_name);
+            this.node = _node || new ƒ.Node("Scene");
+            if (_template) {
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
+            }
+            else {
+                let viewData = new Fudge.ViewData(this);
+                this.addView(viewData, false);
+            }
+        }
+        setNode(_node) {
+            this.node = _node;
+            for (let view of this.views) {
+                if (view instanceof Fudge.ViewNode) {
+                    view.setRoot(this.node);
+                }
+                else if (view instanceof Fudge.ViewViewport) {
+                    view.setRoot(this.node);
+                }
+            }
+        }
+        getNode() {
+            return this.node;
+        }
         /**
-         * Allows to construct the view from a template config.
-         * @param template Panel Template to be used for the construction
-         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
-         */
+ * Allows to construct the view from a template config.
+ * @param template Panel Template to be used for the construction
+ * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+ */
         constructFromTemplate(template, _type) {
             let config = {
                 type: _type,
@@ -143,9 +170,6 @@ var Fudge;
                         switch (item.componentName) {
                             case Fudge.VIEW.NODE:
                                 view = new Fudge.ViewNode(this);
-                                if (this.node) {
-                                    view.setRoot(this.node);
-                                }
                                 // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case Fudge.VIEW.DATA:
@@ -153,9 +177,6 @@ var Fudge;
                                 break;
                             case Fudge.VIEW.PORT:
                                 view = new Fudge.ViewViewport(this);
-                                if (this.node) {
-                                    // (<ViewViewport>view).setRoot(this.node);
-                                }
                                 break;
                         }
                         let viewConfig = {
@@ -180,21 +201,8 @@ var Fudge;
             console.log(config);
             return config;
         }
-        //TODO: Remove and make it Event-Oriented
-        setNode(_node) {
-            this.node = _node;
-            for (let view of this.views) {
-                //HACK
-                if (view instanceof Fudge.ViewNode) {
-                    view.setRoot(this.node);
-                }
-                else if (view instanceof Fudge.ViewViewport) {
-                    view.setRoot(this.node);
-                }
-            }
-        }
     }
-    Fudge.Panel = Panel;
+    Fudge.NodePanel = NodePanel;
 })(Fudge || (Fudge = {}));
 /// <reference types="../@types/jquery"/>
 /// <reference types="../@types/golden-layout"/>
@@ -202,29 +210,15 @@ var Fudge;
 /// <reference types="../@types/jquery"/>
 /// <reference types="../@types/golden-layout"/>
 (function (Fudge) {
-    // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
+    /**
+     * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
+     * @author Monika Galkewitsch, 2019, HFU
+     * @author Lukas Scheuerle, 2019, HFU
+     */
     class PanelManager extends EventTarget {
         constructor() {
             super();
             this.panels = [];
-        }
-        /**
-         * Create new Panel from Template Structure
-         * @param _template Template to be used
-         * @param _name Name of the Panel
-         */
-        createPanelFromTemplate(_template, _name) {
-            let panel = new Fudge.Panel(_name, _template);
-            console.log(panel);
-            return panel;
-        }
-        /**
-         * Creates an Panel with nothing but the default ViewData
-         * @param _name Name of the Panel
-         */
-        createEmptyPanel(_name) {
-            let panel = new Fudge.Panel(_name);
-            return panel;
         }
         /**
          * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
@@ -381,6 +375,7 @@ var Fudge;
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 (function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
@@ -389,8 +384,14 @@ var Fudge;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
             super(_parent);
+            this.changeNodeName = (_event) => {
+                if (this.data instanceof ƒ.Node) {
+                    let target = _event.target;
+                    this.data.name = target.value;
+                }
+            };
             this.setNode = (_event) => {
-                this.node = _event.detail;
+                this.data = _event.detail;
                 while (this.content.firstChild != null) {
                     this.content.removeChild(this.content.lastChild);
                 }
@@ -403,21 +404,22 @@ var Fudge;
             //TODO: Deconstruct;
         }
         fillContent() {
-            if (this.node) {
+            if (this.data) {
                 let cntHeader = document.createElement("span");
                 let lblNodeName = document.createElement("label");
                 lblNodeName.textContent = "Name";
                 cntHeader.append(lblNodeName);
                 this.content.append(cntHeader);
-                let txtNodeName = document.createElement("input");
-                txtNodeName.value = this.node.name;
-                cntHeader.append(txtNodeName);
                 let cntComponents = document.createElement("div");
-                let nodeComponents = this.node.getAllComponents();
-                console.group("Components of the node");
-                console.log(nodeComponents);
-                for (let nodeComponent of nodeComponents) {
-                    let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
+                if (this.data instanceof ƒ.Node) {
+                    let txtNodeName = document.createElement("input");
+                    txtNodeName.addEventListener("input", this.changeNodeName);
+                    txtNodeName.value = this.data.name;
+                    cntHeader.append(txtNodeName);
+                    let nodeComponents = this.data.getAllComponents();
+                    for (let nodeComponent of nodeComponents) {
+                        let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
+                    }
                 }
             }
             else {
@@ -442,6 +444,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    let Menu;
+    (function (Menu) {
+        Menu["NODE"] = "AddNode";
+    })(Menu || (Menu = {}));
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
@@ -451,29 +457,31 @@ var Fudge;
             super(_parent);
             this.createNode = (_event) => {
                 let node = new ƒ.Node("");
-                console.log("Event came in with Signature: " + _event.detail);
+                let targetNode = this.selectedNode || this.branch;
+                let clrRed = new ƒ.Color(1, 0, 0, 1);
+                let coatRed = new ƒ.CoatColored(clrRed);
+                let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
                 switch (_event.detail) {
-                    case "AddNode." + ƒui.NODEMENU.BOX:
-                        console.log("Create Box Node");
-                        let targetNode = this.selectedNode || this.branch;
-                        // node.name = "Box";
-                        let mesh = new ƒ.MeshCube();
-                        // let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
-                        let clrRed = new ƒ.Color(1, 0, 0, 1);
-                        let coatRed = new ƒ.CoatColored(clrRed);
-                        let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-                        // let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrRed);
-                        // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-                        // node.addComponent(cmpMesh);
-                        // node.addComponent(cmpMaterial);
-                        // node.addComponent(cmpTransform);
-                        node = Scenes.createCompleteMeshNode("Box", mtrRed, mesh);
-                        targetNode.appendChild(node);
-                        let event = new Event("childAdd" /* CHILD_APPEND */);
-                        targetNode.dispatchEvent(event);
-                        this.setRoot(this.branch);
+                    case Menu.NODE + "." + ƒui.NODEMENU.BOX:
+                        let meshCube = new ƒ.MeshCube();
+                        node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
+                        break;
+                    case Menu.NODE + "." + ƒui.NODEMENU.EMPTY:
+                        node.name = "Empty Node";
+                        break;
+                    case Menu.NODE + "." + ƒui.NODEMENU.PLANE:
+                        let meshPlane = new ƒ.MeshQuad();
+                        node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
+                        break;
+                    case Menu.NODE + "." + ƒui.NODEMENU.PYRAMID:
+                        let meshPyramid = new ƒ.MeshPyramid();
+                        node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                         break;
                 }
+                targetNode.appendChild(node);
+                let event = new Event("childAdd" /* CHILD_APPEND */);
+                targetNode.dispatchEvent(event);
+                this.setRoot(this.branch);
             };
             this.setSelectedNode = (_event) => {
                 this.listController.setSelection(_event.detail);
@@ -484,7 +492,17 @@ var Fudge;
                 _event.cancelBubble = true;
                 this.parentPanel.dispatchEvent(eventToPass);
             };
-            this.branch = new ƒ.Node("Node");
+            if (_parent instanceof Fudge.NodePanel) {
+                if (_parent.getNode() != null) {
+                    this.branch = _parent.getNode();
+                }
+                else {
+                    this.branch = new ƒ.Node("Scene");
+                }
+            }
+            else {
+                this.branch = new ƒ.Node("Scene");
+            }
             this.selectedNode = null;
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
@@ -499,7 +517,7 @@ var Fudge;
             for (let member in ƒui.NODEMENU) {
                 ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
             }
-            let menu = new ƒui.DropMenu("AddNode", mutator, { _text: "Add Node" });
+            let menu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
             menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.createNode);
             this.content.append(this.listController.listRoot);
             this.content.append(menu);
@@ -533,23 +551,33 @@ var Fudge;
     class ViewViewport extends Fudge.View {
         constructor(_parent) {
             super(_parent);
-            //TODO
+            /**
+             * Update Viewport every frame
+             */
             this.animate = (_e) => {
                 this.viewport.setBranch(this.branch);
                 ƒ.RenderManager.update();
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();
             };
+            if (_parent instanceof Fudge.NodePanel) {
+                if (_parent.getNode() != null) {
+                    this.branch = _parent.getNode();
+                }
+                else {
+                    this.branch = new ƒ.Node("Scene");
+                }
+            }
+            else {
+                this.branch = new ƒ.Node("Scene");
+            }
             this.fillContent();
         }
         deconstruct() {
-            //TODO: desconstruct
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
         fillContent() {
-            this.branch = new ƒ.Node("Dummy Node");
             let camera;
-            // TODO: delete example scene
-            // this.branch = Scenes.createAxisCross();
             // initialize RenderManager and transmit content
             ƒ.RenderManager.addBranch(this.branch);
             ƒ.RenderManager.update();
@@ -566,12 +594,6 @@ var Fudge;
             this.content.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
-            // TODO: if each Panel creates its own instance of GoldenLayout, containers may emit directly to their LayoutManager and no registration is required
-            // Panel.goldenLayout.emit("registerView", _container);
-            // _container.on("setRoot", (_node: ƒ.Node): void => {
-            //     ƒ.Debug.log("Set root", _node);
-            //     this.setRoot(_node);
-            // });
         }
         /**
          * Set the root node for display in this view
@@ -580,11 +602,7 @@ var Fudge;
         setRoot(_node) {
             if (!_node)
                 return;
-            ƒ.Debug.log("Trying to display node: ", _node);
-            // ƒ.RenderManager.removeBranch(this.branch);
             this.branch = _node;
-            // ƒ.RenderManager.addBranch(this.branch);
-            // ƒ.RenderManager.update();
             this.viewport.setBranch(this.branch);
         }
     }

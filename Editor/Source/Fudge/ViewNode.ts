@@ -9,6 +9,9 @@ namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
 
+    enum Menu {
+        NODE = "AddNode"
+    }
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.  
      * Consists of a viewport and a tree-control. 
@@ -18,9 +21,19 @@ namespace Fudge {
         selectedNode: ƒ.Node;
         listController: ƒui.UINodeList;
 
-        constructor(_parent: Panel) {
+        constructor(_parent: NodePanel) {
             super(_parent);
-            this.branch = new ƒ.Node("Node");
+            if (_parent instanceof NodePanel) {
+                if ((<NodePanel>_parent).getNode() != null) {
+                    this.branch = (<NodePanel>_parent).getNode();
+                }
+                else {
+                    this.branch = new ƒ.Node("Scene");
+                }
+            }
+            else {
+                this.branch = new ƒ.Node("Scene");
+            }
             this.selectedNode = null;
             this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setSelectedNode);
             this.listController = new ƒui.UINodeList(this.branch, this.content);
@@ -36,7 +49,7 @@ namespace Fudge {
             for (let member in ƒui.NODEMENU) {
                 ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
             }
-            let menu: ƒui.DropMenu = new ƒui.DropMenu("AddNode", mutator, { _text: "Add Node" });
+            let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
             menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.createNode);
             this.content.append(this.listController.listRoot);
             this.content.append(menu);
@@ -55,30 +68,31 @@ namespace Fudge {
         }
         private createNode = (_event: CustomEvent): void => {
             let node: ƒ.Node = new ƒ.Node("");
-            console.log("Event came in with Signature: " + _event.detail);
+            let targetNode: ƒ.Node = this.selectedNode || this.branch;
+            let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
+            let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
+            let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
             switch (_event.detail) {
-
-                case "AddNode." + ƒui.NODEMENU.BOX:
-                    console.log("Create Box Node");
-                    let targetNode: ƒ.Node = this.selectedNode || this.branch;
-                    // node.name = "Box";
-                    let mesh: ƒ.MeshCube = new ƒ.MeshCube();
-                    // let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
-                    let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
-                    let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
-                    let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-                    // let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrRed);
-                    // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-                    // node.addComponent(cmpMesh);
-                    // node.addComponent(cmpMaterial);
-                    // node.addComponent(cmpTransform);
-                    node = Scenes.createCompleteMeshNode("Box", mtrRed, mesh);
-                    targetNode.appendChild(node);
-                    let event: Event = new Event(ƒ.EVENT.CHILD_APPEND);
-                    targetNode.dispatchEvent(event);
-                    this.setRoot(this.branch);
+                case Menu.NODE + "." + ƒui.NODEMENU.BOX:
+                    let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+                    node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.EMPTY:
+                    node.name = "Empty Node";
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.PLANE:
+                    let meshPlane: ƒ.MeshQuad = new ƒ.MeshQuad();
+                    node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.PYRAMID:
+                    let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
+                    node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                     break;
             }
+            targetNode.appendChild(node);
+            let event: Event = new Event(ƒ.EVENT.CHILD_APPEND);
+            targetNode.dispatchEvent(event);
+            this.setRoot(this.branch);
         }
         private setSelectedNode = (_event: CustomEvent): void => {
             this.listController.setSelection(_event.detail);

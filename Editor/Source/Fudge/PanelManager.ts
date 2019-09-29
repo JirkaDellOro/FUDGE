@@ -1,33 +1,20 @@
 /// <reference types="../@types/jquery"/>
 /// <reference types="../@types/golden-layout"/>
 namespace Fudge {
-  // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
+  /**
+   * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
+   * @author Monika Galkewitsch, 2019, HFU
+   * @author Lukas Scheuerle, 2019, HFU
+   */
   export class PanelManager extends EventTarget {
     static instance: PanelManager = new PanelManager();
     static templates: typeof PanelTemplate[];
     editorLayout: GoldenLayout;
     private panels: Panel[] = [];
+    
 
     private constructor() {
       super();
-    }
-    /**
-     * Create new Panel from Template Structure
-     * @param _template Template to be used
-     * @param _name Name of the Panel
-     */
-    createPanelFromTemplate(_template: PanelTemplate, _name: string): Panel {
-      let panel: Panel = new Panel(_name, _template);
-      console.log(panel);
-      return panel;
-    }
-    /**
-     * Creates an Panel with nothing but the default ViewData
-     * @param _name Name of the Panel
-     */
-    createEmptyPanel(_name: string): Panel {
-      let panel: Panel = new Panel(_name);
-      return panel;
     }
     /**
      * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config

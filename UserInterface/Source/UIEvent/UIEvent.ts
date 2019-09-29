@@ -8,7 +8,8 @@ namespace FudgeUserInterface {
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
         UPDATE = "mutatorUpdateEvent",
-        DROPMENUCLICK = "dropMenuClick"
+        DROPMENUCLICK = "dropMenuClick",
+        DROPMENUCOLLAPSE = "dropMenuCollapse"
     }
 
 }

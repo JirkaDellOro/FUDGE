@@ -4,6 +4,8 @@
 declare namespace Fudge {
 }
 declare namespace Fudge {
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.
@@ -12,16 +14,15 @@ declare namespace Fudge {
      * @author Monika Galkewitsch, HFU, 2019
      * @author Lukas Scheuerle, HFU, 2019
      */
-    class Panel extends EventTarget {
+    abstract class Panel extends EventTarget {
         views: View[];
         config: GoldenLayout.ItemConfig;
-        node: ƒ.Node;
         /**
          * Constructor for panel Objects. Generates an empty panel with a single ViewData.
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
+        constructor(_name: string);
         /**
          * Adds given View to the list of views on the panel.
          * @param _v View to be added
@@ -29,33 +30,37 @@ declare namespace Fudge {
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
         addView(_v: View, _pushToPanelManager?: boolean, _pushConfig?: boolean): void;
-        /**
-         * Allows to construct the view from a template config.
-         * @param template Panel Template to be used for the construction
-         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
-         */
-        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType;
+    }
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    class NodePanel extends Panel {
+        private node;
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
         setNode(_node: ƒ.Node): void;
+        getNode(): ƒ.Node;
+        /**
+ * Allows to construct the view from a template config.
+ * @param template Panel Template to be used for the construction
+ * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+ */
+        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType;
     }
 }
 declare namespace Fudge {
+    /**
+     * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
+     * @author Monika Galkewitsch, 2019, HFU
+     * @author Lukas Scheuerle, 2019, HFU
+     */
     class PanelManager extends EventTarget {
         static instance: PanelManager;
         static templates: typeof PanelTemplate[];
         editorLayout: GoldenLayout;
         private panels;
         private constructor();
-        /**
-         * Create new Panel from Template Structure
-         * @param _template Template to be used
-         * @param _name Name of the Panel
-         */
-        createPanelFromTemplate(_template: PanelTemplate, _name: string): Panel;
-        /**
-         * Creates an Panel with nothing but the default ViewData
-         * @param _name Name of the Panel
-         */
-        createEmptyPanel(_name: string): Panel;
         /**
          * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
          * @param _p Panel to be added
@@ -118,10 +123,11 @@ declare namespace Fudge {
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
     class ViewData extends View {
-        private node;
+        private data;
         constructor(_parent: Panel);
         deconstruct(): void;
         fillContent(): void;
+        private changeNodeName;
         private setNode;
     }
 }
@@ -136,7 +142,7 @@ declare namespace Fudge {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
         listController: ƒui.UINodeList;
-        constructor(_parent: Panel);
+        constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;
         setRoot(_node: ƒ.Node): void;
@@ -155,7 +161,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         branch: ƒ.Node;
-        constructor(_parent: Panel);
+        constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;
         /**
@@ -163,6 +169,9 @@ declare namespace Fudge {
          * @param _node
          */
         setRoot(_node: ƒ.Node): void;
+        /**
+         * Update Viewport every frame
+         */
         private animate;
     }
 }

@@ -8,8 +8,7 @@ namespace FudgeUserInterface {
         EMPTY = "Primitive.Empty Node",
         BOX = "Primitive.Box Mesh Node",
         PYRAMID = "Primitive.Pyramid Mesh Node",
-        PLANE = "Primitive.Plane Mesh Node",
-        TEST = "DeleteMe.Test.DeleteMe"
+        PLANE = "Primitive.Plane Mesh Node"
     }
 
     export class MultiLevelMenuManager {

@@ -33,6 +33,7 @@ declare namespace FudgeUserInterface {
             _text?: string;
         });
         private toggleFoldContent;
+        private collapseMenu;
     }
 }
 declare namespace FudgeUserInterface {
@@ -42,7 +43,8 @@ declare namespace FudgeUserInterface {
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
         UPDATE = "mutatorUpdateEvent",
-        DROPMENUCLICK = "dropMenuClick"
+        DROPMENUCLICK = "dropMenuClick",
+        DROPMENUCOLLAPSE = "dropMenuCollapse"
     }
 }
 declare namespace FudgeUserInterface {
@@ -144,8 +146,7 @@ declare namespace FudgeUserInterface {
         EMPTY = "Primitive.Empty Node",
         BOX = "Primitive.Box Mesh Node",
         PYRAMID = "Primitive.Pyramid Mesh Node",
-        PLANE = "Primitive.Plane Mesh Node",
-        TEST = "DeleteMe.Test.DeleteMe"
+        PLANE = "Primitive.Plane Mesh Node"
     }
     class MultiLevelMenuManager {
         static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
