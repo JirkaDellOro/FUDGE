@@ -26,6 +26,10 @@ namespace Fudge {
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Save");
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof NodePanel) {
+                node = panel.getNode();
+            }
             save(node);
         });
         ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

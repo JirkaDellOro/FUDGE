@@ -22,6 +22,10 @@ var Fudge;
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
         ipcRenderer.on("save", (_event, _args) => {
             ƒ.Debug.log("Save");
+            panel = Fudge.PanelManager.instance.getActivePanel();
+            if (panel instanceof Fudge.NodePanel) {
+                node = panel.getNode();
+            }
             save(node);
         });
         ipcRenderer.on("open", (_event, _args) => {
