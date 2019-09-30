@@ -23,7 +23,7 @@ namespace FudgeCore {
                     out vec4 frag;
                     
                     void main() {
-                       float id = float(u_id) / 10.0;
+                       float id = float(u_id);// / 10.0;
                        frag = vec4(id,id,id,id);
                     }`;
         }

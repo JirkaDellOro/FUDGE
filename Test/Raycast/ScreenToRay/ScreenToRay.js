@@ -68,8 +68,10 @@ var ScreenToRay;
         // ƒ.RenderManager.getRenderingContext().copyTexImage2D
         let data = new Uint8Array(canvas.width * canvas.height * 4);
         let crc3 = ƒ.RenderManager.getRenderingContext();
+        viewport.drawForRayCast();
         crc3.readPixels(0, 0, canvas.width, canvas.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
         ƒ.Debug.log(data);
+        ƒ.Debug.log(canvas);
         function animate(_event) {
             update();
             // branch.cmpTransform.local.rotateY(1);
@@ -123,18 +125,6 @@ var ScreenToRay;
         let posProjection = new ƒ.Vector2((2 * posRender.x / rectRender.width) * rectProjection.width / 2, (2 * posRender.y / rectRender.height) * rectProjection.height / 2);
         posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
         posProjection.y *= -1;
-        // let overflow: ƒ.Vector2 = new ƒ.Vector2();
-        // if (posProjection.x > 1) { posProjection.x -= 1, overflow.x = 90; }
-        // if (posProjection.x < -1) { posProjection.x += 1; overflow.x = -90; }
-        // if (posProjection.y > 1) { posProjection.y -= 1, overflow.y = 90; }
-        // if (posProjection.y < -1) { posProjection.y += 1; overflow.y = -90; }
-        // let angleProjection: ƒ.Vector2 = new ƒ.Vector2(
-        //     Math.asin(posProjection.x) * 180 / Math.PI,
-        //     Math.asin(posProjection.y) * 180 / Math.PI
-        // );
-        // angleProjection.add(overflow);
-        // the ray is starting at (0,0) and goes in the direction of posProjection with unlimited length
-        // ƒ.Debug.info("Point", posProjection.get());
         setUiPoint("Projection", posProjection);
         let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
         return ray;
