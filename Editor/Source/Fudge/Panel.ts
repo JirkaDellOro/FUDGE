@@ -26,10 +26,12 @@ namespace Fudge {
          */
         constructor(_name: string) {
             super();
+            let id: string = this.generateID();
             this.config = {
                 type: "row",
                 content: [],
-                title: _name
+                title: _name,
+                id: id
             };
 
         }
@@ -49,7 +51,11 @@ namespace Fudge {
             }
         }
 
-        //TODO: Remove and make it Event-Oriented
+        private generateID(): string {
+            let randLetter: string = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            let uniqid: string = randLetter + Date.now();
+            return uniqid;
+        }
 
     }
 
@@ -64,7 +70,8 @@ namespace Fudge {
             super(_name);
             this.node = _node || new ƒ.Node("Scene");
             if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
+                let id: string = this.config.id.toString();
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type, id);
             }
             else {
                 let viewData: ViewData = new ViewData(this);
@@ -92,12 +99,13 @@ namespace Fudge {
  * @param template Panel Template to be used for the construction
  * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
  */
-        public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType {
+        public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType {
+            let id: string = template.id + _id;
             let config: GoldenLayout.ItemConfig = {
                 type: _type,
                 width: template.width,
                 height: template.height,
-                id: template.id,
+                id: id,
                 title: template.title,
                 isClosable: template.isClosable,
                 content: []
@@ -137,7 +145,7 @@ namespace Fudge {
 
                     }
                     else {
-                        config.content.push(this.constructFromTemplate(item, item.type));
+                        config.content.push(this.constructFromTemplate(item, item.type, <string>item.id));
                     }
                 }
             }

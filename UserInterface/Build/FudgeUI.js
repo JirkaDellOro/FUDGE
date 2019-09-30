@@ -497,6 +497,7 @@ var FudgeUserInterface;
             this.nodeRoot.addEventListener("childAdd" /* CHILD_APPEND */, this.updateList);
             this.nodeRoot.addEventListener("childRemove" /* CHILD_REMOVE */, this.updateList);
             this.listRoot = document.createElement("ul");
+            this.listRoot.classList.add("NodeList");
             let list = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
@@ -514,6 +515,7 @@ var FudgeUserInterface;
         setNodeRoot(_node) {
             this.nodeRoot = _node;
             this.listRoot = this.BuildListFromNode(this.nodeRoot);
+            this.listRoot.classList.add("NodeList");
         }
         BuildListFromNode(_node) {
             let listRoot = new FudgeUserInterface.CollapsableNodeListElement(_node, _node.name, true);
@@ -532,11 +534,24 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     let NODEMENU;
     (function (NODEMENU) {
-        NODEMENU["EMPTY"] = "Primitive.Empty Node";
-        NODEMENU["BOX"] = "Primitive.Box Mesh Node";
-        NODEMENU["PYRAMID"] = "Primitive.Pyramid Mesh Node";
-        NODEMENU["PLANE"] = "Primitive.Plane Mesh Node";
+        NODEMENU["EMPTY"] = "Empty Node";
+        NODEMENU["BOX"] = "Box Mesh Node";
+        NODEMENU["PYRAMID"] = "Pyramid Mesh Node";
+        NODEMENU["PLANE"] = "Plane Mesh Node";
     })(NODEMENU = FudgeUserInterface.NODEMENU || (FudgeUserInterface.NODEMENU = {}));
+    let COMPONENTMENU;
+    (function (COMPONENTMENU) {
+        COMPONENTMENU["MESHBOX"] = "Mesh Component.Box Mesh Component";
+        COMPONENTMENU["MESHPLANE"] = "Mesh Component.Plane Mesh Component";
+        COMPONENTMENU["MESHPYRAMID"] = "Mesh Component.Pyramid Mesh Component";
+        COMPONENTMENU["AUDIOLISTENER"] = "Audio Listener Component";
+        COMPONENTMENU["AUDIO"] = "Audio Component";
+        COMPONENTMENU["ANIMATION"] = "Animation Component";
+        COMPONENTMENU["CAMERA"] = "Camera Component";
+        COMPONENTMENU["LIGHT"] = "Light Component";
+        COMPONENTMENU["SCRIPT"] = "Script Component";
+        COMPONENTMENU["TRANSFORM"] = "Transform Component";
+    })(COMPONENTMENU = FudgeUserInterface.COMPONENTMENU || (FudgeUserInterface.COMPONENTMENU = {}));
     class MultiLevelMenuManager {
         static buildFromSignature(_signature, _mutator) {
             let mutator = _mutator || {};

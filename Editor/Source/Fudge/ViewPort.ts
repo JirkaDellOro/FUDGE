@@ -77,6 +77,7 @@ namespace Fudge {
          */
         private animate = (_e: Event) => {
             this.viewport.setBranch(this.branch);
+            ƒ.RenderManager.updateBranch(this.branch);
             ƒ.RenderManager.update();
             if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                 this.viewport.draw();

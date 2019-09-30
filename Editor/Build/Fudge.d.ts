@@ -30,6 +30,7 @@ declare namespace Fudge {
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
         addView(_v: View, _pushToPanelManager?: boolean, _pushConfig?: boolean): void;
+        private generateID;
     }
     /**
     * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
@@ -46,7 +47,7 @@ declare namespace Fudge {
  * @param template Panel Template to be used for the construction
  * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
  */
-        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType;
+        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType;
     }
 }
 declare namespace Fudge {
@@ -60,6 +61,7 @@ declare namespace Fudge {
         static templates: typeof PanelTemplate[];
         editorLayout: GoldenLayout;
         private panels;
+        private activePanel;
         private constructor();
         /**
          * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
@@ -71,10 +73,12 @@ declare namespace Fudge {
          * @param _v View to be added
          */
         addView(_v: View): void;
+        getActivePanel(): Panel;
         /**
          * Initialize GoldenLayout Context of the PanelManager Instance
          */
         init(): void;
+        private setActivePanel;
     }
 }
 declare namespace Fudge {
@@ -119,9 +123,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    /**
-     * View displaying all information of any selected entity and offering simple controls for manipulation
-     */
     class ViewData extends View {
         private data;
         constructor(_parent: Panel);
@@ -129,6 +130,7 @@ declare namespace Fudge {
         fillContent(): void;
         private changeNodeName;
         private setNode;
+        private addComponent;
     }
 }
 declare namespace Fudge {

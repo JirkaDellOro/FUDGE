@@ -5,6 +5,7 @@
 
 .lm_content {
     background-color: #414141;
+    overflow: scroll;
 }
 
 .lm_dragProxy .lm_content {

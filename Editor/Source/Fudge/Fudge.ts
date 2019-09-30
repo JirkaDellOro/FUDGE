@@ -31,6 +31,7 @@ namespace Fudge {
         ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Open");
             node = open();
+            panel = PanelManager.instance.getActivePanel();
             if (panel instanceof NodePanel) {
                 panel.setNode(node);
             }
@@ -47,8 +48,8 @@ namespace Fudge {
     }
 
     function openViewNode(): void {
-        
-        node = Scenes.createAxisCross();
+        // node = Scenes.createAxisCross();
+        node = new ƒ.Node("Scene");
         let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
         PanelManager.instance.addPanel(nodePanel);
     }

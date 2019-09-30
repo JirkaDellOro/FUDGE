@@ -27,6 +27,7 @@ var Fudge;
         ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
+            panel = Fudge.PanelManager.instance.getActivePanel();
             if (panel instanceof Fudge.NodePanel) {
                 panel.setNode(node);
             }
@@ -41,7 +42,8 @@ var Fudge;
         });
     }
     function openViewNode() {
-        node = Scenes.createAxisCross();
+        // node = Scenes.createAxisCross();
+        node = new ƒ.Node("Scene");
         let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);
         Fudge.PanelManager.instance.addPanel(nodePanel);
     }
@@ -93,10 +95,12 @@ var Fudge;
         constructor(_name) {
             super();
             this.views = [];
+            let id = this.generateID();
             this.config = {
                 type: "row",
                 content: [],
-                title: _name
+                title: _name,
+                id: id
             };
         }
         /**
@@ -114,6 +118,11 @@ var Fudge;
                 Fudge.PanelManager.instance.addView(_v);
             }
         }
+        generateID() {
+            let randLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            let uniqid = randLetter + Date.now();
+            return uniqid;
+        }
     }
     Fudge.Panel = Panel;
     /**
@@ -126,7 +135,8 @@ var Fudge;
             super(_name);
             this.node = _node || new ƒ.Node("Scene");
             if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
+                let id = this.config.id.toString();
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type, id);
             }
             else {
                 let viewData = new Fudge.ViewData(this);
@@ -152,12 +162,13 @@ var Fudge;
  * @param template Panel Template to be used for the construction
  * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
  */
-        constructFromTemplate(template, _type) {
+        constructFromTemplate(template, _type, _id) {
+            let id = template.id + _id;
             let config = {
                 type: _type,
                 width: template.width,
                 height: template.height,
-                id: template.id,
+                id: id,
                 title: template.title,
                 isClosable: template.isClosable,
                 content: []
@@ -194,7 +205,7 @@ var Fudge;
                         this.addView(view, false, false);
                     }
                     else {
-                        config.content.push(this.constructFromTemplate(item, item.type));
+                        config.content.push(this.constructFromTemplate(item, item.type, item.id));
                     }
                 }
             }
@@ -219,6 +230,14 @@ var Fudge;
         constructor() {
             super();
             this.panels = [];
+            this.setActivePanel = () => {
+                let activeTab = this.editorLayout.root.contentItems[0].getActiveContentItem();
+                for (let panel of this.panels) {
+                    if (panel.config.id == activeTab.config.id) {
+                        this.activePanel = panel;
+                    }
+                }
+            };
         }
         /**
          * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
@@ -227,14 +246,17 @@ var Fudge;
         addPanel(_p) {
             this.panels.push(_p);
             this.editorLayout.root.contentItems[0].addChild(_p.config);
+            this.activePanel = _p;
         }
         /**
          * Add View to PanelManagers View List and add the view to the active panel
          * @param _v View to be added
          */
         addView(_v) {
-            console.log("Add View has been called at PM");
             this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
+        }
+        getActivePanel() {
+            return this.activePanel;
         }
         /**
          * Initialize GoldenLayout Context of the PanelManager Instance
@@ -258,6 +280,7 @@ var Fudge;
             this.editorLayout.registerComponent("welcome", welcome);
             this.editorLayout.registerComponent("View", registerViewComponent);
             this.editorLayout.init();
+            this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
         }
     }
     PanelManager.instance = new PanelManager();
@@ -380,6 +403,10 @@ var Fudge;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
+    let Menu;
+    (function (Menu) {
+        Menu["COMPONENTMENU"] = "Add Components";
+    })(Menu || (Menu = {}));
     class ViewData extends Fudge.View {
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
@@ -396,6 +423,10 @@ var Fudge;
                     this.content.removeChild(this.content.lastChild);
                 }
                 this.fillContent();
+            };
+            this.addComponent = (_event) => {
+                switch (_event.detail) {
+                }
             };
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setNode);
             this.fillContent();
@@ -418,8 +449,16 @@ var Fudge;
                     cntHeader.append(txtNodeName);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents = new ƒui.UINodeData(nodeComponent, this.content);
+                        let uiComponents = new ƒui.UINodeData(nodeComponent, cntComponents);
                     }
+                    this.content.append(cntComponents);
+                    let mutator = {};
+                    for (let member in ƒui.COMPONENTMENU) {
+                        ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.COMPONENTMENU[member], mutator);
+                    }
+                    let menu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
+                    menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.addComponent);
+                    this.content.append(menu);
                 }
             }
             else {
@@ -556,6 +595,7 @@ var Fudge;
              */
             this.animate = (_e) => {
                 this.viewport.setBranch(this.branch);
+                ƒ.RenderManager.updateBranch(this.branch);
                 ƒ.RenderManager.update();
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();

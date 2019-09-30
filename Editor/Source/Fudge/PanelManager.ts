@@ -11,6 +11,7 @@ namespace Fudge {
     static templates: typeof PanelTemplate[];
     editorLayout: GoldenLayout;
     private panels: Panel[] = [];
+    private activePanel: Panel;
     
 
     private constructor() {
@@ -23,6 +24,7 @@ namespace Fudge {
     addPanel(_p: Panel): void {
       this.panels.push(_p);
       this.editorLayout.root.contentItems[0].addChild(_p.config);
+      this.activePanel = _p;
     }
 
     /**
@@ -30,8 +32,11 @@ namespace Fudge {
      * @param _v View to be added
      */
     addView(_v: View): void {
-      console.log("Add View has been called at PM");
       this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
+    }
+    
+    getActivePanel(): Panel {
+      return this.activePanel;
     }
     /**
      * Initialize GoldenLayout Context of the PanelManager Instance
@@ -55,7 +60,18 @@ namespace Fudge {
       this.editorLayout.registerComponent("welcome", welcome);
       this.editorLayout.registerComponent("View", registerViewComponent);
       this.editorLayout.init();
+      this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
     }
+
+    private  setActivePanel = (): void => {
+      let activeTab: GoldenLayout.ContentItem = this.editorLayout.root.contentItems[0].getActiveContentItem();
+      for (let panel of this.panels) {
+        if (panel.config.id == activeTab.config.id) {
+          this.activePanel = panel;
+        }
+      }
+    }
+
   }
   //TODO: Give these Factory Functions a better home
   //TODO: Figure out a better way than any. So far it was the best way to get the attributes of componentState into it properly

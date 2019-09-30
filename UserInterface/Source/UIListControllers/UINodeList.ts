@@ -11,6 +11,7 @@ namespace FudgeUserInterface {
             this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_APPEND, this.updateList);
             this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.updateList);
             this.listRoot = document.createElement("ul");
+            this.listRoot.classList.add("NodeList");
             let list: HTMLUListElement = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
@@ -34,6 +35,7 @@ namespace FudgeUserInterface {
         public setNodeRoot(_node: ƒ.Node): void {
             this.nodeRoot = _node;
             this.listRoot = this.BuildListFromNode(this.nodeRoot);
+            this.listRoot.classList.add("NodeList");
         }
         public toggleCollapse = (_event: Event): void => {
             _event.preventDefault();
