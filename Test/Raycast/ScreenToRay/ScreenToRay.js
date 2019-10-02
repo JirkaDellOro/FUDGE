@@ -56,22 +56,9 @@ var ScreenToRay;
         for (let name in uiMaps) {
             logMutatorInfo(name, uiMaps[name].framing);
         }
-        // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
-        // ƒ.Loop.start();
-        animate(null);
-        ƒ.Debug.log(ƒ.RenderManager.rayCastTargets);
-        let t = ƒ.RenderManager.rayCastTargets[0];
-        // canvas.getContext("2d").drawImage(t.getImageData(),
-        //     this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
-        //     this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
-        // );
-        // ƒ.RenderManager.getRenderingContext().copyTexImage2D
-        let data = new Uint8Array(canvas.width * canvas.height * 4);
-        let crc3 = ƒ.RenderManager.getRenderingContext();
-        viewport.drawForRayCast();
-        crc3.readPixels(0, 0, canvas.width, canvas.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
-        ƒ.Debug.log(data);
-        ƒ.Debug.log(canvas);
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
+        ƒ.Loop.start();
+        // animate(null);
         function animate(_event) {
             update();
             // branch.cmpTransform.local.rotateY(1);
@@ -80,7 +67,8 @@ var ScreenToRay;
             viewport.draw();
             adjustRayCamera();
             let color = getPixelColor(mouse);
-            ƒ.Debug.log(color);
+            // ƒ.Debug.log(color);
+            pickNodeAt(mouse);
         }
     }
     function getPixelColor(_pos) {
@@ -88,6 +76,9 @@ var ScreenToRay;
         let crc2 = canvas.getContext("2d");
         color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
         return color;
+    }
+    function pickNodeAt(_pos) {
+        return viewport.pickNodeAt(_pos);
     }
     function adjustRayCamera() {
         let ray = computeRay();

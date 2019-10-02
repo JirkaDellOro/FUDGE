@@ -1,3 +1,4 @@
+/// <reference types="webgl2" />
 declare namespace FudgeCore {
     type General = any;
     interface Serialization {
@@ -487,7 +488,7 @@ declare namespace FudgeCore {
         NOTCH = "NOTCH",
         ALLPASS = "ALLPASS"
     }
-    export class AudioFilter {
+    class AudioFilter {
         useFilter: boolean;
         filterType: FILTER_TYPE;
         constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
@@ -496,7 +497,6 @@ declare namespace FudgeCore {
          */
         addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -539,7 +539,7 @@ declare namespace FudgeCore {
         INVERSE = "INVERSE",
         EXPONENTIAL = "EXPONENTIAL"
     }
-    export class AudioLocalisation {
+    class AudioLocalisation {
         pannerNode: PannerNode;
         panningModel: PANNING_MODEL_TYPE;
         distanceModel: DISTANCE_MODEL_TYPE;
@@ -572,7 +572,6 @@ declare namespace FudgeCore {
          */
         getPanneOrientation(): Vector3;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -587,7 +586,7 @@ declare namespace FudgeCore {
      * Describes Data Handler for all Audio Sources
      * @authors Thomas Dorner, HFU, 2019
      */
-    export class AudioSessionData {
+    class AudioSessionData {
         dataArray: AudioData[];
         private bufferCounter;
         private audioBufferHolder;
@@ -635,7 +634,6 @@ declare namespace FudgeCore {
          */
         private logErrorFetch;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -1462,6 +1460,7 @@ declare namespace FudgeCore {
         * Draw this viewport for RayCast
         */
         drawForRayCast(): void;
+        pickNodeAt(_pos: Vector2): Node;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2507,6 +2506,7 @@ declare namespace FudgeCore {
      */
     abstract class RenderManager extends RenderOperator {
         static rayCastTargets: WebGLTexture[];
+        static rayCastBuffers: WebGLFramebuffer[];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */

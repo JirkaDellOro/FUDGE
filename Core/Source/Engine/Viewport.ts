@@ -143,6 +143,23 @@ namespace FudgeCore {
                 this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
             );
         }
+
+
+        public pickNodeAt(_pos: Vector2): Node {
+            this.drawForRayCast();
+            let buffers: WebGLFramebuffer[] = RenderManager.rayCastBuffers;
+            let crc3: WebGL2RenderingContext = RenderManager.getRenderingContext();
+            for (let buffer of buffers) {
+                crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
+                let data: Uint8Array = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
+                crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+                let pixel: number = _pos.x + this.rectSource.width * _pos.y;
+                console.log(data[pixel]);
+            }
+
+            return null;
+        }
+
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */

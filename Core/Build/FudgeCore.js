@@ -1813,6 +1813,9 @@ var FudgeCore;
      * A [[Coat]] providing a texture and additional data for texturing
      */
     let CoatTextured = class CoatTextured extends Coat {
+        /**
+         * A [[Coat]] providing a texture and additional data for texturing
+         */
         constructor() {
             super(...arguments);
             this.texture = null;
@@ -3190,6 +3193,19 @@ var FudgeCore;
             FudgeCore.RenderManager.drawBranchForRayCast(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(FudgeCore.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
+        }
+        pickNodeAt(_pos) {
+            this.drawForRayCast();
+            let buffers = FudgeCore.RenderManager.rayCastBuffers;
+            let crc3 = FudgeCore.RenderManager.getRenderingContext();
+            for (let buffer of buffers) {
+                crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
+                let data = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
+                crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+                let pixel = _pos.x + this.rectSource.width * _pos.y;
+                console.log(data[pixel]);
+            }
+            return null;
         }
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
@@ -5690,7 +5706,7 @@ var FudgeCore;
          */
         static drawBranch(_node, _cmpCamera, _drawNode = RenderManager.drawNode) {
             if (_drawNode == RenderManager.drawNode)
-                RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, null);
+                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
             let finalTransform;
             let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
             if (cmpMesh)
@@ -5715,6 +5731,7 @@ var FudgeCore;
          */
         static drawBranchForRayCast(_node, _cmpCamera) {
             RenderManager.rayCastTargets = [];
+            RenderManager.rayCastBuffers = [];
             RenderManager.nodesIndexed = [];
             if (!RenderManager.renderShaders.get(FudgeCore.ShaderRayCast))
                 RenderManager.createReference(RenderManager.renderShaders, FudgeCore.ShaderRayCast, RenderManager.createProgram);
@@ -5733,12 +5750,12 @@ var FudgeCore;
             // TODO: look into SSBOs!
             let target = RenderManager.getRayCastTexture();
             const framebuffer = RenderManager.crc3.createFramebuffer();
-            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // attach the texture as the first color attachment
-            const attachmentPoint = RenderManager.crc3.COLOR_ATTACHMENT0;
-            RenderManager.crc3.framebufferTexture2D(RenderManager.crc3.FRAMEBUFFER, attachmentPoint, RenderManager.crc3.TEXTURE_2D, target, 0);
+            const attachmentPoint = WebGL2RenderingContext.COLOR_ATTACHMENT0;
+            RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
             // render to our targetTexture by binding the framebuffer
-            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // set render target
             let references = RenderManager.nodes.get(_node);
             if (!references)
@@ -5748,6 +5765,7 @@ var FudgeCore;
             RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
             // make texture available to onscreen-display
             RenderManager.rayCastTargets.push(target);
+            RenderManager.rayCastBuffers.push(framebuffer);
             // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
         }
         static getRayCastTexture() {
@@ -5755,16 +5773,16 @@ var FudgeCore;
             const targetTextureWidth = RenderManager.getViewportRectangle().width;
             const targetTextureHeight = RenderManager.getViewportRectangle().height;
             const targetTexture = RenderManager.crc3.createTexture();
-            RenderManager.crc3.bindTexture(RenderManager.crc3.TEXTURE_2D, targetTexture);
+            RenderManager.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
             {
-                const internalFormat = RenderManager.crc3.RGBA;
-                const format = RenderManager.crc3.RGBA;
-                const type = RenderManager.crc3.UNSIGNED_BYTE;
-                RenderManager.crc3.texImage2D(RenderManager.crc3.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null);
+                const internalFormat = WebGL2RenderingContext.RGBA8;
+                const format = WebGL2RenderingContext.RGBA;
+                const type = WebGL2RenderingContext.UNSIGNED_BYTE;
+                RenderManager.crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null);
                 // set the filtering so we don't need mips
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_MIN_FILTER, RenderManager.crc3.LINEAR);
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_S, RenderManager.crc3.CLAMP_TO_EDGE);
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_T, RenderManager.crc3.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
             }
             return targetTexture;
         }
@@ -5856,6 +5874,7 @@ var FudgeCore;
         }
     }
     RenderManager.rayCastTargets = [];
+    RenderManager.rayCastBuffers = [];
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.renderShaders = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -5969,7 +5988,7 @@ var FudgeCore;
                     out vec4 frag;
                     
                     void main() {
-                       float id = float(u_id);// / 10.0;
+                       float id = float(u_id)/ 256.0;
                        frag = vec4(id,id,id,id);
                     }`;
         }

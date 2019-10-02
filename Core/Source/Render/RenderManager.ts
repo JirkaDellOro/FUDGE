@@ -42,6 +42,7 @@ namespace FudgeCore {
      */
     export abstract class RenderManager extends RenderOperator {
         public static rayCastTargets: WebGLTexture[] = [];
+        public static rayCastBuffers: WebGLFramebuffer[] = [];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -209,7 +210,7 @@ namespace FudgeCore {
          */
         public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
             if (_drawNode == RenderManager.drawNode)
-                RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, null);
+                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
             let finalTransform: Matrix4x4;
 
             let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
@@ -240,6 +241,7 @@ namespace FudgeCore {
          */
         public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
             RenderManager.rayCastTargets = [];
+            RenderManager.rayCastBuffers = [];
             RenderManager.nodesIndexed = [];
             if (!RenderManager.renderShaders.get(ShaderRayCast))
                 RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
@@ -262,12 +264,12 @@ namespace FudgeCore {
             let target: WebGLTexture = RenderManager.getRayCastTexture();
 
             const framebuffer: WebGLFramebuffer = RenderManager.crc3.createFramebuffer();
-            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // attach the texture as the first color attachment
-            const attachmentPoint: number = RenderManager.crc3.COLOR_ATTACHMENT0;
-            RenderManager.crc3.framebufferTexture2D(RenderManager.crc3.FRAMEBUFFER, attachmentPoint, RenderManager.crc3.TEXTURE_2D, target, 0);
+            const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
+            RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
             // render to our targetTexture by binding the framebuffer
-            RenderManager.crc3.bindFramebuffer(RenderManager.crc3.FRAMEBUFFER, framebuffer);
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
 
             // set render target
 
@@ -281,6 +283,7 @@ namespace FudgeCore {
             RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
             // make texture available to onscreen-display
             RenderManager.rayCastTargets.push(target);
+            RenderManager.rayCastBuffers.push(framebuffer);
             // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
         }
 
@@ -289,20 +292,20 @@ namespace FudgeCore {
             const targetTextureWidth: number = RenderManager.getViewportRectangle().width;
             const targetTextureHeight: number = RenderManager.getViewportRectangle().height;
             const targetTexture: WebGLTexture = RenderManager.crc3.createTexture();
-            RenderManager.crc3.bindTexture(RenderManager.crc3.TEXTURE_2D, targetTexture);
+            RenderManager.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
 
             {
-                const internalFormat: number = RenderManager.crc3.RGBA;
-                const format: number = RenderManager.crc3.RGBA;
-                const type: number = RenderManager.crc3.UNSIGNED_BYTE;
+                const internalFormat: number = WebGL2RenderingContext.RGBA8;
+                const format: number = WebGL2RenderingContext.RGBA;
+                const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
                 RenderManager.crc3.texImage2D(
-                    RenderManager.crc3.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null
+                    WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null
                 );
 
                 // set the filtering so we don't need mips
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_MIN_FILTER, RenderManager.crc3.LINEAR);
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_S, RenderManager.crc3.CLAMP_TO_EDGE);
-                RenderManager.crc3.texParameteri(RenderManager.crc3.TEXTURE_2D, RenderManager.crc3.TEXTURE_WRAP_T, RenderManager.crc3.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
             }
 
             return targetTexture;
