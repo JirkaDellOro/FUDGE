@@ -1460,7 +1460,7 @@ declare namespace FudgeCore {
         * Draw this viewport for RayCast
         */
         drawForRayCast(): void;
-        pickNodeAt(_pos: Vector2): Node;
+        pickNodeAt(_pos: Vector2): RayHit[];
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2499,6 +2499,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RayHit {
+        node: Node;
+        face: number;
+        zBuffer: number;
+        constructor(_node?: Node, _face?: number, _zBuffer?: number);
+    }
+}
+declare namespace FudgeCore {
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
@@ -2507,6 +2515,7 @@ declare namespace FudgeCore {
     abstract class RenderManager extends RenderOperator {
         static rayCastTargets: WebGLTexture[];
         static rayCastBuffers: WebGLFramebuffer[];
+        static nodesIndexed: Node[];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -2515,7 +2524,6 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
-        private static nodesIndexed;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2562,6 +2570,10 @@ declare namespace FudgeCore {
          * @param _color
          */
         static clear(_color?: Color): void;
+        /**
+         * Reset the offscreen framebuffer to the original RenderingContext
+         */
+        static resetFrameBuffer(_color?: Color): void;
         /**
          * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node

@@ -55,6 +55,7 @@
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Node/NodeResource.ts",
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Node/NodeResourceInstance.ts",
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Ray/Ray.ts",
+      "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Ray/RayHit.ts",
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Render/RenderManager.ts",
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/Shader.ts",
       "C:/Users/jirka/Documents/HFU/FUDGE/Core/Source/Shader/ShaderFlat.ts",
@@ -82,7 +83,7 @@
         },
         {
           "pos": 593,
-          "end": 281341,
+          "end": 282314,
           "kind": "text"
         }
       ],
@@ -119,7 +120,7 @@
         },
         {
           "pos": 34,
-          "end": 115456,
+          "end": 115821,
           "kind": "text"
         }
       ]

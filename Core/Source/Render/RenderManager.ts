@@ -43,6 +43,7 @@ namespace FudgeCore {
     export abstract class RenderManager extends RenderOperator {
         public static rayCastTargets: WebGLTexture[] = [];
         public static rayCastBuffers: WebGLFramebuffer[] = [];
+        public static nodesIndexed: Node[] = [];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -51,7 +52,6 @@ namespace FudgeCore {
         private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
         private static timestampUpdate: number;
-        private static nodesIndexed: Node[] = [];
 
         // #region Adding
         /**
@@ -204,13 +204,21 @@ namespace FudgeCore {
         }
 
         /**
+         * Reset the offscreen framebuffer to the original RenderingContext
+         */
+        public static resetFrameBuffer(_color: Color = null): void {
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+        }
+
+        /**
          * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node 
          * @param _cmpCamera 
          */
         public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
             if (_drawNode == RenderManager.drawNode)
-                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+                RenderManager.resetFrameBuffer();
+
             let finalTransform: Matrix4x4;
 
             let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
@@ -246,6 +254,7 @@ namespace FudgeCore {
             if (!RenderManager.renderShaders.get(ShaderRayCast))
                 RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
             RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+            RenderManager.resetFrameBuffer();
         }
 
         private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
@@ -264,12 +273,11 @@ namespace FudgeCore {
             let target: WebGLTexture = RenderManager.getRayCastTexture();
 
             const framebuffer: WebGLFramebuffer = RenderManager.crc3.createFramebuffer();
+            // render to our targetTexture by binding the framebuffer
             RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // attach the texture as the first color attachment
             const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
             RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
-            // render to our targetTexture by binding the framebuffer
-            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
 
             // set render target
 

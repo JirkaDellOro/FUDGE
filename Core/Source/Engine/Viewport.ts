@@ -99,6 +99,7 @@ namespace FudgeCore {
          * Draw this viewport
          */
         public draw(): void {
+            RenderManager.resetFrameBuffer();
             if (!this.camera.isActive)
                 return;
             if (this.adjustingFrames)
@@ -130,7 +131,6 @@ namespace FudgeCore {
             if (this.adjustingCamera)
                 this.adjustCamera();
 
-            RenderManager.clear(Color.BLACK);
             if (RenderManager.addBranch(this.branch))
                 // branch has not yet been processed fully by rendermanager -> update all registered nodes
                 RenderManager.update();
@@ -145,19 +145,27 @@ namespace FudgeCore {
         }
 
 
-        public pickNodeAt(_pos: Vector2): Node {
+        public pickNodeAt(_pos: Vector2): RayHit[] {
+            let hits: RayHit[] = [];
             this.drawForRayCast();
             let buffers: WebGLFramebuffer[] = RenderManager.rayCastBuffers;
             let crc3: WebGL2RenderingContext = RenderManager.getRenderingContext();
-            for (let buffer of buffers) {
+            for (let index in buffers) {
+                let buffer: WebGLFramebuffer = buffers[index];
                 crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
                 let data: Uint8Array = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
                 crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
                 let pixel: number = _pos.x + this.rectSource.width * _pos.y;
-                console.log(data[pixel]);
+
+                let zBuffer: number = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+                let node: Node = RenderManager.nodesIndexed[index];
+                let hit: RayHit = new RayHit(node, 0, zBuffer);
+
+                hits.push(hit);
             }
 
-            return null;
+            RenderManager.resetFrameBuffer();
+            return hits;
         }
 
         /**

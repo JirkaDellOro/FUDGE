@@ -3163,6 +3163,7 @@ var FudgeCore;
          * Draw this viewport
          */
         draw() {
+            FudgeCore.RenderManager.resetFrameBuffer();
             if (!this.camera.isActive)
                 return;
             if (this.adjustingFrames)
@@ -3186,7 +3187,6 @@ var FudgeCore;
                 this.adjustFrames();
             if (this.adjustingCamera)
                 this.adjustCamera();
-            FudgeCore.RenderManager.clear(FudgeCore.Color.BLACK);
             if (FudgeCore.RenderManager.addBranch(this.branch))
                 // branch has not yet been processed fully by rendermanager -> update all registered nodes
                 FudgeCore.RenderManager.update();
@@ -3195,17 +3195,23 @@ var FudgeCore;
             this.crc2.drawImage(FudgeCore.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
         }
         pickNodeAt(_pos) {
+            let hits = [];
             this.drawForRayCast();
             let buffers = FudgeCore.RenderManager.rayCastBuffers;
             let crc3 = FudgeCore.RenderManager.getRenderingContext();
-            for (let buffer of buffers) {
+            for (let index in buffers) {
+                let buffer = buffers[index];
                 crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
                 let data = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
                 crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
                 let pixel = _pos.x + this.rectSource.width * _pos.y;
-                console.log(data[pixel]);
+                let zBuffer = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+                let node = FudgeCore.RenderManager.nodesIndexed[index];
+                let hit = new FudgeCore.RayHit(node, 0, zBuffer);
+                hits.push(hit);
             }
-            return null;
+            FudgeCore.RenderManager.resetFrameBuffer();
+            return hits;
         }
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
@@ -5535,6 +5541,17 @@ var FudgeCore;
     }
     FudgeCore.Ray = Ray;
 })(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class RayHit {
+        constructor(_node = null, _face = 0, _zBuffer = 0) {
+            this.node = _node;
+            this.face = _face;
+            this.zBuffer = _zBuffer;
+        }
+    }
+    FudgeCore.RayHit = RayHit;
+})(FudgeCore || (FudgeCore = {}));
 /// <reference path="RenderOperator.ts"/>
 var FudgeCore;
 /// <reference path="RenderOperator.ts"/>
@@ -5700,13 +5717,19 @@ var FudgeCore;
             RenderManager.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
         }
         /**
+         * Reset the offscreen framebuffer to the original RenderingContext
+         */
+        static resetFrameBuffer(_color = null) {
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+        }
+        /**
          * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node
          * @param _cmpCamera
          */
         static drawBranch(_node, _cmpCamera, _drawNode = RenderManager.drawNode) {
             if (_drawNode == RenderManager.drawNode)
-                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+                RenderManager.resetFrameBuffer();
             let finalTransform;
             let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
             if (cmpMesh)
@@ -5736,6 +5759,7 @@ var FudgeCore;
             if (!RenderManager.renderShaders.get(FudgeCore.ShaderRayCast))
                 RenderManager.createReference(RenderManager.renderShaders, FudgeCore.ShaderRayCast, RenderManager.createProgram);
             RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+            RenderManager.resetFrameBuffer();
         }
         static drawNode(_node, _finalTransform, _projection) {
             let references = RenderManager.nodes.get(_node);
@@ -5750,12 +5774,11 @@ var FudgeCore;
             // TODO: look into SSBOs!
             let target = RenderManager.getRayCastTexture();
             const framebuffer = RenderManager.crc3.createFramebuffer();
+            // render to our targetTexture by binding the framebuffer
             RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // attach the texture as the first color attachment
             const attachmentPoint = WebGL2RenderingContext.COLOR_ATTACHMENT0;
             RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
-            // render to our targetTexture by binding the framebuffer
-            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
             // set render target
             let references = RenderManager.nodes.get(_node);
             if (!references)
@@ -5875,6 +5898,7 @@ var FudgeCore;
     }
     RenderManager.rayCastTargets = [];
     RenderManager.rayCastBuffers = [];
+    RenderManager.nodesIndexed = [];
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.renderShaders = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -5882,7 +5906,6 @@ var FudgeCore;
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
     RenderManager.renderBuffers = new Map();
     RenderManager.nodes = new Map();
-    RenderManager.nodesIndexed = [];
     FudgeCore.RenderManager = RenderManager;
 })(FudgeCore || (FudgeCore = {}));
 /// <reference path="../Coat/Coat.ts"/>
@@ -5989,7 +6012,9 @@ var FudgeCore;
                     
                     void main() {
                        float id = float(u_id)/ 256.0;
-                       frag = vec4(id,id,id,id);
+                       float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
+                       float lowerbyte = fract(gl_FragCoord.z * 256.0);
+                       frag = vec4(id, id, upperbyte , lowerbyte);
                     }`;
         }
     }

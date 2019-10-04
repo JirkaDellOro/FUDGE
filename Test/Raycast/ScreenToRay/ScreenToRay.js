@@ -56,6 +56,7 @@ var ScreenToRay;
         for (let name in uiMaps) {
             logMutatorInfo(name, uiMaps[name].framing);
         }
+        let count = 0;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         // animate(null);
@@ -68,6 +69,7 @@ var ScreenToRay;
             adjustRayCamera();
             let color = getPixelColor(mouse);
             // ƒ.Debug.log(color);
+            // if (count++ % 10 == 0)
             pickNodeAt(mouse);
         }
     }
@@ -78,7 +80,13 @@ var ScreenToRay;
         return color;
     }
     function pickNodeAt(_pos) {
-        return viewport.pickNodeAt(_pos);
+        let posRender = viewport.pointClientToRender(new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y));
+        let output = document.querySelector("output");
+        output.innerHTML = "";
+        let hits = viewport.pickNodeAt(posRender);
+        hits.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+        for (let hit of hits)
+            output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
     }
     function adjustRayCamera() {
         let ray = computeRay();
