@@ -170,7 +170,7 @@ namespace Fudge {
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"]}));
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"] }));
       }
       console.log(obj);
     }

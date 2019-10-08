@@ -51,7 +51,7 @@ namespace Fudge {
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
-            
+
         });
     }
 
@@ -63,8 +63,8 @@ namespace Fudge {
     }
 
     function openAnimationPanel(): void {
-      let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-      PanelManager.instance.addPanel(panel);
+        //   let panel: Panel = PanelManager.instance.
+        //   PanelManager.instance.addPanel(panel);
     }
 
     function save(_node: ƒ.Node): void {

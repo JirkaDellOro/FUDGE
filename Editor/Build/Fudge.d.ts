@@ -1,10 +1,6 @@
 /// <reference types="../@types/golden-layout" />
-/// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../userinterface/build/fudgeui" />
-declare namespace Fudge {
-}
-declare namespace Fudge {
-}
+/// <reference types="../../core/build/fudgecore" />
+/// <reference types="../../userinterface/build/fudgeui" />
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
