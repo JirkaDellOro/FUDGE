@@ -17,7 +17,7 @@ namespace Iterator {
         child2.cmpTransform.local.rotateX(45);
         child.appendChild(child2);
         Scenes.createViewport();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
 
         console.group("Nodes in branch");
         for (let iter of node.branch)

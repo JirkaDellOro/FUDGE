@@ -55,8 +55,8 @@ namespace FudgeCore {
     labels: AnimationLabel = {};
     stepsPerSecond: number = 10;
     animationStructure: AnimationStructure;
+    events: AnimationEventTrigger = {};
     private framesPerSecond: number = 60;
-    private events: AnimationEventTrigger = {};
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();

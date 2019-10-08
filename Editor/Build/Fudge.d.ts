@@ -105,6 +105,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     enum VIEW {
         NODE = "ViewNode",
+        ANIMATION = "ViewAnimation",
         PORT = "ViewPort",
         DATA = "ViewData",
         CAMERA = "ViewCamera"

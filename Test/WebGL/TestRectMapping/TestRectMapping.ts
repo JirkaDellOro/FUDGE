@@ -1,11 +1,11 @@
-namespace RenderManagerRendering {
+namespace TestRectMapping {
     import ƒ = FudgeCore;
     window.addEventListener("load", init);
     let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
     let uiClient: UI.Rectangle;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    let camera: ƒ.Node;
+    let cmpCamera: ƒ.ComponentCamera;
     let uiCamera: UI.Camera;
 
     function init(): void {
@@ -20,8 +20,7 @@ namespace RenderManagerRendering {
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
         let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
@@ -127,7 +126,6 @@ namespace RenderManagerRendering {
 
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
 
@@ -167,7 +165,6 @@ namespace RenderManagerRendering {
         let clientRect: ClientRect = canvas.getBoundingClientRect();
         uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
 
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

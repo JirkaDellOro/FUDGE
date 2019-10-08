@@ -67,9 +67,9 @@ namespace FudgeCore {
             let result: Vector3 = new Vector3();
             let m: Float32Array = _matrix.get();
             let [x, y, z] = _vector.get();
-            result.x = m[0] * x + m[4] * y + m[8] * z; // + m[12];
-            result.y = m[1] * x + m[5] * y + m[9] * z; // + m[13];
-            result.z = m[2] * x + m[6] * y + m[10] * z; // + m[14];
+            result.x = m[0] * x + m[4] * y + m[8] * z + m[12];
+            result.y = m[1] * x + m[5] * y + m[9] * z + m[13];
+            result.z = m[2] * x + m[6] * y + m[10] * z + m[14];
             return result;
         }
 

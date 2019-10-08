@@ -44,6 +44,10 @@ namespace Fudge {
             ƒ.Debug.log("OpenViewNode");
             openViewNode();
         });
+        ipcRenderer.on("openAnimationPanel", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+            ƒ.Debug.log("Open Animation Panel");
+            openAnimationPanel();
+        });
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
@@ -56,6 +60,11 @@ namespace Fudge {
         node = new ƒ.Node("Scene");
         let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
         PanelManager.instance.addPanel(nodePanel);
+    }
+
+    function openAnimationPanel(): void {
+      let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+      PanelManager.instance.addPanel(panel);
     }
 
     function save(_node: ƒ.Node): void {

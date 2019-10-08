@@ -2,7 +2,7 @@
 
 //<reference types="../../Examples/Code/Scenes"/>
 
-namespace Fudge {
+namespace FudgeTest {
     // import ƒ = FudgeCore;
 
     /**

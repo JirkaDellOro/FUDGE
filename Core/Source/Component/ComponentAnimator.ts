@@ -75,6 +75,22 @@ namespace FudgeCore {
       this.getContainer().applyAnimation(mutator);
     }
 
+    /**
+     * Returns the current time of the animation, modulated for animation length.
+     */
+    getCurrentTime(): number {
+      return this.localTime.get() % this.animation.totalTime;
+    }
+
+    /**
+     * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
+     * @param _time the (unscaled) time to update the animation with.
+     * @returns a Tupel containing the Mutator for Animation and the playmode corrected time. 
+     */
+    updateAnimation(_time: number): [Mutator, number] {
+      return this.updateAnimationLoop(null, _time);
+    }
+
     //#region transfer
     serialize(): Serialization {
       let s: Serialization = super.serialize();
@@ -106,11 +122,13 @@ namespace FudgeCore {
     /**
      * Updates the Animation.
      * Gets called every time the Loop fires the LOOP_FRAME Event.
+     * Uses the built-in time unless a different time is specified.
+     * May also be called from updateAnimation().
      */
-    private updateAnimationLoop(): void {
+    private updateAnimationLoop(_e: Event, _time: number): [Mutator, number] {
       if (this.animation.totalTime == 0)
-        return;
-      let time: number = this.localTime.get();
+        return [null, 0];
+      let time: number = _time || this.localTime.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
         time = this.lastTime + (1000 / this.animation.fps);
       }
@@ -125,7 +143,9 @@ namespace FudgeCore {
         if (this.getContainer()) {
           this.getContainer().applyAnimation(mutator);
         }
+        return [mutator, time];
       }
+      return [null, time];
     }
 
     /**

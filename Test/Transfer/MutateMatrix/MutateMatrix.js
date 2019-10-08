@@ -34,7 +34,7 @@ var MutateMatrixTest;
         i++;
         cmpTransform.mutate(newMutator);
         ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
     }
 })(MutateMatrixTest || (MutateMatrixTest = {}));
 //# sourceMappingURL=MutateMatrix.js.map

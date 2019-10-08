@@ -2,8 +2,8 @@ namespace Scenes {
     import ƒ = FudgeCore;
 
     export let node: ƒ.Node;
-    export let camera: ƒ.Node;
-    export let viewPort: ƒ.Viewport;
+    export let cmpCamera: ƒ.ComponentCamera;
+    export let viewport: ƒ.Viewport;
 
     export function createAxisCross(): ƒ.Node {
         let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 0.5);
@@ -97,7 +97,7 @@ namespace Scenes {
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
         cmpTransform.local.scaleX(2);
 
-        camera = createCamera();
+        cmpCamera = createCamera();
 
         let child: ƒ.Node = new ƒ.Node("Child");
         node.appendChild(child);
@@ -108,22 +108,22 @@ namespace Scenes {
             _canvas = document.createElement("canvas");
             document.body.appendChild(_canvas);
         }
-        viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", node, camera.getComponent(ƒ.ComponentCamera), _canvas);
+        viewport = new ƒ.Viewport();
+        viewport.initialize("TestViewport", node, cmpCamera, _canvas);
         // viewPort.drawScene();
-        viewPort.showSceneGraph();
+        viewport.showSceneGraph();
     }
 
-    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(1, 1, 10), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.Node {
-        let camera: ƒ.Node = new ƒ.Node("Camera");
-        let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-        cmpTransform.local.translate(_translation);
-        cmpTransform.local.lookAt(_lookAt);
-        camera.addComponent(cmpTransform);
+    export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(1, 1, 10), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.ComponentCamera {
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
-        camera.addComponent(cmpCamera);
-        return camera;
+        cmpCamera.pivot.translate(_translation);
+        cmpCamera.pivot.lookAt(_lookAt);
+        return cmpCamera;
+        // camera.addComponent(cmpCamera);
+        // camera.addComponent(cmpTransform);
+        // // let cmpCamera: ƒ.ComponentCamera = new ƒ.Node("Camera");
+        // let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
     }
 
     export function createCompleteMeshNode(_name: string, _material: ƒ.Material, _mesh: ƒ.Mesh): ƒ.Node {

@@ -133,6 +133,9 @@ namespace Fudge {
                             case VIEW.CAMERA:
                                 view = new ViewCamera(this);
                                 break;
+                            case VIEW.ANIMATION:
+                                view = new ViewAnimation(this);
+                                break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {
                             type: "component",

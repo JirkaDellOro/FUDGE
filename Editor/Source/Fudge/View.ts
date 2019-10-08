@@ -7,7 +7,7 @@ namespace Fudge {
     export enum VIEW {
         // PROJECT = ViewProject,
         NODE = "ViewNode",
-        // ANIMATION = ViewAnimation,
+        ANIMATION = "ViewAnimation",
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
         PORT = "ViewPort",

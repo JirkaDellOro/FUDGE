@@ -9,7 +9,7 @@ namespace AnimatorComponentTest {
   function init(): void {
     Scenes.createMiniScene();
     Scenes.createViewport();
-    Scenes.viewPort.draw();
+    Scenes.viewport.draw();
     
     node = Scenes.node;
     initAnim();
@@ -74,7 +74,7 @@ namespace AnimatorComponentTest {
 
   function frame(): void {
     ƒ.RenderManager.update();
-    Scenes.viewPort.draw();
+    Scenes.viewport.draw();
   }
 
   function hndlEv(_e: Event): void {

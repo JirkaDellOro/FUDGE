@@ -19,7 +19,7 @@ var UITest;
     let branch;
     let canvas;
     let viewPort = new ƒ.Viewport();
-    let camera;
+    let cmpCamera;
     let counter;
     window.addEventListener("load", init);
     function init() {
@@ -80,8 +80,7 @@ var UITest;
         canvas.height = 800;
         canvas.width = 1200;
         document.body.append(canvas);
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
@@ -101,7 +100,7 @@ var UITest;
         container.getElement().append(canvas);
     }
     function createCameraComponent(container, state) {
-        return new UITest.CameraUI(container, state, camera.getComponent(ƒ.ComponentCamera));
+        return new UITest.CameraUI(container, state, cmpCamera);
     }
     function createTestComponent(container, state) {
         let content = document.createElement("div");
