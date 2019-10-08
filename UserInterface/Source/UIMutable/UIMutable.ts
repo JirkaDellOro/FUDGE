@@ -49,8 +49,10 @@ namespace FudgeUserInterface {
                                 break;
                             default:
                                 let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
-                                let subTypes: ƒ.Mutator = (<ƒ.General>mutatorTypes)[key];
-                                mutator[key] = this.updateMutator(_mutable, element, subMutator, subTypes);
+                                let subMutable: ƒ.Mutable;
+                                subMutable = (<ƒ.General>_mutable)[key];
+                                let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
+                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }

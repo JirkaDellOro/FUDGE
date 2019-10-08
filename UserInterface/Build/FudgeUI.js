@@ -620,8 +620,10 @@ var FudgeUserInterface;
                                 break;
                             default:
                                 let subMutator = mutator[key];
-                                let subTypes = mutatorTypes[key];
-                                mutator[key] = this.updateMutator(_mutable, element, subMutator, subTypes);
+                                let subMutable;
+                                subMutable = _mutable[key];
+                                let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
+                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }

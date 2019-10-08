@@ -1,9 +1,12 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
+
 namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
 
 
     /**
@@ -55,10 +58,17 @@ namespace Fudge {
             this.viewport.draw();
 
             this.content.append(this.canvas);
-            
+
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+
+            //Focus cameracontrols on new viewport
+            let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            this.parentPanel.dispatchEvent(event);
+
+            this.canvas.addEventListener("click", this.activeViewport);
         }
+
 
 
         /**
@@ -81,6 +91,12 @@ namespace Fudge {
             ƒ.RenderManager.update();
             if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                 this.viewport.draw();
+        }
+        private activeViewport = (_event: MouseEvent): void => {
+            let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            this.parentPanel.dispatchEvent(event);
+
+            _event.cancelBubble = true;
         }
     }
 }

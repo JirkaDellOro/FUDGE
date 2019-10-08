@@ -34,7 +34,9 @@ namespace Fudge {
     addView(_v: View): void {
       this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
     }
-    
+    /**
+     * Returns the currently active Panel
+     */
     getActivePanel(): Panel {
       return this.activePanel;
     }
@@ -63,6 +65,12 @@ namespace Fudge {
       this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
     }
 
+    /**
+     * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
+     * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is 
+     * created and added to the Panel-List.
+     * During Initialization and addPanel function, this method is called already.
+     */
     private  setActivePanel = (): void => {
       let activeTab: GoldenLayout.ContentItem = this.editorLayout.root.contentItems[0].getActiveContentItem();
       for (let panel of this.panels) {

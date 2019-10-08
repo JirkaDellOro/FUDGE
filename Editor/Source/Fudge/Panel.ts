@@ -51,6 +51,10 @@ namespace Fudge {
             }
         }
 
+        /**
+         * Returns a randomly generated ID. 
+         * Used to identify panels
+         */
         private generateID(): string {
             let randLetter: string = String.fromCharCode(65 + Math.floor(Math.random() * 26));
             let uniqid: string = randLetter + Date.now();
@@ -122,10 +126,12 @@ namespace Fudge {
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
-
                                 break;
                             case VIEW.PORT:
                                 view = new ViewViewport(this);
+                                break;
+                            case VIEW.CAMERA:
+                                view = new ViewCamera(this);
                                 break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {

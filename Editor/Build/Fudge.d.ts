@@ -30,6 +30,10 @@ declare namespace Fudge {
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
         addView(_v: View, _pushToPanelManager?: boolean, _pushConfig?: boolean): void;
+        /**
+         * Returns a randomly generated ID.
+         * Used to identify panels
+         */
         private generateID;
     }
     /**
@@ -73,11 +77,20 @@ declare namespace Fudge {
          * @param _v View to be added
          */
         addView(_v: View): void;
+        /**
+         * Returns the currently active Panel
+         */
         getActivePanel(): Panel;
         /**
          * Initialize GoldenLayout Context of the PanelManager Instance
          */
         init(): void;
+        /**
+         * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
+         * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is
+         * created and added to the Panel-List.
+         * During Initialization and addPanel function, this method is called already.
+         */
         private setActivePanel;
     }
 }
@@ -93,12 +106,13 @@ declare namespace Fudge {
     enum VIEW {
         NODE = "ViewNode",
         PORT = "ViewPort",
-        DATA = "ViewData"
+        DATA = "ViewData",
+        CAMERA = "ViewCamera"
     }
     /**
      * Base class for all Views to support generic functionality
-     * TODO: examine, if this should/could be derived from some GoldenLayout "class"
-     *
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
      */
     abstract class View {
         config: GoldenLayout.ComponentConfig;
@@ -123,13 +137,32 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ViewCamera extends View {
+        camera: ƒ.ComponentCamera;
+        constructor(_panel: Panel);
+        fillContent(): void;
+        deconstruct(): void;
+        private setCamera;
+    }
+}
+declare namespace Fudge {
     class ViewData extends View {
         private data;
         constructor(_parent: Panel);
         deconstruct(): void;
         fillContent(): void;
+        /**
+         * Changes the name of the displayed node
+         */
         private changeNodeName;
+        /**
+         * Change displayed node
+         */
         private setNode;
+        /**
+         * Add Component to displayed node
+         */
         private addComponent;
     }
 }
@@ -138,7 +171,7 @@ declare namespace Fudge {
     import ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
-     * Consists of a viewport and a tree-control.
+     * Consists of a viewport, a tree-control and .
      */
     class ViewNode extends View {
         branch: ƒ.Node;
@@ -147,9 +180,22 @@ declare namespace Fudge {
         constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;
+        /**
+         * Display structure of node
+         * @param _node Node to be displayed
+         */
         setRoot(_node: ƒ.Node): void;
+        /**
+         * Add new Node to Node Structure
+         */
         private createNode;
+        /**
+         * Change the selected Node
+         */
         private setSelectedNode;
+        /**
+         * Pass Event to Panel
+         */
         private passEventToPanel;
     }
 }
@@ -175,5 +221,6 @@ declare namespace Fudge {
          * Update Viewport every frame
          */
         private animate;
+        private activeViewport;
     }
 }

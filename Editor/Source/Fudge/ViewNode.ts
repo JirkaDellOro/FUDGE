@@ -14,7 +14,7 @@ namespace Fudge {
     }
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.  
-     * Consists of a viewport and a tree-control. 
+     * Consists of a viewport, a tree-control and . 
      */
     export class ViewNode extends View {
         branch: ƒ.Node;
@@ -55,17 +55,22 @@ namespace Fudge {
             this.content.append(menu);
         }
 
-
+        /**
+         * Display structure of node
+         * @param _node Node to be displayed
+         */
         public setRoot(_node: ƒ.Node): void {
             if (!_node)
                 return;
-            // ƒ.Debug.log("Trying to display node: ", _node);
             this.branch = _node;
             this.listController.listRoot.removeEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
             this.listController.setNodeRoot(_node);
             this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
             this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
         }
+        /**
+         * Add new Node to Node Structure
+         */
         private createNode = (_event: CustomEvent): void => {
             let node: ƒ.Node = new ƒ.Node("");
             let targetNode: ƒ.Node = this.selectedNode || this.branch;
@@ -94,10 +99,16 @@ namespace Fudge {
             targetNode.dispatchEvent(event);
             this.setRoot(this.branch);
         }
+        /**
+         * Change the selected Node
+         */
         private setSelectedNode = (_event: CustomEvent): void => {
             this.listController.setSelection(_event.detail);
             this.selectedNode = _event.detail;
         }
+        /**
+         * Pass Event to Panel
+         */
         private passEventToPanel = (_event: CustomEvent): void => {
             let eventToPass: CustomEvent = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
             _event.cancelBubble = true;

@@ -90,8 +90,9 @@ ul.tree li.open > a:not(:last-child):before {
   .dropdown {
     position: relative;
     display: inline-block;
-    width: max-content;
+    width: inherit;
     height: max-content;
+    padding: 1em;
   }
 
   .dropdown button {
@@ -101,12 +102,12 @@ ul.tree li.open > a:not(:last-child):before {
     border-width: 1px;
     outline: none;
     color: white;
-    padding: 5px 10px;
     align-self: center;
     background-color: inherit;
     font-family: inherit;
     display: block;
     width: inherit;
+    padding: max-content;
 }
   
   .dropdown-content {
@@ -138,3 +139,15 @@ ul.tree li.open > a:not(:last-child):before {
   }
   
   .dropdown a:hover {background-color: #ddd;}
+
+  .NodeList ul{
+      list-style: none;
+      padding-left: 0.5em;
+  }
+
+  .NodeList li {
+      list-style: none;
+  }
+  ul.NodeList {
+    padding-left: 0.5em;
+  }

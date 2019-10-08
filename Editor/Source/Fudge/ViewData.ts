@@ -56,6 +56,9 @@ namespace Fudge {
                 this.content.append(cntEmpty);
             }
         }
+        /**
+         * Changes the name of the displayed node
+         */
         private changeNodeName = (_event: Event) => {
             if (this.data instanceof ƒ.Node) {
                 let target: HTMLInputElement = <HTMLInputElement>_event.target;
@@ -63,6 +66,9 @@ namespace Fudge {
             }
         }
 
+        /**
+         * Change displayed node
+         */
         private setNode = (_event: CustomEvent): void => {
             this.data = _event.detail;
             while (this.content.firstChild != null) {
@@ -70,7 +76,9 @@ namespace Fudge {
             }
             this.fillContent();
         }
-
+        /**
+         * Add Component to displayed node
+         */
         private addComponent = (_event: CustomEvent): void => {
             switch (_event.detail) {
             }

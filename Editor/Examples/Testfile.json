@@ -15,7 +15,7 @@
                   },
                   "pivot": {
                     "translation": {
-                      "x": 0,
+                      "x": 1,
                       "y": 0,
                       "z": 0
                     },
@@ -89,7 +89,187 @@
               }
             ]
           },
-          "children": []
+          "children": [
+            {
+              "ƒ.Node": {
+                "name": "Bla",
+                "components": {
+                  "ComponentMesh": [
+                    {
+                      "ƒ.ComponentMesh": {
+                        "mesh": {
+                          "ƒ.MeshPyramid": {}
+                        },
+                        "pivot": {
+                          "translation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                          },
+                          "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                          },
+                          "scaling": {
+                            "x": 1,
+                            "y": 1,
+                            "z": 1
+                          }
+                        },
+                        "Component": {
+                          "active": true
+                        }
+                      }
+                    }
+                  ],
+                  "ComponentMaterial": [
+                    {
+                      "ƒ.ComponentMaterial": {
+                        "material": {
+                          "ƒ.Material": {
+                            "name": "Red",
+                            "shader": "ShaderUniColor",
+                            "coat": {
+                              "ƒ.CoatColored": {
+                                "name": "Coat",
+                                "color": {
+                                  "r": 1,
+                                  "g": 0,
+                                  "b": 0,
+                                  "a": 1
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "Component": {
+                          "active": true
+                        }
+                      }
+                    }
+                  ],
+                  "ComponentTransform": [
+                    {
+                      "ƒ.ComponentTransform": {
+                        "local": {
+                          "translation": {
+                            "x": -4,
+                            "y": 0,
+                            "z": 0
+                          },
+                          "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                          },
+                          "scaling": {
+                            "x": 4,
+                            "y": 4,
+                            "z": 4
+                          }
+                        },
+                        "Component": {
+                          "active": true
+                        }
+                      }
+                    }
+                  ]
+                },
+                "children": [
+                  {
+                    "ƒ.Node": {
+                      "name": "Box",
+                      "components": {
+                        "ComponentMesh": [
+                          {
+                            "ƒ.ComponentMesh": {
+                              "mesh": {
+                                "ƒ.MeshCube": {}
+                              },
+                              "pivot": {
+                                "translation": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "z": 0
+                                },
+                                "rotation": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "z": 0
+                                },
+                                "scaling": {
+                                  "x": 1,
+                                  "y": 1,
+                                  "z": 1
+                                }
+                              },
+                              "Component": {
+                                "active": true
+                              }
+                            }
+                          }
+                        ],
+                        "ComponentMaterial": [
+                          {
+                            "ƒ.ComponentMaterial": {
+                              "material": {
+                                "ƒ.Material": {
+                                  "name": "Red",
+                                  "shader": "ShaderUniColor",
+                                  "coat": {
+                                    "ƒ.CoatColored": {
+                                      "name": "Coat",
+                                      "color": {
+                                        "r": 1,
+                                        "g": 0,
+                                        "b": 0,
+                                        "a": 1
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "Component": {
+                                "active": true
+                              }
+                            }
+                          }
+                        ],
+                        "ComponentTransform": [
+                          {
+                            "ƒ.ComponentTransform": {
+                              "local": {
+                                "translation": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "z": 0
+                                },
+                                "rotation": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "z": 0
+                                },
+                                "scaling": {
+                                  "x": 1,
+                                  "y": 1,
+                                  "z": 1
+                                }
+                              },
+                              "Component": {
+                                "active": true
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  }
+                ]
+              }
+            }
+          ]
         }
       },
       {
@@ -104,7 +284,7 @@
                   },
                   "pivot": {
                     "translation": {
-                      "x": -1,
+                      "x": 2,
                       "y": -1,
                       "z": -1
                     },
@@ -193,8 +373,8 @@
                   },
                   "pivot": {
                     "translation": {
-                      "x": -1,
-                      "y": -1,
+                      "x": -3,
+                      "y": -4,
                       "z": 0
                     },
                     "rotation": {
@@ -203,7 +383,7 @@
                       "z": 0
                     },
                     "scaling": {
-                      "x": 1,
+                      "x": 4,
                       "y": 1,
                       "z": 1
                     }

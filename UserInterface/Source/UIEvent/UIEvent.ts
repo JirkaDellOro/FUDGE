@@ -9,7 +9,8 @@ namespace FudgeUserInterface {
         HIDE = "nodeHideEvent",
         UPDATE = "mutatorUpdateEvent",
         DROPMENUCLICK = "dropMenuClick",
-        DROPMENUCOLLAPSE = "dropMenuCollapse"
+        DROPMENUCOLLAPSE = "dropMenuCollapse",
+        ACTIVEVIEWPORT = "activeViewport"
     }
 
 }
