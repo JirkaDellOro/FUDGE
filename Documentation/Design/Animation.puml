@@ -1,0 +1,155 @@
+@startuml FudgeCore.Animation
+
+skinparam monochrome true
+skinparam componentStyle uml2
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam handwritten false
+
+left to right direction
+
+package Animation {
+  interface AnimationStructure {
+    [attribute: string]: Serialization | AnimationSequence
+  }
+  interface AnimationLabel {
+    [name: string]: number
+  }
+  interface AnimationEventTrigger{
+    [name: string]: number
+  }
+  enum ANIMATION_STRUCTURE_TYPE {
+    NORMAL
+    REVERSE
+    RASTERED
+    RASTEREDREVERSE
+  }
+  class Animation extends Mutable implements SerializableResource {
+    +idResource: string
+    +name: string
+    +totalTime: number
+    +labels: AnimationLabel
+    +stepsPerSecond: number
+    +animationStructure: AnimationStructure
+    +events: AnimationEventTrigger
+    +fps: number
+    -framesPerSecond: number
+    -eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>
+    -animationStructuresProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>
+    +getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator
+    +getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[]
+    +setEvent(_name: string, _time: number): void
+    +removeEvent(_name: string): void
+    +calculateTotalTime(): void
+    ' +serialize(): Serialization
+    ' +deserialize(_serialization: Serialization): Serializable
+    ' +getMutator(): Mutator
+    ' #reduceMutator(_mutator: Mutator): void
+    -traverseStructureForSerialisation(_structure: AnimationStructure): Serialization
+    -traverseStructureForDeserialisation(_serialization: Serialization): AnimationStructure
+    -getCorrectEventList(_direction: number, _playback: ANIMATION_PLAYBACK): AnimationEventTrigger
+    -traverseStructureForMutator(_structure: AnimationStructure, _time: number): Mutator
+    -traverseStructureForTime(_structure: AnimationStructure): void
+    -getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure
+    -getProcessedEventTrigger(_type: ANIMATION_STRUCTURE_TYPE): AnimationEventTrigger
+    -traverseStructureForNewStructure(_oldStructure: AnimationStructure, _functionToUse: Function): AnimationStructure
+    -calculateReverseSequence(_sequence: AnimationSequence): AnimationSequence
+    -calculateRasteredSequence(_sequence: AnimationSequence): AnimationSequence
+    -calculateReverseEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger
+    -calculateRasteredEventTriggers(_events: AnimationEventTrigger): AnimationEventTrigger
+    -checkEventsBetween(_eventTriggers: AnimationEventTrigger, _min: number, _max: number): string[]
+  }
+
+
+  class AnimationSequence extends Mutable implements Serializable {
+    -keys: AnimationKey[]
+    +evaluate(_time: number): number
+    +addKey(_key: AnimationKey): void
+    +removeKey(_key: AnimationKey): void
+    +removeKeyAtIndex(_index: number): AnimationKey
+    +getKey(_index: number): AnimationKey
+    +length: number
+    ' +serialize(): Serialization
+    ' +deserialize(_serialization: Serialization): Serializable
+    ' #reduceMutator(_mutator: Mutator): void
+    -regenerateFunctions(): void
+  }
+
+  class AnimationKey extends Mutable implements Serializable {
+    +functionIn: AnimationFunction
+    +functionOut: AnimationFunction
+    +broken: boolean
+    +time: number
+    +value: number
+    +constant: boolean
+    +slopeIn: number
+    +slopeOut: number
+    ' +serialize(): Serialization
+    ' +deserialize(_serialization: Serialization): Serializable
+    ' +getMutator(): Mutator
+    ' #reduceMutator(_mutator: Mutator): void
+    +{static} compare(_a: AnimationKey, _b: AnimationKey): number
+  }
+
+  class AnimationFunction {
+    -a: number
+    -b: number
+    -c: number
+    -d: number
+    -keyIn: AnimationKey
+    -keyOut: AnimationKey
+    +evaluate(_time: number): number
+    +setKeyIn(_key: AnimationKey)
+    +setKeyOut(_key: AnimationKey)
+    +calculate(): void
+  }
+}
+package Component {
+  enum ANIMATION_PLAYMODE {
+    LOOP
+    PLAYONCE
+    PLAYONCESTOPAFTER
+    REVERSELOOP
+    STOP
+  }
+  enum ANIMATION_PLAYBACK {
+    TIMEBASED_CONTINOUS
+    TIMEBASED_RASTERED_TO_FPS
+    FRAMEBASED
+  }
+  class ComponentAnimator extends Component {
+    +animation: Animation
+    +playmode: ANIMATION_PLAYMODE
+    +playback: ANIMATION_PLAYBACK
+    +speedScalesWithGlobalSpeed: boolean
+    -localTime: FudgeCore.Time
+    -speedScale: number
+    -lastTime: number
+    +speed: number
+    +jumpTo(_time: number): void
+    +getCurrentTime(): number
+    +updateAnimation(_time: number): [Mutator, number]
+    +serialize(): Serialization
+    +deserialize(_s: Serialization): Serializable
+    -updateAnimationLoop(_e: Event, _time: number): [Mutator, number]
+    -executeEvents(events: string[]): void
+    -applyPlaymodes(_time: number): number
+    -calculateDirection(_time: number): number
+    -updateScale(): void
+  }
+}
+
+' Connections
+Animation "events" -up- AnimationEventTrigger
+Animation "labels" -up- AnimationLabel
+Animation -- ANIMATION_STRUCTURE_TYPE
+Animation "animationStructure" -- AnimationStructure
+AnimationStructure -- "n" AnimationSequence
+AnimationSequence -- "n" AnimationKey
+AnimationKey "2" -- "2" AnimationFunction
+
+ComponentAnimator "playback" -- ANIMATION_PLAYBACK
+ComponentAnimator "playmode" -- ANIMATION_PLAYMODE
+
+ComponentAnimator "animation" -- Animation
+@enduml

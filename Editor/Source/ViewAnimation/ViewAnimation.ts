@@ -195,6 +195,10 @@ namespace Fudge {
       this.attributeList.removeEventListener("click", this.mouseClickOnAttributeList.bind(this));
     }
 
+    addPropertyToAnimate(_m: FudgeCore.Mutator): void {
+      //TODO: go through animation structure and merge with _m
+    }
+
     /**
      * Handles mouseclicks onto the canvas.
      * @param _e The MouseEvent resulting in this call.
