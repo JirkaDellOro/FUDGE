@@ -8,6 +8,12 @@ namespace FudgeCore {
     }
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
+    export interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
+
     /**
      * This class manages the references to render data used by nodes.
      * Multiple nodes may refer to the same data via their references to shader, coat and mesh 
@@ -41,9 +47,6 @@ namespace FudgeCore {
      * With these references, the already buffered data is retrieved when rendering.
      */
     export abstract class RenderManager extends RenderOperator {
-        public static rayCastTargets: WebGLTexture[] = [];
-        public static rayCastBuffers: WebGLFramebuffer[] = [];
-        public static nodesIndexed: Node[] = [];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -52,6 +55,7 @@ namespace FudgeCore {
         private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
         private static timestampUpdate: number;
+        private static pickBuffers: PickBuffer[];
 
         // #region Adding
         /**
@@ -185,7 +189,7 @@ namespace FudgeCore {
         }
         // #endregion
 
-        // #region Transformation & Rendering
+        // #region Rendering
         /**
          * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
@@ -242,20 +246,41 @@ namespace FudgeCore {
                 Recycler.store(finalTransform);
         }
 
+        //#region RayCast & Picking
+
         /**
          * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node 
          * @param _cmpCamera 
          */
-        public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
-            RenderManager.rayCastTargets = [];
-            RenderManager.rayCastBuffers = [];
-            RenderManager.nodesIndexed = [];
+        public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            RenderManager.pickBuffers = [];
             if (!RenderManager.renderShaders.get(ShaderRayCast))
                 RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
             RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
             RenderManager.resetFrameBuffer();
+            return RenderManager.pickBuffers;
         }
+
+        public static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[] {
+            let hits: RayHit[] = [];
+            
+            for (let pickBuffer of _pickBuffers) {
+                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, pickBuffer.frameBuffer);
+                // TODO: instead of reading all data and afterwards pick the pixel, read only the pixel!
+                let data: Uint8Array = new Uint8Array(_rect.width * _rect.height * 4);
+                RenderManager.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+                let pixel: number = _pos.x + _rect.width * _pos.y;
+
+                let zBuffer: number = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+                let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
+
+                hits.push(hit);
+            }
+
+            return hits;
+        }
+
 
         private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
             let references: NodeReferences = RenderManager.nodes.get(_node);
@@ -285,13 +310,12 @@ namespace FudgeCore {
             if (!references)
                 return; // TODO: deal with partial references
 
-            RenderManager.nodesIndexed.push(_node);
+            let pickBuffer: PickBuffer = {node: _node, texture: target, frameBuffer: framebuffer};
+            RenderManager.pickBuffers.push(pickBuffer);
 
             let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
-            RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
+            RenderManager.drawForRayCast(RenderManager.pickBuffers.length, bufferInfo, _finalTransform, _projection);
             // make texture available to onscreen-display
-            RenderManager.rayCastTargets.push(target);
-            RenderManager.rayCastBuffers.push(framebuffer);
             // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
         }
 
@@ -318,7 +342,9 @@ namespace FudgeCore {
 
             return targetTexture;
         }
+        //#endregion
 
+        //#region Transformation of branch
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */

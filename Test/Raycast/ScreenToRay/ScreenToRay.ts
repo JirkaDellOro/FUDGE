@@ -68,25 +68,19 @@ namespace ScreenToRay {
             logMutatorInfo(name, uiMaps[name].framing);
         }
 
-        let count: number = 0;
+        
+        viewport.createPickBuffers();
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
         // animate(null);
 
         function animate(_event: Event): void {
             update();
-            // branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
-            // viewport.drawForRayCast();
             viewport.draw();
-
             adjustRayCamera();
-
-            let color: ƒ.Color = getPixelColor(mouse);
-            // ƒ.Debug.log(color);
-
-            // if (count++ % 10 == 0)
             pickNodeAt(mouse);
+            // let color: ƒ.Color = getPixelColor(mouse);           
         }
     }
 
@@ -104,7 +98,6 @@ namespace ScreenToRay {
         let output: HTMLOutputElement = document.querySelector("output");
         output.innerHTML = "";
         let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-        hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
         for (let hit of hits)
             output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
     }

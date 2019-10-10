@@ -34,6 +34,7 @@ namespace FudgeCore {
         private branch: Node = null; // The first node in the tree(branch) that will be rendered.
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
+        private pickBuffers: PickBuffer[] = [];
 
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
@@ -125,7 +126,7 @@ namespace FudgeCore {
         /**
         * Draw this viewport for RayCast
         */
-        public drawForRayCast(): void {
+        public createPickBuffers(): void {
             if (this.adjustingFrames)
                 this.adjustFrames();
             if (this.adjustingCamera)
@@ -134,7 +135,8 @@ namespace FudgeCore {
             if (RenderManager.addBranch(this.branch))
                 // branch has not yet been processed fully by rendermanager -> update all registered nodes
                 RenderManager.update();
-            RenderManager.drawBranchForRayCast(this.branch, this.camera);
+
+            this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
 
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(
@@ -146,25 +148,9 @@ namespace FudgeCore {
 
 
         public pickNodeAt(_pos: Vector2): RayHit[] {
-            let hits: RayHit[] = [];
-            this.drawForRayCast();
-            let buffers: WebGLFramebuffer[] = RenderManager.rayCastBuffers;
-            let crc3: WebGL2RenderingContext = RenderManager.getRenderingContext();
-            for (let index in buffers) {
-                let buffer: WebGLFramebuffer = buffers[index];
-                crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
-                let data: Uint8Array = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
-                crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
-                let pixel: number = _pos.x + this.rectSource.width * _pos.y;
-
-                let zBuffer: number = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
-                let node: Node = RenderManager.nodesIndexed[index];
-                let hit: RayHit = new RayHit(node, 0, zBuffer);
-
-                hits.push(hit);
-            }
-
-            RenderManager.resetFrameBuffer();
+            // this.createPickBuffers();
+            let hits: RayHit[] = RenderManager.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
+            hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
             return hits;
         }
 

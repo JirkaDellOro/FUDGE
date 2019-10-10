@@ -1428,6 +1428,7 @@ declare namespace FudgeCore {
         private branch;
         private crc2;
         private canvas;
+        private pickBuffers;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _branch
@@ -1461,7 +1462,7 @@ declare namespace FudgeCore {
         /**
         * Draw this viewport for RayCast
         */
-        drawForRayCast(): void;
+        createPickBuffers(): void;
         pickNodeAt(_pos: Vector2): RayHit[];
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
@@ -2509,15 +2510,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
      * With these references, the already buffered data is retrieved when rendering.
      */
     abstract class RenderManager extends RenderOperator {
-        static rayCastTargets: WebGLTexture[];
-        static rayCastBuffers: WebGLFramebuffer[];
-        static nodesIndexed: Node[];
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
@@ -2526,6 +2529,7 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
+        private static pickBuffers;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2587,7 +2591,8 @@ declare namespace FudgeCore {
          * @param _node
          * @param _cmpCamera
          */
-        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): void;
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         private static drawNode;
         private static drawNodeForRayCast;
         private static getRayCastTexture;

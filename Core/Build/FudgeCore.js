@@ -3053,6 +3053,7 @@ var FudgeCore;
             this.branch = null; // The first node in the tree(branch) that will be rendered.
             this.crc2 = null;
             this.canvas = null;
+            this.pickBuffers = [];
             /**
              * Handle drag-drop events and dispatch to viewport as FUDGE-Event
              */
@@ -3179,7 +3180,7 @@ var FudgeCore;
         /**
         * Draw this viewport for RayCast
         */
-        drawForRayCast() {
+        createPickBuffers() {
             if (this.adjustingFrames)
                 this.adjustFrames();
             if (this.adjustingCamera)
@@ -3187,27 +3188,14 @@ var FudgeCore;
             if (FudgeCore.RenderManager.addBranch(this.branch))
                 // branch has not yet been processed fully by rendermanager -> update all registered nodes
                 FudgeCore.RenderManager.update();
-            FudgeCore.RenderManager.drawBranchForRayCast(this.branch, this.camera);
+            this.pickBuffers = FudgeCore.RenderManager.drawBranchForRayCast(this.branch, this.camera);
             this.crc2.imageSmoothingEnabled = false;
             this.crc2.drawImage(FudgeCore.RenderManager.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
         }
         pickNodeAt(_pos) {
-            let hits = [];
-            this.drawForRayCast();
-            let buffers = FudgeCore.RenderManager.rayCastBuffers;
-            let crc3 = FudgeCore.RenderManager.getRenderingContext();
-            for (let index in buffers) {
-                let buffer = buffers[index];
-                crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, buffer);
-                let data = new Uint8Array(this.rectSource.width * this.rectSource.height * 4);
-                crc3.readPixels(0, 0, this.rectSource.width, this.rectSource.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
-                let pixel = _pos.x + this.rectSource.width * _pos.y;
-                let zBuffer = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
-                let node = FudgeCore.RenderManager.nodesIndexed[index];
-                let hit = new FudgeCore.RayHit(node, 0, zBuffer);
-                hits.push(hit);
-            }
-            FudgeCore.RenderManager.resetFrameBuffer();
+            // this.createPickBuffers();
+            let hits = FudgeCore.RenderManager.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
+            hits.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
             return hits;
         }
         /**
@@ -5702,7 +5690,7 @@ var FudgeCore;
             // debugger;
         }
         // #endregion
-        // #region Transformation & Rendering
+        // #region Rendering
         /**
          * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
@@ -5749,19 +5737,33 @@ var FudgeCore;
             if (finalTransform != _node.mtxWorld)
                 FudgeCore.Recycler.store(finalTransform);
         }
+        //#region RayCast & Picking
         /**
          * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node
          * @param _cmpCamera
          */
         static drawBranchForRayCast(_node, _cmpCamera) {
-            RenderManager.rayCastTargets = [];
-            RenderManager.rayCastBuffers = [];
-            RenderManager.nodesIndexed = [];
+            RenderManager.pickBuffers = [];
             if (!RenderManager.renderShaders.get(FudgeCore.ShaderRayCast))
                 RenderManager.createReference(RenderManager.renderShaders, FudgeCore.ShaderRayCast, RenderManager.createProgram);
             RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
             RenderManager.resetFrameBuffer();
+            return RenderManager.pickBuffers;
+        }
+        static pickNodeAt(_pos, _pickBuffers, _rect) {
+            let hits = [];
+            for (let pickBuffer of _pickBuffers) {
+                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, pickBuffer.frameBuffer);
+                // TODO: instead of reading all data and afterwards pick the pixel, read only the pixel!
+                let data = new Uint8Array(_rect.width * _rect.height * 4);
+                RenderManager.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+                let pixel = _pos.x + _rect.width * _pos.y;
+                let zBuffer = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+                let hit = new FudgeCore.RayHit(pickBuffer.node, 0, zBuffer);
+                hits.push(hit);
+            }
+            return hits;
         }
         static drawNode(_node, _finalTransform, _projection) {
             let references = RenderManager.nodes.get(_node);
@@ -5785,12 +5787,11 @@ var FudgeCore;
             let references = RenderManager.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
-            RenderManager.nodesIndexed.push(_node);
+            let pickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
+            RenderManager.pickBuffers.push(pickBuffer);
             let bufferInfo = RenderManager.renderBuffers.get(references.mesh).getReference();
-            RenderManager.drawForRayCast(RenderManager.nodesIndexed.length, bufferInfo, _finalTransform, _projection);
+            RenderManager.drawForRayCast(RenderManager.pickBuffers.length, bufferInfo, _finalTransform, _projection);
             // make texture available to onscreen-display
-            RenderManager.rayCastTargets.push(target);
-            RenderManager.rayCastBuffers.push(framebuffer);
             // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
         }
         static getRayCastTexture() {
@@ -5811,6 +5812,8 @@ var FudgeCore;
             }
             return targetTexture;
         }
+        //#endregion
+        //#region Transformation of branch
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -5898,9 +5901,6 @@ var FudgeCore;
             }
         }
     }
-    RenderManager.rayCastTargets = [];
-    RenderManager.rayCastBuffers = [];
-    RenderManager.nodesIndexed = [];
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     RenderManager.renderShaders = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
