@@ -1813,9 +1813,6 @@ var FudgeCore;
      * A [[Coat]] providing a texture and additional data for texturing
      */
     let CoatTextured = class CoatTextured extends Coat {
-        /**
-         * A [[Coat]] providing a texture and additional data for texturing
-         */
         constructor() {
             super(...arguments);
             this.texture = null;
@@ -5060,6 +5057,7 @@ var FudgeCore;
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
         createVertices() {
             let vertices = new Float32Array([
@@ -5070,7 +5068,7 @@ var FudgeCore;
         }
         createIndices() {
             let indices = new Uint16Array([
-                0, 1, 2, 0, 2, 3
+                1, 2, 0, 2, 3, 0
             ]);
             return indices;
         }
@@ -5081,7 +5079,11 @@ var FudgeCore;
             ]);
             return textureUVs;
         }
-        createFaceNormals() { return null; }
+        createFaceNormals() {
+            return new Float32Array([
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 1, 0, 0
+            ]);
+        }
     }
     FudgeCore.MeshQuad = MeshQuad;
 })(FudgeCore || (FudgeCore = {}));
