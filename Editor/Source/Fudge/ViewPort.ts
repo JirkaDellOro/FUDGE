@@ -1,9 +1,12 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
+
 namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
 
 
     /**
@@ -15,21 +18,28 @@ namespace Fudge {
         canvas: HTMLCanvasElement;
         branch: ƒ.Node;
 
-        constructor(_parent: Panel) {
+        constructor(_parent: NodePanel) {
             super(_parent);
+            if (_parent instanceof NodePanel) {
+                if (_parent.getNode() != null) {
+                    this.branch = _parent.getNode();
+                }
+                else {
+                    this.branch = new ƒ.Node("Scene");
+                }
+            }
+            else {
+                this.branch = new ƒ.Node("Scene");
+            }
             this.fillContent();
         }
         deconstruct(): void {
-            //TODO: desconstruct
+            ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
         }
 
         fillContent(): void {
-            this.branch = new ƒ.Node("Dummy Node");
 
             let camera: ƒ.Node;
-
-            // TODO: delete example scene
-            // this.branch = Scenes.createAxisCross();
 
             // initialize RenderManager and transmit content
             ƒ.RenderManager.addBranch(this.branch);
@@ -48,18 +58,17 @@ namespace Fudge {
             this.viewport.draw();
 
             this.content.append(this.canvas);
-            
+
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
-            // TODO: if each Panel creates its own instance of GoldenLayout, containers may emit directly to their LayoutManager and no registration is required
-            // Panel.goldenLayout.emit("registerView", _container);
+            //Focus cameracontrols on new viewport
+            let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            this.parentPanel.dispatchEvent(event);
 
-            // _container.on("setRoot", (_node: ƒ.Node): void => {
-            //     ƒ.Debug.log("Set root", _node);
-            //     this.setRoot(_node);
-            // });
+            this.canvas.addEventListener("click", this.activeViewport);
         }
+
 
 
         /**
@@ -69,20 +78,25 @@ namespace Fudge {
         public setRoot(_node: ƒ.Node): void {
             if (!_node)
                 return;
-            ƒ.Debug.log("Trying to display node: ", _node);
-            // ƒ.RenderManager.removeBranch(this.branch);
             this.branch = _node;
-            // ƒ.RenderManager.addBranch(this.branch);
-            // ƒ.RenderManager.update();
             this.viewport.setBranch(this.branch);
 
         }
-        //TODO
+        /** 
+         * Update Viewport every frame
+         */
         private animate = (_e: Event) => {
             this.viewport.setBranch(this.branch);
+            ƒ.RenderManager.updateBranch(this.branch);
             ƒ.RenderManager.update();
             if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                 this.viewport.draw();
+        }
+        private activeViewport = (_event: MouseEvent): void => {
+            let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            this.parentPanel.dispatchEvent(event);
+
+            _event.cancelBubble = true;
         }
     }
 }

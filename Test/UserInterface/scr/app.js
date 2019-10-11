@@ -26,12 +26,13 @@ var UITest;
         let config = {
             content: [{
                     type: "column",
-                    content: [{
-                            type: "component",
-                            componentName: "Inspector",
-                            title: "Inspector",
-                            height: 10
-                        },
+                    content: [
+                        //     {
+                        //     type: "component",
+                        //     componentName: "Inspector",
+                        //     title: "Inspector",
+                        //     height: 10
+                        // },
                         {
                             type: "component",
                             componentName: "Manual",
@@ -43,11 +44,11 @@ var UITest;
                             componentName: "Viewport",
                             title: "Viewport"
                         },
-                        {
-                            type: "component",
-                            componentName: "TreeView",
-                            title: "TreeView"
-                        },
+                        // {
+                        //     type: "component",
+                        //     componentName: "TreeView",
+                        //     title: "TreeView"
+                        // },
                         {
                             type: "component",
                             componentName: "AnimationTest",
@@ -58,17 +59,17 @@ var UITest;
         };
         initViewport();
         myLayout = new GoldenLayout(config);
-        myLayout.registerComponent("Inspector", createCameraComponent);
+        // myLayout.registerComponent("Inspector", createCameraComponent);
         myLayout.registerComponent("Viewport", createViewportComponent);
         myLayout.registerComponent("Manual", createTestComponent);
-        myLayout.registerComponent("TreeView", createTreeComponent);
+        // myLayout.registerComponent("TreeView", createTreeComponent);
         myLayout.registerComponent("AnimationTest", createAnimTreeComponent);
         myLayout.init();
     }
     function initViewport() {
         counter = 0;
         // create asset
-        branch = Scenes.createAxisCross();
+        branch = new ƒ.Node("Root");
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
@@ -86,7 +87,6 @@ var UITest;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         document.body.addEventListener("nodeSelectionEvent" /* SELECTION */, function (_event) {
-            console.log("Event just in, passing it to GL");
             myLayout.emit("nodeSelectionEvent" /* SELECTION */, _event);
         });
         function animate(_event) {
@@ -109,12 +109,49 @@ var UITest;
             let uiComponents = new ƒui.UINodeData(component, content);
         }
         container.getElement().append(content);
+        let mutator = {
+            Primitives: {
+                Box: "Create Box",
+                Pyramid: "Create Pyramid",
+                Misc: "Create Something"
+            },
+            NotSoPrimitives: {
+                ComplexBox: "Create Complex Box",
+                ComplexPyramid: "Create Complex Pyramid",
+                NotSoMisc: "Create Whatever"
+            }
+        };
+        let dropdown = new ƒui.DropMenu("AddNodeMenu", mutator, { _text: "Add Node" });
+        dropdown.addEventListener("dropMenuClick" /* DROPMENUCLICK */, function (_event) {
+            switch (_event.detail) {
+                case "AddNodeMenu.Primitives.Box":
+                    let node = new ƒ.Node("Box");
+                    let mesh = new ƒ.MeshCube();
+                    let randX = (Math.random());
+                    let randY = (Math.random());
+                    let randZ = (Math.random());
+                    let clrRed = new ƒ.Color(randX, randY, randZ, 0.5);
+                    let coatRed = new ƒ.CoatColored(clrRed);
+                    let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+                    let cmpMaterial = new ƒ.ComponentMaterial(mtrRed);
+                    let cmpMesh = new ƒ.ComponentMesh(mesh);
+                    console.log("Node at Pos: " + randX + " " + randY + " " + randZ);
+                    let randPos = new ƒ.Vector3(randX, randY, randZ);
+                    node.mtxWorld.translate(randPos);
+                    node.addComponent(cmpMesh);
+                    node.addComponent(cmpMaterial);
+                    branch.appendChild(node);
+                    console.log(node);
+                    break;
+            }
+        });
+        container.getElement().append(dropdown);
     }
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
         let treeController = new ƒui.UINodeList(branch, listContainer);
         myLayout.on("nodeSelectionEvent" /* SELECTION */, function (_event) {
-            console.log(_event);
+            treeController.setNodeRoot(branch);
         });
         container.getElement().html(listContainer);
     }

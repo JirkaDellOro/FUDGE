@@ -73,28 +73,92 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
-    class DropDown extends HTMLDivElement {
-        constructor(_contentList) {
+    class MenuButton extends HTMLDivElement {
+        constructor(_name, textcontent, parentSignature) {
             super();
+            this.resolveClick = (_event) => {
+                let event = new CustomEvent("dropMenuClick" /* DROPMENUCLICK */, { detail: this.signature, bubbles: true });
+                this.dispatchEvent(event);
+            };
+            this.name = _name;
+            this.signature = parentSignature + "." + _name;
+            let button = document.createElement("button");
+            button.textContent = textcontent;
+            this.append(button);
+            button.addEventListener("click", this.resolveClick);
         }
     }
-    FudgeUserInterface.DropDown = DropDown;
-    class DropDownButton extends HTMLButtonElement {
-        constructor() {
+    class MenuContent extends HTMLDivElement {
+        constructor(_submenu) {
             super();
+            if (_submenu) {
+                this.classList.add("submenu-content");
+            }
+            else {
+                this.classList.add("dropdown-content");
+            }
         }
     }
-    class DropDownContent extends HTMLDivElement {
-        constructor() {
+    class DropMenu extends HTMLDivElement {
+        constructor(_name, _contentList, params) {
             super();
+            this.toggleFoldContent = (_event) => {
+                this.content.classList.toggle("folded");
+            };
+            this.collapseMenu = (_event) => {
+                if (!(this.contains(_event.target))) {
+                    if (!this.content.classList.contains("folded")) {
+                        this.toggleFoldContent(_event);
+                    }
+                }
+            };
+            let button = document.createElement("button");
+            button.name = _name;
+            if (params._text) {
+                button.textContent = params._text;
+            }
+            else {
+                button.textContent = _name;
+            }
+            button.addEventListener("click", this.toggleFoldContent);
+            window.addEventListener("click", this.collapseMenu);
+            let isSubmenu = (params._parentSignature != null);
+            if (params._parentSignature) {
+                this.signature = params._parentSignature + "." + _name;
+            }
+            else {
+                this.signature = _name;
+            }
+            this.append(button);
+            this.content = new MenuContent(isSubmenu);
+            if (params._parentSignature) {
+                this.classList.add("submenu");
+            }
+            else {
+                this.classList.add("dropdown");
+            }
+            this.content.classList.toggle("folded");
+            this.name = _name;
+            for (let key in _contentList) {
+                if (typeof _contentList[key] == "object") {
+                    let subMenu = new DropMenu(key, _contentList[key], { _parentSignature: this.signature });
+                    this.content.append(subMenu);
+                }
+                else if (typeof _contentList[key] == "string") {
+                    let contentEntry = new MenuButton(key, _contentList[key], this.signature);
+                    this.content.append(contentEntry);
+                }
+            }
+            this.append(this.content);
         }
     }
+    FudgeUserInterface.DropMenu = DropMenu;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-    customElements.define("ui-dropdown", DropDown, { extends: "div" });
-    customElements.define("ui-dropdown-button", DropDownButton, { extends: "button" });
-    customElements.define("ui-dropdown-content", DropDownContent, { extends: "div" });
+    customElements.define("ui-dropdown", DropMenu, { extends: "div" });
+    customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
+    customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
@@ -233,9 +297,11 @@ var FudgeUserInterface;
             };
             this.toggleCollapse = (_event) => {
                 _event.preventDefault();
-                console.log(this.listRoot);
-                let target = _event.target;
-                target.collapse(target);
+                console.log(_event.target instanceof FudgeUserInterface.CollapsableAnimationListElement);
+                if (_event.target instanceof FudgeUserInterface.CollapsableAnimationListElement) {
+                    let target = _event.target;
+                    target.collapse(target);
+                }
             };
             this.mutator = _mutator;
             this.listRoot = document.createElement("ul");
@@ -322,11 +388,7 @@ var FudgeUserInterface;
         constructor(_node, _name, _unfolded = false) {
             super();
             this.selectNode = (_event) => {
-                console.log(_event, this);
                 let event = new CustomEvent("nodeSelectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
-                console.group("selection was made, dispatching event to bubble up");
-                console.log(event);
-                console.groupEnd();
                 this.dispatchEvent(event);
             };
             this.collapseEvent = (_event) => {
@@ -341,6 +403,7 @@ var FudgeUserInterface;
                 buttonState = "invisible";
             let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
             btnToggle.setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
             this.header.appendChild(btnToggle);
             let lblName = document.createElement("span");
             lblName.textContent = _name;
@@ -414,36 +477,39 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     class UINodeList {
         constructor(_node, _listContainer) {
+            this.updateList = (_event) => {
+                this.setNodeRoot(this.nodeRoot);
+            };
             this.toggleCollapse = (_event) => {
                 _event.preventDefault();
-                let target = _event.target;
-                if (target.nodeName == "BUTTON") {
-                    let targetParent = target.parentElement.parentElement;
-                    if (targetParent.children.length > 1)
-                        targetParent.collapse(targetParent);
+                if (event.target instanceof FudgeUserInterface.CollapsableNodeListElement) {
+                    let target = _event.target;
+                    if (target.content.children.length > 1)
+                        target.collapse(target);
                     else {
-                        let nodeToExpand = targetParent.node;
+                        let nodeToExpand = target.node;
                         let newList = this.BuildListFromNode(nodeToExpand);
                         // if (targetParent == this.listRoot)
                         // newList.addEventListener("click", this.toggleCollapse);
-                        targetParent.replaceWith(newList);
+                        target.replaceWith(newList);
                     }
                 }
             };
             this.nodeRoot = _node;
+            this.nodeRoot.addEventListener("childAdd" /* CHILD_APPEND */, this.updateList);
+            this.nodeRoot.addEventListener("childRemove" /* CHILD_REMOVE */, this.updateList);
             this.listRoot = document.createElement("ul");
+            this.listRoot.classList.add("NodeList");
             let list = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
-            _listContainer.addEventListener("click", this.toggleCollapse);
+            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
         }
         getNodeRoot() {
             return this.nodeRoot;
         }
         setSelection(_node) {
             //TODO: Select Appropriate Entry
-            console.log("got node");
-            console.log(_node);
         }
         getSelection() {
             return this.selectedEntry.node;
@@ -451,7 +517,7 @@ var FudgeUserInterface;
         setNodeRoot(_node) {
             this.nodeRoot = _node;
             this.listRoot = this.BuildListFromNode(this.nodeRoot);
-            // this.listRoot.addEventListener("click", this.toggleCollapse);
+            this.listRoot.classList.add("NodeList");
         }
         BuildListFromNode(_node) {
             let listRoot = new FudgeUserInterface.CollapsableNodeListElement(_node, _node.name, true);
@@ -465,6 +531,52 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.UINodeList = UINodeList;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    let NODEMENU;
+    (function (NODEMENU) {
+        NODEMENU["EMPTY"] = "Empty Node";
+        NODEMENU["BOX"] = "Box Mesh Node";
+        NODEMENU["PYRAMID"] = "Pyramid Mesh Node";
+        NODEMENU["PLANE"] = "Plane Mesh Node";
+    })(NODEMENU = FudgeUserInterface.NODEMENU || (FudgeUserInterface.NODEMENU = {}));
+    let COMPONENTMENU;
+    (function (COMPONENTMENU) {
+        COMPONENTMENU["MESHBOX"] = "Mesh Component.Box Mesh Component";
+        COMPONENTMENU["MESHPLANE"] = "Mesh Component.Plane Mesh Component";
+        COMPONENTMENU["MESHPYRAMID"] = "Mesh Component.Pyramid Mesh Component";
+        COMPONENTMENU["AUDIOLISTENER"] = "Audio Listener Component";
+        COMPONENTMENU["AUDIO"] = "Audio Component";
+        COMPONENTMENU["ANIMATION"] = "Animation Component";
+        COMPONENTMENU["CAMERA"] = "Camera Component";
+        COMPONENTMENU["LIGHT"] = "Light Component";
+        COMPONENTMENU["SCRIPT"] = "Script Component";
+        COMPONENTMENU["TRANSFORM"] = "Transform Component";
+    })(COMPONENTMENU = FudgeUserInterface.COMPONENTMENU || (FudgeUserInterface.COMPONENTMENU = {}));
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature, _mutator) {
+            let mutator = _mutator || {};
+            let signatureLevels = _signature.split(".");
+            if (signatureLevels.length > 1) {
+                let subSignature = signatureLevels[1];
+                for (let i = 2; i < signatureLevels.length; i++) {
+                    subSignature = subSignature + "." + signatureLevels[i];
+                }
+                if (mutator[signatureLevels[0]] != null) {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature, mutator[signatureLevels[0]]);
+                }
+                else {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature);
+                }
+            }
+            else {
+                mutator[signatureLevels[0]] = signatureLevels[0];
+            }
+            return mutator;
+        }
+    }
+    FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
@@ -491,7 +603,6 @@ var FudgeUserInterface;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
@@ -511,8 +622,10 @@ var FudgeUserInterface;
                                 break;
                             default:
                                 let subMutator = mutator[key];
-                                let subTypes = mutatorTypes[key];
-                                mutator[key] = this.updateMutator(_mutable, element, subMutator, subTypes);
+                                let subMutable;
+                                subMutable = _mutable[key];
+                                let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
+                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }

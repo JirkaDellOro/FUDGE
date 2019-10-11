@@ -13,34 +13,27 @@ namespace Fudge {
      * @author Monika Galkewitsch, HFU, 2019
      * @author Lukas Scheuerle, HFU, 2019
      */
-    
-    export class Panel extends EventTarget {
+
+    export abstract class Panel extends EventTarget {
         views: View[] = [];
         config: GoldenLayout.ItemConfig;
-        node: ƒ.Node;
+
 
         /**
          * Constructor for panel Objects. Generates an empty panel with a single ViewData.
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
-        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node) {
+        constructor(_name: string) {
             super();
+            let id: string = this.generateID();
             this.config = {
                 type: "row",
                 content: [],
-                title: _name
+                title: _name,
+                id: id
             };
-            if (_node) {
-                this.node = _node;
-            }
-            if (_template) {
-                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type);
-            }
-            else {
-                let viewData: ViewData = new ViewData(this);
-                this.addView(viewData, false);
-            }
+
         }
         /**
          * Adds given View to the list of views on the panel. 
@@ -57,17 +50,66 @@ namespace Fudge {
                 PanelManager.instance.addView(_v);
             }
         }
+
         /**
-         * Allows to construct the view from a template config.
-         * @param template Panel Template to be used for the construction
-         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+         * Returns a randomly generated ID. 
+         * Used to identify panels
          */
-        public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string): GoldenLayout.ItemConfigType {
+        private generateID(): string {
+            let randLetter: string = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            let uniqid: string = randLetter + Date.now();
+            return uniqid;
+        }
+
+    }
+
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode. 
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    export class NodePanel extends Panel {
+        private node: ƒ.Node;
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node) {
+            super(_name);
+            this.node = _node || new ƒ.Node("Scene");
+            if (_template) {
+                let id: string = this.config.id.toString();
+                this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type, id);
+            }
+            else {
+                let viewData: ViewData = new ViewData(this);
+                this.addView(viewData, false);
+            }
+        }
+
+        public setNode(_node: ƒ.Node): void {
+            this.node = _node;
+            for (let view of this.views) {
+                if (view instanceof ViewNode) {
+                    (<ViewNode>view).setRoot(this.node);
+                }
+                else if (view instanceof ViewViewport) {
+                    (<ViewViewport>view).setRoot(this.node);
+                }
+            }
+        }
+
+        public getNode(): ƒ.Node {
+            return this.node;
+        }
+        /**
+ * Allows to construct the view from a template config.
+ * @param template Panel Template to be used for the construction
+ * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+ */
+        public constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType {
+            let id: string = template.id + _id;
             let config: GoldenLayout.ItemConfig = {
                 type: _type,
                 width: template.width,
                 height: template.height,
-                id: template.id,
+                id: id,
                 title: template.title,
                 isClosable: template.isClosable,
                 content: []
@@ -80,20 +122,16 @@ namespace Fudge {
                         switch (item.componentName) {
                             case VIEW.NODE:
                                 view = new ViewNode(this);
-                                if (this.node) {
-                                    (<ViewNode>view).setRoot(this.node);
-                                }
                                 // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);
-
                                 break;
                             case VIEW.PORT:
                                 view = new ViewViewport(this);
-                                if (this.node) {
-                                    // (<ViewViewport>view).setRoot(this.node);
-                                }
+                                break;
+                            case VIEW.CAMERA:
+                                view = new ViewCamera(this);
                                 break;
                             case VIEW.ANIMATION:
                                 view = new ViewAnimation(this);
@@ -116,32 +154,12 @@ namespace Fudge {
 
                     }
                     else {
-                        config.content.push(this.constructFromTemplate(item, item.type));
+                        config.content.push(this.constructFromTemplate(item, item.type, <string>item.id));
                     }
                 }
             }
             console.log(config);
             return config;
         }
-        //TODO: Remove and make it Event-Oriented
-        public setNode(_node: ƒ.Node): void {
-            this.node = _node;
-            for (let view of this.views) {
-                //HACK
-                if (view instanceof ViewNode) {
-                    (<ViewNode>view).setRoot(this.node);
-                }
-                else if (view instanceof ViewViewport) {
-                    (<ViewViewport>view).setRoot(this.node);
-                }
-            }
-        }
-
-        // private passEvent (_event: CustomEvent): void {
-        //     let eventToPass: CustomEvent = new CustomEvent(_event.type, {bubbles: false, detail: _event.detail});
-        //     _event.cancelBubble = true;
-        //     console.log(eventToPass);
-        //     this.dispatchEvent
-        // }
     }
 }

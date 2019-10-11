@@ -26,13 +26,19 @@ namespace Fudge {
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Save");
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof NodePanel) {
+                node = panel.getNode();
+            }
             save(node);
         });
         ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Open");
             node = open();
-            panel.setNode(node);
-            
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof NodePanel) {
+                panel.setNode(node);
+            }
         });
         ipcRenderer.on("openViewNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("OpenViewNode");
@@ -50,11 +56,10 @@ namespace Fudge {
     }
 
     function openViewNode(): void {
-        
-        node = Scenes.createAxisCross();
-        panel = PanelManager.instance.createPanelFromTemplate(new NodePanelTemplate, "Node Panel");
-        panel.setNode(node);
-        PanelManager.instance.addPanel(panel);
+        // node = Scenes.createAxisCross();
+        node = new ƒ.Node("Scene");
+        let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
+        PanelManager.instance.addPanel(nodePanel);
     }
 
     function openAnimationPanel(): void {

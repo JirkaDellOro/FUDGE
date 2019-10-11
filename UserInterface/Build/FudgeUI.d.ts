@@ -24,8 +24,16 @@ declare namespace FudgeUserInterface {
         constructor(_legend: string);
         private toggleFoldElement;
     }
-    class DropDown extends HTMLDivElement {
-        constructor(_contentList: ƒ.Mutator);
+    class DropMenu extends HTMLDivElement {
+        name: string;
+        private content;
+        private signature;
+        constructor(_name: string, _contentList: ƒ.Mutator, params: {
+            _parentSignature?: string;
+            _text?: string;
+        });
+        private toggleFoldContent;
+        private collapseMenu;
     }
 }
 declare namespace FudgeUserInterface {
@@ -34,7 +42,10 @@ declare namespace FudgeUserInterface {
         COLLAPSE = "listCollapseEvent",
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
-        UPDATE = "mutatorUpdateEvent"
+        UPDATE = "mutatorUpdateEvent",
+        DROPMENUCLICK = "dropMenuClick",
+        DROPMENUCOLLAPSE = "dropMenuCollapse",
+        ACTIVEVIEWPORT = "activeViewport"
     }
 }
 declare namespace FudgeUserInterface {
@@ -121,9 +132,37 @@ declare namespace FudgeUserInterface {
         getNodeRoot(): ƒ.Node;
         setSelection(_node: ƒ.Node): void;
         getSelection(): ƒ.Node;
+        updateList: (_event: Event) => void;
         setNodeRoot(_node: ƒ.Node): void;
-        toggleCollapse: (_event: MouseEvent) => void;
+        toggleCollapse: (_event: Event) => void;
         private BuildListFromNode;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * <select><option>Hallo</option></select>
+     */
+    import ƒ = FudgeCore;
+    enum NODEMENU {
+        EMPTY = "Empty Node",
+        BOX = "Box Mesh Node",
+        PYRAMID = "Pyramid Mesh Node",
+        PLANE = "Plane Mesh Node"
+    }
+    enum COMPONENTMENU {
+        MESHBOX = "Mesh Component.Box Mesh Component",
+        MESHPLANE = "Mesh Component.Plane Mesh Component",
+        MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
+        AUDIOLISTENER = "Audio Listener Component",
+        AUDIO = "Audio Component",
+        ANIMATION = "Animation Component",
+        CAMERA = "Camera Component",
+        LIGHT = "Light Component",
+        SCRIPT = "Script Component",
+        TRANSFORM = "Transform Component"
+    }
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
     }
 }
 declare namespace FudgeUserInterface {

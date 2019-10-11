@@ -30,7 +30,6 @@ namespace FudgeUserInterface {
             let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
             let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type: Object = mutatorTypes[key];
                     if (type instanceof Object) {
@@ -50,8 +49,10 @@ namespace FudgeUserInterface {
                                 break;
                             default:
                                 let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
-                                let subTypes: ƒ.Mutator = (<ƒ.General>mutatorTypes)[key];
-                                mutator[key] = this.updateMutator(_mutable, element, subMutator, subTypes);
+                                let subMutable: ƒ.Mutable;
+                                subMutable = (<ƒ.General>_mutable)[key];
+                                let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
+                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }
