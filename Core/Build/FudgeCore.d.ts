@@ -1,4 +1,3 @@
-/// <reference types="webgl2" />
 declare namespace FudgeCore {
     type General = any;
     interface Serialization {
@@ -488,7 +487,7 @@ declare namespace FudgeCore {
         NOTCH = "NOTCH",
         ALLPASS = "ALLPASS"
     }
-    class AudioFilter {
+    export class AudioFilter {
         useFilter: boolean;
         filterType: FILTER_TYPE;
         constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
@@ -497,6 +496,7 @@ declare namespace FudgeCore {
          */
         addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -539,7 +539,7 @@ declare namespace FudgeCore {
         INVERSE = "INVERSE",
         EXPONENTIAL = "EXPONENTIAL"
     }
-    class AudioLocalisation {
+    export class AudioLocalisation {
         pannerNode: PannerNode;
         panningModel: PANNING_MODEL_TYPE;
         distanceModel: DISTANCE_MODEL_TYPE;
@@ -572,6 +572,7 @@ declare namespace FudgeCore {
          */
         getPanneOrientation(): Vector3;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -586,7 +587,7 @@ declare namespace FudgeCore {
      * Describes Data Handler for all Audio Sources
      * @authors Thomas Dorner, HFU, 2019
      */
-    class AudioSessionData {
+    export class AudioSessionData {
         dataArray: AudioData[];
         private bufferCounter;
         private audioBufferHolder;
@@ -634,6 +635,7 @@ declare namespace FudgeCore {
          */
         private logErrorFetch;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -701,6 +703,7 @@ declare namespace FudgeCore {
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
+        private static renderShaderRayCast;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -749,9 +752,18 @@ declare namespace FudgeCore {
          * @param _renderShader
          * @param _renderBuffers
          * @param _renderCoat
+         * @param _world
          * @param _projection
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        /**
+         * Draw a buffer with a special shader that uses an id instead of a color
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _world
+         * @param _projection
+         */
+        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -1200,8 +1212,17 @@ declare namespace FudgeCore {
         g: number;
         b: number;
         a: number;
-        constructor(_r: number, _g: number, _b: number, _a: number);
+        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
+        static readonly BLACK: Color;
+        static readonly WHITE: Color;
+        static readonly RED: Color;
+        static readonly GREEN: Color;
+        static readonly BLUE: Color;
+        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
+        setArrayNormRGBA(_color: Float32Array): void;
+        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1407,6 +1428,7 @@ declare namespace FudgeCore {
         private branch;
         private crc2;
         private canvas;
+        private pickBuffers;
         /**
          * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
          * @param _branch
@@ -1437,6 +1459,11 @@ declare namespace FudgeCore {
          * Draw this viewport
          */
         draw(): void;
+        /**
+        * Draw this viewport for RayCast
+        */
+        createPickBuffers(): void;
+        pickNodeAt(_pos: Vector2): RayHit[];
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2475,6 +2502,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RayHit {
+        node: Node;
+        face: number;
+        zBuffer: number;
+        constructor(_node?: Node, _face?: number, _zBuffer?: number);
+    }
+}
+declare namespace FudgeCore {
+    interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
@@ -2489,6 +2529,7 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
+        private static pickBuffers;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2527,7 +2568,7 @@ declare namespace FudgeCore {
          */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update(): void;
         /**
@@ -2536,12 +2577,25 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node
-         * @param _cameraMatrix
+         * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
+        static resetFrameBuffer(_color?: Color): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        /**
+         * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         private static drawNode;
+        private static drawNodeForRayCast;
+        private static getRayCastTexture;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -2588,6 +2642,16 @@ declare namespace FudgeCore {
      */
     class ShaderFlat extends Shader {
         static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

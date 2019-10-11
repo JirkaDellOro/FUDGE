@@ -39,6 +39,7 @@ namespace FudgeCore {
     export abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport: Rectangle;
+        private static renderShaderRayCast: RenderShader;
 
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
@@ -65,6 +66,8 @@ namespace FudgeCore {
             RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
             // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+
+            RenderOperator.renderShaderRayCast = RenderOperator.createProgram(ShaderRayCast);
         }
 
         /**
@@ -181,6 +184,7 @@ namespace FudgeCore {
          * @param _renderShader 
          * @param _renderBuffers 
          * @param _renderCoat 
+         * @param _world 
          * @param _projection 
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void {
@@ -216,6 +220,38 @@ namespace FudgeCore {
 
             // Draw call
             // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
+            RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        }
+
+        /**
+         * Draw a buffer with a special shader that uses an id instead of a color
+         * @param _renderShader
+         * @param _renderBuffers 
+         * @param _world 
+         * @param _projection 
+         */
+        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void {
+            let renderShader: RenderShader = RenderOperator.renderShaderRayCast; 
+            RenderOperator.useProgram(renderShader);
+
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
+            RenderOperator.crc3.enableVertexAttribArray(renderShader.attributes["a_position"]);
+            RenderOperator.setAttributeStructure(renderShader.attributes["a_position"], Mesh.getBufferSpecification());
+
+            RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
+
+            // Supply matrixdata to shader. 
+            let uProjection: WebGLUniformLocation = renderShader.uniforms["u_projection"];
+            RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.get());
+
+            if (renderShader.uniforms["u_world"]) {
+                let uWorld: WebGLUniformLocation = renderShader.uniforms["u_world"];
+                RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.get());
+            }
+
+            let idUniformLocation: WebGLUniformLocation = renderShader.uniforms["u_id"];
+            RenderOperator.getRenderingContext().uniform1i(idUniformLocation, _id);
+
             RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
 

@@ -8,6 +8,12 @@ namespace FudgeCore {
     }
     type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
+    export interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
+
     /**
      * This class manages the references to render data used by nodes.
      * Multiple nodes may refer to the same data via their references to shader, coat and mesh 
@@ -49,6 +55,7 @@ namespace FudgeCore {
         private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
         private static nodes: MapNodeToNodeReferences = new Map();
         private static timestampUpdate: number;
+        private static pickBuffers: PickBuffer[];
 
         // #region Adding
         /**
@@ -56,7 +63,7 @@ namespace FudgeCore {
          * @param _node 
          */
         public static addNode(_node: Node): void {
-            if (this.nodes.get(_node))
+            if (RenderManager.nodes.get(_node))
                 return;
 
             let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
@@ -64,16 +71,16 @@ namespace FudgeCore {
                 return;
 
             let shader: typeof Shader = cmpMaterial.material.getShader();
-            this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
+            RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
 
             let coat: Coat = cmpMaterial.material.getCoat();
-            this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
+            RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
 
             let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
-            this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
+            RenderManager.createReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, mesh, RenderManager.createBuffers);
 
             let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
-            this.nodes.set(_node, nodeReferences);
+            RenderManager.nodes.set(_node, nodeReferences);
         }
 
         /**
@@ -87,7 +94,7 @@ namespace FudgeCore {
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup
-                    this.addNode(node);
+                    RenderManager.addNode(node);
                 } catch (_e) {
                     Debug.log(_e);
                 }
@@ -101,15 +108,15 @@ namespace FudgeCore {
          * @param _node 
          */
         public static removeNode(_node: Node): void {
-            let nodeReferences: NodeReferences = this.nodes.get(_node);
+            let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
             if (!nodeReferences)
                 return;
 
-            this.removeReference<typeof Shader, RenderShader>(this.renderShaders, nodeReferences.shader, this.deleteProgram);
-            this.removeReference<Coat, RenderCoat>(this.renderCoats, nodeReferences.coat, this.deleteParameter);
-            this.removeReference<Mesh, RenderBuffers>(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
+            RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
+            RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
+            RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
 
-            this.nodes.delete(_node);
+            RenderManager.nodes.delete(_node);
         }
 
         /**
@@ -118,7 +125,7 @@ namespace FudgeCore {
          */
         public static removeBranch(_node: Node): void {
             for (let node of _node.branch)
-                this.removeNode(node);
+                RenderManager.removeNode(node);
         }
         // #endregion
 
@@ -128,7 +135,7 @@ namespace FudgeCore {
          * @param _node
          */
         public static updateNode(_node: Node): void {
-            let nodeReferences: NodeReferences = this.nodes.get(_node);
+            let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
             if (!nodeReferences)
                 return;
 
@@ -136,22 +143,22 @@ namespace FudgeCore {
 
             let shader: typeof Shader = cmpMaterial.material.getShader();
             if (shader !== nodeReferences.shader) {
-                this.removeReference<typeof Shader, RenderShader>(this.renderShaders, nodeReferences.shader, this.deleteProgram);
-                this.createReference<typeof Shader, RenderShader>(this.renderShaders, shader, this.createProgram);
+                RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
+                RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
                 nodeReferences.shader = shader;
             }
 
             let coat: Coat = cmpMaterial.material.getCoat();
             if (coat !== nodeReferences.coat) {
-                this.removeReference<Coat, RenderCoat>(this.renderCoats, nodeReferences.coat, this.deleteParameter);
-                this.createReference<Coat, RenderCoat>(this.renderCoats, coat, this.createParameter);
+                RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
+                RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
                 nodeReferences.coat = coat;
             }
 
             let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).mesh;
             if (mesh !== nodeReferences.mesh) {
-                this.removeReference<Mesh, RenderBuffers>(this.renderBuffers, nodeReferences.mesh, this.deleteBuffers);
-                this.createReference<Mesh, RenderBuffers>(this.renderBuffers, mesh, this.createBuffers);
+                RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
+                RenderManager.createReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, mesh, RenderManager.createBuffers);
                 nodeReferences.mesh = mesh;
             }
         }
@@ -162,7 +169,7 @@ namespace FudgeCore {
          */
         public static updateBranch(_node: Node): void {
             for (let node of _node.branch)
-                this.updateNode(node);
+                RenderManager.updateNode(node);
         }
         // #endregion
 
@@ -173,22 +180,22 @@ namespace FudgeCore {
          * @param _lights
          */
         public static setLights(_lights: MapLightTypeToLightList): void {
-            // let renderLights: RenderLights = this.createRenderLights(_lights);
-            for (let entry of this.renderShaders) {
+            // let renderLights: RenderLights = RenderManager.createRenderLights(_lights);
+            for (let entry of RenderManager.renderShaders) {
                 let renderShader: RenderShader = entry[1].getReference();
-                this.setLightsInShader(renderShader, _lights);
+                RenderManager.setLightsInShader(renderShader, _lights);
             }
             // debugger;
         }
         // #endregion
 
-        // #region Transformation & Rendering
+        // #region Rendering
         /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
         public static update(): void {
             RenderManager.timestampUpdate = performance.now();
-            this.recalculateAllNodeTransforms();
+            RenderManager.recalculateAllNodeTransforms();
         }
 
         /**
@@ -196,32 +203,42 @@ namespace FudgeCore {
          * @param _color 
          */
         public static clear(_color: Color = null): void {
-            this.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
-            this.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+            RenderManager.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+            RenderManager.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
         }
 
         /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node 
-         * @param _cameraMatrix 
+         * Reset the offscreen framebuffer to the original RenderingContext
          */
-        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+        public static resetFrameBuffer(_color: Color = null): void {
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
+        }
+
+        /**
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node 
+         * @param _cmpCamera 
+         */
+        public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            if (_drawNode == RenderManager.drawNode)
+                RenderManager.resetFrameBuffer();
+
             let finalTransform: Matrix4x4;
 
             let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
             if (cmpMesh)
                 finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
             else
-                finalTransform = _node.mtxWorld; // caution, this is a reference...
+                finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
 
             // multiply camera matrix
             let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
-            this.drawNode(_node, finalTransform, projection);
+            _drawNode(_node, finalTransform, projection);
 
             for (let name in _node.getChildren()) {
                 let childNode: Node = _node.getChildren()[name];
-                this.drawBranch(childNode, _cmpCamera); //, world);
+                RenderManager.drawBranch(childNode, _cmpCamera, _drawNode); //, world);
             }
 
             Recycler.store(projection);
@@ -229,27 +246,115 @@ namespace FudgeCore {
                 Recycler.store(finalTransform);
         }
 
+        //#region RayCast & Picking
+
+        /**
+         * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node 
+         * @param _cmpCamera 
+         */
+        public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+            RenderManager.pickBuffers = [];
+            if (!RenderManager.renderShaders.get(ShaderRayCast))
+                RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
+            RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+            RenderManager.resetFrameBuffer();
+            return RenderManager.pickBuffers;
+        }
+
+        public static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[] {
+            let hits: RayHit[] = [];
+            
+            for (let pickBuffer of _pickBuffers) {
+                RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, pickBuffer.frameBuffer);
+                // TODO: instead of reading all data and afterwards pick the pixel, read only the pixel!
+                let data: Uint8Array = new Uint8Array(_rect.width * _rect.height * 4);
+                RenderManager.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+                let pixel: number = _pos.x + _rect.width * _pos.y;
+
+                let zBuffer: number = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+                let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
+
+                hits.push(hit);
+            }
+
+            return hits;
+        }
+
+
         private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
-            let references: NodeReferences = this.nodes.get(_node);
+            let references: NodeReferences = RenderManager.nodes.get(_node);
             if (!references)
                 return; // TODO: deal with partial references
 
-            let bufferInfo: RenderBuffers = this.renderBuffers.get(references.mesh).getReference();
-            let coatInfo: RenderCoat = this.renderCoats.get(references.coat).getReference();
-            let shaderInfo: RenderShader = this.renderShaders.get(references.shader).getReference();
-            this.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+            let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
+            let coatInfo: RenderCoat = RenderManager.renderCoats.get(references.coat).getReference();
+            let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
+            RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
         }
 
+        private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba
+            // TODO: look into SSBOs!
+            let target: WebGLTexture = RenderManager.getRayCastTexture();
+
+            const framebuffer: WebGLFramebuffer = RenderManager.crc3.createFramebuffer();
+            // render to our targetTexture by binding the framebuffer
+            RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
+            // attach the texture as the first color attachment
+            const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
+            RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
+
+            // set render target
+
+            let references: NodeReferences = RenderManager.nodes.get(_node);
+            if (!references)
+                return; // TODO: deal with partial references
+
+            let pickBuffer: PickBuffer = {node: _node, texture: target, frameBuffer: framebuffer};
+            RenderManager.pickBuffers.push(pickBuffer);
+
+            let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
+            RenderManager.drawForRayCast(RenderManager.pickBuffers.length, bufferInfo, _finalTransform, _projection);
+            // make texture available to onscreen-display
+            // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
+        }
+
+        private static getRayCastTexture(): WebGLTexture {
+            // create to render to
+            const targetTextureWidth: number = RenderManager.getViewportRectangle().width;
+            const targetTextureHeight: number = RenderManager.getViewportRectangle().height;
+            const targetTexture: WebGLTexture = RenderManager.crc3.createTexture();
+            RenderManager.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
+
+            {
+                const internalFormat: number = WebGL2RenderingContext.RGBA8;
+                const format: number = WebGL2RenderingContext.RGBA;
+                const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
+                RenderManager.crc3.texImage2D(
+                    WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null
+                );
+
+                // set the filtering so we don't need mips
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+                RenderManager.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
+            }
+
+            return targetTexture;
+        }
+        //#endregion
+
+        //#region Transformation of branch
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
         private static recalculateAllNodeTransforms(): void {
-            // inner function to be called in a for each node at the bottom of this function
+            // inner function to be called in a for each node at the bottom of RenderManager function
             // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
             //     _nodeReferences.doneTransformToWorld = false;
             // }
 
-            // inner function to be called in a for each node at the bottom of this function
+            // inner function to be called in a for each node at the bottom of RenderManager function
             let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
                 // find uppermost ancestor not recalculated yet
                 let ancestor: Node = _node;
@@ -270,12 +375,12 @@ namespace FudgeCore {
                     matrix = parent.mtxWorld;
 
                 // start recursive recalculation of the whole branch starting from the ancestor found
-                this.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
+                RenderManager.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
             };
 
             // call the functions above for each registered node
-            // this.nodes.forEach(markNodeToBeTransformed);
-            this.nodes.forEach(recalculateBranchContainingNode);
+            // RenderManager.nodes.forEach(markNodeToBeTransformed);
+            RenderManager.nodes.forEach(recalculateBranchContainingNode);
         }
 
         /**
@@ -294,7 +399,7 @@ namespace FudgeCore {
             _node.timestampUpdate = RenderManager.timestampUpdate;
 
             for (let child of _node.getChildren()) {
-                this.recalculateTransformsOfNodeAndChildren(child, world);
+                RenderManager.recalculateTransformsOfNodeAndChildren(child, world);
             }
         }
         // #endregion
