@@ -316,7 +316,7 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            let hule = this.BuildFromMutator(this.mutator);
+            let hule = this.buildFromMutator(this.mutator);
             this.listRoot.replaceWith(hule);
             this.listRoot = hule;
         }

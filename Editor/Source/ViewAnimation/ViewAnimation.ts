@@ -25,7 +25,7 @@ namespace Fudge {
   }
 
 
-  export class ViewAnimation extends Fudge.View {
+  export class ViewAnimation extends View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
     cmpAnimator: FudgeCore.ComponentAnimator;

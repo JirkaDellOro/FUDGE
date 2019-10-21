@@ -39,19 +39,21 @@ namespace Fudge {
 
         fillContent(): void {
 
-            let camera: ƒ.Node;
 
-            // initialize RenderManager and transmit content
-            ƒ.RenderManager.addBranch(this.branch);
-            ƒ.RenderManager.update();
 
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
-            cmpCamera.projectCentral(1, 45);
+            let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+            cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
+            cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, 10) );
+            cmpCamera.pivot.lookAt(new ƒ.Vector3());
             this.canvas = Scenes.createCanvas();
             document.body.appendChild(this.canvas);
+
+            // initialize RenderManager and transmit content
+            ƒ.RenderManager.initialize();
+            ƒ.RenderManager.addBranch(this.branch);
+            ƒ.RenderManager.update();
 
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
