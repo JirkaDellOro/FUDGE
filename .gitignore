@@ -2,4 +2,3 @@ Fudge.tsbuildinfo
 node_modules
 !Editor/node_modules
 FUDGE-win32-x64
-*.tsbuildinfo

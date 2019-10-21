@@ -6,7 +6,7 @@ namespace FudgeCore {
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
    * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
    */
-  interface AnimationStructure {
+  export interface AnimationStructure {
     [attribute: string]: Serialization | AnimationSequence;
   }
 

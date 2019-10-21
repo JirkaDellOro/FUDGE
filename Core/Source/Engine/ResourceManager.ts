@@ -3,11 +3,11 @@ namespace FudgeCore {
         idResource: string;
     }
 
-    interface Resources {
+    export interface Resources {
         [idResource: string]: SerializableResource;
     }
 
-    interface SerializationOfResources {
+    export interface SerializationOfResources {
         [idResource: string]: Serialization;
     }
 

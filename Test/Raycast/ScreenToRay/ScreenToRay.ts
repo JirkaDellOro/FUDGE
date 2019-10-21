@@ -68,16 +68,38 @@ namespace ScreenToRay {
             logMutatorInfo(name, uiMaps[name].framing);
         }
 
+        
+        viewport.createPickBuffers();
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
+        // animate(null);
+
         function animate(_event: Event): void {
             update();
-            // branch.cmpTransform.local.rotateY(1);
             ƒ.RenderManager.update();
             viewport.draw();
-
             adjustRayCamera();
+            pickNodeAt(mouse);
+            // let color: ƒ.Color = getPixelColor(mouse);           
         }
+    }
+
+    function getPixelColor(_pos: ƒ.Vector2): ƒ.Color {
+        let color: ƒ.Color = new ƒ.Color(1, 1, 1, 1);
+        let crc2: CanvasRenderingContext2D = canvas.getContext("2d");
+        color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
+        return color;
+    }
+
+    function pickNodeAt(_pos: ƒ.Vector2): void {
+        let posRender: ƒ.Vector2 = viewport.pointClientToRender(
+            new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y)
+        );
+        let output: HTMLOutputElement = document.querySelector("output");
+        output.innerHTML = "";
+        let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
+        for (let hit of hits)
+            output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
     }
 
     function adjustRayCamera(): void {
@@ -86,13 +108,13 @@ namespace ScreenToRay {
         // ray.direction.y *= 5;
         ray.direction.transform(cmpCamera.pivot);
         cameraRay.pivot.lookAt(ray.direction);
+        cameraRay.projectCentral(1, 10);
         viewportRay.draw();
 
         let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");
         crcRay.translate(crcRay.canvas.width / 2, crcRay.canvas.height / 2);
         crcRay.strokeStyle = "white";
         crcRay.strokeRect(-10, -10, 20, 20);
-
     }
 
     function computeRay(): ƒ.Ray {
@@ -127,20 +149,6 @@ namespace ScreenToRay {
         posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
         posProjection.y *= -1;
 
-        // let overflow: ƒ.Vector2 = new ƒ.Vector2();
-        // if (posProjection.x > 1) { posProjection.x -= 1, overflow.x = 90; }
-        // if (posProjection.x < -1) { posProjection.x += 1; overflow.x = -90; }
-        // if (posProjection.y > 1) { posProjection.y -= 1, overflow.y = 90; }
-        // if (posProjection.y < -1) { posProjection.y += 1; overflow.y = -90; }
-
-        // let angleProjection: ƒ.Vector2 = new ƒ.Vector2(
-        //     Math.asin(posProjection.x) * 180 / Math.PI,
-        //     Math.asin(posProjection.y) * 180 / Math.PI
-        // );
-        // angleProjection.add(overflow);
-
-        // the ray is starting at (0,0) and goes in the direction of posProjection with unlimited length
-        // ƒ.Debug.info("Point", posProjection.get());
         setUiPoint("Projection", posProjection);
 
         let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
