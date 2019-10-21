@@ -175,36 +175,38 @@ var FudgeUserInterface;
         }
         static createFromMutator(_mutator, _mutatorTypes, _parent, _mutable) {
             for (let key in _mutatorTypes) {
-                let type = _mutatorTypes[key];
-                let value = _mutator[key].toString();
-                if (type instanceof Object) {
-                    //Type is Enum
-                    UIGenerator.createLabelElement(key, _parent);
-                    UIGenerator.createDropdown(key, type, value, _parent);
-                }
-                else {
-                    switch (type) {
-                        case "Number":
-                            UIGenerator.createLabelElement(key, _parent, { _value: key });
-                            // UIGenerator.createTextElement(key, _parent, { _value: value })
-                            let numValue = parseInt(value);
-                            UIGenerator.createStepperElement(key, _parent, { _value: numValue });
-                            break;
-                        case "Boolean":
-                            UIGenerator.createLabelElement(key, _parent, { _value: key });
-                            let enabled = value == "true" ? true : false;
-                            UIGenerator.createCheckboxElement(key, enabled, _parent);
-                            break;
-                        case "String":
-                            UIGenerator.createLabelElement(key, _parent, { _value: key });
-                            UIGenerator.createTextElement(key, _parent, { _value: value });
-                            break;
-                        // Some other complex subclass of Mutable
-                        default:
-                            let subMutable;
-                            subMutable = _mutable[key];
-                            UIGenerator.createFromMutable(subMutable, _parent, key, _mutator[key]);
-                            break;
+                if (_mutator[key] != null) {
+                    let type = _mutatorTypes[key];
+                    let value = _mutator[key].toString();
+                    if (type instanceof Object) {
+                        //Type is Enum
+                        UIGenerator.createLabelElement(key, _parent);
+                        UIGenerator.createDropdown(key, type, value, _parent);
+                    }
+                    else {
+                        switch (type) {
+                            case "Number":
+                                UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                // UIGenerator.createTextElement(key, _parent, { _value: value })
+                                let numValue = parseInt(value);
+                                UIGenerator.createStepperElement(key, _parent, { _value: numValue });
+                                break;
+                            case "Boolean":
+                                UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                let enabled = value == "true" ? true : false;
+                                UIGenerator.createCheckboxElement(key, enabled, _parent);
+                                break;
+                            case "String":
+                                UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                UIGenerator.createTextElement(key, _parent, { _value: value });
+                                break;
+                            // Some other complex subclass of Mutable
+                            default:
+                                let subMutable;
+                                subMutable = _mutable[key];
+                                UIGenerator.createFromMutable(subMutable, _parent, key, _mutator[key]);
+                                break;
+                        }
                     }
                 }
             }
