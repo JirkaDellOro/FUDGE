@@ -63,6 +63,7 @@ namespace FudgeCore {
 
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.singleton;
+            delete _mutator.container;
         }
         //#endregion
     }
