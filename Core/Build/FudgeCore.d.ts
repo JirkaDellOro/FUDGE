@@ -1676,7 +1676,7 @@ declare namespace FudgeCore {
         ZERO = "Digit0",
         ONE = "Digit1",
         TWO = "Digit2",
-        TRHEE = "Digit3",
+        THREE = "Digit3",
         FOUR = "Digit4",
         FIVE = "Digit5",
         SIX = "Digit6",

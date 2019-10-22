@@ -3474,7 +3474,7 @@ var FudgeCore;
         KEYBOARD_CODE["ZERO"] = "Digit0";
         KEYBOARD_CODE["ONE"] = "Digit1";
         KEYBOARD_CODE["TWO"] = "Digit2";
-        KEYBOARD_CODE["TRHEE"] = "Digit3";
+        KEYBOARD_CODE["THREE"] = "Digit3";
         KEYBOARD_CODE["FOUR"] = "Digit4";
         KEYBOARD_CODE["FIVE"] = "Digit5";
         KEYBOARD_CODE["SIX"] = "Digit6";
