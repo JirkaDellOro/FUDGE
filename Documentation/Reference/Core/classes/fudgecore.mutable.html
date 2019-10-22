@@ -72,8 +72,11 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Base class implementing mutability of instances of subclasses using <a href="../interfaces/fudgecore.mutator.html">Mutator</a>-objects
-						thus providing and using interfaces created at runtime</p>
+						<p>Base class for all types being mutable using <a href="../interfaces/fudgecore.mutator.html">Mutator</a>-objects, thus providing and using interfaces created at runtime.
+							Mutables provide a <a href="../interfaces/fudgecore.mutator.html">Mutator</a> that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+							Subclasses can either reduce the standard <a href="../interfaces/fudgecore.mutator.html">Mutator</a> built by this base class by deleting properties or implement an individual getMutator-method.
+							The provided properties of the <a href="../interfaces/fudgecore.mutator.html">Mutator</a> must match public properties or getters/setters of the object.
+						Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.</p>
 					</div>
 				</div>
 			</section>
@@ -112,6 +115,9 @@
 									</li>
 									<li>
 										<a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a>
+									</li>
+									<li>
+										<a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>
 									</li>
 									<li>
 										<a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>
@@ -206,7 +212,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L30">Transfer/Mutable.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L33">Transfer/Mutable.ts:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -304,7 +310,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L36">Transfer/Mutable.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L39">Transfer/Mutable.ts:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -326,12 +332,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L82">Transfer/Mutable.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L86">Transfer/Mutable.ts:86</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values</p>
+									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+									Does not recurse into objects!</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -356,7 +363,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L68">Transfer/Mutable.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L71">Transfer/Mutable.ts:71</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -379,7 +386,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L75">Transfer/Mutable.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L78">Transfer/Mutable.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -402,7 +409,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L109">Transfer/Mutable.ts:109</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L117">Transfer/Mutable.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -467,7 +474,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L96">Transfer/Mutable.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L104">Transfer/Mutable.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

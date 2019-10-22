@@ -72,7 +72,9 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Calculates the values between [[AnimationKeys]]</p>
+						<p>Calculates the values between <a href="fudgecore.animationkey.html">AnimationKey</a>s.
+							Represented internally by a cubic function (<code>f(x) = ax³ + bx² + cx + d</code>).
+						Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>author</dt>
@@ -128,7 +130,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Animation/AnimationFunction.ts#L15">Animation/AnimationFunction.ts:15</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Animation/AnimationFunction.ts#L17">Animation/AnimationFunction.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -157,7 +159,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Animation/AnimationFunction.ts#L32">Animation/AnimationFunction.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Animation/AnimationFunction.ts#L38">Animation/AnimationFunction.ts:38</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -180,7 +182,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Animation/AnimationFunction.ts#L37">Animation/AnimationFunction.ts:37</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Animation/AnimationFunction.ts#L43">Animation/AnimationFunction.ts:43</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -206,9 +208,16 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Animation/AnimationFunction.ts#L42">Animation/AnimationFunction.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Animation/AnimationFunction.ts#L53">Animation/AnimationFunction.ts:53</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>(Re-)Calculates the parameters of the cubic function.
+										See <a href="https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably">https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably</a>
+									and <a href="https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS">https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS</a></p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -223,16 +232,25 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Animation/AnimationFunction.ts#L24">Animation/AnimationFunction.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Animation/AnimationFunction.ts#L31">Animation/AnimationFunction.ts:31</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calculates the value of the function at the given time.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_time: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>the value at the given time</p>
 						</li>
 					</ul>
 				</section>

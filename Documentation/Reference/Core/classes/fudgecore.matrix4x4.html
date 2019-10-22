@@ -69,23 +69,6 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Stores a 4x4 transformation matrix and provides operations for it.</p>
-						<pre><code class="language-plaintext">[ 0, 1, 2, 3 ] &lt;- row vector x
-[ 4, 5, 6, 7 ] &lt;- row vector y
-[ 8, 9,10,11 ] &lt;- row vector z
-[12,13,14,15 ] &lt;- translation
-           ^  homogeneous column</code></pre>
-					</div>
-					<dl class="tsd-comment-tags">
-						<dt>authors</dt>
-						<dd><p>Jascha Karagöl, HFU, 2019 | Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
-						</dd>
-					</dl>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -118,6 +101,8 @@
 						<section class="tsd-index-section ">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#rotation" class="tsd-kind-icon">rotation</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#scaling" class="tsd-kind-icon">scaling</a></li>
 								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#translation" class="tsd-kind-icon">translation</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.matrix4x4.html#type" class="tsd-kind-icon">type</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#identity" class="tsd-kind-icon">IDENTITY</a></li>
@@ -130,11 +115,11 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.matrix4x4.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#get" class="tsd-kind-icon">get</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#geteulerangles" class="tsd-kind-icon">get<wbr>Euler<wbr>Angles</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.matrix4x4.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.matrix4x4.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.matrix4x4.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.matrix4x4.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.matrix4x4.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#getvectorrepresentation" class="tsd-kind-icon">get<wbr>Vector<wbr>Representation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#lookat" class="tsd-kind-icon">look<wbr>At</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.matrix4x4.html#multiply" class="tsd-kind-icon">multiply</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.matrix4x4.html#mutate" class="tsd-kind-icon">mutate</a></li>
@@ -161,7 +146,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#rotation_x" class="tsd-kind-icon">ROTATION_<wbr>X</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#rotation_y" class="tsd-kind-icon">ROTATION_<wbr>Y</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#rotation_z" class="tsd-kind-icon">ROTATION_<wbr>Z</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#scaling" class="tsd-kind-icon">SCALING</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#scaling-1" class="tsd-kind-icon">SCALING</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.matrix4x4.html#translation-1" class="tsd-kind-icon">TRANSLATION</a></li>
 							</ul>
 						</section>
@@ -180,7 +165,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L16">Math/Matrix4x4.ts:16</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L24">Math/Matrix4x4.ts:24</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a></h4>
@@ -190,6 +175,70 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="rotation" class="tsd-anchor"></a>
+					<h3>rotation</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> rotation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> rotation<span class="tsd-signature-symbol">(</span>_rotation<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L49">Math/Matrix4x4.ts:49</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L54">Math/Matrix4x4.ts:54</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_rotation: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="scaling" class="tsd-anchor"></a>
+					<h3>scaling</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> scaling<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> scaling<span class="tsd-signature-symbol">(</span>_scaling<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L59">Math/Matrix4x4.ts:59</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L68">Math/Matrix4x4.ts:68</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_scaling: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
 					<a name="translation" class="tsd-anchor"></a>
 					<h3>translation</h3>
@@ -201,7 +250,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L28">Math/Matrix4x4.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L37">Math/Matrix4x4.ts:37</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
@@ -209,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L31">Math/Matrix4x4.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L42">Math/Matrix4x4.ts:42</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -233,7 +282,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L30">Transfer/Mutable.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L33">Transfer/Mutable.ts:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -256,7 +305,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L36">Math/Matrix4x4.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L74">Math/Matrix4x4.ts:74</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a></h4>
@@ -319,7 +368,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L529">Math/Matrix4x4.ts:529</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L565">Math/Matrix4x4.ts:565</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -372,10 +421,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L520">Math/Matrix4x4.ts:520</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L556">Math/Matrix4x4.ts:556</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="geteulerangles" class="tsd-anchor"></a>
+					<h3>get<wbr>Euler<wbr>Angles</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Euler<wbr>Angles<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L507">Math/Matrix4x4.ts:507</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -390,38 +456,31 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L534">Math/Matrix4x4.ts:534</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L570">Math/Matrix4x4.ts:570</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="getmutatorattributetypes" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>Attribute<wbr>Types</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
+								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L82">Transfer/Mutable.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L631">Math/Matrix4x4.ts:631</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></h4>
@@ -439,7 +498,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L68">Transfer/Mutable.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L71">Transfer/Mutable.ts:71</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -463,7 +522,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L75">Transfer/Mutable.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L78">Transfer/Mutable.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -477,23 +536,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getvectorrepresentation" class="tsd-anchor"></a>
-					<h3>get<wbr>Vector<wbr>Representation</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Vector<wbr>Representation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">[]</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L464">Math/Matrix4x4.ts:464</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">[]</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="lookat" class="tsd-anchor"></a>
 					<h3>look<wbr>At</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -503,7 +545,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L402">Math/Matrix4x4.ts:402</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L441">Math/Matrix4x4.ts:441</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -529,7 +571,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L458">Math/Matrix4x4.ts:458</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L500">Math/Matrix4x4.ts:500</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -553,7 +595,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L549">Math/Matrix4x4.ts:549</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L585">Math/Matrix4x4.ts:585</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -611,7 +653,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L374">Math/Matrix4x4.ts:374</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L413">Math/Matrix4x4.ts:413</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -642,7 +684,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L385">Math/Matrix4x4.ts:385</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L424">Math/Matrix4x4.ts:424</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -673,7 +715,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L396">Math/Matrix4x4.ts:396</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L435">Math/Matrix4x4.ts:435</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -704,7 +746,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L441">Math/Matrix4x4.ts:441</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L483">Math/Matrix4x4.ts:483</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -727,7 +769,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L446">Math/Matrix4x4.ts:446</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L488">Math/Matrix4x4.ts:488</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -750,7 +792,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L449">Math/Matrix4x4.ts:449</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L491">Math/Matrix4x4.ts:491</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -773,7 +815,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L452">Math/Matrix4x4.ts:452</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L494">Math/Matrix4x4.ts:494</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -797,7 +839,7 @@
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L524">Math/Matrix4x4.ts:524</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L560">Math/Matrix4x4.ts:560</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
@@ -814,7 +856,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L514">Math/Matrix4x4.ts:514</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L550">Math/Matrix4x4.ts:550</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -837,7 +879,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L410">Math/Matrix4x4.ts:410</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L449">Math/Matrix4x4.ts:449</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -860,7 +902,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L421">Math/Matrix4x4.ts:421</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L460">Math/Matrix4x4.ts:460</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -891,7 +933,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L428">Math/Matrix4x4.ts:428</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L468">Math/Matrix4x4.ts:468</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -922,7 +964,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L435">Math/Matrix4x4.ts:435</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L476">Math/Matrix4x4.ts:476</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -954,7 +996,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L96">Transfer/Mutable.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L104">Transfer/Mutable.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -984,7 +1026,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L116">Math/Matrix4x4.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L154">Math/Matrix4x4.ts:154</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1015,7 +1057,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L199">Math/Matrix4x4.ts:199</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L237">Math/Matrix4x4.ts:237</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1055,7 +1097,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L53">Math/Matrix4x4.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L91">Math/Matrix4x4.ts:91</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1092,7 +1134,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L317">Math/Matrix4x4.ts:317</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L356">Math/Matrix4x4.ts:356</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1123,11 +1165,14 @@
 								<li>
 									<h5>_far: <span class="tsd-signature-type">number</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>The far clipspace borer on the z-axis.</p>
+										<p>The far clipspace border on the z-axis.</p>
 									</div>
 								</li>
 								<li>
 									<h5>_direction: <a href="../enums/fudgecore.field_of_view.html" class="tsd-signature-type">FIELD_OF_VIEW</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The plane on which the fieldOfView-Angle is given</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a></h4>
@@ -1144,7 +1189,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L352">Math/Matrix4x4.ts:352</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L391">Math/Matrix4x4.ts:391</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1205,7 +1250,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L239">Math/Matrix4x4.ts:239</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L277">Math/Matrix4x4.ts:277</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1236,7 +1281,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L258">Math/Matrix4x4.ts:258</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L296">Math/Matrix4x4.ts:296</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1267,7 +1312,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L277">Math/Matrix4x4.ts:277</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L315">Math/Matrix4x4.ts:315</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1289,7 +1334,7 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="scaling" class="tsd-anchor"></a>
+					<a name="scaling-1" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> SCALING</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">SCALING<span class="tsd-signature-symbol">(</span>_scalar<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a></li>
@@ -1298,7 +1343,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L296">Math/Matrix4x4.ts:296</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L334">Math/Matrix4x4.ts:334</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1328,7 +1373,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Math/Matrix4x4.ts#L223">Math/Matrix4x4.ts:223</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Matrix4x4.ts#L261">Math/Matrix4x4.ts:261</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1372,6 +1417,12 @@
 								<a href="fudgecore.matrix4x4.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="fudgecore.matrix4x4.html#rotation" class="tsd-kind-icon">rotation</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="fudgecore.matrix4x4.html#scaling" class="tsd-kind-icon">scaling</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
 								<a href="fudgecore.matrix4x4.html#translation" class="tsd-kind-icon">translation</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
@@ -1392,10 +1443,13 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.matrix4x4.html#get" class="tsd-kind-icon">get</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.matrix4x4.html#geteulerangles" class="tsd-kind-icon">get<wbr>Euler<wbr>Angles</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 								<a href="fudgecore.matrix4x4.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 								<a href="fudgecore.matrix4x4.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -1403,9 +1457,6 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.matrix4x4.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.matrix4x4.html#getvectorrepresentation" class="tsd-kind-icon">get<wbr>Vector<wbr>Representation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.matrix4x4.html#lookat" class="tsd-kind-icon">look<wbr>At</a>
@@ -1486,7 +1537,7 @@
 								<a href="fudgecore.matrix4x4.html#rotation_z" class="tsd-kind-icon">ROTATION_<wbr>Z</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.matrix4x4.html#scaling" class="tsd-kind-icon">SCALING</a>
+								<a href="fudgecore.matrix4x4.html#scaling-1" class="tsd-kind-icon">SCALING</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.matrix4x4.html#translation-1" class="tsd-kind-icon">TRANSLATION</a>
