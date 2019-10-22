@@ -1,0 +1,1426 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Vector2 | Fudge Core</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">Fudge Core</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../index.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/fudgecore.html">FudgeCore</a>
+				</li>
+				<li>
+					<a href="fudgecore.vector2.html">Vector2</a>
+				</li>
+			</ul>
+			<h1>Class Vector2</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Stores and manipulates a twodimensional vector comprised of the components x and y</p>
+						<pre><code class="language-plaintext">           +y
+            |__ +x</code></pre>
+					</div>
+					<dl class="tsd-comment-tags">
+						<dt>authors</dt>
+						<dd><p>Lukas Scheuerle, HFU, 2019</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="fudgecore.mutable.html" class="tsd-signature-type">Mutable</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">Vector2</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.vector2.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.vector2.html#copy" class="tsd-kind-icon">copy</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.vector2.html#x" class="tsd-kind-icon">x</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.vector2.html#y" class="tsd-kind-icon">y</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#down" class="tsd-kind-icon">DOWN</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#left" class="tsd-kind-icon">LEFT</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#right" class="tsd-kind-icon">RIGHT</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#up" class="tsd-kind-icon">UP</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#zero" class="tsd-kind-icon">ZERO</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#add" class="tsd-kind-icon">add</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#equals" class="tsd-kind-icon">equals</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#get" class="tsd-kind-icon">get</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.vector2.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#mutate" class="tsd-kind-icon">mutate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#normalize" class="tsd-kind-icon">normalize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#scale" class="tsd-kind-icon">scale</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#set" class="tsd-kind-icon">set</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector2.html#subtract" class="tsd-kind-icon">subtract</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector2.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#crossproduct" class="tsd-kind-icon">CROSSPRODUCT</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#difference" class="tsd-kind-icon">DIFFERENCE</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#dot" class="tsd-kind-icon">DOT</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#magnitude" class="tsd-kind-icon">MAGNITUDE</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#magnitudesqr" class="tsd-kind-icon">MAGNITUDESQR</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#normalization" class="tsd-kind-icon">NORMALIZATION</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#orthogonal" class="tsd-kind-icon">ORTHOGONAL</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#scale-1" class="tsd-kind-icon">SCALE</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector2.html#sum" class="tsd-kind-icon">SUM</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Vector2<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L11">Math/Vector2.ts:11</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="copy" class="tsd-anchor"></a>
+					<h3>copy</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> copy<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L251">Math/Vector2.ts:251</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A deep copy of the vector.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="type" class="tsd-anchor"></a>
+					<h3>type</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> type<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L33">Transfer/Mutable.ts:33</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieves the type of this mutable subclass as the name of the runtime class</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>The type of the mutable</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="x" class="tsd-anchor"></a>
+					<h3>x</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> x<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> x<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L18">Math/Vector2.ts:18</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L25">Math/Vector2.ts:25</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_x: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="y" class="tsd-anchor"></a>
+					<h3>y</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> y<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> y<span class="tsd-signature-symbol">(</span>_y<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L21">Math/Vector2.ts:21</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L28">Math/Vector2.ts:28</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_y: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+					<a name="down" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> DOWN</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> DOWN<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L54">Math/Vector2.ts:54</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A shorthand for writing <code>new Vector2(0, -1)</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector with the values (0, -1)</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+					<a name="left" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> LEFT</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> LEFT<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L72">Math/Vector2.ts:72</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A shorthand for writing <code>new Vector2(-1, 0)</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector with the values (-1, 0)</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+					<a name="right" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> RIGHT</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> RIGHT<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L63">Math/Vector2.ts:63</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A shorthand for writing <code>new Vector2(1, 0)</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector with the values (1, 0)</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+					<a name="up" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> UP</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> UP<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L45">Math/Vector2.ts:45</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A shorthand for writing <code>new Vector2(0, 1)</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector with the values (0, 1)</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+					<a name="zero" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> ZERO</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> ZERO<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L36">Math/Vector2.ts:36</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A shorthand for writing <code>new Vector2(0, 0)</code>.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector with the values (0, 0)</p>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="add" class="tsd-anchor"></a>
+					<h3>add</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>_addend<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L194">Math/Vector2.ts:194</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adds the given vector to the executing vector, changing the executor.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_addend: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to add.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="addeventlistener" class="tsd-anchor"></a>
+					<h3>add<wbr>Event<wbr>Listener</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from EventTarget.addEventListener</p>
+								<ul>
+									<li>Defined in C:/Users/jirka/AppData/Roaming/npm/node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:5069</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Appends an event listener for events whose type attribute value is type. The callback argument sets the callback that will be invoked when the event is dispatched.
+										The options argument sets listener-specific options. For compatibility this can be a
+										boolean, in which case the method behaves exactly as if the value was specified as options&#39;s capture.
+										When set to true, options&#39;s capture prevents callback from being invoked when the event&#39;s eventPhase attribute value is BUBBLING_PHASE. When false (or not present), callback will not be invoked when event&#39;s eventPhase attribute value is CAPTURING_PHASE. Either way, callback will be invoked if event&#39;s eventPhase attribute value is AT_TARGET.
+										When set to true, options&#39;s passive indicates that the callback will not cancel the event by invoking preventDefault(). This is used to enable performance optimizations described in §2.8 Observing event listeners.
+										When set to true, options&#39;s once indicates that the callback will only be invoked once after which the event listener will
+										be removed.
+									The event listener is appended to target&#39;s event listener list and is not appended if it has the same type, callback, and capture.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>type: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>listener: <span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="dispatchevent" class="tsd-anchor"></a>
+					<h3>dispatch<wbr>Event</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event<span class="tsd-signature-symbol">(</span>event<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Event</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from EventTarget.dispatchEvent</p>
+								<ul>
+									<li>Defined in C:/Users/jirka/AppData/Roaming/npm/node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:5074</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dispatches a synthetic event event to target and returns true
+									if either event&#39;s cancelable attribute value is false or its preventDefault() method was not invoked, and false otherwise.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>event: <span class="tsd-signature-type">Event</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="equals" class="tsd-anchor"></a>
+					<h3>equals</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">equals<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L236">Math/Vector2.ts:236</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Checks whether the given Vector is equal to the executed Vector.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to comapre with.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+							<p>true if the two vectors are equal, otherwise false</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="get" class="tsd-anchor"></a>
+					<h3>get</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Float32Array</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L244">Math/Vector2.ts:244</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
+							<p>An array of the data of the vector</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="getmutator" class="tsd-anchor"></a>
+					<h3>get<wbr>Mutator</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L255">Math/Vector2.ts:255</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="getmutatorattributetypes" class="tsd-anchor"></a>
+					<h3>get<wbr>Mutator<wbr>Attribute<wbr>Types</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L86">Transfer/Mutable.ts:86</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+									Does not recurse into objects!</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="getmutatorforanimation" class="tsd-anchor"></a>
+					<h3>get<wbr>Mutator<wbr>For<wbr>Animation</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L71">Transfer/Mutable.ts:71</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Collect the attributes of the instance and their values applicable for animation.
+									Basic functionality is identical to <a href="fudgecore.vector2.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="getmutatorforuserinterface" class="tsd-anchor"></a>
+					<h3>get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L78">Transfer/Mutable.ts:78</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Collect the attributes of the instance and their values applicable for the user interface.
+									Basic functionality is identical to <a href="fudgecore.vector2.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="mutate" class="tsd-anchor"></a>
+					<h3>mutate</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L117">Transfer/Mutable.ts:117</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Updates the attribute values of the instance according to the state of the mutator. Must be protected...!</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="normalize" class="tsd-anchor"></a>
+					<h3>normalize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">normalize<span class="tsd-signature-symbol">(</span>_length<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L218">Math/Vector2.ts:218</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Normalizes the vector.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _length: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A modificator to get a different length of normalized vector.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="removeeventlistener" class="tsd-anchor"></a>
+					<h3>remove<wbr>Event<wbr>Listener</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">EventListenerOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from EventTarget.removeEventListener</p>
+								<ul>
+									<li>Defined in C:/Users/jirka/AppData/Roaming/npm/node_modules/typedoc/node_modules/typescript/lib/lib.dom.d.ts:5078</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Removes the event listener in target&#39;s event listener list with the same type, callback, and options.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>type: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>callback: <span class="tsd-signature-type">EventListenerOrEventListenerObject</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> options: <span class="tsd-signature-type">EventListenerOptions</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="scale" class="tsd-anchor"></a>
+					<h3>scale</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">scale<span class="tsd-signature-symbol">(</span>_scale<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L210">Math/Vector2.ts:210</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Scales the Vector by the _scale.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_scale: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The scale to multiply the vector with.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="set" class="tsd-anchor"></a>
+					<h3>set</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L227">Math/Vector2.ts:227</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the Vector to the given parameters. Ommitted parameters default to 0.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>new x to set</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>new y to set</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="subtract" class="tsd-anchor"></a>
+					<h3>subtract</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">subtract<span class="tsd-signature-symbol">(</span>_subtrahend<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L202">Math/Vector2.ts:202</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Subtracts the given vector from the executing vector, changing the executor.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_subtrahend: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to subtract.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="updatemutator" class="tsd-anchor"></a>
+					<h3>update<wbr>Mutator</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Transfer/Mutable.ts#L104">Transfer/Mutable.ts:104</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Updates the values of the given mutator according to the current state of the instance</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="crossproduct" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> CROSSPRODUCT</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">CROSSPRODUCT<span class="tsd-signature-symbol">(</span>_a<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _b<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L170">Math/Vector2.ts:170</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
+									which implicitly is on the Z axis. It is also the signed magnitude of the result.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_a: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Vector to compute the cross product on</p>
+									</div>
+								</li>
+								<li>
+									<h5>_b: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Vector to compute the cross product with</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>A number representing result of the cross product.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="difference" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> DIFFERENCE</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">DIFFERENCE<span class="tsd-signature-symbol">(</span>_a<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _b<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L124">Math/Vector2.ts:124</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Subtracts two vectors.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_a: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to subtract from.</p>
+									</div>
+								</li>
+								<li>
+									<h5>_b: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to subtract.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector representing the difference of the given vectors</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="dot" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> DOT</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">DOT<span class="tsd-signature-symbol">(</span>_a<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _b<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L136">Math/Vector2.ts:136</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Computes the dotproduct of 2 vectors.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_a: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to multiply.</p>
+									</div>
+								</li>
+								<li>
+									<h5>_b: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to multiply by.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>A new vector representing the dotproduct of the given vectors</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="magnitude" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> MAGNITUDE</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">MAGNITUDE<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L148">Math/Vector2.ts:148</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the magnitude of a given vector.
+									If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>see</dt>
+									<dd><p>Vector2.MAGNITUDESQR</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to get the magnitude of.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>A number representing the magnitude of the given vector.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="magnitudesqr" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> MAGNITUDESQR</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">MAGNITUDESQR<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L158">Math/Vector2.ts:158</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to get the squared magnitude of.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<p>A number representing the squared magnitude of the given vector.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="normalization" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> NORMALIZATION</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">NORMALIZATION<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _length<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L83">Math/Vector2.ts:83</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Normalizes a given vector to the given length without editing the original vector.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the vector to normalize</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _length: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the length of the resulting vector. defaults to 1</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>a new vector representing the normalised vector scaled by the given length</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="orthogonal" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> ORTHOGONAL</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">ORTHOGONAL<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _clockwise<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L185">Math/Vector2.ts:185</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.</p>
+									<pre><code class="language-plaintext">   ^                |
+   |  =&gt;  &lt;--  =&gt;   v  =&gt;  --&gt;</code></pre>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Vector to get the orthogonal equivalent of</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _clockwise: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;false</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Should the rotation be clockwise instead of the default counterclockwise? default: false</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A Vector that is orthogonal to and has the same magnitude as the given Vector.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="scale-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> SCALE</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">SCALE<span class="tsd-signature-symbol">(</span>_vector<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _scale<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L101">Math/Vector2.ts:101</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Scales a given vector by a given scale without changing the original vector</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_vector: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The vector to scale.</p>
+									</div>
+								</li>
+								<li>
+									<h5>_scale: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The scale to scale with.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector representing the scaled version of the given vector</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="sum" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> SUM</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">SUM<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>_vectors<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/5a247b37/Core/Source/Math/Vector2.ts#L111">Math/Vector2.ts:111</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sums up multiple vectors.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>_vectors: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A series of vectors to sum up</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<p>A new vector representing the sum of the given vectors</p>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../index.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module tsd-is-not-exported">
+						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgecore.vector2.html" class="tsd-kind-icon">Vector2</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#copy" class="tsd-kind-icon">copy</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#type" class="tsd-kind-icon">type</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#x" class="tsd-kind-icon">x</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#y" class="tsd-kind-icon">y</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#down" class="tsd-kind-icon">DOWN</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#left" class="tsd-kind-icon">LEFT</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#right" class="tsd-kind-icon">RIGHT</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#up" class="tsd-kind-icon">UP</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#zero" class="tsd-kind-icon">ZERO</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#add" class="tsd-kind-icon">add</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#equals" class="tsd-kind-icon">equals</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#get" class="tsd-kind-icon">get</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="fudgecore.vector2.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#mutate" class="tsd-kind-icon">mutate</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#normalize" class="tsd-kind-icon">normalize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#scale" class="tsd-kind-icon">scale</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#set" class="tsd-kind-icon">set</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector2.html#subtract" class="tsd-kind-icon">subtract</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.vector2.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#crossproduct" class="tsd-kind-icon">CROSSPRODUCT</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#difference" class="tsd-kind-icon">DIFFERENCE</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#dot" class="tsd-kind-icon">DOT</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#magnitude" class="tsd-kind-icon">MAGNITUDE</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#magnitudesqr" class="tsd-kind-icon">MAGNITUDESQR</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#normalization" class="tsd-kind-icon">NORMALIZATION</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#orthogonal" class="tsd-kind-icon">ORTHOGONAL</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#scale-1" class="tsd-kind-icon">SCALE</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector2.html#sum" class="tsd-kind-icon">SUM</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
