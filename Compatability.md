@@ -1,0 +1,5 @@
+| systems: | Linux | Linux | Linux | Windows | Windows | Windows | Windows | Apple | Apple | Apple | Apple | Android | Android | Android | Android | iOS | iOS | iOS | iOS | iOS |
+|-------------|--------|---------|:-----:|---------|---------|---------|---------|--------|---------|--------|--------|---------|---------|---------|---------|--------|---------|--------|--------|-------|
+| Can it run? | native | Firefox | Opera | native | Firefox | Edge | Chrome | native | Firefox | Safari | Chrome | native | Firefox | Chrome | Opera | native | Firefox | Safari | Chrome | Opera |
+| | | | | | | | | | | | | | | | | | | | | |
+| | | | | | | | | | | | | | | | | | | | | |
