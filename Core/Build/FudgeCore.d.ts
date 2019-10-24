@@ -1430,9 +1430,11 @@ declare namespace FudgeCore {
         private canvas;
         private pickBuffers;
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name
          * @param _branch
          * @param _camera
+         * @param _canvas
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
@@ -1674,7 +1676,7 @@ declare namespace FudgeCore {
         ZERO = "Digit0",
         ONE = "Digit1",
         TWO = "Digit2",
-        TRHEE = "Digit3",
+        THREE = "Digit3",
         FOUR = "Digit4",
         FIVE = "Digit5",
         SIX = "Digit6",
@@ -2414,12 +2416,12 @@ declare namespace FudgeCore {
          * Returns a clone of the list of components of the given class attached to this node.
          * @param _class The class of the components to be found.
          */
-        getComponents<T extends Component>(_class: typeof Component): T[];
+        getComponents<T extends Component>(_class: new () => T): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        getComponent<T extends Component>(_class: typeof Component): T;
+        getComponent<T extends Component>(_class: new () => T): T;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.

@@ -208,14 +208,14 @@ namespace FudgeCore {
      * Returns a clone of the list of components of the given class attached to this node. 
      * @param _class The class of the components to be found.
      */
-    public getComponents<T extends Component>(_class: typeof Component): T[] {
+    public getComponents<T extends Component>(_class: new () => T): T[] {
       return <T[]>(this.components[_class.name] || []).slice(0);
     }
     /**
      * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
      * @param _class The class of the components to be found.
      */
-    public getComponent<T extends Component>(_class: typeof Component): T {
+    public getComponent<T extends Component>(_class: new () => T): T {
       let list: T[] = <T[]>this.components[_class.name];
       if (list)
         return list[0];

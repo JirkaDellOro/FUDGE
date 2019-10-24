@@ -37,9 +37,11 @@ namespace FudgeCore {
         private pickBuffers: PickBuffer[] = [];
 
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name 
          * @param _branch 
          * @param _camera 
+         * @param _canvas 
          */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;

@@ -1893,6 +1893,7 @@ var FudgeCore;
         }
         reduceMutator(_mutator) {
             delete _mutator.singleton;
+            delete _mutator.container;
         }
     }
     FudgeCore.Component = Component;
@@ -3102,9 +3103,11 @@ var FudgeCore;
             };
         }
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name
          * @param _branch
          * @param _camera
+         * @param _canvas
          */
         initialize(_name, _branch, _camera, _canvas) {
             this.name = _name;
@@ -3471,7 +3474,7 @@ var FudgeCore;
         KEYBOARD_CODE["ZERO"] = "Digit0";
         KEYBOARD_CODE["ONE"] = "Digit1";
         KEYBOARD_CODE["TWO"] = "Digit2";
-        KEYBOARD_CODE["TRHEE"] = "Digit3";
+        KEYBOARD_CODE["THREE"] = "Digit3";
         KEYBOARD_CODE["FOUR"] = "Digit4";
         KEYBOARD_CODE["FIVE"] = "Digit5";
         KEYBOARD_CODE["SIX"] = "Digit6";
