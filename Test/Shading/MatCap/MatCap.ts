@@ -31,13 +31,13 @@ namespace MatCapTest {
         branch.appendChild(pyramidRed);
         branch.appendChild(pyramidGreen);
         
-        Scenes.camera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), new ƒ.Vector3);
         
         ƒ.RenderManager.initialize();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
-        let viewport: ƒ.Viewport = new ƒ.Viewport();
 
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let viewport: ƒ.Viewport = new ƒ.Viewport();
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+
         viewport.draw();
         
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, handleFrame);
