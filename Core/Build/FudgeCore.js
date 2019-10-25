@@ -1412,10 +1412,46 @@ var FudgeCore;
                 this.useRenderData(_renderShader);
             }
         }
+        static injectRenderDataForCoatMatCap(_renderShader) {
+            let crc3 = FudgeCore.RenderOperator.getRenderingContext();
+            let colorUniformLocation = _renderShader.uniforms["u_tint_color"];
+            let { r, g, b, a } = this.tintColor;
+            let tintColorArray = new Float32Array([r, g, b, a]);
+            crc3.uniform4fv(colorUniformLocation, tintColorArray);
+            let floatUniformLocation = _renderShader.uniforms["u_flatmix"];
+            let flatMix = this.flatMix;
+            crc3.uniform1f(floatUniformLocation, flatMix);
+            if (this.renderData) {
+                // buffers exist
+                crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
+                crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
+            }
+            else {
+                this.renderData = {};
+                // TODO: check if all WebGL-Creations are asserted
+                const texture = FudgeCore.RenderManager.assert(crc3.createTexture());
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
+                try {
+                    crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texture.image);
+                    crc3.texImage2D(WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, this.texture.image);
+                }
+                catch (_e) {
+                    FudgeCore.Debug.error(_e);
+                }
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
+                crc3.generateMipmap(crc3.TEXTURE_2D);
+                this.renderData["texture0"] = texture;
+                crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
+                this.useRenderData(_renderShader);
+            }
+        }
     }
     RenderInjector.coatInjections = {
         "CoatColored": RenderInjector.injectRenderDataForCoatColored,
-        "CoatTextured": RenderInjector.injectRenderDataForCoatTextured
+        "CoatTextured": RenderInjector.injectRenderDataForCoatTextured,
+        "CoatMatCap": RenderInjector.injectRenderDataForCoatMatCap
     };
     FudgeCore.RenderInjector = RenderInjector;
 })(FudgeCore || (FudgeCore = {}));
@@ -1822,6 +1858,25 @@ var FudgeCore;
         FudgeCore.RenderInjector.decorateCoat
     ], CoatTextured);
     FudgeCore.CoatTextured = CoatTextured;
+    /**
+     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
+     * and a flatMix number for mixing between smooth and flat shading.
+     */
+    let CoatMatCap = class CoatMatCap extends Coat {
+        constructor(_texture, _tintcolor, _flatmix) {
+            super();
+            this.texture = null;
+            this.tintColor = new FudgeCore.Color(0.5, 0.5, 0.5, 1);
+            this.flatMix = 0.5;
+            this.texture = _texture || new FudgeCore.TextureImage();
+            this.tintColor = _tintcolor || new FudgeCore.Color(0.5, 0.5, 0.5, 1);
+            this.flatMix = _flatmix > 1.0 ? this.flatMix = 1.0 : this.flatMix = _flatmix || 0.5;
+        }
+    };
+    CoatMatCap = __decorate([
+        FudgeCore.RenderInjector.decorateCoat
+    ], CoatMatCap);
+    FudgeCore.CoatMatCap = CoatMatCap;
 })(FudgeCore || (FudgeCore = {}));
 /// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
@@ -5989,6 +6044,68 @@ var FudgeCore;
         }
     }
     FudgeCore.ShaderFlat = ShaderFlat;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
+     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
+     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
+     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderMatCap extends FudgeCore.Shader {
+        static getCoat() {
+            return FudgeCore.CoatMatCap;
+        }
+        static getVertexShaderSource() {
+            return `#version 300 es
+
+                    in vec3 a_position;
+                    in vec3 a_normal;
+                    uniform mat4 u_projection;
+
+                    out vec2 tex_coords_smooth;
+                    flat out vec2 tex_coords_flat;
+
+                    void main() {
+                        mat4 normalMatrix = transpose(inverse(u_projection));
+                        vec4 p = vec4(a_position, 1.0);
+                        vec4 normal4 = vec4(a_normal, 1.0);
+                        vec3 e = normalize( vec3( u_projection * p ) );
+                        vec3 n = normalize( vec3(normalMatrix * normal4) );
+
+                        vec3 r = reflect( e, n );
+                        float m = 2. * sqrt(
+                            pow( r.x, 2. ) +
+                            pow( r.y, 2. ) +
+                            pow( r.z + 1., 2. )
+                        );
+
+                        tex_coords_smooth = r.xy / m + .5;
+                        tex_coords_flat = r.xy / m + .5;
+
+                        gl_Position = u_projection * vec4(a_position, 1.0);
+                    }`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+                    precision mediump float;
+                    
+                    uniform vec4 u_tint_color;
+                    uniform float u_flatmix;
+                    uniform sampler2D u_texture;
+                    
+                    in vec2 tex_coords_smooth;
+                    flat in vec2 tex_coords_flat;
+
+                    out vec4 frag;
+
+                    void main() {
+                        vec2 tc = mix(tex_coords_smooth, tex_coords_flat, u_flatmix);
+                        frag = u_tint_color * texture(u_texture, tc) * 2.0;
+                    }`;
+        }
+    }
+    FudgeCore.ShaderMatCap = ShaderMatCap;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
