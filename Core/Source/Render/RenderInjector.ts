@@ -60,7 +60,7 @@ namespace FudgeCore {
         }
 
         private static injectRenderDataForCoatMatCap(this: Coat, _renderShader: RenderShader): void {
-            let crc3: WebGLRenderingContext = RenderOperator.getRenderingContext();
+            let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
             let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_tint_color"];
             let { r, g, b, a } = (<CoatMatCap>this).tintColor;
