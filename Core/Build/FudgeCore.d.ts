@@ -109,8 +109,11 @@ declare namespace FudgeCore {
         readonly forUserInterface: null;
     }
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTarget {
         /**
@@ -168,14 +171,14 @@ declare namespace FudgeCore {
     * Labels need to be unique per Animation.
     * @author Lukas Scheuerle, HFU, 2019
     */
-    export interface AnimationLabel {
+    interface AnimationLabel {
         [name: string]: number;
     }
     /**
     * Holds information about Animation Event Triggers
     * @author Lukas Scheuerle, HFU, 2019
     */
-    export interface AnimationEventTrigger {
+    interface AnimationEventTrigger {
         [name: string]: number;
     }
     /**
@@ -184,15 +187,15 @@ declare namespace FudgeCore {
      * Can be added to a Node and played through [[ComponentAnimator]].
      * @author Lukas Scheuerle, HFU, 2019
      */
-    export class Animation extends Mutable implements SerializableResource {
+    class Animation extends Mutable implements SerializableResource {
         idResource: string;
         name: string;
         totalTime: number;
         labels: AnimationLabel;
         stepsPerSecond: number;
         animationStructure: AnimationStructure;
+        events: AnimationEventTrigger;
         private framesPerSecond;
-        private events;
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
@@ -317,7 +320,6 @@ declare namespace FudgeCore {
          */
         private checkEventsBetween;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -662,7 +664,6 @@ declare namespace FudgeCore {
         static decorateCoat(_constructor: Function): void;
         private static injectRenderDataForCoatColored;
         private static injectRenderDataForCoatTextured;
-        private static injectRenderDataForCoatMatCap;
     }
 }
 declare namespace FudgeCore {
@@ -702,6 +703,7 @@ declare namespace FudgeCore {
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
+        private static renderShaderRayCast;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -750,9 +752,18 @@ declare namespace FudgeCore {
          * @param _renderShader
          * @param _renderBuffers
          * @param _renderCoat
+         * @param _world
          * @param _projection
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        /**
+         * Draw a buffer with a special shader that uses an id instead of a color
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _world
+         * @param _projection
+         */
+        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -802,16 +813,6 @@ declare namespace FudgeCore {
         tilingX: number;
         tilingY: number;
         repetition: boolean;
-    }
-    /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
-     * and a flatMix number for mixing between smooth and flat shading.
-     */
-    class CoatMatCap extends Coat {
-        texture: TextureImage;
-        tintColor: Color;
-        flatMix: number;
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number);
     }
 }
 declare namespace FudgeCore {
@@ -888,11 +889,23 @@ declare namespace FudgeCore {
          * @param _time The time to jump to
          */
         jumpTo(_time: number): void;
+        /**
+         * Returns the current time of the animation, modulated for animation length.
+         */
+        getCurrentTime(): number;
+        /**
+         * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
+         * @param _time the (unscaled) time to update the animation with.
+         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         */
+        updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
         deserialize(_s: Serialization): Serializable;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
+         * Uses the built-in time unless a different time is specified.
+         * May also be called from updateAnimation().
          */
         private updateAnimationLoop;
         /**
@@ -972,6 +985,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        pivot: Matrix4x4;
         private projection;
         private transform;
         private fieldOfView;
@@ -984,6 +998,7 @@ declare namespace FudgeCore {
         getBackgroundEnabled(): boolean;
         getAspect(): number;
         getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -993,6 +1008,7 @@ declare namespace FudgeCore {
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
@@ -1003,6 +1019,10 @@ declare namespace FudgeCore {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle(): Rectangle;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1067,9 +1087,6 @@ declare namespace FudgeCore {
         constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        mutate(_mutator: Mutator): void;
-        getMutator(): Mutator;
-        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1195,8 +1212,17 @@ declare namespace FudgeCore {
         g: number;
         b: number;
         a: number;
-        constructor(_r: number, _g: number, _b: number, _a: number);
+        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
+        static readonly BLACK: Color;
+        static readonly WHITE: Color;
+        static readonly RED: Color;
+        static readonly GREEN: Color;
+        static readonly BLUE: Color;
+        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
+        setArrayNormRGBA(_color: Float32Array): void;
+        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1268,7 +1294,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    export interface SerializableResource extends Serializable {
+    interface SerializableResource extends Serializable {
         idResource: string;
     }
     interface Resources {
@@ -1282,7 +1308,7 @@ declare namespace FudgeCore {
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    export abstract class ResourceManager {
+    abstract class ResourceManager {
         static resources: Resources;
         static serialization: SerializationOfResources;
         /**
@@ -1322,7 +1348,6 @@ declare namespace FudgeCore {
         static deserialize(_serialization: SerializationOfResources): Resources;
         private static deserializeResource;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -1403,10 +1428,13 @@ declare namespace FudgeCore {
         private branch;
         private crc2;
         private canvas;
+        private pickBuffers;
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name
          * @param _branch
          * @param _camera
+         * @param _canvas
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
@@ -1434,6 +1462,11 @@ declare namespace FudgeCore {
          */
         draw(): void;
         /**
+        * Draw this viewport for RayCast
+        */
+        createPickBuffers(): void;
+        pickNodeAt(_pos: Vector2): RayHit[];
+        /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
         adjustFrames(): void;
@@ -1441,6 +1474,9 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        pointClientToSource(_client: Vector2): Vector2;
+        pointSourceToRender(_source: Vector2): Vector2;
+        pointClientToRender(_client: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -1640,7 +1676,7 @@ declare namespace FudgeCore {
         ZERO = "Digit0",
         ONE = "Digit1",
         TWO = "Digit2",
-        TRHEE = "Digit3",
+        THREE = "Digit3",
         FOUR = "Digit4",
         FIVE = "Digit5",
         SIX = "Digit6",
@@ -1790,10 +1826,6 @@ declare namespace FudgeCore {
         right: number;
         bottom: number;
     }
-    interface Point {
-        x: number;
-        y: number;
-    }
     /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle
@@ -1804,13 +1836,13 @@ declare namespace FudgeCore {
          * @param _pointInFrame The point in the frame given
          * @param _rectFrame The frame the point is relative to
          */
-        abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         /**
          * Maps a point in a given rectangle back to a calculated frame of origin
          * @param _point The point in the rectangle
          * @param _rect The rectangle the point is relative to
          */
-        abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         /**
          * Takes a rectangle as the frame and creates a new rectangle according to the framing
          * @param _rectFrame
@@ -1826,8 +1858,8 @@ declare namespace FudgeCore {
         width: number;
         height: number;
         setSize(_width: number, _height: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1838,8 +1870,8 @@ declare namespace FudgeCore {
         normWidth: number;
         normHeight: number;
         setScale(_normWidth: number, _normHeight: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1849,8 +1881,8 @@ declare namespace FudgeCore {
     class FramingComplex extends Framing {
         margin: Border;
         padding: Border;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
         getMutator(): Mutator;
     }
@@ -1877,22 +1909,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Stores a 4x4 transformation matrix and provides operations for it.
-     * ```plaintext
-     * [ 0, 1, 2, 3 ] <- row vector x
-     * [ 4, 5, 6, 7 ] <- row vector y
-     * [ 8, 9,10,11 ] <- row vector z
-     * [12,13,14,15 ] <- translation
-     *            ^  homogeneous column
-     * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
     class Matrix4x4 extends Mutable implements Serializable {
         private data;
         private mutator;
+        private vectors;
         constructor();
         translation: Vector3;
+        rotation: Vector3;
+        scaling: Vector3;
         static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -1941,7 +1965,8 @@ declare namespace FudgeCore {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
@@ -1994,7 +2019,7 @@ declare namespace FudgeCore {
         scaleY(_by: number): void;
         scaleZ(_by: number): void;
         multiply(_matrix: Matrix4x4): void;
-        getVectorRepresentation(): Vector3[];
+        getEulerAngles(): Vector3;
         set(_to: Matrix4x4): void;
         get(): Float32Array;
         serialize(): Serialization;
@@ -2003,6 +2028,7 @@ declare namespace FudgeCore {
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
     }
 }
 declare namespace FudgeCore {
@@ -2014,7 +2040,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Lukas Scheuerle, HFU, 2019
      */
-    class Vector2 {
+    class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
         x: number;
@@ -2148,9 +2174,11 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * @returns An deep copy of the vector.
+         * @returns A deep copy of the vector.
          */
         readonly copy: Vector2;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2388,12 +2416,12 @@ declare namespace FudgeCore {
          * Returns a clone of the list of components of the given class attached to this node.
          * @param _class The class of the components to be found.
          */
-        getComponents<T extends Component>(_class: typeof Component): T[];
+        getComponents<T extends Component>(_class: new () => T): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        getComponent<T extends Component>(_class: typeof Component): T;
+        getComponent<T extends Component>(_class: new () => T): T;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
@@ -2468,6 +2496,27 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Ray {
+        origin: Vector3;
+        direction: Vector3;
+        length: number;
+        constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
+    }
+}
+declare namespace FudgeCore {
+    class RayHit {
+        node: Node;
+        face: number;
+        zBuffer: number;
+        constructor(_node?: Node, _face?: number, _zBuffer?: number);
+    }
+}
+declare namespace FudgeCore {
+    interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
@@ -2482,6 +2531,7 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
+        private static pickBuffers;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2520,7 +2570,7 @@ declare namespace FudgeCore {
          */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update(): void;
         /**
@@ -2529,12 +2579,25 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node
-         * @param _cameraMatrix
+         * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
+        static resetFrameBuffer(_color?: Color): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        /**
+         * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         private static drawNode;
+        private static drawNodeForRayCast;
+        private static getRayCastTexture;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -2587,12 +2650,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
-     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderMatCap extends Shader {
-        static getCoat(): typeof Coat;
+    class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

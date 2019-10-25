@@ -15,7 +15,7 @@ namespace FudgeCore {
             super.mutate(_mutator);
         }
 
-        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderExtender*/ }
+        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderInjector*/ }
         
         //#region Transfer
         public serialize(): Serialization {
@@ -54,22 +54,5 @@ namespace FudgeCore {
         public tilingX: number;
         public tilingY: number;
         public repetition: boolean;
-    }
-    /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
-     * and a flatMix number for mixing between smooth and flat shading.
-     */
-    @RenderInjector.decorateCoat
-    export class CoatMatCap extends Coat {
-        public texture: TextureImage = null;
-        public tintColor: Color = new Color(0.5, 0.5, 0.5, 1);
-        public flatMix: number = 0.5;
-
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number) {
-            super();
-            this.texture = _texture || new TextureImage();
-            this.tintColor = _tintcolor || new Color(0.5, 0.5, 0.5, 1);
-            this.flatMix = _flatmix > 1.0 ? this.flatMix = 1.0 : this.flatMix = _flatmix || 0.5;
-        }
     }
 }
