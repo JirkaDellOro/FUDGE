@@ -1,11 +1,4 @@
 namespace FudgeCore {
-    //TODO: Rectangle as class with comfort methods
-    export interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
     export interface Border {
         left: number;
         top: number;
@@ -70,7 +63,7 @@ namespace FudgeCore {
         }
 
         public getRect(_rectFrame: Rectangle): Rectangle {
-            return { x: 0, y: 0, width: this.width, height: this.height };
+            return Rectangle.get(0, 0, this.width, this.height);
         }
     }
     /**
@@ -103,7 +96,7 @@ namespace FudgeCore {
         }
 
         public getRect(_rectFrame: Rectangle): Rectangle {
-            return { x: 0, y: 0, width: this.normWidth * _rectFrame.width, height: this.normHeight * _rectFrame.height };
+            return Rectangle.get(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
         }
     }
 
@@ -139,8 +132,7 @@ namespace FudgeCore {
             let maxX: number = _rectFrame.x + (1 - this.margin.right) * _rectFrame.width - this.padding.right;
             let maxY: number = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
 
-            let rect: Rectangle = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-            return rect;
+            return Rectangle.get(minX, minY, maxX - minX, maxY - minY);
         }
 
         public getMutator(): Mutator {

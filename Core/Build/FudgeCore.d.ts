@@ -1825,12 +1825,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
     interface Border {
         left: number;
         top: number;
@@ -2040,6 +2034,20 @@ declare namespace FudgeCore {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
+    }
+}
+declare namespace FudgeCore {
+    class Rectangle extends Mutable {
+        position: Vector2;
+        size: Vector2;
+        constructor(_x?: number, _y?: number, _width?: number, _height?: number);
+        static get(_x?: number, _y?: number, _width?: number, _height?: number): Rectangle;
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number): void;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {

@@ -3,7 +3,7 @@ var RenderManagerRendering;
     var ƒ = FudgeCore;
     let map = new ƒ.FramingComplex();
     let uiResult;
-    let frame = { x: 0, y: 0, width: 100, height: 100 };
+    let frame = new ƒ.Rectangle(0, 0, 100, 100);
     let uiMap;
     window.addEventListener("load", init);
     function init() {

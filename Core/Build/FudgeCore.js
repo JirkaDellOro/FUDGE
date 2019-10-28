@@ -1503,7 +1503,7 @@ var FudgeCore;
          */
         static getCanvasRect() {
             let canvas = RenderOperator.crc3.canvas;
-            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
+            return FudgeCore.Rectangle.get(0, 0, canvas.width, canvas.height);
         }
         /**
          * Set the size of the offscreen-canvas.
@@ -2315,7 +2315,7 @@ var FudgeCore;
                 tanHorizontal = tanFov;
                 tanVertical = tanHorizontal / this.aspectRatio;
             }
-            return { x: 0, y: 0, width: tanHorizontal * 2, height: tanVertical * 2 };
+            return FudgeCore.Rectangle.get(0, 0, tanHorizontal * 2, tanVertical * 2);
         }
         //#region Transfer
         serialize() {
@@ -3183,13 +3183,13 @@ var FudgeCore;
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
          */
         getCanvasRectangle() {
-            return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
+            return FudgeCore.Rectangle.get(0, 0, this.canvas.width, this.canvas.height);
         }
         /**
          * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
          */
         getClientRectangle() {
-            return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
+            return FudgeCore.Rectangle.get(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
         }
         /**
          * Set the branch to be drawn in the viewport.
@@ -3717,7 +3717,7 @@ var FudgeCore;
             return result;
         }
         getRect(_rectFrame) {
-            return { x: 0, y: 0, width: this.width, height: this.height };
+            return FudgeCore.Rectangle.get(0, 0, this.width, this.height);
         }
     }
     FudgeCore.FramingFixed = FramingFixed;
@@ -3744,7 +3744,7 @@ var FudgeCore;
             return result;
         }
         getRect(_rectFrame) {
-            return { x: 0, y: 0, width: this.normWidth * _rectFrame.width, height: this.normHeight * _rectFrame.height };
+            return FudgeCore.Rectangle.get(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
         }
     }
     FudgeCore.FramingScaled = FramingScaled;
@@ -3773,8 +3773,7 @@ var FudgeCore;
             let minY = _rectFrame.y + this.margin.top * _rectFrame.height + this.padding.top;
             let maxX = _rectFrame.x + (1 - this.margin.right) * _rectFrame.width - this.padding.right;
             let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
-            let rect = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-            return rect;
+            return FudgeCore.Rectangle.get(minX, minY, maxX - minX, maxY - minY);
         }
         getMutator() {
             return { margin: this.margin, padding: this.padding };
@@ -4461,6 +4460,52 @@ var FudgeCore;
     }
     FudgeCore.Matrix4x4 = Matrix4x4;
     //#endregion
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Rectangle extends FudgeCore.Mutable {
+        constructor(_x = 0, _y = 0, _width = 1, _height = 1) {
+            super();
+            this.position = FudgeCore.Recycler.get(FudgeCore.Vector2);
+            this.size = FudgeCore.Recycler.get(FudgeCore.Vector2);
+            this.setPositionAndSize(_x, _y, _width, _height);
+        }
+        static get(_x = 0, _y = 0, _width = 1, _height = 1) {
+            let rect = FudgeCore.Recycler.get(Rectangle);
+            rect.setPositionAndSize(_x, _y, _width, _height);
+            return rect;
+        }
+        setPositionAndSize(_x = 0, _y = 0, _width = 1, _height = 1) {
+            this.position.set(_x, _y);
+            this.size.set(_width, _height);
+        }
+        get x() {
+            return this.position.x;
+        }
+        get y() {
+            return this.position.y;
+        }
+        get width() {
+            return this.size.x;
+        }
+        get height() {
+            return this.size.y;
+        }
+        set x(_x) {
+            this.position.x = _x;
+        }
+        set y(_y) {
+            this.position.y = _y;
+        }
+        set width(_width) {
+            this.position.x = _width;
+        }
+        set height(_height) {
+            this.position.y = _height;
+        }
+        reduceMutator(_mutator) { }
+    }
+    FudgeCore.Rectangle = Rectangle;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {

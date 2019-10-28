@@ -1,0 +1,126 @@
+{
+  "bundle": {
+    "commonSourceDirectory": "../Source",
+    "sourceFiles": [
+      "../Source/Transfer/Serializer.ts",
+      "../Source/Transfer/Mutable.ts",
+      "../Source/Animation/Animation.ts",
+      "../Source/Animation/AnimationFunction.ts",
+      "../Source/Animation/AnimationKey.ts",
+      "../Source/Animation/AnimationSequence.ts",
+      "../Source/Audio/Audio.ts",
+      "../Source/Audio/AudioFilter.ts",
+      "../Source/Audio/AudioListener.ts",
+      "../Source/Audio/AudioLocalisation.ts",
+      "../Source/Audio/AudioSessionData.ts",
+      "../Source/Audio/AudioSettings.ts",
+      "../Source/Render/RenderInjector.ts",
+      "../Source/Render/RenderOperator.ts",
+      "../Source/Coat/Coat.ts",
+      "../Source/Component/Component.ts",
+      "../Source/Component/ComponentAnimator.ts",
+      "../Source/Component/ComponentAudio.ts",
+      "../Source/Component/ComponentAudioListener.ts",
+      "../Source/Component/ComponentCamera.ts",
+      "../Source/Component/ComponentLight.ts",
+      "../Source/Component/ComponentMaterial.ts",
+      "../Source/Component/ComponentMesh.ts",
+      "../Source/Component/ComponentScript.ts",
+      "../Source/Component/ComponentTransform.ts",
+      "../Source/Debug/DebugInterfaces.ts",
+      "../Source/Debug/DebugTarget.ts",
+      "../Source/Debug/DebugAlert.ts",
+      "../Source/Debug/DebugConsole.ts",
+      "../Source/Debug/Debug.ts",
+      "../Source/Debug/DebugDialog.ts",
+      "../Source/Debug/DebugTextArea.ts",
+      "../Source/Engine/Color.ts",
+      "../Source/Engine/Material.ts",
+      "../Source/Engine/Recycler.ts",
+      "../Source/Engine/ResourceManager.ts",
+      "../Source/Light/Light.ts",
+      "../Source/Engine/Viewport.ts",
+      "../Source/Event/Event.ts",
+      "../Source/Event/EventKeyboard.ts",
+      "../Source/Math/Framing.ts",
+      "../Source/Math/Matrix3x3.ts",
+      "../Source/Math/Matrix4x4.ts",
+      "../Source/Math/Rectangle.ts",
+      "../Source/Math/Vector2.ts",
+      "../Source/Math/Vector3.ts",
+      "../Source/Mesh/Mesh.ts",
+      "../Source/Mesh/MeshCube.ts",
+      "../Source/Mesh/MeshPyramid.ts",
+      "../Source/Mesh/MeshQuad.ts",
+      "../Source/Node/Node.ts",
+      "../Source/Node/NodeResource.ts",
+      "../Source/Node/NodeResourceInstance.ts",
+      "../Source/Ray/Ray.ts",
+      "../Source/Ray/RayHit.ts",
+      "../Source/Render/RenderManager.ts",
+      "../Source/Shader/Shader.ts",
+      "../Source/Shader/ShaderFlat.ts",
+      "../Source/Shader/ShaderMatCap.ts",
+      "../Source/Shader/ShaderRayCast.ts",
+      "../Source/Shader/ShaderTexture.ts",
+      "../Source/Shader/ShaderUniColor.ts",
+      "../Source/Texture/Texture.ts",
+      "../Source/Time/Time.ts",
+      "../Source/Time/Loop.ts",
+      "../Source/Transfer/FileIoBrowserLocal.ts"
+    ],
+    "js": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 13,
+          "kind": "prologue",
+          "data": "use strict"
+        },
+        {
+          "pos": 15,
+          "end": 591,
+          "kind": "emitHelpers",
+          "data": "typescript:decorate"
+        },
+        {
+          "pos": 593,
+          "end": 289616,
+          "kind": "text"
+        }
+      ],
+      "sources": {
+        "prologues": [
+          {
+            "file": 0,
+            "text": "",
+            "directives": [
+              {
+                "pos": -1,
+                "end": -1,
+                "expression": {
+                  "pos": -1,
+                  "end": -1,
+                  "text": "use strict"
+                }
+              }
+            ]
+          }
+        ],
+        "helpers": [
+          "typescript:decorate"
+        ]
+      }
+    },
+    "dts": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 117521,
+          "kind": "text"
+        }
+      ]
+    }
+  },
+  "version": "3.6.3"
+}

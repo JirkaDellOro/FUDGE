@@ -71,6 +71,16 @@ namespace UI {
             this.appendChild(new Stepper("height", { step: 10 }));
         }
 
+        public set(_rect: ƒ.Rectangle): void {
+            let values: {} = { x: _rect.x, y: _rect.y, width: _rect.width, height: _rect.height };
+            super.set(values);
+        }
+        public get(): ƒ.Rectangle {
+            // tslint:disable no-any
+            let _rect: any = super.get();
+            return new ƒ.Rectangle(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+
         public appendButton(_label: string): void {
             let button: HTMLButtonElement = document.createElement("button");
             button.textContent = _label;

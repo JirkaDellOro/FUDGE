@@ -34,7 +34,7 @@ namespace RenderManagerRendering {
         appendUIRectangle(menu, "DomCanvas");
         appendUIRectangle(menu, "CSSRectangle");
 
-        setAll({ x: 0, y: 0, width: 300, height: 300 });
+        setAll(new ƒ.Rectangle(0, 0, 300, 300));
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
@@ -133,9 +133,9 @@ namespace RenderManagerRendering {
         uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
         uiRectangles["ViewportSource"].set(viewPort.rectSource);
         uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
-        uiRectangles["DomCanvas"].set({ x: 0, y: 0, width: canvas.width, height: canvas.height });
+        uiRectangles["DomCanvas"].set(new ƒ.Rectangle(0, 0, canvas.width, canvas.height));
         let client: ClientRect = canvas.getBoundingClientRect();
-        uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });
+        uiRectangles["CSSRectangle"].set(new ƒ.Rectangle(client.left, client.top, client.width, client.height));
 
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }

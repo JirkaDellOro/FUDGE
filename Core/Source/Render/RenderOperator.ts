@@ -87,7 +87,7 @@ namespace FudgeCore {
          */
         public static getCanvasRect(): Rectangle {
             let canvas: HTMLCanvasElement = <HTMLCanvasElement>RenderOperator.crc3.canvas;
-            return { x: 0, y: 0, width: canvas.width, height: canvas.height };
+            return Rectangle.get(0, 0, canvas.width, canvas.height);
         }
         /**
          * Set the size of the offscreen-canvas.
