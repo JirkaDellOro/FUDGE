@@ -163,6 +163,13 @@ namespace FudgeCore {
             this.data = Vector3.TRANSFORMATION(this, _matrix).data;
         }
 
+        /**
+         * Drops the z-component and returns a Vector2 consisting of the x- and y-components
+         */
+        public getVector2(): Vector2 {
+            return new Vector2(this.x, this.y);
+        }
+
 
         public getMutator(): Mutator {
             let mutator: Mutator = {

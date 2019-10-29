@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>RenderShader | Fudge Core</title>
+	<title>ORIGIN2D | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,86 +59,135 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.rendershader.html">RenderShader</a>
+					<a href="fudgecore.origin2d.html">ORIGIN2D</a>
 				</li>
 			</ul>
-			<h1>Interface RenderShader</h1>
+			<h1>Enumeration ORIGIN2D</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">RenderShader</span>
-					</li>
-				</ul>
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Defines the origin of a rectangle</p>
+					</div>
+				</div>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Properties</h3>
+							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudgecore.rendershader.html#attributes" class="tsd-kind-icon">attributes</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudgecore.rendershader.html#program" class="tsd-kind-icon">program</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="fudgecore.rendershader.html#uniforms" class="tsd-kind-icon">uniforms</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#bottomcenter" class="tsd-kind-icon">BOTTOMCENTER</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#bottomleft" class="tsd-kind-icon">BOTTOMLEFT</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#bottomright" class="tsd-kind-icon">BOTTOMRIGHT</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#center" class="tsd-kind-icon">CENTER</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#centerleft" class="tsd-kind-icon">CENTERLEFT</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#centerright" class="tsd-kind-icon">CENTERRIGHT</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#topcenter" class="tsd-kind-icon">TOPCENTER</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#topleft" class="tsd-kind-icon">TOPLEFT</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.origin2d.html#topright" class="tsd-kind-icon">TOPRIGHT</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="attributes" class="tsd-anchor"></a>
-					<h3>attributes</h3>
-					<div class="tsd-signature tsd-kind-icon">attributes<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+				<h2>Enumeration members</h2>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="bottomcenter" class="tsd-anchor"></a>
+					<h3>BOTTOMCENTER</h3>
+					<div class="tsd-signature tsd-kind-icon">BOTTOMCENTER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;33</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Render/RenderOperator.ts#L12">Render/RenderOperator.ts:12</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-index-signature">
-								<h5><span class="tsd-signature-symbol">[</span>name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">number</span></h5>
-							</li>
-						</ul>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="program" class="tsd-anchor"></a>
-					<h3>program</h3>
-					<div class="tsd-signature tsd-kind-icon">program<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLProgram</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Render/RenderOperator.ts#L11">Render/RenderOperator.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L13">Math/Rectangle.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="uniforms" class="tsd-anchor"></a>
-					<h3>uniforms</h3>
-					<div class="tsd-signature tsd-kind-icon">uniforms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="bottomleft" class="tsd-anchor"></a>
+					<h3>BOTTOMLEFT</h3>
+					<div class="tsd-signature tsd-kind-icon">BOTTOMLEFT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;32</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Render/RenderOperator.ts#L13">Render/RenderOperator.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L12">Math/Rectangle.ts:12</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-index-signature">
-								<h5><span class="tsd-signature-symbol">[</span>name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">WebGLUniformLocation</span></h5>
-							</li>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="bottomright" class="tsd-anchor"></a>
+					<h3>BOTTOMRIGHT</h3>
+					<div class="tsd-signature tsd-kind-icon">BOTTOMRIGHT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;34</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L14">Math/Rectangle.ts:14</a></li>
 						</ul>
-					</div>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="center" class="tsd-anchor"></a>
+					<h3>CENTER</h3>
+					<div class="tsd-signature tsd-kind-icon">CENTER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;17</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L10">Math/Rectangle.ts:10</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="centerleft" class="tsd-anchor"></a>
+					<h3>CENTERLEFT</h3>
+					<div class="tsd-signature tsd-kind-icon">CENTERLEFT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;16</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L9">Math/Rectangle.ts:9</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="centerright" class="tsd-anchor"></a>
+					<h3>CENTERRIGHT</h3>
+					<div class="tsd-signature tsd-kind-icon">CENTERRIGHT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;18</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L11">Math/Rectangle.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="topcenter" class="tsd-anchor"></a>
+					<h3>TOPCENTER</h3>
+					<div class="tsd-signature tsd-kind-icon">TOPCENTER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;1</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L7">Math/Rectangle.ts:7</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="topleft" class="tsd-anchor"></a>
+					<h3>TOPLEFT</h3>
+					<div class="tsd-signature tsd-kind-icon">TOPLEFT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;0</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L6">Math/Rectangle.ts:6</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="topright" class="tsd-anchor"></a>
+					<h3>TOPRIGHT</h3>
+					<div class="tsd-signature tsd-kind-icon">TOPRIGHT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;2</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Math/Rectangle.ts#L8">Math/Rectangle.ts:8</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -157,17 +206,35 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module">
-						<a href="fudgecore.rendershader.html" class="tsd-kind-icon">Render<wbr>Shader</a>
+					<li class="current tsd-kind-enum tsd-parent-kind-module">
+						<a href="fudgecore.origin2d.html" class="tsd-kind-icon">ORIGIN2D</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="fudgecore.rendershader.html#attributes" class="tsd-kind-icon">attributes</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#bottomcenter" class="tsd-kind-icon">BOTTOMCENTER</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="fudgecore.rendershader.html#program" class="tsd-kind-icon">program</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#bottomleft" class="tsd-kind-icon">BOTTOMLEFT</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="fudgecore.rendershader.html#uniforms" class="tsd-kind-icon">uniforms</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#bottomright" class="tsd-kind-icon">BOTTOMRIGHT</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#center" class="tsd-kind-icon">CENTER</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#centerleft" class="tsd-kind-icon">CENTERLEFT</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#centerright" class="tsd-kind-icon">CENTERRIGHT</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#topcenter" class="tsd-kind-icon">TOPCENTER</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#topleft" class="tsd-kind-icon">TOPLEFT</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.origin2d.html#topright" class="tsd-kind-icon">TOPRIGHT</a>
 							</li>
 						</ul>
 					</li>

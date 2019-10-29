@@ -274,7 +274,6 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-     * @param _translate 
      */
     public static TRANSLATION(_translate: Vector3): Matrix4x4 {
       // let matrix: Matrix4x4 = new Matrix4x4;
@@ -347,7 +346,6 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-     * @param _scalar 
      */
     public static SCALING(_scalar: Vector3): Matrix4x4 {
       // const matrix: Matrix4x4 = new Matrix4x4;
@@ -425,7 +423,6 @@ namespace FudgeCore {
     //#region Rotation
     /**
      * Adds a rotation around the x-Axis to this matrix
-     * @param _angleInDegrees 
      */
     public rotateX(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
@@ -435,7 +432,6 @@ namespace FudgeCore {
 
     /**
      * Adds a rotation around the y-Axis to this matrix
-     * @param _angleInDegrees 
      */
     public rotateY(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
@@ -445,7 +441,6 @@ namespace FudgeCore {
 
     /**
      * Adds a rotation around the z-Axis to this matrix
-     * @param _angleInDegrees 
      */
     public rotateZ(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
@@ -455,8 +450,6 @@ namespace FudgeCore {
 
     /**
      * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector 
-     * @param _target 
-     * @param _up 
      */
     public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
       const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
@@ -468,7 +461,6 @@ namespace FudgeCore {
     //#region Translation
     /**
      * Add a translation by the given vector to this matrix 
-     * @param _by 
      */
     public translate(_by: Vector3): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
@@ -479,7 +471,6 @@ namespace FudgeCore {
 
     /**
      * Add a translation along the x-Axis by the given amount to this matrix 
-     * @param _x The value of the translation.
      */
     public translateX(_x: number): void {
       this.data[12] += _x;
@@ -487,7 +478,6 @@ namespace FudgeCore {
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
-     * @param _y The value of the translation.
      */
     public translateY(_y: number): void {
       this.data[13] += _y;
@@ -495,7 +485,6 @@ namespace FudgeCore {
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
-     * @param _z The value of the translation.
      */
     public translateZ(_z: number): void {
       this.data[14] += _z;
@@ -506,7 +495,6 @@ namespace FudgeCore {
     //#region Scaling
     /**
      * Add a scaling by the given vector to this matrix 
-     * @param _by 
      */
     public scale(_by: Vector3): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
@@ -515,21 +503,18 @@ namespace FudgeCore {
     }
     /**
      * Add a scaling along the x-Axis by the given amount to this matrix 
-     * @param _by 
      */
     public scaleX(_by: number): void {
       this.scale(new Vector3(_by, 1, 1));
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
-     * @param _by 
      */
     public scaleY(_by: number): void {
       this.scale(new Vector3(1, _by, 1));
     }
     /**
      * Add a scaling along the z-Axis by the given amount to this matrix 
-     * @param _by 
      */
     public scaleZ(_by: number): void {
       this.scale(new Vector3(1, 1, _by));
@@ -539,7 +524,6 @@ namespace FudgeCore {
     //#region Transformation
     /**
      * Multiply this matrix with the given matrix
-     * @param _matrix 
      */
     public multiply(_matrix: Matrix4x4): void {
       this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
@@ -596,7 +580,6 @@ namespace FudgeCore {
 
     /**
      * Sets the elements of this matrix to the values of the given matrix
-     * @param _to 
      */
     public set(_to: Matrix4x4): void {
       // this.data = _to.get();

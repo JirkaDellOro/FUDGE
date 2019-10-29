@@ -115,7 +115,7 @@ namespace FudgeCore {
                 tanVertical = tanHorizontal / this.aspectRatio;
             }
 
-            return Rectangle.get(0, 0, tanHorizontal * 2, tanVertical * 2);
+            return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
         }
 
         //#region Transfer

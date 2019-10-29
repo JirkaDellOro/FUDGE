@@ -64,13 +64,13 @@ namespace FudgeCore {
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0 
          */
         public getCanvasRectangle(): Rectangle {
-            return Rectangle.get(0, 0, this.canvas.width, this.canvas.height);
+            return Rectangle.GET(0, 0, this.canvas.width, this.canvas.height);
         }
         /**
          * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0 
          */
         public getClientRectangle(): Rectangle {
-            return Rectangle.get(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+            return Rectangle.GET(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
         }
 
         /**

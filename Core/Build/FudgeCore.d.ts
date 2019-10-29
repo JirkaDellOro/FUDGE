@@ -1968,7 +1968,6 @@ declare namespace FudgeCore {
         static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-         * @param _translate
          */
         static TRANSLATION(_translate: Vector3): Matrix4x4;
         /**
@@ -1988,7 +1987,6 @@ declare namespace FudgeCore {
         static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         * @param _scalar
          */
         static SCALING(_scalar: Vector3): Matrix4x4;
         /**
@@ -2012,68 +2010,54 @@ declare namespace FudgeCore {
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
          * Adds a rotation around the x-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateX(_angleInDegrees: number): void;
         /**
          * Adds a rotation around the y-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateY(_angleInDegrees: number): void;
         /**
          * Adds a rotation around the z-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateZ(_angleInDegrees: number): void;
         /**
          * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
-         * @param _target
-         * @param _up
          */
         lookAt(_target: Vector3, _up?: Vector3): void;
         /**
          * Add a translation by the given vector to this matrix
-         * @param _by
          */
         translate(_by: Vector3): void;
         /**
          * Add a translation along the x-Axis by the given amount to this matrix
-         * @param _x The value of the translation.
          */
         translateX(_x: number): void;
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
-         * @param _y The value of the translation.
          */
         translateY(_y: number): void;
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
-         * @param _z The value of the translation.
          */
         translateZ(_z: number): void;
         /**
          * Add a scaling by the given vector to this matrix
-         * @param _by
          */
         scale(_by: Vector3): void;
         /**
          * Add a scaling along the x-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleX(_by: number): void;
         /**
          * Add a scaling along the y-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleY(_by: number): void;
         /**
          * Add a scaling along the z-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleZ(_by: number): void;
         /**
          * Multiply this matrix with the given matrix
-         * @param _matrix
          */
         multiply(_matrix: Matrix4x4): void;
         /**
@@ -2082,7 +2066,6 @@ declare namespace FudgeCore {
         getEulerAngles(): Vector3;
         /**
          * Sets the elements of this matrix to the values of the given matrix
-         * @param _to
          */
         set(_to: Matrix4x4): void;
         /**
@@ -2099,16 +2082,49 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Defines the origin of a rectangle
+     */
+    enum ORIGIN2D {
+        TOPLEFT = 0,
+        TOPCENTER = 1,
+        TOPRIGHT = 2,
+        CENTERLEFT = 16,
+        CENTER = 17,
+        CENTERRIGHT = 18,
+        BOTTOMLEFT = 32,
+        BOTTOMCENTER = 33,
+        BOTTOMRIGHT = 34
+    }
+    /**
+     * Defines a rectangle with position and size and add comfortable methods to it
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Rectangle extends Mutable {
         position: Vector2;
         size: Vector2;
-        constructor(_x?: number, _y?: number, _width?: number, _height?: number);
-        static get(_x?: number, _y?: number, _width?: number, _height?: number): Rectangle;
-        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number): void;
+        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
+        /**
+         * Returns a new rectangle created with the given parameters
+         */
+        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
+        /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
         x: number;
         y: number;
         width: number;
         height: number;
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        /**
+         * Returns true if the given point is inside of this rectangle or on the border
+         * @param _point
+         */
+        isInside(_point: Vector2): boolean;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -2258,6 +2274,10 @@ declare namespace FudgeCore {
          * @returns A deep copy of the vector.
          */
         readonly copy: Vector2;
+        /**
+         * Adds a z-component to the vector and returns a new Vector3
+         */
+        getVector3(): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -2321,6 +2341,10 @@ declare namespace FudgeCore {
         get(): Float32Array;
         readonly copy: Vector3;
         transform(_matrix: Matrix4x4): void;
+        /**
+         * Drops the z-component and returns a Vector2 consisting of the x- and y-components
+         */
+        getVector2(): Vector2;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

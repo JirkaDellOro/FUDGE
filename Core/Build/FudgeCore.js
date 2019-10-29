@@ -1503,7 +1503,7 @@ var FudgeCore;
          */
         static getCanvasRect() {
             let canvas = RenderOperator.crc3.canvas;
-            return FudgeCore.Rectangle.get(0, 0, canvas.width, canvas.height);
+            return FudgeCore.Rectangle.GET(0, 0, canvas.width, canvas.height);
         }
         /**
          * Set the size of the offscreen-canvas.
@@ -2315,7 +2315,7 @@ var FudgeCore;
                 tanHorizontal = tanFov;
                 tanVertical = tanHorizontal / this.aspectRatio;
             }
-            return FudgeCore.Rectangle.get(0, 0, tanHorizontal * 2, tanVertical * 2);
+            return FudgeCore.Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
         }
         //#region Transfer
         serialize() {
@@ -3183,13 +3183,13 @@ var FudgeCore;
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
          */
         getCanvasRectangle() {
-            return FudgeCore.Rectangle.get(0, 0, this.canvas.width, this.canvas.height);
+            return FudgeCore.Rectangle.GET(0, 0, this.canvas.width, this.canvas.height);
         }
         /**
          * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
          */
         getClientRectangle() {
-            return FudgeCore.Rectangle.get(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+            return FudgeCore.Rectangle.GET(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
         }
         /**
          * Set the branch to be drawn in the viewport.
@@ -3717,7 +3717,7 @@ var FudgeCore;
             return result;
         }
         getRect(_rectFrame) {
-            return FudgeCore.Rectangle.get(0, 0, this.width, this.height);
+            return FudgeCore.Rectangle.GET(0, 0, this.width, this.height);
         }
     }
     FudgeCore.FramingFixed = FramingFixed;
@@ -3744,7 +3744,7 @@ var FudgeCore;
             return result;
         }
         getRect(_rectFrame) {
-            return FudgeCore.Rectangle.get(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
+            return FudgeCore.Rectangle.GET(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
         }
     }
     FudgeCore.FramingScaled = FramingScaled;
@@ -3773,7 +3773,7 @@ var FudgeCore;
             let minY = _rectFrame.y + this.margin.top * _rectFrame.height + this.padding.top;
             let maxX = _rectFrame.x + (1 - this.margin.right) * _rectFrame.width - this.padding.right;
             let maxY = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
-            return FudgeCore.Rectangle.get(minX, minY, maxX - minX, maxY - minY);
+            return FudgeCore.Rectangle.GET(minX, minY, maxX - minX, maxY - minY);
         }
         getMutator() {
             return { margin: this.margin, padding: this.padding };
@@ -4133,7 +4133,6 @@ var FudgeCore;
         }
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-         * @param _translate
          */
         static TRANSLATION(_translate) {
             // let matrix: Matrix4x4 = new Matrix4x4;
@@ -4202,7 +4201,6 @@ var FudgeCore;
         }
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         * @param _scalar
          */
         static SCALING(_scalar) {
             // const matrix: Matrix4x4 = new Matrix4x4;
@@ -4275,7 +4273,6 @@ var FudgeCore;
         //#region Rotation
         /**
          * Adds a rotation around the x-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateX(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
@@ -4284,7 +4281,6 @@ var FudgeCore;
         }
         /**
          * Adds a rotation around the y-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateY(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
@@ -4293,7 +4289,6 @@ var FudgeCore;
         }
         /**
          * Adds a rotation around the z-Axis to this matrix
-         * @param _angleInDegrees
          */
         rotateZ(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
@@ -4302,8 +4297,6 @@ var FudgeCore;
         }
         /**
          * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
-         * @param _target
-         * @param _up
          */
         lookAt(_target, _up = FudgeCore.Vector3.Y()) {
             const matrix = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
@@ -4314,7 +4307,6 @@ var FudgeCore;
         //#region Translation
         /**
          * Add a translation by the given vector to this matrix
-         * @param _by
          */
         translate(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
@@ -4324,7 +4316,6 @@ var FudgeCore;
         }
         /**
          * Add a translation along the x-Axis by the given amount to this matrix
-         * @param _x The value of the translation.
          */
         translateX(_x) {
             this.data[12] += _x;
@@ -4332,7 +4323,6 @@ var FudgeCore;
         }
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
-         * @param _y The value of the translation.
          */
         translateY(_y) {
             this.data[13] += _y;
@@ -4340,7 +4330,6 @@ var FudgeCore;
         }
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
-         * @param _z The value of the translation.
          */
         translateZ(_z) {
             this.data[14] += _z;
@@ -4350,7 +4339,6 @@ var FudgeCore;
         //#region Scaling
         /**
          * Add a scaling by the given vector to this matrix
-         * @param _by
          */
         scale(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
@@ -4359,21 +4347,18 @@ var FudgeCore;
         }
         /**
          * Add a scaling along the x-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleX(_by) {
             this.scale(new FudgeCore.Vector3(_by, 1, 1));
         }
         /**
          * Add a scaling along the y-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleY(_by) {
             this.scale(new FudgeCore.Vector3(1, _by, 1));
         }
         /**
          * Add a scaling along the z-Axis by the given amount to this matrix
-         * @param _by
          */
         scaleZ(_by) {
             this.scale(new FudgeCore.Vector3(1, 1, _by));
@@ -4382,7 +4367,6 @@ var FudgeCore;
         //#region Transformation
         /**
          * Multiply this matrix with the given matrix
-         * @param _matrix
          */
         multiply(_matrix) {
             this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
@@ -4428,7 +4412,6 @@ var FudgeCore;
         }
         /**
          * Sets the elements of this matrix to the values of the given matrix
-         * @param _to
          */
         set(_to) {
             // this.data = _to.get();
@@ -4514,21 +4497,67 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    /**
+     * Defines the origin of a rectangle
+     */
+    let ORIGIN2D;
+    (function (ORIGIN2D) {
+        ORIGIN2D[ORIGIN2D["TOPLEFT"] = 0] = "TOPLEFT";
+        ORIGIN2D[ORIGIN2D["TOPCENTER"] = 1] = "TOPCENTER";
+        ORIGIN2D[ORIGIN2D["TOPRIGHT"] = 2] = "TOPRIGHT";
+        ORIGIN2D[ORIGIN2D["CENTERLEFT"] = 16] = "CENTERLEFT";
+        ORIGIN2D[ORIGIN2D["CENTER"] = 17] = "CENTER";
+        ORIGIN2D[ORIGIN2D["CENTERRIGHT"] = 18] = "CENTERRIGHT";
+        ORIGIN2D[ORIGIN2D["BOTTOMLEFT"] = 32] = "BOTTOMLEFT";
+        ORIGIN2D[ORIGIN2D["BOTTOMCENTER"] = 33] = "BOTTOMCENTER";
+        ORIGIN2D[ORIGIN2D["BOTTOMRIGHT"] = 34] = "BOTTOMRIGHT";
+    })(ORIGIN2D = FudgeCore.ORIGIN2D || (FudgeCore.ORIGIN2D = {}));
+    /**
+     * Defines a rectangle with position and size and add comfortable methods to it
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Rectangle extends FudgeCore.Mutable {
-        constructor(_x = 0, _y = 0, _width = 1, _height = 1) {
+        constructor(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
             super();
             this.position = FudgeCore.Recycler.get(FudgeCore.Vector2);
             this.size = FudgeCore.Recycler.get(FudgeCore.Vector2);
-            this.setPositionAndSize(_x, _y, _width, _height);
+            this.setPositionAndSize(_x, _y, _width, _height, _origin);
         }
-        static get(_x = 0, _y = 0, _width = 1, _height = 1) {
+        /**
+         * Returns a new rectangle created with the given parameters
+         */
+        static GET(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
             let rect = FudgeCore.Recycler.get(Rectangle);
             rect.setPositionAndSize(_x, _y, _width, _height);
             return rect;
         }
-        setPositionAndSize(_x = 0, _y = 0, _width = 1, _height = 1) {
-            this.position.set(_x, _y);
+        /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
             this.size.set(_width, _height);
+            switch (_origin & 0x03) {
+                case 0x00:
+                    this.position.x = _x;
+                    break;
+                case 0x01:
+                    this.position.x = _x - _width / 2;
+                    break;
+                case 0x02:
+                    this.position.x = _x - _width;
+                    break;
+            }
+            switch (_origin & 0x30) {
+                case 0x00:
+                    this.position.y = _y;
+                    break;
+                case 0x10:
+                    this.position.y = _y - _height / 2;
+                    break;
+                case 0x20:
+                    this.position.y = _y - _height;
+                    break;
+            }
         }
         get x() {
             return this.position.x;
@@ -4542,6 +4571,18 @@ var FudgeCore;
         get height() {
             return this.size.y;
         }
+        get left() {
+            return this.position.x;
+        }
+        get top() {
+            return this.position.y;
+        }
+        get right() {
+            return this.position.x + this.size.x;
+        }
+        get bottom() {
+            return this.position.y + this.size.y;
+        }
         set x(_x) {
             this.position.x = _x;
         }
@@ -4553,6 +4594,27 @@ var FudgeCore;
         }
         set height(_height) {
             this.position.y = _height;
+        }
+        set left(_value) {
+            this.size.x = this.right - _value;
+            this.position.x = _value;
+        }
+        set top(_value) {
+            this.size.y = this.bottom - _value;
+            this.position.y = _value;
+        }
+        set right(_value) {
+            this.size.x = this.position.x + _value;
+        }
+        set bottom(_value) {
+            this.size.y = this.position.y + _value;
+        }
+        /**
+         * Returns true if the given point is inside of this rectangle or on the border
+         * @param _point
+         */
+        isInside(_point) {
+            return (_point.x >= this.left && _point.x <= this.right && _point.y >= this.top && _point.y <= this.bottom);
         }
         reduceMutator(_mutator) { }
     }
@@ -4790,6 +4852,12 @@ var FudgeCore;
         get copy() {
             return new Vector2(this.x, this.y);
         }
+        /**
+         * Adds a z-component to the vector and returns a new Vector3
+         */
+        getVector3() {
+            return new FudgeCore.Vector3(this.x, this.y, 0);
+        }
         getMutator() {
             let mutator = {
                 x: this.data[0], y: this.data[1]
@@ -4947,6 +5015,12 @@ var FudgeCore;
         }
         transform(_matrix) {
             this.data = Vector3.TRANSFORMATION(this, _matrix).data;
+        }
+        /**
+         * Drops the z-component and returns a Vector2 consisting of the x- and y-components
+         */
+        getVector2() {
+            return new FudgeCore.Vector2(this.x, this.y);
         }
         getMutator() {
             let mutator = {

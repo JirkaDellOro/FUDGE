@@ -252,6 +252,13 @@ namespace FudgeCore {
       return new Vector2(this.x, this.y);
     }
 
+    /**
+     * Adds a z-component to the vector and returns a new Vector3
+     */
+    public getVector3(): Vector3 {
+      return new Vector3(this.x, this.y, 0);
+    }
+
     public getMutator(): Mutator {
       let mutator: Mutator = {
           x: this.data[0], y: this.data[1]

@@ -63,7 +63,7 @@ namespace FudgeCore {
         }
 
         public getRect(_rectFrame: Rectangle): Rectangle {
-            return Rectangle.get(0, 0, this.width, this.height);
+            return Rectangle.GET(0, 0, this.width, this.height);
         }
     }
     /**
@@ -96,7 +96,7 @@ namespace FudgeCore {
         }
 
         public getRect(_rectFrame: Rectangle): Rectangle {
-            return Rectangle.get(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
+            return Rectangle.GET(0, 0, this.normWidth * _rectFrame.width, this.normHeight * _rectFrame.height);
         }
     }
 
@@ -132,7 +132,7 @@ namespace FudgeCore {
             let maxX: number = _rectFrame.x + (1 - this.margin.right) * _rectFrame.width - this.padding.right;
             let maxY: number = _rectFrame.y + (1 - this.margin.bottom) * _rectFrame.height - this.padding.bottom;
 
-            return Rectangle.get(minX, minY, maxX - minX, maxY - minY);
+            return Rectangle.GET(minX, minY, maxX - minX, maxY - minY);
         }
 
         public getMutator(): Mutator {
