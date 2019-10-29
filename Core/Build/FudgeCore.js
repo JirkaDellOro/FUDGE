@@ -3892,11 +3892,11 @@ var FudgeCore;
     /**
      * Stores a 4x4 transformation matrix and provides operations for it.
      * ```plaintext
-     * [ 0, 1, 2, 3 ] <- row vector x
-     * [ 4, 5, 6, 7 ] <- row vector y
-     * [ 8, 9,10,11 ] <- row vector z
-     * [12,13,14,15 ] <- translation
-     *            ^  homogeneous column
+     * [ 0, 1, 2, 3 ] ← row vector x
+     * [ 4, 5, 6, 7 ] ← row vector y
+     * [ 8, 9,10,11 ] ← row vector z
+     * [12,13,14,15 ] ← translation
+     *            ↑  homogeneous column
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -3913,10 +3913,14 @@ var FudgeCore;
             ]);
             this.resetCache();
         }
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix
+         */
         get translation() {
             if (!this.vectors.translation)
                 this.vectors.translation = new FudgeCore.Vector3(this.data[12], this.data[13], this.data[14]);
-            return this.vectors.translation;
+            return this.vectors.translation.copy;
         }
         set translation(_translation) {
             this.data.set(_translation.get(), 12);
@@ -3924,25 +3928,36 @@ var FudgeCore;
             this.vectors.translation = _translation;
             this.mutator = null;
         }
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
         get rotation() {
             if (!this.vectors.rotation)
                 this.vectors.rotation = this.getEulerAngles();
-            return this.vectors.rotation;
+            return this.vectors.rotation.copy;
         }
         set rotation(_rotation) {
             this.mutate({ "rotation": _rotation });
             this.resetCache();
         }
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
         get scaling() {
             if (!this.vectors.scaling)
                 this.vectors.scaling = new FudgeCore.Vector3(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
-            return this.vectors.scaling;
+            return this.vectors.scaling.copy;
         }
         set scaling(_scaling) {
             this.mutate({ "scaling": _scaling });
             this.resetCache();
         }
         //#region STATICS
+        /**
+         * Retrieve a new identity matrix
+         */
         static get IDENTITY() {
             // const result: Matrix4x4 = new Matrix4x4();
             const result = FudgeCore.Recycler.get(Matrix4x4);
@@ -4259,19 +4274,17 @@ var FudgeCore;
         //#endregion
         //#region Rotation
         /**
-        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-        * @param _matrix The matrix to multiply.
-        * @param _angleInDegrees The angle to rotate by.
-        */
+         * Adds a rotation around the x-Axis to this matrix
+         * @param _angleInDegrees
+         */
         rotateX(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
             this.set(matrix);
             FudgeCore.Recycler.store(matrix);
         }
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the y-Axis to this matrix
+         * @param _angleInDegrees
          */
         rotateY(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
@@ -4279,15 +4292,19 @@ var FudgeCore;
             FudgeCore.Recycler.store(matrix);
         }
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the z-Axis to this matrix
+         * @param _angleInDegrees
          */
         rotateZ(_angleInDegrees) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
             this.set(matrix);
             FudgeCore.Recycler.store(matrix);
         }
+        /**
+         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
+         * @param _target
+         * @param _up
+         */
         lookAt(_target, _up = FudgeCore.Vector3.Y()) {
             const matrix = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
             this.set(matrix);
@@ -4295,6 +4312,10 @@ var FudgeCore;
         }
         //#endregion
         //#region Translation
+        /**
+         * Add a translation by the given vector to this matrix
+         * @param _by
+         */
         translate(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
             // TODO: possible optimization, translation may alter mutator instead of deleting it.
@@ -4302,7 +4323,7 @@ var FudgeCore;
             FudgeCore.Recycler.store(matrix);
         }
         /**
-         * Translate the transformation along the x-axis.
+         * Add a translation along the x-Axis by the given amount to this matrix
          * @param _x The value of the translation.
          */
         translateX(_x) {
@@ -4310,7 +4331,7 @@ var FudgeCore;
             this.mutator = null;
         }
         /**
-         * Translate the transformation along the y-axis.
+         * Add a translation along the y-Axis by the given amount to this matrix
          * @param _y The value of the translation.
          */
         translateY(_y) {
@@ -4318,7 +4339,7 @@ var FudgeCore;
             this.mutator = null;
         }
         /**
-         * Translate the transformation along the z-axis.
+         * Add a translation along the y-Axis by the given amount to this matrix
          * @param _z The value of the translation.
          */
         translateZ(_z) {
@@ -4327,28 +4348,51 @@ var FudgeCore;
         }
         //#endregion
         //#region Scaling
+        /**
+         * Add a scaling by the given vector to this matrix
+         * @param _by
+         */
         scale(_by) {
             const matrix = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
             this.set(matrix);
             FudgeCore.Recycler.store(matrix);
         }
+        /**
+         * Add a scaling along the x-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleX(_by) {
             this.scale(new FudgeCore.Vector3(_by, 1, 1));
         }
+        /**
+         * Add a scaling along the y-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleY(_by) {
             this.scale(new FudgeCore.Vector3(1, _by, 1));
         }
+        /**
+         * Add a scaling along the z-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleZ(_by) {
             this.scale(new FudgeCore.Vector3(1, 1, _by));
         }
         //#endregion
         //#region Transformation
+        /**
+         * Multiply this matrix with the given matrix
+         * @param _matrix
+         */
         multiply(_matrix) {
             this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
             this.mutator = null;
         }
         //#endregion
         //#region Transfer
+        /**
+         * Calculates and returns the euler-angles representing the current rotation of this matrix
+         */
         getEulerAngles() {
             let scaling = this.scaling;
             let s0 = this.data[0] / scaling.x;
@@ -4382,11 +4426,18 @@ var FudgeCore;
             rotation.scale(180 / Math.PI);
             return rotation;
         }
+        /**
+         * Sets the elements of this matrix to the values of the given matrix
+         * @param _to
+         */
         set(_to) {
             // this.data = _to.get();
             this.data.set(_to.data);
             this.resetCache();
         }
+        /**
+         * Return the elements of this matrix as a Float32Array
+         */
         get() {
             return new Float32Array(this.data);
         }

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FramingScaled | Fudge Core</title>
+	<title>CoatMatCap | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.framingscaled.html">FramingScaled</a>
+					<a href="fudgecore.coatmatcap.html">CoatMatCap</a>
 				</li>
 			</ul>
-			<h1>Class FramingScaled</h1>
+			<h1>Class CoatMatCap</h1>
 		</div>
 	</div>
 </header>
@@ -72,8 +72,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Width and height of the resulting rectangle are fractions of those of the frame, scaled by normed values normWidth and normHeight.
-						Display should scale to fit the frame and points are scaled in the same ratio</p>
+						<p>A <a href="fudgecore.coat.html">Coat</a> to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
+						and a flatMix number for mixing between smooth and flat shading.</p>
 					</div>
 				</div>
 			</section>
@@ -81,13 +81,19 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudgecore.framing.html" class="tsd-signature-type">Framing</a>
+						<a href="fudgecore.coat.html" class="tsd-signature-type">Coat</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">FramingScaled</span>
+								<span class="target">CoatMatCap</span>
 							</li>
 						</ul>
 					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -95,58 +101,118 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.coatmatcap.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.framingscaled.html#normheight" class="tsd-kind-icon">norm<wbr>Height</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.framingscaled.html#normwidth" class="tsd-kind-icon">norm<wbr>Width</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.coatmatcap.html#flatmix" class="tsd-kind-icon">flat<wbr>Mix</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.coatmatcap.html#texture" class="tsd-kind-icon">texture</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.coatmatcap.html#tintcolor" class="tsd-kind-icon">tint<wbr>Color</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#type" class="tsd-kind-icon">type</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.framingscaled.html#getpoint" class="tsd-kind-icon">get<wbr>Point</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.framingscaled.html#getpointinverse" class="tsd-kind-icon">get<wbr>Point<wbr>Inverse</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.framingscaled.html#getrect" class="tsd-kind-icon">get<wbr>Rect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#mutate" class="tsd-kind-icon">mutate</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.framingscaled.html#setscale" class="tsd-kind-icon">set<wbr>Scale</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.framingscaled.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.coatmatcap.html#mutate" class="tsd-kind-icon">mutate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.coatmatcap.html#userenderdata" class="tsd-kind-icon">use<wbr>Render<wbr>Data</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Coat<wbr>Mat<wbr>Cap<span class="tsd-signature-symbol">(</span>_texture<span class="tsd-signature-symbol">?: </span><a href="fudgecore.textureimage.html" class="tsd-signature-type">TextureImage</a>, _tintcolor<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a>, _flatmix<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.coatmatcap.html" class="tsd-signature-type">CoatMatCap</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L66">Coat/Coat.ts:66</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _texture: <a href="fudgecore.textureimage.html" class="tsd-signature-type">TextureImage</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _tintcolor: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _flatmix: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.coatmatcap.html" class="tsd-signature-type">CoatMatCap</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="normheight" class="tsd-anchor"></a>
-					<h3>norm<wbr>Height</h3>
-					<div class="tsd-signature tsd-kind-icon">norm<wbr>Height<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
+					<a name="flatmix" class="tsd-anchor"></a>
+					<h3>flat<wbr>Mix</h3>
+					<div class="tsd-signature tsd-kind-icon">flat<wbr>Mix<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;0.5</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L75">Math/Framing.ts:75</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L66">Coat/Coat.ts:66</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;&quot;Coat&quot;</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="fudgecore.coat.html">Coat</a>.<a href="fudgecore.coat.html#name">name</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L11">Coat/Coat.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="normwidth" class="tsd-anchor"></a>
-					<h3>norm<wbr>Width</h3>
-					<div class="tsd-signature tsd-kind-icon">norm<wbr>Width<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;1</span></div>
+					<a name="texture" class="tsd-anchor"></a>
+					<h3>texture</h3>
+					<div class="tsd-signature tsd-kind-icon">texture<span class="tsd-signature-symbol">:</span> <a href="fudgecore.textureimage.html" class="tsd-signature-type">TextureImage</a><span class="tsd-signature-symbol"> =&nbsp;null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L74">Math/Framing.ts:74</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L64">Coat/Coat.ts:64</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="tintcolor" class="tsd-anchor"></a>
+					<h3>tint<wbr>Color</h3>
+					<div class="tsd-signature tsd-kind-icon">tint<wbr>Color<span class="tsd-signature-symbol">:</span> <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> =&nbsp;new Color(0.5, 0.5, 0.5, 1)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L65">Coat/Coat.ts:65</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,7 +244,7 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="addeventlistener" class="tsd-anchor"></a>
@@ -219,6 +285,31 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="deserialize" class="tsd-anchor"></a>
+					<h3>deserialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#deserialize">deserialize</a></p>
+								<p>Inherited from <a href="fudgecore.coat.html">Coat</a>.<a href="fudgecore.coat.html#deserialize">deserialize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L25">Coat/Coat.ts:25</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_serialization: <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -324,7 +415,7 @@
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for animation.
-									Basic functionality is identical to <a href="fudgecore.framingscaled.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.coatmatcap.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></h4>
@@ -348,116 +439,32 @@
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for the user interface.
-									Basic functionality is identical to <a href="fudgecore.framingscaled.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.coatmatcap.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-					<a name="getpoint" class="tsd-anchor"></a>
-					<h3>get<wbr>Point</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Point<span class="tsd-signature-symbol">(</span>_pointInFrame<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _rectFrame<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Overrides <a href="fudgecore.framing.html">Framing</a>.<a href="fudgecore.framing.html#getpoint">getPoint</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L82">Math/Framing.ts:82</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_pointInFrame: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
-								</li>
-								<li>
-									<h5>_rectFrame: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-					<a name="getpointinverse" class="tsd-anchor"></a>
-					<h3>get<wbr>Point<wbr>Inverse</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Point<wbr>Inverse<span class="tsd-signature-symbol">(</span>_point<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Overrides <a href="fudgecore.framing.html">Framing</a>.<a href="fudgecore.framing.html#getpointinverse">getPointInverse</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L90">Math/Framing.ts:90</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_point: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
-								</li>
-								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-					<a name="getrect" class="tsd-anchor"></a>
-					<h3>get<wbr>Rect</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Rect<span class="tsd-signature-symbol">(</span>_rectFrame<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Overrides <a href="fudgecore.framing.html">Framing</a>.<a href="fudgecore.framing.html#getrect">getRect</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L98">Math/Framing.ts:98</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_rectFrame: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 					<a name="mutate" class="tsd-anchor"></a>
 					<h3>mutate</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
+								<p>Inherited from <a href="fudgecore.coat.html">Coat</a>.<a href="fudgecore.coat.html#mutate">mutate</a></p>
+								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Transfer/Mutable.ts#L117">Transfer/Mutable.ts:117</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L14">Coat/Coat.ts:14</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Updates the attribute values of the instance according to the state of the mutator. Must be protected...!</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -499,29 +506,22 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setscale" class="tsd-anchor"></a>
-					<h3>set<wbr>Scale</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Scale<span class="tsd-signature-symbol">(</span>_normWidth<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _normHeight<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="serialize" class="tsd-anchor"></a>
+					<h3>serialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#serialize">serialize</a></p>
+								<p>Inherited from <a href="fudgecore.coat.html">Coat</a>.<a href="fudgecore.coat.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Math/Framing.ts#L77">Math/Framing.ts:77</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L21">Coat/Coat.ts:21</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_normWidth: <span class="tsd-signature-type">number</span></h5>
-								</li>
-								<li>
-									<h5>_normHeight: <span class="tsd-signature-type">number</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -556,6 +556,30 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="userenderdata" class="tsd-anchor"></a>
+					<h3>use<wbr>Render<wbr>Data</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">use<wbr>Render<wbr>Data<span class="tsd-signature-symbol">(</span>_renderShader<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.rendershader.html" class="tsd-signature-type">RenderShader</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.coat.html">Coat</a>.<a href="fudgecore.coat.html#userenderdata">useRenderData</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/3b1191cc/Core/Source/Coat/Coat.ts#L18">Coat/Coat.ts:18</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_renderShader: <a href="../interfaces/fudgecore.rendershader.html" class="tsd-signature-type">RenderShader</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -574,55 +598,61 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="fudgecore.framingscaled.html" class="tsd-kind-icon">Framing<wbr>Scaled</a>
+						<a href="fudgecore.coatmatcap.html" class="tsd-kind-icon">Coat<wbr>Mat<wbr>Cap</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.framingscaled.html#normheight" class="tsd-kind-icon">norm<wbr>Height</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.coatmatcap.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.framingscaled.html#normwidth" class="tsd-kind-icon">norm<wbr>Width</a>
+								<a href="fudgecore.coatmatcap.html#flatmix" class="tsd-kind-icon">flat<wbr>Mix</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.coatmatcap.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.coatmatcap.html#texture" class="tsd-kind-icon">texture</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.coatmatcap.html#tintcolor" class="tsd-kind-icon">tint<wbr>Color</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#type" class="tsd-kind-icon">type</a>
+								<a href="fudgecore.coatmatcap.html#type" class="tsd-kind-icon">type</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+								<a href="fudgecore.coatmatcap.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
+								<a href="fudgecore.coatmatcap.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
+								<a href="fudgecore.coatmatcap.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
+								<a href="fudgecore.coatmatcap.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
+								<a href="fudgecore.coatmatcap.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.framingscaled.html#getpoint" class="tsd-kind-icon">get<wbr>Point</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.framingscaled.html#getpointinverse" class="tsd-kind-icon">get<wbr>Point<wbr>Inverse</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.framingscaled.html#getrect" class="tsd-kind-icon">get<wbr>Rect</a>
+								<a href="fudgecore.coatmatcap.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#mutate" class="tsd-kind-icon">mutate</a>
+								<a href="fudgecore.coatmatcap.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+								<a href="fudgecore.coatmatcap.html#mutate" class="tsd-kind-icon">mutate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.framingscaled.html#setscale" class="tsd-kind-icon">set<wbr>Scale</a>
+								<a href="fudgecore.coatmatcap.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.framingscaled.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
+								<a href="fudgecore.coatmatcap.html#serialize" class="tsd-kind-icon">serialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.coatmatcap.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.coatmatcap.html#userenderdata" class="tsd-kind-icon">use<wbr>Render<wbr>Data</a>
 							</li>
 						</ul>
 					</li>

@@ -1914,14 +1914,40 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Stores a 4x4 transformation matrix and provides operations for it.
+     * ```plaintext
+     * [ 0, 1, 2, 3 ] ← row vector x
+     * [ 4, 5, 6, 7 ] ← row vector y
+     * [ 8, 9,10,11 ] ← row vector z
+     * [12,13,14,15 ] ← translation
+     *            ↑  homogeneous column
+     * ```
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Matrix4x4 extends Mutable implements Serializable {
         private data;
         private mutator;
         private vectors;
         constructor();
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix
+         */
         translation: Vector3;
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
         rotation: Vector3;
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
         scaling: Vector3;
+        /**
+         * Retrieve a new identity matrix
+         */
         static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -1985,47 +2011,83 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-        * @param _matrix The matrix to multiply.
-        * @param _angleInDegrees The angle to rotate by.
-        */
+         * Adds a rotation around the x-Axis to this matrix
+         * @param _angleInDegrees
+         */
         rotateX(_angleInDegrees: number): void;
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the y-Axis to this matrix
+         * @param _angleInDegrees
          */
         rotateY(_angleInDegrees: number): void;
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the z-Axis to this matrix
+         * @param _angleInDegrees
          */
         rotateZ(_angleInDegrees: number): void;
+        /**
+         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
+         * @param _target
+         * @param _up
+         */
         lookAt(_target: Vector3, _up?: Vector3): void;
+        /**
+         * Add a translation by the given vector to this matrix
+         * @param _by
+         */
         translate(_by: Vector3): void;
         /**
-         * Translate the transformation along the x-axis.
+         * Add a translation along the x-Axis by the given amount to this matrix
          * @param _x The value of the translation.
          */
         translateX(_x: number): void;
         /**
-         * Translate the transformation along the y-axis.
+         * Add a translation along the y-Axis by the given amount to this matrix
          * @param _y The value of the translation.
          */
         translateY(_y: number): void;
         /**
-         * Translate the transformation along the z-axis.
+         * Add a translation along the y-Axis by the given amount to this matrix
          * @param _z The value of the translation.
          */
         translateZ(_z: number): void;
+        /**
+         * Add a scaling by the given vector to this matrix
+         * @param _by
+         */
         scale(_by: Vector3): void;
+        /**
+         * Add a scaling along the x-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleX(_by: number): void;
+        /**
+         * Add a scaling along the y-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleY(_by: number): void;
+        /**
+         * Add a scaling along the z-Axis by the given amount to this matrix
+         * @param _by
+         */
         scaleZ(_by: number): void;
+        /**
+         * Multiply this matrix with the given matrix
+         * @param _matrix
+         */
         multiply(_matrix: Matrix4x4): void;
+        /**
+         * Calculates and returns the euler-angles representing the current rotation of this matrix
+         */
         getEulerAngles(): Vector3;
+        /**
+         * Sets the elements of this matrix to the values of the given matrix
+         * @param _to
+         */
         set(_to: Matrix4x4): void;
+        /**
+         * Return the elements of this matrix as a Float32Array
+         */
         get(): Float32Array;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
