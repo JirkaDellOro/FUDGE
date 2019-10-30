@@ -4855,7 +4855,7 @@ var FudgeCore;
         /**
          * Adds a z-component to the vector and returns a new Vector3
          */
-        getVector3() {
+        toVector3() {
             return new FudgeCore.Vector3(this.x, this.y, 0);
         }
         getMutator() {
@@ -4968,6 +4968,14 @@ var FudgeCore;
             return vector;
         }
         /**
+         * Returns a new vector representing the given vector scaled by the given scaling factor
+         */
+        static SCALE(_vector, _scaling) {
+            let scaled = new Vector3();
+            scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
+            return scaled;
+        }
+        /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
@@ -4991,6 +4999,20 @@ var FudgeCore;
         static DOT(_a, _b) {
             let scalarProduct = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
             return scalarProduct;
+        }
+        /**
+         * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
+         *     __________________
+         *           /|\
+         * incoming / | \ reflection
+         *         /  |  \
+         *          normal
+         *
+         */
+        static REFLECTION(_incoming, _normal) {
+            let dot = -Vector3.DOT(_incoming, _normal);
+            let reflection = Vector3.SUM(_incoming, Vector3.SCALE(_normal, 2 * dot));
+            return reflection;
         }
         add(_addend) {
             this.data = new Vector3(_addend.x + this.x, _addend.y + this.y, _addend.z + this.z).data;
@@ -5019,8 +5041,13 @@ var FudgeCore;
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
-        getVector2() {
+        toVector2() {
             return new FudgeCore.Vector2(this.x, this.y);
+        }
+        reflect(_normal) {
+            const reflected = Vector3.REFLECTION(this, _normal);
+            this.set(reflected.x, reflected.y, reflected.z);
+            FudgeCore.Recycler.store(reflected);
         }
         getMutator() {
             let mutator = {

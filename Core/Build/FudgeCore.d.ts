@@ -2277,7 +2277,7 @@ declare namespace FudgeCore {
         /**
          * Adds a z-component to the vector and returns a new Vector3
          */
-        getVector3(): Vector3;
+        toVector3(): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -2320,6 +2320,10 @@ declare namespace FudgeCore {
          */
         static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3;
         /**
+         * Returns a new vector representing the given vector scaled by the given scaling factor
+         */
+        static SCALE(_vector: Vector3, _scaling: number): Vector3;
+        /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
@@ -2333,6 +2337,16 @@ declare namespace FudgeCore {
          * @returns A new vector representing the dotproduct of the given vectors
          */
         static DOT(_a: Vector3, _b: Vector3): number;
+        /**
+         * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
+         *     __________________
+         *           /|\
+         * incoming / | \ reflection
+         *         /  |  \
+         *          normal
+         *
+         */
+        static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3;
         add(_addend: Vector3): void;
         subtract(_subtrahend: Vector3): void;
         scale(_scale: number): void;
@@ -2344,7 +2358,8 @@ declare namespace FudgeCore {
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
-        getVector2(): Vector2;
+        toVector2(): Vector2;
+        reflect(_normal: Vector3): void;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

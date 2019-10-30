@@ -109,6 +109,14 @@ namespace FudgeCore {
             return vector;
         }
         /**
+         * Returns a new vector representing the given vector scaled by the given scaling factor
+         */
+        public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
+            let scaled: Vector3 = new Vector3();
+            scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
+            return scaled;
+        }
+        /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
@@ -131,6 +139,21 @@ namespace FudgeCore {
         public static DOT(_a: Vector3, _b: Vector3): number {
             let scalarProduct: number = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
             return scalarProduct;
+        }
+
+        /**
+         * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
+         *     __________________
+         *           /|\
+         * incoming / | \ reflection
+         *         /  |  \   
+         *          normal
+         * 
+         */
+        public static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3 {
+            let dot: number = -Vector3.DOT(_incoming, _normal);
+            let reflection: Vector3 = Vector3.SUM(_incoming, Vector3.SCALE(_normal, 2 * dot));
+            return reflection;
         }
 
         public add(_addend: Vector3): void {
@@ -166,10 +189,15 @@ namespace FudgeCore {
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
-        public getVector2(): Vector2 {
+        public toVector2(): Vector2 {
             return new Vector2(this.x, this.y);
         }
 
+        public reflect(_normal: Vector3): void {
+            const reflected: Vector3 = Vector3.REFLECTION(this, _normal);
+            this.set(reflected.x, reflected.y, reflected.z);
+            Recycler.store(reflected);
+        }
 
         public getMutator(): Mutator {
             let mutator: Mutator = {

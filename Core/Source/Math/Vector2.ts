@@ -255,7 +255,7 @@ namespace FudgeCore {
     /**
      * Adds a z-component to the vector and returns a new Vector3
      */
-    public getVector3(): Vector3 {
+    public toVector3(): Vector3 {
       return new Vector3(this.x, this.y, 0);
     }
 
