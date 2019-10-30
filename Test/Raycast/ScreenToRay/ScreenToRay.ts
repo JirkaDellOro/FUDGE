@@ -269,7 +269,7 @@ namespace ScreenToRay {
             }
         }
         let clientRect: ClientRect = canvas.getBoundingClientRect();
-        uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
+        uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
 
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
