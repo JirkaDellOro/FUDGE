@@ -39,7 +39,7 @@ namespace FudgeCore {
 
     /** 
      * - get: a copy of the calculated translation vector   
-     * - set: effect the matrix
+     * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector3 {
       if (!this.vectors.translation)

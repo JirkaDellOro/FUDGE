@@ -39,11 +39,10 @@ namespace FudgeCore {
     }
 
     /** 
-     * A shorthand for writing `new Vector2(1, 1)`.
-     * @returns A new vector with the values (1, 1)
+     * A shorthand for writing `new Vector2(_scale, _scale)`.
      */
-    public static get ONE(): Vector2 {
-      let vector: Vector2 = new Vector2(1, 1);
+    public static ONE(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(_scale, _scale);
       return vector;
     }
 

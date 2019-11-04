@@ -1932,7 +1932,7 @@ declare namespace FudgeCore {
         constructor();
         /**
          * - get: a copy of the calculated translation vector
-         * - set: effect the matrix
+         * - set: effect the matrix ignoring its rotation and scaling
          */
         translation: Vector3;
         /**
@@ -2148,6 +2148,10 @@ declare namespace FudgeCore {
          */
         static readonly ZERO: Vector2;
         /**
+         * A shorthand for writing `new Vector2(_scale, _scale)`.
+         */
+        static ONE(_scale?: number): Vector2;
+        /**
          * A shorthand for writing `new Vector2(0, 1)`.
          * @returns A new vector with the values (0, 1)
          */
@@ -2304,7 +2308,7 @@ declare namespace FudgeCore {
         static Z(_scale?: number): Vector3;
         static ZERO(): Vector3;
         static ONE(_scale?: number): Vector3;
-        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
+        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation?: boolean): Vector3;
         static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
          * Sums up multiple vectors.
@@ -2354,7 +2358,7 @@ declare namespace FudgeCore {
         set(_x?: number, _y?: number, _z?: number): void;
         get(): Float32Array;
         readonly copy: Vector3;
-        transform(_matrix: Matrix4x4): void;
+        transform(_matrix: Matrix4x4, _includeTranslation?: boolean): void;
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
