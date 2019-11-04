@@ -39,6 +39,15 @@ namespace FudgeCore {
     }
 
     /** 
+     * A shorthand for writing `new Vector2(1, 1)`.
+     * @returns A new vector with the values (1, 1)
+     */
+    public static get ONE(): Vector2 {
+      let vector: Vector2 = new Vector2(1, 1);
+      return vector;
+    }
+
+    /** 
      * A shorthand for writing `new Vector2(0, 1)`.
      * @returns A new vector with the values (0, 1)
      */
@@ -261,10 +270,10 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = {
-          x: this.data[0], y: this.data[1]
+        x: this.data[0], y: this.data[1]
       };
       return mutator;
-  }
+    }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 }
