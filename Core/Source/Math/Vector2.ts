@@ -33,13 +33,14 @@ namespace FudgeCore {
      * A shorthand for writing `new Vector2(0, 0)`.
      * @returns A new vector with the values (0, 0)
      */
-    public static get ZERO(): Vector2 {
+    public static ZERO(): Vector2 {
       let vector: Vector2 = new Vector2();
       return vector;
     }
 
     /** 
      * A shorthand for writing `new Vector2(_scale, _scale)`.
+     * @param _scale the scale of the vector. Default: 1
      */
     public static ONE(_scale: number = 1): Vector2 {
       let vector: Vector2 = new Vector2(_scale, _scale);
@@ -47,40 +48,25 @@ namespace FudgeCore {
     }
 
     /** 
-     * A shorthand for writing `new Vector2(0, 1)`.
-     * @returns A new vector with the values (0, 1)
+     * A shorthand for writing `new Vector2(0, y)`.
+     * @param _scale The number to write in the y coordinate. Default: 1
+     * @returns A new vector with the values (0, _scale)
      */
-    public static get UP(): Vector2 {
-      let vector: Vector2 = new Vector2(0, 1);
+    public static Y(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(0, _scale);
       return vector;
     }
 
     /** 
-     * A shorthand for writing `new Vector2(0, -1)`.
-     * @returns A new vector with the values (0, -1)
+     * A shorthand for writing `new Vector2(x, 0)`.
+     * @param _scale The number to write in the x coordinate. Default: 1
+     * @returns A new vector with the values (_scale, 0)
      */
-    public static get DOWN(): Vector2 {
-      let vector: Vector2 = new Vector2(0, -1);
+    public static X(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(_scale, 0);
       return vector;
     }
 
-    /** 
-     * A shorthand for writing `new Vector2(1, 0)`.
-     * @returns A new vector with the values (1, 0)
-     */
-    public static get RIGHT(): Vector2 {
-      let vector: Vector2 = new Vector2(1, 0);
-      return vector;
-    }
-
-    /** 
-     * A shorthand for writing `new Vector2(-1, 0)`.
-     * @returns A new vector with the values (-1, 0)
-     */
-    public static get LEFT(): Vector2 {
-      let vector: Vector2 = new Vector2(-1, 0);
-      return vector;
-    }
 
     /**
      * Normalizes a given vector to the given length without editing the original vector.
@@ -89,7 +75,7 @@ namespace FudgeCore {
      * @returns a new vector representing the normalised vector scaled by the given length
      */
     public static NORMALIZATION(_vector: Vector2, _length: number = 1): Vector2 {
-      let vector: Vector2 = Vector2.ZERO;
+      let vector: Vector2 = Vector2.ZERO();
       try {
         let [x, y] = _vector.data;
         let factor: number = _length / Math.hypot(x, y);
