@@ -1,4 +1,4 @@
-/// <reference types=".././FUDGE-development/Core/Build/FudgeCore" />
+/// <reference types="../../FUDGE-development/Core/Build/FudgeCore" />
 
 
 namespace FudgeCore {

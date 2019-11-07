@@ -1,5 +1,4 @@
 
-/// <reference types="./Physics/Plugins/oimoJSPlugin" />
 
 namespace FudgeCore {
 
