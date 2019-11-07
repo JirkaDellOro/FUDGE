@@ -321,7 +321,7 @@ namespace FudgeCore {
         public removeJoint(impostorJoint: PhysicsImpostorJoint) {
             //Bug in Oimo prevents us from disposing a joint in the playground
             //joint.joint.physicsJoint.dispose();
-            //So we will bruteforce it!
+            //So we will bruteforce it!!
             try {
                 this.world.removeJoint(impostorJoint.joint.physicsJoint);
             } catch (e) {
