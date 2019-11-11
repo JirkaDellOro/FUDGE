@@ -4,8 +4,8 @@ namespace TextureTest {
     window.addEventListener("load", init);
 
     function init(_event: Event): void {
-        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-        let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
+        let coatWhite: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.WHITE);
+        let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
         let branch: ƒ.Node = new ƒ.Node("Branch");
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());

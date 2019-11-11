@@ -54,8 +54,8 @@ namespace FudgeCore {
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
-        public static initialize(): void {
-            let contextAttributes: WebGLContextAttributes = { alpha: false, antialias: false };
+        public static initialize(_antialias: boolean = false, _alpha: boolean = false): void {
+            let contextAttributes: WebGLContextAttributes = { alpha: _alpha, antialias: _antialias };
             let canvas: HTMLCanvasElement = document.createElement("canvas");
             RenderOperator.crc3 = RenderOperator.assert<WebGL2RenderingContext>(
                 canvas.getContext("webgl2", contextAttributes),

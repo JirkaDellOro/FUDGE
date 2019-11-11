@@ -3,8 +3,8 @@ var TextureTest;
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
     function init(_event) {
-        let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-        let material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
+        let coatWhite = new ƒ.CoatColored(ƒ.Color.WHITE);
+        let material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
         let body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
         body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));

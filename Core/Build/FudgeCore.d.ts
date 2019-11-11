@@ -714,7 +714,7 @@ declare namespace FudgeCore {
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
-        static initialize(): void;
+        static initialize(_antialias?: boolean, _alpha?: boolean): void;
         /**
          * Return a reference to the offscreen-canvas
          */
