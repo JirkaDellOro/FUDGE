@@ -1043,13 +1043,81 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Light extends Mutable {
+        color: Color;
+        constructor(_color?: Color);
+        protected reduceMutator(): void;
+    }
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```plaintext
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```plaintext
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        direction: Vector3;
+        constructor(_color?: Color, _direction?: Vector3);
+    }
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```plaintext
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        range: number;
+    }
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```plaintext
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    /**
+     * Defines identifiers for the various types of light this component can provide.
+     */
+    enum LIGHT_TYPE {
+        AMBIENT = "ambient",
+        DIRECTIONAL = "directional",
+        POINT = "point",
+        SPOT = "spot"
+    }
     class ComponentLight extends Component {
+        private static constructors;
+        pivot: Matrix4x4;
         private light;
-        constructor(_light?: Light);
+        private lightType;
+        constructor(_type?: LIGHT_TYPE, _color?: Color);
         getLight(): Light;
+        getType(): LIGHT_TYPE;
+        setType(_type: LIGHT_TYPE): void;
     }
 }
 declare namespace FudgeCore {
@@ -1358,60 +1426,6 @@ declare namespace FudgeCore {
          */
         static deserialize(_serialization: SerializationOfResources): Resources;
         private static deserializeResource;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Baseclass for different kinds of lights.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class Light extends Mutable {
-        color: Color;
-        constructor(_color?: Color);
-        protected reduceMutator(): void;
-    }
-    /**
-     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```plaintext
-     * ~ ~ ~
-     *  ~ ~ ~
-     * ```
-     */
-    class LightAmbient extends Light {
-        constructor(_color?: Color);
-    }
-    /**
-     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```plaintext
-     * --->
-     * --->
-     * --->
-     * ```
-     */
-    class LightDirectional extends Light {
-        direction: Vector3;
-        constructor(_color?: Color, _direction?: Vector3);
-    }
-    /**
-     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```plaintext
-     *         .\|/.
-     *        -- o --
-     *         ´/|\`
-     * ```
-     */
-    class LightPoint extends Light {
-        range: number;
-    }
-    /**
-     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```plaintext
-     *          o
-     *         /|\
-     *        / | \
-     * ```
-     */
-    class LightSpot extends Light {
     }
 }
 declare namespace FudgeCore {
@@ -2146,31 +2160,24 @@ declare namespace FudgeCore {
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
          */
-        static readonly ZERO: Vector2;
+        static ZERO(): Vector2;
         /**
          * A shorthand for writing `new Vector2(_scale, _scale)`.
+         * @param _scale the scale of the vector. Default: 1
          */
         static ONE(_scale?: number): Vector2;
         /**
-         * A shorthand for writing `new Vector2(0, 1)`.
-         * @returns A new vector with the values (0, 1)
+         * A shorthand for writing `new Vector2(0, y)`.
+         * @param _scale The number to write in the y coordinate. Default: 1
+         * @returns A new vector with the values (0, _scale)
          */
-        static readonly UP: Vector2;
+        static Y(_scale?: number): Vector2;
         /**
-         * A shorthand for writing `new Vector2(0, -1)`.
-         * @returns A new vector with the values (0, -1)
+         * A shorthand for writing `new Vector2(x, 0)`.
+         * @param _scale The number to write in the x coordinate. Default: 1
+         * @returns A new vector with the values (_scale, 0)
          */
-        static readonly DOWN: Vector2;
-        /**
-         * A shorthand for writing `new Vector2(1, 0)`.
-         * @returns A new vector with the values (1, 0)
-         */
-        static readonly RIGHT: Vector2;
-        /**
-         * A shorthand for writing `new Vector2(-1, 0)`.
-         * @returns A new vector with the values (-1, 0)
-         */
-        static readonly LEFT: Vector2;
+        static X(_scale?: number): Vector2;
         /**
          * Normalizes a given vector to the given length without editing the original vector.
          * @param _vector the vector to normalize

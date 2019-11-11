@@ -126,7 +126,7 @@ var Scenes;
         _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
         _viewport.addEventListener("\u0192keydown" /* DOWN */, rotate);
         function rotate(_event) {
-            let mtxCamera = _viewport.camera.getContainer().cmpTransform.local;
+            let mtxCamera = _viewport.camera.pivot;
             let vctCamera = ƒ.Vector3.ZERO();
             vctCamera.y = (0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :

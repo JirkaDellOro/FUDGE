@@ -12,17 +12,17 @@ namespace TextureTest {
         body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
-        let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
+        let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
         branch.addComponent(cmpLightAmbient);
 
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0.2, 0)));
-        branch.addComponent(cmpLightDirectionalRed);
+        // let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(1, 0, 0, 1));
+        // branch.addComponent(cmpLightDirectionalRed);
 
-        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(-1, 0.2, -1)));
-        branch.addComponent(cmpLightDirectionalGreen);
+        // let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(0, 1, 0, 1));
+        // branch.addComponent(cmpLightDirectionalGreen);
 
-        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0.2, 1)));
-        branch.addComponent(cmpLightDirectionalBlue);
+        // let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(0, 0, 1, 1));
+        // branch.addComponent(cmpLightDirectionalBlue);
 
         branch.appendChild(body);
         branch.appendChild(Scenes.createCoordinateSystem());
