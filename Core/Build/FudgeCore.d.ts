@@ -742,6 +742,7 @@ declare namespace FudgeCore {
         static getViewportRectangle(): Rectangle;
         /**
          * Convert light data to flat arrays
+         * TODO: this method appears to be obsolete...?
          */
         protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
         /**
@@ -1102,21 +1103,11 @@ declare namespace FudgeCore {
     /**
      * Defines identifiers for the various types of light this component can provide.
      */
-    enum LIGHT_TYPE {
-        AMBIENT = "ambient",
-        DIRECTIONAL = "directional",
-        POINT = "point",
-        SPOT = "spot"
-    }
     class ComponentLight extends Component {
-        private static constructors;
         pivot: Matrix4x4;
-        private light;
-        private lightType;
-        constructor(_type?: LIGHT_TYPE, _color?: Color);
-        getLight(): Light;
-        getType(): LIGHT_TYPE;
-        setType(_type: LIGHT_TYPE): void;
+        light: Light;
+        constructor(_light?: Light);
+        setType<T extends Light>(_class: new () => T): void;
     }
 }
 declare namespace FudgeCore {

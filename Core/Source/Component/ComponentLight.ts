@@ -8,42 +8,31 @@ namespace FudgeCore {
     /**
      * Defines identifiers for the various types of light this component can provide.  
      */
-    export enum LIGHT_TYPE {
-        AMBIENT = "ambient",
-        DIRECTIONAL = "directional",
-        POINT = "point",
-        SPOT = "spot"
-    }
+    // export enum LIGHT_TYPE {
+    //     AMBIENT = "ambient",
+    //     DIRECTIONAL = "directional",
+    //     POINT = "point",
+    //     SPOT = "spot"
+    // }
 
     export class ComponentLight extends Component {
-        private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
+        // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
         public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
-        private light: Light = null;
-        private lightType: LIGHT_TYPE;
+        public light: Light = null;
 
-        constructor(_type: LIGHT_TYPE = LIGHT_TYPE.AMBIENT, _color: Color = new Color(1, 1, 1, 1)) {
+        constructor(_light: Light = new LightAmbient()) {
             super();
             this.singleton = false;
-            this.setType(_type);
-            this.light.color = _color;
+            this.light = _light;
         }
 
-        public getLight(): Light {
-            return this.light;
-        }
-
-        public getType(): LIGHT_TYPE {
-            return this.lightType;
-        }
-
-        public setType(_type: LIGHT_TYPE): void {
+        public setType<T extends Light>(_class: new () => T): void {
             let mtrOld: Mutator = {};
             if (this.light)
                 mtrOld = this.light.getMutator();
 
-            this.light = new ComponentLight.constructors[_type]();
+            this.light = new _class();
             this.light.mutate(mtrOld);
-            this.lightType = _type;
         }
     }
 }

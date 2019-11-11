@@ -15,18 +15,18 @@ namespace TextureTest {
         // let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
         // branch.addComponent(cmpLightAmbient);
 
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.RED);
+        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.RED));
         cmpLightDirectionalRed.pivot.rotateY(-90);
         branch.addComponent(cmpLightDirectionalRed);
 
-        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.GREEN);
+        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.GREEN));
         branch.addComponent(cmpLightDirectionalGreen);
 
-        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.BLUE);
+        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional( ƒ.Color.BLUE));
         cmpLightDirectionalBlue.pivot.rotateY(180);
         branch.addComponent(cmpLightDirectionalBlue);
 
-        let cmpLightDirectionalWhite: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.WHITE);
+        let cmpLightDirectionalWhite: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.WHITE));
         cmpLightDirectionalWhite.pivot.rotateY(90);
         branch.addComponent(cmpLightDirectionalWhite);
 

@@ -17,13 +17,16 @@ namespace TextureTest {
         let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
         lights.addComponent(cmpLightAmbient);
 
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0.2, 0)));
+        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.RED));
+        cmpLightDirectionalRed.pivot.lookAt(new ƒ.Vector3(-1, 1, 0));
         lights.addComponent(cmpLightDirectionalRed);
 
-        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(-1, 0.2, -1)));
+        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.GREEN));
+        cmpLightDirectionalGreen.pivot.lookAt(new ƒ.Vector3(0, 1, -1));
         lights.addComponent(cmpLightDirectionalGreen);
 
-        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0.2, 1)));
+        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional( ƒ.Color.BLUE));
+        cmpLightDirectionalBlue.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.5));
         lights.addComponent(cmpLightDirectionalBlue);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");

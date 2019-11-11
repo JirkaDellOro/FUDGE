@@ -113,6 +113,7 @@ namespace FudgeCore {
 
         /**
          * Convert light data to flat arrays
+         * TODO: this method appears to be obsolete...?
          */
         protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights {
             let renderLights: RenderLights = {};
@@ -121,16 +122,16 @@ namespace FudgeCore {
                 switch (entry[0]) {
                     case LightAmbient.name:
                         let ambient: number[] = [];
-                        for (let light of entry[1]) {
-                            let c: Color = light.getLight().color;
+                        for (let cmpLight of entry[1]) {
+                            let c: Color = cmpLight.light.color;
                             ambient.push(c.r, c.g, c.b, c.a);
                         }
                         renderLights["u_ambient"] = new Float32Array(ambient);
                         break;
                     case LightDirectional.name:
                         let directional: number[] = [];
-                        for (let light of entry[1]) {
-                            let c: Color = light.getLight().color;
+                        for (let cmpLight of entry[1]) {
+                            let c: Color = cmpLight.light.color;
                             // let d: Vector3 = (<LightDirectional>light.getLight()).direction;
                             directional.push(c.r, c.g, c.b, c.a, 0, 0, 1);
                         }
@@ -158,7 +159,7 @@ namespace FudgeCore {
                     // let result: Color = new Color(0, 0, 0, 1);
                     for (let cmpLight of cmpLights)
                         // for now, only the last is relevant
-                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.light.color.getArray());
                 }
             }
 
@@ -170,8 +171,7 @@ namespace FudgeCore {
                     RenderOperator.crc3.uniform1ui(nDirectional, n);
                     for (let i: number = 0; i < n; i++) {
                         let cmpLight: ComponentLight = cmpLights[i];
-                        let light: LightDirectional = <LightDirectional>cmpLight.getLight();
-                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
                         let direction: Vector3 = Vector3.Z();
                         direction.transform(cmpLight.pivot);
                         direction.transform(cmpLight.getContainer().mtxWorld);

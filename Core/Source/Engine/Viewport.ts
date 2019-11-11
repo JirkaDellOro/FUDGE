@@ -356,7 +356,7 @@ namespace FudgeCore {
             for (let node of this.branch.branch) {
                 let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
                 for (let cmpLight of cmpLights) {
-                    let type: string = cmpLight.getLight().type;
+                    let type: string = cmpLight.light.type;
                     let lightsOfType: ComponentLight[] = this.lights.get(type);
                     if (!lightsOfType) {
                         lightsOfType = [];
