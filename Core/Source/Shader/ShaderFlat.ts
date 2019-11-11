@@ -38,10 +38,11 @@ namespace FudgeCore {
                         v_color = vec4(0,0,0,0);
                         for (uint i = 0u; i < u_nLightsDirectional; i++) {
                             float illumination = -dot(normal, u_directional[i].direction);
-                            v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
+                            if (illumination > 0.0f)
+                                v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
                         }
-                        u_ambient;
-                        u_directional[0];
+                        //u_ambient;
+                        //u_directional[0];
                     }`;
         }
         public static getFragmentShaderSource(): string {

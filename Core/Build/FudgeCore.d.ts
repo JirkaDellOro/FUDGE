@@ -742,6 +742,7 @@ declare namespace FudgeCore {
         static getViewportRectangle(): Rectangle;
         /**
          * Convert light data to flat arrays
+         * TODO: this method appears to be obsolete...?
          */
         protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
         /**
@@ -1043,13 +1044,70 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Light extends Mutable {
+        color: Color;
+        constructor(_color?: Color);
+        protected reduceMutator(): void;
+    }
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```plaintext
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```plaintext
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```plaintext
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        range: number;
+    }
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```plaintext
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    /**
+     * Defines identifiers for the various types of light this component can provide.
+     */
     class ComponentLight extends Component {
-        private light;
+        pivot: Matrix4x4;
+        light: Light;
         constructor(_light?: Light);
-        getLight(): Light;
+        setType<T extends Light>(_class: new () => T): void;
     }
 }
 declare namespace FudgeCore {
@@ -1229,6 +1287,9 @@ declare namespace FudgeCore {
         static readonly RED: Color;
         static readonly GREEN: Color;
         static readonly BLUE: Color;
+        static readonly YELLOW: Color;
+        static readonly CYAN: Color;
+        static readonly MAGENTA: Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
@@ -1358,60 +1419,6 @@ declare namespace FudgeCore {
          */
         static deserialize(_serialization: SerializationOfResources): Resources;
         private static deserializeResource;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Baseclass for different kinds of lights.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class Light extends Mutable {
-        color: Color;
-        constructor(_color?: Color);
-        protected reduceMutator(): void;
-    }
-    /**
-     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```plaintext
-     * ~ ~ ~
-     *  ~ ~ ~
-     * ```
-     */
-    class LightAmbient extends Light {
-        constructor(_color?: Color);
-    }
-    /**
-     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```plaintext
-     * --->
-     * --->
-     * --->
-     * ```
-     */
-    class LightDirectional extends Light {
-        direction: Vector3;
-        constructor(_color?: Color, _direction?: Vector3);
-    }
-    /**
-     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```plaintext
-     *         .\|/.
-     *        -- o --
-     *         ´/|\`
-     * ```
-     */
-    class LightPoint extends Light {
-        range: number;
-    }
-    /**
-     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```plaintext
-     *          o
-     *         /|\
-     *        / | \
-     * ```
-     */
-    class LightSpot extends Light {
     }
 }
 declare namespace FudgeCore {

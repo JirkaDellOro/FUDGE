@@ -113,25 +113,27 @@ namespace FudgeCore {
 
         /**
          * Convert light data to flat arrays
+         * TODO: this method appears to be obsolete...?
          */
         protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights {
             let renderLights: RenderLights = {};
             for (let entry of _lights) {
+                // TODO: simplyfy, since direction is now handled by ComponentLight
                 switch (entry[0]) {
                     case LightAmbient.name:
                         let ambient: number[] = [];
-                        for (let light of entry[1]) {
-                            let c: Color = light.getLight().color;
+                        for (let cmpLight of entry[1]) {
+                            let c: Color = cmpLight.light.color;
                             ambient.push(c.r, c.g, c.b, c.a);
                         }
                         renderLights["u_ambient"] = new Float32Array(ambient);
                         break;
                     case LightDirectional.name:
                         let directional: number[] = [];
-                        for (let light of entry[1]) {
-                            let c: Color = light.getLight().color;
-                            let d: Vector3 = (<LightDirectional>light.getLight()).direction;
-                            directional.push(c.r, c.g, c.b, c.a, d.x, d.y, d.z);
+                        for (let cmpLight of entry[1]) {
+                            let c: Color = cmpLight.light.color;
+                            // let d: Vector3 = (<LightDirectional>light.getLight()).direction;
+                            directional.push(c.r, c.g, c.b, c.a, 0, 0, 1);
                         }
                         renderLights["u_directional"] = new Float32Array(directional);
                         break;
@@ -157,7 +159,7 @@ namespace FudgeCore {
                     // let result: Color = new Color(0, 0, 0, 1);
                     for (let cmpLight of cmpLights)
                         // for now, only the last is relevant
-                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.getLight().color.getArray());
+                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.light.color.getArray());
                 }
             }
 
@@ -168,10 +170,11 @@ namespace FudgeCore {
                     let n: number = cmpLights.length;
                     RenderOperator.crc3.uniform1ui(nDirectional, n);
                     for (let i: number = 0; i < n; i++) {
-                        let light: LightDirectional = <LightDirectional>cmpLights[i].getLight();
-                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], light.color.getArray());
-                        let direction: Vector3 = light.direction.copy;
-                        direction.transform(cmpLights[i].getContainer().mtxWorld);
+                        let cmpLight: ComponentLight = cmpLights[i];
+                        RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
+                        let direction: Vector3 = Vector3.Z();
+                        direction.transform(cmpLight.pivot);
+                        direction.transform(cmpLight.getContainer().mtxWorld);
                         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }
                 }
@@ -231,7 +234,7 @@ namespace FudgeCore {
          * @param _projection 
          */
         protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void {
-            let renderShader: RenderShader = RenderOperator.renderShaderRayCast; 
+            let renderShader: RenderShader = RenderOperator.renderShaderRayCast;
             RenderOperator.useProgram(renderShader);
 
             RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);

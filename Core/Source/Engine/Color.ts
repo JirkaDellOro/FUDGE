@@ -28,6 +28,15 @@ namespace FudgeCore {
         public static get BLUE(): Color {
             return new Color(0, 0, 1, 1);
         }
+        public static get YELLOW(): Color {
+            return new Color(1, 1, 0, 1);
+        }
+        public static get CYAN(): Color {
+            return new Color(0, 1, 1, 1);
+        }
+        public static get MAGENTA(): Color {
+            return new Color(1, 0, 1, 1);
+        }
 
         public setNormRGBA(_r: number, _g: number, _b: number, _a: number): void {
             this.r = Math.min(1, Math.max(0, _r));
