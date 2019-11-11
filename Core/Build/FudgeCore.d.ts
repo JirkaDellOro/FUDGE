@@ -1070,8 +1070,7 @@ declare namespace FudgeCore {
      * ```
      */
     class LightDirectional extends Light {
-        direction: Vector3;
-        constructor(_color?: Color, _direction?: Vector3);
+        constructor(_color?: Color);
     }
     /**
      * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
@@ -1297,6 +1296,9 @@ declare namespace FudgeCore {
         static readonly RED: Color;
         static readonly GREEN: Color;
         static readonly BLUE: Color;
+        static readonly YELLOW: Color;
+        static readonly CYAN: Color;
+        static readonly MAGENTA: Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;

@@ -12,17 +12,23 @@ namespace TextureTest {
         body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
-        let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
-        branch.addComponent(cmpLightAmbient);
+        // let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
+        // branch.addComponent(cmpLightAmbient);
 
-        // let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(1, 0, 0, 1));
-        // branch.addComponent(cmpLightDirectionalRed);
+        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.RED);
+        cmpLightDirectionalRed.pivot.rotateY(-90);
+        branch.addComponent(cmpLightDirectionalRed);
 
-        // let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(0, 1, 0, 1));
-        // branch.addComponent(cmpLightDirectionalGreen);
+        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.GREEN);
+        branch.addComponent(cmpLightDirectionalGreen);
 
-        // let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, new ƒ.Color(0, 0, 1, 1));
-        // branch.addComponent(cmpLightDirectionalBlue);
+        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.BLUE);
+        cmpLightDirectionalBlue.pivot.rotateY(180);
+        branch.addComponent(cmpLightDirectionalBlue);
+
+        let cmpLightDirectionalWhite: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.DIRECTIONAL, ƒ.Color.WHITE);
+        cmpLightDirectionalWhite.pivot.rotateY(90);
+        branch.addComponent(cmpLightDirectionalWhite);
 
         branch.appendChild(body);
         branch.appendChild(Scenes.createCoordinateSystem());
