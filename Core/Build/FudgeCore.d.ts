@@ -2146,31 +2146,24 @@ declare namespace FudgeCore {
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
          */
-        static readonly ZERO: Vector2;
+        static ZERO(): Vector2;
         /**
          * A shorthand for writing `new Vector2(_scale, _scale)`.
+         * @param _scale the scale of the vector. Default: 1
          */
         static ONE(_scale?: number): Vector2;
         /**
-         * A shorthand for writing `new Vector2(0, 1)`.
-         * @returns A new vector with the values (0, 1)
+         * A shorthand for writing `new Vector2(0, y)`.
+         * @param _scale The number to write in the y coordinate. Default: 1
+         * @returns A new vector with the values (0, _scale)
          */
-        static readonly UP: Vector2;
+        static Y(_scale?: number): Vector2;
         /**
-         * A shorthand for writing `new Vector2(0, -1)`.
-         * @returns A new vector with the values (0, -1)
+         * A shorthand for writing `new Vector2(x, 0)`.
+         * @param _scale The number to write in the x coordinate. Default: 1
+         * @returns A new vector with the values (_scale, 0)
          */
-        static readonly DOWN: Vector2;
-        /**
-         * A shorthand for writing `new Vector2(1, 0)`.
-         * @returns A new vector with the values (1, 0)
-         */
-        static readonly RIGHT: Vector2;
-        /**
-         * A shorthand for writing `new Vector2(-1, 0)`.
-         * @returns A new vector with the values (-1, 0)
-         */
-        static readonly LEFT: Vector2;
+        static X(_scale?: number): Vector2;
         /**
          * Normalizes a given vector to the given length without editing the original vector.
          * @param _vector the vector to normalize

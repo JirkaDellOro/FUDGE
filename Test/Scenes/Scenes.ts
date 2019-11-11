@@ -153,7 +153,7 @@ namespace Scenes {
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
 
         function rotate(_event: ƒ.KeyboardEventƒ): void {
-            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.pivot;
             let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO();
             vctCamera.y = (0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
