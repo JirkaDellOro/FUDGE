@@ -636,7 +636,7 @@ namespace FudgeCore {
       let newTranslation: Vector3 = <Vector3>_mutator["translation"];
       let newRotation: Vector3 = <Vector3>_mutator["rotation"];
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
-      let vectors: VectorRepresentation = { translation: null, rotation: null, scaling: null };
+      let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
         vectors.translation = new Vector3(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
