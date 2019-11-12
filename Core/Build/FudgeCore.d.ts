@@ -2016,6 +2016,11 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
+         * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+         * @param _by
+         */
+        rotate(_by: Vector3): void;
+        /**
          * Adds a rotation around the x-Axis to this matrix
          */
         rotateX(_angleInDegrees: number): void;

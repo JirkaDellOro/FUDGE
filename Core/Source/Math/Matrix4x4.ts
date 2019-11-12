@@ -422,6 +422,16 @@ namespace FudgeCore {
 
     //#region Rotation
     /**
+     * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+     * @param _by 
+     */
+    public rotate(_by: Vector3): void {
+      this.rotateZ(_by.z);
+      this.rotateY(_by.y);
+      this.rotateX(_by.x);
+    }
+
+    /**
      * Adds a rotation around the x-Axis to this matrix
      */
     public rotateX(_angleInDegrees: number): void {
