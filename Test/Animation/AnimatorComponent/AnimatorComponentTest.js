@@ -7,7 +7,7 @@ var AnimatorComponentTest;
     function init() {
         Scenes.createMiniScene();
         Scenes.createViewport();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
         node = Scenes.node;
         initAnim();
     }
@@ -64,7 +64,7 @@ var AnimatorComponentTest;
     }
     function frame() {
         ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
     }
     function hndlEv(_e) {
         console.log(_e.type /*, (<ƒ.ComponentAnimator>_e.target).getContainer().name*/);

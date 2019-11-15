@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FUDGE Matcap Shader</title>
+</head>
+<body>
+    
+    <h1>Matcap - Flat Shading</h1>
+    <canvas width="800" height="600"></canvas>
+    <!--textures can only be loaded by https - not with file:// address (cross origin block) 
+        so this example only works online or on a local server (form example node's http-server)-->
+    <img id="mc1" src="./mc_metal.png">
+    <img id="mc2" src="./mc_color.png">
+    <script src="../../../Core/Build/FudgeCore.js"></script>
+    <script src="../../Scenes/Scenes.js"></script>
+    <script src="./MatCap.js"></script>
+</body>
+</html>

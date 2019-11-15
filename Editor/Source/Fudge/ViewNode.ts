@@ -1,83 +1,119 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../Examples/Code/Scenes"/>
+
+//<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
 
 namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
 
+    enum Menu {
+        NODE = "AddNode"
+    }
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.  
-     * Consists of a viewport and a tree-control. 
+     * Consists of a viewport, a tree-control and . 
      */
     export class ViewNode extends View {
-        public viewport: ƒ.Viewport = new ƒ.Viewport();
+        branch: ƒ.Node;
+        selectedNode: ƒ.Node;
+        listController: ƒui.UINodeList;
 
-        constructor(_container: GoldenLayout.Container, _state: Object) {
-            super(_container, _state);
-            let branch: ƒ.Node;
-            let canvas: HTMLCanvasElement;
-            let camera: ƒ.Node;
+        constructor(_parent: NodePanel) {
+            super(_parent);
+            if (_parent instanceof NodePanel) {
+                if ((<NodePanel>_parent).getNode() != null) {
+                    this.branch = (<NodePanel>_parent).getNode();
+                }
+                else {
+                    this.branch = new ƒ.Node("Scene");
+                }
+            }
+            else {
+                this.branch = new ƒ.Node("Scene");
+            }
+            this.selectedNode = null;
+            this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setSelectedNode);
+            this.listController = new ƒui.UINodeList(this.branch, this.content);
+            this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
+            this.fillContent();
+        }
+        deconstruct(): void {
+            //TODO: desconstruct
+        }
 
-            // TODO: delete example scene
-            branch = Scenes.createAxisCross();
-
-            // initialize RenderManager and transmit content
-            ƒ.RenderManager.addBranch(branch);
-            ƒ.RenderManager.update();
-
-            // initialize viewport
-            // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
-            cmpCamera.projectCentral(1, 45);
-            canvas = Scenes.createCanvas();
-            document.body.appendChild(canvas);
-
-            this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", branch, cmpCamera, canvas);
-            this.viewport.draw();
-
-            _container.getElement().append(canvas);
-
-            // TODO: if each Panel creates its own instance of GoldenLayout, containers may emit directly to their LayoutManager and no registration is required
-            Panel.goldenLayout.emit("registerView", _container);
-
-            _container.on("setRoot", (_node: ƒ.Node): void => {
-                ƒ.Debug.log("Set root", _node);
-                this.setRoot(_node);
-            });
+        fillContent(): void {
+            let mutator: ƒ.Mutator = {};
+            for (let member in ƒui.NODEMENU) {
+                ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
+            }
+            let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
+            menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.createNode);
+            this.content.append(this.listController.listRoot);
+            this.content.append(menu);
         }
 
         /**
-         * Set the root node for display in this view
-         * @param _node 
+         * Display structure of node
+         * @param _node Node to be displayed
          */
         public setRoot(_node: ƒ.Node): void {
             if (!_node)
                 return;
-            ƒ.Debug.log("Trying to display node: ", _node);
-            // ƒ.RenderManager.removeBranch(this.viewport. this.viewport.getBranch());
-            this.viewport.setBranch(_node);
-            this.viewport.draw();
+            this.branch = _node;
+            this.listController.listRoot.removeEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
+            this.listController.setNodeRoot(_node);
+            this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
+            this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
         }
+        /**
+         * Add new Node to Node Structure
+         */
+        private createNode = (_event: CustomEvent): void => {
+            let node: ƒ.Node = new ƒ.Node("");
+            let targetNode: ƒ.Node = this.selectedNode || this.branch;
+            let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
+            let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
+            let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
+            switch (_event.detail) {
+                case Menu.NODE + "." + ƒui.NODEMENU.BOX:
+                    let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+                    node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.EMPTY:
+                    node.name = "Empty Node";
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.PLANE:
+                    let meshPlane: ƒ.MeshQuad = new ƒ.MeshQuad();
+                    node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
+                    break;
+                case Menu.NODE + "." + ƒui.NODEMENU.PYRAMID:
+                    let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
+                    node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
+                    break;
+            }
+            targetNode.appendChild(node);
+            let event: Event = new Event(ƒ.EVENT.CHILD_APPEND);
+            targetNode.dispatchEvent(event);
+            this.setRoot(this.branch);
+        }
+        /**
+         * Change the selected Node
+         */
+        private setSelectedNode = (_event: CustomEvent): void => {
+            this.listController.setSelection(_event.detail);
+            this.selectedNode = _event.detail;
+        }
+        /**
+         * Pass Event to Panel
+         */
+        private passEventToPanel = (_event: CustomEvent): void => {
+            let eventToPass: CustomEvent = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
+            _event.cancelBubble = true;
 
-        // TODO: This layout should be used to create a ViewNode, since it contains not only a viewport, but also a tree
-        public getLayout(): GoldenLayout.Config {
-            const config: GoldenLayout.Config = {
-                content: [{
-                    type: "row",
-                    content: [{
-                        type: "component",
-                        componentName: "ComponentTree",
-                        title: "Graph"
-                    }, {
-                        type: "component",
-                        componentName: "ComponentViewport",
-                        title: "Viewport"
-                    }]
-                }]
-            };
-            return config;
+            this.parentPanel.dispatchEvent(eventToPass);
         }
     }
 }

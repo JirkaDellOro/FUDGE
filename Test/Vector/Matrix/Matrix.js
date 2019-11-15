@@ -10,8 +10,8 @@ var MarixTest;
         coSys = Scenes.createCoordinateSystem();
         coSys.addComponent(new ƒ.ComponentTransform());
         ƒ.RenderManager.initialize();
-        let camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", coSys, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
         update();
         displayVectors(coSys.cmpTransform.local);
         animate();
@@ -19,7 +19,7 @@ var MarixTest;
     function animate() {
         window.setInterval(function () {
             let local = coSys.cmpTransform.local;
-            anim = local.getVectorRepresentation();
+            anim = [local.translation, local.rotation, local.scaling];
             // anim[2].x += 1;
             // anim[2].y += 1;
             // anim[2].z += 1;
@@ -139,7 +139,7 @@ var MarixTest;
         }
     }
     function displayVectors(_matrix) {
-        let vectors = _matrix.getVectorRepresentation();
+        let vectors = [_matrix.translation, _matrix.rotation, _matrix.scaling];
         for (let transform of ["t", "r", "s"]) {
             let vector = vectors.shift();
             for (let dimension of ["x", "y", "z"]) {

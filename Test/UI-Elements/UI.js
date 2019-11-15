@@ -1,5 +1,6 @@
 var UI;
 (function (UI) {
+    var ƒ = FudgeCore;
     class FieldSet extends HTMLFieldSetElement {
         constructor(_name = "FieldSet") {
             super();
@@ -63,6 +64,15 @@ var UI;
             this.appendChild(new Stepper("width", { step: 10 }));
             this.appendChild(new Stepper("height", { step: 10 }));
         }
+        set(_rect) {
+            let values = { x: _rect.x, y: _rect.y, width: _rect.width, height: _rect.height };
+            super.set(values);
+        }
+        get() {
+            // tslint:disable no-any
+            let _rect = super.get();
+            return new ƒ.Rectangle(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
         appendButton(_label) {
             let button = document.createElement("button");
             button.textContent = _label;
@@ -92,6 +102,16 @@ var UI;
         }
     }
     UI.Camera = Camera;
+    class Point extends FieldSet {
+        constructor(_name = "Point") {
+            super(_name);
+            this.values = { x: 0, y: 0 };
+            this.appendChild(new Stepper("x", { value: 0 }));
+            this.appendChild(new Stepper("y", { value: 0 }));
+            super.disable({ x: true, y: true });
+        }
+    }
+    UI.Point = Point;
     class FramingScaled extends FieldSet {
         constructor(_name = "FramingScaled") {
             super(_name);
@@ -147,5 +167,6 @@ var UI;
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
+    customElements.define("ui-point", Point, { extends: "fieldset" });
 })(UI || (UI = {}));
 //# sourceMappingURL=UI.js.map

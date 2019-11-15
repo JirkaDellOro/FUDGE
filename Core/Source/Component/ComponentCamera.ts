@@ -18,7 +18,7 @@ namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class ComponentCamera extends Component {
-        // TODO: a ComponentPivot might be interesting to ease behaviour scripting
+        public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
         //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projection: PROJECTION = PROJECTION.CENTRAL;
         private transform: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
@@ -49,24 +49,30 @@ namespace FudgeCore {
             return this.fieldOfView;
         }
 
+        public getDirection(): FIELD_OF_VIEW {
+            return this.direction;
+        }
+
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
         public get ViewProjectionMatrix(): Matrix4x4 {
+            let world: Matrix4x4 = this.pivot;
             try {
-                let cmpTransform: ComponentTransform = this.getContainer().cmpTransform;
-                let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(cmpTransform.local); // TODO: WorldMatrix-> Camera must be calculated
-                return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
-            } catch {
-                return this.transform;
+                world = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+            } catch (_error) {
+                // no container node or no world transformation found -> continue with pivot only
             }
+            let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(world); 
+            return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
         }
 
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given 
          */
         public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void {
             this.aspectRatio = _aspect;
@@ -86,6 +92,32 @@ namespace FudgeCore {
             this.projection = PROJECTION.ORTHOGRAPHIC;
             this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
         }
+
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        public getProjectionRectangle(): Rectangle {
+            let tanFov: number = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
+            let tanHorizontal: number = 0;
+            let tanVertical: number = 0;
+
+            if (this.direction == FIELD_OF_VIEW.DIAGONAL) {
+                let aspect: number = Math.sqrt(this.aspectRatio);
+                tanHorizontal = tanFov * aspect;
+                tanVertical = tanFov / aspect;
+            }
+            else if (this.direction == FIELD_OF_VIEW.VERTICAL) {
+                tanVertical = tanFov;
+                tanHorizontal = tanVertical * this.aspectRatio;
+            }
+            else {//FOV_DIRECTION.HORIZONTAL
+                tanHorizontal = tanFov;
+                tanVertical = tanHorizontal / this.aspectRatio;
+            }
+
+            return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
+        }
+
         //#region Transfer
         public serialize(): Serialization {
             let serialization: Serialization = {
@@ -95,6 +127,7 @@ namespace FudgeCore {
                 fieldOfView: this.fieldOfView,
                 direction: this.direction,
                 aspect: this.aspectRatio,
+                pivot: this.pivot.serialize(),
                 [super.constructor.name]: super.serialize()
             };
             return serialization;
@@ -107,6 +140,7 @@ namespace FudgeCore {
             this.fieldOfView = _serialization.fieldOfView;
             this.aspectRatio = _serialization.aspect;
             this.direction = _serialization.direction;
+            this.pivot.deserialize(_serialization.pivot);
             super.deserialize(_serialization[super.constructor.name]);
             switch (this.projection) {
                 case PROJECTION.ORTHOGRAPHIC:

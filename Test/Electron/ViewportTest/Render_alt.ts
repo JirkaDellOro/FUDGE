@@ -12,7 +12,7 @@ namespace ElectronViewport {
     let branch: ƒ.Node;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    let camera: ƒ.Node;
+    let cmpCamera: ƒ.ComponentCamera;
     window.addEventListener("load", init);
 
     function init(): void {
@@ -52,8 +52,7 @@ namespace ElectronViewport {
         ƒ.RenderManager.update();
 
         // initialize viewport
-        camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
         canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);

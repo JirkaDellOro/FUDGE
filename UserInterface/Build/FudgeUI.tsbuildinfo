@@ -1,11 +1,16 @@
 {
   "bundle": {
-    "commonSourceDirectory": "E:/DAta/GitHub/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
     "sourceFiles": [
-      "E:/DAta/GitHub/FUDGE/UserInterface/Source/NodeList/UINodeList.ts",
-      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
-      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
-      "E:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts"
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMultiLevelMenu/UIMultiLevelMenu.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts",
+      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UINodeData.ts"
     ],
     "js": {
       "sections": [
@@ -17,7 +22,7 @@
         },
         {
           "pos": 15,
-          "end": 16270,
+          "end": 31133,
           "kind": "text"
         }
       ],
@@ -45,13 +50,13 @@
       "sections": [
         {
           "pos": 0,
-          "end": 55,
-          "kind": "type",
-          "data": "../../../core/build/fudgecore"
+          "end": 56,
+          "kind": "reference",
+          "data": "../../Core/Build/FudgeCore.d.ts"
         },
         {
-          "pos": 57,
-          "end": 3153,
+          "pos": 58,
+          "end": 7121,
           "kind": "text"
         }
       ]

@@ -1,2 +1,1 @@
-export * from "./NetworkMessageBasicCollection";
-export * from "./PeerMessageBasicCollection";
+export * from "./NetworkMessageCollection";

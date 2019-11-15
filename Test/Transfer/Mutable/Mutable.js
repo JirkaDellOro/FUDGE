@@ -14,12 +14,12 @@ var Mutable;
         let serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
         let mttCamera;
-        mttCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutator();
+        mttCamera = Scenes.cmpCamera.getMutator();
         console.log("mttCamera: ", mttCamera);
         let mttCameraTypes;
-        mttCameraTypes = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutatorAttributeTypes(mttCamera);
+        mttCameraTypes = Scenes.cmpCamera.getMutatorAttributeTypes(mttCamera);
         console.log("mttCameraTypes: ", mttCameraTypes);
-        let srlCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).serialize();
+        let srlCamera = Scenes.cmpCamera.serialize();
         console.log("srlCamera: ", srlCamera);
         let srlNode = Scenes.node.serialize();
         console.log("srlNode: ", srlNode);
@@ -32,7 +32,7 @@ var Mutable;
         mutator.scaling["y"] = Math.cos(1.7 * angle);
         cmpTransform.mutate(mutator);
         ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
     }
 })(Mutable || (Mutable = {}));
 //# sourceMappingURL=Mutable.js.map

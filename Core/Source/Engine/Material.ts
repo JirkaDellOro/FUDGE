@@ -55,6 +55,7 @@ namespace FudgeCore {
             this.shaderType = _shaderType;
             let coat: Coat = this.createCoatMatchingShader();
             coat.mutate(this.coat.getMutator());
+            this.setCoat(coat);
         }
 
         /**

@@ -33,10 +33,8 @@ namespace FudgeCore {
      * ```
      */
     export class LightDirectional extends Light {
-        public direction: Vector3 = new Vector3(0, -1, 0);
-        constructor(_color: Color = new Color(1, 1, 1, 1), _direction: Vector3 = new Vector3(0, -1, 0)) {
+        constructor(_color: Color = new Color(1, 1, 1, 1)) {
             super(_color);
-            this.direction = _direction;
         }
     }
     /**

@@ -1,8 +1,8 @@
 /// <reference types="../../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 
-namespace UI {
-    // import ƒ = FudgeCore;
+namespace UITest {
+    import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     export class CameraUI extends ƒui.UIMutable {
         protected root: HTMLFormElement;

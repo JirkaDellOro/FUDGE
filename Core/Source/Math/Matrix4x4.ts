@@ -1,19 +1,30 @@
 namespace FudgeCore {
 
   /**
+   * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+   */
+  interface VectorRepresentation {
+    translation: Vector3;
+    rotation: Vector3;
+    scaling: Vector3;
+  }
+
+  /**
    * Stores a 4x4 transformation matrix and provides operations for it.
    * ```plaintext
-   * [ 0, 1, 2, 3 ] <- row vector x
-   * [ 4, 5, 6, 7 ] <- row vector y
-   * [ 8, 9,10,11 ] <- row vector z
-   * [12,13,14,15 ] <- translation
-   *            ^  homogeneous column
+   * [ 0, 1, 2, 3 ] ← row vector x
+   * [ 4, 5, 6, 7 ] ← row vector y
+   * [ 8, 9,10,11 ] ← row vector z
+   * [12,13,14,15 ] ← translation
+   *            ↑  homogeneous column
    * ```
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
+
   export class Matrix4x4 extends Mutable implements Serializable {
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
+    private vectors: VectorRepresentation; // vector representation of 
 
     public constructor() {
       super();
@@ -23,16 +34,61 @@ namespace FudgeCore {
         0, 0, 1, 0,
         0, 0, 0, 1
       ]);
+      this.resetCache();
     }
 
+    /** 
+     * - get: a copy of the calculated translation vector   
+     * - set: effect the matrix ignoring its rotation and scaling
+     */
     public get translation(): Vector3 {
-      return new Vector3(this.data[12], this.data[13], this.data[14]);
+      if (!this.vectors.translation)
+        this.vectors.translation = new Vector3(this.data[12], this.data[13], this.data[14]);
+      return this.vectors.translation.copy;
     }
     public set translation(_translation: Vector3) {
       this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      this.vectors.translation = _translation;
+      this.mutator = null;
+    }
+
+    /** 
+     * - get: a copy of the calculated rotation vector   
+     * - set: effect the matrix
+     */
+    public get rotation(): Vector3 {
+      if (!this.vectors.rotation)
+        this.vectors.rotation = this.getEulerAngles();
+      return this.vectors.rotation.copy;
+    }
+    public set rotation(_rotation: Vector3) {
+      this.mutate({ "rotation": _rotation });
+      this.resetCache();
+    }
+
+    /** 
+     * - get: a copy of the calculated scale vector   
+     * - set: effect the matrix
+     */
+    public get scaling(): Vector3 {
+      if (!this.vectors.scaling)
+        this.vectors.scaling = new Vector3(
+          Math.hypot(this.data[0], this.data[1], this.data[2]),
+          Math.hypot(this.data[4], this.data[5], this.data[6]),
+          Math.hypot(this.data[8], this.data[9], this.data[10])
+        );
+      return this.vectors.scaling.copy;
+    }
+    public set scaling(_scaling: Vector3) {
+      this.mutate({ "scaling": _scaling });
+      this.resetCache();
     }
 
     //#region STATICS
+    /**
+     * Retrieve a new identity matrix
+     */
     public static get IDENTITY(): Matrix4x4 {
       // const result: Matrix4x4 = new Matrix4x4();
       const result: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -218,7 +274,6 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-     * @param _translate 
      */
     public static TRANSLATION(_translate: Vector3): Matrix4x4 {
       // let matrix: Matrix4x4 = new Matrix4x4;
@@ -291,7 +346,6 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-     * @param _scalar 
      */
     public static SCALING(_scalar: Vector3): Matrix4x4 {
       // const matrix: Matrix4x4 = new Matrix4x4;
@@ -312,7 +366,8 @@ namespace FudgeCore {
      * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
      * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
      * @param _near The near clipspace border on the z-axis.
-     * @param _far The far clipspace borer on the z-axis.
+     * @param _far The far clipspace border on the z-axis.
+     * @param _direction The plane on which the fieldOfView-Angle is given 
      */
     public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
       let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
@@ -367,10 +422,18 @@ namespace FudgeCore {
 
     //#region Rotation
     /**
-    * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-    * @param _matrix The matrix to multiply.
-    * @param _angleInDegrees The angle to rotate by.
-    */
+     * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+     * @param _by 
+     */
+    public rotate(_by: Vector3): void {
+      this.rotateZ(_by.z);
+      this.rotateY(_by.y);
+      this.rotateX(_by.x);
+    }
+
+    /**
+     * Adds a rotation around the x-Axis to this matrix
+     */
     public rotateX(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
       this.set(matrix);
@@ -378,9 +441,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-     * @param _matrix The matrix to multiply.
-     * @param _angleInDegrees The angle to rotate by.
+     * Adds a rotation around the y-Axis to this matrix
      */
     public rotateY(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
@@ -389,9 +450,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-     * @param _matrix The matrix to multiply.
-     * @param _angleInDegrees The angle to rotate by.
+     * Adds a rotation around the z-Axis to this matrix
      */
     public rotateZ(_angleInDegrees: number): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
@@ -399,6 +458,9 @@ namespace FudgeCore {
       Recycler.store(matrix);
     }
 
+    /**
+     * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector 
+     */
     public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
       const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
       this.set(matrix);
@@ -407,6 +469,9 @@ namespace FudgeCore {
     //#endregion
 
     //#region Translation
+    /**
+     * Add a translation by the given vector to this matrix 
+     */
     public translate(_by: Vector3): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
       // TODO: possible optimization, translation may alter mutator instead of deleting it.
@@ -415,61 +480,73 @@ namespace FudgeCore {
     }
 
     /**
-     * Translate the transformation along the x-axis.
-     * @param _x The value of the translation.
+     * Add a translation along the x-Axis by the given amount to this matrix 
      */
     public translateX(_x: number): void {
       this.data[12] += _x;
+      this.mutator = null;
     }
     /**
-     * Translate the transformation along the y-axis.
-     * @param _y The value of the translation.
+     * Add a translation along the y-Axis by the given amount to this matrix 
      */
     public translateY(_y: number): void {
       this.data[13] += _y;
+      this.mutator = null;
     }
     /**
-     * Translate the transformation along the z-axis.
-     * @param _z The value of the translation.
+     * Add a translation along the y-Axis by the given amount to this matrix 
      */
     public translateZ(_z: number): void {
       this.data[14] += _z;
+      this.mutator = null;
     }
     //#endregion
 
     //#region Scaling
+    /**
+     * Add a scaling by the given vector to this matrix 
+     */
     public scale(_by: Vector3): void {
       const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
       this.set(matrix);
       Recycler.store(matrix);
     }
+    /**
+     * Add a scaling along the x-Axis by the given amount to this matrix 
+     */
     public scaleX(_by: number): void {
       this.scale(new Vector3(_by, 1, 1));
     }
+    /**
+     * Add a scaling along the y-Axis by the given amount to this matrix 
+     */
     public scaleY(_by: number): void {
       this.scale(new Vector3(1, _by, 1));
     }
+    /**
+     * Add a scaling along the z-Axis by the given amount to this matrix 
+     */
     public scaleZ(_by: number): void {
       this.scale(new Vector3(1, 1, _by));
     }
     //#endregion
 
     //#region Transformation
+    /**
+     * Multiply this matrix with the given matrix
+     */
     public multiply(_matrix: Matrix4x4): void {
       this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
+      this.mutator = null;
     }
     //#endregion
 
     //#region Transfer
-    public getVectorRepresentation(): Vector3[] {
-      // extract translation vector
-      // let translation: Vector3 = this.translation;  // already defined
-      // extract scaling vector and divide matrix by
-      let scaling: Vector3 = new Vector3(
-        Math.hypot(this.data[0], this.data[1], this.data[2]),
-        Math.hypot(this.data[4], this.data[5], this.data[6]),
-        Math.hypot(this.data[8], this.data[9], this.data[10])
-      );
+    /**
+     * Calculates and returns the euler-angles representing the current rotation of this matrix
+     */
+    public getEulerAngles(): Vector3 {
+      let scaling: Vector3 = this.scaling;
 
       let s0: number = this.data[0] / scaling.x;
       let s1: number = this.data[1] / scaling.x;
@@ -508,15 +585,21 @@ namespace FudgeCore {
       let rotation: Vector3 = new Vector3(x1, y1, z1);
       rotation.scale(180 / Math.PI);
 
-      return [this.translation, rotation, scaling];
+      return rotation;
     }
 
+    /**
+     * Sets the elements of this matrix to the values of the given matrix
+     */
     public set(_to: Matrix4x4): void {
       // this.data = _to.get();
       this.data.set(_to.data);
-      this.mutator = null;
+      this.resetCache();
     }
 
+    /**
+     * Return the elements of this matrix as a Float32Array
+     */
     public get(): Float32Array {
       return new Float32Array(this.data);
     }
@@ -535,60 +618,76 @@ namespace FudgeCore {
       if (this.mutator)
         return this.mutator;
 
-      let vectors: Vector3[] = this.getVectorRepresentation();
       let mutator: Mutator = {
-        translation: vectors[0].getMutator(),
-        rotation: vectors[1].getMutator(),
-        scaling: vectors[2].getMutator()
+        translation: this.translation.getMutator(),
+        rotation: this.rotation.getMutator(),
+        scaling: this.scaling.getMutator()
       };
 
-      // TODO: keep copy as this.mutator. Set this copy to null, when data changes so getMutator creates a new mutator on request
+      // cache mutator
+      this.mutator = mutator;
       return mutator;
     }
 
     public mutate(_mutator: Mutator): void {
-      let mutator: Mutator = this.getMutator();
-
-      let oldTranslation: Vector3 = <Vector3>mutator["translation"];
-      let oldRotation: Vector3 = <Vector3>mutator["rotation"];
-      let oldScaling: Vector3 = <Vector3>mutator["scaling"];
+      let oldTranslation: Vector3 = this.translation;
+      let oldRotation: Vector3 = this.rotation;
+      let oldScaling: Vector3 = this.scaling;
       let newTranslation: Vector3 = <Vector3>_mutator["translation"];
       let newRotation: Vector3 = <Vector3>_mutator["rotation"];
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
+      let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        mutator["translation"] = {
-          x: newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
-          y: newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
-          z: newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
-        };
+        vectors.translation = new Vector3(
+          newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
+          newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
+          newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
+        );
       }
       if (newRotation) {
-        mutator["rotation"] = {
-          x: newRotation.x != undefined ? newRotation.x : oldRotation.x,
-          y: newRotation.y != undefined ? newRotation.y : oldRotation.y,
-          z: newRotation.z != undefined ? newRotation.z : oldRotation.z
-        };
+        vectors.rotation = new Vector3(
+          newRotation.x != undefined ? newRotation.x : oldRotation.x,
+          newRotation.y != undefined ? newRotation.y : oldRotation.y,
+          newRotation.z != undefined ? newRotation.z : oldRotation.z
+        );
       }
       if (newScaling) {
-        mutator["scaling"] = {
-          x: newScaling.x != undefined ? newScaling.x : oldScaling.x,
-          y: newScaling.y != undefined ? newScaling.y : oldScaling.y,
-          z: newScaling.z != undefined ? newScaling.z : oldScaling.z
-        };
+        vectors.scaling = new Vector3(
+          newScaling.x != undefined ? newScaling.x : oldScaling.x,
+          newScaling.y != undefined ? newScaling.y : oldScaling.y,
+          newScaling.z != undefined ? newScaling.z : oldScaling.z
+        );
       }
 
+      // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
-      matrix.translate(<Vector3>mutator.translation);
-      // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/Qutionets
-      matrix.rotateZ((<Vector3>mutator.rotation).z);
-      matrix.rotateY((<Vector3>mutator.rotation).y);
-      matrix.rotateX((<Vector3>mutator.rotation).x);
-      matrix.scale(<Vector3>mutator.scaling);
+      if (vectors.translation)
+        matrix.translate(vectors.translation);
+      if (vectors.rotation) {
+        matrix.rotateZ(vectors.rotation.z);
+        matrix.rotateY(vectors.rotation.y);
+        matrix.rotateX(vectors.rotation.x);
+      }
+      if (vectors.scaling)
+        matrix.scale(vectors.scaling);
       this.set(matrix);
-      this.mutator = mutator;
+
+      this.vectors = vectors;
     }
 
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = {};
+      if (_mutator.translation) types.translation = "Vector3";
+      if (_mutator.rotation) types.rotation = "Vector3";
+      if (_mutator.scaling) types.scaling = "Vector3";
+      return types;
+    }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
+
+    private resetCache(): void {
+      this.vectors = { translation: null, rotation: null, scaling: null };
+      this.mutator = null;
+    }
   }
   //#endregion
 }

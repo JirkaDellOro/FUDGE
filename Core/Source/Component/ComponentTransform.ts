@@ -25,12 +25,18 @@ namespace FudgeCore {
             return this;
         }
 
-        public mutate(_mutator: Mutator): void {
-            this.local.mutate(_mutator);
-        }
-        public getMutator(): Mutator { 
-            return this.local.getMutator();
-        }
+        // public mutate(_mutator: Mutator): void {
+        //     this.local.mutate(_mutator);
+        // }
+        // public getMutator(): Mutator { 
+        //     return this.local.getMutator();
+        // }
+
+        // public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+        //     let types: MutatorAttributeTypes = this.local.getMutatorAttributeTypes(_mutator);
+        //     return types;
+        // }
+
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.world;
             super.reduceMutator(_mutator);

@@ -13,36 +13,58 @@ namespace Fudge {
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node: ƒ.Node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels
-    let panel: Panel;
+    let panel: Panel = null;
+
 
     window.addEventListener("load", initWindow);
 
     function initWindow(): void {
         ƒ.Debug.log("Fudge started");
+        PanelManager.instance.init();
+        console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
         ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Save");
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof NodePanel) {
+                node = panel.getNode();
+            }
             save(node);
         });
         ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Open");
             node = open();
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof NodePanel) {
+                panel.setNode(node);
+            }
         });
         ipcRenderer.on("openViewNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("OpenViewNode");
             openViewNode();
         });
+        ipcRenderer.on("openAnimationPanel", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+            ƒ.Debug.log("Open Animation Panel");
+            openAnimationPanel();
+        });
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("UpdateViewNode");
-            panel.viewContainers[0].emit("setRoot", node);
+            
         });
     }
 
     function openViewNode(): void {
-        // HACK... multiple panels must be supported in the future
-        panel = new Panel(VIEW.NODE);
+        // node = Scenes.createAxisCross();
+        node = new ƒ.Node("Scene");
+        let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
+        PanelManager.instance.addPanel(nodePanel);
+    }
+
+    function openAnimationPanel(): void {
+      let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+      PanelManager.instance.addPanel(panel);
     }
 
     function save(_node: ƒ.Node): void {
@@ -72,4 +94,5 @@ namespace Fudge {
 
         return node;
     }
+
 }

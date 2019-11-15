@@ -4,25 +4,31 @@ namespace TextureTest {
     window.addEventListener("load", init);
 
     function init(_event: Event): void {
-        let coatRed: ƒ.CoatColored = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
-        let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
+        let coatWhite: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.WHITE);
+        let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
         let branch: ƒ.Node = new ƒ.Node("Branch");
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
         body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
-        let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
-        branch.addComponent(cmpLightAmbient);
+        // let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
+        // branch.addComponent(cmpLightAmbient);
 
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0, 0, 1), new ƒ.Vector3(1, 0.2, 0)));
+        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.RED));
+        cmpLightDirectionalRed.pivot.rotateY(-90);
         branch.addComponent(cmpLightDirectionalRed);
 
-        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 1, 0, 1), new ƒ.Vector3(-1, 0.2, -1)));
+        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.GREEN));
         branch.addComponent(cmpLightDirectionalGreen);
 
-        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0, 0, 1, 1), new ƒ.Vector3(0, 0.2, 1)));
+        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional( ƒ.Color.BLUE));
+        cmpLightDirectionalBlue.pivot.rotateY(180);
         branch.addComponent(cmpLightDirectionalBlue);
+
+        let cmpLightDirectionalWhite: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.WHITE));
+        cmpLightDirectionalWhite.pivot.rotateY(90);
+        branch.addComponent(cmpLightDirectionalWhite);
 
         branch.appendChild(body);
         branch.appendChild(Scenes.createCoordinateSystem());
@@ -32,8 +38,8 @@ namespace TextureTest {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
 
         Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);

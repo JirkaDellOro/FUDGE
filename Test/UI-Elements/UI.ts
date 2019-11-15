@@ -71,6 +71,16 @@ namespace UI {
             this.appendChild(new Stepper("height", { step: 10 }));
         }
 
+        public set(_rect: ƒ.Rectangle): void {
+            let values: {} = { x: _rect.x, y: _rect.y, width: _rect.width, height: _rect.height };
+            super.set(values);
+        }
+        public get(): ƒ.Rectangle {
+            // tslint:disable no-any
+            let _rect: any = super.get();
+            return new ƒ.Rectangle(_rect.x, _rect.y, _rect.width, _rect.height);
+        }
+
         public appendButton(_label: string): void {
             let button: HTMLButtonElement = document.createElement("button");
             button.textContent = _label;
@@ -100,6 +110,16 @@ namespace UI {
             this.values = { aspect: 0, fieldOfView: 0 };
             this.appendChild(new Stepper("fieldOfView", { min: 5, max: 100, step: 5, value: 45 }));
             this.appendChild(new Stepper("aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
+        }
+    }
+
+    export class Point extends FieldSet<{ x: number, y: number }> {
+        constructor(_name: string = "Point") {
+            super(_name);
+            this.values = { x: 0, y: 0 };
+            this.appendChild(new Stepper("x", { value: 0 }));
+            this.appendChild(new Stepper("y", { value: 0 }));
+            super.disable({ x: true, y: true });
         }
     }
 
@@ -163,4 +183,5 @@ namespace UI {
     customElements.define("ui-rectangle", Rectangle, { extends: "fieldset" });
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
+    customElements.define("ui-point", Point, { extends: "fieldset" });
 }

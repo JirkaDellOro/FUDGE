@@ -72,7 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Holds an <a href="fudgecore.animation.html">Animation</a> and controls it.</p>
+						<p>Holds a reference to an <a href="fudgecore.animation.html">Animation</a> and controls it. Controls playback and playmode as well as speed.</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
@@ -136,6 +136,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentanimator.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentanimator.html#getcurrenttime" class="tsd-kind-icon">get<wbr>Current<wbr>Time</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
@@ -145,6 +146,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentanimator.html#serialize" class="tsd-kind-icon">serialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#setcontainer" class="tsd-kind-icon">set<wbr>Container</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentanimator.html#updateanimation" class="tsd-kind-icon">update<wbr>Animation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentanimator.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
 							</ul>
 						</section>
@@ -163,7 +165,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L37">Component/ComponentAnimator.ts:37</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L44">Component/ComponentAnimator.ts:44</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -191,7 +193,7 @@
 					<div class="tsd-signature tsd-kind-icon">animation<span class="tsd-signature-symbol">:</span> <a href="fudgecore.animation.html" class="tsd-signature-type">Animation</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L30">Component/ComponentAnimator.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L37">Component/ComponentAnimator.ts:37</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -201,7 +203,7 @@
 					<div class="tsd-signature tsd-kind-icon">playback<span class="tsd-signature-symbol">:</span> <a href="../enums/fudgecore.animation_playback.html" class="tsd-signature-type">ANIMATION_PLAYBACK</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L32">Component/ComponentAnimator.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L39">Component/ComponentAnimator.ts:39</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -211,7 +213,7 @@
 					<div class="tsd-signature tsd-kind-icon">playmode<span class="tsd-signature-symbol">:</span> <a href="../enums/fudgecore.animation_playmode.html" class="tsd-signature-type">ANIMATION_PLAYMODE</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L31">Component/ComponentAnimator.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L38">Component/ComponentAnimator.ts:38</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -221,7 +223,7 @@
 					<div class="tsd-signature tsd-kind-icon">speed<wbr>Scales<wbr>With<wbr>Global<wbr>Speed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L33">Component/ComponentAnimator.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L40">Component/ComponentAnimator.ts:40</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -239,7 +241,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#isactive">isActive</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/Component.ts#L17">Component/Component.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/Component.ts#L17">Component/Component.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -257,7 +259,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#issingleton">isSingleton</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/Component.ts#L24">Component/Component.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/Component.ts#L24">Component/Component.ts:24</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -279,7 +281,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L57">Component/ComponentAnimator.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L61">Component/ComponentAnimator.ts:61</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -303,7 +305,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L30">Transfer/Mutable.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L33">Transfer/Mutable.ts:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -330,7 +332,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#activate">activate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/Component.ts#L13">Component/Component.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/Component.ts#L13">Component/Component.ts:13</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -397,7 +399,7 @@
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#deserialize">deserialize</a></p>
 								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L85">Component/ComponentAnimator.ts:85</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L108">Component/ComponentAnimator.ts:108</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -451,7 +453,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#getcontainer">getContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/Component.ts#L31">Component/Component.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/Component.ts#L31">Component/Component.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -467,6 +469,28 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getcurrenttime" class="tsd-anchor"></a>
+					<h3>get<wbr>Current<wbr>Time</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Current<wbr>Time<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L81">Component/ComponentAnimator.ts:81</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the current time of the animation, modulated for animation length.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="getmutator" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator</h3>
@@ -478,7 +502,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L36">Transfer/Mutable.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L39">Transfer/Mutable.ts:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -501,12 +525,13 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L82">Transfer/Mutable.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L86">Transfer/Mutable.ts:86</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values</p>
+									<p>Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+									Does not recurse into objects!</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -532,7 +557,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L68">Transfer/Mutable.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L71">Transfer/Mutable.ts:71</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -556,7 +581,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L75">Transfer/Mutable.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L78">Transfer/Mutable.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -579,13 +604,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L62">Component/ComponentAnimator.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L70">Component/ComponentAnimator.ts:70</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Jumps to a certain time in the animation to play from there.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_time: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The time to jump to</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -603,7 +636,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L109">Transfer/Mutable.ts:109</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L117">Transfer/Mutable.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -670,7 +703,7 @@
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#serialize">serialize</a></p>
 								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/ComponentAnimator.ts#L72">Component/ComponentAnimator.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L95">Component/ComponentAnimator.ts:95</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
@@ -688,7 +721,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#setcontainer">setContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Component/Component.ts#L38">Component/Component.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/Component.ts#L38">Component/Component.ts:38</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -709,6 +742,38 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="updateanimation" class="tsd-anchor"></a>
+					<h3>update<wbr>Animation</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Animation<span class="tsd-signature-symbol">(</span>_time<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Component/ComponentAnimator.ts#L90">Component/ComponentAnimator.ts:90</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn&#39;t be used during the game.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_time: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the (unscaled) time to update the animation with.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
+							<p>a Tupel containing the Mutator for Animation and the playmode corrected time.</p>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="updatemutator" class="tsd-anchor"></a>
 					<h3>update<wbr>Mutator</h3>
@@ -720,7 +785,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Transfer/Mutable.ts#L96">Transfer/Mutable.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/336d7031/Core/Source/Transfer/Mutable.ts#L104">Transfer/Mutable.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -802,6 +867,9 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentanimator.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.componentanimator.html#getcurrenttime" class="tsd-kind-icon">get<wbr>Current<wbr>Time</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentanimator.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
 							</li>
@@ -828,6 +896,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentanimator.html#setcontainer" class="tsd-kind-icon">set<wbr>Container</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.componentanimator.html#updateanimation" class="tsd-kind-icon">update<wbr>Animation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentanimator.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>

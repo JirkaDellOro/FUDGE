@@ -1,4 +1,3 @@
-/// <reference types="webgl2" />
 declare namespace FudgeCore {
     type General = any;
     interface Serialization {
@@ -110,8 +109,11 @@ declare namespace FudgeCore {
         readonly forUserInterface: null;
     }
     /**
-     * Base class implementing mutability of instances of subclasses using [[Mutator]]-objects
-     * thus providing and using interfaces created at runtime
+     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTarget {
         /**
@@ -135,6 +137,7 @@ declare namespace FudgeCore {
         getMutatorForUserInterface(): MutatorForUserInterface;
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
+         * Does not recurse into objects!
          * @param _mutator
          */
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -156,11 +159,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
+     * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
+     */
     interface AnimationStructure {
         [attribute: string]: Serialization | AnimationSequence;
     }
     /**
-    * Holds information about Animation Labels
+    * An associative array mapping names of lables to timestamps.
+    * Labels need to be unique per Animation.
     * @author Lukas Scheuerle, HFU, 2019
     */
     interface AnimationLabel {
@@ -176,6 +184,7 @@ declare namespace FudgeCore {
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
+     * Can be added to a Node and played through [[ComponentAnimator]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class Animation extends Mutable implements SerializableResource {
@@ -185,40 +194,138 @@ declare namespace FudgeCore {
         labels: AnimationLabel;
         stepsPerSecond: number;
         animationStructure: AnimationStructure;
+        events: AnimationEventTrigger;
         private framesPerSecond;
-        private events;
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        /**
+         * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+         * @param _time The time at which the animation currently is at
+         * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
+         * @param _playback The playbackmode the animation is supposed to be calculated with.
+         * @returns a "Mutator" to apply.
+         */
         getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
+        /**
+         * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max.
+         * @param _min The minimum time (inclusive) to check between
+         * @param _max The maximum time (exclusive) to check between
+         * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
+         * @param _direction The direction the animation is supposed to run in. >0 == forward, 0 == stop, <0 == backwards
+         * @returns a list of strings with the names of the custom events to fire.
+         */
         getEventsToFire(_min: number, _max: number, _playback: ANIMATION_PLAYBACK, _direction: number): string[];
+        /**
+         * Adds an Event to the List of events.
+         * @param _name The name of the event (needs to be unique per Animation).
+         * @param _time The timestamp of the event (in milliseconds).
+         */
         setEvent(_name: string, _time: number): void;
+        /**
+         * Removes the event with the given name from the list of events.
+         * @param _name name of the event to remove.
+         */
         removeEvent(_name: string): void;
         readonly getLabels: Enumerator;
         fps: number;
+        /**
+         * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
+         */
         calculateTotalTime(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Traverses an AnimationStructure and returns the Serialization of said Structure.
+         * @param _structure The Animation Structure at the current level to transform into the Serialization.
+         * @returns the filled Serialization.
+         */
         private traverseStructureForSerialisation;
+        /**
+         * Traverses a Serialization to create a new AnimationStructure.
+         * @param _serialization The serialization to transfer into an AnimationStructure
+         * @returns the newly created AnimationStructure.
+         */
         private traverseStructureForDeserialisation;
+        /**
+         * Finds the list of events to be used with these settings.
+         * @param _direction The direction the animation is playing in.
+         * @param _playback The playbackmode the animation is playing in.
+         * @returns The correct AnimationEventTrigger Object to use
+         */
         private getCorrectEventList;
+        /**
+         * Traverses an AnimationStructure to turn it into the "Mutator" to return to the Component.
+         * @param _structure The strcuture to traverse
+         * @param _time the point in time to write the animation numbers into.
+         * @returns The "Mutator" filled with the correct values at the given time.
+         */
         private traverseStructureForMutator;
+        /**
+         * Traverses the current AnimationStrcuture to find the totalTime of this animation.
+         * @param _structure The structure to traverse
+         */
         private traverseStructureForTime;
+        /**
+         * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+         * @param _type the type of the structure to get
+         * @returns the requested [[AnimationStructure]]
+         */
         private getProcessedAnimationStructure;
+        /**
+         * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+         * @param _type The type of AnimationEventTrigger to get
+         * @returns the requested [[AnimationEventTrigger]]
+         */
         private getProcessedEventTrigger;
+        /**
+         * Traverses an existing structure to apply a recalculation function to the AnimationStructure to store in a new Structure.
+         * @param _oldStructure The old structure to traverse
+         * @param _functionToUse The function to use to recalculated the structure.
+         * @returns A new Animation Structure with the recalulated Animation Sequences.
+         */
         private traverseStructureForNewStructure;
+        /**
+         * Creates a reversed Animation Sequence out of a given Sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns The reversed Sequence
+         */
         private calculateReverseSequence;
+        /**
+         * Creates a rastered [[AnimationSequence]] out of a given sequence.
+         * @param _sequence The sequence to calculate the new sequence out of
+         * @returns the rastered sequence.
+         */
         private calculateRasteredSequence;
+        /**
+         * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the reversed event object
+         */
         private calculateReverseEventTriggers;
+        /**
+         * Creates a rastered [[AnimationEventTrigger]] object based on the given one.
+         * @param _events the event object to calculate the new one out of
+         * @returns the rastered event object
+         */
         private calculateRasteredEventTriggers;
+        /**
+         * Checks which events lay between two given times and returns the names of the ones that do.
+         * @param _eventTriggers The event object to check the events inside of
+         * @param _min the minimum of the range to check between (inclusive)
+         * @param _max the maximum of the range to check between (exclusive)
+         * @returns an array of the names of the events in the given range.
+         */
         private checkEventsBetween;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Calculates the values between [[AnimationKeys]]
+     * Calculates the values between [[AnimationKey]]s.
+     * Represented internally by a cubic function (`f(x) = ax³ + bx² + cx + d`).
+     * Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationFunction {
@@ -229,33 +336,53 @@ declare namespace FudgeCore {
         private keyIn;
         private keyOut;
         constructor(_keyIn: AnimationKey, _keyOut?: AnimationKey);
+        /**
+         * Calculates the value of the function at the given time.
+         * @param _time the point in time at which to evaluate the function in milliseconds. Will be corrected for offset internally.
+         * @returns the value at the given time
+         */
         evaluate(_time: number): number;
         setKeyIn: AnimationKey;
         setKeyOut: AnimationKey;
+        /**
+         * (Re-)Calculates the parameters of the cubic function.
+         * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
+         * and https://jirkadelloro.github.io/FUDGE/Documentation/Logs/190410_Notizen_LS
+         */
         calculate(): void;
     }
 }
 declare namespace FudgeCore {
     /**
-     *
+     * Holds information about set points in time, their accompanying values as well as their slopes.
+     * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
+     * Saved inside an [[AnimationSequence]].
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
-        time: number;
-        value: number;
-        constant: boolean;
+        /**Don't modify this unless you know what you're doing.*/
         functionIn: AnimationFunction;
+        /**Don't modify this unless you know what you're doing.*/
         functionOut: AnimationFunction;
         broken: boolean;
-        path2D: Path2D;
+        private time;
+        private value;
+        private constant;
         private slopeIn;
         private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
-        readonly getSlopeIn: number;
-        readonly getSlopeOut: number;
-        setSlopeIn: number;
-        setSlopeOut: number;
-        static sort(_a: AnimationKey, _b: AnimationKey): number;
+        Time: number;
+        Value: number;
+        Constant: boolean;
+        SlopeIn: number;
+        SlopeOut: number;
+        /**
+         * Static comparation function to use in an array sort function to sort the keys by their time.
+         * @param _a the animation key to check
+         * @param _b the animation key to check against
+         * @returns >0 if a>b, 0 if a=b, <0 if a<b
+         */
+        static compare(_a: AnimationKey, _b: AnimationKey): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -264,17 +391,47 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     *
+     * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
+     * Provides functions to modify said keys
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationSequence extends Mutable implements Serializable {
-        keys: AnimationKey[];
+        private keys;
+        /**
+         * Evaluates the sequence at the given point in time.
+         * @param _time the point in time at which to evaluate the sequence in milliseconds.
+         * @returns the value of the sequence at the given time. 0 if there are no keys.
+         */
         evaluate(_time: number): number;
+        /**
+         * Adds a new key to the sequence.
+         * @param _key the key to add
+         */
         addKey(_key: AnimationKey): void;
+        /**
+         * Removes a given key from the sequence.
+         * @param _key the key to remove
+         */
         removeKey(_key: AnimationKey): void;
+        /**
+         * Removes the Animation Key at the given index from the keys.
+         * @param _index the zero-based index at which to remove the key
+         * @returns the removed AnimationKey if successful, null otherwise.
+         */
+        removeKeyAtIndex(_index: number): AnimationKey;
+        /**
+         * Gets a key from the sequence at the desired index.
+         * @param _index the zero-based index at which to get the key
+         * @returns the AnimationKey at the index if it exists, null otherwise.
+         */
+        getKey(_index: number): AnimationKey;
+        readonly length: number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Utility function that (re-)generates all functions in the sequence.
+         */
         private regenerateFunctions;
     }
 }
@@ -330,7 +487,7 @@ declare namespace FudgeCore {
         NOTCH = "NOTCH",
         ALLPASS = "ALLPASS"
     }
-    class AudioFilter {
+    export class AudioFilter {
         useFilter: boolean;
         filterType: FILTER_TYPE;
         constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
@@ -339,6 +496,7 @@ declare namespace FudgeCore {
          */
         addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -381,7 +539,7 @@ declare namespace FudgeCore {
         INVERSE = "INVERSE",
         EXPONENTIAL = "EXPONENTIAL"
     }
-    class AudioLocalisation {
+    export class AudioLocalisation {
         pannerNode: PannerNode;
         panningModel: PANNING_MODEL_TYPE;
         distanceModel: DISTANCE_MODEL_TYPE;
@@ -414,6 +572,7 @@ declare namespace FudgeCore {
          */
         getPanneOrientation(): Vector3;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -428,7 +587,7 @@ declare namespace FudgeCore {
      * Describes Data Handler for all Audio Sources
      * @authors Thomas Dorner, HFU, 2019
      */
-    class AudioSessionData {
+    export class AudioSessionData {
         dataArray: AudioData[];
         private bufferCounter;
         private audioBufferHolder;
@@ -476,6 +635,7 @@ declare namespace FudgeCore {
          */
         private logErrorFetch;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -504,6 +664,7 @@ declare namespace FudgeCore {
         static decorateCoat(_constructor: Function): void;
         private static injectRenderDataForCoatColored;
         private static injectRenderDataForCoatTextured;
+        private static injectRenderDataForCoatMatCap;
     }
 }
 declare namespace FudgeCore {
@@ -543,6 +704,7 @@ declare namespace FudgeCore {
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
+        private static renderShaderRayCast;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -552,7 +714,7 @@ declare namespace FudgeCore {
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
-        static initialize(): void;
+        static initialize(_antialias?: boolean, _alpha?: boolean): void;
         /**
          * Return a reference to the offscreen-canvas
          */
@@ -580,6 +742,7 @@ declare namespace FudgeCore {
         static getViewportRectangle(): Rectangle;
         /**
          * Convert light data to flat arrays
+         * TODO: this method appears to be obsolete...?
          */
         protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
         /**
@@ -591,9 +754,18 @@ declare namespace FudgeCore {
          * @param _renderShader
          * @param _renderBuffers
          * @param _renderCoat
+         * @param _world
          * @param _projection
          */
         protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        /**
+         * Draw a buffer with a special shader that uses an id instead of a color
+         * @param _renderShader
+         * @param _renderBuffers
+         * @param _world
+         * @param _projection
+         */
+        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -644,6 +816,16 @@ declare namespace FudgeCore {
         tilingY: number;
         repetition: boolean;
     }
+    /**
+     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
+     * and a flatMix number for mixing between smooth and flat shading.
+     */
+    class CoatMatCap extends Coat {
+        texture: TextureImage;
+        tintColor: Color;
+        flatMix: number;
+        constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number);
+    }
 }
 declare namespace FudgeCore {
     /**
@@ -681,10 +863,15 @@ declare namespace FudgeCore {
      * @author Lukas Scheuerle, HFU, 2019
      */
     enum ANIMATION_PLAYMODE {
+        /**Plays animation in a loop: it restarts once it hit the end.*/
         LOOP = 0,
+        /**Plays animation once and stops at the last key/frame*/
         PLAYONCE = 1,
+        /**Plays animation once and stops on the first key/frame */
         PLAYONCESTOPAFTER = 2,
+        /**Plays animation like LOOP, but backwards.*/
         REVERSELOOP = 3,
+        /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
         STOP = 4
     }
     enum ANIMATION_PLAYBACK {
@@ -696,7 +883,7 @@ declare namespace FudgeCore {
         FRAMEBASED = 2
     }
     /**
-     * Holds an [[Animation]] and controls it.
+     * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Component {
@@ -709,13 +896,50 @@ declare namespace FudgeCore {
         private lastTime;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         speed: number;
+        /**
+         * Jumps to a certain time in the animation to play from there.
+         * @param _time The time to jump to
+         */
         jumpTo(_time: number): void;
+        /**
+         * Returns the current time of the animation, modulated for animation length.
+         */
+        getCurrentTime(): number;
+        /**
+         * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
+         * @param _time the (unscaled) time to update the animation with.
+         * @returns a Tupel containing the Mutator for Animation and the playmode corrected time.
+         */
+        updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
         deserialize(_s: Serialization): Serializable;
+        /**
+         * Updates the Animation.
+         * Gets called every time the Loop fires the LOOP_FRAME Event.
+         * Uses the built-in time unless a different time is specified.
+         * May also be called from updateAnimation().
+         */
         private updateAnimationLoop;
+        /**
+         * Fires all custom events the Animation should have fired between the last frame and the current frame.
+         * @param events a list of names of custom events to fire
+         */
         private executeEvents;
+        /**
+         * Calculates the actual time to use, using the current playmodes.
+         * @param _time the time to apply the playmodes to
+         * @returns the recalculated time
+         */
         private applyPlaymodes;
+        /**
+         * Calculates and returns the direction the animation should currently be playing in.
+         * @param _time the time at which to calculate the direction
+         * @returns 1 if forward, 0 if stop, -1 if backwards
+         */
         private calculateDirection;
+        /**
+         * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
+         */
         private updateScale;
     }
 }
@@ -773,6 +997,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        pivot: Matrix4x4;
         private projection;
         private transform;
         private fieldOfView;
@@ -785,6 +1010,7 @@ declare namespace FudgeCore {
         getBackgroundEnabled(): boolean;
         getAspect(): number;
         getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
@@ -794,6 +1020,7 @@ declare namespace FudgeCore {
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
         /**
@@ -804,6 +1031,10 @@ declare namespace FudgeCore {
          * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
+        /**
+         * Return the calculated normed dimension of the projection space
+         */
+        getProjectionRectangle(): Rectangle;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -813,13 +1044,70 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Baseclass for different kinds of lights.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class Light extends Mutable {
+        color: Color;
+        constructor(_color?: Color);
+        protected reduceMutator(): void;
+    }
+    /**
+     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
+     * ```plaintext
+     * ~ ~ ~
+     *  ~ ~ ~
+     * ```
+     */
+    class LightAmbient extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
+     * ```plaintext
+     * --->
+     * --->
+     * --->
+     * ```
+     */
+    class LightDirectional extends Light {
+        constructor(_color?: Color);
+    }
+    /**
+     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
+     * ```plaintext
+     *         .\|/.
+     *        -- o --
+     *         ´/|\`
+     * ```
+     */
+    class LightPoint extends Light {
+        range: number;
+    }
+    /**
+     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
+     * ```plaintext
+     *          o
+     *         /|\
+     *        / | \
+     * ```
+     */
+    class LightSpot extends Light {
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Attaches a [[Light]] to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    /**
+     * Defines identifiers for the various types of light this component can provide.
+     */
     class ComponentLight extends Component {
-        private light;
+        pivot: Matrix4x4;
+        light: Light;
         constructor(_light?: Light);
-        getLight(): Light;
+        setType<T extends Light>(_class: new () => T): void;
     }
 }
 declare namespace FudgeCore {
@@ -868,8 +1156,6 @@ declare namespace FudgeCore {
         constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        mutate(_mutator: Mutator): void;
-        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -995,8 +1281,20 @@ declare namespace FudgeCore {
         g: number;
         b: number;
         a: number;
-        constructor(_r: number, _g: number, _b: number, _a: number);
+        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
+        static readonly BLACK: Color;
+        static readonly WHITE: Color;
+        static readonly RED: Color;
+        static readonly GREEN: Color;
+        static readonly BLUE: Color;
+        static readonly YELLOW: Color;
+        static readonly CYAN: Color;
+        static readonly MAGENTA: Color;
+        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
+        setArrayNormRGBA(_color: Float32Array): void;
+        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1124,60 +1422,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Baseclass for different kinds of lights.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class Light extends Mutable {
-        color: Color;
-        constructor(_color?: Color);
-        protected reduceMutator(): void;
-    }
-    /**
-     * Ambient light, coming from all directions, illuminating everything with its color independent of position and orientation (like a foggy day or in the shades)
-     * ```plaintext
-     * ~ ~ ~
-     *  ~ ~ ~
-     * ```
-     */
-    class LightAmbient extends Light {
-        constructor(_color?: Color);
-    }
-    /**
-     * Directional light, illuminating everything from a specified direction with its color (like standing in bright sunlight)
-     * ```plaintext
-     * --->
-     * --->
-     * --->
-     * ```
-     */
-    class LightDirectional extends Light {
-        direction: Vector3;
-        constructor(_color?: Color, _direction?: Vector3);
-    }
-    /**
-     * Omnidirectional light emitting from its position, illuminating objects depending on their position and distance with its color (like a colored light bulb)
-     * ```plaintext
-     *         .\|/.
-     *        -- o --
-     *         ´/|\`
-     * ```
-     */
-    class LightPoint extends Light {
-        range: number;
-    }
-    /**
-     * Spot light emitting within a specified angle from its position, illuminating objects depending on their position and distance with its color
-     * ```plaintext
-     *          o
-     *         /|\
-     *        / | \
-     * ```
-     */
-    class LightSpot extends Light {
-    }
-}
-declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<string, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
@@ -1202,10 +1446,13 @@ declare namespace FudgeCore {
         private branch;
         private crc2;
         private canvas;
+        private pickBuffers;
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name
          * @param _branch
          * @param _camera
+         * @param _canvas
          */
         initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
@@ -1233,6 +1480,11 @@ declare namespace FudgeCore {
          */
         draw(): void;
         /**
+        * Draw this viewport for RayCast
+        */
+        createPickBuffers(): void;
+        pickNodeAt(_pos: Vector2): RayHit[];
+        /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
         adjustFrames(): void;
@@ -1240,6 +1492,9 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        pointClientToSource(_client: Vector2): Vector2;
+        pointSourceToRender(_source: Vector2): Vector2;
+        pointClientToRender(_client: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -1439,7 +1694,7 @@ declare namespace FudgeCore {
         ZERO = "Digit0",
         ONE = "Digit1",
         TWO = "Digit2",
-        TRHEE = "Digit3",
+        THREE = "Digit3",
         FOUR = "Digit4",
         FIVE = "Digit5",
         SIX = "Digit6",
@@ -1577,21 +1832,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    }
     interface Border {
         left: number;
         top: number;
         right: number;
         bottom: number;
-    }
-    interface Point {
-        x: number;
-        y: number;
     }
     /**
      * Framing describes how to map a rectangle into a given frame
@@ -1603,13 +1848,13 @@ declare namespace FudgeCore {
          * @param _pointInFrame The point in the frame given
          * @param _rectFrame The frame the point is relative to
          */
-        abstract getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
+        abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         /**
          * Maps a point in a given rectangle back to a calculated frame of origin
          * @param _point The point in the rectangle
          * @param _rect The rectangle the point is relative to
          */
-        abstract getPointInverse(_point: Point, _rect: Rectangle): Point;
+        abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         /**
          * Takes a rectangle as the frame and creates a new rectangle according to the framing
          * @param _rectFrame
@@ -1625,8 +1870,8 @@ declare namespace FudgeCore {
         width: number;
         height: number;
         setSize(_width: number, _height: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1637,8 +1882,8 @@ declare namespace FudgeCore {
         normWidth: number;
         normHeight: number;
         setScale(_normWidth: number, _normHeight: number): void;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
     }
     /**
@@ -1648,8 +1893,8 @@ declare namespace FudgeCore {
     class FramingComplex extends Framing {
         margin: Border;
         padding: Border;
-        getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point;
-        getPointInverse(_point: Point, _rect: Rectangle): Point;
+        getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+        getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
         getRect(_rectFrame: Rectangle): Rectangle;
         getMutator(): Mutator;
     }
@@ -1679,19 +1924,37 @@ declare namespace FudgeCore {
     /**
      * Stores a 4x4 transformation matrix and provides operations for it.
      * ```plaintext
-     * [ 0, 1, 2, 3 ] <- row vector x
-     * [ 4, 5, 6, 7 ] <- row vector y
-     * [ 8, 9,10,11 ] <- row vector z
-     * [12,13,14,15 ] <- translation
-     *            ^  homogeneous column
+     * [ 0, 1, 2, 3 ] ← row vector x
+     * [ 4, 5, 6, 7 ] ← row vector y
+     * [ 8, 9,10,11 ] ← row vector z
+     * [12,13,14,15 ] ← translation
+     *            ↑  homogeneous column
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Matrix4x4 extends Mutable implements Serializable {
         private data;
         private mutator;
+        private vectors;
         constructor();
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix ignoring its rotation and scaling
+         */
         translation: Vector3;
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
+        rotation: Vector3;
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
+        scaling: Vector3;
+        /**
+         * Retrieve a new identity matrix
+         */
         static readonly IDENTITY: Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
@@ -1712,7 +1975,6 @@ declare namespace FudgeCore {
         static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
-         * @param _translate
          */
         static TRANSLATION(_translate: Vector3): Matrix4x4;
         /**
@@ -1732,7 +1994,6 @@ declare namespace FudgeCore {
         static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         * @param _scalar
          */
         static SCALING(_scalar: Vector3): Matrix4x4;
         /**
@@ -1740,7 +2001,8 @@ declare namespace FudgeCore {
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
          * @param _near The near clipspace border on the z-axis.
-         * @param _far The far clipspace borer on the z-axis.
+         * @param _far The far clipspace border on the z-axis.
+         * @param _direction The plane on which the fieldOfView-Angle is given
          */
         static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
         /**
@@ -1754,52 +2016,278 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-        * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed x-rotation.
-        * @param _matrix The matrix to multiply.
-        * @param _angleInDegrees The angle to rotate by.
-        */
+         * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+         * @param _by
+         */
+        rotate(_by: Vector3): void;
+        /**
+         * Adds a rotation around the x-Axis to this matrix
+         */
         rotateX(_angleInDegrees: number): void;
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed y-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the y-Axis to this matrix
          */
         rotateY(_angleInDegrees: number): void;
         /**
-         * Wrapper function that multiplies a passed matrix by a rotationmatrix with passed z-rotation.
-         * @param _matrix The matrix to multiply.
-         * @param _angleInDegrees The angle to rotate by.
+         * Adds a rotation around the z-Axis to this matrix
          */
         rotateZ(_angleInDegrees: number): void;
+        /**
+         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
+         */
         lookAt(_target: Vector3, _up?: Vector3): void;
+        /**
+         * Add a translation by the given vector to this matrix
+         */
         translate(_by: Vector3): void;
         /**
-         * Translate the transformation along the x-axis.
-         * @param _x The value of the translation.
+         * Add a translation along the x-Axis by the given amount to this matrix
          */
         translateX(_x: number): void;
         /**
-         * Translate the transformation along the y-axis.
-         * @param _y The value of the translation.
+         * Add a translation along the y-Axis by the given amount to this matrix
          */
         translateY(_y: number): void;
         /**
-         * Translate the transformation along the z-axis.
-         * @param _z The value of the translation.
+         * Add a translation along the y-Axis by the given amount to this matrix
          */
         translateZ(_z: number): void;
+        /**
+         * Add a scaling by the given vector to this matrix
+         */
         scale(_by: Vector3): void;
+        /**
+         * Add a scaling along the x-Axis by the given amount to this matrix
+         */
         scaleX(_by: number): void;
+        /**
+         * Add a scaling along the y-Axis by the given amount to this matrix
+         */
         scaleY(_by: number): void;
+        /**
+         * Add a scaling along the z-Axis by the given amount to this matrix
+         */
         scaleZ(_by: number): void;
+        /**
+         * Multiply this matrix with the given matrix
+         */
         multiply(_matrix: Matrix4x4): void;
-        getVectorRepresentation(): Vector3[];
+        /**
+         * Calculates and returns the euler-angles representing the current rotation of this matrix
+         */
+        getEulerAngles(): Vector3;
+        /**
+         * Sets the elements of this matrix to the values of the given matrix
+         */
         set(_to: Matrix4x4): void;
+        /**
+         * Return the elements of this matrix as a Float32Array
+         */
         get(): Float32Array;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Defines the origin of a rectangle
+     */
+    enum ORIGIN2D {
+        TOPLEFT = 0,
+        TOPCENTER = 1,
+        TOPRIGHT = 2,
+        CENTERLEFT = 16,
+        CENTER = 17,
+        CENTERRIGHT = 18,
+        BOTTOMLEFT = 32,
+        BOTTOMCENTER = 33,
+        BOTTOMRIGHT = 34
+    }
+    /**
+     * Defines a rectangle with position and size and add comfortable methods to it
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Rectangle extends Mutable {
+        position: Vector2;
+        size: Vector2;
+        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
+        /**
+         * Returns a new rectangle created with the given parameters
+         */
+        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
+        /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        /**
+         * Returns true if the given point is inside of this rectangle or on the border
+         * @param _point
+         */
+        isInside(_point: Vector2): boolean;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Stores and manipulates a twodimensional vector comprised of the components x and y
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     * ```
+     * @authors Lukas Scheuerle, HFU, 2019
+     */
+    class Vector2 extends Mutable {
+        private data;
+        constructor(_x?: number, _y?: number);
+        x: number;
+        y: number;
+        /**
+         * A shorthand for writing `new Vector2(0, 0)`.
+         * @returns A new vector with the values (0, 0)
+         */
+        static ZERO(): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(_scale, _scale)`.
+         * @param _scale the scale of the vector. Default: 1
+         */
+        static ONE(_scale?: number): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(0, y)`.
+         * @param _scale The number to write in the y coordinate. Default: 1
+         * @returns A new vector with the values (0, _scale)
+         */
+        static Y(_scale?: number): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(x, 0)`.
+         * @param _scale The number to write in the x coordinate. Default: 1
+         * @returns A new vector with the values (_scale, 0)
+         */
+        static X(_scale?: number): Vector2;
+        /**
+         * Normalizes a given vector to the given length without editing the original vector.
+         * @param _vector the vector to normalize
+         * @param _length the length of the resulting vector. defaults to 1
+         * @returns a new vector representing the normalised vector scaled by the given length
+         */
+        static NORMALIZATION(_vector: Vector2, _length?: number): Vector2;
+        /**
+         * Scales a given vector by a given scale without changing the original vector
+         * @param _vector The vector to scale.
+         * @param _scale The scale to scale with.
+         * @returns A new vector representing the scaled version of the given vector
+         */
+        static SCALE(_vector: Vector2, _scale: number): Vector2;
+        /**
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
+         * @returns A new vector representing the sum of the given vectors
+         */
+        static SUM(..._vectors: Vector2[]): Vector2;
+        /**
+         * Subtracts two vectors.
+         * @param _a The vector to subtract from.
+         * @param _b The vector to subtract.
+         * @returns A new vector representing the difference of the given vectors
+         */
+        static DIFFERENCE(_a: Vector2, _b: Vector2): Vector2;
+        /**
+         * Computes the dotproduct of 2 vectors.
+         * @param _a The vector to multiply.
+         * @param _b The vector to multiply by.
+         * @returns A new vector representing the dotproduct of the given vectors
+         */
+        static DOT(_a: Vector2, _b: Vector2): number;
+        /**
+         * Returns the magnitude of a given vector.
+         * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
+         * @see Vector2.MAGNITUDESQR
+         * @param _vector The vector to get the magnitude of.
+         * @returns A number representing the magnitude of the given vector.
+         */
+        static MAGNITUDE(_vector: Vector2): number;
+        /**
+         * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
+         * @param _vector The vector to get the squared magnitude of.
+         * @returns A number representing the squared magnitude of the given vector.
+         */
+        static MAGNITUDESQR(_vector: Vector2): number;
+        /**
+         * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
+         * which implicitly is on the Z axis. It is also the signed magnitude of the result.
+         * @param _a Vector to compute the cross product on
+         * @param _b Vector to compute the cross product with
+         * @returns A number representing result of the cross product.
+         */
+        static CROSSPRODUCT(_a: Vector2, _b: Vector2): number;
+        /**
+         * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
+         * ```plaintext
+         *    ^                |
+         *    |  =>  <--  =>   v  =>  -->
+         * ```
+         * @param _vector Vector to get the orthogonal equivalent of
+         * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
+         * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
+         */
+        static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        /**
+         * Adds the given vector to the executing vector, changing the executor.
+         * @param _addend The vector to add.
+         */
+        add(_addend: Vector2): void;
+        /**
+         * Subtracts the given vector from the executing vector, changing the executor.
+         * @param _subtrahend The vector to subtract.
+         */
+        subtract(_subtrahend: Vector2): void;
+        /**
+         * Scales the Vector by the _scale.
+         * @param _scale The scale to multiply the vector with.
+         */
+        scale(_scale: number): void;
+        /**
+         * Normalizes the vector.
+         * @param _length A modificator to get a different length of normalized vector.
+         */
+        normalize(_length?: number): void;
+        /**
+         * Sets the Vector to the given parameters. Ommitted parameters default to 0.
+         * @param _x new x to set
+         * @param _y new y to set
+         */
+        set(_x?: number, _y?: number): void;
+        /**
+         * Checks whether the given Vector is equal to the executed Vector.
+         * @param _vector The vector to comapre with.
+         * @returns true if the two vectors are equal, otherwise false
+         */
+        equals(_vector: Vector2): boolean;
+        /**
+         * @returns An array of the data of the vector
+         */
+        get(): Float32Array;
+        /**
+         * @returns A deep copy of the vector.
+         */
+        readonly copy: Vector2;
+        /**
+         * Adds a z-component to the vector and returns a new Vector3
+         */
+        toVector3(): Vector3;
+        getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1825,7 +2313,7 @@ declare namespace FudgeCore {
         static Z(_scale?: number): Vector3;
         static ZERO(): Vector3;
         static ONE(_scale?: number): Vector3;
-        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4): Vector3;
+        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation?: boolean): Vector3;
         static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
          * Sums up multiple vectors.
@@ -1841,6 +2329,10 @@ declare namespace FudgeCore {
          */
         static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3;
         /**
+         * Returns a new vector representing the given vector scaled by the given scaling factor
+         */
+        static SCALE(_vector: Vector3, _scaling: number): Vector3;
+        /**
          * Computes the crossproduct of 2 vectors.
          * @param _a The vector to multiply.
          * @param _b The vector to multiply by.
@@ -1854,6 +2346,16 @@ declare namespace FudgeCore {
          * @returns A new vector representing the dotproduct of the given vectors
          */
         static DOT(_a: Vector3, _b: Vector3): number;
+        /**
+         * Calculates and returns the reflection of the incoming vector at the given normal vector. The length of normal should be 1.
+         *     __________________
+         *           /|\
+         * incoming / | \ reflection
+         *         /  |  \
+         *          normal
+         *
+         */
+        static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3;
         add(_addend: Vector3): void;
         subtract(_subtrahend: Vector3): void;
         scale(_scale: number): void;
@@ -1861,7 +2363,12 @@ declare namespace FudgeCore {
         set(_x?: number, _y?: number, _z?: number): void;
         get(): Float32Array;
         readonly copy: Vector3;
-        transform(_matrix: Matrix4x4): void;
+        transform(_matrix: Matrix4x4, _includeTranslation?: boolean): void;
+        /**
+         * Drops the z-component and returns a Vector2 consisting of the x- and y-components
+         */
+        toVector2(): Vector2;
+        reflect(_normal: Vector3): void;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -2031,15 +2538,19 @@ declare namespace FudgeCore {
          */
         applyAnimation(_mutator: Mutator): void;
         /**
-         * Returns a clone of the list of components of the given class attached this node.
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents(): Component[];
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
          * @param _class The class of the components to be found.
          */
-        getComponents<T extends Component>(_class: typeof Component): T[];
+        getComponents<T extends Component>(_class: new () => T): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
          * @param _class The class of the components to be found.
          */
-        getComponent<T extends Component>(_class: typeof Component): T;
+        getComponent<T extends Component>(_class: new () => T): T;
         /**
          * Adds the supplied component into the nodes component map.
          * @param _component The component to be pushed into the array.
@@ -2114,6 +2625,27 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Ray {
+        origin: Vector3;
+        direction: Vector3;
+        length: number;
+        constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
+    }
+}
+declare namespace FudgeCore {
+    class RayHit {
+        node: Node;
+        face: number;
+        zBuffer: number;
+        constructor(_node?: Node, _face?: number, _zBuffer?: number);
+    }
+}
+declare namespace FudgeCore {
+    interface PickBuffer {
+        node: Node;
+        texture: WebGLTexture;
+        frameBuffer: WebGLFramebuffer;
+    }
     /**
      * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
      * Stores the references to the shader, the coat and the mesh used for each node registered.
@@ -2128,6 +2660,7 @@ declare namespace FudgeCore {
         private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
+        private static pickBuffers;
         /**
          * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
          * @param _node
@@ -2166,7 +2699,7 @@ declare namespace FudgeCore {
          */
         static setLights(_lights: MapLightTypeToLightList): void;
         /**
-         * Update all render data. After this, multiple viewports can render their associated data without updating the same data multiple times
+         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
          */
         static update(): void;
         /**
@@ -2175,12 +2708,25 @@ declare namespace FudgeCore {
          */
         static clear(_color?: Color): void;
         /**
-         * Draws the branch starting with the given [[Node]] using the projection matrix given as _cameraMatrix.
-         * @param _node
-         * @param _cameraMatrix
+         * Reset the offscreen framebuffer to the original RenderingContext
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera): void;
+        static resetFrameBuffer(_color?: Color): void;
+        /**
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        /**
+         * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * @param _node
+         * @param _cmpCamera
+         */
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         private static drawNode;
+        private static drawNodeForRayCast;
+        private static getRayCastTexture;
         /**
          * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
          */
@@ -2227,6 +2773,28 @@ declare namespace FudgeCore {
      */
     class ShaderFlat extends Shader {
         static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
+     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
+     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderMatCap extends Shader {
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

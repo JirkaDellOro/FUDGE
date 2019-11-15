@@ -1,4 +1,5 @@
 namespace AnimationTest {
+  //TEST
   import ƒ = FudgeCore;
   window.addEventListener("DOMContentLoaded", init);
 
@@ -11,7 +12,7 @@ namespace AnimationTest {
   function init(): void {
     Scenes.createMiniScene();
     Scenes.createViewport();
-    Scenes.viewPort.draw();
+    Scenes.viewport.draw();
 
     node = Scenes.node;
     cmpMesh = node.getComponent(ƒ.ComponentMesh);
@@ -72,7 +73,7 @@ namespace AnimationTest {
     // console.clear();
     // console.log(time % 4000, animation.animatedObject["pivot"]["rotation"]["x"]);
     ƒ.RenderManager.update();
-    Scenes.viewPort.draw();
+    Scenes.viewport.draw();
   }
 
   function hndlEv(_e: Event): void {

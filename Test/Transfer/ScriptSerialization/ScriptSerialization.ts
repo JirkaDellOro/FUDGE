@@ -8,7 +8,7 @@ namespace ScriptSerialization {
 
         let root: ƒ.Node = new ƒ.Node("Root");
         let branch: ƒ.Node = new ƒ.Node("Branch");
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(5, 7, 10));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 10));
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
@@ -58,7 +58,7 @@ namespace ScriptSerialization {
 
         ƒ.RenderManager.initialize();
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), canvas);
+        viewport.initialize("Viewport", branch, cmpCamera, canvas);
         // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
         // ƒ.Loop.start();
         Compare.compare(branch, reconstruct);

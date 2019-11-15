@@ -25,8 +25,8 @@ var TextureTest;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
-        let camera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         window.setInterval(function () {
             pyramid.cmpTransform.local.rotateX(1);

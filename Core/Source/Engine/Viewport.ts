@@ -34,11 +34,14 @@ namespace FudgeCore {
         private branch: Node = null; // The first node in the tree(branch) that will be rendered.
         private crc2: CanvasRenderingContext2D = null;
         private canvas: HTMLCanvasElement = null;
+        private pickBuffers: PickBuffer[] = [];
 
         /**
-         * Creates a new viewport scenetree with a passed rootnode and camera and initializes all nodes currently in the tree(branch).
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         * @param _name 
          * @param _branch 
          * @param _camera 
+         * @param _canvas 
          */
         public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
             this.name = _name;
@@ -61,13 +64,13 @@ namespace FudgeCore {
          * Retrieve the size of the destination canvas as a rectangle, x and y are always 0 
          */
         public getCanvasRectangle(): Rectangle {
-            return { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height };
+            return Rectangle.GET(0, 0, this.canvas.width, this.canvas.height);
         }
         /**
          * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0 
          */
         public getClientRectangle(): Rectangle {
-            return { x: 0, y: 0, width: this.canvas.clientWidth, height: this.canvas.clientHeight };
+            return Rectangle.GET(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
         }
 
         /**
@@ -99,6 +102,7 @@ namespace FudgeCore {
          * Draw this viewport
          */
         public draw(): void {
+            RenderManager.resetFrameBuffer();
             if (!this.camera.isActive)
                 return;
             if (this.adjustingFrames)
@@ -120,6 +124,38 @@ namespace FudgeCore {
                 this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
             );
         }
+
+        /**
+        * Draw this viewport for RayCast
+        */
+        public createPickBuffers(): void {
+            if (this.adjustingFrames)
+                this.adjustFrames();
+            if (this.adjustingCamera)
+                this.adjustCamera();
+
+            if (RenderManager.addBranch(this.branch))
+                // branch has not yet been processed fully by rendermanager -> update all registered nodes
+                RenderManager.update();
+
+            this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
+
+            this.crc2.imageSmoothingEnabled = false;
+            this.crc2.drawImage(
+                RenderManager.getCanvas(),
+                this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+                this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+            );
+        }
+
+
+        public pickNodeAt(_pos: Vector2): RayHit[] {
+            // this.createPickBuffers();
+            let hits: RayHit[] = RenderManager.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
+            hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+            return hits;
+        }
+
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -151,6 +187,33 @@ namespace FudgeCore {
         }
         // #endregion
 
+        //#region Points
+        public pointClientToSource(_client: Vector2): Vector2 {
+            let result: Vector2;
+            let rect: Rectangle;
+            rect = this.getClientRectangle();
+            result = this.frameClientToCanvas.getPoint(_client, rect);
+            rect = this.getCanvasRectangle();
+            result = this.frameCanvasToDestination.getPoint(result, rect);
+            result = this.frameDestinationToSource.getPoint(result, this.rectSource);
+            //TODO: when Source, Render and RenderViewport deviate, continue transformation 
+            return result;
+        }
+
+        public pointSourceToRender(_source: Vector2): Vector2 {
+            let projectionRectangle: Rectangle = this.camera.getProjectionRectangle();
+            let point: Vector2 = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+            return point;
+        }
+
+        public pointClientToRender(_client: Vector2): Vector2 {
+            let point: Vector2 = this.pointClientToSource(_client);
+            point = this.pointSourceToRender(point);
+            //TODO: when Render and RenderViewport deviate, continue transformation 
+            return point;
+        }
+
+        //#endregion
 
         // #region Events (passing from canvas to viewport and from there into branch)
         /**
@@ -293,7 +356,7 @@ namespace FudgeCore {
             for (let node of this.branch.branch) {
                 let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
                 for (let cmpLight of cmpLights) {
-                    let type: string = cmpLight.getLight().type;
+                    let type: string = cmpLight.light.type;
                     let lightsOfType: ComponentLight[] = this.lights.get(type);
                     if (!lightsOfType) {
                         lightsOfType = [];

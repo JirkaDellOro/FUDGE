@@ -1,5 +1,6 @@
 var AnimationTest;
 (function (AnimationTest) {
+    //TEST
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let node;
@@ -9,7 +10,7 @@ var AnimationTest;
     function init() {
         Scenes.createMiniScene();
         Scenes.createViewport();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
         node = Scenes.node;
         cmpMesh = node.getComponent(ƒ.ComponentMesh);
         initAnim();
@@ -61,7 +62,7 @@ var AnimationTest;
         // console.clear();
         // console.log(time % 4000, animation.animatedObject["pivot"]["rotation"]["x"]);
         ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
     }
     function hndlEv(_e) {
         console.log("event!");
