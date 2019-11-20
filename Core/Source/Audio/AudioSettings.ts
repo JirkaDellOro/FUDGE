@@ -6,33 +6,30 @@ namespace FudgeCore {
      */
     export class AudioSettings {
         
-        //public audioSessionData: AudioSessionData;
-
-        //TODO Add masterGain
         public masterGain: GainNode;
-        public masterGainValue: number;
+        private masterGainValue: number;
 
-        // const? or private with getter?
         private globalAudioContext: AudioContext;
-
+        private audioSessionData: AudioSessionData;
         //
         /**
-         * Constructor for master Volume
-         * @param _gainValue 
+         * Constructor for the [[AudioSettings]] Class.
+         * Main class for all Audio Classes.
+         * Need to create this first, when working with sounds.
          */
-        constructor(_gainValue: number) {
+        constructor() {
             this.setAudioContext(new AudioContext({ latencyHint: "interactive", sampleRate: 44100 }));
-            
             //this.globalAudioContext.resume();
-            console.log("GlobalAudioContext: " + this.globalAudioContext);
             this.masterGain = this.globalAudioContext.createGain();
-            this.masterGainValue = _gainValue;
+            this.setMasterGainValue(1);
 
-            //this.audioSessionData = new AudioSessionData();
+            this.setAudioSession(new AudioSessionData());
+            this.masterGain.connect(this.globalAudioContext.destination);
         }
 
         public setMasterGainValue(_masterGainValue: number): void {
             this.masterGainValue = _masterGainValue;
+            this.masterGain.gain.value = this.masterGainValue;
         }
 
         public getMasterGainValue(): number {
@@ -47,6 +44,26 @@ namespace FudgeCore {
             this.globalAudioContext = _audioContext;
         }
 
-        //TODO add suspend/resume functions for AudioContext controls
+        public getAudioSession(): AudioSessionData {
+            return this.audioSessionData;
+        }
+
+        public setAudioSession(_audioSession: AudioSessionData): void {
+            this.audioSessionData = _audioSession;
+        }
+
+        /**
+         * Pauses the progression of time of the AudioContext.
+         */
+        public suspendAudioContext(): void {
+            this.globalAudioContext.suspend();
+        }
+
+        /**
+         * Resumes the progression of time of the AudioContext after pausing it.
+         */
+        public resumeAudioContext(): void {
+            this.globalAudioContext.resume();
+        }
     }
 }
