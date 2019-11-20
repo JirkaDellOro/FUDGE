@@ -1,7 +1,6 @@
-namespace FudgeCore{
 
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * using M; // mixing it in causes errors :
@@ -310,7 +309,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * 4x4 Matrix class.
@@ -664,7 +663,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * This class provides mathematical operations for internal purposes.
@@ -792,7 +791,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * using M; // mixing it in causes errors :
@@ -955,7 +954,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The object pool system of `Vec3`, `Mat3`, `Mat4`, and `Quat`.
@@ -1038,7 +1037,7 @@ declare module OIMO {
 
 
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Setting provides advenced parameters used by the physics simulation.
@@ -1158,7 +1157,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Transform class provides a set of translation and rotation.
@@ -1266,7 +1265,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * using M; // mixing it in causes errors :
@@ -1457,7 +1456,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A contact is a cached pair of overlapping shapes in the physics world. contacts
@@ -1513,7 +1512,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A contact link is used to build a constraint graph for clustering rigid bodies.
@@ -1561,7 +1560,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The manager of the contacts in the physics world. A contact of two
@@ -1589,7 +1588,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Simulation island.
@@ -1636,7 +1635,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Information of time-step sizes of the simulation.
@@ -1665,7 +1664,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The physics simulation world. This manages entire the dynamic simulation. You can add
@@ -1814,7 +1813,7 @@ declare module OIMO {
 
     }
 
-    module World {
+    namespace World {
 
         export class RayCastWrapper extends BroadPhaseProxyCallback {
 
@@ -1889,7 +1888,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     export class IQuat {
 
@@ -1897,7 +1896,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The axis-aligned bounding box.
@@ -2020,7 +2019,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A box collision geometry.
@@ -2046,7 +2045,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A capsule collision geometry aligned with the y-axis.
@@ -2148,7 +2147,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Abstract class of the convex collision geometries supported by GJK/EPA collision detection.
@@ -2178,7 +2177,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A cone collision geometry aligned with the y-axis.
@@ -2254,7 +2253,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A convex hull collision geometry. A convex hull of the vertices is the smallest convex
@@ -2334,7 +2333,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A cylinder collision geometry aligned with the y-axis.
@@ -2433,7 +2432,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Abstract collision geometry.
@@ -2471,7 +2470,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of collision geometry types.
@@ -2540,7 +2539,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A sphere collision geometry.
@@ -2583,7 +2582,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A single ray cast hit data.
@@ -2614,7 +2613,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The abstract class of a broad-phase collision detection algorithm.
@@ -2683,7 +2682,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A callback class for queries in a broad phase.
@@ -2704,7 +2703,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Types of broad-phase algorithms.
@@ -2730,7 +2729,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A proxy is an object that can be added to a broad-phase collision detection algorithm.
@@ -2786,7 +2785,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A pair between two proxies. Broad-phase collision algorithms collect pairs of proxies
@@ -2822,7 +2821,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * CollisionMatrix provides corresponding collision detector for a pair of
@@ -2860,7 +2859,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The result of narrow-phase collision detection. This is used for generating contact
@@ -2913,7 +2912,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The result point is a pair of the closest points of collision geometries
@@ -2949,7 +2948,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The interface of debug drawer. This provides graphical information of a physics world
@@ -3213,7 +3212,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Style settings of the debug draw.
@@ -3289,7 +3288,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Performance
@@ -3308,7 +3307,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A callback interface for aabb tests in a world.
@@ -3330,7 +3329,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A callback class for contact events. Contact events between two shapes
@@ -3377,7 +3376,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A callback class for ray casts in a world.
@@ -3399,7 +3398,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A ray cast callback implementation that keeps only the closest hit data.
@@ -3449,7 +3448,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The base class of all constarint solvers.
@@ -3513,7 +3512,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of the algorithms for position corretion.
@@ -3546,7 +3545,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * This class holds mass and moment of inertia for a rigid body.
@@ -3572,7 +3571,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A rigid body. To add a rigid body to a physics world, create a `RigidBody`
@@ -3997,7 +3996,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A rigid body configuration is used for constructions of rigid bodies. An instance of this
@@ -4058,7 +4057,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of a rigid body's motion types.
@@ -4089,7 +4088,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A shape is a component of a rigid body. It attaches a collision geometry to the parent rigid body
@@ -4247,7 +4246,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A shape configuration is used for construction of shapes. An instance of
@@ -4322,7 +4321,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Brute force implementation of broad-phase collision detection. Time complexity is O(n^2).
@@ -4354,7 +4353,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The broad-phase collision detection algorithm based on bounding volume hierarchy (BVH).
@@ -4440,7 +4439,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -4457,7 +4456,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -4469,7 +4468,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -4486,7 +4485,7 @@ declare module OIMO {
 }
 
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     export class BoxBoxDetectorMacro {
 
@@ -4503,7 +4502,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Interface of a collision detector for narrow-phase collision detection.
@@ -4540,7 +4539,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * General convex collision detector using GJK/EPA
@@ -4549,7 +4548,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Sphere vs Box collision 
@@ -4567,7 +4566,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Sphere vs Capsule 
@@ -4641,7 +4640,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Sphere vs Sphere 
@@ -4677,7 +4676,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Capsule vs Capsule 
@@ -4787,7 +4786,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A contact manifold holds collision data of a pair of shapes.
@@ -4853,7 +4852,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A contact constraint provides collision information for a contact constraint solver.
@@ -4867,7 +4866,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A manifold point is a contact point in a contact manifold. This holds detailed collision
@@ -4933,7 +4932,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class
@@ -4978,7 +4977,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The row of a Jacobian matrix.
@@ -5012,7 +5011,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A cylindrical joint constrains two rigid bodies to share their constraint
@@ -5076,7 +5075,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A cylindrical joint config is used for constructions of cylindrical joints.
@@ -5128,7 +5127,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The base class of joints. Joints are used to connect two rigid bodies
@@ -5332,7 +5331,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class
@@ -5381,7 +5380,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A joint configuration is used for constructions of various joints.
@@ -5448,7 +5447,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -5478,7 +5477,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A joint link is used to build a constraint graph for clustering rigid bodies.
@@ -5518,7 +5517,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of the types of the joints.
@@ -5571,7 +5570,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A prismatic joint (a.k.a. slider joint) constrains two rigid bodies to
@@ -5632,7 +5631,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A prismatic joint config is used for constructions of prismatic joints.
@@ -5674,7 +5673,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A ragdoll joint is designed to simulate ragdoll's limbs. It constrains
@@ -5794,7 +5793,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A ragdoll joint config is used for constructions of ragdoll joints.
@@ -5862,7 +5861,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A revolute joint (a.k.a. hinge joint) constrains two rigid bodies to share
@@ -5939,7 +5938,7 @@ declare module OIMO {
     }
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A revolute joint config is used for constructions of revolute joints.
@@ -5981,7 +5980,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Rotational limits and motor settings of a joint.
@@ -6042,7 +6041,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A spherical joint (a.k.a. ball and socket joint) constrains two rigid bodies to share
@@ -6105,7 +6104,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A spherical joint config is used for constructions of spherical joints.
@@ -6131,7 +6130,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Spring and damper settings of a joint.
@@ -6181,7 +6180,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Translational limits and motor settings of a joint.
@@ -6242,7 +6241,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A universal joint constrains two rigid bodies' constraint axes to be perpendicular
@@ -6366,7 +6365,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A universal joint config is used for constructions of universal joints.
@@ -6418,7 +6417,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6460,7 +6459,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of the constraint solvers.
@@ -6486,7 +6485,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6511,7 +6510,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6535,7 +6534,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6562,7 +6561,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6579,7 +6578,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6613,7 +6612,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * GJK algorithm and EPA for narrow-phase collision detection.
@@ -6714,7 +6713,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     export class GjkEpaLog {
 
@@ -6726,7 +6725,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The list of the state of a result of `GjkEpa.computeClosestPoints`.
@@ -6779,7 +6778,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Simplex utilities for GJK/EPA computations.
@@ -6804,7 +6803,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6825,7 +6824,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6875,7 +6874,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6898,7 +6897,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -6957,7 +6956,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -7019,7 +7018,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -7050,7 +7049,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A contact constraint solver using projected Gauss-Seidel (sequential impulse).
@@ -7079,7 +7078,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * A joint constraint solver using projected Gauss-Seidel (sequential impulse).
@@ -7121,7 +7120,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class
@@ -7178,7 +7177,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class.
@@ -7199,7 +7198,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class
@@ -7245,7 +7244,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal Class
@@ -7284,7 +7283,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * The direct solver of a mixed linear complementality problem (MLCP) for
@@ -7371,7 +7370,7 @@ declare module OIMO {
 
 }
 
-declare module OIMO {
+declare namespace FudgeCore.OIMO {
 
     /**
      * Internal class
