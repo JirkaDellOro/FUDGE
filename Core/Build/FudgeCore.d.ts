@@ -444,57 +444,72 @@ declare namespace FudgeCore {
     class Audio {
         url: string;
         audioBuffer: AudioBuffer;
-        bufferSource: AudioBufferSourceNode;
-        localGain: GainNode;
-        localGainValue: number;
-        isLooping: boolean;
+        private bufferSource;
+        private localGain;
+        private localGainValue;
+        private isLooping;
         /**
          * Constructor for the [[Audio]] Class
          * @param _audioContext from [[AudioSettings]]
          * @param _gainValue 0 for muted | 1 for max volume
          */
-        constructor(_audioContext: AudioContext, _audioSessionData: AudioSessionData, _url: string, _gainValue: number, _loop: boolean);
-        init(_audioContext: AudioContext, _audioSessionData: AudioSessionData, _url: string, _gainValue: number, _loop: boolean): Promise<void>;
-        /**
-         * initBufferSource
-         */
-        initBufferSource(_audioContext: AudioContext): void;
+        constructor(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean);
+        init(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean): Promise<void>;
+        initBufferSource(_audioSettings: AudioSettings): void;
+        setBufferSourceNode(_bufferSourceNode: AudioBufferSourceNode): void;
+        getBufferSourceNode(): AudioBufferSourceNode;
+        setLocalGain(_localGain: GainNode): void;
+        getLocalGain(): GainNode;
         setLocalGainValue(_localGainValue: number): void;
         getLocalGainValue(): number;
+        setLooping(_isLooping: boolean): void;
+        getLooping(): boolean;
         setBufferSource(_buffer: AudioBuffer): void;
+        getBufferSource(): AudioBuffer;
         /**
          * createAudio builds an [[Audio]] to use with the [[ComponentAudio]]
          * @param _audioContext from [[AudioSettings]]
          * @param _audioBuffer from [[AudioSessionData]]
          */
         private createAudio;
-        private setLoop;
-        private addLocalGain;
+        private beginLoop;
     }
 }
 declare namespace FudgeCore {
     /**
+     * Add an [[AudioDelay]] to an [[Audio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioDelay {
+        audioDelay: DelayNode;
+        private delay;
+        constructor(_audioSettings: AudioSettings, _delay: number);
+        setDelay(_audioSettings: AudioSettings, _delay: number): void;
+        getDelay(): number;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * All possible Filter Types of an Audio Filter
+     */
+    type FILTER_TYPE = "lowpass" | "highpass" | "bandpass" | "lowshelf" | "highshelf" | "peaking" | "notch" | "allpass";
+    /**
      * Add an [[AudioFilter]] to an [[Audio]]
      * @authors Thomas Dorner, HFU, 2019
      */
-    enum FILTER_TYPE {
-        LOWPASS = "LOWPASS",
-        HIGHPASS = "HIGHPASS",
-        BANDPASS = "BANDPASS",
-        LOWSHELF = "LOWSHELF",
-        HIGHSHELF = "HIGHSHELF",
-        PEAKING = "PEAKING",
-        NOTCH = "NOTCH",
-        ALLPASS = "ALLPASS"
-    }
     export class AudioFilter {
-        useFilter: boolean;
-        filterType: FILTER_TYPE;
-        constructor(_useFilter: boolean, _filterType: FILTER_TYPE);
-        /**
-         * addFilterTo
-         */
-        addFilterToAudio(_audioBuffer: AudioBuffer, _filterType: FILTER_TYPE): void;
+        audioFilter: BiquadFilterNode;
+        private filterType;
+        constructor(_audioSettings: AudioSettings, _filterType: FILTER_TYPE, _frequency: number, _gain: number, _quality: number);
+        initFilter(_audioSettings: AudioSettings, _filterType: FILTER_TYPE, _frequency: number, _gain: number, _quality: number): void;
+        setFilterType(_filterType: FILTER_TYPE): void;
+        getFilterType(): FILTER_TYPE;
+        setFrequency(_audioSettings: AudioSettings, _frequency: number): void;
+        getFrequency(): number;
+        setGain(_audioSettings: AudioSettings, _gain: number): void;
+        getGain(): number;
+        setQuality(_quality: number): void;
+        getQuality(): number;
     }
     export {};
 }
@@ -527,50 +542,125 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     *
+     * Panning Model Type for 3D localisation of a [[ComponentAudio]].
+     * @param HRFT Usually used for 3D world space, this will be the default setting
+     */
+    type PANNING_MODEL_TYPE = "equalpower" | "HRTF";
+    /**
+     * Distance Model Type for 3D localisation of a [[ComponentAudio]].
+     * @param inverse Usually used for volume drop of sound in 3D world space
+     */
+    type DISTANCE_MODEL_TYPE = "linear" | "inverse" | "exponential";
+    /**
+     * [[AudioLocalisation]] describes the Audio Panner used in [[ComponentAudio]],
+     * which contains data for Position, Orientation and other data needed to localize the Audio in a 3D space.
      * @authors Thomas Dorner, HFU, 2019
      */
-    enum PANNING_MODEL_TYPE {
-        EQUALPOWER = "EQUALPOWER",
-        HRFT = "HRFT"
-    }
-    enum DISTANCE_MODEL_TYPE {
-        LINEAR = "LINEAR",
-        INVERSE = "INVERSE",
-        EXPONENTIAL = "EXPONENTIAL"
-    }
     export class AudioLocalisation {
         pannerNode: PannerNode;
-        panningModel: PANNING_MODEL_TYPE;
-        distanceModel: DISTANCE_MODEL_TYPE;
-        refDistance: number;
-        maxDistance: number;
-        rolloffFactor: number;
-        connerInnerAngle: number;
-        coneOuterAngle: number;
-        coneOuterGain: number;
-        position: Vector3;
-        orientation: Vector3;
+        private panningModel;
+        private distanceModel;
+        private refDistance;
+        private maxDistance;
+        private rolloffFactor;
+        private coneInnerAngle;
+        private coneOuterAngle;
+        private coneOuterGain;
+        private position;
+        private orientation;
         /**
          * Constructor for the [[AudioLocalisation]] Class
          * @param _audioContext from [[AudioSettings]]
          */
-        constructor(_audioContext: AudioContext);
+        constructor(_audioSettings: AudioSettings);
+        updatePositions(_position: Vector3, _orientation: Vector3): void;
         /**
         * We will call setPannerPosition whenever there is a need to change Positions.
-        * All the position values should be identical to the current Position this is atteched to.
+        * All the position values should be identical to the current Position this is attached to.
+        *
+        *      |
+        *      o---
+        *    /  __
+        *      |_| Position
+        *
         */
-        /**
-         * getPannerPosition
-         */
+        setPannerPosition(_position: Vector3): void;
         getPannerPosition(): Vector3;
         /**
-         * setPanneOrientation
+         * Set Position for orientation target
+         *
+         *      |
+         *      o---
+         *    /  __
+         *      |_|
+         *        \
+         *       Target
          */
+        setPannerOrientation(_orientation: Vector3): void;
+        getPannerOrientation(): Vector3;
+        setDistanceModel(_distanceModelType: DISTANCE_MODEL_TYPE): void;
+        getDistanceModel(): DISTANCE_MODEL_TYPE;
+        setPanningModel(_panningModelType: PANNING_MODEL_TYPE): void;
+        getPanningModel(): PANNING_MODEL_TYPE;
+        setRefDistance(_refDistance: number): void;
+        getRefDistance(): number;
+        setMaxDistance(_maxDistance: number): void;
+        getMaxDistance(): number;
+        setRolloffFactor(_rolloffFactor: number): void;
+        getRolloffFactor(): number;
+        setConeInnerAngle(_coneInnerAngle: number): void;
+        getConeInnerAngle(): number;
+        setConeOuterAngle(_coneOuterAngle: number): void;
+        getConeOuterAngle(): number;
+        setConeOuterGain(_coneOuterGain: number): void;
+        getConeOuterGain(): number;
         /**
-         * getPanneOrientation
+         * Show all Settings inside of [[AudioLocalisation]].
+         * Use for Debugging purposes.
          */
-        getPanneOrientation(): Vector3;
+        showLocalisationSettings(): void;
+        private initDefaultValues;
+    }
+    export {};
+}
+declare namespace FudgeCore {
+    /**
+     * Enumerator for all possible Oscillator Types
+     */
+    type OSCILLATOR_TYPE = "sine" | "square" | "sawtooth" | "triangle" | "custom";
+    /**
+     * Interface to create Custom Oscillator Types.
+     * Start-/Endpoint of a custum curve e.g. sine curve.
+     * Both parameters need to be inbetween -1 and 1.
+     * @param startpoint startpoint of a curve
+     * @param endpoint Endpoint of a curve
+     */
+    interface OscillatorWave {
+        startpoint: number;
+        endpoint: number;
+    }
+    /**
+     * Add an [[AudioFilter]] to an [[Audio]]
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    export class AudioOscillator {
+        audioOscillator: OscillatorNode;
+        private frequency;
+        private oscillatorType;
+        private oscillatorWave;
+        private localGain;
+        private localGainValue;
+        constructor(_audioSettings: AudioSettings, _oscillatorType?: OSCILLATOR_TYPE);
+        setOscillatorType(_oscillatorType: OSCILLATOR_TYPE): void;
+        getOscillatorType(): OSCILLATOR_TYPE;
+        createPeriodicWave(_audioSettings: AudioSettings, _real: OscillatorWave, _imag: OscillatorWave): void;
+        setLocalGain(_localGain: GainNode): void;
+        getLocalGain(): GainNode;
+        setLocalGainValue(_localGainValue: number): void;
+        getLocalGainValue(): number;
+        setFrequency(_audioSettings: AudioSettings, _frequency: number): void;
+        getFrequency(): number;
+        createSnare(_audioSettings: AudioSettings): void;
     }
     export {};
 }
@@ -581,7 +671,6 @@ declare namespace FudgeCore {
     interface AudioData {
         url: string;
         buffer: AudioBuffer;
-        counter: number;
     }
     /**
      * Describes Data Handler for all Audio Sources
@@ -589,46 +678,38 @@ declare namespace FudgeCore {
      */
     export class AudioSessionData {
         dataArray: AudioData[];
-        private bufferCounter;
-        private audioBufferHolder;
         /**
-         * constructor of the [[AudioSessionData]] class
+         * Constructor of the [[AudioSessionData]] Class.
          */
         constructor();
         /**
-         * getBufferCounter returns [bufferCounter] to keep track of number of different used sounds
-         */
-        getBufferCounter(): number;
-        /**
          * Decoding Audio Data
          * Asynchronous Function to permit the loading of multiple Data Sources at the same time
+         * @param _audioContext AudioContext from AudioSettings
          * @param _url URL as String for Data fetching
          */
         urlToBuffer(_audioContext: AudioContext, _url: string): Promise<AudioBuffer>;
         /**
-         * pushTuple Source and Decoded Audio Data gets saved for later use
-         * @param _url URL from used Data
-         * @param _audioBuffer AudioBuffer generated from URL
+         * Push URL into Data Array to create a Placeholder in which the Buffer can be placed at a later time
          */
-        pushDataArray(_url: string, _audioBuffer: AudioBuffer): AudioData;
         /**
-         * iterateArray
-         * Look at saved Data Count
+         *
+         * @param _url
+         * @param _audioBuffer
          */
-        countDataInArray(): void;
+        pushBufferInArray(_url: string, _audioBuffer: AudioBuffer): void;
         /**
-         * showDataInArray
-         * Show all Data in Array
+         * Create a new log for the Data Array.
+         * Uses a url and creates a placeholder for the AudioBuffer.
+         * The AudioBuffer gets added as soon as it is created.
+         * @param _url Add a url to a wanted resource as a string
+         */
+        pushUrlInArray(_url: string): void;
+        /**
+         * Show all Data in Array.
+         * Use this for Debugging purposes.
          */
         showDataInArray(): void;
-        /**
-         * getAudioBuffer
-         */
-        getAudioBufferHolder(): AudioData;
-        /**
-         * setAudioBuffer
-         */
-        setAudioBufferHolder(_audioData: AudioData): void;
         /**
          * Error Message for Data Fetching
          * @param e Error
@@ -645,17 +726,29 @@ declare namespace FudgeCore {
      */
     class AudioSettings {
         masterGain: GainNode;
-        masterGainValue: number;
+        private masterGainValue;
         private globalAudioContext;
+        private audioSessionData;
         /**
-         * Constructor for master Volume
-         * @param _gainValue
+         * Constructor for the [[AudioSettings]] Class.
+         * Main class for all Audio Classes.
+         * Need to create this first, when working with sounds.
          */
-        constructor(_gainValue: number);
+        constructor();
         setMasterGainValue(_masterGainValue: number): void;
         getMasterGainValue(): number;
         getAudioContext(): AudioContext;
         setAudioContext(_audioContext: AudioContext): void;
+        getAudioSession(): AudioSessionData;
+        setAudioSession(_audioSession: AudioSessionData): void;
+        /**
+         * Pauses the progression of time of the AudioContext.
+         */
+        suspendAudioContext(): void;
+        /**
+         * Resumes the progression of time of the AudioContext after pausing it.
+         */
+        resumeAudioContext(): void;
     }
 }
 declare namespace FudgeCore {
@@ -949,31 +1042,121 @@ declare namespace FudgeCore {
      * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019
      */
-    class ComponentAudio extends Component {
-        audio: Audio;
+    class ComponentAudio extends Component implements Serializable {
+        audio: Audio | null;
+        audioOscillator: AudioOscillator;
         isLocalised: boolean;
-        localisation: AudioLocalisation | null;
         isFiltered: boolean;
-        filter: AudioFilter | null;
-        constructor(_audio: Audio);
-        setLocalisation(_localisation: AudioLocalisation): void;
+        isDelayed: boolean;
+        protected singleton: boolean;
+        private localisation;
+        private filter;
+        private delay;
         /**
-         * playAudio
+         * Create Component Audio for
+         * @param _audio
          */
-        playAudio(_audioContext: AudioContext): void;
+        constructor(_audio?: Audio, _audioOscillator?: AudioOscillator);
+        /**
+         * set AudioFilter in ComponentAudio
+         * @param _filter AudioFilter
+         */
+        setFilter(_filter: AudioFilter): void;
+        getFilter(): AudioFilter;
+        setDelay(_delay: AudioDelay): void;
+        getDelay(): AudioDelay;
+        setLocalisation(_localisation: AudioLocalisation): void;
+        getLocalisation(): AudioLocalisation;
+        /**
+         * Play Audio at current time of AudioContext
+         */
+        playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void;
         /**
          * Adds an [[Audio]] to the [[ComponentAudio]]
-         * @param _audio Decoded Audio Data as [[Audio]]
+         * @param _audio Audio Data as [[Audio]]
          */
-        private setAudio;
+        setAudio(_audio: Audio): void;
+        getAudio(): Audio;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Final attachments for the Audio Nodes in following order.
+         * This method needs to be called whenever there is a change of parts in the [[ComponentAudio]].
+         * 1. Local Gain
+         * 2. Localisation
+         * 3. Filter
+         * 4. Delay
+         * 5. Master Gain
+         */
+        private connectAudioNodes;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a [[AudioListener]] to the node
+     * Attaches an [[AudioListener]] to the node
      * @authors Thomas Dorner, HFU, 2019
      */
     class ComponentAudioListener extends Component {
+        private audioListener;
+        private positionBase;
+        private positionUP;
+        private positionFW;
+        /**
+         * Constructor of the AudioListener class
+         * @param _audioContext Audio Context from AudioSessionData
+         */
+        constructor(_audioSettings: AudioSettings);
+        setAudioListener(_audioSettings: AudioSettings): void;
+        getAudioListener(): AudioListener;
+        /**
+         * We will call setAudioListenerPosition whenever there is a need to change Positions.
+         * All the position values should be identical to the current Position this is attached to.
+         *
+         *     __|___
+         *    |  |  |
+         *    |  °--|--
+         *    |/____|
+         *   /
+         *
+         */
+        setListenerPosition(_position: Vector3): void;
+        getListenerPosition(): Vector3;
+        /**
+         * FUDGE SYSTEM
+         *
+         *      UP (Y)
+         *       ^
+         *     __|___
+         *    |  |  |
+         *    |  O--|--> FORWARD (Z)
+         *    |_____|
+         */
+        setListenerPositionForward(_position: Vector3): void;
+        getListenerPositionForward(): Vector3;
+        /**
+         *      UP (Z)
+         *       ^
+         *     __|___
+         *    |  |  |
+         *    |  O--|--> FORWARD (X)
+         *    |_____|
+         */
+        setListenerPostitionUp(_position: Vector3): void;
+        getListenerPositionUp(): Vector3;
+        /**
+         * Set all positional Values based on a single Position
+         * @param _position position of the Object
+         */
+        updatePositions(_position: Vector3): void;
+        /**
+         * Show all Settings inside of [[ComponentAudioListener]].
+         * Method only for Debugging Purposes.
+         */
+        showListenerSettings(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2015,6 +2198,11 @@ declare namespace FudgeCore {
          * @param _far The positionvalue of the projectionspace's far border
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
+        /**
+         * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+         * @param _by
+         */
+        rotate(_by: Vector3): void;
         /**
          * Adds a rotation around the x-Axis to this matrix
          */
