@@ -518,8 +518,8 @@ declare namespace FudgeCore {
      * Describes a [[AudioListener]] attached to a [[Node]]
      * @authors Thomas Dorner, HFU, 2019
      */
-    class AudioListener {
-        audioListener: AudioListener;
+    class AudioListenerX {
+        audioListener: AudioListenerX;
         private position;
         private orientation;
         constructor(_audioContext: AudioContext);
@@ -2553,7 +2553,7 @@ declare namespace FudgeCore {
         toVector2(): Vector2;
         reflect(_normal: Vector3): void;
         toString(): string;
-        round(): Vector3;
+        apply(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

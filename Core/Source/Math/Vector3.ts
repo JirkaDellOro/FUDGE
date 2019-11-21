@@ -209,9 +209,9 @@ namespace FudgeCore {
             return result;
         }
 
-        public round(/*_function: Function*/): Vector3 {
-            let copy: Vector3 = this.copy;
-            copy.data.map(Math.round);
+        public apply(_function: (value: number, index: number, array: Float32Array) => number): Vector3 {
+            let copy: Vector3 = Recycler.get(Vector3);
+            copy.data = this.data.map(_function);
             return copy;
         }
 
