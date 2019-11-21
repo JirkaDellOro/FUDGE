@@ -204,6 +204,17 @@ namespace FudgeCore {
             Recycler.store(reflected);
         }
 
+        public toString(): string {
+            let result: string = `(${this.x}, ${this.y}, ${this.z})`;
+            return result;
+        }
+
+        public round(/*_function: Function*/): Vector3 {
+            let copy: Vector3 = this.copy;
+            copy.data.map(Math.round);
+            return copy;
+        }
+
         public getMutator(): Mutator {
             let mutator: Mutator = {
                 x: this.data[0], y: this.data[1], z: this.data[2]

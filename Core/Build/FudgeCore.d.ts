@@ -2364,6 +2364,8 @@ declare namespace FudgeCore {
          */
         toVector2(): Vector2;
         reflect(_normal: Vector3): void;
+        toString(): string;
+        round(): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
