@@ -209,7 +209,7 @@ namespace FudgeCore {
             return result;
         }
 
-        public apply(_function: (value: number, index: number, array: Float32Array) => number): Vector3 {
+        public map(_function: (value: number, index: number, array: Float32Array) => number): Vector3 {
             let copy: Vector3 = Recycler.get(Vector3);
             copy.data = this.data.map(_function);
             return copy;

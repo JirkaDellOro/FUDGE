@@ -49,7 +49,7 @@ namespace FudgeCore {
     public set translation(_translation: Vector3) {
       this.data.set(_translation.get(), 12);
       // no full cache reset required
-      this.vectors.translation = _translation;
+      this.vectors.translation = _translation.copy;
       this.mutator = null;
     }
 
@@ -425,37 +425,37 @@ namespace FudgeCore {
      * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
      * @param _by 
      */
-    public rotate(_by: Vector3): void {
-      this.rotateZ(_by.z);
-      this.rotateY(_by.y);
-      this.rotateX(_by.x);
+    public rotate(_by: Vector3, _fromLeft: boolean = false): void {
+      this.rotateZ(_by.z, _fromLeft);
+      this.rotateY(_by.y, _fromLeft);
+      this.rotateX(_by.x, _fromLeft);
     }
 
     /**
      * Adds a rotation around the x-Axis to this matrix
      */
-    public rotateX(_angleInDegrees: number): void {
-      const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_X(_angleInDegrees));
-      this.set(matrix);
-      Recycler.store(matrix);
+    public rotateX(_angleInDegrees: number, _fromLeft: boolean = false): void {
+      let rotation: Matrix4x4 = Matrix4x4.ROTATION_X(_angleInDegrees);
+      this.multiply(rotation, _fromLeft);
+      Recycler.store(rotation);
     }
 
     /**
      * Adds a rotation around the y-Axis to this matrix
      */
-    public rotateY(_angleInDegrees: number): void {
-      const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Y(_angleInDegrees));
-      this.set(matrix);
-      Recycler.store(matrix);
+    public rotateY(_angleInDegrees: number, _fromLeft: boolean = false): void {
+      let rotation: Matrix4x4 = Matrix4x4.ROTATION_Y(_angleInDegrees);
+      this.multiply(rotation, _fromLeft);
+      Recycler.store(rotation);
     }
 
     /**
      * Adds a rotation around the z-Axis to this matrix
      */
-    public rotateZ(_angleInDegrees: number): void {
-      const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.ROTATION_Z(_angleInDegrees));
-      this.set(matrix);
-      Recycler.store(matrix);
+    public rotateZ(_angleInDegrees: number, _fromLeft: boolean = false): void {
+      let rotation: Matrix4x4 = Matrix4x4.ROTATION_Z(_angleInDegrees);
+      this.multiply(rotation, _fromLeft);
+      Recycler.store(rotation);
     }
 
     /**
@@ -535,9 +535,10 @@ namespace FudgeCore {
     /**
      * Multiply this matrix with the given matrix
      */
-    public multiply(_matrix: Matrix4x4): void {
-      this.set(Matrix4x4.MULTIPLICATION(this, _matrix));
-      this.mutator = null;
+    public multiply(_matrix: Matrix4x4, _fromLeft: boolean = false): void {
+      const matrix: Matrix4x4 = _fromLeft ? Matrix4x4.MULTIPLICATION(_matrix, this) : Matrix4x4.MULTIPLICATION(this, _matrix);
+      this.set(matrix);
+      Recycler.store(matrix);
     }
     //#endregion
 

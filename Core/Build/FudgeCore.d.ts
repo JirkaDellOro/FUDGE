@@ -1473,6 +1473,20 @@ declare namespace FudgeCore {
         static readonly YELLOW: Color;
         static readonly CYAN: Color;
         static readonly MAGENTA: Color;
+        static readonly LIGHT_GREY: Color;
+        static readonly LIGHT_RED: Color;
+        static readonly LIGHT_GREEN: Color;
+        static readonly LIGHT_BLUE: Color;
+        static readonly LIGHT_YELLOW: Color;
+        static readonly LIGHT_CYAN: Color;
+        static readonly LIGHT_MAGENTA: Color;
+        static readonly DARK_GREY: Color;
+        static readonly DARK_RED: Color;
+        static readonly DARK_GREEN: Color;
+        static readonly DARK_BLUE: Color;
+        static readonly DARK_YELLOW: Color;
+        static readonly DARK_CYAN: Color;
+        static readonly DARK_MAGENTA: Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
@@ -2202,19 +2216,19 @@ declare namespace FudgeCore {
          * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * @param _by
          */
-        rotate(_by: Vector3): void;
+        rotate(_by: Vector3, _fromLeft?: boolean): void;
         /**
          * Adds a rotation around the x-Axis to this matrix
          */
-        rotateX(_angleInDegrees: number): void;
+        rotateX(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
          * Adds a rotation around the y-Axis to this matrix
          */
-        rotateY(_angleInDegrees: number): void;
+        rotateY(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
          * Adds a rotation around the z-Axis to this matrix
          */
-        rotateZ(_angleInDegrees: number): void;
+        rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
          * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
          */
@@ -2254,7 +2268,7 @@ declare namespace FudgeCore {
         /**
          * Multiply this matrix with the given matrix
          */
-        multiply(_matrix: Matrix4x4): void;
+        multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix
          */
@@ -2553,7 +2567,7 @@ declare namespace FudgeCore {
         toVector2(): Vector2;
         reflect(_normal: Vector3): void;
         toString(): string;
-        apply(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
+        map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

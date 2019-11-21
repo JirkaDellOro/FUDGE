@@ -13,30 +13,31 @@ namespace FudgeCore {
             this.setNormRGBA(_r, _g, _b, _a);
         }
 
-        public static get BLACK(): Color {
-            return new Color(0, 0, 0, 1);
-        }
-        public static get WHITE(): Color {
-            return new Color(1, 1, 1, 1);
-        }
-        public static get RED(): Color {
-            return new Color(1, 0, 0, 1);
-        }
-        public static get GREEN(): Color {
-            return new Color(0, 1, 0, 1);
-        }
-        public static get BLUE(): Color {
-            return new Color(0, 0, 1, 1);
-        }
-        public static get YELLOW(): Color {
-            return new Color(1, 1, 0, 1);
-        }
-        public static get CYAN(): Color {
-            return new Color(0, 1, 1, 1);
-        }
-        public static get MAGENTA(): Color {
-            return new Color(1, 0, 1, 1);
-        }
+        public static get BLACK(): Color { return new Color(0, 0, 0, 1); }
+        public static get WHITE(): Color { return new Color(1, 1, 1, 1); }
+
+        public static get RED(): Color { return new Color(1, 0, 0, 1); }
+        public static get GREEN(): Color { return new Color(0, 1, 0, 1); }
+        public static get BLUE(): Color { return new Color(0, 0, 1, 1); }
+        public static get YELLOW(): Color { return new Color(1, 1, 0, 1); }
+        public static get CYAN(): Color { return new Color(0, 1, 1, 1); }
+        public static get MAGENTA(): Color { return new Color(1, 0, 1, 1); }
+
+        public static get LIGHT_GREY(): Color { return new Color(0.75, 0.75, 0.75, 1); }
+        public static get LIGHT_RED(): Color { return new Color(1, 0.5, 0.5, 1); }
+        public static get LIGHT_GREEN(): Color { return new Color(0.5, 1, 0.5, 1); }
+        public static get LIGHT_BLUE(): Color { return new Color(0.5, 0.5, 1, 1); }
+        public static get LIGHT_YELLOW(): Color { return new Color(1, 1, 0.5, 1); }
+        public static get LIGHT_CYAN(): Color { return new Color(0.5, 1, 1, 1); }
+        public static get LIGHT_MAGENTA(): Color { return new Color(1, 0.5, 1, 1); }
+
+        public static get DARK_GREY(): Color { return new Color(0.25, 0.25, 0.25, 1); }
+        public static get DARK_RED(): Color { return new Color(0.5, 0, 0, 1); }
+        public static get DARK_GREEN(): Color { return new Color(0, 0.5, 0, 1); }
+        public static get DARK_BLUE(): Color { return new Color(0, 0, 0.5, 1); }
+        public static get DARK_YELLOW(): Color { return new Color(0.5, 0.5, 0, 1); }
+        public static get DARK_CYAN(): Color { return new Color(0, 0.5, 0.5, 1); }
+        public static get DARK_MAGENTA(): Color { return new Color(0.5, 0, 0.5, 1); }
 
         public setNormRGBA(_r: number, _g: number, _b: number, _a: number): void {
             this.r = Math.min(1, Math.max(0, _r));

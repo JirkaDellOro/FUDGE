@@ -1,7 +1,9 @@
 namespace FudgeCore {
+    // TODO: implement countdown timer that ticks a specified number of times
     enum TIMER_TYPE {
         INTERVAL,
-        TIMEOUT
+        TIMEOUT,
+        COUNTDOWN 
     }
 
     interface Timers {
