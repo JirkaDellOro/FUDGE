@@ -3,8 +3,8 @@ namespace FudgeCore {
      * Describes a [[AudioListener]] attached to a [[Node]]
      * @authors Thomas Dorner, HFU, 2019
      */
-    export class AudioListener {
-        public audioListener: AudioListener;
+    export class AudioListenerX {
+        public audioListener: AudioListenerX;
 
         private position: Vector3;
         private orientation: Vector3;
