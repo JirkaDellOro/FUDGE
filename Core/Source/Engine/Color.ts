@@ -24,7 +24,7 @@ namespace FudgeCore {
         DARK_BLUE,
         DARK_YELLOW,
         DARK_CYAN,
-        DARK_MAGENTA,
+        DARK_MAGENTA
     }
 
     /**
