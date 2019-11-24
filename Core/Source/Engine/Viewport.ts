@@ -110,7 +110,7 @@ namespace FudgeCore {
             if (this.adjustingCamera)
                 this.adjustCamera();
 
-            RenderManager.clear(this.camera.getBackgoundColor());
+            RenderManager.clear(this.camera.backgroundColor);
             if (RenderManager.addBranch(this.branch))
                 // branch has not yet been processed fully by rendermanager -> update all registered nodes
                 RenderManager.update();

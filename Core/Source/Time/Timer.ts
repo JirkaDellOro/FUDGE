@@ -1,7 +1,4 @@
 namespace FudgeCore {
-    export interface Timers {
-        [id: number]: Timer;
-    }
 
     export class Timer {
         public active: boolean;
@@ -14,7 +11,7 @@ namespace FudgeCore {
         private timeoutReal: number;
         private idWindow: number;
 
-        constructor(_time: Time, _elapse: number, _count: number, _callback: Function, _arguments: Object[]) {
+        constructor(_time: Time, _elapse: number, _count: number, _callback: Function, ..._arguments: Object[]) {
             this.time = _time;
             this.elapse = _elapse;
             this.arguments = _arguments;

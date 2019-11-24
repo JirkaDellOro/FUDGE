@@ -19,22 +19,18 @@ namespace FudgeCore {
      */
     export class ComponentCamera extends Component {
         public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+        public backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
         //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
         private projection: PROJECTION = PROJECTION.CENTRAL;
         private transform: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
         private fieldOfView: number = 45; // The camera's sensorangle.
         private aspectRatio: number = 1.0;
         private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
-        private backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
         private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
         // TODO: examine, if background should be an attribute of Camera or Viewport
 
         public getProjection(): PROJECTION {
             return this.projection;
-        }
-
-        public getBackgoundColor(): Color {
-            return this.backgroundColor;
         }
 
         public getBackgroundEnabled(): boolean {

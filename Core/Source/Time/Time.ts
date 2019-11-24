@@ -1,4 +1,8 @@
 namespace FudgeCore {
+    export interface Timers extends Object {
+        [id: number]: Timer;
+    }
+
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
@@ -85,7 +89,7 @@ namespace FudgeCore {
 
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
-             /**
+        /**
          * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         public clearAllTimers(): void {
@@ -123,15 +127,33 @@ namespace FudgeCore {
             }
         }
 
-        public setTimer(_lapse: number, _count: number, _callback: Function, _arguments: Object[] = null): number {
+        /**
+         * Installs a timer at this time object
+         * @param _lapse The object-time to elapse between the calls to _callback
+         * @param _count The number of calls desired, 0 = Infinite
+         * @param _callback The function to call each the given lapse has elapsed
+         * @param _arguments Additional parameters to pass to callback function
+         */
+        public setTimer(_lapse: number, _count: number, _callback: Function, ..._arguments: Object[]): number {
             let timer: Timer = new Timer(this, _lapse, _count, _callback, _arguments);
             this.timers[++this.idTimerNext] = timer;
             return this.idTimerNext;
         }
 
+        /**
+         * Deletes the timer with the id given by this time object
+         */
         public deleteTimer(_id: number): void {
             this.timers[_id].clear();
             delete this.timers[_id];
+        }
+        
+        /**
+         * Returns a copy of the list of timers currently installed on this time object
+         */
+        public getTimers(): Timers {
+            let result: Timers = {};
+            return Object.assign(result, this.timers);
         }
         //#endregion
     }

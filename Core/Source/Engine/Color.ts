@@ -50,6 +50,7 @@ namespace FudgeCore {
         public static get YELLOW(): Color { return new Color(1, 1, 0, 1); }
         public static get CYAN(): Color { return new Color(0, 1, 1, 1); }
         public static get MAGENTA(): Color { return new Color(1, 0, 1, 1); }
+        public static get GREY(): Color { return new Color(0.5, 0.5, 0.5, 1); }
 
         public static get LIGHT_GREY(): Color { return new Color(0.75, 0.75, 0.75, 1); }
         public static get LIGHT_RED(): Color { return new Color(1, 0.5, 0.5, 1); }
