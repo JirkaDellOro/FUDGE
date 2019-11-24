@@ -1,71 +1,4 @@
 namespace FudgeCore {
-    // TODO: implement countdown timer that ticks a specified number of times
-    enum TIMER_TYPE {
-        INTERVAL,
-        TIMEOUT,
-        COUNTDOWN 
-    }
-
-    interface Timers {
-        [id: number]: Timer;
-    }
-
-    class Timer {
-        active: boolean;
-        type: TIMER_TYPE;
-        callback: Function;
-        timeout: number;
-        arguments: Object[];
-        startTimeReal: number;
-        timeoutReal: number;
-        id: number;
-
-        constructor(_time: Time, _type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]) {
-            this.type = _type;
-            this.timeout = _timeout;
-            this.arguments = _arguments;
-            this.startTimeReal = performance.now();
-            this.callback = _callback;
-
-            let scale: number = Math.abs(_time.getScale());
-
-            if (!scale) {
-                // Time is stopped, timer won't be active
-                this.active = false;
-                return;
-            }
-
-            let id: number;
-            this.timeoutReal = this.timeout / scale;
-
-            if (this.type == TIMER_TYPE.TIMEOUT) {
-                let callback: Function = (): void => {
-                    _time.deleteTimerByInternalId(this.id);
-                    _callback(_arguments);
-                };
-                id = window.setTimeout(callback, this.timeoutReal);
-            }
-            else
-                id = window.setInterval(_callback, this.timeoutReal, _arguments);
-
-            this.id = id;
-            this.active = true;
-        }
-
-        public clear(): void {
-            if (this.type == TIMER_TYPE.TIMEOUT) {
-                if (this.active)
-                    // save remaining time to timeout as new timeout for restart
-                    this.timeout = this.timeout * (1 - (performance.now() - this.startTimeReal) / this.timeoutReal);
-                window.clearTimeout(this.id);
-            }
-            else
-                // TODO: reusing timer starts interval anew. Should be remaining interval as timeout, then starting interval anew 
-                window.clearInterval(this.id);
-            this.active = false;
-        }
-    }
-
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
@@ -136,7 +69,7 @@ namespace FudgeCore {
          * Retrieves the offset of this time
          */
         public getOffset(): number {
-          return this.offset;
+            return this.offset;
         }
 
         /**
@@ -152,40 +85,7 @@ namespace FudgeCore {
 
         //#region Timers
         // TODO: examine if web-workers would enhance performance here!
-        /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback
-         * @param _timeout 
-         * @param _arguments 
-         */
-        public setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
-            return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
-        }
-        /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback 
-         * @param _timeout 
-         * @param _arguments 
-         */
-        public setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
-            return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
-        }
-        /**
-         * See Javascript documentation
-         * @param _id 
-         */
-        public clearTimeout(_id: number): void {
-            this.deleteTimer(_id);
-        }
-        /**
-         * See Javascript documentation
-         * @param _id 
-         */
-        public clearInterval(_id: number): void {
-            this.deleteTimer(_id);
-        }
-
-        /**
+             /**
          * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
         public clearAllTimers(): void {
@@ -205,12 +105,7 @@ namespace FudgeCore {
                     // Time has stopped, no need to replace cleared timers
                     continue;
 
-                let timeout: number = timer.timeout;
-                // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
-                //     // for an active timeout-timer, calculate the remaining time to timeout
-                //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                let replace: Timer = new Timer(this, timer.type, timer.callback, timeout, timer.arguments);
-                this.timers[id] = replace;
+                this.timers[id] = Timer.getRescaled(timer);
             }
         }
 
@@ -228,13 +123,13 @@ namespace FudgeCore {
             }
         }
 
-        private setTimer(_type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]): number {
-            let timer: Timer = new Timer(this, _type, _callback, _timeout, _arguments);
+        public setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[]): number {
+            let timer: Timer = new Timer(this, _timeout, _count, _callback, _arguments);
             this.timers[++this.idTimerNext] = timer;
             return this.idTimerNext;
         }
 
-        private deleteTimer(_id: number): void {
+        public deleteTimer(_id: number): void {
             this.timers[_id].clear();
             delete this.timers[_id];
         }

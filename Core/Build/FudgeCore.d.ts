@@ -3125,32 +3125,8 @@ declare namespace FudgeCore {
          */
         getElapsedSincePreviousCall(): number;
         /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback
-         * @param _timeout
-         * @param _arguments
-         */
-        setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
-        /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback
-         * @param _timeout
-         * @param _arguments
-         */
-        setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number;
-        /**
-         * See Javascript documentation
-         * @param _id
-         */
-        clearTimeout(_id: number): void;
-        /**
-         * See Javascript documentation
-         * @param _id
-         */
-        clearInterval(_id: number): void;
-        /**
-         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
-         */
+    * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
+    */
         clearAllTimers(): void;
         /**
          * Recreates [[Timer]]s when scaling changes
@@ -3161,8 +3137,8 @@ declare namespace FudgeCore {
          * @param _id
          */
         deleteTimerByInternalId(_id: number): void;
-        private setTimer;
-        private deleteTimer;
+        setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[]): number;
+        deleteTimer(_id: number): void;
     }
 }
 declare namespace FudgeCore {
@@ -3214,6 +3190,25 @@ declare namespace FudgeCore {
         private static loop;
         private static loopFrame;
         private static loopTime;
+    }
+}
+declare namespace FudgeCore {
+    interface Timers {
+        [id: number]: Timer;
+    }
+    class Timer {
+        active: boolean;
+        count: number;
+        private callback;
+        private time;
+        private elapse;
+        private arguments;
+        private timeoutReal;
+        private idWindow;
+        constructor(_time: Time, _elapse: number, _count: number, _callback: Function, _arguments: Object[]);
+        static getRescaled(_timer: Timer): Timer;
+        readonly id: number;
+        clear(): void;
     }
 }
 declare namespace FudgeCore {
