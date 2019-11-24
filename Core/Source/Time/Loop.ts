@@ -94,7 +94,7 @@ namespace FudgeCore {
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Time.game.clear(Loop.idIntervall);
+                    Time.game.deleteTimer(Loop.idIntervall);
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 default:

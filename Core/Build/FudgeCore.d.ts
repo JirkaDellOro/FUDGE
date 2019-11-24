@@ -3133,11 +3133,11 @@ declare namespace FudgeCore {
          */
         rescaleAllTimers(): void;
         /**
-         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * Deletes [[Timer]] found using the internal id of the connected interval-object
          * @param _id
          */
-        deleteTimerByInternalId(_id: number): void;
-        setTimer(_timeout: number, _count: number, _callback: Function, _arguments?: Object[]): number;
+        deleteTimerByItsInternalId(_id: number): void;
+        setTimer(_lapse: number, _count: number, _callback: Function, _arguments?: Object[]): number;
         deleteTimer(_id: number): void;
     }
 }

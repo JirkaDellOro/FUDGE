@@ -43,8 +43,8 @@ namespace FudgeCore {
             let callback: Function = (): void => {
                 _callback(this.arguments);
                 if (this.count > 0)
-                    if (this.count-- == 0)
-                        _time.deleteTimerByInternalId(this.idWindow);
+                    if (--this.count == 0)
+                        _time.deleteTimerByItsInternalId(this.idWindow);
 
             };
 

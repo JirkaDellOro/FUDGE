@@ -9,6 +9,7 @@ namespace TimeLoop {
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, handleFrame);
         loop();
+        handleChangeLoop(null);
     }
 
     function handleChangeLoop(_event: Event): void {
@@ -17,6 +18,9 @@ namespace TimeLoop {
         let fps: number = Number(formData.get("fps"));
 
         ƒ.Loop.start(ƒ.LOOP_MODE[mode], fps, true);
+
+        let fpsInput: HTMLInputElement = (<HTMLInputElement>document.querySelector("input[name=fps]"));
+        fpsInput.readOnly = (mode == "FRAME_REQUEST");
     }
 
     function handleChangeTime(_event: Event): void {
@@ -29,7 +33,7 @@ namespace TimeLoop {
     function handleButtonClick(_event: Event): void {
         let lapse: number = Number((<HTMLInputElement>document.querySelector("input[name=lapse]")).value);
         console.log("Timeout set to: " + lapse);
-        ƒ.Time.game.setTimer(lapse, 0, handleTimeout);
+        ƒ.Time.game.setTimer(lapse, 1, handleTimeout);
     }
     function handleTimeout(): void {
         let meter: HTMLMeterElement = document.querySelector("[name=event]");

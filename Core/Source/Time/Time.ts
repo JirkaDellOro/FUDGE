@@ -110,10 +110,10 @@ namespace FudgeCore {
         }
 
         /**
-         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
+         * Deletes [[Timer]] found using the internal id of the connected interval-object
          * @param _id 
          */
-        public deleteTimerByInternalId(_id: number): void {
+        public deleteTimerByItsInternalId(_id: number): void {
             for (let id in this.timers) {
                 let timer: Timer = this.timers[id];
                 if (timer.id == _id) {
@@ -123,8 +123,8 @@ namespace FudgeCore {
             }
         }
 
-        public setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[] = null): number {
-            let timer: Timer = new Timer(this, _timeout, _count, _callback, _arguments);
+        public setTimer(_lapse: number, _count: number, _callback: Function, _arguments: Object[] = null): number {
+            let timer: Timer = new Timer(this, _lapse, _count, _callback, _arguments);
             this.timers[++this.idTimerNext] = timer;
             return this.idTimerNext;
         }
