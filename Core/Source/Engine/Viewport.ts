@@ -1,7 +1,7 @@
 /// <reference path="../Light/Light.ts"/>
 /// <reference path="../Component/ComponentLight.ts"/>
 namespace FudgeCore {
-    export type MapLightTypeToLightList = Map<string, ComponentLight[]>;
+    export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -356,7 +356,7 @@ namespace FudgeCore {
             for (let node of this.branch.branch) {
                 let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
                 for (let cmpLight of cmpLights) {
-                    let type: string = cmpLight.light.type;
+                    let type: TypeOfLight = cmpLight.light.getType();
                     let lightsOfType: ComponentLight[] = this.lights.get(type);
                     if (!lightsOfType) {
                         lightsOfType = [];

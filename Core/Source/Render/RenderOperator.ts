@@ -120,7 +120,7 @@ namespace FudgeCore {
             for (let entry of _lights) {
                 // TODO: simplyfy, since direction is now handled by ComponentLight
                 switch (entry[0]) {
-                    case LightAmbient.name:
+                    case LightAmbient:
                         let ambient: number[] = [];
                         for (let cmpLight of entry[1]) {
                             let c: Color = cmpLight.light.color;
@@ -128,7 +128,7 @@ namespace FudgeCore {
                         }
                         renderLights["u_ambient"] = new Float32Array(ambient);
                         break;
-                    case LightDirectional.name:
+                    case LightDirectional:
                         let directional: number[] = [];
                         for (let cmpLight of entry[1]) {
                             let c: Color = cmpLight.light.color;
@@ -153,19 +153,19 @@ namespace FudgeCore {
 
             let ambient: WebGLUniformLocation = uni["u_ambient.color"];
             if (ambient) {
-                let cmpLights: ComponentLight[] = _lights.get("LightAmbient");
+                let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
                 if (cmpLights) {
                     // TODO: add up ambient lights to a single color
-                    // let result: Color = new Color(0, 0, 0, 1);
+                    let result: Color = new Color(0, 0, 0, 1);
                     for (let cmpLight of cmpLights)
-                        // for now, only the last is relevant
-                        RenderOperator.crc3.uniform4fv(ambient, cmpLight.light.color.getArray());
+                        result.add(cmpLight.light.color);
+                    RenderOperator.crc3.uniform4fv(ambient, result.getArray());
                 }
             }
 
             let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
             if (nDirectional) {
-                let cmpLights: ComponentLight[] = _lights.get("LightDirectional");
+                let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
                 if (cmpLights) {
                     let n: number = cmpLights.length;
                     RenderOperator.crc3.uniform1ui(nDirectional, n);

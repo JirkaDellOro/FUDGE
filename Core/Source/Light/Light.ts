@@ -1,4 +1,5 @@
 namespace FudgeCore {
+    export type TypeOfLight = new () => Light;
     /**
      * Baseclass for different kinds of lights. 
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -9,6 +10,11 @@ namespace FudgeCore {
             super();
             this.color = _color;
         }
+
+        public getType(): TypeOfLight {
+            return <TypeOfLight>this.constructor;
+        }
+        
         protected reduceMutator(): void {/**/ }
     }
 

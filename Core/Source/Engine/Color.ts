@@ -1,4 +1,32 @@
 namespace FudgeCore {
+    export enum COLOR {
+        BLACK,
+        WHITE,
+
+        RED,
+        GREEN,
+        BLUE,
+        YELLOW,
+        CYAN,
+        MAGENTA,
+
+        LIGHT_GREY,
+        LIGHT_RED,
+        LIGHT_GREEN,
+        LIGHT_BLUE,
+        LIGHT_YELLOW,
+        LIGHT_CYAN,
+        LIGHT_MAGENTA,
+
+        DARK_GREY,
+        DARK_RED,
+        DARK_GREEN,
+        DARK_BLUE,
+        DARK_YELLOW,
+        DARK_CYAN,
+        DARK_MAGENTA,
+    }
+
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
@@ -39,6 +67,11 @@ namespace FudgeCore {
         public static get DARK_CYAN(): Color { return new Color(0, 0.5, 0.5, 1); }
         public static get DARK_MAGENTA(): Color { return new Color(0.5, 0, 0.5, 1); }
 
+        public static PRESET(_color: COLOR): Color {
+            // TODO: replace above getters with switch here... Reason: it's more like an enum and should be documented as such
+            return new Color(1, 1, 1, 1);
+        }
+
         public setNormRGBA(_r: number, _g: number, _b: number, _a: number): void {
             this.r = Math.min(1, Math.max(0, _r));
             this.g = Math.min(1, Math.max(0, _g));
@@ -60,6 +93,12 @@ namespace FudgeCore {
 
         public setArrayBytesRGBA(_color: Uint8ClampedArray): void {
             this.setBytesRGBA(_color[0], _color[1], _color[2], _color[3]);
+        }
+
+        public add(_color: Color): void {
+            this.r += _color.r;
+            this.g += _color.g;
+            this.b += _color.b;
         }
 
         protected reduceMutator(_mutator: Mutator): void {/** */ }

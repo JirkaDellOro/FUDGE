@@ -1226,6 +1226,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    type TypeOfLight = new () => Light;
     /**
      * Baseclass for different kinds of lights.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1233,6 +1234,7 @@ declare namespace FudgeCore {
     abstract class Light extends Mutable {
         color: Color;
         constructor(_color?: Color);
+        getType(): TypeOfLight;
         protected reduceMutator(): void;
     }
     /**
@@ -1456,6 +1458,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum COLOR {
+        BLACK = 0,
+        WHITE = 1,
+        RED = 2,
+        GREEN = 3,
+        BLUE = 4,
+        YELLOW = 5,
+        CYAN = 6,
+        MAGENTA = 7,
+        LIGHT_GREY = 8,
+        LIGHT_RED = 9,
+        LIGHT_GREEN = 10,
+        LIGHT_BLUE = 11,
+        LIGHT_YELLOW = 12,
+        LIGHT_CYAN = 13,
+        LIGHT_MAGENTA = 14,
+        DARK_GREY = 15,
+        DARK_RED = 16,
+        DARK_GREEN = 17,
+        DARK_BLUE = 18,
+        DARK_YELLOW = 19,
+        DARK_CYAN = 20,
+        DARK_MAGENTA = 21
+    }
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
@@ -1487,11 +1513,13 @@ declare namespace FudgeCore {
         static readonly DARK_YELLOW: Color;
         static readonly DARK_CYAN: Color;
         static readonly DARK_MAGENTA: Color;
+        static PRESET(_color: COLOR): Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;
         setArrayNormRGBA(_color: Float32Array): void;
         setArrayBytesRGBA(_color: Uint8ClampedArray): void;
+        add(_color: Color): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1619,7 +1647,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type MapLightTypeToLightList = Map<string, ComponentLight[]>;
+    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
