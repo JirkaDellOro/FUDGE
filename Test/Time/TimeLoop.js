@@ -23,9 +23,9 @@ var TimeLoop;
         console.log("Scale set to: " + scale);
     }
     function handleButtonClick(_event) {
-        let timeout = Number(document.querySelector("input[name=timeout]").value);
-        console.log("Timeout set to: " + timeout);
-        ƒ.Time.game.setTimeout(handleTimeout, timeout);
+        let lapse = Number(document.querySelector("input[name=lapse]").value);
+        console.log("Timeout set to: " + lapse);
+        ƒ.Time.game.setTimer(lapse, 0, handleTimeout);
     }
     function handleTimeout() {
         let meter = document.querySelector("[name=event]");

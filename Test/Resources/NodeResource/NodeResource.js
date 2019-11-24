@@ -40,8 +40,6 @@ var NodeResource;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
-        ƒ.Time.game.setScale(10);
-        ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
         function update(_event) {
             ƒ.RenderManager.update();
             viewport.draw();

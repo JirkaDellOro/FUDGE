@@ -3137,7 +3137,7 @@ declare namespace FudgeCore {
          * @param _id
          */
         deleteTimerByInternalId(_id: number): void;
-        setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[]): number;
+        setTimer(_timeout: number, _count: number, _callback: Function, _arguments?: Object[]): number;
         deleteTimer(_id: number): void;
     }
 }

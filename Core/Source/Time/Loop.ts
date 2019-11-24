@@ -68,7 +68,7 @@ namespace FudgeCore {
                     Loop.loopTime();
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    Loop.idIntervall = Time.game.setInterval(Loop.loopTime, 1000 / Loop.fpsDesired);
+                    Loop.idIntervall = Time.game.setTimer(1000 / Loop.fpsDesired, 0, Loop.loopTime);
                     Loop.loopTime();
                     break;
                 default:
@@ -94,8 +94,7 @@ namespace FudgeCore {
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 case LOOP_MODE.TIME_GAME:
-                    // TODO: DANGER! id changes internally in game when time is scaled!
-                    Time.game.clearInterval(Loop.idIntervall);
+                    Time.game.clear(Loop.idIntervall);
                     window.cancelAnimationFrame(Loop.idRequest);
                     break;
                 default:

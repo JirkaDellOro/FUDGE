@@ -123,7 +123,7 @@ namespace FudgeCore {
             }
         }
 
-        public setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[]): number {
+        public setTimer(_timeout: number, _count: number, _callback: Function, _arguments: Object[] = null): number {
             let timer: Timer = new Timer(this, _timeout, _count, _callback, _arguments);
             this.timers[++this.idTimerNext] = timer;
             return this.idTimerNext;

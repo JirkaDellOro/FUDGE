@@ -35,7 +35,7 @@ var AudioTest;
         * 6. ComponentAudio zur Node hinzufügen
         */
         // 1. Audio Settings und Audio Data Handler
-        audioSettings = new ƒ.AudioSettings(1);
+        // audioSettings = new ƒ.AudioSettings(1);
         // 2. Audio Session Data anlegen
         audioSessionData = new ƒ.AudioSessionData();
         // 3. Used Audio File
@@ -44,8 +44,8 @@ var AudioTest;
         // 4. Create Audio
         // 4.1 Audio talks to AudioSession
         // 4.2 Audio bekommt Buffer
-        audio = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioSourceTwo, 1, false);
-        audioTest = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioFileSource, 1, false);
+        // audio = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioSourceTwo, 1, false);
+        // audioTest = new ƒ.Audio(audioSettings.getAudioContext(), audioSessionData, audioFileSource, 1, false);
         console.log("audio: " + audio + " | " + audioTest);
         // 5. Create ComponentAudio with Audio
         componentAudio = new ƒ.ComponentAudio(audio);
@@ -142,7 +142,7 @@ var AudioTest;
                 case ƒ.KEYBOARD_CODE.P:
                     //play Sound
                     console.log("pressed p");
-                    componentAudio.playAudio(audioSettings.getAudioContext());
+                    // componentAudio.playAudio(audioSettings.getAudioContext());
                     break;
                 case ƒ.KEYBOARD_CODE.L:
                     //play Sound

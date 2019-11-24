@@ -27,9 +27,9 @@ namespace TimeLoop {
     }
 
     function handleButtonClick(_event: Event): void {
-        let timeout: number = Number((<HTMLInputElement>document.querySelector("input[name=timeout]")).value);
-        console.log("Timeout set to: " + timeout);
-        ƒ.Time.game.setTimeout(handleTimeout, timeout);
+        let lapse: number = Number((<HTMLInputElement>document.querySelector("input[name=lapse]")).value);
+        console.log("Timeout set to: " + lapse);
+        ƒ.Time.game.setTimer(lapse, 0, handleTimeout);
     }
     function handleTimeout(): void {
         let meter: HTMLMeterElement = document.querySelector("[name=event]");
