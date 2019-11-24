@@ -89,8 +89,9 @@ namespace FudgeCore {
          * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
          */
         public static addBranch(_node: Node): boolean {
-            if (_node.isUpdated(RenderManager.timestampUpdate))
-                return false;
+            // TODO: rethink optimization!!
+            // if (_node.isUpdated(RenderManager.timestampUpdate))
+            //     return false;
             for (let node of _node.branch)
                 try {
                     // may fail when some components are missing. TODO: cleanup

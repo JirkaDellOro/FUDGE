@@ -95,6 +95,7 @@ namespace FudgeCore {
 
       let ancestor: Node = this;
       while (ancestor) {
+        ancestor.timestampUpdate = 0;
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else
