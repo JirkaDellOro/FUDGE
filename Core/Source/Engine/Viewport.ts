@@ -1,4 +1,5 @@
 /// <reference path="../Light/Light.ts"/>
+/// <reference path="../Event/Event.ts"/>
 /// <reference path="../Component/ComponentLight.ts"/>
 namespace FudgeCore {
     export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
@@ -9,7 +10,7 @@ namespace FudgeCore {
      * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Viewport extends EventTarget {
+    export class Viewport extends EventTargetƒ {
         private static focus: Viewport;
 
         public name: string = "Viewport"; // The name to call this viewport by.

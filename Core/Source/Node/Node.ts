@@ -7,7 +7,7 @@ namespace FudgeCore {
    * Represents a node in the scenetree.
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Node extends EventTarget implements Serializable {
+  export class Node extends EventTargetƒ implements Serializable {
     public name: string; // The name to call this node by.
     public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
     public timestampUpdate: number = 0;

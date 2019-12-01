@@ -8,7 +8,7 @@ namespace FudgeCore {
      * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Time extends EventTarget {
+    export class Time extends EventTargetƒ {
         private static gameTime: Time = new Time();
         private start: number;
         private scale: number;

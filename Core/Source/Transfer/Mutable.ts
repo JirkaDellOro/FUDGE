@@ -1,3 +1,4 @@
+/// <reference path="../Event/Event.ts"/>
 namespace FudgeCore {
     /**
      * Interface describing the datatypes of the attributes a mutator as strings 
@@ -25,7 +26,7 @@ namespace FudgeCore {
      * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
-    export abstract class Mutable extends EventTarget {
+    export abstract class Mutable extends EventTargetƒ {
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable

@@ -43,7 +43,15 @@ namespace FudgeCore {
 
     export const enum EVENT_POINTER {
         UP = "ƒpointerup",
-        DOWN = "ƒpointerdown"
+        DOWN = "ƒpointerdown",
+        MOVE = "ƒpointermove",
+        OVER = "ƒpointerover",
+        ENTER = "ƒpointerenter",
+        CANCEL = "ƒpointercancel",
+        OUT = "ƒpointerout",
+        LEAVE = "ƒpointerleave",
+        GOTCAPTURE = "ƒgotpointercapture",
+        LOSTCAPTURE = "ƒlostpointercapture"
     }
     export const enum EVENT_DRAGDROP {
         DRAG = "ƒdrag",
@@ -94,10 +102,33 @@ namespace FudgeCore {
         }
     }
 
+    export type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | Event;
+
+    export type EventListenerƒ =
+        ((_event: PointerEventƒ) => void) |
+        ((_event: DragDropEventƒ) => void) |
+        ((_event: WheelEventƒ) => void) |
+        ((_event: KeyboardEventƒ) => void) |
+        ((_event: Eventƒ) => void) |
+        EventListenerObject;
+
+    export class EventTargetƒ extends EventTarget {
+        addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+            super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
+        }
+        removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+            super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
+        }
+
+        dispatchEvent(_event: Eventƒ): boolean {
+            return super.dispatchEvent(_event);
+        }
+    }
+
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop 
      */
-    export class EventTargetStatic extends EventTarget {
+    export class EventTargetStatic extends EventTargetƒ {
         protected static targetStatic: EventTargetStatic = new EventTargetStatic();
 
         protected constructor() {
