@@ -45,7 +45,7 @@ namespace FudgeCore {
                 this.container = _container;
                 if (this.container)
                     this.container.addComponent(this);
-            } catch {
+            } catch(_error) {
                 this.container = previousContainer;
             }
         }

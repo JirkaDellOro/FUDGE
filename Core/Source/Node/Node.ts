@@ -255,7 +255,7 @@ namespace FudgeCore {
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
         _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
-      } catch {
+      } catch(_error) {
         throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
       }
     }

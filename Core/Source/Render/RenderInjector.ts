@@ -46,8 +46,8 @@ namespace FudgeCore {
                         WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE,
                         (<CoatTextured>this).texture.image
                     );
-                } catch (_e) {
-                    Debug.error(_e);
+                } catch (_error) {
+                    Debug.error(_error);
                 }
                 crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
                 crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);
@@ -89,8 +89,8 @@ namespace FudgeCore {
                         WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE,
                         (<CoatMatCap>this).texture.image
                     );
-                } catch (_e) {
-                    Debug.error(_e);
+                } catch (_error) {
+                    Debug.error(_error);
                 }
                 crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MAG_FILTER, WebGL2RenderingContext.NEAREST);
                 crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.NEAREST);

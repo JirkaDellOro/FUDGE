@@ -85,8 +85,8 @@ namespace FudgeCore {
                 let [x, y, z] = _vector.data;
                 let factor: number = _length / Math.hypot(x, y, z);
                 vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
-            } catch (_e) {
-                Debug.warn(_e);
+            } catch (_error) {
+                Debug.warn(_error);
             }
             return vector;
         }

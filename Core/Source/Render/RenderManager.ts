@@ -96,8 +96,8 @@ namespace FudgeCore {
                 try {
                     // may fail when some components are missing. TODO: cleanup
                     RenderManager.addNode(node);
-                } catch (_e) {
-                    Debug.log(_e);
+                } catch (_error) {
+                    Debug.log(_error);
                 }
             return true;
         }

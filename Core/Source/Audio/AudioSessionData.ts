@@ -65,7 +65,7 @@ namespace FudgeCore {
                     const decodedAudio: AudioBuffer = await _audioContext.decodeAudioData(arrayBuffer);
                     this.pushBufferInArray(_url, decodedAudio);
                     return decodedAudio;
-                } catch (e) {
+                } catch (_error) {
                     this.logErrorFetch(e);
                     return null;
                 }
