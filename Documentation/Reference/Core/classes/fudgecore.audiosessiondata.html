@@ -108,11 +108,8 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#countdatainarray" class="tsd-kind-icon">count<wbr>Data<wbr>InArray</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#getaudiobufferholder" class="tsd-kind-icon">get<wbr>Audio<wbr>Buffer<wbr>Holder</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#getbuffercounter" class="tsd-kind-icon">get<wbr>Buffer<wbr>Counter</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#pushdataarray" class="tsd-kind-icon">push<wbr>Data<wbr>Array</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#setaudiobufferholder" class="tsd-kind-icon">set<wbr>Audio<wbr>Buffer<wbr>Holder</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#pushbufferinarray" class="tsd-kind-icon">push<wbr>Buffer<wbr>InArray</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#pushurlinarray" class="tsd-kind-icon">push<wbr>Url<wbr>InArray</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#showdatainarray" class="tsd-kind-icon">show<wbr>Data<wbr>InArray</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosessiondata.html#urltobuffer" class="tsd-kind-icon">url<wbr>ToBuffer</a></li>
 							</ul>
@@ -132,12 +129,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L19">Audio/AudioSessionData.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L16">Audio/AudioSessionData.ts:16</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>constructor of the <a href="fudgecore.audiosessiondata.html">AudioSessionData</a> class</p>
+									<p>Constructor of the <a href="fudgecore.audiosessiondata.html">AudioSessionData</a> Class.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></h4>
@@ -153,7 +150,7 @@
 					<div class="tsd-signature tsd-kind-icon">data<wbr>Array<span class="tsd-signature-symbol">:</span> <a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a><span class="tsd-signature-symbol">[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L16">Audio/AudioSessionData.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L16">Audio/AudioSessionData.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -161,88 +158,53 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="countdatainarray" class="tsd-anchor"></a>
-					<h3>count<wbr>Data<wbr>InArray</h3>
+					<a name="pushbufferinarray" class="tsd-anchor"></a>
+					<h3>push<wbr>Buffer<wbr>InArray</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">count<wbr>Data<wbr>InArray<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">push<wbr>Buffer<wbr>InArray<span class="tsd-signature-symbol">(</span>_url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _audioBuffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBuffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L107">Audio/AudioSessionData.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L87">Audio/AudioSessionData.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>iterateArray
-									Look at saved Data Count</p>
-								</div>
 							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_url: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>_audioBuffer: <span class="tsd-signature-type">AudioBuffer</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getaudiobufferholder" class="tsd-anchor"></a>
-					<h3>get<wbr>Audio<wbr>Buffer<wbr>Holder</h3>
+					<a name="pushurlinarray" class="tsd-anchor"></a>
+					<h3>push<wbr>Url<wbr>InArray</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Audio<wbr>Buffer<wbr>Holder<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a></li>
+						<li class="tsd-signature tsd-kind-icon">push<wbr>Url<wbr>InArray<span class="tsd-signature-symbol">(</span>_url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L124">Audio/AudioSessionData.ts:124</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L104">Audio/AudioSessionData.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>getAudioBuffer</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getbuffercounter" class="tsd-anchor"></a>
-					<h3>get<wbr>Buffer<wbr>Counter</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Buffer<wbr>Counter<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L32">Audio/AudioSessionData.ts:32</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>getBufferCounter returns [bufferCounter] to keep track of number of different used sounds</p>
-								</div>
-							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="pushdataarray" class="tsd-anchor"></a>
-					<h3>push<wbr>Data<wbr>Array</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">push<wbr>Data<wbr>Array<span class="tsd-signature-symbol">(</span>_url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _audioBuffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBuffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L90">Audio/AudioSessionData.ts:90</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>pushTuple Source and Decoded Audio Data gets saved for later use</p>
+									<p>Create a new log for the Data Array.
+										Uses a url and creates a placeholder for the AudioBuffer.
+									The AudioBuffer gets added as soon as it is created.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -250,42 +212,8 @@
 								<li>
 									<h5>_url: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>URL from used Data</p>
+										<p>Add a url to a wanted resource as a string</p>
 									</div>
-								</li>
-								<li>
-									<h5>_audioBuffer: <span class="tsd-signature-type">AudioBuffer</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>AudioBuffer generated from URL</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setaudiobufferholder" class="tsd-anchor"></a>
-					<h3>set<wbr>Audio<wbr>Buffer<wbr>Holder</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Audio<wbr>Buffer<wbr>Holder<span class="tsd-signature-symbol">(</span>_audioData<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L131">Audio/AudioSessionData.ts:131</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>setAudioBuffer</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_audioData: <a href="../interfaces/fudgecore.audiodata.html" class="tsd-signature-type">AudioData</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -302,13 +230,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L115">Audio/AudioSessionData.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L117">Audio/AudioSessionData.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>showDataInArray
-									Show all Data in Array</p>
+									<p>Show all Data in Array.
+									Use this for Debugging purposes.</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -325,7 +253,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioSessionData.ts#L41">Audio/AudioSessionData.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioSessionData.ts#L31">Audio/AudioSessionData.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -338,6 +266,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>AudioContext from AudioSettings</p>
+									</div>
 								</li>
 								<li>
 									<h5>_url: <span class="tsd-signature-type">string</span></h5>
@@ -377,19 +308,10 @@
 								<a href="fudgecore.audiosessiondata.html#dataarray" class="tsd-kind-icon">data<wbr>Array</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiosessiondata.html#countdatainarray" class="tsd-kind-icon">count<wbr>Data<wbr>InArray</a>
+								<a href="fudgecore.audiosessiondata.html#pushbufferinarray" class="tsd-kind-icon">push<wbr>Buffer<wbr>InArray</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiosessiondata.html#getaudiobufferholder" class="tsd-kind-icon">get<wbr>Audio<wbr>Buffer<wbr>Holder</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiosessiondata.html#getbuffercounter" class="tsd-kind-icon">get<wbr>Buffer<wbr>Counter</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiosessiondata.html#pushdataarray" class="tsd-kind-icon">push<wbr>Data<wbr>Array</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiosessiondata.html#setaudiobufferholder" class="tsd-kind-icon">set<wbr>Audio<wbr>Buffer<wbr>Holder</a>
+								<a href="fudgecore.audiosessiondata.html#pushurlinarray" class="tsd-kind-icon">push<wbr>Url<wbr>InArray</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audiosessiondata.html#showdatainarray" class="tsd-kind-icon">show<wbr>Data<wbr>InArray</a>

@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>PANNING_MODEL_TYPE | Fudge Core</title>
+	<title>OscillatorWave | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.panning_model_type.html">PANNING_MODEL_TYPE</a>
+					<a href="fudgecore.oscillatorwave.html">OscillatorWave</a>
 				</li>
 			</ul>
-			<h1>Enumeration PANNING_MODEL_TYPE</h1>
+			<h1>Interface OscillatorWave</h1>
 		</div>
 	</div>
 </header>
@@ -71,46 +71,62 @@
 		<div class="col-8 col-content">
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Interface to create Custom Oscillator Types.
+							Start-/Endpoint of a custum curve e.g. sine curve.
+						Both parameters need to be inbetween -1 and 1.</p>
+					</div>
 					<dl class="tsd-comment-tags">
-						<dt>authors</dt>
-						<dd><p>Thomas Dorner, HFU, 2019</p>
+						<dt>param</dt>
+						<dd><p>startpoint of a curve</p>
+						</dd>
+						<dt>param</dt>
+						<dd><p>Endpoint of a curve</p>
 						</dd>
 					</dl>
 				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">OscillatorWave</span>
+					</li>
+				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Enumeration members</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.panning_model_type.html#equalpower" class="tsd-kind-icon">EQUALPOWER</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.panning_model_type.html#hrft" class="tsd-kind-icon">HRFT</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="fudgecore.oscillatorwave.html#endpoint" class="tsd-kind-icon">endpoint</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="fudgecore.oscillatorwave.html#startpoint" class="tsd-kind-icon">startpoint</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="equalpower" class="tsd-anchor"></a>
-					<h3>EQUALPOWER</h3>
-					<div class="tsd-signature tsd-kind-icon">EQUALPOWER<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;EQUALPOWER&quot;</span></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="endpoint" class="tsd-anchor"></a>
+					<h3>endpoint</h3>
+					<div class="tsd-signature tsd-kind-icon">endpoint<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioLocalisation.ts#L7">Audio/AudioLocalisation.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioOscillator.ts#L17">Audio/AudioOscillator.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="hrft" class="tsd-anchor"></a>
-					<h3>HRFT</h3>
-					<div class="tsd-signature tsd-kind-icon">HRFT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;HRFT&quot;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+					<a name="startpoint" class="tsd-anchor"></a>
+					<h3>startpoint</h3>
+					<div class="tsd-signature tsd-kind-icon">startpoint<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioLocalisation.ts#L8">Audio/AudioLocalisation.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioOscillator.ts#L16">Audio/AudioOscillator.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -131,14 +147,14 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum tsd-parent-kind-module tsd-is-not-exported">
-						<a href="fudgecore.panning_model_type.html" class="tsd-kind-icon">PANNING_<wbr>MODEL_<wbr>TYPE</a>
+					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+						<a href="fudgecore.oscillatorwave.html" class="tsd-kind-icon">Oscillator<wbr>Wave</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.panning_model_type.html#equalpower" class="tsd-kind-icon">EQUALPOWER</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="fudgecore.oscillatorwave.html#endpoint" class="tsd-kind-icon">endpoint</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.panning_model_type.html#hrft" class="tsd-kind-icon">HRFT</a>
+							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
+								<a href="fudgecore.oscillatorwave.html#startpoint" class="tsd-kind-icon">startpoint</a>
 							</li>
 						</ul>
 					</li>

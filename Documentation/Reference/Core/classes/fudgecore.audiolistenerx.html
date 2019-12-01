@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FILTER_TYPE | Fudge Core</title>
+	<title>AudioListenerX | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.filter_type.html">FILTER_TYPE</a>
+					<a href="fudgecore.audiolistenerx.html">AudioListenerX</a>
 				</li>
 			</ul>
-			<h1>Enumeration FILTER_TYPE</h1>
+			<h1>Class AudioListenerX</h1>
 		</div>
 	</div>
 </header>
@@ -72,7 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Add an <a href="../classes/fudgecore.audiofilter.html">AudioFilter</a> to an <a href="../classes/fudgecore.audio.html">Audio</a></p>
+						<p>Describes a [[AudioListener]] attached to a <a href="fudgecore.node.html">Node</a></p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
@@ -81,107 +81,124 @@
 					</dl>
 				</div>
 			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">AudioListenerX</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Enumeration members</h3>
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#allpass" class="tsd-kind-icon">ALLPASS</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#bandpass" class="tsd-kind-icon">BANDPASS</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#highpass" class="tsd-kind-icon">HIGHPASS</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#highshelf" class="tsd-kind-icon">HIGHSHELF</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#lowpass" class="tsd-kind-icon">LOWPASS</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#lowshelf" class="tsd-kind-icon">LOWSHELF</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#notch" class="tsd-kind-icon">NOTCH</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported"><a href="fudgecore.filter_type.html#peaking" class="tsd-kind-icon">PEAKING</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.audiolistenerx.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiolistenerx.html#audiolistener" class="tsd-kind-icon">audio<wbr>Listener</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiolistenerx.html#getaudiolistenerorientation" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Orientation</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiolistenerx.html#getaudiolistenerposition" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Position</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="allpass" class="tsd-anchor"></a>
-					<h3>ALLPASS</h3>
-					<div class="tsd-signature tsd-kind-icon">ALLPASS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;ALLPASS&quot;</span></div>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<wbr>ListenerX<span class="tsd-signature-symbol">(</span>_audioContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioContext</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiolistenerx.html" class="tsd-signature-type">AudioListenerX</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioListener.ts#L10">Audio/AudioListener.ts:10</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.audiolistenerx.html" class="tsd-signature-type">AudioListenerX</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="audiolistener" class="tsd-anchor"></a>
+					<h3>audio<wbr>Listener</h3>
+					<div class="tsd-signature tsd-kind-icon">audio<wbr>Listener<span class="tsd-signature-symbol">:</span> <a href="fudgecore.audiolistenerx.html" class="tsd-signature-type">AudioListenerX</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L14">Audio/AudioFilter.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioListener.ts#L7">Audio/AudioListener.ts:7</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="bandpass" class="tsd-anchor"></a>
-					<h3>BANDPASS</h3>
-					<div class="tsd-signature tsd-kind-icon">BANDPASS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;BANDPASS&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L9">Audio/AudioFilter.ts:9</a></li>
-						</ul>
-					</aside>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getaudiolistenerorientation" class="tsd-anchor"></a>
+					<h3>get<wbr>Audio<wbr>Listener<wbr>Orientation</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Orientation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioListener.ts#L51">Audio/AudioListener.ts:51</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>getAudioListenerOrientation</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="highpass" class="tsd-anchor"></a>
-					<h3>HIGHPASS</h3>
-					<div class="tsd-signature tsd-kind-icon">HIGHPASS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;HIGHPASS&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L8">Audio/AudioFilter.ts:8</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="highshelf" class="tsd-anchor"></a>
-					<h3>HIGHSHELF</h3>
-					<div class="tsd-signature tsd-kind-icon">HIGHSHELF<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;HIGHSHELF&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L11">Audio/AudioFilter.ts:11</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="lowpass" class="tsd-anchor"></a>
-					<h3>LOWPASS</h3>
-					<div class="tsd-signature tsd-kind-icon">LOWPASS<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;LOWPASS&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L7">Audio/AudioFilter.ts:7</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="lowshelf" class="tsd-anchor"></a>
-					<h3>LOWSHELF</h3>
-					<div class="tsd-signature tsd-kind-icon">LOWSHELF<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;LOWSHELF&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L10">Audio/AudioFilter.ts:10</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="notch" class="tsd-anchor"></a>
-					<h3>NOTCH</h3>
-					<div class="tsd-signature tsd-kind-icon">NOTCH<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;NOTCH&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L13">Audio/AudioFilter.ts:13</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-					<a name="peaking" class="tsd-anchor"></a>
-					<h3>PEAKING</h3>
-					<div class="tsd-signature tsd-kind-icon">PEAKING<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;PEAKING&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/6283b55b/Core/Source/Audio/AudioFilter.ts#L12">Audio/AudioFilter.ts:12</a></li>
-						</ul>
-					</aside>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getaudiolistenerposition" class="tsd-anchor"></a>
+					<h3>get<wbr>Audio<wbr>Listener<wbr>Position</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Position<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Audio/AudioListener.ts#L33">Audio/AudioListener.ts:33</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>getAudioListenerPosition</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -200,32 +217,20 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-enum tsd-parent-kind-module tsd-is-not-exported">
-						<a href="fudgecore.filter_type.html" class="tsd-kind-icon">FILTER_<wbr>TYPE</a>
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgecore.audiolistenerx.html" class="tsd-kind-icon">Audio<wbr>ListenerX</a>
 						<ul>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#allpass" class="tsd-kind-icon">ALLPASS</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.audiolistenerx.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#bandpass" class="tsd-kind-icon">BANDPASS</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.audiolistenerx.html#audiolistener" class="tsd-kind-icon">audio<wbr>Listener</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#highpass" class="tsd-kind-icon">HIGHPASS</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiolistenerx.html#getaudiolistenerorientation" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Orientation</a>
 							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#highshelf" class="tsd-kind-icon">HIGHSHELF</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#lowpass" class="tsd-kind-icon">LOWPASS</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#lowshelf" class="tsd-kind-icon">LOWSHELF</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#notch" class="tsd-kind-icon">NOTCH</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum tsd-is-not-exported">
-								<a href="fudgecore.filter_type.html#peaking" class="tsd-kind-icon">PEAKING</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiolistenerx.html#getaudiolistenerposition" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener<wbr>Position</a>
 							</li>
 						</ul>
 					</li>
