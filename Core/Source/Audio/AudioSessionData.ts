@@ -66,7 +66,7 @@ namespace FudgeCore {
                     this.pushBufferInArray(_url, decodedAudio);
                     return decodedAudio;
                 } catch (_error) {
-                    this.logErrorFetch(e);
+                    this.logErrorFetch(_error);
                     return null;
                 }
             } 
