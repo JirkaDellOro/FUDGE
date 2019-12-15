@@ -2387,13 +2387,21 @@ declare namespace FudgeCore {
      *            +y
      *             |__ +x
      * ```
-     * @authors Lukas Scheuerle, HFU, 2019
+     * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
         x: number;
         y: number;
+        /**
+         * Returns the length of the vector
+         */
+        readonly magnitude: number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        readonly magnitudeSquared: number;
         /**
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
@@ -2450,20 +2458,6 @@ declare namespace FudgeCore {
          * @returns A new vector representing the dotproduct of the given vectors
          */
         static DOT(_a: Vector2, _b: Vector2): number;
-        /**
-         * Returns the magnitude of a given vector.
-         * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
-         * @see Vector2.MAGNITUDESQR
-         * @param _vector The vector to get the magnitude of.
-         * @returns A number representing the magnitude of the given vector.
-         */
-        static MAGNITUDE(_vector: Vector2): number;
-        /**
-         * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
-         * @param _vector The vector to get the squared magnitude of.
-         * @returns A number representing the squared magnitude of the given vector.
-         */
-        static MAGNITUDESQR(_vector: Vector2): number;
         /**
          * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
          * which implicitly is on the Z axis. It is also the signed magnitude of the result.
@@ -2548,6 +2542,14 @@ declare namespace FudgeCore {
         x: number;
         y: number;
         z: number;
+        /**
+         * Returns the length of the vector
+         */
+        readonly magnitude: number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        readonly magnitudeSquared: number;
         static X(_scale?: number): Vector3;
         static Y(_scale?: number): Vector3;
         static Z(_scale?: number): Vector3;

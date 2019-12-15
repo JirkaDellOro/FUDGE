@@ -38,6 +38,20 @@ namespace FudgeCore {
             this.data[2] = _z;
         }
 
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number {
+            return Math.hypot(...this.data);
+        }
+
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number {
+            return Vector3.DOT(this, this);
+        }
+
         public static X(_scale: number = 1): Vector3 {
             const vector: Vector3 = new Vector3(_scale, 0, 0);
             return vector;
@@ -82,8 +96,7 @@ namespace FudgeCore {
         public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
             let vector: Vector3 = Vector3.ZERO();
             try {
-                let [x, y, z] = _vector.data;
-                let factor: number = _length / Math.hypot(x, y, z);
+                let factor: number = _length / _vector.magnitude;
                 vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
             } catch (_error) {
                 Debug.warn(_error);

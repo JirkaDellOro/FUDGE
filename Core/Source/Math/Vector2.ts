@@ -5,7 +5,7 @@ namespace FudgeCore {
    *            +y
    *             |__ +x
    * ```
-   * @authors Lukas Scheuerle, HFU, 2019
+   * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Vector2 extends Mutable {
     private data: Float32Array;
@@ -27,6 +27,20 @@ namespace FudgeCore {
     }
     set y(_y: number) {
       this.data[1] = _y;
+    }
+
+    /**
+     * Returns the length of the vector
+     */
+    get magnitude(): number {
+      return Math.hypot(...this.data);
+    }
+
+    /**
+     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+     */
+    get magnitudeSquared(): number {
+      return Vector2.DOT(this, this);
     }
 
     /** 
@@ -130,28 +144,6 @@ namespace FudgeCore {
     public static DOT(_a: Vector2, _b: Vector2): number {
       let scalarProduct: number = _a.x * _b.x + _a.y * _b.y;
       return scalarProduct;
-    }
-
-    /**
-     * Returns the magnitude of a given vector.
-     * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
-     * @see Vector2.MAGNITUDESQR
-     * @param _vector The vector to get the magnitude of.
-     * @returns A number representing the magnitude of the given vector.
-     */
-    public static MAGNITUDE(_vector: Vector2): number {
-      let magnitude: number = Math.sqrt(Vector2.MAGNITUDESQR(_vector));
-      return magnitude;
-    }
-
-    /**
-     * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
-     * @param _vector The vector to get the squared magnitude of.
-     * @returns A number representing the squared magnitude of the given vector.
-     */
-    public static MAGNITUDESQR(_vector: Vector2): number {
-      let magnitude: number = Vector2.DOT(_vector, _vector);
-      return magnitude;
     }
 
     /**
