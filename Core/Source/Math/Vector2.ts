@@ -174,6 +174,16 @@ namespace FudgeCore {
     }
 
     /**
+     * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+     * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+     */
+    public equals(_compare: Vector2, _tolerance: number = Number.EPSILON): boolean {
+      if (Math.abs(this.x - _compare.x) > _tolerance) return false;
+      if (Math.abs(this.y - _compare.y) > _tolerance) return false;
+      return true;
+    }
+
+    /**
      * Adds the given vector to the executing vector, changing the executor.
      * @param _addend The vector to add.
      */
@@ -212,16 +222,6 @@ namespace FudgeCore {
      */
     public set(_x: number = 0, _y: number = 0): void {
       this.data = new Float32Array([_x, _y]);
-    }
-
-    /**
-     * Checks whether the given Vector is equal to the executed Vector.
-     * @param _vector The vector to comapre with.
-     * @returns true if the two vectors are equal, otherwise false
-     */
-    public equals(_vector: Vector2): boolean {
-      if (this.data[0] == _vector.data[0] && this.data[1] == _vector.data[1]) return true;
-      return false;
     }
 
     /**

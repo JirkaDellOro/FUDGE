@@ -2478,6 +2478,11 @@ declare namespace FudgeCore {
          */
         static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
         /**
+         * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+         * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+         */
+        equals(_compare: Vector2, _tolerance?: number): boolean;
+        /**
          * Adds the given vector to the executing vector, changing the executor.
          * @param _addend The vector to add.
          */
@@ -2503,12 +2508,6 @@ declare namespace FudgeCore {
          * @param _y new y to set
          */
         set(_x?: number, _y?: number): void;
-        /**
-         * Checks whether the given Vector is equal to the executed Vector.
-         * @param _vector The vector to comapre with.
-         * @returns true if the two vectors are equal, otherwise false
-         */
-        equals(_vector: Vector2): boolean;
         /**
          * @returns An array of the data of the vector
          */
@@ -2598,6 +2597,10 @@ declare namespace FudgeCore {
          *
          */
         static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3;
+        /**
+         * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+         * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+         */
         equals(_compare: Vector3, _tolerance?: number): boolean;
         add(_addend: Vector3): void;
         subtract(_subtrahend: Vector3): void;

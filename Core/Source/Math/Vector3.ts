@@ -174,13 +174,17 @@ namespace FudgeCore {
             return reflection;
         }
 
+        /**
+         * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+         * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+         */
         public equals(_compare: Vector3, _tolerance: number = Number.EPSILON): boolean {
             if (Math.abs(this.x - _compare.x) > _tolerance) return false;
             if (Math.abs(this.y - _compare.y) > _tolerance) return false;
             if (Math.abs(this.z - _compare.z) > _tolerance) return false;
             return true;
         }
-        
+
         public add(_addend: Vector3): void {
             this.data = new Vector3(_addend.x + this.x, _addend.y + this.y, _addend.z + this.z).data;
         }
