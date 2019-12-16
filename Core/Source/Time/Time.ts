@@ -88,6 +88,13 @@ namespace FudgeCore {
         }
 
         //#region Timers
+        /**
+         * Returns a Promise<void> to be resolved after the time given. To be used with async/await
+         */
+        public delay(_lapse: number): Promise<void> {
+            return new Promise(_resolve => this.setTimer(_lapse, 1, _resolve));
+        }
+
         // TODO: examine if web-workers would enhance performance here!
         /**
          * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
@@ -147,7 +154,7 @@ namespace FudgeCore {
             this.timers[_id].clear();
             delete this.timers[_id];
         }
-        
+
         /**
          * Returns a copy of the list of timers currently installed on this time object
          */

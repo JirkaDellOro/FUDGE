@@ -174,6 +174,13 @@ namespace FudgeCore {
             return reflection;
         }
 
+        public equals(_compare: Vector3, _tolerance: number = Number.EPSILON): boolean {
+            if (Math.abs(this.x - _compare.x) > _tolerance) return false;
+            if (Math.abs(this.y - _compare.y) > _tolerance) return false;
+            if (Math.abs(this.z - _compare.z) > _tolerance) return false;
+            return true;
+        }
+        
         public add(_addend: Vector3): void {
             this.data = new Vector3(_addend.x + this.x, _addend.y + this.y, _addend.z + this.z).data;
         }

@@ -2598,6 +2598,7 @@ declare namespace FudgeCore {
          *
          */
         static REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3;
+        equals(_compare: Vector3, _tolerance?: number): boolean;
         add(_addend: Vector3): void;
         subtract(_subtrahend: Vector3): void;
         scale(_scale: number): void;
@@ -3144,6 +3145,10 @@ declare namespace FudgeCore {
          * Automatically reset at every call to set(...) and setScale(...)
          */
         getElapsedSincePreviousCall(): number;
+        /**
+         * Returns a Promise<void> to be resolved after the time given. To be used with async/await
+         */
+        delay(_lapse: number): Promise<void>;
         /**
          * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
          */
