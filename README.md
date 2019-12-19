@@ -42,3 +42,4 @@ Tests to verify functionality
 - Grapheditor/Wiring z.B. für Shader und Animation
 - Input-Manager
 - Selection-Sets zum Speichern temporärer Gruppierungen
+- Fortgeschrittene Texturierung
