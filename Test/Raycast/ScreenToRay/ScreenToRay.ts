@@ -68,7 +68,7 @@ namespace ScreenToRay {
             logMutatorInfo(name, uiMaps[name].framing);
         }
 
-        
+
         viewport.createPickBuffers();
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
@@ -118,7 +118,6 @@ namespace ScreenToRay {
     }
 
     function computeRay(): ƒ.Ray {
-        let rect: ƒ.Rectangle = viewport.getClientRectangle();
         // let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
         // posMouse.y *= -1;
         let posMouse: ƒ.Vector2 = mouse.copy;
@@ -127,8 +126,8 @@ namespace ScreenToRay {
         let posRender: ƒ.Vector2 = viewport.pointClientToRender(posMouse);
         setUiPoint("Render", posRender);
 
+        let rect: ƒ.Rectangle = viewport.getClientRectangle();
         let result: ƒ.Vector2;
-        rect = viewport.getClientRectangle();
         result = viewport.frameClientToCanvas.getPoint(posMouse, rect);
         setUiPoint("Canvas", result);
         rect = viewport.getCanvasRectangle();
@@ -138,17 +137,8 @@ namespace ScreenToRay {
         setUiPoint("Source", result);
         //TODO: when Source, Render and RenderViewport deviate, continue transformation 
 
-        let rectRender: ƒ.Rectangle = viewport.frameSourceToRender.getRect(viewport.rectSource);
+        let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(posMouse);
         let rectProjection: ƒ.Rectangle = cmpCamera.getProjectionRectangle();
-
-        let posProjection: ƒ.Vector2 = new ƒ.Vector2(
-            (2 * posRender.x / rectRender.width) * rectProjection.width / 2,
-            (2 * posRender.y / rectRender.height) * rectProjection.height / 2
-        );
-
-        posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
-        posProjection.y *= -1;
-
         setUiPoint("Projection", posProjection);
 
         let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));

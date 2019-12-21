@@ -52,31 +52,49 @@ namespace FudgeCore {
             return Vector3.DOT(this, this);
         }
 
+        /**
+         * Creates and returns a vector with the given length pointing in x-direction
+         */
         public static X(_scale: number = 1): Vector3 {
             const vector: Vector3 = new Vector3(_scale, 0, 0);
             return vector;
         }
 
+        /**
+         * Creates and returns a vector with the given length pointing in y-direction
+         */
         public static Y(_scale: number = 1): Vector3 {
             const vector: Vector3 = new Vector3(0, _scale, 0);
             return vector;
         }
 
+        /**
+         * Creates and returns a vector with the given length pointing in z-direction
+         */
         public static Z(_scale: number = 1): Vector3 {
             const vector: Vector3 = new Vector3(0, 0, _scale);
             return vector;
         }
 
+        /**
+         * Creates and returns a vector with the value 0 on each axis
+         */
         public static ZERO(): Vector3 {
             const vector: Vector3 = new Vector3(0, 0, 0);
             return vector;
         }
 
+        /**
+         * Creates and returns a vector of the given size on each of the three axis
+         */
         public static ONE(_scale: number = 1): Vector3 {
             const vector: Vector3 = new Vector3(_scale, _scale, _scale);
             return vector;
         }
 
+        /**
+         * Creates and returns a vector through transformation of the given vector by the given matrix
+         */
         public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
             let result: Vector3 = new Vector3();
             let m: Float32Array = _matrix.get();
@@ -92,7 +110,9 @@ namespace FudgeCore {
             return result;
         }
 
-
+        /**
+         * Creates and returns a vector which is a copy of the given vector scaled to the given length
+         */
         public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
             let vector: Vector3 = Vector3.ZERO();
             try {

@@ -97,15 +97,14 @@ var ScreenToRay;
         crcRay.strokeRect(-10, -10, 20, 20);
     }
     function computeRay() {
-        let rect = viewport.getClientRectangle();
         // let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
         // posMouse.y *= -1;
         let posMouse = mouse.copy;
         setUiPoint("Client", posMouse);
         let posRender = viewport.pointClientToRender(posMouse);
         setUiPoint("Render", posRender);
+        let rect = viewport.getClientRectangle();
         let result;
-        rect = viewport.getClientRectangle();
         result = viewport.frameClientToCanvas.getPoint(posMouse, rect);
         setUiPoint("Canvas", result);
         rect = viewport.getCanvasRectangle();
@@ -114,11 +113,8 @@ var ScreenToRay;
         result = viewport.frameDestinationToSource.getPoint(result, viewport.rectSource);
         setUiPoint("Source", result);
         //TODO: when Source, Render and RenderViewport deviate, continue transformation 
-        let rectRender = viewport.frameSourceToRender.getRect(viewport.rectSource);
+        let posProjection = viewport.pointClientToProjection(posMouse);
         let rectProjection = cmpCamera.getProjectionRectangle();
-        let posProjection = new ƒ.Vector2((2 * posRender.x / rectRender.width) * rectProjection.width / 2, (2 * posRender.y / rectRender.height) * rectProjection.height / 2);
-        posProjection.subtract(new ƒ.Vector2(rectProjection.width / 2, rectProjection.height / 2));
-        posProjection.y *= -1;
         setUiPoint("Projection", posProjection);
         let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
         return ray;

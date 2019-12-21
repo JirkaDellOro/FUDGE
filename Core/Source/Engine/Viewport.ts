@@ -189,29 +189,65 @@ namespace FudgeCore {
         // #endregion
 
         //#region Points
+        /**
+         * Returns a point on the source-rectangle matching the given point on the client rectangle
+         */
         public pointClientToSource(_client: Vector2): Vector2 {
-            let result: Vector2;
-            let rect: Rectangle;
-            rect = this.getClientRectangle();
-            result = this.frameClientToCanvas.getPoint(_client, rect);
-            rect = this.getCanvasRectangle();
-            result = this.frameCanvasToDestination.getPoint(result, rect);
+            let result: Vector2 = this.frameClientToCanvas.getPoint(_client, this.getClientRectangle());
+            result = this.frameCanvasToDestination.getPoint(result, this.getCanvasRectangle());
             result = this.frameDestinationToSource.getPoint(result, this.rectSource);
             //TODO: when Source, Render and RenderViewport deviate, continue transformation 
             return result;
         }
-
+        /**
+         * Returns a point on the render-rectangle matching the given point on the source rectangle
+         */
         public pointSourceToRender(_source: Vector2): Vector2 {
             let projectionRectangle: Rectangle = this.camera.getProjectionRectangle();
             let point: Vector2 = this.frameSourceToRender.getPoint(_source, projectionRectangle);
             return point;
         }
 
+        /**
+         * Returns a point on the render-rectangle matching the given point on the client rectangle
+         */
         public pointClientToRender(_client: Vector2): Vector2 {
             let point: Vector2 = this.pointClientToSource(_client);
             point = this.pointSourceToRender(point);
             //TODO: when Render and RenderViewport deviate, continue transformation 
             return point;
+        }
+
+        /**
+         * Returns a point in normed view-rectangle matching the given point on the client rectangle
+         * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+         * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
+         */
+        public pointClientToProjection(_client: Vector2): Vector2 {
+            let posRender: Vector2 = this.pointClientToRender(_client);
+            let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
+            let rectProjection: Rectangle = this.camera.getProjectionRectangle();
+
+            let posProjection: Vector2 = new Vector2(
+                rectProjection.width * posRender.x / rectRender.width,
+                rectProjection.height * posRender.y / rectRender.height
+            );
+
+            posProjection.subtract(new Vector2(rectProjection.width / 2, rectProjection.height / 2));
+            posProjection.y *= -1;
+
+            return posProjection;
+        }
+
+        /**
+         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle, 
+         * which stretches from -1 to 1 in both dimensions, y pointing up
+         */
+        public pointClipToClient(_normed: Vector2): Vector2 {
+            let result: Vector2 = Vector2.ONE(0.5);
+            result.x *= (_normed.x + 1) * this.getClientRectangle().width;
+            result.y *= (1 - _normed.y) * this.getClientRectangle().height;
+            return result;
         }
 
         //#endregion

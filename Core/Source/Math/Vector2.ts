@@ -161,8 +161,7 @@ namespace FudgeCore {
     /**
      * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
      * ```plaintext
-     *    ^                |
-     *    |  =>  <--  =>   v  =>  -->
+     * ↑ => ← => ↓ => → => ↑
      * ```
      * @param _vector Vector to get the orthogonal equivalent of
      * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
@@ -243,6 +242,11 @@ namespace FudgeCore {
      */
     public toVector3(): Vector3 {
       return new Vector3(this.x, this.y, 0);
+    }
+
+    public toString(): string {
+      let result: string = `(${this.x}, ${this.y})`;
+      return result;
     }
 
     public getMutator(): Mutator {

@@ -53,6 +53,12 @@ namespace FudgeCore {
             }
         }
 
+        // public pointToOrigin(_point: Vector2, _origin: ORIGIN2D) {
+        //     let result: Vector2 = _point.copy;
+        //     if (this.or)
+
+        // }
+
         get x(): number {
             return this.position.x;
         }

@@ -1273,9 +1273,10 @@ declare namespace FudgeCore {
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
         /**
-         * Return the calculated normed dimension of the projection space
+         * Return the calculated normed dimension of the projection surface, that is in the hypothetical distance of 1 to the camera
          */
         getProjectionRectangle(): Rectangle;
+        project(_pointInWorldSpace: Vector3): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1776,9 +1777,29 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        /**
+         * Returns a point on the source-rectangle matching the given point on the client rectangle
+         */
         pointClientToSource(_client: Vector2): Vector2;
+        /**
+         * Returns a point on the render-rectangle matching the given point on the source rectangle
+         */
         pointSourceToRender(_source: Vector2): Vector2;
+        /**
+         * Returns a point on the render-rectangle matching the given point on the client rectangle
+         */
         pointClientToRender(_client: Vector2): Vector2;
+        /**
+         * Returns a point in normed view-rectangle matching the given point on the client rectangle
+         * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+         * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
+         */
+        pointClientToProjection(_client: Vector2): Vector2;
+        /**
+         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
+         * which stretches from -1 to 1 in both dimensions, y pointing up
+         */
+        pointClipToClient(_normed: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -2488,8 +2509,7 @@ declare namespace FudgeCore {
         /**
          * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
          * ```plaintext
-         *    ^                |
-         *    |  =>  <--  =>   v  =>  -->
+         * ↑ => ← => ↓ => → => ↑
          * ```
          * @param _vector Vector to get the orthogonal equivalent of
          * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
@@ -2539,6 +2559,7 @@ declare namespace FudgeCore {
          * Adds a z-component to the vector and returns a new Vector3
          */
         toVector3(): Vector3;
+        toString(): string;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -2568,12 +2589,33 @@ declare namespace FudgeCore {
          * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
          */
         readonly magnitudeSquared: number;
+        /**
+         * Creates and returns a vector with the given length pointing in x-direction
+         */
         static X(_scale?: number): Vector3;
+        /**
+         * Creates and returns a vector with the given length pointing in y-direction
+         */
         static Y(_scale?: number): Vector3;
+        /**
+         * Creates and returns a vector with the given length pointing in z-direction
+         */
         static Z(_scale?: number): Vector3;
+        /**
+         * Creates and returns a vector with the value 0 on each axis
+         */
         static ZERO(): Vector3;
+        /**
+         * Creates and returns a vector of the given size on each of the three axis
+         */
         static ONE(_scale?: number): Vector3;
+        /**
+         * Creates and returns a vector through transformation of the given vector by the given matrix
+         */
         static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation?: boolean): Vector3;
+        /**
+         * Creates and returns a vector which is a copy of the given vector scaled to the given length
+         */
         static NORMALIZATION(_vector: Vector3, _length?: number): Vector3;
         /**
          * Sums up multiple vectors.

@@ -54,14 +54,16 @@ namespace FudgeCore {
          * @returns the world-projection-matrix
          */
         public get ViewProjectionMatrix(): Matrix4x4 {
-            let world: Matrix4x4 = this.pivot;
+            //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+            let mtxCamera: Matrix4x4 = this.pivot;
             try {
-                world = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+                mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
             } catch (_error) {
                 // no container node or no world transformation found -> continue with pivot only
             }
-            let viewMatrix: Matrix4x4 = Matrix4x4.INVERSION(world); 
-            return Matrix4x4.MULTIPLICATION(this.transform, viewMatrix);
+            let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
+            mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
+            return mtxWorldProjection;
         }
 
         /**
@@ -90,7 +92,7 @@ namespace FudgeCore {
         }
 
         /**
-         * Return the calculated normed dimension of the projection space
+         * Return the calculated normed dimension of the projection surface, that is in the hypothetical distance of 1 to the camera
          */
         public getProjectionRectangle(): Rectangle {
             let tanFov: number = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
@@ -112,6 +114,15 @@ namespace FudgeCore {
             }
 
             return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
+        }
+
+        public project(_pointInWorldSpace: Vector3): Vector3 {
+            let result: Vector3;
+            result = Vector3.TRANSFORMATION(_pointInWorldSpace, this.ViewProjectionMatrix);
+            let m: Float32Array = this.ViewProjectionMatrix.get()
+            let w: number = m[3] * _pointInWorldSpace.x + m[7] * _pointInWorldSpace.y + m[11] * _pointInWorldSpace.z + m[15];
+            result.scale(1 / w);
+            return result;
         }
 
         //#region Transfer
