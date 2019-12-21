@@ -1,4 +1,4 @@
-# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/Fudge_48.png) F U D G E 
+# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/Fudge_48.png) &nbsp; &nbsp; F U D G E 
 Furtwangen University Didactic Game Editor  
 
 ## Modules
