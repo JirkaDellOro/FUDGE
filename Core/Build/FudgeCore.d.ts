@@ -130,48 +130,7 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been saved */
         FILE_SAVED = "fileSaved"
     }
-    const enum EVENT_POINTER {
-        UP = "\u0192pointerup",
-        DOWN = "\u0192pointerdown",
-        MOVE = "\u0192pointermove",
-        OVER = "\u0192pointerover",
-        ENTER = "\u0192pointerenter",
-        CANCEL = "\u0192pointercancel",
-        OUT = "\u0192pointerout",
-        LEAVE = "\u0192pointerleave",
-        GOTCAPTURE = "\u0192gotpointercapture",
-        LOSTCAPTURE = "\u0192lostpointercapture"
-    }
-    const enum EVENT_DRAGDROP {
-        DRAG = "\u0192drag",
-        DROP = "\u0192drop",
-        START = "\u0192dragstart",
-        END = "\u0192dragend",
-        OVER = "\u0192dragover"
-    }
-    const enum EVENT_WHEEL {
-        WHEEL = "\u0192wheel"
-    }
-    class PointerEventƒ extends PointerEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: PointerEventƒ);
-    }
-    class DragDropEventƒ extends DragEvent {
-        pointerX: number;
-        pointerY: number;
-        canvasX: number;
-        canvasY: number;
-        clientRect: ClientRect;
-        constructor(type: string, _event: DragDropEventƒ);
-    }
-    class WheelEventƒ extends WheelEvent {
-        constructor(type: string, _event: WheelEventƒ);
-    }
-    type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | Event;
+    type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | TimerEventƒ | Event;
     type EventListenerƒ = ((_event: PointerEventƒ) => void) | ((_event: DragDropEventƒ) => void) | ((_event: WheelEventƒ) => void) | ((_event: KeyboardEventƒ) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -1890,6 +1849,23 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    const enum EVENT_DRAGDROP {
+        DRAG = "\u0192drag",
+        DROP = "\u0192drop",
+        START = "\u0192dragstart",
+        END = "\u0192dragend",
+        OVER = "\u0192dragover"
+    }
+    class DragDropEventƒ extends DragEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: DragDropEventƒ);
+    }
+}
+declare namespace FudgeCore {
     class KeyboardEventƒ extends KeyboardEvent {
         constructor(type: string, _event: KeyboardEventƒ);
     }
@@ -2069,6 +2045,49 @@ declare namespace FudgeCore {
         NUMPAD_PARENT_LEFT = "NumpadParentLeft",
         NUMPAD_PARENT_RIGHT = "NumpadParentRight",
         SLEEP = "Sleep"
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_POINTER {
+        UP = "\u0192pointerup",
+        DOWN = "\u0192pointerdown",
+        MOVE = "\u0192pointermove",
+        OVER = "\u0192pointerover",
+        ENTER = "\u0192pointerenter",
+        CANCEL = "\u0192pointercancel",
+        OUT = "\u0192pointerout",
+        LEAVE = "\u0192pointerleave",
+        GOTCAPTURE = "\u0192gotpointercapture",
+        LOSTCAPTURE = "\u0192lostpointercapture"
+    }
+    class PointerEventƒ extends PointerEvent {
+        pointerX: number;
+        pointerY: number;
+        canvasX: number;
+        canvasY: number;
+        clientRect: ClientRect;
+        constructor(type: string, _event: PointerEventƒ);
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_TIMER {
+        CALL = "\u0192lapse"
+    }
+    class TimerEventƒ {
+        type: EVENT_TIMER;
+        target: Timer;
+        arguments: Object[];
+        firstCall: boolean;
+        lastCall: boolean;
+        constructor(_timer: Timer, ..._arguments: Object[]);
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_WHEEL {
+        WHEEL = "\u0192wheel"
+    }
+    class WheelEventƒ extends WheelEvent {
+        constructor(type: string, _event: WheelEventƒ);
     }
 }
 declare namespace FudgeCore {
@@ -3181,6 +3200,10 @@ declare namespace FudgeCore {
          * Returns a copy of the list of timers currently installed on this time object
          */
         getTimers(): Timers;
+        /**
+         * Returns true if there are [[Timers]] installed to this
+         */
+        hasTimers(): boolean;
     }
 }
 declare namespace FudgeCore {
@@ -3235,16 +3258,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    type TimerHandler = (_event: TimerEventƒ) => void;
     class Timer {
         active: boolean;
         count: number;
-        private callback;
+        private handler;
         private time;
         private elapse;
-        private arguments;
+        private event;
         private timeoutReal;
         private idWindow;
-        constructor(_time: Time, _elapse: number, _count: number, _callback: Function, ..._arguments: Object[]);
+        constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]);
         static getRescaled(_timer: Timer): Timer;
         readonly id: number;
         clear(): void;

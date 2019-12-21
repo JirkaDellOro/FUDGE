@@ -1,22 +1,25 @@
 namespace FudgeCore {
+    export type TimerHandler= (_event: TimerEventƒ) => void;
 
     export class Timer {
         public active: boolean;
         public count: number;
-        private callback: Function;
+        private handler: TimerHandler;
         private time: Time;
         private elapse: number;
-        private arguments: Object[];
+        // private arguments: Object[];
         // private startTimeReal: number;
+        private event: TimerEventƒ;
         private timeoutReal: number;
         private idWindow: number;
 
-        constructor(_time: Time, _elapse: number, _count: number, _callback: Function, ..._arguments: Object[]) {
+        constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
             this.time = _time;
             this.elapse = _elapse;
-            this.arguments = _arguments;
+            // this.arguments = _arguments;
             // this.startTimeReal = performance.now();
-            this.callback = _callback;
+            this.event = new TimerEventƒ(this, _arguments);
+            this.handler = _handler;
             this.count = _count;
 
             let scale: number = Math.abs(_time.getScale());
@@ -38,7 +41,10 @@ namespace FudgeCore {
             // }
             // else
             let callback: Function = (): void => {
-                _callback(this.arguments);
+                this.event.lastCall = (this.count == 1);
+                _handler(this.event);
+                this.event.firstCall = false;
+
                 if (this.count > 0)
                     if (--this.count == 0)
                         _time.deleteTimerByItsInternalId(this.idWindow);
@@ -53,7 +59,7 @@ namespace FudgeCore {
             // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
             //     // for an active timeout-timer, calculate the remaining time to timeout
             //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-            let rescaled: Timer = new Timer(_timer.time, _timer.elapse, _timer.count, _timer.callback, _timer.arguments);
+            let rescaled: Timer = new Timer(_timer.time, _timer.elapse, _timer.count, _timer.handler, _timer.event.arguments);
             return rescaled;
         }
 

@@ -162,6 +162,13 @@ namespace FudgeCore {
             let result: Timers = {};
             return Object.assign(result, this.timers);
         }
+
+        /**
+         * Returns true if there are [[Timers]] installed to this
+         */
+        public hasTimers(): boolean {
+            return (Object.keys(this.timers).length > 0);
+        }
         //#endregion
     }
 }
