@@ -1,5 +1,5 @@
 namespace FudgeCore {
-    export type TimerHandler= (_event: TimerEventƒ) => void;
+    export type TimerHandler = (_event: TimerEventƒ) => void;
 
     export class Timer {
         public active: boolean;

@@ -130,7 +130,7 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been saved */
         FILE_SAVED = "fileSaved"
     }
-    type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | TimerEventƒ | Event;
+    type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | Event;
     type EventListenerƒ = ((_event: PointerEventƒ) => void) | ((_event: DragDropEventƒ) => void) | ((_event: WheelEventƒ) => void) | ((_event: KeyboardEventƒ) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -3188,10 +3188,10 @@ declare namespace FudgeCore {
          * Installs a timer at this time object
          * @param _lapse The object-time to elapse between the calls to _callback
          * @param _count The number of calls desired, 0 = Infinite
-         * @param _callback The function to call each the given lapse has elapsed
+         * @param _handler The function to call each the given lapse has elapsed
          * @param _arguments Additional parameters to pass to callback function
          */
-        setTimer(_lapse: number, _count: number, _callback: Function, ..._arguments: Object[]): number;
+        setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
         /**
          * Deletes the timer with the id given by this time object
          */

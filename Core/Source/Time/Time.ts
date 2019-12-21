@@ -92,7 +92,7 @@ namespace FudgeCore {
          * Returns a Promise<void> to be resolved after the time given. To be used with async/await
          */
         public delay(_lapse: number): Promise<void> {
-            return new Promise(_resolve => this.setTimer(_lapse, 1, _resolve));
+            return new Promise(_resolve => this.setTimer(_lapse, 1, () => _resolve()));
         }
 
         // TODO: examine if web-workers would enhance performance here!
@@ -138,11 +138,11 @@ namespace FudgeCore {
          * Installs a timer at this time object
          * @param _lapse The object-time to elapse between the calls to _callback
          * @param _count The number of calls desired, 0 = Infinite
-         * @param _callback The function to call each the given lapse has elapsed
+         * @param _handler The function to call each the given lapse has elapsed
          * @param _arguments Additional parameters to pass to callback function
          */
-        public setTimer(_lapse: number, _count: number, _callback: Function, ..._arguments: Object[]): number {
-            let timer: Timer = new Timer(this, _lapse, _count, _callback, _arguments);
+        public setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number {
+            let timer: Timer = new Timer(this, _lapse, _count, _handler, _arguments);
             this.timers[++this.idTimerNext] = timer;
             return this.idTimerNext;
         }
