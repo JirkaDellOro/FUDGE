@@ -9,9 +9,9 @@ namespace ScreenToRayToScreen {
   let speedCameraRotation: number = 0.2;
   let speedCameraTranslation: number = 0.02;
   let labelDOM: HTMLSpanElement;
-  
-  ƒ.Debug.setFilter(ƒ.DebugTextArea, ƒ.DEBUG_FILTER.ALL);
+
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL - ƒ.DEBUG_FILTER.CLEAR);
+  ƒ.Debug.setFilter(ƒ.DebugTextArea, ƒ.DEBUG_FILTER.ALL);
 
   function init(): void {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
@@ -23,7 +23,7 @@ namespace ScreenToRayToScreen {
     canvas.addEventListener("click", canvas.requestPointerLock);
 
     labelDOM = document.createElement("span");
-    labelDOM.innerHTML = "Hallo";
+    labelDOM.appendChild(ƒ.DebugTextArea.textArea);
     document.body.appendChild(labelDOM);
 
 
@@ -139,14 +139,16 @@ namespace ScreenToRayToScreen {
     let projection: ƒ.Vector3 = camera.cmpCamera.project(mtxCube.translation);
     let client: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
     let screen: ƒ.Vector2 = viewport.pointClientToScreen(client);
-    console.group("Cube");
+
+    ƒ.Debug.clear();
+    ƒ.Debug.group("Cube");
     ƒ.Debug.log("End", mtxCube.translation.toString());
     ƒ.Debug.log("Projected", projection.toString());
+    ƒ.Debug.groupCollapsed("Cube2");
     ƒ.Debug.log("Client", client.toString());
+    ƒ.Debug.groupEnd();
     ƒ.Debug.log("Screen", screen.toString());
-    console.groupEnd();
-
-    console.log(ƒ.DebugTextArea.textArea);
+    ƒ.Debug.groupEnd();
 
     labelDOM.style.left = screen.x + 10 + "px";
     labelDOM.style.top = screen.y + 10 + "px";

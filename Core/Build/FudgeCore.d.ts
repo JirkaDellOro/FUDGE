@@ -1414,7 +1414,12 @@ declare namespace FudgeCore {
         WARN = 4,
         ERROR = 8,
         CLEAR = 16,
-        ALL = 31
+        GROUP = 32,
+        GROUPCOLLAPSED = 64,
+        GROUPEND = 128,
+        MESSAGES = 15,
+        FORMAT = 240,
+        ALL = 255
     }
     type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
     interface MapDebugFilterToDelegate {
@@ -1451,6 +1456,7 @@ declare namespace FudgeCore {
     /**
      * The Debug-Class offers functions known from the console-object and additions,
      * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
      */
     class Debug {
         /**
@@ -1459,48 +1465,42 @@ declare namespace FudgeCore {
         private static delegates;
         /**
          * De- / Activate a filter for the given DebugTarget.
-         * @param _target
-         * @param _filter
          */
         static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
         /**
-         * Debug function to be implemented by the DebugTarget.
-         * info(...) displays additional information with low priority
-         * @param _message
-         * @param _args
+         * Info(...) displays additional information with low priority
          */
         static info(_message: Object, ..._args: Object[]): void;
         /**
-         * Debug function to be implemented by the DebugTarget.
-         * log(...) displays information with medium priority
-         * @param _message
-         * @param _args
+         * Displays information with medium priority
          */
         static log(_message: Object, ..._args: Object[]): void;
         /**
-         * Debug function to be implemented by the DebugTarget.
-         * warn(...) displays information about non-conformities in usage, which is emphasized e.g. by color
-         * @param _message
-         * @param _args
+         * Displays information about non-conformities in usage, which is emphasized e.g. by color
          */
         static warn(_message: Object, ..._args: Object[]): void;
         /**
-         * Debug function to be implemented by the DebugTarget.
-         * error(...) displays critical information about failures, which is emphasized e.g. by color
-         * @param _message
-         * @param _args
+         * Displays critical information about failures, which is emphasized e.g. by color
          */
         static error(_message: Object, ..._args: Object[]): void;
         /**
-         * Debug function to be implemented by the DebugTarget.
-         * clear() clears the output and removes previous messages if possible
+         * Clears the output and removes previous messages if possible
          */
         static clear(): void;
         /**
+         * Opens a new group for messages
+         */
+        static group(_name: string): void;
+        /**
+         * Opens a new group for messages that is collapsed at first
+         */
+        static groupCollapsed(_name: string): void;
+        /**
+         * Closes the youngest group
+         */
+        static groupEnd(): void;
+        /**
          * Lookup all delegates registered to the filter and call them using the given arguments
-         * @param _filter
-         * @param _message
-         * @param _args
          */
         private static delegate;
     }
@@ -1519,8 +1519,13 @@ declare namespace FudgeCore {
     class DebugTextArea extends DebugTarget {
         static textArea: HTMLTextAreaElement;
         static delegates: MapDebugFilterToDelegate;
+        private static groups;
         static clear(): void;
+        static group(_name: string): void;
+        static groupEnd(): void;
         static createDelegate(_headline: string): Function;
+        private static getIndentation;
+        private static print;
     }
 }
 declare namespace FudgeCore {
