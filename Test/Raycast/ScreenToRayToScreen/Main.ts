@@ -9,15 +9,18 @@ namespace ScreenToRayToScreen {
   let speedCameraRotation: number = 0.2;
   let speedCameraTranslation: number = 0.02;
   let labelDOM: HTMLSpanElement;
+  let crc2: CanvasRenderingContext2D;
 
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL - ƒ.DEBUG_FILTER.CLEAR);
   ƒ.Debug.setFilter(ƒ.DebugTextArea, ƒ.DEBUG_FILTER.ALL);
 
   function init(): void {
-    const canvas: HTMLCanvasElement = document.querySelector("canvas");
     args = new URLSearchParams(location.search);
-    ƒ.RenderManager.initialize(true);
+    const canvas: HTMLCanvasElement = document.querySelector("canvas");
     ƒ.Debug.log("Canvas", canvas);
+    crc2 = canvas.getContext("2d");
+
+    ƒ.RenderManager.initialize(true);
 
     // enable unlimited mouse-movement (user needs to click on canvas first)
     canvas.addEventListener("click", canvas.requestPointerLock);
@@ -137,20 +140,32 @@ namespace ScreenToRayToScreen {
   function drawLabels(): void {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxWorld;
     let projection: ƒ.Vector3 = camera.cmpCamera.project(mtxCube.translation);
-    let client: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
-    let screen: ƒ.Vector2 = viewport.pointClientToScreen(client);
+    let posCanvas: ƒ.Vector2 = viewport.pointClipToCanvas(projection.toVector2());
+    let posClient: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
+    let posScreen: ƒ.Vector2 = viewport.pointClientToScreen(posClient);
 
-    ƒ.Debug.clear();
     ƒ.Debug.group("Cube");
-    ƒ.Debug.log("End", mtxCube.translation.toString());
+    ƒ.Debug.clear();
+    ƒ.Debug.info("End", mtxCube.translation.toString());
     ƒ.Debug.log("Projected", projection.toString());
-    ƒ.Debug.groupCollapsed("Cube2");
-    ƒ.Debug.log("Client", client.toString());
-    ƒ.Debug.groupEnd();
-    ƒ.Debug.log("Screen", screen.toString());
+    ƒ.Debug.warn("Canvas", posCanvas.toString());
+    ƒ.Debug.error("Client", posClient.toString());
+    ƒ.Debug.log("Screen", posScreen.toString());
     ƒ.Debug.groupEnd();
 
-    labelDOM.style.left = screen.x + 10 + "px";
-    labelDOM.style.top = screen.y + 10 + "px";
+    labelDOM.style.left = posScreen.x + 30 + "px";
+    labelDOM.style.top = posScreen.y + 30 + "px";
+
+    crc2.beginPath();
+    crc2.arc(posCanvas.x, posCanvas.y, 2, 0, 2 * Math.PI);
+    crc2.moveTo(posCanvas.x, posCanvas.y);
+    posCanvas.subtract(ƒ.Vector2.ONE(50));
+    crc2.lineTo(posCanvas.x, posCanvas.y);
+    crc2.rect(posCanvas.x, posCanvas.y, -220, -100);
+    let text: string[] = ƒ.DebugTextArea.textArea.textContent.split("\n");
+    let posLineY: number = 0;
+    for (let line of text)
+      crc2.fillText(line, posCanvas.x - 210, posCanvas.y - 96 + (posLineY += 16), 200);
+    crc2.stroke();
   }
 }
