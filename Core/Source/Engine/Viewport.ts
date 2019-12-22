@@ -1,6 +1,7 @@
 /// <reference path="../Light/Light.ts"/>
 /// <reference path="../Event/Event.ts"/>
 /// <reference path="../Component/ComponentLight.ts"/>
+/// <reference path="../Math/Rectangle.ts"/>
 namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
   /**
@@ -71,6 +72,8 @@ namespace FudgeCore {
      * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0 
      */
     public getClientRectangle(): Rectangle {
+      // FUDGE doesn't care about where the client rect is, only about the size matters.
+      // return Rectangle.GET(this.canvas.offsetLeft, this.canvas.offsetTop, this.canvas.clientWidth, this.canvas.clientHeight);
       return Rectangle.GET(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
     }
 
@@ -244,12 +247,28 @@ namespace FudgeCore {
      * which stretches from -1 to 1 in both dimensions, y pointing up
      */
     public pointClipToClient(_normed: Vector2): Vector2 {
-      let result: Vector2 = Vector2.ONE(0.5);
-      result.x *= (_normed.x + 1) * this.getClientRectangle().width;
-      result.y *= (1 - _normed.y) * this.getClientRectangle().height;
-      return result;
+      // let rectClient: Rectangle = this.getClientRectangle();
+      // let result: Vector2 = Vector2.ONE(0.5);
+      // result.x *= (_normed.x + 1) * rectClient.width;
+      // result.y *= (1 - _normed.y) * rectClient.height;
+      // result.add(rectClient.position);
+      //TODO: check if rectDestination can be safely (and more perfomant) be used instead getClientRectangle
+      let pointClient: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.rectDestination);
+      return pointClient;
+    }
+    /**
+     * Returns a point in the client rectangle matching the given point in normed clipspace rectangle, 
+     * which stretches from -1 to 1 in both dimensions, y pointing up
+     */
+    public pointClipToCanvas(_normed: Vector2): Vector2 {
+      let pointCanvas: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.getCanvasRectangle());
+      return pointCanvas;
     }
 
+    public pointClientToScreen(_client: Vector2): Vector2 {
+      let screen: Vector2 = new Vector2(this.canvas.offsetLeft + _client.x, this.canvas.offsetTop + _client.y);
+      return screen;
+    }
     //#endregion
 
     // #region Events (passing from canvas to viewport and from there into branch)

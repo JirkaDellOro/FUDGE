@@ -6,6 +6,7 @@ var ScreenToRayToScreen;
     let viewport;
     let speedCameraRotation = 0.2;
     let speedCameraTranslation = 0.02;
+    let labelDOM;
     function init() {
         const canvas = document.querySelector("canvas");
         ScreenToRayToScreen.args = new URLSearchParams(location.search);
@@ -13,6 +14,9 @@ var ScreenToRayToScreen;
         ƒ.Debug.log("Canvas", canvas);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("click", canvas.requestPointerLock);
+        labelDOM = document.createElement("span");
+        labelDOM.innerHTML = "Hallo";
+        document.body.appendChild(labelDOM);
         createScene();
         // setup viewport
         viewport = new ƒ.Viewport();
@@ -51,6 +55,7 @@ var ScreenToRayToScreen;
         console.groupEnd();
         let rayEnd = ƒ.Vector3.SUM(ray.origin, ray.direction);
         let projection = ScreenToRayToScreen.camera.cmpCamera.project(rayEnd);
+        // let screen: ƒ.Vector2 = ƒ.RenderManager.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
         let screen = viewport.pointClipToClient(projection.toVector2());
         console.group("end");
         ƒ.Debug.log("End", rayEnd.toString());
@@ -89,7 +94,22 @@ var ScreenToRayToScreen;
     }
     function updateDisplay() {
         viewport.draw();
+        drawLabels();
     }
     ScreenToRayToScreen.updateDisplay = updateDisplay;
+    function drawLabels() {
+        let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].mtxWorld;
+        let projection = ScreenToRayToScreen.camera.cmpCamera.project(mtxCube.translation);
+        let client = viewport.pointClipToClient(projection.toVector2());
+        let screen = viewport.pointClientToScreen(client);
+        console.group("Cube");
+        ƒ.Debug.log("End", mtxCube.translation.toString());
+        ƒ.Debug.log("Projected", projection.toString());
+        ƒ.Debug.log("Client", client.toString());
+        ƒ.Debug.log("Screen", screen.toString());
+        console.groupEnd();
+        labelDOM.style.left = screen.x + 10 + "px";
+        labelDOM.style.top = screen.y + 10 + "px";
+    }
 })(ScreenToRayToScreen || (ScreenToRayToScreen = {}));
 //# sourceMappingURL=Main.js.map

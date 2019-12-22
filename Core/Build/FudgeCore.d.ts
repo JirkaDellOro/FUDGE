@@ -1707,6 +1707,54 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Defines the origin of a rectangle
+     */
+    enum ORIGIN2D {
+        TOPLEFT = 0,
+        TOPCENTER = 1,
+        TOPRIGHT = 2,
+        CENTERLEFT = 16,
+        CENTER = 17,
+        CENTERRIGHT = 18,
+        BOTTOMLEFT = 32,
+        BOTTOMCENTER = 33,
+        BOTTOMRIGHT = 34
+    }
+    /**
+     * Defines a rectangle with position and size and add comfortable methods to it
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Rectangle extends Mutable {
+        position: Vector2;
+        size: Vector2;
+        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
+        /**
+         * Returns a new rectangle created with the given parameters
+         */
+        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
+        /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
+        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        /**
+         * Returns true if the given point is inside of this rectangle or on the border
+         * @param _point
+         */
+        isInside(_point: Vector2): boolean;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
@@ -1800,6 +1848,12 @@ declare namespace FudgeCore {
          * which stretches from -1 to 1 in both dimensions, y pointing up
          */
         pointClipToClient(_normed: Vector2): Vector2;
+        /**
+         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
+         * which stretches from -1 to 1 in both dimensions, y pointing up
+         */
+        pointClipToCanvas(_normed: Vector2): Vector2;
+        pointClientToScreen(_client: Vector2): Vector2;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -2149,6 +2203,7 @@ declare namespace FudgeCore {
     class FramingFixed extends Framing {
         width: number;
         height: number;
+        constructor(_width?: number, _height?: number);
         setSize(_width: number, _height: number): void;
         getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
         getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
@@ -2371,53 +2426,6 @@ declare namespace FudgeCore {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Defines the origin of a rectangle
-     */
-    enum ORIGIN2D {
-        TOPLEFT = 0,
-        TOPCENTER = 1,
-        TOPRIGHT = 2,
-        CENTERLEFT = 16,
-        CENTER = 17,
-        CENTERRIGHT = 18,
-        BOTTOMLEFT = 32,
-        BOTTOMCENTER = 33,
-        BOTTOMRIGHT = 34
-    }
-    /**
-     * Defines a rectangle with position and size and add comfortable methods to it
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Rectangle extends Mutable {
-        position: Vector2;
-        size: Vector2;
-        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
-        /**
-         * Returns a new rectangle created with the given parameters
-         */
-        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
-        /**
-         * Sets the position and size of the rectangle according to the given parameters
-         */
-        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        left: number;
-        top: number;
-        right: number;
-        bottom: number;
-        /**
-         * Returns true if the given point is inside of this rectangle or on the border
-         * @param _point
-         */
-        isInside(_point: Vector2): boolean;
-        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2961,6 +2969,7 @@ declare namespace FudgeCore {
      * With these references, the already buffered data is retrieved when rendering.
      */
     abstract class RenderManager extends RenderOperator {
+        static rectClip: Rectangle;
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
