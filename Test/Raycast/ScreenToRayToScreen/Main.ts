@@ -9,6 +9,9 @@ namespace ScreenToRayToScreen {
   let speedCameraRotation: number = 0.2;
   let speedCameraTranslation: number = 0.02;
   let labelDOM: HTMLSpanElement;
+  
+  ƒ.Debug.setFilter(ƒ.DebugTextArea, ƒ.DEBUG_FILTER.ALL);
+  ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL - ƒ.DEBUG_FILTER.CLEAR);
 
   function init(): void {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
@@ -54,6 +57,8 @@ namespace ScreenToRayToScreen {
 
     let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
 
+    ƒ.Debug.clear();
+
     let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
     console.group("original");
     ƒ.Debug.log("origin", ray.origin.toString());
@@ -84,6 +89,7 @@ namespace ScreenToRayToScreen {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].cmpTransform.local;
     mtxCube.translation = rayEnd;
     updateDisplay();
+
   }
 
   function hndWheelMove(_event: WheelEvent): void {
@@ -127,6 +133,7 @@ namespace ScreenToRayToScreen {
     viewport.draw();
     drawLabels();
   }
+
   function drawLabels(): void {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxWorld;
     let projection: ƒ.Vector3 = camera.cmpCamera.project(mtxCube.translation);
@@ -138,6 +145,8 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Client", client.toString());
     ƒ.Debug.log("Screen", screen.toString());
     console.groupEnd();
+
+    console.log(ƒ.DebugTextArea.textArea);
 
     labelDOM.style.left = screen.x + 10 + "px";
     labelDOM.style.top = screen.y + 10 + "px";

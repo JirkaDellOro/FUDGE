@@ -249,7 +249,7 @@ namespace FudgeCore {
     }
 
     public toString(): string {
-      let result: string = `(${this.x}, ${this.y}, ${this.z})`;
+      let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)}, ${this.z.toPrecision(5)})`;
       return result;
     }
 

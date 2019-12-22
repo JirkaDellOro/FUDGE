@@ -9,7 +9,8 @@ namespace FudgeCore {
         LOG = 0x02,
         WARN = 0x04,
         ERROR = 0x08,
-        ALL = INFO | LOG | WARN | ERROR
+        CLEAR = 0x10,
+        ALL = INFO | LOG | WARN | ERROR | CLEAR
     }
     // reminescent of an early attempt of Debug
     // export enum DEBUG_TARGET {

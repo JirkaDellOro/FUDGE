@@ -7,6 +7,8 @@ var ScreenToRayToScreen;
     let speedCameraRotation = 0.2;
     let speedCameraTranslation = 0.02;
     let labelDOM;
+    ƒ.Debug.setFilter(ƒ.DebugTextArea, ƒ.DEBUG_FILTER.ALL);
+    ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL - ƒ.DEBUG_FILTER.CLEAR);
     function init() {
         const canvas = document.querySelector("canvas");
         ScreenToRayToScreen.args = new URLSearchParams(location.search);
@@ -39,6 +41,7 @@ var ScreenToRayToScreen;
             return;
         }
         let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+        ƒ.Debug.clear();
         let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
         console.group("original");
         ƒ.Debug.log("origin", ray.origin.toString());
@@ -108,6 +111,7 @@ var ScreenToRayToScreen;
         ƒ.Debug.log("Client", client.toString());
         ƒ.Debug.log("Screen", screen.toString());
         console.groupEnd();
+        console.log(ƒ.DebugTextArea.textArea);
         labelDOM.style.left = screen.x + 10 + "px";
         labelDOM.style.top = screen.y + 10 + "px";
     }

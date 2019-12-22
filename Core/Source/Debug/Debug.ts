@@ -15,7 +15,8 @@ namespace FudgeCore {
             [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]]]),
             [DEBUG_FILTER.LOG]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.LOG]]]),
             [DEBUG_FILTER.WARN]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.WARN]]]),
-            [DEBUG_FILTER.ERROR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.ERROR]]])
+            [DEBUG_FILTER.ERROR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.ERROR]]]),
+            [DEBUG_FILTER.CLEAR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.CLEAR]]])
         };
 
         /**
@@ -73,6 +74,13 @@ namespace FudgeCore {
             Debug.delegate(DEBUG_FILTER.ERROR, _message, _args);
         }
         /**
+         * Debug function to be implemented by the DebugTarget. 
+         * clear() clears the output and removes previous messages if possible
+         */
+        public static clear(): void {
+            Debug.delegate(DEBUG_FILTER.CLEAR, null, null);
+        }
+        /**
          * Lookup all delegates registered to the filter and call them using the given arguments
          * @param _filter 
          * @param _message 
@@ -81,7 +89,7 @@ namespace FudgeCore {
         private static delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void {
             let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
             for (let delegate of delegates.values())
-                if (_args.length > 0)
+                if (_args && _args.length > 0)
                     delegate(_message, ..._args);
                 else
                     delegate(_message);

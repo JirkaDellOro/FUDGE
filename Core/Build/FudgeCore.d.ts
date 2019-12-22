@@ -1413,7 +1413,8 @@ declare namespace FudgeCore {
         LOG = 2,
         WARN = 4,
         ERROR = 8,
-        ALL = 15
+        CLEAR = 16,
+        ALL = 31
     }
     type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
     interface MapDebugFilterToDelegate {
@@ -1491,6 +1492,11 @@ declare namespace FudgeCore {
          */
         static error(_message: Object, ..._args: Object[]): void;
         /**
+         * Debug function to be implemented by the DebugTarget.
+         * clear() clears the output and removes previous messages if possible
+         */
+        static clear(): void;
+        /**
          * Lookup all delegates registered to the filter and call them using the given arguments
          * @param _filter
          * @param _message
@@ -1513,6 +1519,7 @@ declare namespace FudgeCore {
     class DebugTextArea extends DebugTarget {
         static textArea: HTMLTextAreaElement;
         static delegates: MapDebugFilterToDelegate;
+        static clear(): void;
         static createDelegate(_headline: string): Function;
     }
 }
