@@ -1591,7 +1591,9 @@ declare namespace FudgeCore {
         getArray(): Float32Array;
         setArrayNormRGBA(_color: Float32Array): void;
         setArrayBytesRGBA(_color: Uint8ClampedArray): void;
+        getArrayBytesRGBA(): Uint8ClampedArray;
         add(_color: Color): void;
+        getCSS(): string;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
