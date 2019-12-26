@@ -3336,6 +3336,7 @@ declare namespace FudgeCore {
         constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]);
         static getRescaled(_timer: Timer): Timer;
         readonly id: number;
+        readonly lapse: number;
         clear(): void;
     }
 }
