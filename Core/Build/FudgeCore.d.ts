@@ -2443,6 +2443,23 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Random {
+        static readonly standard: Random;
+        private generate;
+        constructor(_ownGenerator?: boolean, _seed?: number);
+        static createGenerator(_seed: number): Function;
+        getNorm(): number;
+        getRange(_min: number, _max: number): number;
+        getRangeFloored(_min: number, _max: number): number;
+        getBoolean(): boolean;
+        getSign(): number;
+        getIndex<T>(_array: Array<T>): number;
+        getKey<T, U>(_map: Map<T, U>): T;
+        getPropertyName(_object: Object): string;
+        getPropertySymbol(_object: Object): symbol;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Stores and manipulates a twodimensional vector comprised of the components x and y
      * ```plaintext
