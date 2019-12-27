@@ -1,23 +1,37 @@
 namespace FudgeCore {
+  /**
+   * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
+   */
   export type TimerHandler = (_event: TimerEventƒ) => void;
 
+  /**
+   * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+   * passing an [[TimerEventƒ]]-instance with additional information and given arguments. 
+   * The frequency scales with the [[Time]]-instance the [[Timer]]-instance is attached to.
+   * 
+   * @author Jirka Dell'Oro-Friedl, HFU, 2019
+   */
   export class Timer {
     public active: boolean;
     public count: number;
     private handler: TimerHandler;
     private time: Time;
     private elapse: number;
-    // private arguments: Object[];
-    // private startTimeReal: number;
     private event: TimerEventƒ;
     private timeoutReal: number;
     private idWindow: number;
 
+    /**
+     * Creates a [[Timer]] instance.
+     * @param _time The [[Time]] instance, the timer attaches to
+     * @param _elapse The time in milliseconds to elapse, to the next call of _handler, measured in _time
+     * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
+     * @param _handler The [[TimerHandler]] instance to call
+     * @param _arguments Additional arguments to pass to _handler
+     */
     constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
       this.time = _time;
       this.elapse = _elapse;
-      // this.arguments = _arguments;
-      // this.startTimeReal = performance.now();
       this.event = new TimerEventƒ(this, _arguments);
       this.handler = _handler;
       this.count = _count;
@@ -32,14 +46,6 @@ namespace FudgeCore {
 
       this.timeoutReal = this.elapse / scale;
 
-      // if (this.type == TIMER_TYPE.TIMEOUT) {
-      //     let callback: Function = (): void => {
-      //         _time.deleteTimerByInternalId(this.id);
-      //         _callback(_arguments);
-      //     };
-      //     id = window.setTimeout(callback, this.timeoutReal);
-      // }
-      // else
       let callback: Function = (): void => {
         this.event.lastCall = (this.count == 1);
         _handler(this.event);
@@ -55,22 +61,30 @@ namespace FudgeCore {
       this.active = true;
     }
 
-    public static getRescaled(_timer: Timer): Timer {
-      // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
-      //     // for an active timeout-timer, calculate the remaining time to timeout
-      //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-      let rescaled: Timer = new Timer(_timer.time, _timer.elapse, _timer.count, _timer.handler, _timer.event.arguments);
-      return rescaled;
-    }
-
+    /**
+     * Returns the window-id of the timer, which was returned by setInterval
+     */
     public get id(): number {
       return this.idWindow;
     }
 
+    /**
+     * Returns the time-intervall for calls to the handler
+     */
     public get lapse(): number {
       return this.elapse;
     }
 
+    /**
+     * Attaches a copy of this at its current state to the same [[Time]]-instance. Used internally when rescaling [[Time]]
+     */
+    public installCopy(): Timer {
+      return new Timer(this.time, this.elapse, this.count, this.handler, this.event.arguments);
+    }
+
+    /**
+     * Clears the timer, removing it from the interval-timers handled by window
+     */
     public clear(): void {
       // if (this.type == TIMER_TYPE.TIMEOUT) {
       //     if (this.active)

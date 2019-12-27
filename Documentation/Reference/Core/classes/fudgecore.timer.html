@@ -69,6 +69,20 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A <a href="fudgecore.timer.html">Timer</a>-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+							passing an <a href="fudgecore.timerevent_.html">TimerEventƒ</a>-instance with additional information and given arguments.
+						The frequency scales with the <a href="fudgecore.time.html">Time</a>-instance the <a href="fudgecore.timer.html">Timer</a>-instance is attached to.</p>
+					</div>
+					<dl class="tsd-comment-tags">
+						<dt>author</dt>
+						<dd><p>Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -98,13 +112,14 @@
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.timer.html#id" class="tsd-kind-icon">id</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.timer.html#lapse" class="tsd-kind-icon">lapse</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.timer.html#clear" class="tsd-kind-icon">clear</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.timer.html#getrescaled" class="tsd-kind-icon">get<wbr>Rescaled</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.timer.html#installcopy" class="tsd-kind-icon">install<wbr>Copy</a></li>
 							</ul>
 						</section>
 					</div>
@@ -116,31 +131,61 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Timer<span class="tsd-signature-symbol">(</span>_time<span class="tsd-signature-symbol">: </span><a href="fudgecore.time.html" class="tsd-signature-type">Time</a>, _elapse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _count<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Function</span>, <span class="tsd-signature-symbol">...</span>_arguments<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Timer<span class="tsd-signature-symbol">(</span>_time<span class="tsd-signature-symbol">: </span><a href="fudgecore.time.html" class="tsd-signature-type">Time</a>, _elapse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _count<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#timerhandler" class="tsd-signature-type">TimerHandler</a>, <span class="tsd-signature-symbol">...</span>_arguments<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L12">Time/Timer.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L22">Time/Timer.ts:22</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a <a href="fudgecore.timer.html">Timer</a> instance.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_time: <a href="fudgecore.time.html" class="tsd-signature-type">Time</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The <a href="fudgecore.time.html">Time</a> instance, the timer attaches to</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5>_elapse: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The time in milliseconds to elapse, to the next call of _handler, measured in _time</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5>_count: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls</p>
+										</div>
+									</div>
 								</li>
 								<li>
-									<h5>_callback: <span class="tsd-signature-type">Function</span></h5>
+									<h5>_handler: <a href="../modules/fudgecore.html#timerhandler" class="tsd-signature-type">TimerHandler</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The <a href="../modules/fudgecore.html#timerhandler">TimerHandler</a> instance to call</p>
+										</div>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>_arguments: <span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">[]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Additional arguments to pass to _handler</p>
+										</div>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></h4>
@@ -156,7 +201,7 @@
 					<div class="tsd-signature tsd-kind-icon">active<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L4">Time/Timer.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L15">Time/Timer.ts:15</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -166,7 +211,7 @@
 					<div class="tsd-signature tsd-kind-icon">count<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L5">Time/Timer.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L16">Time/Timer.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -183,9 +228,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L60">Time/Timer.ts:60</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L67">Time/Timer.ts:67</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the window-id of the timer, which was returned by setInterval</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="lapse" class="tsd-anchor"></a>
+					<h3>lapse</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> lapse<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L74">Time/Timer.ts:74</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the time-intervall for calls to the handler</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 						</li>
 					</ul>
@@ -203,32 +275,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L64">Time/Timer.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L88">Time/Timer.ts:88</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clears the timer, removing it from the interval-timers handled by window</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="getrescaled" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Rescaled</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Rescaled<span class="tsd-signature-symbol">(</span>_timer<span class="tsd-signature-symbol">: </span><a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="installcopy" class="tsd-anchor"></a>
+					<h3>install<wbr>Copy</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">install<wbr>Copy<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/98bf8236/Core/Source/Time/Timer.ts#L52">Time/Timer.ts:52</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Timer.ts#L81">Time/Timer.ts:81</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_timer: <a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></h5>
-								</li>
-							</ul>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Attaches a copy of this at its current state to the same <a href="fudgecore.time.html">Time</a>-instance. Used internally when rescaling <a href="fudgecore.time.html">Time</a></p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.timer.html" class="tsd-signature-type">Timer</a></h4>
 						</li>
 					</ul>
@@ -265,11 +341,14 @@
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="fudgecore.timer.html#id" class="tsd-kind-icon">id</a>
 							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="fudgecore.timer.html#lapse" class="tsd-kind-icon">lapse</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.timer.html#clear" class="tsd-kind-icon">clear</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.timer.html#getrescaled" class="tsd-kind-icon">get<wbr>Rescaled</a>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.timer.html#installcopy" class="tsd-kind-icon">install<wbr>Copy</a>
 							</li>
 						</ul>
 					</li>

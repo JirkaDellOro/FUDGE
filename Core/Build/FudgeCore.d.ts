@@ -2443,20 +2443,64 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Class for creating random values, supporting Javascript's Math.random and a deterministig pseudo-random number generator (PRNG)
+     * that can be fed with a seed and then returns a reproducable set of random numbers (if the precision of Javascript allows)
+     *
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Random {
         private generate;
+        /**
+         * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
+         * @param _ownGenerator
+         * @param _seed
+         */
         constructor(_ownGenerator?: boolean, _seed?: number);
+        /**
+         * Creates a dererminstic PRNG with the given seed
+         */
         static createGenerator(_seed: number): Function;
+        /**
+         * Returns a normed random number, thus in the range of [0, 1[
+         */
         getNorm(): number;
+        /**
+         * Returns a random number in the range of given [_min, _max[
+         */
         getRange(_min: number, _max: number): number;
+        /**
+         * Returns a random integer number in the range of given floored [_min, _max[
+         */
         getRangeFloored(_min: number, _max: number): number;
+        /**
+         * Returns true or false randomly
+         */
         getBoolean(): boolean;
+        /**
+         * Returns -1 or 1 randomly
+         */
         getSign(): number;
+        /**
+         * Returns a randomly selected index into the given array
+         */
         getIndex<T>(_array: Array<T>): number;
+        /**
+         * Returns a randomly selected key from the given Map-instance
+         */
         getKey<T, U>(_map: Map<T, U>): T;
+        /**
+         * Returns a randomly selected property name from the given object
+         */
         getPropertyName(_object: Object): string;
+        /**
+         * Returns a randomly selected symbol from the given object, if symbols are used as keys
+         */
         getPropertySymbol(_object: Object): symbol;
     }
+    /**
+     * Standard [[Random]]-instance using Math.random().
+     */
     const random: Random;
 }
 declare namespace FudgeCore {
@@ -3206,7 +3250,8 @@ declare namespace FudgeCore {
     }
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
-     * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
+     * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time
+     *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Time extends EventTargetƒ {
@@ -3258,10 +3303,6 @@ declare namespace FudgeCore {
          */
         clearAllTimers(): void;
         /**
-         * Recreates [[Timer]]s when scaling changes
-         */
-        rescaleAllTimers(): void;
-        /**
          * Deletes [[Timer]] found using the internal id of the connected interval-object
          * @param _id
          */
@@ -3286,9 +3327,20 @@ declare namespace FudgeCore {
          * Returns true if there are [[Timers]] installed to this
          */
         hasTimers(): boolean;
+        /**
+         * Recreates [[Timer]]s when scaling changes
+         */
+        private rescaleAllTimers;
     }
+    /**
+     * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
+     */
+    const time: Time;
 }
 declare namespace FudgeCore {
+    /**
+     * Determines the mode a loop runs in
+     */
     enum LOOP_MODE {
         /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
@@ -3300,6 +3352,8 @@ declare namespace FudgeCore {
     /**
      * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
      * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
+     *
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Loop extends EventTargetStatic {
         /** The gametime the loop was started, overwritten at each start */
@@ -3340,7 +3394,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
+     */
     type TimerHandler = (_event: TimerEventƒ) => void;
+    /**
+     * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+     * passing an [[TimerEventƒ]]-instance with additional information and given arguments.
+     * The frequency scales with the [[Time]]-instance the [[Timer]]-instance is attached to.
+     *
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     class Timer {
         active: boolean;
         count: number;
@@ -3350,10 +3414,30 @@ declare namespace FudgeCore {
         private event;
         private timeoutReal;
         private idWindow;
+        /**
+         * Creates a [[Timer]] instance.
+         * @param _time The [[Time]] instance, the timer attaches to
+         * @param _elapse The time in milliseconds to elapse, to the next call of _handler, measured in _time
+         * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
+         * @param _handler The [[TimerHandler]] instance to call
+         * @param _arguments Additional arguments to pass to _handler
+         */
         constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]);
-        static getRescaled(_timer: Timer): Timer;
+        /**
+         * Returns the window-id of the timer, which was returned by setInterval
+         */
         readonly id: number;
+        /**
+         * Returns the time-intervall for calls to the handler
+         */
         readonly lapse: number;
+        /**
+         * Attaches a copy of this at its current state to the same [[Time]]-instance. Used internally when rescaling [[Time]]
+         */
+        installCopy(): Timer;
+        /**
+         * Clears the timer, removing it from the interval-timers handled by window
+         */
         clear(): void;
     }
 }
