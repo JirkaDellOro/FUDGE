@@ -1,6 +1,5 @@
 namespace FudgeCore {
   export class Random {
-    public static readonly standard: Random = new Random();
     private generate: Function = Math.random;
 
     constructor(_ownGenerator: boolean = false, _seed: number = Math.random()) {
@@ -54,4 +53,6 @@ namespace FudgeCore {
       return keys[this.getIndex(keys)];
     }
   }
+  
+  export const random: Random = new Random();
 }

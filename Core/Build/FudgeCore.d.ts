@@ -2444,7 +2444,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class Random {
-        static readonly standard: Random;
         private generate;
         constructor(_ownGenerator?: boolean, _seed?: number);
         static createGenerator(_seed: number): Function;
@@ -2458,6 +2457,7 @@ declare namespace FudgeCore {
         getPropertyName(_object: Object): string;
         getPropertySymbol(_object: Object): symbol;
     }
+    const random: Random;
 }
 declare namespace FudgeCore {
     /**
