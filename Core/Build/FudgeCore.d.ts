@@ -3245,12 +3245,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface TimeUnits {
+        hours?: number;
+        minutes?: number;
+        seconds?: number;
+        tenths?: number;
+        hundreds?: number;
+        thousands?: number;
+        fraction?: number;
+        asHours?: number;
+        asMinutes?: number;
+        asSeconds?: number;
+    }
     interface Timers extends Object {
         [id: number]: Timer;
     }
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
-     * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time
+     * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time.
+     * All time values are given in milliseconds
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -3267,10 +3280,15 @@ declare namespace FudgeCore {
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
          */
         static readonly game: Time;
+        static getUnits(_milliseconds: number): TimeUnits;
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds
          */
         get(): number;
+        /**
+         * Returns the remaining time to the given point of time
+         */
+        getRemainder(_to: number): number;
         /**
          * (Re-) Sets the timestamp of this instance
          * @param _time The timestamp to represent the current time (default 0.0)

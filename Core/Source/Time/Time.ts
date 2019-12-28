@@ -1,11 +1,25 @@
 namespace FudgeCore {
+  export interface TimeUnits {
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    tenths?: number;
+    hundreds?: number;
+    thousands?: number;
+    fraction?: number;
+    asHours?: number;
+    asMinutes?: number;
+    asSeconds?: number;
+  }
+
   export interface Timers extends Object {
     [id: number]: Timer;
   }
 
   /**
    * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
-   * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time
+   * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time.
+   * All time values are given in milliseconds
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
@@ -33,11 +47,38 @@ namespace FudgeCore {
       return Time.gameTime;
     }
 
+    public static getUnits(_milliseconds: number): TimeUnits {
+      let units: TimeUnits = {};
+
+      units.asSeconds = _milliseconds / 1000;
+      units.asMinutes = units.asSeconds / 60;
+      units.asHours = units.asMinutes / 60;
+
+      units.hours = Math.floor(units.asHours);
+      units.minutes = Math.floor(units.asMinutes) % 60;
+      units.seconds = Math.floor(units.asSeconds) % 60;
+
+      units.fraction = _milliseconds % 1000;
+      units.thousands = _milliseconds % 10;
+      units.hundreds = _milliseconds % 100 - units.thousands;
+      units.tenths = units.fraction - units.hundreds - units.thousands;
+
+      return units;
+    }
+
+    //#region Get/Set time and scaling
     /**
      * Retrieves the current scaled timestamp of this instance in milliseconds
      */
     public get(): number {
       return this.offset + this.scale * (performance.now() - this.start);
+    }
+
+    /**
+     * Returns the remaining time to the given point of time
+     */
+    public getRemainder(_to: number): number {
+      return _to - this.get();
     }
 
     /**
@@ -87,6 +128,8 @@ namespace FudgeCore {
       this.lastCallToElapsed = current;
       return elapsed;
     }
+    //#endregion
+
 
     //#region Timers
     /**
@@ -155,7 +198,6 @@ namespace FudgeCore {
     public hasTimers(): boolean {
       return (Object.keys(this.timers).length > 0);
     }
-    //#endregion
 
     /**
      * Recreates [[Timer]]s when scaling changes
@@ -172,6 +214,7 @@ namespace FudgeCore {
       }
     }
   }
+  //#endregion
 
   /**
    * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
