@@ -42,13 +42,13 @@ namespace FudgeCore {
     }
 
 
-    export type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | Event;
+    export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
 
     export type EventListenerƒ =
-        ((_event: PointerEventƒ) => void) |
-        ((_event: DragDropEventƒ) => void) |
-        ((_event: WheelEventƒ) => void) |
-        ((_event: KeyboardEventƒ) => void) |
+        ((_event: EventPointer) => void) |
+        ((_event: EventDragDrop) => void) |
+        ((_event: EventWheel) => void) |
+        ((_event: EventKeyboard) => void) |
         ((_event: Eventƒ) => void) |
         EventListenerObject;
 

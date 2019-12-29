@@ -130,8 +130,8 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been saved */
         FILE_SAVED = "fileSaved"
     }
-    type Eventƒ = PointerEventƒ | DragDropEventƒ | WheelEventƒ | KeyboardEventƒ | Event;
-    type EventListenerƒ = ((_event: PointerEventƒ) => void) | ((_event: DragDropEventƒ) => void) | ((_event: WheelEventƒ) => void) | ((_event: KeyboardEventƒ) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
+    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
+    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -1945,18 +1945,18 @@ declare namespace FudgeCore {
         END = "\u0192dragend",
         OVER = "\u0192dragover"
     }
-    class DragDropEventƒ extends DragEvent {
+    class EventDragDrop extends DragEvent {
         pointerX: number;
         pointerY: number;
         canvasX: number;
         canvasY: number;
         clientRect: ClientRect;
-        constructor(type: string, _event: DragDropEventƒ);
+        constructor(type: string, _event: EventDragDrop);
     }
 }
 declare namespace FudgeCore {
-    class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ);
+    class EventKeyboard extends KeyboardEvent {
+        constructor(type: string, _event: EventKeyboard);
     }
     /**
      * Mappings of standard DOM/Browser-Events as passed from a canvas to the viewport
@@ -2149,20 +2149,20 @@ declare namespace FudgeCore {
         GOTCAPTURE = "\u0192gotpointercapture",
         LOSTCAPTURE = "\u0192lostpointercapture"
     }
-    class PointerEventƒ extends PointerEvent {
+    class EventPointer extends PointerEvent {
         pointerX: number;
         pointerY: number;
         canvasX: number;
         canvasY: number;
         clientRect: ClientRect;
-        constructor(type: string, _event: PointerEventƒ);
+        constructor(type: string, _event: EventPointer);
     }
 }
 declare namespace FudgeCore {
     const enum EVENT_TIMER {
         CALL = "\u0192lapse"
     }
-    class TimerEventƒ {
+    class EventTimer {
         type: EVENT_TIMER;
         target: Timer;
         arguments: Object[];
@@ -2175,8 +2175,8 @@ declare namespace FudgeCore {
     const enum EVENT_WHEEL {
         WHEEL = "\u0192wheel"
     }
-    class WheelEventƒ extends WheelEvent {
-        constructor(type: string, _event: WheelEventƒ);
+    class EventWheel extends WheelEvent {
+        constructor(type: string, _event: EventWheel);
     }
 }
 declare namespace FudgeCore {
@@ -3415,7 +3415,7 @@ declare namespace FudgeCore {
     /**
      * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
      */
-    type TimerHandler = (_event: TimerEventƒ) => void;
+    type TimerHandler = (_event: EventTimer) => void;
     /**
      * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
      * passing an [[TimerEventƒ]]-instance with additional information and given arguments.

@@ -40,7 +40,7 @@ namespace EventPassing {
         }
     }
 
-    function hndEvent(_event: ƒ.PointerEventƒ | ƒ.DragDropEventƒ): void {
+    function hndEvent(_event: ƒ.EventPointer | ƒ.EventDragDrop): void {
         if (_event.type == ƒ.EVENT_DRAGDROP.OVER)
             return;
 

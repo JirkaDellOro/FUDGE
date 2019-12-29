@@ -152,7 +152,7 @@ namespace Scenes {
         _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
 
-        function rotate(_event: ƒ.KeyboardEventƒ): void {
+        function rotate(_event: ƒ.EventKeyboard): void {
             let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.pivot;
             let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO();
             vctCamera.y = (0.1 *

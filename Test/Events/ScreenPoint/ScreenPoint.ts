@@ -34,7 +34,7 @@ namespace ScreenPoint {
         console.log("Destin: ", viewPort.rectDestination);
     }
 
-    function hndEvent(_event: ƒ.PointerEventƒ | ƒ.DragDropEventƒ): void {
+    function hndEvent(_event: ƒ.EventPointer | ƒ.EventDragDrop): void {
         console.group(`${_event.type} on ${viewPort.name}`);
         let pointClient: ƒ.Vector2 = <ƒ.Vector2>{ x: _event.pointerX, y: _event.pointerY };
         calculate(pointClient);

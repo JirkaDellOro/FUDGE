@@ -50,7 +50,7 @@ namespace ScreenToRayToScreen {
     ƒ.Debug.log("Game", root);
   }
 
-  function hndPointerMove(_event: ƒ.PointerEventƒ): void {
+  function hndPointerMove(_event: ƒ.EventPointer): void {
     if (document.pointerLockElement) {
       camera.rotateY(_event.movementX * speedCameraRotation);
       camera.rotateX(_event.movementY * speedCameraRotation);

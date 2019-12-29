@@ -3,8 +3,8 @@ namespace FudgeCore {
         WHEEL = "ƒwheel"
     }
     
-    export class WheelEventƒ extends WheelEvent {
-        constructor(type: string, _event: WheelEventƒ) {
+    export class EventWheel extends WheelEvent {
+        constructor(type: string, _event: EventWheel) {
             super(type, _event);
         }
     }

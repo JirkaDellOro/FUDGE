@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
    */
-  export type TimerHandler = (_event: TimerEventƒ) => void;
+  export type TimerHandler = (_event: EventTimer) => void;
 
   /**
    * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
@@ -17,7 +17,7 @@ namespace FudgeCore {
     private handler: TimerHandler;
     private time: Time;
     private elapse: number;
-    private event: TimerEventƒ;
+    private event: EventTimer;
     private timeoutReal: number;
     private idWindow: number;
 
@@ -32,7 +32,7 @@ namespace FudgeCore {
     constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
       this.time = _time;
       this.elapse = _elapse;
-      this.event = new TimerEventƒ(this, _arguments);
+      this.event = new EventTimer(this, _arguments);
       this.handler = _handler;
       this.count = _count;
 

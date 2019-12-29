@@ -339,7 +339,7 @@ namespace FudgeCore {
      * Handle drag-drop events and dispatch to viewport as FUDGE-Event
      */
     private hndDragDropEvent: EventListener = (_event: Event) => {
-      let _dragevent: DragDropEventƒ = <DragDropEventƒ>_event;
+      let _dragevent: EventDragDrop = <EventDragDrop>_event;
       switch (_dragevent.type) {
         case "dragover":
         case "drop":
@@ -353,7 +353,7 @@ namespace FudgeCore {
           _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
           break;
       }
-      let event: DragDropEventƒ = new DragDropEventƒ("ƒ" + _event.type, _dragevent);
+      let event: EventDragDrop = new EventDragDrop("ƒ" + _event.type, _dragevent);
       this.addCanvasPosition(event);
       this.dispatchEvent(event);
     }
@@ -361,7 +361,7 @@ namespace FudgeCore {
      * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
      * @param event
      */
-    private addCanvasPosition(event: PointerEventƒ | DragDropEventƒ): void {
+    private addCanvasPosition(event: EventPointer | EventDragDrop): void {
       event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
       event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
     }
@@ -369,7 +369,7 @@ namespace FudgeCore {
      * Handle pointer events and dispatch to viewport as FUDGE-Event
      */
     private hndPointerEvent: EventListener = (_event: Event) => {
-      let event: PointerEventƒ = new PointerEventƒ("ƒ" + _event.type, <PointerEventƒ>_event);
+      let event: EventPointer = new EventPointer("ƒ" + _event.type, <EventPointer>_event);
       this.addCanvasPosition(event);
       this.dispatchEvent(event);
     }
@@ -379,14 +379,14 @@ namespace FudgeCore {
     private hndKeyboardEvent: EventListener = (_event: Event) => {
       if (!this.hasFocus)
         return;
-      let event: KeyboardEventƒ = new KeyboardEventƒ("ƒ" + _event.type, <KeyboardEventƒ>_event);
+      let event: EventKeyboard = new EventKeyboard("ƒ" + _event.type, <EventKeyboard>_event);
       this.dispatchEvent(event);
     }
     /**
      * Handle wheel event and dispatch to viewport as FUDGE-Event
      */
     private hndWheelEvent: EventListener = (_event: Event) => {
-      let event: WheelEventƒ = new WheelEventƒ("ƒ" + _event.type, <WheelEventƒ>_event);
+      let event: EventWheel = new EventWheel("ƒ" + _event.type, <EventWheel>_event);
       this.dispatchEvent(event);
     }
 

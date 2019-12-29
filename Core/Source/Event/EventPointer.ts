@@ -12,14 +12,14 @@ namespace FudgeCore {
         LOSTCAPTURE = "ƒlostpointercapture"
     }
 
-    export class PointerEventƒ extends PointerEvent {
+    export class EventPointer extends PointerEvent {
         public pointerX: number;
         public pointerY: number;
         public canvasX: number;
         public canvasY: number;
         public clientRect: ClientRect;
 
-        constructor(type: string, _event: PointerEventƒ) {
+        constructor(type: string, _event: EventPointer) {
             super(type, _event);
             let target: HTMLElement = <HTMLElement>_event.target;
             this.clientRect = target.getClientRects()[0];

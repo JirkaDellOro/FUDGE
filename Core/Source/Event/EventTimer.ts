@@ -3,7 +3,7 @@ namespace FudgeCore {
         CALL = "ƒlapse"
     }
 
-    export class TimerEventƒ {
+    export class EventTimer {
         public type: EVENT_TIMER = EVENT_TIMER.CALL;
         public target: Timer;
         public arguments: Object[];

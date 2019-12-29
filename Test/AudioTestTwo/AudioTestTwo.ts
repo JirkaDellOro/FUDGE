@@ -98,7 +98,7 @@ namespace AudioTest {
         _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, move);
 
-        function move(_event: ƒ.KeyboardEventƒ): void {
+        function move(_event: ƒ.EventKeyboard): void {
             const mtxBody: ƒ.Matrix4x4 = _body.cmpTransform.local;
             // let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
 
