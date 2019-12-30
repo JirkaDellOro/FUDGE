@@ -1,41 +1,43 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 var StateMachine;
-(function (StateMachine) {
+(function (StateMachine_1) {
     var ƒ = FudgeCore;
-    class StateMachineMap extends Map {
+    class StateMachine extends Map {
         setTransition(_current, _next, _transition) {
+            let active = this.getStateMethods(_current);
+            active.transitions.set(_next, _transition);
+        }
+        setAction(_current, _action) {
+            let active = this.getStateMethods(_current);
+            active.action = _action;
+        }
+        transit(_current, _next, _cmpAgent) {
+            let active = this.get(_current);
+            let transition = active.transitions.get(_next);
+            transition(_cmpAgent);
+        }
+        act(_current, _cmpAgent) {
+            let active = this.get(_current);
+            active.action(_cmpAgent);
+        }
+        getStateMethods(_current) {
             let active = this.get(_current);
             if (!active) {
                 active = { action: null, transitions: new Map() };
                 this.set(_current, active);
             }
-            active.transitions.set(_next, _transition);
-        }
-        transit(_current, _next, _agent) {
-            let active = this.get(_current);
-            let transition = active.transitions.get(_next);
-            transition(_agent);
+            return active;
         }
     }
-    StateMachine.StateMachineMap = StateMachineMap;
-    // export class StateMachine<State> {
-    //   public mapStateCurrentToNext: StateMachineMapTransitions<State> = new Map();
-    //   public setTransition(_current: State, _next: State, _transition: StateMachineTransition<State>): void {
-    //     let active: Map<State, StateMachineTransition<State>> = this.mapStateCurrentToNext.get(_current);
-    //     if (!active) {
-    //       active = new Map();
-    //       this.mapStateCurrentToNext.set(_current, active);
-    //     }
-    //     active.set(_next, _transition);
-    //   }
-    //   public transit(_current: State, _next: State, _agent: StateMachineAgent<State>): void {
-    //     let active: Map<State, StateMachineTransition<State>> = this.mapStateCurrentToNext.get(_current);
-    //     let transition: StateMachineTransition<State> = active.get(_next);
-    //     transition(_agent);
-    //   }
-    // }
+    StateMachine_1.StateMachine = StateMachine;
     class ComponentStateMachine extends ƒ.ComponentScript {
+        transit(_current, _next) {
+            this.stateMachine.transit(_current, _next, this);
+        }
+        act(_current) {
+            this.stateMachine.act(_current, this);
+        }
     }
-    StateMachine.ComponentStateMachine = ComponentStateMachine;
+    StateMachine_1.ComponentStateMachine = ComponentStateMachine;
 })(StateMachine || (StateMachine = {}));
 //# sourceMappingURL=StateMachine.js.map

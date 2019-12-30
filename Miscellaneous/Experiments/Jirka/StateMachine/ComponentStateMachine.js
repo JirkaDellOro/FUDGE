@@ -8,45 +8,27 @@ var StateMachine;
         JOB[JOB["PATROL"] = 1] = "PATROL";
         JOB[JOB["CHASE"] = 2] = "CHASE";
     })(JOB || (JOB = {}));
-    // class Guard1 extends ƒ.ComponentScript implements StateMachineAgent<JOB>{
-    //   private static stateMachine: StateMachine<JOB> = Guard1.getInstructions();
-    //   public state: JOB;
-    //   public stateMachine: StateMachine<JOB> = Guard1.stateMachine;
-    //   public constructor() {
-    //     super();
-    //   }
-    //   private static getInstructions(): StateMachine<JOB> {
-    //     let instructions: StateMachine<JOB> = new StateMachine<JOB>();
-    //     instructions.setTransition(JOB.IDLE, JOB.PATROL, _node => ƒ.Debug.log("Transit from IDLE to PATROL"));
-    //     instructions.setTransition(JOB.PATROL, JOB.IDLE, _node => ƒ.Debug.log("Transit from PATROL to IDLE"));
-    //     return instructions;
-    //   }
-    // }
-    class Guard2 extends StateMachine.ComponentStateMachine {
+    class Guard extends StateMachine.ComponentStateMachine {
         constructor() {
             super();
-            this.stateMachineMap = Guard2.stateMachineMap;
+            this.stateMachine = Guard.stateMachine;
         }
-        static getInstructions() {
-            let instructions = new StateMachine.StateMachineMap();
-            instructions.setTransition(JOB.IDLE, JOB.PATROL, _node => ƒ.Debug.log("Transit from IDLE to PATROL"));
-            instructions.setTransition(JOB.PATROL, JOB.IDLE, _node => ƒ.Debug.log("Transit from PATROL to IDLE"));
-            return instructions;
+        static setupStateMachine() {
+            let setup = new StateMachine.StateMachine();
+            setup.setTransition(JOB.IDLE, JOB.PATROL, _cmp => ƒ.Debug.log("Transit from IDLE to PATROL"));
+            setup.setTransition(JOB.PATROL, JOB.IDLE, _cmp => ƒ.Debug.log("Transit from PATROL to IDLE"));
+            setup.setAction(JOB.IDLE, _cmp => ƒ.Debug.log("IDLE"));
+            setup.setAction(JOB.PATROL, _cmp => ƒ.Debug.log("PATROL"));
+            return setup;
         }
     }
-    Guard2.stateMachineMap = Guard2.getInstructions();
-    // let node: ƒ.Node = new ƒ.Node("StateMachine");
-    // node.addComponent(cmpStateMachine1);
-    // ƒ.Debug.log(node);
-    // console.group("Guard1");
-    // let cmpStateMachine1: Guard1 = new Guard1();
-    // cmpStateMachine1.stateMachine.transit(JOB.IDLE, JOB.PATROL, cmpStateMachine1);
-    // cmpStateMachine1.stateMachine.transit(JOB.PATROL, JOB.IDLE, cmpStateMachine1);
-    // console.groupEnd();
-    console.group("Guard2");
-    let cmpStateMachine2 = new Guard2();
-    cmpStateMachine2.stateMachineMap.transit(JOB.IDLE, JOB.PATROL, cmpStateMachine2);
-    cmpStateMachine2.stateMachineMap.transit(JOB.PATROL, JOB.IDLE, cmpStateMachine2);
+    Guard.stateMachine = Guard.setupStateMachine();
+    console.group("Guard");
+    let cmpStateMachine = new Guard();
+    cmpStateMachine.transit(JOB.IDLE, JOB.PATROL);
+    cmpStateMachine.transit(JOB.PATROL, JOB.IDLE);
+    cmpStateMachine.act(JOB.IDLE);
+    cmpStateMachine.act(JOB.PATROL);
     console.groupEnd();
 })(StateMachine || (StateMachine = {}));
 //# sourceMappingURL=ComponentStateMachine.js.map
