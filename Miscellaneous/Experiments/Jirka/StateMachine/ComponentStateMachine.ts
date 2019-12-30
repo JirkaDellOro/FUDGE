@@ -5,6 +5,7 @@ namespace StateMachine {
   
   export class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachineAgent<State> {
     public stateCurrent: State;
+    public stateNext: State;
     public stateMachine: StateMachine<State>;
 
     public transit(_next: State): void {
