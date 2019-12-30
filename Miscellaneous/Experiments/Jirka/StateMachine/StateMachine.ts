@@ -10,19 +10,21 @@ namespace StateMachine {
     transitions: StateMachineMapStateToMethod<State>;
   }
   export class StateMachineAgent<State> {
-    state: State;
-    stateMachine: StateMachine<State>;
-    
+    public stateCurrent: State;
+    public stateNext: State;
+    public stateMachine: StateMachine<State>;
+
     public transit(_next: State): void {
-      this.stateMachine.transit(this.state, _next, this);
+      this.stateMachine.transit(this.stateCurrent, _next, this);
     }
 
     public act(): void {
-      this.stateMachine.act(this.state, this);
+      this.stateMachine.act(this.stateCurrent, this);
     }
   }
 
   export class StateMachine<State> extends Map<State, StateMachineMapStateToMethods<State>> {
+
     public setTransition(_current: State, _next: State, _transition: StateMachineMethod<State>): void {
       let active: StateMachineMapStateToMethods<State> = this.getStateMethods(_current);
       active.transitions.set(_next, _transition);
@@ -33,16 +35,37 @@ namespace StateMachine {
       active.action = _action;
     }
 
+    public transitDefault(_agent: StateMachineAgent<State>): void {
+      //
+    }
+
+    public actDefault(_agent: StateMachineAgent<State>): void {
+      //
+    }
+
     public transit(_current: State, _next: State, _agent: StateMachineAgent<State>): void {
-      let active: StateMachineMapStateToMethods<State> = this.get(_current);
-      let transition: StateMachineMethod<State> = active.transitions.get(_next);
-      transition(_agent);
-      _agent.state = _next;
+      _agent.stateNext = _next;
+      try {
+        let active: StateMachineMapStateToMethods<State> = this.get(_current);
+        let transition: StateMachineMethod<State> = active.transitions.get(_next);
+        transition(_agent);
+      } catch (_error) {
+        console.info(_error.message);
+        this.transitDefault(_agent);
+      } finally {
+        _agent.stateCurrent = _next;
+        _agent.stateNext = undefined;
+      }
     }
 
     public act(_current: State, _agent: StateMachineAgent<State>): void {
-      let active: StateMachineMapStateToMethods<State> = this.get(_current);
-      active.action(_agent);
+      try {
+        let active: StateMachineMapStateToMethods<State> = this.get(_current);
+        active.action(_agent);
+      } catch (_error) {
+        console.info(_error.message);
+        this.actDefault(_agent);
+      }
     }
 
     private getStateMethods(_current: State): StateMachineMapStateToMethods<State> {

@@ -3,10 +3,10 @@ var StateMachine;
 (function (StateMachine_1) {
     class StateMachineAgent {
         transit(_next) {
-            this.stateMachine.transit(this.state, _next, this);
+            this.stateMachine.transit(this.stateCurrent, _next, this);
         }
         act() {
-            this.stateMachine.act(this.state, this);
+            this.stateMachine.act(this.stateCurrent, this);
         }
     }
     StateMachine_1.StateMachineAgent = StateMachineAgent;
@@ -19,15 +19,37 @@ var StateMachine;
             let active = this.getStateMethods(_current);
             active.action = _action;
         }
+        transitDefault(_agent) {
+            //
+        }
+        actDefault(_agent) {
+            //
+        }
         transit(_current, _next, _agent) {
-            let active = this.get(_current);
-            let transition = active.transitions.get(_next);
-            transition(_agent);
-            _agent.state = _next;
+            _agent.stateNext = _next;
+            try {
+                let active = this.get(_current);
+                let transition = active.transitions.get(_next);
+                transition(_agent);
+            }
+            catch (_error) {
+                console.info(_error.message);
+                this.transitDefault(_agent);
+            }
+            finally {
+                _agent.stateCurrent = _next;
+                _agent.stateNext = undefined;
+            }
         }
         act(_current, _agent) {
-            let active = this.get(_current);
-            active.action(_agent);
+            try {
+                let active = this.get(_current);
+                active.action(_agent);
+            }
+            catch (_error) {
+                console.info(_error.message);
+                this.actDefault(_agent);
+            }
         }
         getStateMethods(_current) {
             let active = this.get(_current);
