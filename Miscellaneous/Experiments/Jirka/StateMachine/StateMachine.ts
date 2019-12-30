@@ -3,11 +3,15 @@
 namespace StateMachine {
   import ƒ = FudgeCore;
 
-  type StateMachineMethod<State> = (_cmpAgent: ComponentStateMachine<State>) => void;
+  type StateMachineMethod<State> = (_agent: StateMachineAgent<State>) => void;
   type StateMachineMapStateToMethod<State> = Map<State, StateMachineMethod<State>>;
   interface StateMachineMapStateToMethods<State> {
     action: StateMachineMethod<State>;
     transitions: StateMachineMapStateToMethod<State>;
+  }
+  export interface StateMachineAgent<State> {
+    state: State;
+    stateMachine: StateMachine<State>;
   }
 
   export class StateMachine<State> extends Map<State, StateMachineMapStateToMethods<State>> {
@@ -21,15 +25,16 @@ namespace StateMachine {
       active.action = _action;
     }
 
-    public transit(_current: State, _next: State, _cmpAgent: ComponentStateMachine<State>): void {
+    public transit(_current: State, _next: State, _agent: StateMachineAgent<State>): void {
       let active: StateMachineMapStateToMethods<State> = this.get(_current);
       let transition: StateMachineMethod<State> = active.transitions.get(_next);
-      transition(_cmpAgent);
+      transition(_agent);
+      _agent.state = _next;
     }
 
-    public act(_current: State, _cmpAgent: ComponentStateMachine<State>): void {
+    public act(_current: State, _agent: StateMachineAgent<State>): void {
       let active: StateMachineMapStateToMethods<State> = this.get(_current);
-      active.action(_cmpAgent);
+      active.action(_agent);
     }
 
     private getStateMethods(_current: State): StateMachineMapStateToMethods<State> {
@@ -39,19 +44,6 @@ namespace StateMachine {
         this.set(_current, active);
       }
       return active;
-    }
-  }
-
-  export class ComponentStateMachine<State> extends ƒ.ComponentScript {
-    public state: State;
-    public stateMachine: StateMachine<State>;
-
-    public transit(_current: State, _next: State): void {
-      this.stateMachine.transit(_current, _next, this);
-    }
-
-    public act(_current: State): void {
-      this.stateMachine.act(_current, this);
     }
   }
 }
