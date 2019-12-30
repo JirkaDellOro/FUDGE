@@ -1,6 +1,15 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 var StateMachine;
 (function (StateMachine_1) {
+    class StateMachineAgent {
+        transit(_next) {
+            this.stateMachine.transit(this.state, _next, this);
+        }
+        act() {
+            this.stateMachine.act(this.state, this);
+        }
+    }
+    StateMachine_1.StateMachineAgent = StateMachineAgent;
     class StateMachine extends Map {
         setTransition(_current, _next, _transition) {
             let active = this.getStateMethods(_current);

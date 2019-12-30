@@ -9,9 +9,17 @@ namespace StateMachine {
     action: StateMachineMethod<State>;
     transitions: StateMachineMapStateToMethod<State>;
   }
-  export interface StateMachineAgent<State> {
+  export class StateMachineAgent<State> {
     state: State;
     stateMachine: StateMachine<State>;
+    
+    public transit(_next: State): void {
+      this.stateMachine.transit(this.state, _next, this);
+    }
+
+    public act(): void {
+      this.stateMachine.act(this.state, this);
+    }
   }
 
   export class StateMachine<State> extends Map<State, StateMachineMapStateToMethods<State>> {
