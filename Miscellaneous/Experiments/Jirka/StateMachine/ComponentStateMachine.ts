@@ -12,7 +12,7 @@ namespace StateMachine {
       this.stateMachine.transit(this.stateCurrent, _next, this);
     }
 
-    public act(): void {
+    public actDefault(): void {
       this.stateMachine.act(this.stateCurrent, this);
     }
   }

@@ -21,29 +21,36 @@ var StateMachine;
             super();
             this.stateMachine = Guard.stateMachine;
         }
-        static transition(_guard) {
-            console.log(`Guard transits from ${JOB[_guard.stateCurrent]} to ${JOB[_guard.stateNext]}`);
+        static transit(_guard) {
+            console.log(`${JOB[_guard.stateCurrent]} -> ${JOB[_guard.stateNext]} | Dedicated Transition`);
         }
-        static action(_guard) {
+        static transitDefault(_guard) {
+            console.log(`${JOB[_guard.stateCurrent]} -> ${JOB[_guard.stateNext]} | Default Transition`);
+        }
+        static actDefault(_guard) {
             return __awaiter(this, void 0, void 0, function* () {
-                console.log("Guard acts on ", JOB[_guard.stateCurrent]);
+                console.log(`${JOB[_guard.stateCurrent]} | Default Action`);
                 yield new Promise(resolve => window.setTimeout(resolve, 1000));
-                // console.log("Guard finished on ", JOB[_guard.stateCurrent]);
                 let random = Math.floor(Math.random() * Object.keys(JOB).length / 2);
-                // console.log("Guard chooses ", random);
                 _guard.transit(JOB[JOB[random]]);
-                _guard.act();
+                _guard.actDefault();
+            });
+        }
+        static act(_guard) {
+            return __awaiter(this, void 0, void 0, function* () {
+                console.log(`${JOB[_guard.stateCurrent]} | Dedicated Action`);
+                Guard.actDefault(_guard);
             });
         }
         static setupStateMachine() {
             let setup = new StateMachine.StateMachine();
-            setup.transitDefault = Guard.transition;
-            setup.actDefault = Guard.action;
-            setup.setTransition(JOB.IDLE, JOB.IDLE, this.transition);
-            setup.setTransition(JOB.CHASE, JOB.CHASE, this.transition);
+            setup.transitDefault = Guard.transitDefault;
+            setup.actDefault = Guard.actDefault;
+            setup.setTransition(JOB.IDLE, JOB.IDLE, this.transit);
+            setup.setTransition(JOB.CHASE, JOB.CHASE, this.transit);
             //...
-            setup.setAction(JOB.IDLE, this.action);
-            setup.setAction(JOB.PATROL, this.action);
+            setup.setAction(JOB.IDLE, this.act);
+            setup.setAction(JOB.PATROL, this.act);
             return setup;
         }
     }
@@ -72,7 +79,7 @@ var StateMachine;
     console.group("Guard");
     let guard = new Guard();
     guard.stateCurrent = JOB.IDLE;
-    guard.act();
+    guard.actDefault();
     // guard.act();
     // guard.transit(JOB.IDLE);
     // guard.act();
@@ -80,11 +87,11 @@ var StateMachine;
     console.group("ComponentGuard");
     let cmpGuard = new ComponentGuard();
     cmpGuard.stateCurrent = JOB.IDLE;
-    cmpGuard.act();
+    cmpGuard.actDefault();
     cmpGuard.transit(JOB.PATROL);
-    cmpGuard.act();
+    cmpGuard.actDefault();
     cmpGuard.transit(JOB.IDLE);
-    cmpGuard.act();
+    cmpGuard.actDefault();
     console.groupEnd();
 })(StateMachine || (StateMachine = {}));
 //# sourceMappingURL=Test.js.map

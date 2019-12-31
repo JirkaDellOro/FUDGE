@@ -6,7 +6,7 @@ var StateMachine;
         transit(_next) {
             this.stateMachine.transit(this.stateCurrent, _next, this);
         }
-        act() {
+        actDefault() {
             this.stateMachine.act(this.stateCurrent, this);
         }
     }
