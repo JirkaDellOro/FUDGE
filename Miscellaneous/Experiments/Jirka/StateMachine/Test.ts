@@ -5,37 +5,37 @@ namespace StateMachine {
     IDLE, PATROL, CHASE
   }
 
-  class Guard extends StateMachineAgent<JOB> {
-    private static stateMachine: StateMachine<JOB> = Guard.setupStateMachine();
+  class Guard extends StateMachine<JOB> {
+    private static stateMachine: StateMachineInstructions<JOB> = Guard.setupStateMachine();
 
     public constructor() {
       super();
       this.stateMachine = Guard.stateMachine;
     }
 
-    public static transit(_guard: Guard): void {
-      console.log(`${JOB[_guard.stateCurrent]} -> ${JOB[_guard.stateNext]} | Dedicated Transition`);
+    public static transit(_machine: Guard): void {
+      console.log(`${JOB[_machine.stateCurrent]} -> ${JOB[_machine.stateNext]} | Dedicated Transition`);
     }
     
-    public static transitDefault(_guard: Guard): void {
-      console.log(`${JOB[_guard.stateCurrent]} -> ${JOB[_guard.stateNext]} | Default Transition`);
+    public static transitDefault(_machine: Guard): void {
+      console.log(`${JOB[_machine.stateCurrent]} -> ${JOB[_machine.stateNext]} | Default Transition`);
     }
 
-    public static async actDefault(_guard: Guard): Promise<void> {
-      console.log(`${JOB[_guard.stateCurrent]} | Default Action`);
+    public static async actDefault(_machine: Guard): Promise<void> {
+      console.log(`${JOB[_machine.stateCurrent]} | Default Action`);
       await new Promise(resolve => window.setTimeout(resolve, 1000));
       let random: number = Math.floor(Math.random() * Object.keys(JOB).length / 2);
-      _guard.transit(JOB[JOB[random]]);
-      _guard.actDefault();
+      _machine.transit(JOB[JOB[random]]);
+      _machine.act();
     }
 
-    public static async act(_guard: Guard): Promise<void> {
-      console.log(`${JOB[_guard.stateCurrent]} | Dedicated Action`);
-      Guard.actDefault(_guard);
+    public static async act(_machine: Guard): Promise<void> {
+      console.log(`${JOB[_machine.stateCurrent]} | Dedicated Action`);
+      Guard.actDefault(_machine);
     }
 
-    private static setupStateMachine(): StateMachine<JOB> {
-      let setup: StateMachine<JOB> = new StateMachine();
+    private static setupStateMachine(): StateMachineInstructions<JOB> {
+      let setup: StateMachineInstructions<JOB> = new StateMachineInstructions();
       setup.transitDefault = Guard.transitDefault ;
       setup.actDefault = Guard.actDefault;
       setup.setTransition(JOB.IDLE, JOB.IDLE, this.transit);
@@ -48,26 +48,26 @@ namespace StateMachine {
   }
 
   class ComponentGuard extends ComponentStateMachine<JOB> {
-    private static stateMachine: StateMachine<JOB> = ComponentGuard.setupStateMachine();
+    private static stateMachine: StateMachineInstructions<JOB> = ComponentGuard.setupStateMachine();
 
     public constructor() {
       super();
       this.stateMachine = ComponentGuard.stateMachine;
     }
 
-    public static transition(_cmp: ComponentGuard): void {
-      console.log("ComponentGuard transits from ", _cmp.stateCurrent);
+    public static transit(_machine: ComponentGuard): void {
+      console.log("ComponentGuard transits from ", _machine.stateCurrent);
     }
-    public static action(_cmp: ComponentGuard): void {
-      console.log("ComponentGuard acts on ", _cmp.stateCurrent);
+    public static act(_machine: ComponentGuard): void {
+      console.log("ComponentGuard acts on ", _machine.stateCurrent);
     }
 
-    private static setupStateMachine(): StateMachine<JOB> {
-      let setup: StateMachine<JOB> = new StateMachine();
-      setup.setTransition(JOB.IDLE, JOB.PATROL, this.transition);
-      setup.setTransition(JOB.PATROL, JOB.IDLE, this.transition);
-      setup.setAction(JOB.IDLE, this.action);
-      setup.setAction(JOB.PATROL, this.action);
+    private static setupStateMachine(): StateMachineInstructions<JOB> {
+      let setup: StateMachineInstructions<JOB> = new StateMachineInstructions();
+      setup.setTransition(JOB.IDLE, JOB.PATROL, this.transit);
+      setup.setTransition(JOB.PATROL, JOB.IDLE, this.transit);
+      setup.setAction(JOB.IDLE, this.act);
+      setup.setAction(JOB.PATROL, this.act);
       return setup;
     }
   }
@@ -76,7 +76,7 @@ namespace StateMachine {
   console.group("Guard");
   let guard: Guard = new Guard();
   guard.stateCurrent = JOB.IDLE;
-  guard.actDefault();
+  guard.act();
   // guard.act();
   // guard.transit(JOB.IDLE);
   // guard.act();
@@ -86,10 +86,10 @@ namespace StateMachine {
   console.group("ComponentGuard");
   let cmpGuard: ComponentGuard = new ComponentGuard();
   cmpGuard.stateCurrent = JOB.IDLE;
-  cmpGuard.actDefault();
+  cmpGuard.act();
   cmpGuard.transit(JOB.PATROL);
-  cmpGuard.actDefault();
+  cmpGuard.act();
   cmpGuard.transit(JOB.IDLE);
-  cmpGuard.actDefault();
+  cmpGuard.act();
   console.groupEnd();
 }
