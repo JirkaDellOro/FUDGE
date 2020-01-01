@@ -1586,6 +1586,7 @@ declare namespace FudgeCore {
         static readonly DARK_CYAN: Color;
         static readonly DARK_MAGENTA: Color;
         static PRESET(_color: COLOR): Color;
+        static MULTIPLY(_color1: Color, _color2: Color): Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
         getArray(): Float32Array;

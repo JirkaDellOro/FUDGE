@@ -55,7 +55,7 @@ namespace FudgeCore {
          * Initializes offscreen-canvas, renderingcontext and hardware viewport.
          */
         public static initialize(_antialias: boolean = false, _alpha: boolean = false): void {
-            let contextAttributes: WebGLContextAttributes = { alpha: _alpha, antialias: _antialias };
+            let contextAttributes: WebGLContextAttributes = { alpha: _alpha, antialias: _antialias, premultipliedAlpha: false };
             let canvas: HTMLCanvasElement = document.createElement("canvas");
             RenderOperator.crc3 = RenderOperator.assert<WebGL2RenderingContext>(
                 canvas.getContext("webgl2", contextAttributes),
@@ -64,6 +64,10 @@ namespace FudgeCore {
             // Enable backface- and zBuffer-culling.
             RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
             RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+            RenderOperator.crc3.enable(WebGL2RenderingContext.BLEND);
+            RenderOperator.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
+            RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+            // RenderOperator.crc3.enable(WebGL2RenderingContext.);
             // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
             RenderOperator.rectViewport = RenderOperator.getCanvasRect();
 

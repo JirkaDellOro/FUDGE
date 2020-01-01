@@ -73,6 +73,10 @@ namespace FudgeCore {
       return new Color(1, 1, 1, 1);
     }
 
+    public static MULTIPLY(_color1: Color, _color2: Color): Color {
+      return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);
+    }
+
     public setNormRGBA(_r: number, _g: number, _b: number, _a: number): void {
       this.r = Math.min(1, Math.max(0, _r));
       this.g = Math.min(1, Math.max(0, _g));
@@ -104,11 +108,12 @@ namespace FudgeCore {
       this.r += _color.r;
       this.g += _color.g;
       this.b += _color.b;
+      this.a += _color.a;
     }
 
     public getCSS(): string {
       let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
-      return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${bytes[3]})`
+      return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${bytes[3]})`;
     }
 
     protected reduceMutator(_mutator: Mutator): void {/** */ }
