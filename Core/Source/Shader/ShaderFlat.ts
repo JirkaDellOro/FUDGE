@@ -41,6 +41,7 @@ namespace FudgeCore {
                             if (illumination > 0.0f)
                                 v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
                         }
+                        v_color.a = 1.0;
                     }`;
         }
         public static getFragmentShaderSource(): string {

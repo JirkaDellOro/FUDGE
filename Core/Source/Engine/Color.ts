@@ -1,77 +1,44 @@
 namespace FudgeCore {
-  export enum COLOR {
-    BLACK,
-    WHITE,
-
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW,
-    CYAN,
-    MAGENTA,
-
-    LIGHT_GREY,
-    LIGHT_RED,
-    LIGHT_GREEN,
-    LIGHT_BLUE,
-    LIGHT_YELLOW,
-    LIGHT_CYAN,
-    LIGHT_MAGENTA,
-
-    DARK_GREY,
-    DARK_RED,
-    DARK_GREEN,
-    DARK_BLUE,
-    DARK_YELLOW,
-    DARK_CYAN,
-    DARK_MAGENTA
-  }
-
   /**
    * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
    */
   export class Color extends Mutable { //implements Serializable {
     public r: number;
     public g: number;
-    public b: number;
+    public b: number; 
     public a: number;
 
     constructor(_r: number = 1, _g: number = 1, _b: number = 1, _a: number = 1) {
       super();
       this.setNormRGBA(_r, _g, _b, _a);
     }
+ 
+    public static BLACK(_alpha: number = 1): Color { return new Color(0, 0, 0, _alpha); }
+    public static WHITE(_alpha: number = 1): Color { return new Color(1, 1, 1, _alpha); }
 
-    public static get BLACK(): Color { return new Color(0, 0, 0, 1); }
-    public static get WHITE(): Color { return new Color(1, 1, 1, 1); }
+    public static RED(_alpha: number = 1): Color { return new Color(1, 0, 0, _alpha); }
+    public static GREEN(_alpha: number = 1): Color { return new Color(0, 1, 0, _alpha); }
+    public static BLUE(_alpha: number = 1): Color { return new Color(0, 0, 1, _alpha); }
+    public static YELLOW(_alpha: number = 1): Color { return new Color(1, 1, 0, _alpha); }
+    public static CYAN(_alpha: number = 1): Color { return new Color(0, 1, 1, _alpha); }
+    public static MAGENTA(_alpha: number = 1): Color { return new Color(1, 0, 1, _alpha); }
+    public static GREY(_alpha: number = 1): Color { return new Color(0.5, 0.5, 0.5, _alpha); }
 
-    public static get RED(): Color { return new Color(1, 0, 0, 1); }
-    public static get GREEN(): Color { return new Color(0, 1, 0, 1); }
-    public static get BLUE(): Color { return new Color(0, 0, 1, 1); }
-    public static get YELLOW(): Color { return new Color(1, 1, 0, 1); }
-    public static get CYAN(): Color { return new Color(0, 1, 1, 1); }
-    public static get MAGENTA(): Color { return new Color(1, 0, 1, 1); }
-    public static get GREY(): Color { return new Color(0.5, 0.5, 0.5, 1); }
+    public static LIGHT_GREY(_alpha: number = 1): Color { return new Color(0.75, 0.75, 0.75, _alpha); }
+    public static LIGHT_RED(_alpha: number = 1): Color { return new Color(1, 0.5, 0.5, _alpha); }
+    public static LIGHT_GREEN(_alpha: number = 1): Color { return new Color(0.5, 1, 0.5, _alpha); }
+    public static LIGHT_BLUE(_alpha: number = 1): Color { return new Color(0.5, 0.5, 1, _alpha); }
+    public static LIGHT_YELLOW(_alpha: number = 1): Color { return new Color(1, 1, 0.5, _alpha); }
+    public static LIGHT_CYAN(_alpha: number = 1): Color { return new Color(0.5, 1, 1, _alpha); }
+    public static LIGHT_MAGENTA(_alpha: number = 1): Color { return new Color(1, 0.5, 1, _alpha); }
 
-    public static get LIGHT_GREY(): Color { return new Color(0.75, 0.75, 0.75, 1); }
-    public static get LIGHT_RED(): Color { return new Color(1, 0.5, 0.5, 1); }
-    public static get LIGHT_GREEN(): Color { return new Color(0.5, 1, 0.5, 1); }
-    public static get LIGHT_BLUE(): Color { return new Color(0.5, 0.5, 1, 1); }
-    public static get LIGHT_YELLOW(): Color { return new Color(1, 1, 0.5, 1); }
-    public static get LIGHT_CYAN(): Color { return new Color(0.5, 1, 1, 1); }
-    public static get LIGHT_MAGENTA(): Color { return new Color(1, 0.5, 1, 1); }
-
-    public static get DARK_GREY(): Color { return new Color(0.25, 0.25, 0.25, 1); }
-    public static get DARK_RED(): Color { return new Color(0.5, 0, 0, 1); }
-    public static get DARK_GREEN(): Color { return new Color(0, 0.5, 0, 1); }
-    public static get DARK_BLUE(): Color { return new Color(0, 0, 0.5, 1); }
-    public static get DARK_YELLOW(): Color { return new Color(0.5, 0.5, 0, 1); }
-    public static get DARK_CYAN(): Color { return new Color(0, 0.5, 0.5, 1); }
-    public static get DARK_MAGENTA(): Color { return new Color(0.5, 0, 0.5, 1); }
-
-    public static PRESET(_color: COLOR): Color {
-      // TODO: replace above getters with switch here... Reason: it's more like an enum and should be documented as such
-      return new Color(1, 1, 1, 1);
-    }
+    public static DARK_GREY(_alpha: number = 1): Color { return new Color(0.25, 0.25, 0.25, _alpha); }
+    public static DARK_RED(_alpha: number = 1): Color { return new Color(0.5, 0, 0, _alpha); }
+    public static DARK_GREEN(_alpha: number = 1): Color { return new Color(0, 0.5, 0, _alpha); }
+    public static DARK_BLUE(_alpha: number = 1): Color { return new Color(0, 0, 0.5, _alpha); }
+    public static DARK_YELLOW(_alpha: number = 1): Color { return new Color(0.5, 0.5, 0, _alpha); }
+    public static DARK_CYAN(_alpha: number = 1): Color { return new Color(0, 0.5, 0.5, _alpha); }
+    public static DARK_MAGENTA(_alpha: number = 1): Color { return new Color(0.5, 0, 0.5, _alpha); }
 
     public static MULTIPLY(_color1: Color, _color2: Color): Color {
       return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);

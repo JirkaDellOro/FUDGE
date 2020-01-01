@@ -1529,30 +1529,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    enum COLOR {
-        BLACK = 0,
-        WHITE = 1,
-        RED = 2,
-        GREEN = 3,
-        BLUE = 4,
-        YELLOW = 5,
-        CYAN = 6,
-        MAGENTA = 7,
-        LIGHT_GREY = 8,
-        LIGHT_RED = 9,
-        LIGHT_GREEN = 10,
-        LIGHT_BLUE = 11,
-        LIGHT_YELLOW = 12,
-        LIGHT_CYAN = 13,
-        LIGHT_MAGENTA = 14,
-        DARK_GREY = 15,
-        DARK_RED = 16,
-        DARK_GREEN = 17,
-        DARK_BLUE = 18,
-        DARK_YELLOW = 19,
-        DARK_CYAN = 20,
-        DARK_MAGENTA = 21
-    }
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
@@ -1562,30 +1538,29 @@ declare namespace FudgeCore {
         b: number;
         a: number;
         constructor(_r?: number, _g?: number, _b?: number, _a?: number);
-        static readonly BLACK: Color;
-        static readonly WHITE: Color;
-        static readonly RED: Color;
-        static readonly GREEN: Color;
-        static readonly BLUE: Color;
-        static readonly YELLOW: Color;
-        static readonly CYAN: Color;
-        static readonly MAGENTA: Color;
-        static readonly GREY: Color;
-        static readonly LIGHT_GREY: Color;
-        static readonly LIGHT_RED: Color;
-        static readonly LIGHT_GREEN: Color;
-        static readonly LIGHT_BLUE: Color;
-        static readonly LIGHT_YELLOW: Color;
-        static readonly LIGHT_CYAN: Color;
-        static readonly LIGHT_MAGENTA: Color;
-        static readonly DARK_GREY: Color;
-        static readonly DARK_RED: Color;
-        static readonly DARK_GREEN: Color;
-        static readonly DARK_BLUE: Color;
-        static readonly DARK_YELLOW: Color;
-        static readonly DARK_CYAN: Color;
-        static readonly DARK_MAGENTA: Color;
-        static PRESET(_color: COLOR): Color;
+        static BLACK(_alpha?: number): Color;
+        static WHITE(_alpha?: number): Color;
+        static RED(_alpha?: number): Color;
+        static GREEN(_alpha?: number): Color;
+        static BLUE(_alpha?: number): Color;
+        static YELLOW(_alpha?: number): Color;
+        static CYAN(_alpha?: number): Color;
+        static MAGENTA(_alpha?: number): Color;
+        static GREY(_alpha?: number): Color;
+        static LIGHT_GREY(_alpha?: number): Color;
+        static LIGHT_RED(_alpha?: number): Color;
+        static LIGHT_GREEN(_alpha?: number): Color;
+        static LIGHT_BLUE(_alpha?: number): Color;
+        static LIGHT_YELLOW(_alpha?: number): Color;
+        static LIGHT_CYAN(_alpha?: number): Color;
+        static LIGHT_MAGENTA(_alpha?: number): Color;
+        static DARK_GREY(_alpha?: number): Color;
+        static DARK_RED(_alpha?: number): Color;
+        static DARK_GREEN(_alpha?: number): Color;
+        static DARK_BLUE(_alpha?: number): Color;
+        static DARK_YELLOW(_alpha?: number): Color;
+        static DARK_CYAN(_alpha?: number): Color;
+        static DARK_MAGENTA(_alpha?: number): Color;
         static MULTIPLY(_color1: Color, _color2: Color): Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
