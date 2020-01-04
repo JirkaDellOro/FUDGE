@@ -10,11 +10,9 @@ namespace FudgeCore {
   }
 
   /**
-   * Simple class for 3x3 matrix operations (This class can only handle 2D
-   * transformations. Could be removed after applying full 2D compatibility to Mat4).
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * Simple class for 3x3 matrix operations
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  // TODO: refactor to match Matrix3x3
   export class Matrix3x3 extends Mutable implements Serializable {
     private data: Float32Array = new Float32Array(3); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!

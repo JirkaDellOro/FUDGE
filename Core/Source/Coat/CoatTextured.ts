@@ -12,7 +12,8 @@ namespace FudgeCore {
     public repetition: boolean;
 
     public getMutatorForComponent(): MutatorForComponent {
-      let mutatorPivot: Mutator = this.pivot.getMutator();
+      let mutatorPivot: MutatorForComponent = <MutatorForComponent><unknown>this.pivot.getMutator();
+      return mutatorPivot;
     }
   }
 

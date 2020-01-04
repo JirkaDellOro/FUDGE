@@ -2098,9 +2098,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Simple class for 3x3 matrix operations (This class can only handle 2D
-     * transformations. Could be removed after applying full 2D compatibility to Mat4).
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Simple class for 3x3 matrix operations
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Matrix3x3 extends Mutable implements Serializable {
         private data;
