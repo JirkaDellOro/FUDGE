@@ -989,6 +989,7 @@ declare namespace FudgeCore {
         tilingY: number;
         repetition: boolean;
         getMutatorForComponent(): MutatorForComponent;
+        mutate(_mutator: MutatorForComponent): void;
     }
 }
 declare namespace FudgeCore {

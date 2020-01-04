@@ -15,5 +15,9 @@ namespace FudgeCore {
       let mutatorPivot: MutatorForComponent = <MutatorForComponent><unknown>this.pivot.getMutator();
       return mutatorPivot;
     }
+
+    public mutate(_mutator: MutatorForComponent): void {
+      this.pivot.mutate(_mutator);
+    }
   }
 }
