@@ -485,6 +485,7 @@ namespace FudgeCore {
     public translateX(_x: number): void {
       this.data[12] += _x;
       this.mutator = null;
+      this.vectors.translation = null;
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
@@ -492,6 +493,7 @@ namespace FudgeCore {
     public translateY(_y: number): void {
       this.data[13] += _y;
       this.mutator = null;
+      this.vectors.translation = null;
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
@@ -499,6 +501,7 @@ namespace FudgeCore {
     public translateZ(_z: number): void {
       this.data[14] += _z;
       this.mutator = null;
+      this.vectors.translation = null;
     }
     //#endregion
 

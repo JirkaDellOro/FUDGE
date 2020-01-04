@@ -67,6 +67,19 @@ namespace FudgeCore {
       return vector;
     }
 
+    public static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
+      let result: Vector2 = new Vector2();
+      let m: Float32Array = _matrix.get();
+      let [x, y] = _vector.get();
+      result.x = m[0] * x + m[3] * y;
+      result.y = m[1] * x + m[4] * y;
+
+      if (_includeTranslation) {
+        result.add(_matrix.translation);
+      }
+
+      return result;
+    }
 
     /**
      * Normalizes a given vector to the given length without editing the original vector.
@@ -244,6 +257,10 @@ namespace FudgeCore {
      */
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);
+    }
+
+    public transform(_matrix: Matrix3x3, _includeTranslation: boolean = true): void {
+      this.data = Vector2.TRANSFORMATION(this, _matrix, _includeTranslation).data;
     }
 
     /**

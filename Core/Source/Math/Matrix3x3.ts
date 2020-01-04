@@ -196,6 +196,7 @@ namespace FudgeCore {
     public translateX(_x: number): void {
       this.data[6] += _x;
       this.mutator = null;
+      this.vectors.translation = null;
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
@@ -203,6 +204,7 @@ namespace FudgeCore {
     public translateY(_y: number): void {
       this.data[7] += _y;
       this.mutator = null;
+      this.vectors.translation = null;
     }
     //#endregion
 
@@ -261,16 +263,16 @@ namespace FudgeCore {
 
       let s0: number = this.data[0] / scaling.x;
       let s1: number = this.data[1] / scaling.x;
+      let s3: number = this.data[3] / scaling.y;
       let s4: number = this.data[4] / scaling.y;
-      let s5: number = this.data[5] / scaling.y;
 
-      let xSkew: number = Math.atan2(-s4, s5);
+      let xSkew: number = Math.atan2(-s3, s4);
       let ySkew: number = Math.atan2(s0, s1);
 
       let sy: number = Math.hypot(s0, s1); // probably 2. param should be this.data[4] / scaling.y
       let rotation: number;
 
-      if (sy > 1e-6)
+      if (!(sy > 1e-6))
         rotation = ySkew;
       else
         rotation = xSkew;
@@ -336,7 +338,7 @@ namespace FudgeCore {
         );
       }
 
-      vectors.rotation = newRotation ? newRotation : oldRotation;
+      vectors.rotation = (newRotation == undefined) ? oldRotation : newRotation;
 
       if (newScaling) {
         vectors.scaling = new Vector2(
