@@ -1,47 +1,32 @@
-namespace Mutable {
-    import ƒ = FudgeCore;
-    window.addEventListener("DOMContentLoaded", init);
+namespace ComponentParameters {
+  import ƒ = FudgeCore;
+  window.addEventListener("DOMContentLoaded", init);
 
-    let mutator: ƒ.Mutator;
-    let angle: number = 0;
-    let cmpTransform: ƒ.ComponentTransform;
+  function init(): void {
+    let img: HTMLImageElement = document.querySelector("img");
+    let txtImage: ƒ.TextureImage = new ƒ.TextureImage();
+    txtImage.image = img;
+    let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+    coatTextured.texture = txtImage;
+    let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(
+      new ƒ.Material("Material", ƒ.ShaderTexture, coatTextured)
+    );
 
-    function init(): void {
-        Scenes.createMiniScene();
-        Scenes.createViewport();
+    let quad: ƒ.Node = new ƒ.Node("Quad");
+    quad.addComponent(new ƒ.ComponentMesh(new ƒ.MeshQuad()));
+    quad.addComponent(cmpMaterial);
 
-        cmpTransform = Scenes.node.cmpTransform;
-        mutator = cmpTransform.getMutatorForAnimation();
-        console.log("Mutator: ", mutator);
-        let serialization: ƒ.Serialization = Scenes.node.cmpTransform.serialize();
-        console.log("Serialization: ", serialization);
+    ƒ.RenderManager.initialize();
+    ƒ.RenderManager.update();
 
-        let mttCamera: ƒ.Mutator;
-        mttCamera = Scenes.cmpCamera.getMutator();
-        console.log("mttCamera: ", mttCamera);
-        let mttCameraTypes: ƒ.MutatorAttributeTypes;
-        mttCameraTypes = Scenes.cmpCamera.getMutatorAttributeTypes(mttCamera);
-        console.log("mttCameraTypes: ", mttCameraTypes);
-        let srlCamera: ƒ.Serialization = Scenes.cmpCamera.serialize();
-        console.log("srlCamera: ", srlCamera);
+    let viewport: ƒ.Viewport = new ƒ.Viewport();
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translateZ(2);
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    viewport.initialize("Viewport", quad, cmpCamera, document.querySelector("canvas"));
+    viewport.draw();
 
-        let srlNode: ƒ.Serialization = Scenes.node.serialize();
-        console.log("srlNode: ", srlNode);
-
-        animate();
-    }
-
-    function animate(): void {
-        window.requestAnimationFrame(animate);
-
-        angle += 0.03;
-
-        mutator.translation["x"] = 5 * Math.sin(angle);
-        mutator.scaling["y"] = Math.cos(1.7 * angle);
-
-        cmpTransform.mutate(mutator);
-
-        ƒ.RenderManager.update();
-        Scenes.viewport.draw();
-    }
+    let mutator: ƒ.Mutator = cmpMaterial.getMutatorForUserInterface();
+    ƒ.Debug.log(mutator);
+  }
 }

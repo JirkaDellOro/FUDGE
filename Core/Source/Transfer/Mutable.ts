@@ -17,6 +17,7 @@ namespace FudgeCore {
      */
     export interface MutatorForAnimation extends Mutator { readonly forAnimation: null; }
     export interface MutatorForUserInterface extends Mutator { readonly forUserInterface: null; }
+    export interface MutatorForComponent extends Mutator { readonly forUserComponent: null; }
 
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
@@ -82,8 +83,8 @@ namespace FudgeCore {
          * Collect the attributes of the instance and their values applicable for indiviualization by the component.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
          */
-        public getMutatorForComponent(): MutatorForUserInterface {
-            return <MutatorForUserInterface>this.getMutator();
+        public getMutatorForComponent(): MutatorForComponent {
+            return <MutatorForComponent>this.getMutator();
         }
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values

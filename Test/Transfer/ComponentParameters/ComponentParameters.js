@@ -1,38 +1,27 @@
-var Mutable;
-(function (Mutable) {
+var ComponentParameters;
+(function (ComponentParameters) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    let mutator;
-    let angle = 0;
-    let cmpTransform;
     function init() {
-        Scenes.createMiniScene();
-        Scenes.createViewport();
-        cmpTransform = Scenes.node.cmpTransform;
-        mutator = cmpTransform.getMutatorForAnimation();
-        console.log("Mutator: ", mutator);
-        let serialization = Scenes.node.cmpTransform.serialize();
-        console.log("Serialization: ", serialization);
-        let mttCamera;
-        mttCamera = Scenes.cmpCamera.getMutator();
-        console.log("mttCamera: ", mttCamera);
-        let mttCameraTypes;
-        mttCameraTypes = Scenes.cmpCamera.getMutatorAttributeTypes(mttCamera);
-        console.log("mttCameraTypes: ", mttCameraTypes);
-        let srlCamera = Scenes.cmpCamera.serialize();
-        console.log("srlCamera: ", srlCamera);
-        let srlNode = Scenes.node.serialize();
-        console.log("srlNode: ", srlNode);
-        animate();
-    }
-    function animate() {
-        window.requestAnimationFrame(animate);
-        angle += 0.03;
-        mutator.translation["x"] = 5 * Math.sin(angle);
-        mutator.scaling["y"] = Math.cos(1.7 * angle);
-        cmpTransform.mutate(mutator);
+        let img = document.querySelector("img");
+        let txtImage = new ƒ.TextureImage();
+        txtImage.image = img;
+        let coatTextured = new ƒ.CoatTextured();
+        coatTextured.texture = txtImage;
+        let cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material("Material", ƒ.ShaderTexture, coatTextured));
+        let quad = new ƒ.Node("Quad");
+        quad.addComponent(new ƒ.ComponentMesh(new ƒ.MeshQuad()));
+        quad.addComponent(cmpMaterial);
+        ƒ.RenderManager.initialize();
         ƒ.RenderManager.update();
-        Scenes.viewport.draw();
+        let viewport = new ƒ.Viewport();
+        let cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.pivot.translateZ(2);
+        cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+        viewport.initialize("Viewport", quad, cmpCamera, document.querySelector("canvas"));
+        viewport.draw();
+        let mutator = cmpMaterial.getMutatorForUserInterface();
+        ƒ.Debug.log(mutator);
     }
-})(Mutable || (Mutable = {}));
+})(ComponentParameters || (ComponentParameters = {}));
 //# sourceMappingURL=ComponentParameters.js.map
