@@ -24,11 +24,15 @@ var ComponentParameters;
         ƒ.Debug.log(mutator);
         mutator = cmpMaterial.mutatorCoat;
         ƒ.Debug.log(mutator);
-        mutator.rotation = 45;
-        cmpMaterial.material.getCoat().mutate(mutator);
-        viewport.draw();
-        mutator = cmpMaterial.material.getCoat().getMutatorForComponent();
-        ƒ.Debug.log(mutator);
+        ƒ.Loop.start();
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, (_event) => {
+            mutator.rotation = mutator.rotation + 0.1;
+            mutator.translation["x"] += 0.01;
+            let s = 1.5 + Math.sin(mutator.translation["x"]);
+            mutator.scaling = { x: s, y: s };
+            coatTextured.mutate(mutator);
+            viewport.draw();
+        });
     }
 })(ComponentParameters || (ComponentParameters = {}));
 //# sourceMappingURL=ComponentParameters.js.map

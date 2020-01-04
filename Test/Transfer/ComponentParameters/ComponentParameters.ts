@@ -25,15 +25,20 @@ namespace ComponentParameters {
     cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport.initialize("Viewport", quad, cmpCamera, document.querySelector("canvas"));
     viewport.draw();
-    
+
     let mutator: ƒ.Mutator = cmpMaterial.getMutatorForUserInterface();
     ƒ.Debug.log(mutator);
     mutator = cmpMaterial.mutatorCoat;
     ƒ.Debug.log(mutator);
-    mutator.rotation = 45;
-    cmpMaterial.material.getCoat().mutate(mutator);
-    viewport.draw();
-    mutator = cmpMaterial.material.getCoat().getMutatorForComponent();
-    ƒ.Debug.log(mutator);
+
+    ƒ.Loop.start();
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, (_event: ƒ.Eventƒ) => {
+      mutator.rotation = (<number>mutator.rotation) + 0.1;
+      mutator.translation["x"] += 0.01;
+      let s: number = 1.5 + Math.sin(mutator.translation["x"]);
+      mutator.scaling = {x: s, y: s};
+      coatTextured.mutate(<ƒ.MutatorForComponent>mutator);
+      viewport.draw();
+    });
   }
 }
