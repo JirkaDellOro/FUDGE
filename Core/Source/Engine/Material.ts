@@ -3,7 +3,7 @@ namespace FudgeCore {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Material implements SerializableResource {
+    export class Material extends Mutable implements SerializableResource {
         /** The name to call the Material by. */
         public name: string;
         public idResource: string = undefined;
@@ -11,6 +11,7 @@ namespace FudgeCore {
         private coat: Coat;
 
         public constructor(_name: string, _shader?: typeof Shader, _coat?: Coat) {
+            super();
             this.name = _name;
             this.shaderType = _shader;
             if (_shader) {
@@ -86,6 +87,11 @@ namespace FudgeCore {
             let coat: Coat = <Coat>Serializer.deserialize(_serialization.coat);
             this.setCoat(coat);
             return this;
+        }
+
+        
+        protected reduceMutator(_mutator: Mutator): void {
+            //
         }
         //#endregion
     }

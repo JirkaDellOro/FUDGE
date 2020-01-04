@@ -136,6 +136,11 @@ declare namespace FudgeCore {
          */
         getMutatorForUserInterface(): MutatorForUserInterface;
         /**
+         * Collect the attributes of the instance and their values applicable for indiviualization by the component.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForComponent(): MutatorForUserInterface;
+        /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
          * Does not recurse into objects!
          * @param _mutator
@@ -1486,7 +1491,7 @@ declare namespace FudgeCore {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Material implements SerializableResource {
+    class Material extends Mutable implements SerializableResource {
         /** The name to call the Material by. */
         name: string;
         idResource: string;
@@ -1518,6 +1523,7 @@ declare namespace FudgeCore {
         getShader(): typeof Shader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
