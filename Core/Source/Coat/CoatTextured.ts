@@ -5,7 +5,7 @@ namespace FudgeCore {
   @RenderInjector.decorateCoat
   export class CoatTextured extends Coat {
     public texture: TextureImage = null;
-    public pivot: Matrix3x3 = Matrix3x3.ROTATION(-180);
+    public pivot: Matrix3x3 = Matrix3x3.IDENTITY;
     // just ideas so far
     public tilingX: number;
     public tilingY: number;
