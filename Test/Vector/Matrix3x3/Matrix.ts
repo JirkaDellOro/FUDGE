@@ -53,12 +53,12 @@ namespace Marix3x3 {
     syncMatrix(m0, m1);
     printComparison("Rotate", m0, m1);
 
-    draw(m0);
-    draw(m1);
-
     m0.translate(new ƒ.Vector2(1, 1));
     syncMatrix(m0, m1);
     printComparison("Translate", m0, m1);
+
+    draw(m0);
+    draw(m1);
   }
 
 

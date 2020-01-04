@@ -42,11 +42,11 @@ var Marix3x3;
         m0.rotate(-45);
         syncMatrix(m0, m1);
         printComparison("Rotate", m0, m1);
-        draw(m0);
-        draw(m1);
         m0.translate(new ƒ.Vector2(1, 1));
         syncMatrix(m0, m1);
         printComparison("Translate", m0, m1);
+        draw(m0);
+        draw(m1);
     }
     function printComparison(_group, _m0, _m1) {
         let mtt0 = _m0.getMutatorForUserInterface();

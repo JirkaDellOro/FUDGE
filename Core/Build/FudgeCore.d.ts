@@ -1373,6 +1373,7 @@ declare namespace FudgeCore {
      */
     class ComponentMaterial extends Component {
         material: Material;
+        mutatorCoat: MutatorForComponent;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;

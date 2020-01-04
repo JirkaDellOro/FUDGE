@@ -22,6 +22,13 @@ var ComponentParameters;
         viewport.draw();
         let mutator = cmpMaterial.getMutatorForUserInterface();
         ƒ.Debug.log(mutator);
+        mutator = cmpMaterial.mutatorCoat;
+        ƒ.Debug.log(mutator);
+        mutator.rotation = 45;
+        cmpMaterial.material.getCoat().mutate(mutator);
+        viewport.draw();
+        mutator = cmpMaterial.material.getCoat().getMutatorForComponent();
+        ƒ.Debug.log(mutator);
     }
 })(ComponentParameters || (ComponentParameters = {}));
 //# sourceMappingURL=ComponentParameters.js.map
