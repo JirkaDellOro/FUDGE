@@ -45,17 +45,6 @@ namespace FudgeCore {
     }
 
     /**
-     * A [[Coat]] providing a texture and additional data for texturing
-     */
-    @RenderInjector.decorateCoat
-    export class CoatTextured extends Coat {
-        public texture: TextureImage = null;
-        // just ideas so far
-        public tilingX: number;
-        public tilingY: number;
-        public repetition: boolean;
-    }
-    /**
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
      * and a flatMix number for mixing between smooth and flat shading.
      */

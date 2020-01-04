@@ -11,7 +11,7 @@ namespace Mutable {
         Scenes.createViewport();
 
         cmpTransform = Scenes.node.cmpTransform;
-        mutator = cmpTransform.getMutatorForAnimation();
+        mutator = cmpTransform.local.getMutatorForAnimation();
         console.log("Mutator: ", mutator);
         let serialization: ƒ.Serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
@@ -39,7 +39,7 @@ namespace Mutable {
         mutator.translation["x"] = 5 * Math.sin(angle);
         mutator.scaling["y"] = Math.cos(1.7 * angle);
 
-        cmpTransform.mutate(mutator);
+        cmpTransform.local.mutate(mutator);
 
         ƒ.RenderManager.update();
         Scenes.viewport.draw();

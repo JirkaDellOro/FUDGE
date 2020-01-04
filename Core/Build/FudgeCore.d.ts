@@ -167,6 +167,9 @@ declare namespace FudgeCore {
     interface MutatorForUserInterface extends Mutator {
         readonly forUserInterface: null;
     }
+    interface MutatorForComponent extends Mutator {
+        readonly forUserComponent: null;
+    }
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -194,6 +197,11 @@ declare namespace FudgeCore {
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         getMutatorForUserInterface(): MutatorForUserInterface;
+        /**
+         * Collect the attributes of the instance and their values applicable for indiviualization by the component.
+         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         */
+        getMutatorForComponent(): MutatorForComponent;
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
          * Does not recurse into objects!
@@ -960,15 +968,6 @@ declare namespace FudgeCore {
         constructor(_color?: Color);
     }
     /**
-     * A [[Coat]] providing a texture and additional data for texturing
-     */
-    class CoatTextured extends Coat {
-        texture: TextureImage;
-        tilingX: number;
-        tilingY: number;
-        repetition: boolean;
-    }
-    /**
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
      * and a flatMix number for mixing between smooth and flat shading.
      */
@@ -977,6 +976,19 @@ declare namespace FudgeCore {
         tintColor: Color;
         flatMix: number;
         constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number);
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
+    class CoatTextured extends Coat {
+        texture: TextureImage;
+        pivot: Matrix3x3;
+        tilingX: number;
+        tilingY: number;
+        repetition: boolean;
+        getMutatorForComponent(): MutatorForComponent;
     }
 }
 declare namespace FudgeCore {
@@ -1364,6 +1376,7 @@ declare namespace FudgeCore {
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutatorForUserInterface(): MutatorForUserInterface;
     }
 }
 declare namespace FudgeCore {
@@ -1578,7 +1591,7 @@ declare namespace FudgeCore {
      * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Material implements SerializableResource {
+    class Material extends Mutable implements SerializableResource {
         /** The name to call the Material by. */
         name: string;
         idResource: string;
@@ -1610,6 +1623,7 @@ declare namespace FudgeCore {
         getShader(): typeof Shader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -2226,23 +2240,96 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Simple class for 3x3 matrix operations (This class can only handle 2D
-     * transformations. Could be removed after applying full 2D compatibility to Mat4).
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * Simple class for 3x3 matrix operations
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Matrix3x3 {
-        data: number[];
+    class Matrix3x3 extends Mutable implements Serializable {
+        private data;
+        private mutator;
+        private vectors;
         constructor();
-        static projection(_width: number, _height: number): Matrix3x3;
-        readonly Data: number[];
-        identity(): Matrix3x3;
-        translate(_matrix: Matrix3x3, _xTranslation: number, _yTranslation: number): Matrix3x3;
-        rotate(_matrix: Matrix3x3, _angleInDegrees: number): Matrix3x3;
-        scale(_matrix: Matrix3x3, _xScale: number, _yscale: number): Matrix3x3;
-        multiply(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
-        private translation;
-        private scaling;
-        private rotation;
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix ignoring its rotation and scaling
+         */
+        translation: Vector2;
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
+        rotation: number;
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
+        scaling: Vector2;
+        static PROJECTION(_width: number, _height: number): Matrix3x3;
+        static readonly IDENTITY: Matrix3x3;
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         */
+        static TRANSLATION(_translate: Vector2): Matrix3x3;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION(_angleInDegrees: number): Matrix3x3;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         */
+        static SCALING(_scalar: Vector2): Matrix3x3;
+        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+        /**
+         * Add a translation by the given vector to this matrix
+         */
+        translate(_by: Vector2): void;
+        /**
+         * Add a translation along the x-Axis by the given amount to this matrix
+         */
+        translateX(_x: number): void;
+        /**
+         * Add a translation along the y-Axis by the given amount to this matrix
+         */
+        translateY(_y: number): void;
+        /**
+         * Add a scaling by the given vector to this matrix
+         */
+        scale(_by: Vector2): void;
+        /**
+         * Add a scaling along the x-Axis by the given amount to this matrix
+         */
+        scaleX(_by: number): void;
+        /**
+         * Add a scaling along the y-Axis by the given amount to this matrix
+         */
+        scaleY(_by: number): void;
+        /**
+         * Adds a rotation around the z-Axis to this matrix
+         */
+        rotate(_angleInDegrees: number): void;
+        /**
+         * Multiply this matrix with the given matrix
+         */
+        multiply(_matrix: Matrix3x3): void;
+        /**
+         * Calculates and returns the euler-angles representing the current rotation of this matrix
+         */
+        getEulerAngles(): number;
+        /**
+         * Sets the elements of this matrix to the values of the given matrix
+         */
+        set(_to: Matrix3x3): void;
+        /**
+         * Return the elements of this matrix as a Float32Array
+         */
+        get(): Float32Array;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): void;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        protected reduceMutator(_mutator: Mutator): void;
+        private resetCache;
     }
 }
 declare namespace FudgeCore {
@@ -2523,6 +2610,7 @@ declare namespace FudgeCore {
          * @returns A new vector with the values (_scale, 0)
          */
         static X(_scale?: number): Vector2;
+        static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation?: boolean): Vector2;
         /**
          * Normalizes a given vector to the given length without editing the original vector.
          * @param _vector the vector to normalize
@@ -2614,6 +2702,7 @@ declare namespace FudgeCore {
          * @returns A deep copy of the vector.
          */
         readonly copy: Vector2;
+        transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
          * Adds a z-component to the vector and returns a new Vector3
          */
