@@ -10,7 +10,7 @@ namespace Minimal {
         let viewport: ƒ.Viewport = new ƒ.Viewport();
 
         let mesh: ƒ.MeshQuad = new ƒ.MeshQuad();
-        let mtrSolidWhite: ƒ.Material = new ƒ.Material("SolidWhite", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.WHITE));
+        let mtrSolidWhite: ƒ.Material = new ƒ.Material("SolidWhite", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.WHITE()));
 
         let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
         let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrSolidWhite);

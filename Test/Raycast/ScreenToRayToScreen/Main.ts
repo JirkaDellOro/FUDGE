@@ -103,10 +103,10 @@ namespace ScreenToRayToScreen {
 
   function createScene(): void {
     // set lights
-    let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.WHITE));
+    let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.WHITE()));
     cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.8));
     // game.addComponent(cmpLight);
-    let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.DARK_GREY));
+    let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.DARK_GREY()));
     root.addComponent(cmpLightAmbient);
 
     // setup orbiting camera
@@ -121,7 +121,7 @@ namespace ScreenToRayToScreen {
     cube.addComponent(cmpMesh);
 
     let cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(
-      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.RED))
+      new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.RED()))
     );
     cube.addComponent(cmpMaterial);
 
