@@ -11,13 +11,13 @@ namespace FudgeCore {
     public tilingY: number;
     public repetition: boolean;
 
-    public getMutatorForComponent(): MutatorForComponent {
-      let mutatorPivot: MutatorForComponent = <MutatorForComponent><unknown>this.pivot.getMutator();
-      return mutatorPivot;
-    }
+    // public getMutatorForComponent(): MutatorForComponent {
+    //   let mutatorPivot: MutatorForComponent = <MutatorForComponent><unknown>this.pivot.getMutator();
+    //   return mutatorPivot;
+    // }
 
-    public mutate(_mutator: MutatorForComponent): void {
-      this.pivot.mutate(_mutator);
-    }
+    // public mutate(_mutator: MutatorForComponent): void {
+    //   this.pivot.mutate(_mutator);
+    // }
   }
 }

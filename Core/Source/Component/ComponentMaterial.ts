@@ -5,12 +5,12 @@ namespace FudgeCore {
    */
   export class ComponentMaterial extends Component {
     public material: Material;
-    public mutatorCoat: MutatorForComponent;
+    // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {
       super();
       this.material = _material;
-      this.mutatorCoat = _material.getCoat().getMutatorForComponent();
+      // this.mutatorCoat = _material.getCoat().getMutatorForComponent();
     }
 
     //#region Transfer
@@ -37,10 +37,10 @@ namespace FudgeCore {
       return this;
     }
 
-    public getMutatorForUserInterface(): MutatorForUserInterface {
-      let mutatorCoat: MutatorForComponent = this.material.getCoat().getMutatorForComponent();
-      return <MutatorForUserInterface><unknown>mutatorCoat;
-    }
+    // public getMutatorForUserInterface(): MutatorForUserInterface {
+    //   let mutatorCoat: MutatorForComponent = this.material.getCoat().getMutatorForComponent();
+    //   return <MutatorForUserInterface><unknown>mutatorCoat;
+    // }
     //#endregion
   }
 }

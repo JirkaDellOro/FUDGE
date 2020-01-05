@@ -167,9 +167,6 @@ declare namespace FudgeCore {
     interface MutatorForUserInterface extends Mutator {
         readonly forUserInterface: null;
     }
-    interface MutatorForComponent extends Mutator {
-        readonly forUserComponent: null;
-    }
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -201,7 +198,6 @@ declare namespace FudgeCore {
          * Collect the attributes of the instance and their values applicable for indiviualization by the component.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
          */
-        getMutatorForComponent(): MutatorForComponent;
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
          * Does not recurse into objects!
@@ -988,8 +984,6 @@ declare namespace FudgeCore {
         tilingX: number;
         tilingY: number;
         repetition: boolean;
-        getMutatorForComponent(): MutatorForComponent;
-        mutate(_mutator: MutatorForComponent): void;
     }
 }
 declare namespace FudgeCore {
@@ -1374,11 +1368,9 @@ declare namespace FudgeCore {
      */
     class ComponentMaterial extends Component {
         material: Material;
-        mutatorCoat: MutatorForComponent;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        getMutatorForUserInterface(): MutatorForUserInterface;
     }
 }
 declare namespace FudgeCore {
@@ -1757,6 +1749,7 @@ declare namespace FudgeCore {
          * @param _point
          */
         isInside(_point: Vector2): boolean;
+        toString(): string;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
