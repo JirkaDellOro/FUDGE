@@ -123,6 +123,12 @@ namespace FudgeCore {
       return (_point.x >= this.left && _point.x <= this.right && _point.y >= this.top && _point.y <= this.bottom);
     }
 
+    public toString(): string {
+      let result: string = `ƒ.Rectangle(position:${this.position.toString()}, size:${this.size.toString()}`;
+      result += `, left:${this.left.toPrecision(5)}, top:${this.top.toPrecision(5)}, right:${this.right.toPrecision(5)}, bottom:${this.bottom.toPrecision(5)}`;
+      return result;
+    }
+    
     protected reduceMutator(_mutator: Mutator): void {/* */ }
   }
 }
