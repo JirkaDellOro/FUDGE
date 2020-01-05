@@ -20,6 +20,7 @@ namespace FudgeCore {
 
                 void main() {  
                     gl_Position = u_projection * vec4(a_position, 1.0);
+                    // v_textureUVs = a_textureUVs;
                     v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
                 }`;
         }
@@ -33,6 +34,8 @@ namespace FudgeCore {
                 
                 void main() {
                     frag = texture(u_texture, v_textureUVs);
+                    if (frag.a < 0.01)
+                      discard;
             }`;
         }
     }
