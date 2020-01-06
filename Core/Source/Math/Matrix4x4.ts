@@ -601,6 +601,10 @@ namespace FudgeCore {
       this.resetCache();
     }
 
+    public toString(): string {
+      return `ƒ.Matrix4x4(translation: ${this.translation.toString()}, rotation: ${this.rotation.toString()}, scaling: ${this.scaling.toString()}`;
+    }
+
     /**
      * Return the elements of this matrix as a Float32Array
      */
