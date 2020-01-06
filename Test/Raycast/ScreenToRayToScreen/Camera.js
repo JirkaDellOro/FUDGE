@@ -13,7 +13,7 @@ var ScreenToRayToScreen;
             rotatorX.addComponent(new ƒ.ComponentTransform());
             this.appendChild(rotatorX);
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.backgroundColor = ƒ.Color.WHITE();
+            cmpCamera.backgroundColor = ƒ.Color.CSS("WHITE");
             rotatorX.addComponent(cmpCamera);
             this.setDistance(20);
         }

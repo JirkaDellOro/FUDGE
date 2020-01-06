@@ -77,10 +77,10 @@ var ScreenToRayToScreen;
     }
     function createScene() {
         // set lights
-        let cmpLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.WHITE()));
+        let cmpLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
         cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.8));
         // game.addComponent(cmpLight);
-        let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.DARK_GREY()));
+        let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("DARK_GREY")));
         ScreenToRayToScreen.root.addComponent(cmpLightAmbient);
         // setup orbiting camera
         ScreenToRayToScreen.camera = new ScreenToRayToScreen.CameraOrbit(75);
@@ -91,7 +91,7 @@ var ScreenToRayToScreen;
         let cube = new ƒ.Node("Cube");
         let cmpMesh = new ƒ.ComponentMesh(new ƒ.MeshCube());
         cube.addComponent(cmpMesh);
-        let cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.RED())));
+        let cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED"))));
         cube.addComponent(cmpMaterial);
         let cmpTransform = new ƒ.ComponentTransform();
         cube.addComponent(cmpTransform);

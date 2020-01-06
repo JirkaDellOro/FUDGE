@@ -7,7 +7,7 @@ var Minimal;
         ƒ.RenderManager.initialize();
         let viewport = new ƒ.Viewport();
         let mesh = new ƒ.MeshQuad();
-        let mtrSolidWhite = new ƒ.Material("SolidWhite", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.WHITE()));
+        let mtrSolidWhite = new ƒ.Material("SolidWhite", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         let cmpMesh = new ƒ.ComponentMesh(mesh);
         let cmpMaterial = new ƒ.ComponentMaterial(mtrSolidWhite);
         let node = new ƒ.Node("Quad");

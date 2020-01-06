@@ -4,7 +4,7 @@ namespace TextureTest {
     window.addEventListener("load", init);
 
     function init(_event: Event): void {
-        let coatWhite: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.WHITE());
+        let coatWhite: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.CSS("WHITE"));
         let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
@@ -17,15 +17,15 @@ namespace TextureTest {
         let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
         lights.addComponent(cmpLightAmbient);
 
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.RED()));
+        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("RED")));
         cmpLightDirectionalRed.pivot.lookAt(new ƒ.Vector3(-1, 1, 0));
         lights.addComponent(cmpLightDirectionalRed);
 
-        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.GREEN()));
+        let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("GREEN")));
         cmpLightDirectionalGreen.pivot.lookAt(new ƒ.Vector3(0, 1, -1));
         lights.addComponent(cmpLightDirectionalGreen);
 
-        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional( ƒ.Color.BLUE()));
+        let cmpLightDirectionalBlue: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional( ƒ.Color.CSS("BLUE")));
         cmpLightDirectionalBlue.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.5));
         lights.addComponent(cmpLightDirectionalBlue);
 

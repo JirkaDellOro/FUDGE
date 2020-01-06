@@ -1540,34 +1540,14 @@ declare namespace FudgeCore {
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
     class Color extends Mutable {
+        private static crc2;
         r: number;
         g: number;
         b: number;
         a: number;
         constructor(_r?: number, _g?: number, _b?: number, _a?: number);
-        static BLACK(_alpha?: number): Color;
-        static WHITE(_alpha?: number): Color;
-        static RED(_alpha?: number): Color;
-        static GREEN(_alpha?: number): Color;
-        static BLUE(_alpha?: number): Color;
-        static YELLOW(_alpha?: number): Color;
-        static CYAN(_alpha?: number): Color;
-        static MAGENTA(_alpha?: number): Color;
-        static GREY(_alpha?: number): Color;
-        static LIGHT_GREY(_alpha?: number): Color;
-        static LIGHT_RED(_alpha?: number): Color;
-        static LIGHT_GREEN(_alpha?: number): Color;
-        static LIGHT_BLUE(_alpha?: number): Color;
-        static LIGHT_YELLOW(_alpha?: number): Color;
-        static LIGHT_CYAN(_alpha?: number): Color;
-        static LIGHT_MAGENTA(_alpha?: number): Color;
-        static DARK_GREY(_alpha?: number): Color;
-        static DARK_RED(_alpha?: number): Color;
-        static DARK_GREEN(_alpha?: number): Color;
-        static DARK_BLUE(_alpha?: number): Color;
-        static DARK_YELLOW(_alpha?: number): Color;
-        static DARK_CYAN(_alpha?: number): Color;
-        static DARK_MAGENTA(_alpha?: number): Color;
+        static getHexFromCSSKeyword(_keyword: string): string;
+        static CSS(_keyword: string, _alpha?: number): Color;
         static MULTIPLY(_color1: Color, _color2: Color): Color;
         setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
         setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
