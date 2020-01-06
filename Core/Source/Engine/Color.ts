@@ -3,42 +3,34 @@ namespace FudgeCore {
    * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
    */
   export class Color extends Mutable { //implements Serializable {
+    // crc2 only used for converting colors from strings predefined by CSS
+    private static crc2: CanvasRenderingContext2D = document.createElement("canvas").getContext("2d");
+
     public r: number;
     public g: number;
-    public b: number; 
+    public b: number;
     public a: number;
 
     constructor(_r: number = 1, _g: number = 1, _b: number = 1, _a: number = 1) {
       super();
       this.setNormRGBA(_r, _g, _b, _a);
     }
- 
-    public static BLACK(_alpha: number = 1): Color { return new Color(0, 0, 0, _alpha); }
-    public static WHITE(_alpha: number = 1): Color { return new Color(1, 1, 1, _alpha); }
 
-    public static RED(_alpha: number = 1): Color { return new Color(1, 0, 0, _alpha); }
-    public static GREEN(_alpha: number = 1): Color { return new Color(0, 1, 0, _alpha); }
-    public static BLUE(_alpha: number = 1): Color { return new Color(0, 0, 1, _alpha); }
-    public static YELLOW(_alpha: number = 1): Color { return new Color(1, 1, 0, _alpha); }
-    public static CYAN(_alpha: number = 1): Color { return new Color(0, 1, 1, _alpha); }
-    public static MAGENTA(_alpha: number = 1): Color { return new Color(1, 0, 1, _alpha); }
-    public static GREY(_alpha: number = 1): Color { return new Color(0.5, 0.5, 0.5, _alpha); }
+    public static getHexFromCSSKeyword(_keyword: string): string {
+      Color.crc2.fillStyle = _keyword;
+      return Color.crc2.fillStyle;
+    }
 
-    public static LIGHT_GREY(_alpha: number = 1): Color { return new Color(0.75, 0.75, 0.75, _alpha); }
-    public static LIGHT_RED(_alpha: number = 1): Color { return new Color(1, 0.5, 0.5, _alpha); }
-    public static LIGHT_GREEN(_alpha: number = 1): Color { return new Color(0.5, 1, 0.5, _alpha); }
-    public static LIGHT_BLUE(_alpha: number = 1): Color { return new Color(0.5, 0.5, 1, _alpha); }
-    public static LIGHT_YELLOW(_alpha: number = 1): Color { return new Color(1, 1, 0.5, _alpha); }
-    public static LIGHT_CYAN(_alpha: number = 1): Color { return new Color(0.5, 1, 1, _alpha); }
-    public static LIGHT_MAGENTA(_alpha: number = 1): Color { return new Color(1, 0.5, 1, _alpha); }
+    public static CSS(_keyword: string, _alpha: number = 1): Color {
+      let hex: string = Color.getHexFromCSSKeyword(_keyword);
+      let color: Color = new Color(
+        parseInt(hex.substr(1, 2), 16) / 255,
+        parseInt(hex.substr(3, 2), 16) / 255,
+        parseInt(hex.substr(5, 2), 16) / 255,
+        _alpha);
+      return color;
+    }
 
-    public static DARK_GREY(_alpha: number = 1): Color { return new Color(0.25, 0.25, 0.25, _alpha); }
-    public static DARK_RED(_alpha: number = 1): Color { return new Color(0.5, 0, 0, _alpha); }
-    public static DARK_GREEN(_alpha: number = 1): Color { return new Color(0, 0.5, 0, _alpha); }
-    public static DARK_BLUE(_alpha: number = 1): Color { return new Color(0, 0, 0.5, _alpha); }
-    public static DARK_YELLOW(_alpha: number = 1): Color { return new Color(0.5, 0.5, 0, _alpha); }
-    public static DARK_CYAN(_alpha: number = 1): Color { return new Color(0, 0.5, 0.5, _alpha); }
-    public static DARK_MAGENTA(_alpha: number = 1): Color { return new Color(0.5, 0, 0.5, _alpha); }
 
     public static MULTIPLY(_color1: Color, _color2: Color): Color {
       return new Color(_color1.r * _color2.r, _color1.g * _color2.g, _color1.b * _color2.b, _color1.a * _color2.a);
