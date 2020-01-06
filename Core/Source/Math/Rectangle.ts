@@ -115,6 +115,10 @@ namespace FudgeCore {
       this.size.y = this.position.y + _value;
     }
 
+    public get copy(): Rectangle {
+      return Rectangle.GET(this.x, this.y, this.width, this.height);
+    }
+
     /**
      * Returns true if the given point is inside of this rectangle or on the border
      * @param _point
@@ -128,7 +132,7 @@ namespace FudgeCore {
       result += `, left:${this.left.toPrecision(5)}, top:${this.top.toPrecision(5)}, right:${this.right.toPrecision(5)}, bottom:${this.bottom.toPrecision(5)}`;
       return result;
     }
-    
+
     protected reduceMutator(_mutator: Mutator): void {/* */ }
   }
 }

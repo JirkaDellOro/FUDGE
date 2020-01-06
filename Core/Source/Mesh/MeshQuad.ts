@@ -47,7 +47,7 @@ namespace FudgeCore {
 
         protected createFaceNormals(): Float32Array {
             return new Float32Array([
-                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 1, 0, 0
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 0, 0, 0
             ]);
         }
     }

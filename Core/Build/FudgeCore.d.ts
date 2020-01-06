@@ -1724,6 +1724,7 @@ declare namespace FudgeCore {
         top: number;
         right: number;
         bottom: number;
+        readonly copy: Rectangle;
         /**
          * Returns true if the given point is inside of this rectangle or on the border
          * @param _point
@@ -2294,6 +2295,7 @@ declare namespace FudgeCore {
          * Sets the elements of this matrix to the values of the given matrix
          */
         set(_to: Matrix3x3): void;
+        toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array
          */
@@ -2882,6 +2884,25 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Mesh {
+        constructor();
+        create(): void;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed
+     * ```plaintext
+     *        0 __ 3
+     *         |__|
+     *        1    2
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class MeshSprite extends Mesh {
         constructor();
         create(): void;
         protected createVertices(): Float32Array;

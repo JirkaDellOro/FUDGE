@@ -291,6 +291,12 @@ namespace FudgeCore {
       this.resetCache();
     }
 
+    public toString(): string {
+      return `ƒ.Matrix3x3(translation: ${this.translation.toString()}, rotation: ${this.rotation.toString()}, scaling: ${this.scaling.toString()}`;
+    }
+
+
+
     /**
      * Return the elements of this matrix as a Float32Array
      */
