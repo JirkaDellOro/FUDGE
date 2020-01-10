@@ -99,13 +99,13 @@ namespace AudioTest {
             // let ctxCamera: ƒ.Matrix4x4 = viewport.camera.getContainer().cmpTransform.local;
             // ctxCamera.lookAt(position);
             viewport.draw();
-            printInfo(body, viewport.camera.getContainer());
+            printInfo(body, viewport.camera);
         }
     }
 
-    function printInfo(_body: ƒ.Node, _camera: ƒ.Node): void {
+    function printInfo(_body: ƒ.Node, _camera: ƒ.ComponentCamera): void {
         let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;
-        let posCamera: ƒ.Vector3 = _camera.cmpTransform.local.translation;
+        let posCamera: ƒ.Vector3 = _camera.pivot.translation;
         let info: string = "<fieldset><legend>Info</legend>";
         info += `camera [${posCamera.x.toFixed(2)} |${posCamera.y.toFixed(2)} |${posCamera.z.toFixed(2)}] `;
         info += ` body [${posBody.x.toFixed(2)} |${posBody.y.toFixed(2)} |${posBody.z.toFixed(2)}]`;
@@ -123,7 +123,7 @@ namespace AudioTest {
 
         function move(_event: ƒ.EventKeyboard): void {
             const mtxBody: ƒ.Matrix4x4 = _body.cmpTransform.local;
-            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.getContainer().cmpTransform.local;
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.pivot;
 
             mtxBody.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? -1 :

@@ -75,17 +75,37 @@ namespace FudgeCore {
       return this.size.y;
     }
 
+    /**
+     * Return the leftmost expansion, respecting also negative values of width
+     */
     get left(): number {
+      if (this.size.x > 0)
+        return this.position.x;
+      return (this.position.x + this.size.x);
+    }
+    /**
+     * Return the topmost expansion, respecting also negative values of height
+     */
+    get top(): number {
+      if (this.size.y > 0)
+        return this.position.y;
+      return (this.position.y + this.size.y);
+    }
+    /**
+     * Return the rightmost expansion, respecting also negative values of width
+     */
+    get right(): number {
+      if (this.size.x > 0)
+        return (this.position.x + this.size.x);
       return this.position.x;
     }
-    get top(): number {
-      return this.position.y;
-    }
-    get right(): number {
-      return this.position.x + this.size.x;
-    }
+    /**
+     * Return the lowest expansion, respecting also negative values of height
+     */
     get bottom(): number {
-      return this.position.y + this.size.y;
+      if (this.size.y > 0)
+        return (this.position.y + this.size.y);
+      return this.position.y;
     }
 
     set x(_x: number) {
@@ -125,6 +145,14 @@ namespace FudgeCore {
      */
     public isInside(_point: Vector2): boolean {
       return (_point.x >= this.left && _point.x <= this.right && _point.y >= this.top && _point.y <= this.bottom);
+    }
+
+    public collides(_rect: Rectangle): boolean {
+      if (this.left > _rect.right) return false;
+      if (this.right < _rect.left) return false;
+      if (this.top > _rect.bottom) return false;
+      if (this.bottom < _rect.top) return false;
+      return true;
     }
 
     public toString(): string {

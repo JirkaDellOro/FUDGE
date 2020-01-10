@@ -78,12 +78,12 @@ var AudioTest;
             // let ctxCamera: ƒ.Matrix4x4 = viewport.camera.getContainer().cmpTransform.local;
             // ctxCamera.lookAt(position);
             viewport.draw();
-            printInfo(body, viewport.camera.getContainer());
+            printInfo(body, viewport.camera);
         }
     }
     function printInfo(_body, _camera) {
         let posBody = _body.cmpTransform.local.translation;
-        let posCamera = _camera.cmpTransform.local.translation;
+        let posCamera = _camera.pivot.translation;
         let info = "<fieldset><legend>Info</legend>";
         info += `camera [${posCamera.x.toFixed(2)} |${posCamera.y.toFixed(2)} |${posCamera.z.toFixed(2)}] `;
         info += ` body [${posBody.x.toFixed(2)} |${posBody.y.toFixed(2)} |${posBody.z.toFixed(2)}]`;
@@ -99,7 +99,7 @@ var AudioTest;
         _viewport.addEventListener("\u0192keydown" /* DOWN */, move);
         function move(_event) {
             const mtxBody = _body.cmpTransform.local;
-            let mtxCamera = _viewport.camera.getContainer().cmpTransform.local;
+            let mtxCamera = _viewport.camera.pivot;
             mtxBody.translateZ(0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? -1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? 1 :

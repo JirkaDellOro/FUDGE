@@ -1720,9 +1720,21 @@ declare namespace FudgeCore {
         y: number;
         width: number;
         height: number;
+        /**
+         * Return the leftmost expansion, respecting also negative values of width
+         */
         left: number;
+        /**
+         * Return the topmost expansion, respecting also negative values of height
+         */
         top: number;
+        /**
+         * Return the rightmost expansion, respecting also negative values of width
+         */
         right: number;
+        /**
+         * Return the lowest expansion, respecting also negative values of height
+         */
         bottom: number;
         readonly copy: Rectangle;
         /**
@@ -1730,6 +1742,7 @@ declare namespace FudgeCore {
          * @param _point
          */
         isInside(_point: Vector2): boolean;
+        collides(_rect: Rectangle): boolean;
         toString(): string;
         protected reduceMutator(_mutator: Mutator): void;
     }

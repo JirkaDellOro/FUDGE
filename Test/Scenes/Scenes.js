@@ -2,9 +2,9 @@ var Scenes;
 (function (Scenes) {
     var ƒ = FudgeCore;
     function createAxisCross() {
-        let clrRed = new ƒ.Color(1, 0, 0, 0.5);
-        let clrGreen = new ƒ.Color(0, 1, 0, 0.5);
-        let clrBlue = new ƒ.Color(0, 0, 1, 0.5);
+        let clrRed = new ƒ.Color(1, 0, 0, 1);
+        let clrGreen = new ƒ.Color(0, 1, 0, 1);
+        let clrBlue = new ƒ.Color(0, 0, 1, 1);
         let coatRed = new ƒ.CoatColored(clrRed);
         let coatGreen = new ƒ.CoatColored(clrGreen);
         let coatBlue = new ƒ.CoatColored(clrBlue);

@@ -86,9 +86,11 @@ namespace FudgeCore {
         this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
       this.branch = _branch;
-      this.collectLights();
-      this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-      this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      if (this.branch) {
+        this.collectLights();
+        this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      }
     }
     /**
      * Logs this viewports scenegraph to the console.

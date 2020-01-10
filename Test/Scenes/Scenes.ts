@@ -6,9 +6,9 @@ namespace Scenes {
     export let viewport: ƒ.Viewport;
 
     export function createAxisCross(): ƒ.Node {
-        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 0.5);
-        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 0.5);
-        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 0.5);
+        let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
+        let clrGreen: ƒ.Color = new ƒ.Color(0, 1, 0, 1);
+        let clrBlue: ƒ.Color = new ƒ.Color(0, 0, 1, 1);
 
         let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
         let coatGreen: ƒ.CoatColored = new ƒ.CoatColored(clrGreen);
