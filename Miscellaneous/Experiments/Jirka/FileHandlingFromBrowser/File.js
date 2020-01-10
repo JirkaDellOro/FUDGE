@@ -33,12 +33,14 @@ var FileHandling;
     function handleSave(_event) {
         let blob = new Blob([content.value], { type: "text/plain" });
         let url = window.URL.createObjectURL(blob);
+        //*/ using anchor element for download
         downloader.setAttribute("href", url);
         downloader.setAttribute("download", getFilenameDisplay());
         document.body.appendChild(downloader);
         downloader.click();
         document.body.removeChild(downloader);
         window.URL.revokeObjectURL(url);
+        //*/
     }
     function handleFileSelect(_event) {
         let fileList = _event.target.files;
@@ -79,7 +81,8 @@ var FileHandling;
             for (let file of _fileList) {
                 logFile(file);
                 const data = await fetch(file.name);
-                logContent(data.toString());
+                const content = await data.text();
+                logContent(content);
             }
         }
         catch (_e) {
