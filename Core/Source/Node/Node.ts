@@ -19,6 +19,7 @@ namespace FudgeCore {
     // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
     private listeners: MapEventTypeToListener = {};
     private captures: MapEventTypeToListener = {};
+    private active: boolean = true;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -27,6 +28,14 @@ namespace FudgeCore {
     public constructor(_name: string) {
       super();
       this.name = _name;
+    }
+
+    public activate(_on: boolean): void {
+      this.active = _on;
+      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
+    }
+    public get isActive(): boolean {
+      return this.active;
     }
 
     /**
@@ -255,7 +264,7 @@ namespace FudgeCore {
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
         _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
-      } catch(_error) {
+      } catch (_error) {
         throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
       }
     }
@@ -330,7 +339,7 @@ namespace FudgeCore {
       }
     }
     /**
-     * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+     * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
      * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase, 
      * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
      * @param _event The event to dispatch
@@ -376,7 +385,7 @@ namespace FudgeCore {
       return true; //TODO: return a meaningful value, see documentation of dispatch event
     }
     /**
-     * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+     * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
      * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
      * @param _event The event to broadcast
      */

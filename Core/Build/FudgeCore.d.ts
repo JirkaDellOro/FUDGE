@@ -2941,11 +2941,14 @@ declare namespace FudgeCore {
         private components;
         private listeners;
         private captures;
+        private active;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
+        activate(_on: boolean): void;
+        readonly isActive: boolean;
         /**
          * Returns a reference to this nodes parent node
          */
@@ -3040,14 +3043,14 @@ declare namespace FudgeCore {
          */
         addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
         /**
-         * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
          * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
          * @param _event The event to dispatch
          */
         dispatchEvent(_event: Event): boolean;
         /**
-         * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
          * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
          * @param _event The event to broadcast
          */

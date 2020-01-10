@@ -222,6 +222,8 @@ namespace FudgeCore {
      * @param _cmpCamera 
      */
     public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+      if (!_node.isActive)
+        return;
       if (_drawNode == RenderManager.drawNode)
         RenderManager.resetFrameBuffer();
 
