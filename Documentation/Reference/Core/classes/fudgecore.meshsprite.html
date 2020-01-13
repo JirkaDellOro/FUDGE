@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>MeshPyramid | Fudge Core</title>
+	<title>MeshSprite | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.meshpyramid.html">MeshPyramid</a>
+					<a href="fudgecore.meshsprite.html">MeshSprite</a>
 				</li>
 			</ul>
-			<h1>Class MeshPyramid</h1>
+			<h1>Class MeshSprite</h1>
 		</div>
 	</div>
 </header>
@@ -72,15 +72,14 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons</p>
-						<pre><code class="language-plaintext">              4
-             /\`.
-           3/__\_\ 2
-          0/____\/1</code></pre>
+						<p>Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed</p>
+						<pre><code class="language-plaintext">       0 __ 3
+        |__|
+       1    2</code></pre>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
-						<dd><p>Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
+						<dd><p>Jirka Dell&#39;Oro-Friedl, HFU, 2020</p>
 						</dd>
 					</dl>
 				</div>
@@ -92,7 +91,7 @@
 						<a href="fudgecore.mesh.html" class="tsd-signature-type">Mesh</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">MeshPyramid</span>
+								<span class="target">MeshSprite</span>
 							</li>
 						</ul>
 					</li>
@@ -111,28 +110,28 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.meshpyramid.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.meshsprite.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#indices" class="tsd-kind-icon">indices</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#vertices" class="tsd-kind-icon">vertices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#indices" class="tsd-kind-icon">indices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#vertices" class="tsd-kind-icon">vertices</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshpyramid.html#create" class="tsd-kind-icon">create</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#serialize" class="tsd-kind-icon">serialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshpyramid.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshsprite.html#create" class="tsd-kind-icon">create</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshsprite.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshsprite.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
 							</ul>
 						</section>
 					</div>
@@ -144,16 +143,16 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Pyramid<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshpyramid.html" class="tsd-signature-type">MeshPyramid</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Sprite<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshsprite.html" class="tsd-signature-type">MeshSprite</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Mesh/MeshPyramid.ts#L12">Mesh/MeshPyramid.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Mesh/MeshSprite.ts#L11">Mesh/MeshSprite.ts:11</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshpyramid.html" class="tsd-signature-type">MeshPyramid</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshsprite.html" class="tsd-signature-type">MeshSprite</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -230,7 +229,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#create">create</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Mesh/MeshPyramid.ts#L18">Mesh/MeshPyramid.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Mesh/MeshSprite.ts#L17">Mesh/MeshSprite.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -353,43 +352,43 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="fudgecore.meshpyramid.html" class="tsd-kind-icon">Mesh<wbr>Pyramid</a>
+						<a href="fudgecore.meshsprite.html" class="tsd-kind-icon">Mesh<wbr>Sprite</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudgecore.meshpyramid.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgecore.meshsprite.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
+								<a href="fudgecore.meshsprite.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#indices" class="tsd-kind-icon">indices</a>
+								<a href="fudgecore.meshsprite.html#indices" class="tsd-kind-icon">indices</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
+								<a href="fudgecore.meshsprite.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
+								<a href="fudgecore.meshsprite.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#vertices" class="tsd-kind-icon">vertices</a>
+								<a href="fudgecore.meshsprite.html#vertices" class="tsd-kind-icon">vertices</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.meshpyramid.html#create" class="tsd-kind-icon">create</a>
+								<a href="fudgecore.meshsprite.html#create" class="tsd-kind-icon">create</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#deserialize" class="tsd-kind-icon">deserialize</a>
+								<a href="fudgecore.meshsprite.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
+								<a href="fudgecore.meshsprite.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
+								<a href="fudgecore.meshsprite.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#serialize" class="tsd-kind-icon">serialize</a>
+								<a href="fudgecore.meshsprite.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshpyramid.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
+								<a href="fudgecore.meshsprite.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
 							</li>
 						</ul>
 					</li>
