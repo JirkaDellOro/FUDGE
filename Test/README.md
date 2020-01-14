@@ -50,4 +50,4 @@ Hier soll in der Console eine Matrix als Unterpunkt verschiedener Funktionen zu 
 ## UserInterface
 - [UserInterface](UserInterface/scr/app.html)
 ## Rectangle
-- [Collision](Rectangles/Collision/RectangleCollision)
+- [Collision](Rectangles/Collision)
