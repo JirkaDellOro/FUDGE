@@ -24,6 +24,10 @@ var AudioTest;
     let delayTwo;
     window.addEventListener("load", init);
     function init(_event) {
+        document.addEventListener("click", start);
+    }
+    function start() {
+        document.removeEventListener("click", start);
         out = document.querySelector("output");
         let material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, .5, .5, 1)));
         const body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());

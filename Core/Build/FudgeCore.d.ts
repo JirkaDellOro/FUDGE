@@ -578,33 +578,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Describes a [[AudioListener]] attached to a [[Node]]
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    class AudioListenerX {
-        audioListener: AudioListenerX;
-        private position;
-        private orientation;
-        constructor(_audioContext: AudioContext);
-        /**
-         * We will call setAudioListenerPosition whenever there is a need to change Positions.
-         * All the position values should be identical to the current Position this is atteched to.
-         */
-        /**
-         * getAudioListenerPosition
-         */
-        getAudioListenerPosition(): Vector3;
-        /**
-         * setAudioListenerOrientation
-         */
-        /**
-         * getAudioListenerOrientation
-         */
-        getAudioListenerOrientation(): Vector3;
-    }
-}
-declare namespace FudgeCore {
-    /**
      * Panning Model Type for 3D localisation of a [[ComponentAudio]].
      * @param HRFT Usually used for 3D world space, this will be the default setting
      */
