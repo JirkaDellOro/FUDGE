@@ -507,9 +507,8 @@ declare namespace FudgeCore {
     class Audio {
         url: string;
         audioBuffer: AudioBuffer;
-        private bufferSource;
+        bufferSource: AudioBufferSourceNode;
         private localGain;
-        private localGainValue;
         private isLooping;
         /**
          * Constructor for the [[Audio]] Class
@@ -517,14 +516,10 @@ declare namespace FudgeCore {
          * @param _gainValue 0 for muted | 1 for max volume
          */
         constructor(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean);
-        init(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean): Promise<void>;
+        init(_audioSettings: AudioSettings, _url: string, _volume: number, _loop: boolean): Promise<void>;
         initBufferSource(_audioSettings: AudioSettings): void;
-        setBufferSourceNode(_bufferSourceNode: AudioBufferSourceNode): void;
-        getBufferSourceNode(): AudioBufferSourceNode;
-        setLocalGain(_localGain: GainNode): void;
-        getLocalGain(): GainNode;
-        setLocalGainValue(_localGainValue: number): void;
-        getLocalGainValue(): number;
+        connect(_audioNode: AudioNode): void;
+        volume: number;
         setLooping(_isLooping: boolean): void;
         getLooping(): boolean;
         setBufferSource(_buffer: AudioBuffer): void;
@@ -1091,6 +1086,7 @@ declare namespace FudgeCore {
         private localisation;
         private filter;
         private delay;
+        private playing;
         /**
          * Create Component Audio for
          * @param _audio
@@ -1110,6 +1106,8 @@ declare namespace FudgeCore {
          * Play Audio at current time of AudioContext
          */
         playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void;
+        stop(): void;
+        readonly isPlaying: boolean;
         /**
          * Adds an [[Audio]] to the [[ComponentAudio]]
          * @param _audio Audio Data as [[Audio]]
