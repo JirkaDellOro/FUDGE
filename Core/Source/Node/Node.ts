@@ -111,6 +111,9 @@ namespace FudgeCore {
           ancestor = ancestor.parent;
       }
 
+      let previousParent: Node = _node.parent;
+      if (previousParent)
+        previousParent.removeChild(_node);
       this.children.push(_node);
       _node.setParent(this);
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
