@@ -60,6 +60,9 @@ var AudioTest;
             if (parameter.zAmplitude)
                 position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
             mtxBody.translation = position;
+            componentAudioListener.updatePositions(mtxCamera.translation);
+            mtxCamera.lookAt(ƒ.Vector3.ZERO());
+            componentAudio.getLocalisation().updatePositions(mtxBody.translation, mtxCamera.translation);
             ƒ.RenderManager.update();
             viewport.draw();
             printInfo(mtxBody, mtxCamera);
@@ -156,9 +159,6 @@ var AudioTest;
                     componentAudioListener.showListenerSettings();
                     break;
             }
-            componentAudioListener.updatePositions(mtxCamera.translation);
-            mtxCamera.lookAt(ƒ.Vector3.ZERO());
-            componentAudio.getLocalisation().updatePositions(_body.cmpTransform.local.translation, mtxCamera.translation);
         }
     }
 })(AudioTest || (AudioTest = {}));

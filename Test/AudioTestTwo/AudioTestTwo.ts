@@ -75,6 +75,10 @@ namespace AudioTest {
 
       mtxBody.translation = position;
 
+      componentAudioListener.updatePositions(mtxCamera.translation);
+      mtxCamera.lookAt(ƒ.Vector3.ZERO());
+      componentAudio.getLocalisation().updatePositions(mtxBody.translation, mtxCamera.translation);
+
 
       ƒ.RenderManager.update();
       viewport.draw();
@@ -178,10 +182,6 @@ namespace AudioTest {
           componentAudioListener.showListenerSettings();
           break;
       }
-      componentAudioListener.updatePositions(mtxCamera.translation);
-      mtxCamera.lookAt(ƒ.Vector3.ZERO());
-
-      componentAudio.getLocalisation().updatePositions(_body.cmpTransform.local.translation, mtxCamera.translation);
     }
   }
 }

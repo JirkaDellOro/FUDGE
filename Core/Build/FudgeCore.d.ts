@@ -1074,9 +1074,9 @@ declare namespace FudgeCore {
     /**
      * Attaches a [[ComponentAudio]] to a [[Node]].
      * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
-     * @authors Thomas Dorner, HFU, 2019
+     * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ComponentAudio extends Component implements Serializable {
+    class ComponentAudio extends Component {
         audio: Audio | null;
         audioOscillator: AudioOscillator;
         isLocalised: boolean;
