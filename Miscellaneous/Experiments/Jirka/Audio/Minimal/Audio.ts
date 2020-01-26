@@ -1,9 +1,22 @@
 window.addEventListener("click", startAudio);
 let starts: number = 0;
+let audioContext: AudioContext = new window.AudioContext();
+
 
 async function startAudio(): Promise<void> {
-  let audioContext: AudioContext = new window.AudioContext();
-  console.log("Play");
+  // var contexts: AudioContext[] = [];
+  // try {
+  //   for (let i: number = 0; i < 48; i++) {
+  //     let context: AudioContext = new AudioContext();
+  //     contexts.push(context);
+  //     context.createAnalyser();
+  //     console.log(i);
+  //   }
+  // } catch (e) {
+  //   console.log(e);
+  // }
+  // console.log(contexts);
+
   let source: AudioBufferSourceNode = audioContext.createBufferSource();
   let url: string = "mario_piano.mp3";
 
@@ -11,17 +24,19 @@ async function startAudio(): Promise<void> {
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
   const decodedAudio: AudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
   source.buffer = decodedAudio;
-  console.log(source);
+  // console.log(source);
 
   // Connect the audio to source (multiple audio buffers can be connected!)
   // source.connect(audioContext.destination);
 
   let panner: PannerNode = audioContext.createPanner();
-  console.log(panner);
+  panner.setPosition(1 - 2 * starts, 0, 0);
+  // console.log(panner);
 
-  audioContext.listener.setPosition(1 - 2 * starts, 0, 0);
-  console.log(audioContext.listener);
+  // audioContext.listener.setPosition(1 - 2 * starts, 0, 0);
+  // console.log(audioContext.listener);
 
+  setTimeout((): void => { panner.disconnect(); source.disconnect(); }, 2000);
 
   source.connect(panner);
   panner.connect(audioContext.destination);
@@ -29,4 +44,6 @@ async function startAudio(): Promise<void> {
   source.loop = true;
   source.start(0);
   starts++;
+
+  console.log(audioContext);
 }
