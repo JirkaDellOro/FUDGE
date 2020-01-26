@@ -115,7 +115,7 @@ namespace FudgeCore {
       if (previousParent)
         previousParent.removeChild(_node);
       this.children.push(_node);
-      _node.setParent(this);
+      _node.parent = this;
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
     }
 
@@ -130,7 +130,7 @@ namespace FudgeCore {
 
       _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
       this.children.splice(found, 1);
-      _node.setParent(null);
+      _node.parent = null;
     }
 
     /**
@@ -150,12 +150,15 @@ namespace FudgeCore {
       let found: number = this.findChild(_replace);
       if (found < 0)
         return false;
+
       let previousParent: Node = _with.getParent();
       if (previousParent)
         previousParent.removeChild(_with);
-      _replace.setParent(null);
+
+      _replace.parent = null;
       this.children[found] = _with;
-      _with.setParent(this);
+      _with.parent = this;
+      
       return true;
     }
 
@@ -416,14 +419,6 @@ namespace FudgeCore {
       }
     }
     // #endregion
-
-    /**
-     * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
-     * @param _parent The parent to be set for this node.
-     */
-    private setParent(_parent: Node | null): void {
-      this.parent = _parent;
-    }
 
     private *getBranchGenerator(): IterableIterator<Node> {
       yield this;
