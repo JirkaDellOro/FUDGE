@@ -1,6 +1,7 @@
 window.addEventListener("click", startAudio);
 let starts: number = 0;
 let audioContext: AudioContext = new window.AudioContext();
+let audioContextData: AudioContext = new window.AudioContext();
 
 
 async function startAudio(): Promise<void> {
@@ -22,9 +23,12 @@ async function startAudio(): Promise<void> {
 
   const response: Response = await window.fetch(url);
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
-  const decodedAudio: AudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const decodedAudio: AudioBuffer = await audioContextData.decodeAudioData(arrayBuffer);
   source.buffer = decodedAudio;
   // console.log(source);
+  audioContextData.close();
+  audioContextData = null;
+  console.log(decodedAudio);
 
   // Connect the audio to source (multiple audio buffers can be connected!)
   // source.connect(audioContext.destination);

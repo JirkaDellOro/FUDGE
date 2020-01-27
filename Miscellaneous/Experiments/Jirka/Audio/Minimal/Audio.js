@@ -2,6 +2,7 @@
 window.addEventListener("click", startAudio);
 let starts = 0;
 let audioContext = new window.AudioContext();
+let audioContextData = new window.AudioContext();
 async function startAudio() {
     // var contexts: AudioContext[] = [];
     // try {
@@ -19,9 +20,12 @@ async function startAudio() {
     let url = "mario_piano.mp3";
     const response = await window.fetch(url);
     const arrayBuffer = await response.arrayBuffer();
-    const decodedAudio = await audioContext.decodeAudioData(arrayBuffer);
+    const decodedAudio = await audioContextData.decodeAudioData(arrayBuffer);
     source.buffer = decodedAudio;
     // console.log(source);
+    audioContextData.close();
+    audioContextData = null;
+    console.log(decodedAudio);
     // Connect the audio to source (multiple audio buffers can be connected!)
     // source.connect(audioContext.destination);
     let panner = audioContext.createPanner();
