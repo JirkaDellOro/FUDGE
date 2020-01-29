@@ -506,38 +506,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Describes the [[Audio]] class in which all Audio Data is stored.
-     * Audio will be given to the [[ComponentAudio]] for further usage.
-     * @authors Thomas Dorner, HFU, 2019
+     * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Audio {
-        url: string;
-        audioBuffer: AudioBuffer;
-        bufferSource: AudioBufferSourceNode;
-        private localGain;
-        private isLooping;
-        /**
-         * Constructor for the [[Audio]] Class
-         * @param _audioContext from [[AudioSettings]]
-         * @param _gainValue 0 for muted | 1 for max volume
-         */
-        constructor(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean);
-        init(_audioSettings: AudioSettings, _url: string, _volume: number, _loop: boolean): Promise<void>;
-        initBufferSource(_audioSettings: AudioSettings): void;
-        connect(_audioNode: AudioNode): void;
-        set volume(_volume: number);
-        get volume(): number;
-        setLooping(_isLooping: boolean): void;
-        getLooping(): boolean;
-        setBufferSource(_buffer: AudioBuffer): void;
-        getBufferSource(): AudioBuffer;
-        /**
-         * createAudio builds an [[Audio]] to use with the [[ComponentAudio]]
-         * @param _audioContext from [[AudioSettings]]
-         * @param _audioBuffer from [[AudioSessionData]]
-         */
-        private createAudio;
-        private beginLoop;
+    class Audio extends AudioBuffer {
+        static load(_url: string): Promise<Audio>;
     }
 }
 declare namespace FudgeCore {
@@ -660,6 +632,13 @@ declare namespace FudgeCore {
         private initDefaultValues;
     }
     export {};
+}
+declare namespace FudgeCore {
+    class AudioManager extends AudioContext {
+        static readonly default: AudioManager;
+        readonly gain: AudioNode;
+        constructor(contextOptions?: AudioContextOptions);
+    }
 }
 declare namespace FudgeCore {
     /**
@@ -787,6 +766,42 @@ declare namespace FudgeCore {
          * Resumes the progression of time of the AudioContext after pausing it.
          */
         resumeAudioContext(): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Describes the [[Audio]] class in which all Audio Data is stored.
+     * Audio will be given to the [[ComponentAudio]] for further usage.
+     * @authors Thomas Dorner, HFU, 2019
+     */
+    class AudioX {
+        url: string;
+        audioBuffer: AudioBuffer;
+        bufferSource: AudioBufferSourceNode;
+        private localGain;
+        private isLooping;
+        /**
+         * Constructor for the [[Audio]] Class
+         * @param _audioContext from [[AudioSettings]]
+         * @param _gainValue 0 for muted | 1 for max volume
+         */
+        constructor(_audioSettings: AudioSettings, _url: string, _gainValue: number, _loop: boolean);
+        init(_audioSettings: AudioSettings, _url: string, _volume: number, _loop: boolean): Promise<void>;
+        initBufferSource(_audioSettings: AudioSettings): void;
+        connect(_audioNode: AudioNode): void;
+        set volume(_volume: number);
+        get volume(): number;
+        setLooping(_isLooping: boolean): void;
+        getLooping(): boolean;
+        setBufferSource(_buffer: AudioBuffer): void;
+        getBufferSource(): AudioBuffer;
+        /**
+         * createAudio builds an [[Audio]] to use with the [[ComponentAudio]]
+         * @param _audioContext from [[AudioSettings]]
+         * @param _audioBuffer from [[AudioSessionData]]
+         */
+        private createAudio;
+        private beginLoop;
     }
 }
 declare namespace FudgeCore {
@@ -1084,56 +1099,28 @@ declare namespace FudgeCore {
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudio extends Component {
-        audio: Audio | null;
-        audioOscillator: AudioOscillator;
-        isLocalised: boolean;
-        isFiltered: boolean;
-        isDelayed: boolean;
+        pivot: Matrix4x4;
+        gain: GainNode;
         protected singleton: boolean;
-        private localisation;
-        private filter;
-        private delay;
+        private panner;
+        private source;
+        private audioManager;
         private playing;
-        /**
-         * Create Component Audio for
-         * @param _audio
-         */
-        constructor(_audio?: Audio, _audioOscillator?: AudioOscillator);
-        /**
-         * set AudioFilter in ComponentAudio
-         * @param _filter AudioFilter
-         */
-        setFilter(_filter: AudioFilter): void;
-        getFilter(): AudioFilter;
-        setDelay(_delay: AudioDelay): void;
-        getDelay(): AudioDelay;
-        setLocalisation(_localisation: AudioLocalisation): void;
-        getLocalisation(): AudioLocalisation;
-        /**
-         * Play Audio at current time of AudioContext
-         */
-        playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void;
-        stop(): void;
+        constructor(_audio?: Audio);
+        set audio(_audio: Audio);
+        get audio(): Audio;
+        play(_on: boolean): void;
         get isPlaying(): boolean;
         /**
-         * Adds an [[Audio]] to the [[ComponentAudio]]
-         * @param _audio Audio Data as [[Audio]]
+         * Activate override. Connects or disconnects AudioNodes
          */
-        setAudio(_audio: Audio): void;
-        getAudio(): Audio;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        protected reduceMutator(_mutator: Mutator): void;
+        activate(_on: boolean): void;
+        install(_audioManager?: AudioManager): void;
         /**
-         * Final attachments for the Audio Nodes in following order.
-         * This method needs to be called whenever there is a change of parts in the [[ComponentAudio]].
-         * 1. Local Gain
-         * 2. Localisation
-         * 3. Filter
-         * 4. Delay
-         * 5. Master Gain
+         * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node.
+         * Therefore unused AudioNodes may be garbage collected when an unused component is collected
          */
-        private connectAudioNodes;
+        private handleAttach;
     }
 }
 declare namespace FudgeCore {
@@ -1201,6 +1188,65 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Attaches a [[ComponentAudio]] to a [[Node]].
+     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+     * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class ComponentAudioX extends Component {
+        audio: AudioX | null;
+        audioOscillator: AudioOscillator;
+        isLocalised: boolean;
+        isFiltered: boolean;
+        isDelayed: boolean;
+        protected singleton: boolean;
+        private localisation;
+        private filter;
+        private delay;
+        private playing;
+        /**
+         * Create Component Audio for
+         * @param _audio
+         */
+        constructor(_audio?: AudioX, _audioOscillator?: AudioOscillator);
+        /**
+         * set AudioFilter in ComponentAudio
+         * @param _filter AudioFilter
+         */
+        setFilter(_filter: AudioFilter): void;
+        getFilter(): AudioFilter;
+        setDelay(_delay: AudioDelay): void;
+        getDelay(): AudioDelay;
+        setLocalisation(_localisation: AudioLocalisation): void;
+        getLocalisation(): AudioLocalisation;
+        /**
+         * Play Audio at current time of AudioContext
+         */
+        playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void;
+        stop(): void;
+        get isPlaying(): boolean;
+        /**
+         * Adds an [[Audio]] to the [[ComponentAudio]]
+         * @param _audio Audio Data as [[Audio]]
+         */
+        setAudio(_audio: AudioX): void;
+        getAudio(): AudioX;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        protected reduceMutator(_mutator: Mutator): void;
+        /**
+         * Final attachments for the Audio Nodes in following order.
+         * This method needs to be called whenever there is a change of parts in the [[ComponentAudio]].
+         * 1. Local Gain
+         * 2. Localisation
+         * 3. Filter
+         * 4. Delay
+         * 5. Master Gain
+         */
+        private connectAudioNodes;
     }
 }
 declare namespace FudgeCore {
@@ -3338,7 +3384,8 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Time extends EventTargetƒ {
-        private static gameTime;
+        /** Standard game time starting automatically with the application */
+        static readonly game: Time;
         private start;
         private scale;
         private offset;
@@ -3349,7 +3396,6 @@ declare namespace FudgeCore {
         /**
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
          */
-        static get game(): Time;
         static getUnits(_milliseconds: number): TimeUnits;
         /**
          * Retrieves the current scaled timestamp of this instance in milliseconds

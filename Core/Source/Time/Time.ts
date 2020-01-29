@@ -24,7 +24,8 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Time extends EventTargetƒ {
-    private static gameTime: Time = new Time();
+    /** Standard game time starting automatically with the application */
+    public static readonly game: Time = new Time();
     private start: number;
     private scale: number;
     private offset: number;
@@ -43,9 +44,9 @@ namespace FudgeCore {
     /**
      * Returns the game-time-object which starts automatically and serves as base for various internal operations. 
      */
-    public static get game(): Time {
-      return Time.gameTime;
-    }
+    // public static get game(): Time {
+    //   return Time.gameTime;
+    // }
 
     public static getUnits(_milliseconds: number): TimeUnits {
       let units: TimeUnits = {};

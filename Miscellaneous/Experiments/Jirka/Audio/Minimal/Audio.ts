@@ -1,7 +1,7 @@
 window.addEventListener("click", startAudio);
 let starts: number = 0;
-let audioContext: AudioContext = new window.AudioContext();
-let audioContextData: AudioContext = new window.AudioContext();
+let audioContext: AudioContext = new AudioContext();
+let audioContextData: AudioContext = new AudioContext();
 
 
 async function startAudio(): Promise<void> {
@@ -24,8 +24,9 @@ async function startAudio(): Promise<void> {
   const response: Response = await window.fetch(url);
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
   const decodedAudio: AudioBuffer = await audioContextData.decodeAudioData(arrayBuffer);
+  // let c: AudioBuffer = new AudioBuffer({})
   source.buffer = decodedAudio;
-  // console.log(source);
+  console.log(source);
   audioContextData.close();
   audioContextData = null;
   console.log(decodedAudio);
@@ -37,10 +38,10 @@ async function startAudio(): Promise<void> {
   panner.setPosition(1 - 2 * starts, 0, 0);
   // console.log(panner);
 
-  // audioContext.listener.setPosition(1 - 2 * starts, 0, 0);
-  // console.log(audioContext.listener);
+  audioContext.listener.setPosition(1, 0, 0);
+  console.log(audioContext.listener);
 
-  setTimeout((): void => { panner.disconnect(); source.disconnect(); }, 2000);
+  setTimeout((): void => { panner.disconnect(); source.disconnect(); }, 2500);
 
   source.connect(panner);
   panner.connect(audioContext.destination);

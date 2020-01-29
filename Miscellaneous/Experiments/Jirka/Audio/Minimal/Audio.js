@@ -1,8 +1,8 @@
 "use strict";
 window.addEventListener("click", startAudio);
 let starts = 0;
-let audioContext = new window.AudioContext();
-let audioContextData = new window.AudioContext();
+let audioContext = new AudioContext();
+let audioContextData = new AudioContext();
 async function startAudio() {
     // var contexts: AudioContext[] = [];
     // try {
@@ -21,8 +21,9 @@ async function startAudio() {
     const response = await window.fetch(url);
     const arrayBuffer = await response.arrayBuffer();
     const decodedAudio = await audioContextData.decodeAudioData(arrayBuffer);
+    // let c: AudioBuffer = new AudioBuffer({})
     source.buffer = decodedAudio;
-    // console.log(source);
+    console.log(source);
     audioContextData.close();
     audioContextData = null;
     console.log(decodedAudio);
@@ -31,9 +32,9 @@ async function startAudio() {
     let panner = audioContext.createPanner();
     panner.setPosition(1 - 2 * starts, 0, 0);
     // console.log(panner);
-    // audioContext.listener.setPosition(1 - 2 * starts, 0, 0);
-    // console.log(audioContext.listener);
-    setTimeout(() => { panner.disconnect(); source.disconnect(); }, 2000);
+    audioContext.listener.setPosition(1, 0, 0);
+    console.log(audioContext.listener);
+    setTimeout(() => { panner.disconnect(); source.disconnect(); }, 2500);
     source.connect(panner);
     panner.connect(audioContext.destination);
     source.loop = true;
