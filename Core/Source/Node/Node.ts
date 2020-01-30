@@ -102,9 +102,11 @@ namespace FudgeCore {
         // _node is already a child of this
         return;
 
+      let inAudioBranch: boolean = false;
       let ancestor: Node = this;
       while (ancestor) {
         ancestor.timestampUpdate = 0;
+        inAudioBranch = inAudioBranch || (ancestor == AudioManager.default.getBranchListeningTo());
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else
@@ -117,6 +119,8 @@ namespace FudgeCore {
       this.children.push(_node);
       _node.parent = this;
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
+      if (inAudioBranch)
+        _node.broadcastEvent(new Event(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH));
     }
 
     /**
@@ -129,6 +133,8 @@ namespace FudgeCore {
         return;
 
       _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
+      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+        _node.broadcastEvent(new Event(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH));
       this.children.splice(found, 1);
       _node.parent = null;
     }
@@ -158,7 +164,11 @@ namespace FudgeCore {
       _replace.parent = null;
       this.children[found] = _with;
       _with.parent = this;
-      
+
+      _with.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
+      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+        _with.broadcastEvent(new Event(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH));
+
       return true;
     }
 
@@ -171,6 +181,13 @@ namespace FudgeCore {
 
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
+    }
+
+    public isDescendantOf(_ancestor: Node): boolean {
+      let node: Node = this;
+      while (node != _ancestor)
+        node = node.parent;
+      return (node != null);
     }
 
     /**

@@ -111,6 +111,10 @@ declare namespace FudgeCore {
         CHILD_APPEND = "childAdd",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of after it was appended to a parent */
+        CHILD_APPEND_TO_AUDIO_BRANCH = "branchAdd",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
+        CHILD_REMOVE_FROM_AUDIO_BRANCH = "branchRemove",
         /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate",
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
@@ -637,7 +641,10 @@ declare namespace FudgeCore {
     class AudioManager extends AudioContext {
         static readonly default: AudioManager;
         readonly gain: AudioNode;
+        private branch;
         constructor(contextOptions?: AudioContextOptions);
+        listenTo: (_branch: Node) => void;
+        getBranchListeningTo: () => Node;
     }
 }
 declare namespace FudgeCore {
@@ -1106,21 +1113,31 @@ declare namespace FudgeCore {
         private source;
         private audioManager;
         private playing;
-        constructor(_audio?: Audio);
+        private connected;
+        private listened;
+        constructor(_audio?: Audio, _loop?: boolean, _start?: boolean);
         set audio(_audio: Audio);
         get audio(): Audio;
         play(_on: boolean): void;
         get isPlaying(): boolean;
+        get isConnected(): boolean;
+        get isAttached(): boolean;
+        get isListened(): boolean;
         /**
          * Activate override. Connects or disconnects AudioNodes
          */
         activate(_on: boolean): void;
         install(_audioManager?: AudioManager): void;
+        private updateConnection;
         /**
          * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node.
          * Therefore unused AudioNodes may be garbage collected when an unused component is collected
          */
         private handleAttach;
+        /**
+         * Automatically connects/disconnects AudioNodes when appending/removing the branch the component is in.
+         */
+        private handleBranch;
     }
 }
 declare namespace FudgeCore {
@@ -3045,6 +3062,7 @@ declare namespace FudgeCore {
          */
         get branch(): IterableIterator<Node>;
         isUpdated(_timestampUpdate: number): boolean;
+        isDescendantOf(_ancestor: Node): boolean;
         /**
          * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
          * @param _mutator The mutator generated from an [[Animation]]
