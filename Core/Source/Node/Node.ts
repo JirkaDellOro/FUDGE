@@ -18,7 +18,7 @@ namespace FudgeCore {
     // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
     // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
     private listeners: MapEventTypeToListener = {};
-    private captures: MapEventTypeToListener = {};
+    public captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
     /**
@@ -185,7 +185,7 @@ namespace FudgeCore {
 
     public isDescendantOf(_ancestor: Node): boolean {
       let node: Node = this;
-      while (node != _ancestor)
+      while (node && node != _ancestor)
         node = node.parent;
       return (node != null);
     }
@@ -284,9 +284,9 @@ namespace FudgeCore {
         let foundAt: number = componentsOfType.indexOf(_component);
         if (foundAt < 0)
           return;
+        _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
-        _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
       } catch (_error) {
         throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
       }
@@ -350,16 +350,23 @@ namespace FudgeCore {
      * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
      */
     public addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
-      if (_capture) {
-        if (!this.captures[_type])
-          this.captures[_type] = [];
-        this.captures[_type].push(_handler);
-      }
-      else {
-        if (!this.listeners[_type])
-          this.listeners[_type] = [];
-        this.listeners[_type].push(_handler);
-      }
+      let listListeners: MapEventTypeToListener = _capture ? this.captures : this.listeners;
+      if (!listListeners[_type])
+        listListeners[_type] = [];
+      listListeners[_type].push(_handler);
+    }
+    /**
+     * Removes an event listener from the node. The signatur must match the one used with addEventListener
+     * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+     * @param _handler The function to call when the event reaches this node
+     * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+     */
+    public removeEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+      let listenersForType: EventListener[] = _capture ? this.captures[_type] : this.listeners[_type];
+      if (listenersForType)
+        for (let i: number = listenersForType.length - 1; i >= 0; i--)
+          if (listenersForType[i] == _handler)
+            listenersForType.splice(i, 1);
     }
     /**
      * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
@@ -437,7 +444,7 @@ namespace FudgeCore {
     }
     // #endregion
 
-    private *getBranchGenerator(): IterableIterator<Node> {
+    private * getBranchGenerator(): IterableIterator<Node> {
       yield this;
       for (let child of this.children)
         yield* child.branch;

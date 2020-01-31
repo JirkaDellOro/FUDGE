@@ -108,13 +108,13 @@ declare namespace FudgeCore {
         /** dispatched to a [[Component]] when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
-        CHILD_APPEND = "childAdd",
+        CHILD_APPEND = "childAppend",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of after it was appended to a parent */
-        CHILD_APPEND_TO_AUDIO_BRANCH = "branchAdd",
+        CHILD_APPEND_TO_AUDIO_BRANCH = "childAppendToAudioBranch",
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
-        CHILD_REMOVE_FROM_AUDIO_BRANCH = "branchRemove",
+        CHILD_REMOVE_FROM_AUDIO_BRANCH = "childRemoveFromAudioBranch",
         /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate",
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
@@ -3000,7 +3000,7 @@ declare namespace FudgeCore {
         private children;
         private components;
         private listeners;
-        private captures;
+        captures: MapEventTypeToListener;
         private active;
         /**
          * Creates a new node with a name and initializes all attributes
@@ -3103,6 +3103,13 @@ declare namespace FudgeCore {
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
         addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Removes an event listener from the node. The signatur must match the one used with addEventListener
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,

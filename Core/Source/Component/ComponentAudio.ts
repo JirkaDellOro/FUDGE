@@ -104,7 +104,6 @@ namespace FudgeCore {
      */
     private handleAttach = (_event: Event): void => {
       Debug.log(_event);
-      this.updateConnection();
       if (_event.type == EVENT.COMPONENT_ADD) {
         this.getContainer().addEventListener(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH, this.handleBranch, true);
         this.getContainer().addEventListener(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH, this.handleBranch, true);
@@ -112,7 +111,10 @@ namespace FudgeCore {
       else {
         this.getContainer().removeEventListener(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH, this.handleBranch, true);
         this.getContainer().removeEventListener(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH, this.handleBranch, true);
+        this.listened = false;
       }
+      Debug.log(this.getContainer().name, this.getContainer().captures);
+      this.updateConnection();
     }
 
     /** 
