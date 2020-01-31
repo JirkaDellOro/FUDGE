@@ -105,15 +105,17 @@ namespace FudgeCore {
     private handleAttach = (_event: Event): void => {
       Debug.log(_event);
       if (_event.type == EVENT.COMPONENT_ADD) {
-        this.getContainer().addEventListener(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH, this.handleBranch, true);
-        this.getContainer().addEventListener(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
+        this.listened = this.getContainer().isDescendantOf(AudioManager.default.getBranchListeningTo());
       }
       else {
-        this.getContainer().removeEventListener(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH, this.handleBranch, true);
-        this.getContainer().removeEventListener(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
         this.listened = false;
       }
-      Debug.log(this.getContainer().name, this.getContainer().captures);
       this.updateConnection();
     }
 
@@ -122,8 +124,18 @@ namespace FudgeCore {
      */
     private handleBranch = (_event: Event): void => {
       Debug.log(_event);
-      this.listened = (_event.type == EVENT.CHILD_APPEND_TO_AUDIO_BRANCH);
+      this.listened = (_event.type == EVENT_AUDIO.CHILD_APPEND);
       this.updateConnection();
+    }
+
+    /** 
+     * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
+     */
+    private updatePanner = (_event: Event): void => {
+      Debug.log(_event);
+      let local: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+      Debug.log(local.toString());
+      this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z );
     }
   }
 }

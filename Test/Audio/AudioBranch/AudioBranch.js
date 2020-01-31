@@ -11,15 +11,17 @@ var AudioBranch;
         let audioMario = await ƒ.Audio.load("Sound/mario_piano.mp3");
         let audioTrancy = await ƒ.Audio.load("Sound/trancyvania.mp3");
         let audioHypno = await ƒ.Audio.load("Sound/hypnotic.mp3");
-        // cmpAudio = new ƒ.ComponentAudio(audio);
-        // cmpAudio.play(true);
-        // cmpAudio.activate(false);
-        // log();
         for (let i = 0; i < 10; i++)
             nodes.push(new ƒ.Node("Node" + i));
-        nodes[0].addComponent(new ƒ.ComponentAudio(audioHypno, true, true));
-        nodes[1].addComponent(new ƒ.ComponentAudio(audioTrancy, true, true));
-        nodes[2].addComponent(new ƒ.ComponentAudio(audioMario, true, true));
+        let cmpAudio = new ƒ.ComponentAudio(audioHypno, true, true);
+        cmpAudio.pivot.translateX(2);
+        nodes[0].addComponent(cmpAudio);
+        cmpAudio = new ƒ.ComponentAudio(audioTrancy, true, true);
+        cmpAudio.pivot.translateX(-2);
+        nodes[1].addComponent(cmpAudio);
+        cmpAudio = new ƒ.ComponentAudio(audioMario, true, true);
+        cmpAudio.pivot.translateX(0);
+        nodes[2].addComponent(cmpAudio);
         nodeControlled = nodes[0];
         ƒ.AudioManager.default.listenTo(nodes[0]);
         log();
@@ -30,9 +32,9 @@ var AudioBranch;
             let out = `node: ${node.name}`;
             if (node.getParent())
                 out += ` [->${node.getParent().name}]`;
-            let cmpAudio = node.getComponent(ƒ.ComponentAudio);
-            if (cmpAudio)
-                out += `, active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
+            let cmpAudioList = node.getComponents(ƒ.ComponentAudio);
+            for (let cmpAudio of cmpAudioList)
+                out += ` | active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
             ƒ.Debug.log(out);
         }
         ƒ.Debug.groupEnd();
@@ -59,10 +61,12 @@ var AudioBranch;
                 if (container < 0 || container > 9)
                     throw (new Error("Index out of bounds"));
                 nodes[container].addComponent(cmpAudio);
-                // nodeControlled.removeComponent(cmpAudio);
                 break;
             case ƒ.KEYBOARD_CODE.L:
                 ƒ.AudioManager.default.listenTo(nodeControlled);
+                break;
+            case ƒ.KEYBOARD_CODE.U:
+                ƒ.AudioManager.default.update();
                 break;
         }
         log();

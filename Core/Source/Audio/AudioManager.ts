@@ -12,15 +12,19 @@ namespace FudgeCore {
 
     public listenTo = (_branch: Node | null): void => {
       if (this.branch)
-        this.branch.broadcastEvent(new Event(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH));
+        this.branch.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       if (!_branch)
         return;
       this.branch = _branch;
-      this.branch.broadcastEvent(new Event(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH));
+      this.branch.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
     public getBranchListeningTo = (): Node => {
       return this.branch;
+    }
+
+    public update = (): void => {
+      this.branch.broadcastEvent(new Event(EVENT_AUDIO.UPDATE_PANNER));
     }
   }
 }

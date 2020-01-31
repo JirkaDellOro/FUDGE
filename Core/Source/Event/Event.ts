@@ -21,10 +21,6 @@ namespace FudgeCore {
         CHILD_APPEND = "childAppend",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of after it was appended to a parent */
-        CHILD_APPEND_TO_AUDIO_BRANCH = "childAppendToAudioBranch",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
-        CHILD_REMOVE_FROM_AUDIO_BRANCH = "childRemoveFromAudioBranch",
         /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate",
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */

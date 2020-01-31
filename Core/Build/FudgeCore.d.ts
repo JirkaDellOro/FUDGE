@@ -111,10 +111,6 @@ declare namespace FudgeCore {
         CHILD_APPEND = "childAppend",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of after it was appended to a parent */
-        CHILD_APPEND_TO_AUDIO_BRANCH = "childAppendToAudioBranch",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
-        CHILD_REMOVE_FROM_AUDIO_BRANCH = "childRemoveFromAudioBranch",
         /** dispatched to a [[Mutable]] when its being mutated */
         MUTATE = "mutate",
         /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
@@ -645,6 +641,7 @@ declare namespace FudgeCore {
         constructor(contextOptions?: AudioContextOptions);
         listenTo: (_branch: Node) => void;
         getBranchListeningTo: () => Node;
+        update: () => void;
     }
 }
 declare namespace FudgeCore {
@@ -1138,6 +1135,10 @@ declare namespace FudgeCore {
          * Automatically connects/disconnects AudioNodes when appending/removing the branch the component is in.
          */
         private handleBranch;
+        /**
+         * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component.
+         */
+        private updatePanner;
     }
 }
 declare namespace FudgeCore {
@@ -1963,6 +1964,16 @@ declare namespace FudgeCore {
          * @param _fudgeNode The node to create a scenegraphentry for.
          */
         private createSceneGraph;
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_AUDIO {
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of after it was appended to a parent */
+        CHILD_APPEND = "childAppendToAudioBranch",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
+        CHILD_REMOVE = "childRemoveFromAudioBranch",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch to update the panners in AudioComponents */
+        UPDATE_PANNER = "updateAudioBranch"
     }
 }
 declare namespace FudgeCore {
@@ -3000,7 +3011,7 @@ declare namespace FudgeCore {
         private children;
         private components;
         private listeners;
-        captures: MapEventTypeToListener;
+        private captures;
         private active;
         /**
          * Creates a new node with a name and initializes all attributes

@@ -12,17 +12,22 @@ namespace AudioBranch {
     let audioTrancy: ƒ.Audio = await ƒ.Audio.load("Sound/trancyvania.mp3");
     let audioHypno: ƒ.Audio = await ƒ.Audio.load("Sound/hypnotic.mp3");
 
-    // cmpAudio = new ƒ.ComponentAudio(audio);
-
-    // cmpAudio.play(true);
-    // cmpAudio.activate(false);
-    // log();
+    
     for (let i: number = 0; i < 10; i++)
-      nodes.push(new ƒ.Node("Node" + i));
+    nodes.push(new ƒ.Node("Node" + i));
+    
+    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audioHypno, true, true);
+    cmpAudio.pivot.translateX(2);
+    nodes[0].addComponent(cmpAudio);
+    
+    cmpAudio = new ƒ.ComponentAudio(audioTrancy, true, true);
+    cmpAudio.pivot.translateX(-2);
+    nodes[1].addComponent(cmpAudio);
 
-    nodes[0].addComponent(new ƒ.ComponentAudio(audioHypno, true, true));
-    nodes[1].addComponent(new ƒ.ComponentAudio(audioTrancy, true, true));
-    nodes[2].addComponent(new ƒ.ComponentAudio(audioMario, true, true));
+    cmpAudio = new ƒ.ComponentAudio(audioMario, true, true);
+    cmpAudio.pivot.translateX(0);
+    nodes[2].addComponent(cmpAudio);
+
     nodeControlled = nodes[0];
 
     ƒ.AudioManager.default.listenTo(nodes[0]);
@@ -35,9 +40,9 @@ namespace AudioBranch {
       let out: string = `node: ${node.name}`;
       if (node.getParent())
         out += ` [->${node.getParent().name}]`;
-      let cmpAudio: ƒ.ComponentAudio = node.getComponent(ƒ.ComponentAudio);
-      if (cmpAudio)
-        out += `, active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
+      let cmpAudioList: ƒ.ComponentAudio[] = node.getComponents(ƒ.ComponentAudio);
+      for (let cmpAudio of cmpAudioList)
+        out += ` | active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
 
       ƒ.Debug.log(out);
     }
@@ -56,20 +61,22 @@ namespace AudioBranch {
       case ƒ.KEYBOARD_CODE.P:
         let parent: number = parseInt(prompt("Enter the number of the node that will become the parent", "0"));
         if (parent < 0 || parent > 9)
-          throw (new Error("Index out of bounds"))
+          throw (new Error("Index out of bounds"));
         nodes[parent].appendChild(nodeControlled);
         break;
       case ƒ.KEYBOARD_CODE.C:
         if (!cmpAudio)
-          throw(new Error("No ComponentAudio attached"));
+          throw (new Error("No ComponentAudio attached"));
         let container: number = parseInt(prompt("Enter the number of the node the component attaches to", "0"));
         if (container < 0 || container > 9)
-          throw (new Error("Index out of bounds"))
+          throw (new Error("Index out of bounds"));
         nodes[container].addComponent(cmpAudio);
-        // nodeControlled.removeComponent(cmpAudio);
         break;
       case ƒ.KEYBOARD_CODE.L:
         ƒ.AudioManager.default.listenTo(nodeControlled);
+        break;
+      case ƒ.KEYBOARD_CODE.U:
+        ƒ.AudioManager.default.update();
         break;
     }
     log();

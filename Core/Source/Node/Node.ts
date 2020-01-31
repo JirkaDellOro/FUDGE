@@ -18,7 +18,7 @@ namespace FudgeCore {
     // private tags: string[] = []; // Names of tags that are attached to this node. (TODO: As of yet no functionality)
     // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
     private listeners: MapEventTypeToListener = {};
-    public captures: MapEventTypeToListener = {};
+    private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
     /**
@@ -120,7 +120,7 @@ namespace FudgeCore {
       _node.parent = this;
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
       if (inAudioBranch)
-        _node.broadcastEvent(new Event(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH));
+        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
     /**
@@ -134,7 +134,7 @@ namespace FudgeCore {
 
       _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
       if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
-        _node.broadcastEvent(new Event(EVENT.CHILD_REMOVE_FROM_AUDIO_BRANCH));
+        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       this.children.splice(found, 1);
       _node.parent = null;
     }
@@ -167,7 +167,7 @@ namespace FudgeCore {
 
       _with.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
       if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
-        _with.broadcastEvent(new Event(EVENT.CHILD_APPEND_TO_AUDIO_BRANCH));
+        _with.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
 
       return true;
     }
