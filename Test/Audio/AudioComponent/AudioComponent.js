@@ -27,9 +27,9 @@ var AudioComponent;
                 break;
             case ƒ.KEYBOARD_CODE.B:
                 if (branched)
-                    cmpAudio.dispatchEvent(new Event(ƒ.EVENT.BRANCH_REMOVE));
+                    cmpAudio.dispatchEvent(new Event("childRemoveFromAudioBranch" /* CHILD_REMOVE */));
                 else
-                    cmpAudio.dispatchEvent(new Event(ƒ.EVENT.BRANCH_APPEND));
+                    cmpAudio.dispatchEvent(new Event("childAppendToAudioBranch" /* CHILD_APPEND */));
                 branched = !branched;
                 break;
             case ƒ.KEYBOARD_CODE.C:
