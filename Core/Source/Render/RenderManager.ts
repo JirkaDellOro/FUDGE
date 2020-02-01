@@ -261,7 +261,12 @@ namespace FudgeCore {
       RenderManager.pickBuffers = [];
       if (!RenderManager.renderShaders.get(ShaderRayCast))
         RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
+
+      //TODO: examine, why switching blendFunction is necessary 
+      RenderOperator.crc3.blendFunc(1, 0);
       RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+      RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+
       RenderManager.resetFrameBuffer();
       return RenderManager.pickBuffers;
     }
@@ -276,7 +281,8 @@ namespace FudgeCore {
         RenderManager.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
         let pixel: number = _pos.x + _rect.width * _pos.y;
 
-        let zBuffer: number = data[4 * pixel + 2] + data[4 * pixel + 3] / 256;
+        // let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
+        let zBuffer: number = data[4 * pixel + 0];
         let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
 
         hits.push(hit);
