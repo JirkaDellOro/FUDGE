@@ -18,17 +18,14 @@ namespace FudgeCore {
     // private attached: boolean = false;
     private listened: boolean = false;
 
-    constructor(_audio?: Audio, _loop?: boolean, _start?: boolean) {
+    constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false) {
       super();
       this.install();
-      if (_audio)
-        this.audio = _audio;
+      this.createSource(_audio, _loop);
 
       this.addEventListener(EVENT.COMPONENT_ADD, this.handleAttach);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.handleAttach);
 
-      if (_loop)
-        this.source.loop = _loop;
       if (_start)
         this.play(_start);
     }
@@ -42,10 +39,10 @@ namespace FudgeCore {
     }
 
     public play(_on: boolean): void {
-      this.source.disconnect();
-      this.source.connect(this.panner);
-      if (_on)
+      if (_on) {
+        this.createSource(this.audio, this.source.loop);
         this.source.start(0, 0);
+      }
       else
         this.source.stop();
       this.playing = _on;
@@ -84,13 +81,20 @@ namespace FudgeCore {
       let active: boolean = this.isActive;
       this.activate(false);
       this.audioManager = _audioManager;
-      this.source = _audioManager.createBufferSource();
       this.panner = _audioManager.createPanner();
       this.gain = _audioManager.createGain();
-      this.source.connect(this.panner);
       this.panner.connect(this.gain);
       this.gain.connect(_audioManager.gain);
       this.activate(active);
+    }
+
+    public createSource(_audio: Audio, _loop: boolean): void {
+      this.source = this.audioManager.createBufferSource();
+      this.source.connect(this.panner);
+
+      if (_audio)
+        this.audio = _audio;
+      this.source.loop = _loop;
     }
 
     public connect(_on: boolean): void {

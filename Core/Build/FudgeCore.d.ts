@@ -1125,6 +1125,7 @@ declare namespace FudgeCore {
          */
         activate(_on: boolean): void;
         install(_audioManager?: AudioManager): void;
+        createSource(_audio: Audio, _loop: boolean): void;
         connect(_on: boolean): void;
         private updateConnection;
         /**
