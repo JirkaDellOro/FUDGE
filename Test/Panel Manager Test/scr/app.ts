@@ -3,7 +3,7 @@
 
 
 
-namespace Fudge {
+namespace FudgeTest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     window.addEventListener("DOMContentLoaded", init);

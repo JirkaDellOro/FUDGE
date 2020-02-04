@@ -6,7 +6,7 @@ namespace FudgeCore {
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
    * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
    */
-  interface AnimationStructure {
+  export interface AnimationStructure {
     [attribute: string]: Serialization | AnimationSequence;
   }
 
@@ -55,8 +55,8 @@ namespace FudgeCore {
     labels: AnimationLabel = {};
     stepsPerSecond: number = 10;
     animationStructure: AnimationStructure;
+    events: AnimationEventTrigger = {};
     private framesPerSecond: number = 60;
-    private events: AnimationEventTrigger = {};
 
     // processed eventlist and animation strucutres for playback.
     private eventsProcessed: Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger> = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();

@@ -16,8 +16,7 @@ namespace EventPassing {
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList: HTMLCollectionOf<HTMLCanvasElement> = document.getElementsByTagName("canvas");
         for (let i: number = 0; i < canvasList.length; i++) {
-            let camera: ƒ.Node = Scenes.createCamera(posCameras[i]);
-            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+            let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(posCameras[i]);
             cmpCamera.projectCentral(1, 45);
             let viewport: ƒ.Viewport = new ƒ.Viewport();
             viewport.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
@@ -41,7 +40,7 @@ namespace EventPassing {
         }
     }
 
-    function hndEvent(_event: ƒ.PointerEventƒ | ƒ.DragDropEventƒ): void {
+    function hndEvent(_event: ƒ.EventPointer | ƒ.EventDragDrop): void {
         if (_event.type == ƒ.EVENT_DRAGDROP.OVER)
             return;
 

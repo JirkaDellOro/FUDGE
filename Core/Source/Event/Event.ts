@@ -18,7 +18,7 @@ namespace FudgeCore {
         /** dispatched to a [[Component]] when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
-        CHILD_APPEND = "childAdd",
+        CHILD_APPEND = "childAppend",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
         /** dispatched to a [[Mutable]] when its being mutated */
@@ -41,63 +41,34 @@ namespace FudgeCore {
         FILE_SAVED = "fileSaved"
     }
 
-    export const enum EVENT_POINTER {
-        UP = "ƒpointerup",
-        DOWN = "ƒpointerdown"
-    }
-    export const enum EVENT_DRAGDROP {
-        DRAG = "ƒdrag",
-        DROP = "ƒdrop",
-        START = "ƒdragstart",
-        END = "ƒdragend",
-        OVER = "ƒdragover"
-    }
-    export const enum EVENT_WHEEL {
-        WHEEL = "ƒwheel"
-    }
 
-    export class PointerEventƒ extends PointerEvent {
-        public pointerX: number;
-        public pointerY: number;
-        public canvasX: number;
-        public canvasY: number;
-        public clientRect: ClientRect;
+    export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
 
-        constructor(type: string, _event: PointerEventƒ) {
-            super(type, _event);
-            let target: HTMLElement = <HTMLElement>_event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
+    export type EventListenerƒ =
+        ((_event: EventPointer) => void) |
+        ((_event: EventDragDrop) => void) |
+        ((_event: EventWheel) => void) |
+        ((_event: EventKeyboard) => void) |
+        ((_event: Eventƒ) => void) |
+        EventListenerObject;
+
+    export class EventTargetƒ extends EventTarget {
+        addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+            super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
         }
-    }
-
-    export class DragDropEventƒ extends DragEvent {
-        public pointerX: number;
-        public pointerY: number;
-        public canvasX: number;
-        public canvasY: number;
-        public clientRect: ClientRect;
-
-        constructor(type: string, _event: DragDropEventƒ) {
-            super(type, _event);
-            let target: HTMLElement = <HTMLElement>_event.target;
-            this.clientRect = target.getClientRects()[0];
-            this.pointerX = _event.clientX - this.clientRect.left;
-            this.pointerY = _event.clientY - this.clientRect.top;
+        removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
+            super.removeEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);
         }
-    }
 
-    export class WheelEventƒ extends WheelEvent {
-        constructor(type: string, _event: WheelEventƒ) {
-            super(type, _event);
+        dispatchEvent(_event: Eventƒ): boolean {
+            return super.dispatchEvent(_event);
         }
     }
 
     /**
      * Base class for EventTarget singletons, which are fixed entities in the structure of Fudge, such as the core loop 
      */
-    export class EventTargetStatic extends EventTarget {
+    export class EventTargetStatic extends EventTargetƒ {
         protected static targetStatic: EventTargetStatic = new EventTargetStatic();
 
         protected constructor() {

@@ -1,9 +1,9 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
-var Fudge;
+var FudgeTest;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
-(function (Fudge) {
+(function (FudgeTest) {
     // import ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.
@@ -29,7 +29,7 @@ var Fudge;
                 this.config.content[0] = this.constructFromTemplate(_template.config, "row");
             }
             else {
-                let viewData = new Fudge.ViewData(this);
+                let viewData = new FudgeTest.ViewData(this);
                 this.addView(viewData, false);
             }
         }
@@ -45,7 +45,7 @@ var Fudge;
                 this.config.content.push(_v.config);
             }
             if (_pushToPanelManager) {
-                Fudge.PanelManager.instance.addView(_v);
+                FudgeTest.PanelManager.instance.addView(_v);
             }
         }
         /**
@@ -64,14 +64,14 @@ var Fudge;
                     if (item.type == "component") {
                         let view;
                         switch (item.componentName) {
-                            case Fudge.VIEW.NODE:
-                                view = new Fudge.ViewNode(this);
+                            case FudgeTest.VIEW.NODE:
+                                view = new FudgeTest.ViewNode(this);
                                 break;
-                            case Fudge.VIEW.DATA:
-                                view = new Fudge.ViewData(this);
+                            case FudgeTest.VIEW.DATA:
+                                view = new FudgeTest.ViewData(this);
                                 break;
-                            case Fudge.VIEW.PORT:
-                                view = new Fudge.ViewPort(this);
+                            case FudgeTest.VIEW.PORT:
+                                view = new FudgeTest.ViewPort(this);
                                 break;
                         }
                         let viewConfig = {
@@ -93,6 +93,6 @@ var Fudge;
             return config;
         }
     }
-    Fudge.Panel = Panel;
-})(Fudge || (Fudge = {}));
+    FudgeTest.Panel = Panel;
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=Panel.js.map

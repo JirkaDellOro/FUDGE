@@ -1,241 +1,224 @@
 namespace FudgeCore {
-    enum TIMER_TYPE {
-        INTERVAL,
-        TIMEOUT
-    }
+  export interface TimeUnits {
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+    tenths?: number;
+    hundreds?: number;
+    thousands?: number;
+    fraction?: number;
+    asHours?: number;
+    asMinutes?: number;
+    asSeconds?: number;
+  }
 
-    interface Timers {
-        [id: number]: Timer;
-    }
+  export interface Timers extends Object {
+    [id: number]: Timer;
+  }
 
-    class Timer {
-        active: boolean;
-        type: TIMER_TYPE;
-        callback: Function;
-        timeout: number;
-        arguments: Object[];
-        startTimeReal: number;
-        timeoutReal: number;
-        id: number;
+  /**
+   * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
+   * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time.
+   * All time values are given in milliseconds
+   * 
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export class Time extends EventTargetƒ {
+    /** Standard game time starting automatically with the application */
+    public static readonly game: Time = new Time();
+    private start: number;
+    private scale: number;
+    private offset: number;
+    private lastCallToElapsed: number;
+    private timers: Timers = {};
+    private idTimerNext: number = 0;
 
-        constructor(_time: Time, _type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]) {
-            this.type = _type;
-            this.timeout = _timeout;
-            this.arguments = _arguments;
-            this.startTimeReal = performance.now();
-            this.callback = _callback;
-
-            let scale: number = Math.abs(_time.getScale());
-
-            if (!scale) {
-                // Time is stopped, timer won't be active
-                this.active = false;
-                return;
-            }
-
-            let id: number;
-            this.timeoutReal = this.timeout / scale;
-
-            if (this.type == TIMER_TYPE.TIMEOUT) {
-                let callback: Function = (): void => {
-                    _time.deleteTimerByInternalId(this.id);
-                    _callback(_arguments);
-                };
-                id = window.setTimeout(callback, this.timeoutReal);
-            }
-            else
-                id = window.setInterval(_callback, this.timeoutReal, _arguments);
-
-            this.id = id;
-            this.active = true;
-        }
-
-        public clear(): void {
-            if (this.type == TIMER_TYPE.TIMEOUT) {
-                if (this.active)
-                    // save remaining time to timeout as new timeout for restart
-                    this.timeout = this.timeout * (1 - (performance.now() - this.startTimeReal) / this.timeoutReal);
-                window.clearTimeout(this.id);
-            }
-            else
-                // TODO: reusing timer starts interval anew. Should be remaining interval as timeout, then starting interval anew 
-                window.clearInterval(this.id);
-            this.active = false;
-        }
+    constructor() {
+      super();
+      this.start = performance.now();
+      this.scale = 1.0;
+      this.offset = 0.0;
+      this.lastCallToElapsed = 0.0;
     }
 
     /**
-     * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
-     * Supports interval- and timeout-callbacks identical with standard Javascript but with respect to the scaled time
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * Returns the game-time-object which starts automatically and serves as base for various internal operations. 
      */
-    export class Time extends EventTarget {
-        private static gameTime: Time = new Time();
-        private start: number;
-        private scale: number;
-        private offset: number;
-        private lastCallToElapsed: number;
-        private timers: Timers = {};
-        private idTimerNext: number = 0;
+    // public static get game(): Time {
+    //   return Time.gameTime;
+    // }
 
-        constructor() {
-            super();
-            this.start = performance.now();
-            this.scale = 1.0;
-            this.offset = 0.0;
-            this.lastCallToElapsed = 0.0;
-        }
+    public static getUnits(_milliseconds: number): TimeUnits {
+      let units: TimeUnits = {};
 
-        /**
-         * Returns the game-time-object which starts automatically and serves as base for various internal operations. 
-         */
-        public static get game(): Time {
-            return Time.gameTime;
-        }
+      units.asSeconds = _milliseconds / 1000;
+      units.asMinutes = units.asSeconds / 60;
+      units.asHours = units.asMinutes / 60;
 
-        /**
-         * Retrieves the current scaled timestamp of this instance in milliseconds
-         */
-        public get(): number {
-            return this.offset + this.scale * (performance.now() - this.start);
-        }
+      units.hours = Math.floor(units.asHours);
+      units.minutes = Math.floor(units.asMinutes) % 60;
+      units.seconds = Math.floor(units.asSeconds) % 60;
 
-        /**
-         * (Re-) Sets the timestamp of this instance
-         * @param _time The timestamp to represent the current time (default 0.0)
-         */
-        public set(_time: number = 0): void {
-            this.offset = _time;
-            this.start = performance.now();
-            this.getElapsedSincePreviousCall();
-        }
+      units.fraction = _milliseconds % 1000;
+      units.thousands = _milliseconds % 10;
+      units.hundreds = _milliseconds % 100 - units.thousands;
+      units.tenths = units.fraction - units.hundreds - units.thousands;
 
-        /**
-         * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1) 
-         * @param _scale The desired scaling (default 1.0)
-         */
-        public setScale(_scale: number = 1.0): void {
-            this.set(this.get());
-            this.scale = _scale;
-            //TODO: catch scale=0
-            this.rescaleAllTimers();
-            this.getElapsedSincePreviousCall();
-            this.dispatchEvent(new Event(EVENT.TIME_SCALED));
-        }
-
-        /**
-         * Retrieves the current scaling of this time
-         */
-        public getScale(): number {
-            return this.scale;
-        }
-
-        /**
-         * Retrieves the offset of this time
-         */
-        public getOffset(): number {
-          return this.offset;
-        }
-
-        /**
-         * Retrieves the scaled time in milliseconds passed since the last call to this method
-         * Automatically reset at every call to set(...) and setScale(...)
-         */
-        public getElapsedSincePreviousCall(): number {
-            let current: number = this.get();
-            let elapsed: number = current - this.lastCallToElapsed;
-            this.lastCallToElapsed = current;
-            return elapsed;
-        }
-
-        //#region Timers
-        // TODO: examine if web-workers would enhance performance here!
-        /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback
-         * @param _timeout 
-         * @param _arguments 
-         */
-        public setTimeout(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
-            return this.setTimer(TIMER_TYPE.TIMEOUT, _callback, _timeout, _arguments);
-        }
-        /**
-         * See Javascript documentation. Creates an internal [[Timer]] object
-         * @param _callback 
-         * @param _timeout 
-         * @param _arguments 
-         */
-        public setInterval(_callback: Function, _timeout: number, ..._arguments: Object[]): number {
-            return this.setTimer(TIMER_TYPE.INTERVAL, _callback, _timeout, _arguments);
-        }
-        /**
-         * See Javascript documentation
-         * @param _id 
-         */
-        public clearTimeout(_id: number): void {
-            this.deleteTimer(_id);
-        }
-        /**
-         * See Javascript documentation
-         * @param _id 
-         */
-        public clearInterval(_id: number): void {
-            this.deleteTimer(_id);
-        }
-
-        /**
-         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
-         */
-        public clearAllTimers(): void {
-            for (let id in this.timers) {
-                this.deleteTimer(Number(id));
-            }
-        }
-
-        /**
-         * Recreates [[Timer]]s when scaling changes
-         */
-        public rescaleAllTimers(): void {
-            for (let id in this.timers) {
-                let timer: Timer = this.timers[id];
-                timer.clear();
-                if (!this.scale)
-                    // Time has stopped, no need to replace cleared timers
-                    continue;
-
-                let timeout: number = timer.timeout;
-                // if (timer.type == TIMER_TYPE.TIMEOUT && timer.active)
-                //     // for an active timeout-timer, calculate the remaining time to timeout
-                //     timeout = (performance.now() - timer.startTimeReal) / timer.timeoutReal;
-                let replace: Timer = new Timer(this, timer.type, timer.callback, timeout, timer.arguments);
-                this.timers[id] = replace;
-            }
-        }
-
-        /**
-         * Deletes [[Timer]] found using the id of the connected interval/timeout-object
-         * @param _id 
-         */
-        public deleteTimerByInternalId(_id: number): void {
-            for (let id in this.timers) {
-                let timer: Timer = this.timers[id];
-                if (timer.id == _id) {
-                    timer.clear();
-                    delete this.timers[id];
-                }
-            }
-        }
-
-        private setTimer(_type: TIMER_TYPE, _callback: Function, _timeout: number, _arguments: Object[]): number {
-            let timer: Timer = new Timer(this, _type, _callback, _timeout, _arguments);
-            this.timers[++this.idTimerNext] = timer;
-            return this.idTimerNext;
-        }
-
-        private deleteTimer(_id: number): void {
-            this.timers[_id].clear();
-            delete this.timers[_id];
-        }
-        //#endregion
+      return units;
     }
+
+    //#region Get/Set time and scaling
+    /**
+     * Retrieves the current scaled timestamp of this instance in milliseconds
+     */
+    public get(): number {
+      return this.offset + this.scale * (performance.now() - this.start);
+    }
+
+    /**
+     * Returns the remaining time to the given point of time
+     */
+    public getRemainder(_to: number): number {
+      return _to - this.get();
+    }
+
+    /**
+     * (Re-) Sets the timestamp of this instance
+     * @param _time The timestamp to represent the current time (default 0.0)
+     */
+    public set(_time: number = 0): void {
+      this.offset = _time;
+      this.start = performance.now();
+      this.getElapsedSincePreviousCall();
+    }
+
+    /**
+     * Sets the scaling of this time, allowing for slowmotion (<1) or fastforward (>1) 
+     * @param _scale The desired scaling (default 1.0)
+     */
+    public setScale(_scale: number = 1.0): void {
+      this.set(this.get());
+      this.scale = _scale;
+      //TODO: catch scale=0
+      this.rescaleAllTimers();
+      this.getElapsedSincePreviousCall();
+      this.dispatchEvent(new Event(EVENT.TIME_SCALED));
+    }
+
+    /**
+     * Retrieves the current scaling of this time
+     */
+    public getScale(): number {
+      return this.scale;
+    }
+
+    /**
+     * Retrieves the offset of this time
+     */
+    public getOffset(): number {
+      return this.offset;
+    }
+
+    /**
+     * Retrieves the scaled time in milliseconds passed since the last call to this method
+     * Automatically reset at every call to set(...) and setScale(...)
+     */
+    public getElapsedSincePreviousCall(): number {
+      let current: number = this.get();
+      let elapsed: number = current - this.lastCallToElapsed;
+      this.lastCallToElapsed = current;
+      return elapsed;
+    }
+    //#endregion
+
+
+    //#region Timers
+    /**
+     * Returns a Promise<void> to be resolved after the time given. To be used with async/await
+     */
+    public delay(_lapse: number): Promise<void> {
+      return new Promise(_resolve => this.setTimer(_lapse, 1, () => _resolve()));
+    }
+
+    // TODO: examine if web-workers would enhance performance here!
+    /**
+     * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
+     */
+    public clearAllTimers(): void {
+      for (let id in this.timers) {
+        this.deleteTimer(Number(id));
+      }
+    }
+
+    /**
+     * Deletes [[Timer]] found using the internal id of the connected interval-object
+     * @param _id 
+     */
+    public deleteTimerByItsInternalId(_id: number): void {
+      for (let id in this.timers) {
+        let timer: Timer = this.timers[id];
+        if (timer.id == _id) {
+          timer.clear();
+          delete this.timers[id];
+        }
+      }
+    }
+
+    /**
+     * Installs a timer at this time object
+     * @param _lapse The object-time to elapse between the calls to _callback
+     * @param _count The number of calls desired, 0 = Infinite
+     * @param _handler The function to call each the given lapse has elapsed
+     * @param _arguments Additional parameters to pass to callback function
+     */
+    public setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number {
+      let timer: Timer = new Timer(this, _lapse, _count, _handler, _arguments);
+      this.timers[++this.idTimerNext] = timer;
+      return this.idTimerNext;
+    }
+
+    /**
+     * Deletes the timer with the id given by this time object
+     */
+    public deleteTimer(_id: number): void {
+      this.timers[_id].clear();
+      delete this.timers[_id];
+    }
+
+    /**
+     * Returns a copy of the list of timers currently installed on this time object
+     */
+    public getTimers(): Timers {
+      let result: Timers = {};
+      return Object.assign(result, this.timers);
+    }
+
+    /**
+     * Returns true if there are [[Timers]] installed to this
+     */
+    public hasTimers(): boolean {
+      return (Object.keys(this.timers).length > 0);
+    }
+
+    /**
+     * Recreates [[Timer]]s when scaling changes
+     */
+    private rescaleAllTimers(): void {
+      for (let id in this.timers) {
+        let timer: Timer = this.timers[id];
+        timer.clear();
+        if (!this.scale)
+          // Time has stopped, no need to replace cleared timers
+          continue;
+
+        this.timers[id] = timer.installCopy();
+      }
+    }
+  }
+  //#endregion
+
+  /**
+   * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
+   */
+  export const time: Time = Time.game; // TODO: eliminate Time.gameTime and use time solely
 }

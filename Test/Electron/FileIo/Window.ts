@@ -72,8 +72,7 @@ namespace ElectronFileIo {
         ƒ.RenderManager.initialize();
 
         // initialize viewport
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);

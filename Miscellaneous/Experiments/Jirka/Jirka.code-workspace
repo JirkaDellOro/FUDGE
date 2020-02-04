@@ -1,127 +1,130 @@
 {
 	"folders": [
-		{
-			"name": "Scripttests",
-			"path": "Scripttests"
-		},
-		{
-			"name": "x3dom",
-			"path": "x3dom"
-		},
-		{
-			"name": "DomScene",
-			"path": "DomScene"
-		},
-		{
-			"name": "JSONTest",
-			"path": "JSONTest"
-		},
-		{
-			"name": "Shapes",
-			"path": "Shapes"
-		},
-		{
-			"name": "Animate",
-			"path": "Animate"
-		},
-		{
-			"name": "ClassGetterSetter",
-			"path": "ClassGetterSetter"
-		},
-		{
-			"name": "Console",
-			"path": "Console"
-		},
-		{
-			"name": "Vector",
-			"path": "Vector"
-		},
-		{
-			"name": "Curves",
-			"path": "Curves"
-		},
-		{
-			"name": "Generics",
-			"path": "Generics"
-		},
-		{
-			"name": "ImagesAndSound",
-			"path": "ImagesAndSound"
-		},
-		{
-			"name": "RenderHTMLandSVG",
-			"path": "RenderHTMLandSVG"
-		},
-		{
-			"name": "ResponsiveCanvas",
-			"path": "ResponsiveCanvas"
-		},
-		{
-			"name": "ObjectManager",
-			"path": "ObjectManager"
-		},
-		{
-			"name": "Time",
-			"path": "Time"
-		},
-		{
-			"name": "ModuleHandling",
-			"path": "ModuleHandling"
-		},
-		{
-			"name": "Mutable",
-			"path": "Mutable"
-		},
-		{
-			"name": "NameSpace",
-			"path": "NameSpace"
-		},
-		{
-			"name": "Canvas3D",
-			"path": "Canvas3D"
-		},
-		{
-			"name": "Maps",
-			"path": "Maps"
-		},
-		{
-			"name": "GoldenLayout",
-			"path": "GoldenLayout"
-		},
-		{
-			"name": "EventSystem",
-			"path": "EventSystem"
-		},
-		{
-			"name": "EventPassing",
-			"path": "EventPassing"
-		},
-		{
-			"name": "Audio",
-			"path": "Audio"
-		},
-		{
-			"name": "DeconstructMixin",
-			"path": "DeconstructMixin"
-		},
-		{
-			"name": "InjectMethod",
-			"path": "InjectMethod"
-		},
-		{
-			"name": "StaticClass",
-			"path": "StaticClass"
-		},
-		{
-			"name": "WebGL",
-			"path": "WebGL"
-		},
-		{
-			"path": "SerializeChain"
-		},
-		{
-			"path": "FileHandlingFromBrowser"
-		}
-	],
+    {
+      "name": "Scripttests",
+      "path": "Scripttests"
+    },
+    {
+      "name": "x3dom",
+      "path": "x3dom"
+    },
+    {
+      "name": "DomScene",
+      "path": "DomScene"
+    },
+    {
+      "name": "JSONTest",
+      "path": "JSONTest"
+    },
+    {
+      "name": "Shapes",
+      "path": "Shapes"
+    },
+    {
+      "name": "Animate",
+      "path": "Animate"
+    },
+    {
+      "name": "ClassGetterSetter",
+      "path": "ClassGetterSetter"
+    },
+    {
+      "name": "Console",
+      "path": "Console"
+    },
+    {
+      "name": "Vector",
+      "path": "Vector"
+    },
+    {
+      "name": "Curves",
+      "path": "Curves"
+    },
+    {
+      "name": "Generics",
+      "path": "Generics"
+    },
+    {
+      "name": "ImagesAndSound",
+      "path": "ImagesAndSound"
+    },
+    {
+      "name": "RenderHTMLandSVG",
+      "path": "RenderHTMLandSVG"
+    },
+    {
+      "name": "ResponsiveCanvas",
+      "path": "ResponsiveCanvas"
+    },
+    {
+      "name": "ObjectManager",
+      "path": "ObjectManager"
+    },
+    {
+      "name": "Time",
+      "path": "Time"
+    },
+    {
+      "name": "ModuleHandling",
+      "path": "ModuleHandling"
+    },
+    {
+      "name": "Mutable",
+      "path": "Mutable"
+    },
+    {
+      "name": "NameSpace",
+      "path": "NameSpace"
+    },
+    {
+      "name": "Canvas3D",
+      "path": "Canvas3D"
+    },
+    {
+      "name": "Maps",
+      "path": "Maps"
+    },
+    {
+      "name": "GoldenLayout",
+      "path": "GoldenLayout"
+    },
+    {
+      "name": "EventSystem",
+      "path": "EventSystem"
+    },
+    {
+      "name": "EventPassing",
+      "path": "EventPassing"
+    },
+    {
+      "name": "Audio",
+      "path": "Audio"
+    },
+    {
+      "name": "DeconstructMixin",
+      "path": "DeconstructMixin"
+    },
+    {
+      "name": "InjectMethod",
+      "path": "InjectMethod"
+    },
+    {
+      "name": "StaticClass",
+      "path": "StaticClass"
+    },
+    {
+      "name": "WebGL",
+      "path": "WebGL"
+    },
+    {
+      "path": "SerializeChain"
+    },
+    {
+      "path": "FileHandlingFromBrowser"
+    },
+    {
+      "path": "StateMachine"
+    }
+  ],
 	"settings": {}
 }

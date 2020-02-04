@@ -8,14 +8,14 @@ namespace NodeResource {
         ƒ.RenderManager.initialize();
 
         let branch: ƒ.Node = new ƒ.Node("Root");
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
         // let coSys: ƒ.Node = Scenes.createCoordinateSystem();
         // branch.appendChild(coSys);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), canvas);
+        viewport.initialize("Viewport", branch, cmpCamera, canvas);
 
         let center: ƒ.Node = createCenterAndSatellite();
         // branch.appendChild(center);
@@ -48,8 +48,6 @@ namespace NodeResource {
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
-        ƒ.Time.game.setScale(10);
-        ƒ.Time.game.setTimeout(() => { ƒ.Debug.log("Timeout!"); }, 50000);
 
         function update(_event: Event): void {
             ƒ.RenderManager.update();

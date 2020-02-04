@@ -26,11 +26,10 @@ namespace FudgeUserInterface {
             this.updateUI(this.mutable, this.root);
         }
 
-        protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement): ƒ.Mutator {
-            let mutator: ƒ.Mutator = _mutable.getMutator();
-            let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+        protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+            let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+            let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                console.log(this.root.querySelector("#" + key));
                 if (this.root.querySelector("#" + key) != null) {
                     let type: Object = mutatorTypes[key];
                     if (type instanceof Object) {
@@ -48,9 +47,12 @@ namespace FudgeUserInterface {
                             case "Number":
                                 mutator[key] = input.value;
                                 break;
-                            case "Object":
-                                let subMutable: ƒ.Mutable = (<ƒ.General>_mutable)[key];
-                                mutator[key] = this.updateMutator(subMutable, element);
+                            default:
+                                let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
+                                let subMutable: ƒ.Mutable;
+                                subMutable = (<ƒ.General>_mutable)[key];
+                                let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
+                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }
@@ -81,9 +83,11 @@ namespace FudgeUserInterface {
                                 break;
                             case "Number":
                                 let stepper: HTMLInputElement = <HTMLInputElement>_root.querySelector("#" + key);
-                                stepper.value = <string>mutator[key];
+                                if (document.activeElement != stepper) {
+                                    stepper.value = <string>mutator[key];
+                                }
                                 break;
-                            case "Object":
+                            default:
                                 let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#" + key);
                                 let subMutable: ƒ.Mutable = (<any>_mutable)[key];
                                 this.updateUI(subMutable, fieldset);

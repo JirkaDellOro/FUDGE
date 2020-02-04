@@ -16,6 +16,11 @@ namespace Fudge {
                             title: "Viewport"
                         },
                         {
+                            type: "component",
+                            componentName: Fudge.VIEW.CAMERA,
+                            title: "Camera Controller"
+                        },
+                        {
                             type: "column",
                             content: [
                                 {

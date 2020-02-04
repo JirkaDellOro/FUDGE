@@ -18,6 +18,7 @@ namespace FudgeCore {
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
         }
 
         protected createVertices(): Float32Array {
@@ -26,12 +27,12 @@ namespace FudgeCore {
             ]);
 
             vertices = vertices.map(_value => _value / 2);
-            
+
             return vertices;
         }
         protected createIndices(): Uint16Array {
             let indices: Uint16Array = new Uint16Array([
-                0, 1, 2, 0, 2, 3
+                1, 2, 0, 2, 3, 0
             ]);
             return indices;
         }
@@ -44,6 +45,10 @@ namespace FudgeCore {
             return textureUVs;
         }
 
-        protected createFaceNormals(): Float32Array { return null; }
+        protected createFaceNormals(): Float32Array {
+            return new Float32Array([
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 0, 0, 0
+            ]);
+        }
     }
 }

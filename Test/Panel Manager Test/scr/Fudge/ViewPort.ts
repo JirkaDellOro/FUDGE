@@ -2,7 +2,7 @@
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
 
-namespace Fudge {
+namespace FudgeTest {
     import ƒ = FudgeCore;
     
 
@@ -25,7 +25,7 @@ namespace Fudge {
         fillContent(): void { 
             this.branch = new ƒ.Node("Dummy Node");
             let canvas: HTMLCanvasElement;
-            let camera: ƒ.Node;
+            let cmpCamera: ƒ.ComponentCamera;
 
             // TODO: delete example scene
             this.branch = Scenes.createAxisCross();
@@ -36,8 +36,7 @@ namespace Fudge {
 
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-            let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
             cmpCamera.projectCentral(1, 45);
             canvas = Scenes.createCanvas();
             document.body.appendChild(canvas);

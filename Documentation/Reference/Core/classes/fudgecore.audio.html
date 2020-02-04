@@ -104,21 +104,24 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#audiobuffer" class="tsd-kind-icon">audio<wbr>Buffer</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#buffersource" class="tsd-kind-icon">buffer<wbr>Source</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#islooping" class="tsd-kind-icon">is<wbr>Looping</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#localgain" class="tsd-kind-icon">local<wbr>Gain</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#localgainvalue" class="tsd-kind-icon">local<wbr>Gain<wbr>Value</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audio.html#url" class="tsd-kind-icon">url</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#getbuffersource" class="tsd-kind-icon">get<wbr>Buffer<wbr>Source</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#getbuffersourcenode" class="tsd-kind-icon">get<wbr>Buffer<wbr>Source<wbr>Node</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#getlocalgain" class="tsd-kind-icon">get<wbr>Local<wbr>Gain</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#getlocalgainvalue" class="tsd-kind-icon">get<wbr>Local<wbr>Gain<wbr>Value</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#getlooping" class="tsd-kind-icon">get<wbr>Looping</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#init" class="tsd-kind-icon">init</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#initbuffersource" class="tsd-kind-icon">init<wbr>Buffer<wbr>Source</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#setbuffersource" class="tsd-kind-icon">set<wbr>Buffer<wbr>Source</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#setbuffersourcenode" class="tsd-kind-icon">set<wbr>Buffer<wbr>Source<wbr>Node</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#setlocalgain" class="tsd-kind-icon">set<wbr>Local<wbr>Gain</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#setlocalgainvalue" class="tsd-kind-icon">set<wbr>Local<wbr>Gain<wbr>Value</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audio.html#setlooping" class="tsd-kind-icon">set<wbr>Looping</a></li>
 							</ul>
 						</section>
 					</div>
@@ -130,13 +133,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<span class="tsd-signature-symbol">(</span>_audioContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioContext</span>, _audioSessionData<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a>, _url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _gainValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _loop<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audio.html" class="tsd-signature-type">Audio</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _gainValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _loop<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audio.html" class="tsd-signature-type">Audio</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L17">Audio/Audio.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L17">Audio/Audio.ts:17</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -147,15 +150,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>from <a href="fudgecore.audiosettings.html">AudioSettings</a></p>
-										</div>
-									</div>
-								</li>
-								<li>
-									<h5>_audioSessionData: <a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></h5>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
 								</li>
 								<li>
 									<h5>_url: <span class="tsd-signature-type">string</span></h5>
@@ -185,47 +180,7 @@
 					<div class="tsd-signature tsd-kind-icon">audio<wbr>Buffer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AudioBuffer</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L11">Audio/Audio.ts:11</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="buffersource" class="tsd-anchor"></a>
-					<h3>buffer<wbr>Source</h3>
-					<div class="tsd-signature tsd-kind-icon">buffer<wbr>Source<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">AudioBufferSourceNode</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L12">Audio/Audio.ts:12</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="islooping" class="tsd-anchor"></a>
-					<h3>is<wbr>Looping</h3>
-					<div class="tsd-signature tsd-kind-icon">is<wbr>Looping<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L17">Audio/Audio.ts:17</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="localgain" class="tsd-anchor"></a>
-					<h3>local<wbr>Gain</h3>
-					<div class="tsd-signature tsd-kind-icon">local<wbr>Gain<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">GainNode</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L14">Audio/Audio.ts:14</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="localgainvalue" class="tsd-anchor"></a>
-					<h3>local<wbr>Gain<wbr>Value</h3>
-					<div class="tsd-signature tsd-kind-icon">local<wbr>Gain<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L15">Audio/Audio.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L11">Audio/Audio.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -235,13 +190,64 @@
 					<div class="tsd-signature tsd-kind-icon">url<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L9">Audio/Audio.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L9">Audio/Audio.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getbuffersource" class="tsd-anchor"></a>
+					<h3>get<wbr>Buffer<wbr>Source</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Buffer<wbr>Source<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBuffer</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L90">Audio/Audio.ts:90</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AudioBuffer</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getbuffersourcenode" class="tsd-anchor"></a>
+					<h3>get<wbr>Buffer<wbr>Source<wbr>Node</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Buffer<wbr>Source<wbr>Node<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBufferSourceNode</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L56">Audio/Audio.ts:56</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AudioBufferSourceNode</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getlocalgain" class="tsd-anchor"></a>
+					<h3>get<wbr>Local<wbr>Gain</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Local<wbr>Gain<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">GainNode</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L64">Audio/Audio.ts:64</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">GainNode</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="getlocalgainvalue" class="tsd-anchor"></a>
 					<h3>get<wbr>Local<wbr>Gain<wbr>Value</h3>
@@ -252,7 +258,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L70">Audio/Audio.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L73">Audio/Audio.ts:73</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -260,25 +266,39 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="init" class="tsd-anchor"></a>
-					<h3>init</h3>
+					<a name="getlooping" class="tsd-anchor"></a>
+					<h3>get<wbr>Looping</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>_audioContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioContext</span>, _audioSessionData<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a>, _url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _gainValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _loop<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Looping<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L28">Audio/Audio.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L81">Audio/Audio.ts:81</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="init" class="tsd-anchor"></a>
+					<h3>init</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _gainValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _loop<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L28">Audio/Audio.ts:28</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
-								</li>
-								<li>
-									<h5>_audioSessionData: <a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></h5>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
 								</li>
 								<li>
 									<h5>_url: <span class="tsd-signature-type">string</span></h5>
@@ -298,24 +318,19 @@
 					<a name="initbuffersource" class="tsd-anchor"></a>
 					<h3>init<wbr>Buffer<wbr>Source</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">init<wbr>Buffer<wbr>Source<span class="tsd-signature-symbol">(</span>_audioContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioContext</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">init<wbr>Buffer<wbr>Source<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L53">Audio/Audio.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L46">Audio/Audio.ts:46</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>initBufferSource</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -332,13 +347,59 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L75">Audio/Audio.ts:75</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L85">Audio/Audio.ts:85</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_buffer: <span class="tsd-signature-type">AudioBuffer</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setbuffersourcenode" class="tsd-anchor"></a>
+					<h3>set<wbr>Buffer<wbr>Source<wbr>Node</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Buffer<wbr>Source<wbr>Node<span class="tsd-signature-symbol">(</span>_bufferSourceNode<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBufferSourceNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L52">Audio/Audio.ts:52</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_bufferSourceNode: <span class="tsd-signature-type">AudioBufferSourceNode</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setlocalgain" class="tsd-anchor"></a>
+					<h3>set<wbr>Local<wbr>Gain</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Local<wbr>Gain<span class="tsd-signature-symbol">(</span>_localGain<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">GainNode</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L60">Audio/Audio.ts:60</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_localGain: <span class="tsd-signature-type">GainNode</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -355,13 +416,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/Audio.ts#L66">Audio/Audio.ts:66</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L68">Audio/Audio.ts:68</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_localGainValue: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setlooping" class="tsd-anchor"></a>
+					<h3>set<wbr>Looping</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Looping<span class="tsd-signature-symbol">(</span>_isLooping<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/Audio.ts#L77">Audio/Audio.ts:77</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_isLooping: <span class="tsd-signature-type">boolean</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -395,22 +479,22 @@
 								<a href="fudgecore.audio.html#audiobuffer" class="tsd-kind-icon">audio<wbr>Buffer</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audio.html#buffersource" class="tsd-kind-icon">buffer<wbr>Source</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audio.html#islooping" class="tsd-kind-icon">is<wbr>Looping</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audio.html#localgain" class="tsd-kind-icon">local<wbr>Gain</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audio.html#localgainvalue" class="tsd-kind-icon">local<wbr>Gain<wbr>Value</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.audio.html#url" class="tsd-kind-icon">url</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#getbuffersource" class="tsd-kind-icon">get<wbr>Buffer<wbr>Source</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#getbuffersourcenode" class="tsd-kind-icon">get<wbr>Buffer<wbr>Source<wbr>Node</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#getlocalgain" class="tsd-kind-icon">get<wbr>Local<wbr>Gain</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audio.html#getlocalgainvalue" class="tsd-kind-icon">get<wbr>Local<wbr>Gain<wbr>Value</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#getlooping" class="tsd-kind-icon">get<wbr>Looping</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audio.html#init" class="tsd-kind-icon">init</a>
@@ -422,7 +506,16 @@
 								<a href="fudgecore.audio.html#setbuffersource" class="tsd-kind-icon">set<wbr>Buffer<wbr>Source</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#setbuffersourcenode" class="tsd-kind-icon">set<wbr>Buffer<wbr>Source<wbr>Node</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#setlocalgain" class="tsd-kind-icon">set<wbr>Local<wbr>Gain</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audio.html#setlocalgainvalue" class="tsd-kind-icon">set<wbr>Local<wbr>Gain<wbr>Value</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audio.html#setlooping" class="tsd-kind-icon">set<wbr>Looping</a>
 							</li>
 						</ul>
 					</li>
@@ -445,6 +538,7 @@
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -493,7 +587,7 @@
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="../assets/js/main.js"></script>

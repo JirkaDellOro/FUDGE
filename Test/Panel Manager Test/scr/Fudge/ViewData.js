@@ -1,15 +1,15 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
-var Fudge;
+var FudgeTest;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
-(function (Fudge) {
+(function (FudgeTest) {
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
-    class ViewData extends Fudge.View {
+    class ViewData extends FudgeTest.View {
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent) {
             super(_parent);
@@ -28,6 +28,6 @@ var Fudge;
             this.content.appendChild(btnMessage);
         }
     }
-    Fudge.ViewData = ViewData;
-})(Fudge || (Fudge = {}));
+    FudgeTest.ViewData = ViewData;
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=ViewData.js.map

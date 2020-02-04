@@ -15,8 +15,7 @@ namespace ScreenPoint {
 
         let posCamera: ƒ.Vector3 = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
-        let camera: ƒ.Node = Scenes.createCamera(posCamera);
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(posCamera);
         cmpCamera.projectCentral(1, 45);
         viewPort = new ƒ.Viewport();
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
@@ -35,18 +34,18 @@ namespace ScreenPoint {
         console.log("Destin: ", viewPort.rectDestination);
     }
 
-    function hndEvent(_event: ƒ.PointerEventƒ | ƒ.DragDropEventƒ): void {
+    function hndEvent(_event: ƒ.EventPointer | ƒ.EventDragDrop): void {
         console.group(`${_event.type} on ${viewPort.name}`);
-        let pointClient: ƒ.Point = { x: _event.pointerX, y: _event.pointerY };
+        let pointClient: ƒ.Vector2 = <ƒ.Vector2>{ x: _event.pointerX, y: _event.pointerY };
         calculate(pointClient);
         console.groupEnd();
     }
 
-    export function calculate(_point: ƒ.Point): void {
-        let pointCanvas: ƒ.Point;
-        let pointDestination: ƒ.Point;
-        let pointCanvasInverse: ƒ.Point;
-        let pointInverse: ƒ.Point;
+    export function calculate(_point: ƒ.Vector2): void {
+        let pointCanvas: ƒ.Vector2;
+        let pointDestination: ƒ.Vector2;
+        let pointCanvasInverse: ƒ.Vector2;
+        let pointInverse: ƒ.Vector2;
         let rectFrame: ƒ.Rectangle;
 
         rectFrame = viewPort.getClientRectangle();

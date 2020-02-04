@@ -11,18 +11,18 @@ namespace Mutable {
         Scenes.createViewport();
 
         cmpTransform = Scenes.node.cmpTransform;
-        mutator = cmpTransform.getMutatorForAnimation();
+        mutator = cmpTransform.local.getMutatorForAnimation();
         console.log("Mutator: ", mutator);
         let serialization: ƒ.Serialization = Scenes.node.cmpTransform.serialize();
         console.log("Serialization: ", serialization);
 
         let mttCamera: ƒ.Mutator;
-        mttCamera = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutator();
+        mttCamera = Scenes.cmpCamera.getMutator();
         console.log("mttCamera: ", mttCamera);
         let mttCameraTypes: ƒ.MutatorAttributeTypes;
-        mttCameraTypes = Scenes.camera.getComponent(ƒ.ComponentCamera).getMutatorAttributeTypes(mttCamera);
+        mttCameraTypes = Scenes.cmpCamera.getMutatorAttributeTypes(mttCamera);
         console.log("mttCameraTypes: ", mttCameraTypes);
-        let srlCamera: ƒ.Serialization = Scenes.camera.getComponent(ƒ.ComponentCamera).serialize();
+        let srlCamera: ƒ.Serialization = Scenes.cmpCamera.serialize();
         console.log("srlCamera: ", srlCamera);
 
         let srlNode: ƒ.Serialization = Scenes.node.serialize();
@@ -39,9 +39,9 @@ namespace Mutable {
         mutator.translation["x"] = 5 * Math.sin(angle);
         mutator.scaling["y"] = Math.cos(1.7 * angle);
 
-        cmpTransform.mutate(mutator);
+        cmpTransform.local.mutate(mutator);
 
         ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        Scenes.viewport.draw();
     }
 }

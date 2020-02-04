@@ -26,8 +26,8 @@ namespace Cube {
         // ƒ.RenderManager.addBranch(branch);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
     }
 }

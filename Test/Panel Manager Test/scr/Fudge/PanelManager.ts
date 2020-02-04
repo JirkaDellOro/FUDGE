@@ -1,6 +1,6 @@
 /// <reference types="../../../@types/jquery"/>
 /// <reference types="../../../@types/golden-layout"/>
-namespace Fudge {
+namespace FudgeTest {
   // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
   export class PanelManager extends EventTarget {
     static instance: PanelManager = new PanelManager();

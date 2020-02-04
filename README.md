@@ -1,5 +1,4 @@
-# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/Fudge_48.png) FUDGE 
-Furtwangen University Didactic Game Editor  
+# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
@@ -42,3 +41,4 @@ Tests to verify functionality
 - Grapheditor/Wiring z.B. für Shader und Animation
 - Input-Manager
 - Selection-Sets zum Speichern temporärer Gruppierungen
+- Fortgeschrittene Texturierung

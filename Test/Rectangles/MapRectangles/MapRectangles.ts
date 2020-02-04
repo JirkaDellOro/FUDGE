@@ -2,7 +2,7 @@ namespace RenderManagerRendering {
     import ƒ = FudgeCore;
     let map: ƒ.FramingComplex = new ƒ.FramingComplex();
     let uiResult: UI.Rectangle;
-    let frame: ƒ.Rectangle = { x: 0, y: 0, width: 100, height: 100 };
+    let frame: ƒ.Rectangle = new ƒ.Rectangle(0, 0, 100, 100);
     let uiMap: UI.FramingComplex;
 
     window.addEventListener("load", init);

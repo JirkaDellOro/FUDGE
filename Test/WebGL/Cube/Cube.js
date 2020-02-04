@@ -19,8 +19,8 @@ var Cube;
         ƒ.RenderManager.initialize();
         // ƒ.RenderManager.addBranch(branch);
         let viewport = new ƒ.Viewport();
-        let camera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
     }
 })(Cube || (Cube = {}));

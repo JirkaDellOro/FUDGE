@@ -9,12 +9,15 @@ var TimeLoop;
         document.querySelector("[name=start]").addEventListener("click", handleButtonClick);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
         loop();
+        handleChangeLoop(null);
     }
     function handleChangeLoop(_event) {
         let formData = new FormData(document.forms[0]);
         let mode = String(formData.get("mode"));
         let fps = Number(formData.get("fps"));
         ƒ.Loop.start(ƒ.LOOP_MODE[mode], fps, true);
+        let fpsInput = document.querySelector("input[name=fps]");
+        fpsInput.readOnly = (mode == "FRAME_REQUEST");
     }
     function handleChangeTime(_event) {
         let formData = new FormData(_event.currentTarget);
@@ -23,9 +26,9 @@ var TimeLoop;
         console.log("Scale set to: " + scale);
     }
     function handleButtonClick(_event) {
-        let timeout = Number(document.querySelector("input[name=timeout]").value);
-        console.log("Timeout set to: " + timeout);
-        ƒ.Time.game.setTimeout(handleTimeout, timeout);
+        let lapse = Number(document.querySelector("input[name=lapse]").value);
+        console.log("Timeout set to: " + lapse);
+        ƒ.Time.game.setTimer(lapse, 1, handleTimeout);
     }
     function handleTimeout() {
         let meter = document.querySelector("[name=event]");

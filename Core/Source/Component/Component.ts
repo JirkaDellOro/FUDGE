@@ -45,7 +45,7 @@ namespace FudgeCore {
                 this.container = _container;
                 if (this.container)
                     this.container.addComponent(this);
-            } catch {
+            } catch(_error) {
                 this.container = previousContainer;
             }
         }
@@ -63,6 +63,7 @@ namespace FudgeCore {
 
         protected reduceMutator(_mutator: Mutator): void {
             delete _mutator.singleton;
+            delete _mutator.container;
         }
         //#endregion
     }

@@ -104,8 +104,8 @@ namespace FudgeCore {
                     reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
-            } catch (message) {
-                throw new Error("Deserialization failed: " + message);
+            } catch (_error) {
+                throw new Error("Deserialization failed: " + _error);
             }
             return null;
         }

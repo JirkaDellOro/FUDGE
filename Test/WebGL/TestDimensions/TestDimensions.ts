@@ -4,7 +4,7 @@ namespace RenderManagerRendering {
     let uiRectangles: { [name: string]: UI.Rectangle } = {};
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    let camera: ƒ.Node;
+    let cmpCamera: ƒ.ComponentCamera;
     let uiCamera: UI.Camera;
 
     function init(): void {
@@ -19,8 +19,7 @@ namespace RenderManagerRendering {
 
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
 
 
@@ -35,7 +34,7 @@ namespace RenderManagerRendering {
         appendUIRectangle(menu, "DomCanvas");
         appendUIRectangle(menu, "CSSRectangle");
 
-        setAll({ x: 0, y: 0, width: 300, height: 300 });
+        setAll(new ƒ.Rectangle(0, 0, 300, 300));
         update();
         uiCamera.addEventListener("input", hndChangeOnCamera);
         setCamera();
@@ -126,7 +125,6 @@ namespace RenderManagerRendering {
 
     function setCamera(): void {
         let params: UI.ParamsCamera = uiCamera.get();
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
 
@@ -135,11 +133,10 @@ namespace RenderManagerRendering {
         uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
         uiRectangles["ViewportSource"].set(viewPort.rectSource);
         uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
-        uiRectangles["DomCanvas"].set({ x: 0, y: 0, width: canvas.width, height: canvas.height });
+        uiRectangles["DomCanvas"].set(new ƒ.Rectangle(0, 0, canvas.width, canvas.height));
         let client: ClientRect = canvas.getBoundingClientRect();
-        uiRectangles["CSSRectangle"].set({ x: client.left, y: client.top, width: client.width, height: client.height });
+        uiRectangles["CSSRectangle"].set(new ƒ.Rectangle(client.left, client.top, client.width, client.height));
 
-        let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
 }

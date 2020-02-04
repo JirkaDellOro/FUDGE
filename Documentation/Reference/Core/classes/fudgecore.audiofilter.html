@@ -69,6 +69,18 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Add an <a href="fudgecore.audiofilter.html">AudioFilter</a> to an <a href="fudgecore.audio.html">Audio</a></p>
+					</div>
+					<dl class="tsd-comment-tags">
+						<dt>authors</dt>
+						<dd><p>Thomas Dorner, HFU, 2019</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -90,14 +102,21 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#filtertype" class="tsd-kind-icon">filter<wbr>Type</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#usefilter" class="tsd-kind-icon">use<wbr>Filter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#audiofilter" class="tsd-kind-icon">audio<wbr>Filter</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#addfiltertoaudio" class="tsd-kind-icon">add<wbr>Filter<wbr>ToAudio</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#getfiltertype" class="tsd-kind-icon">get<wbr>Filter<wbr>Type</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#getfrequency" class="tsd-kind-icon">get<wbr>Frequency</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#getgain" class="tsd-kind-icon">get<wbr>Gain</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#getquality" class="tsd-kind-icon">get<wbr>Quality</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#initfilter" class="tsd-kind-icon">init<wbr>Filter</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#setfiltertype" class="tsd-kind-icon">set<wbr>Filter<wbr>Type</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#setfrequency" class="tsd-kind-icon">set<wbr>Frequency</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#setgain" class="tsd-kind-icon">set<wbr>Gain</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiofilter.html#setquality" class="tsd-kind-icon">set<wbr>Quality</a></li>
 							</ul>
 						</section>
 					</div>
@@ -109,22 +128,31 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<wbr>Filter<span class="tsd-signature-symbol">(</span>_useFilter<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span>, _filterType<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.filter_type.html" class="tsd-signature-type">FILTER_TYPE</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiofilter.html" class="tsd-signature-type">AudioFilter</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<wbr>Filter<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _filterType<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a>, _frequency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _gain<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _quality<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiofilter.html" class="tsd-signature-type">AudioFilter</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioFilter.ts#L20">Audio/AudioFilter.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L15">Audio/AudioFilter.ts:15</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_useFilter: <span class="tsd-signature-type">boolean</span></h5>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
 								</li>
 								<li>
-									<h5>_filterType: <a href="../enums/fudgecore.filter_type.html" class="tsd-signature-type">FILTER_TYPE</a></h5>
+									<h5>_filterType: <a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a></h5>
+								</li>
+								<li>
+									<h5>_frequency: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>_gain: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>_quality: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.audiofilter.html" class="tsd-signature-type">AudioFilter</a></h4>
@@ -135,22 +163,12 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="filtertype" class="tsd-anchor"></a>
-					<h3>filter<wbr>Type</h3>
-					<div class="tsd-signature tsd-kind-icon">filter<wbr>Type<span class="tsd-signature-symbol">:</span> <a href="../enums/fudgecore.filter_type.html" class="tsd-signature-type">FILTER_TYPE</a></div>
+					<a name="audiofilter" class="tsd-anchor"></a>
+					<h3>audio<wbr>Filter</h3>
+					<div class="tsd-signature tsd-kind-icon">audio<wbr>Filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">BiquadFilterNode</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioFilter.ts#L20">Audio/AudioFilter.ts:20</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="usefilter" class="tsd-anchor"></a>
-					<h3>use<wbr>Filter</h3>
-					<div class="tsd-signature tsd-kind-icon">use<wbr>Filter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioFilter.ts#L19">Audio/AudioFilter.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L14">Audio/AudioFilter.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -158,30 +176,200 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="addfiltertoaudio" class="tsd-anchor"></a>
-					<h3>add<wbr>Filter<wbr>ToAudio</h3>
+					<a name="getfiltertype" class="tsd-anchor"></a>
+					<h3>get<wbr>Filter<wbr>Type</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Filter<wbr>ToAudio<span class="tsd-signature-symbol">(</span>_audioBuffer<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioBuffer</span>, _filterType<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.filter_type.html" class="tsd-signature-type">FILTER_TYPE</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Filter<wbr>Type<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioFilter.ts#L30">Audio/AudioFilter.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L34">Audio/AudioFilter.ts:34</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>addFilterTo</p>
-								</div>
-							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getfrequency" class="tsd-anchor"></a>
+					<h3>get<wbr>Frequency</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Frequency<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L42">Audio/AudioFilter.ts:42</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getgain" class="tsd-anchor"></a>
+					<h3>get<wbr>Gain</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Gain<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L49">Audio/AudioFilter.ts:49</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getquality" class="tsd-anchor"></a>
+					<h3>get<wbr>Quality</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Quality<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L56">Audio/AudioFilter.ts:56</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="initfilter" class="tsd-anchor"></a>
+					<h3>init<wbr>Filter</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">init<wbr>Filter<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _filterType<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a>, _frequency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _gain<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _quality<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L21">Audio/AudioFilter.ts:21</a></li>
+								</ul>
+							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_audioBuffer: <span class="tsd-signature-type">AudioBuffer</span></h5>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
 								</li>
 								<li>
-									<h5>_filterType: <a href="../enums/fudgecore.filter_type.html" class="tsd-signature-type">FILTER_TYPE</a></h5>
+									<h5>_filterType: <a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a></h5>
+								</li>
+								<li>
+									<h5>_frequency: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>_gain: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>_quality: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setfiltertype" class="tsd-anchor"></a>
+					<h3>set<wbr>Filter<wbr>Type</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Filter<wbr>Type<span class="tsd-signature-symbol">(</span>_filterType<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L29">Audio/AudioFilter.ts:29</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_filterType: <a href="../modules/fudgecore.html#filter_type" class="tsd-signature-type">FILTER_TYPE</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setfrequency" class="tsd-anchor"></a>
+					<h3>set<wbr>Frequency</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Frequency<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _frequency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L38">Audio/AudioFilter.ts:38</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
+								</li>
+								<li>
+									<h5>_frequency: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setgain" class="tsd-anchor"></a>
+					<h3>set<wbr>Gain</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Gain<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a>, _gain<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L45">Audio/AudioFilter.ts:45</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
+								</li>
+								<li>
+									<h5>_gain: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setquality" class="tsd-anchor"></a>
+					<h3>set<wbr>Quality</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Quality<span class="tsd-signature-symbol">(</span>_quality<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioFilter.ts#L52">Audio/AudioFilter.ts:52</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_quality: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -212,13 +400,34 @@
 								<a href="fudgecore.audiofilter.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audiofilter.html#filtertype" class="tsd-kind-icon">filter<wbr>Type</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audiofilter.html#usefilter" class="tsd-kind-icon">use<wbr>Filter</a>
+								<a href="fudgecore.audiofilter.html#audiofilter" class="tsd-kind-icon">audio<wbr>Filter</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiofilter.html#addfiltertoaudio" class="tsd-kind-icon">add<wbr>Filter<wbr>ToAudio</a>
+								<a href="fudgecore.audiofilter.html#getfiltertype" class="tsd-kind-icon">get<wbr>Filter<wbr>Type</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#getfrequency" class="tsd-kind-icon">get<wbr>Frequency</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#getgain" class="tsd-kind-icon">get<wbr>Gain</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#getquality" class="tsd-kind-icon">get<wbr>Quality</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#initfilter" class="tsd-kind-icon">init<wbr>Filter</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#setfiltertype" class="tsd-kind-icon">set<wbr>Filter<wbr>Type</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#setfrequency" class="tsd-kind-icon">set<wbr>Frequency</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#setgain" class="tsd-kind-icon">set<wbr>Gain</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiofilter.html#setquality" class="tsd-kind-icon">set<wbr>Quality</a>
 							</li>
 						</ul>
 					</li>
@@ -241,6 +450,7 @@
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -289,7 +499,7 @@
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="../assets/js/main.js"></script>

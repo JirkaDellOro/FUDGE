@@ -16,24 +16,24 @@ namespace TextureTest {
         let cube: ƒ.Node = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
         let pyramid: ƒ.Node = Scenes.createCompleteMeshNode("Pyramid", material, new ƒ.MeshPyramid());
 
-        cube.cmpTransform.local.translateX(1);
+        cube.cmpTransform.local.translateX(0.7);
         // cube.cmpTransform.rotateX(-45);
         cube.cmpTransform.local.rotateY(-45);
 
-        pyramid.cmpTransform.local.translateX(-1);
+        pyramid.cmpTransform.local.translateX(-0.7);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
         branch.appendChild(quad);
         branch.appendChild(cube);
         branch.appendChild(pyramid);
 
-        ƒ.RenderManager.initialize();
+        ƒ.RenderManager.initialize(true, true);
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let camera: ƒ.Node = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, camera.getComponent(ƒ.ComponentCamera), document.querySelector("canvas"));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
+        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
 
         viewport.draw();
 

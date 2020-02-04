@@ -1,17 +1,17 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
-var Fudge;
+var FudgeTest;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference path="../../../Scenes/Scenes.ts"/>
 ///<reference path="View.ts"/>
-(function (Fudge) {
+(function (FudgeTest) {
     var ƒ = FudgeCore;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewPort extends Fudge.View {
+    class ViewPort extends FudgeTest.View {
         constructor(_parent) {
             super(_parent);
             this.fillContent();
@@ -22,7 +22,7 @@ var Fudge;
         fillContent() {
             this.branch = new ƒ.Node("Dummy Node");
             let canvas;
-            let camera;
+            let cmpCamera;
             // TODO: delete example scene
             this.branch = Scenes.createAxisCross();
             // initialize RenderManager and transmit content
@@ -30,8 +30,7 @@ var Fudge;
             ƒ.RenderManager.update();
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-            let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+            cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
             cmpCamera.projectCentral(1, 45);
             canvas = Scenes.createCanvas();
             document.body.appendChild(canvas);
@@ -59,6 +58,6 @@ var Fudge;
             // this.viewport.draw();
         }
     }
-    Fudge.ViewPort = ViewPort;
-})(Fudge || (Fudge = {}));
+    FudgeTest.ViewPort = ViewPort;
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=ViewPort.js.map

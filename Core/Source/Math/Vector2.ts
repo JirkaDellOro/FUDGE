@@ -5,12 +5,13 @@ namespace FudgeCore {
    *            +y
    *             |__ +x
    * ```
-   * @authors Lukas Scheuerle, HFU, 2019
+   * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Vector2 {
+  export class Vector2 extends Mutable {
     private data: Float32Array;
 
     public constructor(_x: number = 0, _y: number = 0) {
+      super();
       this.data = new Float32Array([_x, _y]);
     }
 
@@ -28,49 +29,70 @@ namespace FudgeCore {
       this.data[1] = _y;
     }
 
+    /**
+     * Returns the length of the vector
+     */
+    get magnitude(): number {
+      return Math.hypot(...this.data);
+    }
+
+    /**
+     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+     */
+    get magnitudeSquared(): number {
+      return Vector2.DOT(this, this);
+    }
+
     /** 
      * A shorthand for writing `new Vector2(0, 0)`.
      * @returns A new vector with the values (0, 0)
      */
-    public static get ZERO(): Vector2 {
+    public static ZERO(): Vector2 {
       let vector: Vector2 = new Vector2();
       return vector;
     }
 
     /** 
-     * A shorthand for writing `new Vector2(0, 1)`.
-     * @returns A new vector with the values (0, 1)
+     * A shorthand for writing `new Vector2(_scale, _scale)`.
+     * @param _scale the scale of the vector. Default: 1
      */
-    public static get UP(): Vector2 {
-      let vector: Vector2 = new Vector2(0, 1);
+    public static ONE(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(_scale, _scale);
       return vector;
     }
 
     /** 
-     * A shorthand for writing `new Vector2(0, -1)`.
-     * @returns A new vector with the values (0, -1)
+     * A shorthand for writing `new Vector2(0, y)`.
+     * @param _scale The number to write in the y coordinate. Default: 1
+     * @returns A new vector with the values (0, _scale)
      */
-    public static get DOWN(): Vector2 {
-      let vector: Vector2 = new Vector2(0, -1);
+    public static Y(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(0, _scale);
       return vector;
     }
 
     /** 
-     * A shorthand for writing `new Vector2(1, 0)`.
-     * @returns A new vector with the values (1, 0)
+     * A shorthand for writing `new Vector2(x, 0)`.
+     * @param _scale The number to write in the x coordinate. Default: 1
+     * @returns A new vector with the values (_scale, 0)
      */
-    public static get RIGHT(): Vector2 {
-      let vector: Vector2 = new Vector2(1, 0);
+    public static X(_scale: number = 1): Vector2 {
+      let vector: Vector2 = new Vector2(_scale, 0);
       return vector;
     }
 
-    /** 
-     * A shorthand for writing `new Vector2(-1, 0)`.
-     * @returns A new vector with the values (-1, 0)
-     */
-    public static get LEFT(): Vector2 {
-      let vector: Vector2 = new Vector2(-1, 0);
-      return vector;
+    public static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
+      let result: Vector2 = new Vector2();
+      let m: Float32Array = _matrix.get();
+      let [x, y] = _vector.get();
+      result.x = m[0] * x + m[3] * y;
+      result.y = m[1] * x + m[4] * y;
+
+      if (_includeTranslation) {
+        result.add(_matrix.translation);
+      }
+
+      return result;
     }
 
     /**
@@ -80,13 +102,13 @@ namespace FudgeCore {
      * @returns a new vector representing the normalised vector scaled by the given length
      */
     public static NORMALIZATION(_vector: Vector2, _length: number = 1): Vector2 {
-      let vector: Vector2 = Vector2.ZERO;
+      let vector: Vector2 = Vector2.ZERO();
       try {
         let [x, y] = _vector.data;
         let factor: number = _length / Math.hypot(x, y);
         vector.data = new Float32Array([_vector.x * factor, _vector.y * factor]);
-      } catch (_e) {
-        console.warn(_e);
+      } catch (_error) {
+        console.warn(_error);
       }
       return vector;
     }
@@ -98,7 +120,7 @@ namespace FudgeCore {
      * @returns A new vector representing the scaled version of the given vector
      */
     public static SCALE(_vector: Vector2, _scale: number): Vector2 {
-      let vector: Vector2 = new Vector2();
+      let vector: Vector2 = new Vector2(_vector.x * _scale, _vector.y * _scale);
       return vector;
     }
 
@@ -138,28 +160,6 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the magnitude of a given vector.
-     * If you only need to compare magnitudes of different vectors, you can compare squared magnitudes using Vector2.MAGNITUDESQR instead.
-     * @see Vector2.MAGNITUDESQR
-     * @param _vector The vector to get the magnitude of.
-     * @returns A number representing the magnitude of the given vector.
-     */
-    public static MAGNITUDE(_vector: Vector2): number {
-      let magnitude: number = Math.sqrt(Vector2.MAGNITUDESQR(_vector));
-      return magnitude;
-    }
-
-    /**
-     * Returns the squared magnitude of a given vector. Much less calculation intensive than Vector2.MAGNITUDE, should be used instead if possible.
-     * @param _vector The vector to get the squared magnitude of.
-     * @returns A number representing the squared magnitude of the given vector.
-     */
-    public static MAGNITUDESQR(_vector: Vector2): number {
-      let magnitude: number = Vector2.DOT(_vector, _vector);
-      return magnitude;
-    }
-
-    /**
      * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
      * which implicitly is on the Z axis. It is also the signed magnitude of the result.
      * @param _a Vector to compute the cross product on
@@ -174,8 +174,7 @@ namespace FudgeCore {
     /**
      * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
      * ```plaintext
-     *    ^                |
-     *    |  =>  <--  =>   v  =>  -->
+     * ↑ => ← => ↓ => → => ↑
      * ```
      * @param _vector Vector to get the orthogonal equivalent of
      * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
@@ -184,6 +183,16 @@ namespace FudgeCore {
     public static ORTHOGONAL(_vector: Vector2, _clockwise: boolean = false): Vector2 {
       if (_clockwise) return new Vector2(_vector.y, -_vector.x);
       else return new Vector2(-_vector.y, _vector.x);
+    }
+
+    /**
+     * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+     * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+     */
+    public equals(_compare: Vector2, _tolerance: number = Number.EPSILON): boolean {
+      if (Math.abs(this.x - _compare.x) > _tolerance) return false;
+      if (Math.abs(this.y - _compare.y) > _tolerance) return false;
+      return true;
     }
 
     /**
@@ -228,16 +237,6 @@ namespace FudgeCore {
     }
 
     /**
-     * Checks whether the given Vector is equal to the executed Vector.
-     * @param _vector The vector to comapre with.
-     * @returns true if the two vectors are equal, otherwise false
-     */
-    public equals(_vector: Vector2): boolean {
-      if (this.data[0] == _vector.data[0] && this.data[1] == _vector.data[1]) return true;
-      return false;
-    }
-
-    /**
      * @returns An array of the data of the vector
      */
     public get(): Float32Array {
@@ -245,10 +244,34 @@ namespace FudgeCore {
     }
 
     /**
-     * @returns An deep copy of the vector.
+     * @returns A deep copy of the vector.
      */
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);
     }
+
+    public transform(_matrix: Matrix3x3, _includeTranslation: boolean = true): void {
+      this.data = Vector2.TRANSFORMATION(this, _matrix, _includeTranslation).data;
+    }
+
+    /**
+     * Adds a z-component to the vector and returns a new Vector3
+     */
+    public toVector3(): Vector3 {
+      return new Vector3(this.x, this.y, 0);
+    }
+
+    public toString(): string {
+      let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)})`;
+      return result;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = {
+        x: this.data[0], y: this.data[1]
+      };
+      return mutator;
+    }
+    protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 }

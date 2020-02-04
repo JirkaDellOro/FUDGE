@@ -12,6 +12,7 @@ var Main;
         MENU[MENU["NODE_DELETE"] = 4] = "NODE_DELETE";
         MENU[MENU["NODE_UPDATE"] = 5] = "NODE_UPDATE";
         MENU[MENU["DEVTOOLS_OPEN"] = 6] = "DEVTOOLS_OPEN";
+        MENU[MENU["VIEW_ANIMATION"] = 7] = "VIEW_ANIMATION";
     })(MENU || (MENU = {}));
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
@@ -72,6 +73,9 @@ var Main;
             case MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();
                 break;
+            case MENU.VIEW_ANIMATION:
+                send(_window, "openAnimationPanel");
+                break;
             case MENU.QUIT:
                 app.quit();
                 break;
@@ -101,6 +105,9 @@ var Main;
                     },
                     {
                         label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
+                    },
+                    {
+                        label: "Animation", id: String(MENU.VIEW_ANIMATION), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
                     }
                 ]
             },

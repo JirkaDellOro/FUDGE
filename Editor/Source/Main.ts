@@ -9,7 +9,8 @@ namespace Main {
     VIEW_NODE_OPEN,
     NODE_DELETE,
     NODE_UPDATE,
-    DEVTOOLS_OPEN
+    DEVTOOLS_OPEN,
+    VIEW_ANIMATION
   }
 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
@@ -78,6 +79,9 @@ namespace Main {
       case MENU.DEVTOOLS_OPEN:
         _window.webContents.openDevTools();
         break;
+      case MENU.VIEW_ANIMATION:
+        send(_window, "openAnimationPanel");
+        break;
       case MENU.QUIT:
         app.quit();
         break;
@@ -108,6 +112,9 @@ namespace Main {
           },
           {
             label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
+          },
+          {
+            label: "Animation", id: String(MENU.VIEW_ANIMATION), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
           }
         ]
       },

@@ -1,6 +1,6 @@
 namespace FudgeCore {
-    export class KeyboardEventƒ extends KeyboardEvent {
-        constructor(type: string, _event: KeyboardEventƒ) {
+    export class EventKeyboard extends KeyboardEvent {
+        constructor(type: string, _event: EventKeyboard) {
             super(type, _event);
         }
     }
@@ -47,7 +47,7 @@ namespace FudgeCore {
         ZERO = "Digit0",
         ONE = "Digit1",
         TWO = "Digit2",
-        TRHEE = "Digit3",
+        THREE = "Digit3",
         FOUR = "Digit4",
         FIVE = "Digit5",
         SIX = "Digit6",

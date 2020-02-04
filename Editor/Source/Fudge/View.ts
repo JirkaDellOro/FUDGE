@@ -7,19 +7,19 @@ namespace Fudge {
     export enum VIEW {
         // PROJECT = ViewProject,
         NODE = "ViewNode",
-        // ANIMATION = ViewAnimation,
+        ANIMATION = "ViewAnimation",
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
         PORT = "ViewPort",
-        DATA = "ViewData"
+        DATA = "ViewData",
+        CAMERA = "ViewCamera"
     }
 
     /**
      * Base class for all Views to support generic functionality
-     * TODO: examine, if this should/could be derived from some GoldenLayout "class"
-     * 
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
      */
-    // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
     export abstract class View {
 
         config: GoldenLayout.ComponentConfig;

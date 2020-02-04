@@ -104,16 +104,19 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#mastergain" class="tsd-kind-icon">master<wbr>Gain</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#mastergainvalue" class="tsd-kind-icon">master<wbr>Gain<wbr>Value</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#getaudiocontext" class="tsd-kind-icon">get<wbr>Audio<wbr>Context</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#getaudiosession" class="tsd-kind-icon">get<wbr>Audio<wbr>Session</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#getmastergainvalue" class="tsd-kind-icon">get<wbr>Master<wbr>Gain<wbr>Value</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#resumeaudiocontext" class="tsd-kind-icon">resume<wbr>Audio<wbr>Context</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#setaudiocontext" class="tsd-kind-icon">set<wbr>Audio<wbr>Context</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#setaudiosession" class="tsd-kind-icon">set<wbr>Audio<wbr>Session</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#setmastergainvalue" class="tsd-kind-icon">set<wbr>Master<wbr>Gain<wbr>Value</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiosettings.html#suspendaudiocontext" class="tsd-kind-icon">suspend<wbr>Audio<wbr>Context</a></li>
 							</ul>
 						</section>
 					</div>
@@ -125,30 +128,22 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<wbr>Settings<span class="tsd-signature-symbol">(</span>_gainValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Audio<wbr>Settings<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L16">Audio/AudioSettings.ts:16</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L13">Audio/AudioSettings.ts:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Constructor for master Volume</p>
+									<p>Constructor for the <a href="fudgecore.audiosettings.html">AudioSettings</a> Class.
+										Main class for all Audio Classes.
+									Need to create this first, when working with sounds.</p>
 								</div>
 							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_gainValue: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-										</div>
-									</div>
-								</li>
-							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h4>
 						</li>
 					</ul>
@@ -162,17 +157,7 @@
 					<div class="tsd-signature tsd-kind-icon">master<wbr>Gain<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">GainNode</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L12">Audio/AudioSettings.ts:12</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="mastergainvalue" class="tsd-anchor"></a>
-					<h3>master<wbr>Gain<wbr>Value</h3>
-					<div class="tsd-signature tsd-kind-icon">master<wbr>Gain<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L13">Audio/AudioSettings.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L9">Audio/AudioSettings.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -189,10 +174,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L42">Audio/AudioSettings.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L39">Audio/AudioSettings.ts:39</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AudioContext</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getaudiosession" class="tsd-anchor"></a>
+					<h3>get<wbr>Audio<wbr>Session</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Audio<wbr>Session<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L47">Audio/AudioSettings.ts:47</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -206,10 +208,32 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L38">Audio/AudioSettings.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L35">Audio/AudioSettings.ts:35</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="resumeaudiocontext" class="tsd-anchor"></a>
+					<h3>resume<wbr>Audio<wbr>Context</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">resume<wbr>Audio<wbr>Context<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L65">Audio/AudioSettings.ts:65</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Resumes the progression of time of the AudioContext after pausing it.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -223,13 +247,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L46">Audio/AudioSettings.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L43">Audio/AudioSettings.ts:43</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_audioContext: <span class="tsd-signature-type">AudioContext</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setaudiosession" class="tsd-anchor"></a>
+					<h3>set<wbr>Audio<wbr>Session</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Audio<wbr>Session<span class="tsd-signature-symbol">(</span>_audioSession<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L51">Audio/AudioSettings.ts:51</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_audioSession: <a href="fudgecore.audiosessiondata.html" class="tsd-signature-type">AudioSessionData</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -246,7 +293,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/362369e5/Core/Source/Audio/AudioSettings.ts#L34">Audio/AudioSettings.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L30">Audio/AudioSettings.ts:30</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -255,6 +302,28 @@
 									<h5>_masterGainValue: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="suspendaudiocontext" class="tsd-anchor"></a>
+					<h3>suspend<wbr>Audio<wbr>Context</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">suspend<wbr>Audio<wbr>Context<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioSettings.ts#L58">Audio/AudioSettings.ts:58</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Pauses the progression of time of the AudioContext.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -285,20 +354,29 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.audiosettings.html#mastergain" class="tsd-kind-icon">master<wbr>Gain</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.audiosettings.html#mastergainvalue" class="tsd-kind-icon">master<wbr>Gain<wbr>Value</a>
-							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audiosettings.html#getaudiocontext" class="tsd-kind-icon">get<wbr>Audio<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiosettings.html#getaudiosession" class="tsd-kind-icon">get<wbr>Audio<wbr>Session</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audiosettings.html#getmastergainvalue" class="tsd-kind-icon">get<wbr>Master<wbr>Gain<wbr>Value</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiosettings.html#resumeaudiocontext" class="tsd-kind-icon">resume<wbr>Audio<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audiosettings.html#setaudiocontext" class="tsd-kind-icon">set<wbr>Audio<wbr>Context</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiosettings.html#setaudiosession" class="tsd-kind-icon">set<wbr>Audio<wbr>Session</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.audiosettings.html#setmastergainvalue" class="tsd-kind-icon">set<wbr>Master<wbr>Gain<wbr>Value</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.audiosettings.html#suspendaudiocontext" class="tsd-kind-icon">suspend<wbr>Audio<wbr>Context</a>
 							</li>
 						</ul>
 					</li>
@@ -321,6 +399,7 @@
 				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
 				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
@@ -369,7 +448,7 @@
 	</div>
 </footer>
 <div class="container tsd-generator">
-	<p>Generated using <a href="http://typedoc.org/" target="_blank">TypeDoc</a></p>
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
 </div>
 <div class="overlay"></div>
 <script src="../assets/js/main.js"></script>

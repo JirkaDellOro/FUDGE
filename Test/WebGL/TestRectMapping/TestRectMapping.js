@@ -1,12 +1,12 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var TestRectMapping;
+(function (TestRectMapping) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
     let uiMaps = {};
     let uiClient;
     let canvas;
     let viewPort = new ƒ.Viewport();
-    let camera;
+    let cmpCamera;
     let uiCamera;
     function init() {
         // create asset
@@ -18,8 +18,7 @@ var RenderManagerRendering;
         ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
-        camera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
         let menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
@@ -111,7 +110,6 @@ var RenderManagerRendering;
     }
     function setCamera() {
         let params = uiCamera.get();
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
     function setClient(_uiRectangle) {
@@ -146,9 +144,8 @@ var RenderManagerRendering;
             }
         }
         let clientRect = canvas.getBoundingClientRect();
-        uiClient.set({ x: clientRect.left, y: clientRect.top, width: clientRect.width, height: clientRect.height });
-        let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+        uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(TestRectMapping || (TestRectMapping = {}));
 //# sourceMappingURL=TestRectMapping.js.map

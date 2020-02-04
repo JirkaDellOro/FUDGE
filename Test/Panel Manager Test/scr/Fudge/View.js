@@ -1,9 +1,9 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
-var Fudge;
+var FudgeTest;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
-(function (Fudge) {
+(function (FudgeTest) {
     var ƒ = FudgeCore;
     let VIEW;
     (function (VIEW) {
@@ -14,7 +14,7 @@ var Fudge;
         // MESH = ViewMesh,
         VIEW["PORT"] = "ViewPort";
         VIEW["DATA"] = "ViewData";
-    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    })(VIEW = FudgeTest.VIEW || (FudgeTest.VIEW = {}));
     /**
      * Base class for all Views to support generic functionality
      * TODO: examine, if this should/could be derived from some GoldenLayout "class"
@@ -44,6 +44,6 @@ var Fudge;
             return config;
         }
     }
-    Fudge.View = View;
-})(Fudge || (Fudge = {}));
+    FudgeTest.View = View;
+})(FudgeTest || (FudgeTest = {}));
 //# sourceMappingURL=View.js.map

@@ -12,8 +12,7 @@ var RenderManagerRendering;
         let canvasList = document.getElementsByTagName("canvas");
         let viewPorts = [];
         for (let i = 0; i < canvasList.length; i++) {
-            let camera = Scenes.createCamera(posCameras[i]);
-            let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
+            let cmpCamera = Scenes.createCamera(posCameras[i]);
             cmpCamera.projectCentral(1, 45);
             let viewPort = new ƒ.Viewport();
             viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
