@@ -42,12 +42,18 @@ namespace FudgeCore {
     }
 
     public play(_on: boolean): void {
+      this.source.disconnect();
+      this.source.connect(this.panner);
       if (_on)
-        this.source.start();
+        this.source.start(0, 0);
       else
         this.source.stop();
       this.playing = _on;
     }
+
+    // public reset(): void {
+    //   this.source.re
+    // }
 
     public get isPlaying(): boolean {
       return this.playing;
@@ -87,12 +93,16 @@ namespace FudgeCore {
       this.activate(active);
     }
 
+    public connect(_on: boolean): void {
+      if (_on)
+        this.gain.connect(this.audioManager.gain);
+      else
+        this.gain.disconnect(this.audioManager.gain);
+    }
+
     private updateConnection(): void {
       try {
-        if (this.isActive && this.isAttached && this.listened)
-          this.gain.connect(this.audioManager.gain);
-        else
-          this.gain.disconnect(this.audioManager.gain);
+        this.connect(this.isActive && this.isAttached && this.listened);
       } catch (_error) {
         // nop
       }
@@ -135,7 +145,7 @@ namespace FudgeCore {
       Debug.log(_event);
       let local: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
       Debug.log(local.toString());
-      this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z );
+      this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z);
     }
   }
 }

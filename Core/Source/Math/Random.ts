@@ -6,6 +6,7 @@ namespace FudgeCore {
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Random {
+    public static default: Random = new Random();
     private generate: Function = Math.random;
 
     /**
@@ -71,6 +72,13 @@ namespace FudgeCore {
     }
 
     /**
+     * Returns removes a randomly selected element from the given array and returns it
+     */
+    public splice<T>(_array: Array<T>): T {
+      return _array.splice(this.getIndex(_array), 1)[0];
+    }
+
+    /**
      * Returns a randomly selected key from the given Map-instance
      */
     public getKey<T, U>(_map: Map<T, U>): T {
@@ -94,7 +102,7 @@ namespace FudgeCore {
       return keys[this.getIndex(keys)];
     }
   }
- 
+
   /**
    * Standard [[Random]]-instance using Math.random().
    */
