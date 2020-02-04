@@ -1,4 +1,4 @@
-# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
+![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
