@@ -7,6 +7,9 @@ namespace FudgeAid {
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
+    private rotatorX: ƒ.Node;
+    private translator: ƒ.Node;
+
 
     public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 2, _maxRotX: number = 75, _minDistance: number = 1, _maxDistance: number = 10) {
       super("CameraOrbit");
@@ -18,29 +21,32 @@ namespace FudgeAid {
       let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
       this.addComponent(cmpTransform);
 
-      let rotatorX: ƒ.Node = new ƒ.Node("CameraRotX");
-      rotatorX.addComponent(new ƒ.ComponentTransform());
-      this.appendChild(rotatorX);
+      this.rotatorX = new ƒ.Node("CameraRotX");
+      this.rotatorX.addComponent(new ƒ.ComponentTransform());
+      this.appendChild(this.rotatorX);
+      this.translator = new ƒ.Node("CameraRotY");
+      this.translator.addComponent(new ƒ.ComponentTransform());
+      this.rotatorX.appendChild(this.translator);
 
-      rotatorX.addComponent(_cmpCamera);
+      this.translator.addComponent(_cmpCamera);
       this.distance = _distanceStart;
     }
 
-    public get cmpCamera(): ƒ.ComponentCamera {
-      return this.rotatorX.getComponent(ƒ.ComponentCamera);
+    public get component(): ƒ.ComponentCamera {
+      return this.translator.getComponent(ƒ.ComponentCamera);
     }
 
-    public get rotatorX(): ƒ.Node {
-      return this.getChildrenByName("CameraRotX")[0];
+    public get node(): ƒ.Node {
+      return this.translator;
     }
 
     public set distance(_distance: number) {
       let newDistance: number = Math.min(this.maxDistance, Math.max(this.minDistance, _distance));
-      this.cmpCamera.pivot.translation = ƒ.Vector3.Z(newDistance);
+      this.translator.cmpTransform.local.translation = ƒ.Vector3.Z(newDistance);
     }
 
     public get distance(): number {
-      return this.cmpCamera.pivot.translation.z;
+      return this.translator.cmpTransform.local.translation.z;
     }
 
     public set rotationY(_angle: number) {

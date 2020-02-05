@@ -30,6 +30,8 @@ namespace FudgeCore {
 
     public update = (): void => {
       this.branch.broadcastEvent(new Event(EVENT_AUDIO.UPDATE_PANNER));
+      if (this.cmpListener)
+        this.cmpListener.update(this.listener);
     }
   }
 }

@@ -17,9 +17,8 @@ var AudioSpace;
         frequency: 1,
         cameraPosition: new ƒ.Vector3(0, 0, 5)
     };
-    let audioSettings;
-    let componentAudio;
-    let componentAudioListener;
+    let cmpAudio;
+    let cmpAudioListener;
     window.addEventListener("load", init);
     async function init(_event) {
         out = document.querySelector("output");
@@ -29,12 +28,13 @@ var AudioSpace;
         ƒ.RenderManager.initialize();
         // #region Audio Setup
         let audio = await ƒ.Audio.load("hypnotic.mp3");
-        componentAudio = new ƒ.ComponentAudio(audio, true, true);
-        body.addComponent(componentAudio);
+        cmpAudio = new ƒ.ComponentAudio(audio, true, true);
+        body.addComponent(cmpAudio);
         // #endregion
         // camera setup
         let cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 3, 20);
+        camera.node.addComponent(new ƒ.ComponentAudioListener());
         // scene setup
         let branch = new ƒ.Node("Branch");
         branch.appendChild(new ƒAid.NodeCoordinateSystem());
@@ -44,6 +44,7 @@ var AudioSpace;
         let canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", branch, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(branch);
+        ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
         viewport.setFocus(true);
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
@@ -155,21 +156,10 @@ var AudioSpace;
                 case ƒ.KEYBOARD_CODE.ENTER:
                     //play Sound
                     console.log("Play Audio");
-                    if (componentAudio.isPlaying)
-                        componentAudio.play(false);
+                    if (cmpAudio.isPlaying)
+                        cmpAudio.play(false);
                     else
-                        componentAudio.play(true);
-                    break;
-                case ƒ.KEYBOARD_CODE.L:
-                    //play Sound
-                    console.log("pressed l");
-                    // Look at Data Array
-                    audioSettings.getAudioSession().showDataInArray();
-                    break;
-                case ƒ.KEYBOARD_CODE.I:
-                    console.log("pressed i");
-                    // Look at Postions of Listener and Panner
-                    componentAudioListener.showListenerSettings();
+                        cmpAudio.play(true);
                     break;
             }
         }
