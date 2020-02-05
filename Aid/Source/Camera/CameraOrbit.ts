@@ -8,7 +8,7 @@ namespace FudgeAid {
     private minDistance: number;
     private maxDistance: number;
 
-    public constructor(_cmpCamera: ƒ.ComponentCamera, _maxRotX: number = 75, _minDistance: number = 10, _maxDistance: number = 100) {
+    public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 2, _maxRotX: number = 75, _minDistance: number = 1, _maxDistance: number = 10) {
       super("CameraOrbit");
 
       this.maxRotX = Math.min(_maxRotX, 89);
@@ -23,7 +23,7 @@ namespace FudgeAid {
       this.appendChild(rotatorX);
 
       rotatorX.addComponent(_cmpCamera);
-      this.distance = 20;
+      this.distance = _distanceStart;
     }
 
     public get cmpCamera(): ƒ.ComponentCamera {

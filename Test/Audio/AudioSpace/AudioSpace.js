@@ -7,6 +7,9 @@ var AudioSpace;
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
     let out;
+    let camera;
+    let speedCameraRotation = 0.2;
+    let speedCameraTranslation = 0.01;
     // tslint:disable-next-line: typedef
     let parameter = {
         xAmplitude: 0,
@@ -21,8 +24,7 @@ var AudioSpace;
     async function init(_event) {
         out = document.querySelector("output");
         let material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, .5, .5, 1)));
-        // const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
-        const body = new ƒAid.NodeGeometry("Body", material, new ƒ.MeshCube());
+        const body = new ƒAid.NodeGeometry("Body", material, new ƒ.MeshPyramid());
         const mtxBody = body.cmpTransform.local;
         ƒ.RenderManager.initialize();
         // #region Audio Setup
@@ -31,24 +33,25 @@ var AudioSpace;
         body.addComponent(componentAudio);
         // #endregion
         // camera setup
-        let camera = new ƒ.Node("Camera");
         let cmpCamera = new ƒ.ComponentCamera();
-        // componentAudioListener = new ƒ.ComponentAudioListener(audioSettings);
-        let mtxCamera = ƒ.Matrix4x4.TRANSLATION(parameter.cameraPosition);
-        mtxCamera.lookAt(ƒ.Vector3.ZERO());
-        camera.addComponent(cmpCamera);
-        camera.addComponent(new ƒ.ComponentTransform(mtxCamera));
-        // camera.addComponent(componentAudioListener);
+        camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 3, 20);
         // scene setup
         let branch = new ƒ.Node("Branch");
-        // branch.appendChild(Scenes.createCoordinateSystem());
         branch.appendChild(new ƒAid.NodeCoordinateSystem());
         branch.appendChild(body);
         branch.appendChild(camera);
         let viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        let canvas = document.querySelector("canvas");
+        viewport.initialize("Viewport", branch, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(branch);
+        // setup event handling
         viewport.setFocus(true);
+        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
+        viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
+        viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
+        viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
+        canvas.addEventListener("mousedown", canvas.requestPointerLock);
+        canvas.addEventListener("mouseup", () => document.exitPointerLock());
         startInteraction(viewport, body);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start();
@@ -61,13 +64,22 @@ var AudioSpace;
                 position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
             mtxBody.translation = position;
             // componentAudioListener.updatePositions(mtxCamera.translation);
-            mtxCamera.lookAt(ƒ.Vector3.ZERO());
+            // mtxCamera.lookAt(ƒ.Vector3.ZERO());
             ƒ.AudioManager.default.update();
             // componentAudio.getLocalisation().updatePositions(mtxBody.translation, mtxCamera.translation);
             // ƒ.RenderManager.update();
             viewport.draw();
-            printInfo(mtxBody, mtxCamera);
+            // printInfo(mtxBody, mtxCamera);
         }
+    }
+    function hndPointerMove(_event) {
+        if (!_event.buttons)
+            return;
+        camera.rotateY(_event.movementX * speedCameraRotation);
+        camera.rotateX(_event.movementY * speedCameraRotation);
+    }
+    function hndWheelMove(_event) {
+        camera.distance += _event.deltaY * speedCameraTranslation;
     }
     function printInfo(_mtxBody, _mtxCamera) {
         // let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;

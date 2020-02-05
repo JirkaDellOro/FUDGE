@@ -5,7 +5,8 @@ namespace FudgeCore {
   export class AudioManager extends AudioContext {
     public static readonly default: AudioManager = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
     public readonly gain: AudioNode;
-    private branch: Node;
+    private branch: Node = null;
+    private cmpListener: ComponentAudioListener = null;
 
     constructor(contextOptions?: AudioContextOptions) {
       super(contextOptions);
@@ -24,6 +25,10 @@ namespace FudgeCore {
 
     public getBranchListeningTo = (): Node => {
       return this.branch;
+    }
+
+    public listen = (_cmpListener: ComponentAudioListener | null): void => {
+      this.cmpListener = _cmpListener;
     }
 
     public update = (): void => {
