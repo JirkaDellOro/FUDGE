@@ -2997,7 +2997,7 @@ declare namespace FudgeCore {
         private _stacks;
         readonly stacks: number;
         private normals;
-        constructor(_meridians?: number, _parallels?: number);
+        constructor(_sectors?: number, _stacks?: number);
         create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;

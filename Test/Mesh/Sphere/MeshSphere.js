@@ -5,7 +5,7 @@ var MeshTest;
     let branch = new ƒ.Node("Branch");
     let object = new ƒ.Node("object");
     function init(_event) {
-        let mymesh = new ƒ.MeshSphere();
+        let mymesh = new ƒ.MeshSphere(16, 12);
         let material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         object = Scenes.createCompleteMeshNode("Cube", material, mymesh);
         object.cmpTransform.local.scale(new ƒ.Vector3(0.5, 0.5, 0.5));
@@ -22,14 +22,14 @@ var MeshTest;
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
-        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
+        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 0, 1.5), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
         Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);
         viewport.draw();
         window.setInterval(function () {
-            object.cmpTransform.local.rotateY(-1);
-            object.cmpTransform.local.rotateX(1);
+            object.cmpTransform.local.rotateY(-0.4);
+            object.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
         }, 20);

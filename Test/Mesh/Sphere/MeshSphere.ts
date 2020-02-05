@@ -8,7 +8,7 @@ namespace MeshTest {
 
 
     function init(_event: Event): void {
-        let mymesh: ƒ.Mesh = new ƒ.MeshSphere();
+        let mymesh: ƒ.Mesh = new ƒ.MeshSphere(16, 12);
         let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         object = Scenes.createCompleteMeshNode("Cube", material, mymesh);
         object.cmpTransform.local.scale(new ƒ.Vector3(0.5,0.5,0.5));
@@ -31,7 +31,7 @@ namespace MeshTest {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 0, 1.5), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
 
         Scenes.dollyViewportCamera(viewport);
@@ -40,8 +40,8 @@ namespace MeshTest {
 
         
         window.setInterval(function (): void {
-            object.cmpTransform.local.rotateY(-1);
-            object.cmpTransform.local.rotateX(1);
+            object.cmpTransform.local.rotateY(-0.4);
+            object.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
         },                 20);
