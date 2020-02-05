@@ -81,14 +81,7 @@ namespace AudioSpace {
         position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
 
       mtxBody.translation = position;
-
-      // componentAudioListener.updatePositions(mtxCamera.translation);
-      // mtxCamera.lookAt(ƒ.Vector3.ZERO());
       ƒ.AudioManager.default.update();
-      // componentAudio.getLocalisation().updatePositions(mtxBody.translation, mtxCamera.translation);
-
-
-      // ƒ.RenderManager.update();
       viewport.draw();
       // printInfo(mtxBody, mtxCamera);
     }

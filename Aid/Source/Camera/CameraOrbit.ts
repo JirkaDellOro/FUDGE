@@ -21,10 +21,10 @@ namespace FudgeAid {
       let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
       this.addComponent(cmpTransform);
 
-      this.rotatorX = new ƒ.Node("CameraRotX");
+      this.rotatorX = new ƒ.Node("CameraRotationX");
       this.rotatorX.addComponent(new ƒ.ComponentTransform());
       this.appendChild(this.rotatorX);
-      this.translator = new ƒ.Node("CameraRotY");
+      this.translator = new ƒ.Node("CameraTranslate");
       this.translator.addComponent(new ƒ.ComponentTransform());
       this.rotatorX.appendChild(this.translator);
 

@@ -17,6 +17,8 @@ namespace FudgeCore {
       let up: Vector3 = Vector3.TRANSFORMATION(Vector3.Y(), local);
 
       _listener.setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
+
+      Debug.log(local.translation.toString(), forward.toString(), up.toString());
     }
   }
 }
