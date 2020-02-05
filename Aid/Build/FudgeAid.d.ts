@@ -5,9 +5,11 @@ declare namespace FudgeAid {
         private maxRotX;
         private minDistance;
         private maxDistance;
+        private rotatorX;
+        private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        get cmpCamera(): ƒ.ComponentCamera;
-        get rotatorX(): ƒ.Node;
+        get component(): ƒ.ComponentCamera;
+        get node(): ƒ.Node;
         set distance(_distance: number);
         get distance(): number;
         set rotationY(_angle: number);

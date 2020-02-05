@@ -1272,10 +1272,11 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Attaches an [[AudioListener]] to the node
-     * @authors Thomas Dorner, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudioListener extends Component {
         pivot: Matrix4x4;
+        update(_listener: AudioListener): void;
     }
 }
 declare namespace FudgeCore {
