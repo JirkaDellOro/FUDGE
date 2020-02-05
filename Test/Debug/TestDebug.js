@@ -1,8 +1,11 @@
 var TestDebug;
 (function (TestDebug) {
     var ƒ = FudgeCore;
-    window.addEventListener("DOMContentLoaded", init);
-    function init() {
+    window.addEventListener("load", init);
+    function init(_event) {
+        document.querySelector("button").addEventListener("click", start);
+    }
+    function start() {
         let test = { n: 10, t: "Text", b: true, o: {} };
         // console.info("Object: ", test);
         ƒ.Debug.info("Info | Console | 1 Object: ", test);

@@ -18,7 +18,7 @@ namespace FudgeCore {
         /** dispatched to a [[Component]] when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
         /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
-        CHILD_APPEND = "childAdd",
+        CHILD_APPEND = "childAppend",
         /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
         /** dispatched to a [[Mutable]] when its being mutated */

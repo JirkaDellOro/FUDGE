@@ -1,12 +1,11 @@
-# ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/Fudge_48.png) &nbsp; &nbsp; F U D G E 
-Furtwangen University Didactic Game Editor  
+![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
 - [Core](Core)
 - [UserInterface](UserInterface)
 - [Network](Network)
-
+ 
 ## Editor
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 - [Editor](Editor)

@@ -22,7 +22,6 @@
   "homepage": "https://github.com/JirkaDellOro/FUDGE#readme",
   "dependencies": {
     "@types/node": "^12.7.1",
-    "@types/webgl2": "0.0.5",
     "@types/ws": "^6.0.2",
     "electron": "^6.0.2",
     "websocket": "^1.0.29",

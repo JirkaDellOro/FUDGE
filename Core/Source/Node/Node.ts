@@ -19,6 +19,7 @@ namespace FudgeCore {
     // private layers: string[] = []; // Names of the layers this node is on. (TODO: As of yet no functionality)
     private listeners: MapEventTypeToListener = {};
     private captures: MapEventTypeToListener = {};
+    private active: boolean = true;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -27,6 +28,14 @@ namespace FudgeCore {
     public constructor(_name: string) {
       super();
       this.name = _name;
+    }
+
+    public activate(_on: boolean): void {
+      this.active = _on;
+      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
+    }
+    public get isActive(): boolean {
+      return this.active;
     }
 
     /**
@@ -93,18 +102,25 @@ namespace FudgeCore {
         // _node is already a child of this
         return;
 
+      let inAudioBranch: boolean = false;
       let ancestor: Node = this;
       while (ancestor) {
         ancestor.timestampUpdate = 0;
+        inAudioBranch = inAudioBranch || (ancestor == AudioManager.default.getBranchListeningTo());
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else
           ancestor = ancestor.parent;
       }
 
+      let previousParent: Node = _node.parent;
+      if (previousParent)
+        previousParent.removeChild(_node);
       this.children.push(_node);
-      _node.setParent(this);
+      _node.parent = this;
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
+      if (inAudioBranch)
+        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
     /**
@@ -117,8 +133,10 @@ namespace FudgeCore {
         return;
 
       _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
+      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       this.children.splice(found, 1);
-      _node.setParent(null);
+      _node.parent = null;
     }
 
     /**
@@ -138,12 +156,19 @@ namespace FudgeCore {
       let found: number = this.findChild(_replace);
       if (found < 0)
         return false;
+
       let previousParent: Node = _with.getParent();
       if (previousParent)
         previousParent.removeChild(_with);
-      _replace.setParent(null);
+
+      _replace.parent = null;
       this.children[found] = _with;
-      _with.setParent(this);
+      _with.parent = this;
+
+      _with.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
+      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+        _with.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
+
       return true;
     }
 
@@ -156,6 +181,13 @@ namespace FudgeCore {
 
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
+    }
+
+    public isDescendantOf(_ancestor: Node): boolean {
+      let node: Node = this;
+      while (node && node != _ancestor)
+        node = node.parent;
+      return (node != null);
     }
 
     /**
@@ -252,10 +284,10 @@ namespace FudgeCore {
         let foundAt: number = componentsOfType.indexOf(_component);
         if (foundAt < 0)
           return;
+        _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
-        _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
-      } catch(_error) {
+      } catch (_error) {
         throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
       }
     }
@@ -318,19 +350,26 @@ namespace FudgeCore {
      * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
      */
     public addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
-      if (_capture) {
-        if (!this.captures[_type])
-          this.captures[_type] = [];
-        this.captures[_type].push(_handler);
-      }
-      else {
-        if (!this.listeners[_type])
-          this.listeners[_type] = [];
-        this.listeners[_type].push(_handler);
-      }
+      let listListeners: MapEventTypeToListener = _capture ? this.captures : this.listeners;
+      if (!listListeners[_type])
+        listListeners[_type] = [];
+      listListeners[_type].push(_handler);
     }
     /**
-     * Dispatches a synthetic event event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+     * Removes an event listener from the node. The signatur must match the one used with addEventListener
+     * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+     * @param _handler The function to call when the event reaches this node
+     * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+     */
+    public removeEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+      let listenersForType: EventListener[] = _capture ? this.captures[_type] : this.listeners[_type];
+      if (listenersForType)
+        for (let i: number = listenersForType.length - 1; i >= 0; i--)
+          if (listenersForType[i] == _handler)
+            listenersForType.splice(i, 1);
+    }
+    /**
+     * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
      * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase, 
      * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
      * @param _event The event to dispatch
@@ -376,7 +415,7 @@ namespace FudgeCore {
       return true; //TODO: return a meaningful value, see documentation of dispatch event
     }
     /**
-     * Broadcasts a synthetic event event to this node and from there to all nodes deeper in the hierarchy,
+     * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
      * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
      * @param _event The event to broadcast
      */
@@ -405,15 +444,7 @@ namespace FudgeCore {
     }
     // #endregion
 
-    /**
-     * Sets the parent of this node to be the supplied node. Will be called on the child that is appended to this node by appendChild().
-     * @param _parent The parent to be set for this node.
-     */
-    private setParent(_parent: Node | null): void {
-      this.parent = _parent;
-    }
-
-    private *getBranchGenerator(): IterableIterator<Node> {
+    private * getBranchGenerator(): IterableIterator<Node> {
       yield this;
       for (let child of this.children)
         yield* child.branch;

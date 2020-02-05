@@ -94,7 +94,8 @@ namespace FileHandling {
             for (let file of _fileList) {
                 logFile(file);
                 const data: Response = await fetch(file.name);
-                logContent(data.toString());
+                const content: string = await data.text();
+                logContent(content);
             }
         } catch (_e) {
             console.error(_e);

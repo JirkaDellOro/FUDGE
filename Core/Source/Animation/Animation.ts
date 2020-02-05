@@ -1,4 +1,3 @@
-/// <reference path="../Transfer/Serializer.ts"/>
 /// <reference path="../Transfer/Mutable.ts"/>
 
 namespace FudgeCore {

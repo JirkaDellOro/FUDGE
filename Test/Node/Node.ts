@@ -1,32 +1,25 @@
 namespace NodeTest {
-    import ƒ = FudgeCore;
-    window.addEventListener("DOMContentLoaded", init);
+  import ƒ = FudgeCore;
+  window.addEventListener("DOMContentLoaded", init);
 
-    let node: ƒ.Node;
-    let child: ƒ.Node;
-    let grandchild: ƒ.Node;
+  function init(): void {
+    let branch: ƒ.Node = new ƒ.Node("branch");
+    let node1: ƒ.Node = new ƒ.Node("node1");
+    let node2: ƒ.Node = new ƒ.Node("node2");
+    let child1: ƒ.Node = new ƒ.Node("child1");
+    let child2: ƒ.Node = new ƒ.Node("child2");
 
-    function init(): void {
-        Scenes.createThreeLevelNodeHierarchy();
-        console.log(Scenes.node);
-        let all: ƒ.Component[] = Scenes.node.getAllComponents();
-        console.log(all);
-        
-        let cmpMaterial: ƒ.Component[] = Scenes.node.getComponents(ƒ.ComponentMaterial);
-        let cmpMesh: ƒ.Component[] = Scenes.node.getComponents(ƒ.ComponentMesh);
-        
-        console.log(cmpMaterial, cmpMesh);
-        
-        let all2: ƒ.Component[] = [];
-        all2 = all2.concat(cmpMesh);
-        all2 = all2.concat(cmpMaterial);
-        console.log(all2);
+    branch.appendChild(node1);
+    branch.appendChild(node2);
+    node1.appendChild(child1);
+    node2.appendChild(child2);
 
+    for (let node of branch.branch)
+      ƒ.Debug.log(node.name);
 
-        var array1: string[] = ["a", "b", "c"];
-        var array2: string[] = ["d", "e", "f"];
+    node1.appendChild(child2);
 
-        console.log(array1.concat(array2));
-        // expected output: Array ["a", "b", "c", "d", "e", "f"]
-    }
+    for (let node of branch.branch)
+      ƒ.Debug.log(node.name);
+  }
 } 

@@ -73,7 +73,8 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
-						Supports <a href="fudgecore.timer.html">Timer</a>s similar to window.setInterval but with respect to the scaled time</p>
+							Supports <a href="fudgecore.timer.html">Timer</a>s similar to window.setInterval but with respect to the scaled time.
+						All time values are given in milliseconds</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
@@ -123,6 +124,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#get" class="tsd-kind-icon">get</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#getelapsedsincepreviouscall" class="tsd-kind-icon">get<wbr>Elapsed<wbr>Since<wbr>Previous<wbr>Call</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#getoffset" class="tsd-kind-icon">get<wbr>Offset</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#getremainder" class="tsd-kind-icon">get<wbr>Remainder</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#getscale" class="tsd-kind-icon">get<wbr>Scale</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#gettimers" class="tsd-kind-icon">get<wbr>Timers</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#hastimers" class="tsd-kind-icon">has<wbr>Timers</a></li>
@@ -130,6 +132,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#set" class="tsd-kind-icon">set</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#setscale" class="tsd-kind-icon">set<wbr>Scale</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.time.html#settimer" class="tsd-kind-icon">set<wbr>Timer</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.time.html#getunits" class="tsd-kind-icon">get<wbr>Units</a></li>
 							</ul>
 						</section>
 					</div>
@@ -147,7 +150,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L19">Time/Time.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L33">Time/Time.ts:33</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.time.html" class="tsd-signature-type">Time</a></h4>
@@ -167,7 +170,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L32">Time/Time.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L46">Time/Time.ts:46</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -194,7 +197,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
 								<p>Overrides EventTarget.addEventListener</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Event/Event.ts#L56">Event/Event.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L56">Event/Event.ts:56</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -223,7 +226,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L103">Time/Time.ts:103</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L146">Time/Time.ts:146</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -245,7 +248,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L95">Time/Time.ts:95</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L138">Time/Time.ts:138</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -273,7 +276,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L139">Time/Time.ts:139</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L182">Time/Time.ts:182</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -301,7 +304,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L113">Time/Time.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L156">Time/Time.ts:156</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -333,7 +336,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
 								<p>Overrides EventTarget.dispatchEvent</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Event/Event.ts#L63">Event/Event.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L63">Event/Event.ts:63</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -356,7 +359,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L39">Time/Time.ts:39</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L73">Time/Time.ts:73</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -378,7 +381,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L84">Time/Time.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L125">Time/Time.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -401,7 +404,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L76">Time/Time.ts:76</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L117">Time/Time.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -409,6 +412,34 @@
 									<p>Retrieves the offset of this time</p>
 								</div>
 							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getremainder" class="tsd-anchor"></a>
+					<h3>get<wbr>Remainder</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Remainder<span class="tsd-signature-symbol">(</span>_to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L80">Time/Time.ts:80</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the remaining time to the given point of time</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_to: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 						</li>
 					</ul>
@@ -423,7 +454,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L69">Time/Time.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L110">Time/Time.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -445,7 +476,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L147">Time/Time.ts:147</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L190">Time/Time.ts:190</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -467,7 +498,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L155">Time/Time.ts:155</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L198">Time/Time.ts:198</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -491,7 +522,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
 								<p>Overrides EventTarget.removeEventListener</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Event/Event.ts#L59">Event/Event.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L59">Event/Event.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -520,7 +551,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L47">Time/Time.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L88">Time/Time.ts:88</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -551,7 +582,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L57">Time/Time.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L98">Time/Time.ts:98</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -582,7 +613,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/66afc59e/Core/Source/Time/Time.ts#L130">Time/Time.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L173">Time/Time.ts:173</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -618,6 +649,29 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getunits" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Units</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Units<span class="tsd-signature-symbol">(</span>_milliseconds<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.timeunits.html" class="tsd-signature-type">TimeUnits</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Time/Time.ts#L50">Time/Time.ts:50</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_milliseconds: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.timeunits.html" class="tsd-signature-type">TimeUnits</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -675,6 +729,9 @@
 								<a href="fudgecore.time.html#getoffset" class="tsd-kind-icon">get<wbr>Offset</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.time.html#getremainder" class="tsd-kind-icon">get<wbr>Remainder</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.time.html#getscale" class="tsd-kind-icon">get<wbr>Scale</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -694,6 +751,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.time.html#settimer" class="tsd-kind-icon">set<wbr>Timer</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.time.html#getunits" class="tsd-kind-icon">get<wbr>Units</a>
 							</li>
 						</ul>
 					</li>

@@ -187,9 +187,9 @@ namespace FudgeCore {
         private initDefaultValues(): void {
             this.setPanningModel("HRTF");
             this.setDistanceModel("inverse");
-            this.setConeInnerAngle(90);
-            this.setConeOuterAngle(270);
-            this.setConeOuterGain(0);
+            this.setConeInnerAngle(360);
+            this.setConeOuterAngle(0);
+            this.setConeOuterGain(1);
             this.setRefDistance(1);
             this.setMaxDistance(5);
             this.setRolloffFactor(1);

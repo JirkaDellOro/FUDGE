@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>Debug</title>
-    <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
-    <script type="text/javascript" src="../Scenes/Scenes.js"></script>
-    <script type="text/javascript" src="TestDebug.js"></script>
-
-    <style type="text/css">
-        html,
-        body {
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        canvas {
-            width: 400px;
-            height: 400px;
-            background-color: aqua;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Debug</title>
+  <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="TestDebug.js"></script>
 </head>
 
 <body>
-    <canvas id="viewport_1" width="800" height="800"></canvas>
+  <h1>
+    Test: Debug-Class
+  </h1>
+  <p>
+    <h2>What</h2> Test the filtering and routing of debug-information to various channels and their formatting 
+  </p>
+  <p>
+    <h2>How</h2>
+    <ul>
+      <li>Open the debug console and press the start button</li>
+      <li>Observe output to the console, the alert window and the textfield</li>
+    </ul>
+  </p>
+  <p>
+    <h2>Expect</h2>
+    <ul>
+      <li>Messages appear in the output targets</li>
+      <li>Message format is [type] |  [targets] | [number of argument objects] | [argument objects]</li>
+      <li>Messages appear in the targets listet in [targets]</li>
+      <li>Messages are formatted, formating depends on target, e.g. no groups in alert</li>
+    </ul>
+  </p>
+  <button type="button">Start</button>
 </body>

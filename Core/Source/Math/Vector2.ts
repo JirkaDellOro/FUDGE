@@ -120,7 +120,7 @@ namespace FudgeCore {
      * @returns A new vector representing the scaled version of the given vector
      */
     public static SCALE(_vector: Vector2, _scale: number): Vector2 {
-      let vector: Vector2 = new Vector2();
+      let vector: Vector2 = new Vector2(_vector.x * _scale, _vector.y * _scale);
       return vector;
     }
 

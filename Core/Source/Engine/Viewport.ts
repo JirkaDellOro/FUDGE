@@ -36,7 +36,7 @@ namespace FudgeCore {
     private branch: Node = null; // The first node in the tree(branch) that will be rendered.
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
-    private pickBuffers: PickBuffer[] = [];
+    private  pickBuffers: PickBuffer[] = [];
 
     /**
      * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
@@ -86,9 +86,11 @@ namespace FudgeCore {
         this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
       this.branch = _branch;
-      this.collectLights();
-      this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-      this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      if (this.branch) {
+        this.collectLights();
+        this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      }
     }
     /**
      * Logs this viewports scenegraph to the console.
@@ -143,13 +145,7 @@ namespace FudgeCore {
         RenderManager.update();
 
       this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
-
-      this.crc2.imageSmoothingEnabled = false;
-      this.crc2.drawImage(
-        RenderManager.getCanvas(),
-        this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
-        this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
-      );
+      Debug.log(this.pickBuffers[0].frameBuffer);
     }
 
 

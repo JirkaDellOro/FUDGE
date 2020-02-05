@@ -1,208 +1,155 @@
 namespace FudgeCore {
-    /**
-     * Attaches a [[ComponentAudio]] to a [[Node]].
-     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    export class ComponentAudio extends Component implements Serializable {
-        
-        public audio: Audio | null;
-        public audioOscillator: AudioOscillator;
+  /**
+   * Attaches a [[ComponentAudio]] to a [[Node]].
+   * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+   * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export class ComponentAudio extends Component {
+    public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+    public gain: GainNode;
 
-        public isLocalised: boolean = false;
-        public isFiltered: boolean = false;
-        public isDelayed: boolean = false;
-        
-        protected singleton: boolean = false;
+    protected singleton: boolean = false;
+    private panner: PannerNode;
+    private source: AudioBufferSourceNode;
+    private audioManager: AudioManager;
+    private playing: boolean = false;
+    private connected: boolean = false;
+    // solely for testing component standalone. Determine at runtime
+    // private attached: boolean = false;
+    private listened: boolean = false;
 
-        private localisation: AudioLocalisation | null;
-        private filter: AudioFilter | null;
-        private delay: AudioDelay | null;
-        
-        /**
-         * Create Component Audio for 
-         * @param _audio 
-         */
-        constructor(_audio?: Audio, _audioOscillator?: AudioOscillator) {
-            super();
-            if (_audio) {
-                this.setAudio(_audio);
-            }
-        }
+    constructor(_audio: Audio = null, _loop: boolean = false, _start: boolean = false) {
+      super();
+      this.install();
+      this.createSource(_audio, _loop);
 
-        /**
-         * set AudioFilter in ComponentAudio
-         * @param _filter AudioFilter 
-         */
-        public setFilter(_filter: AudioFilter): void {
-            this.filter = _filter;
-            this.isFiltered = true;
-        }
+      this.addEventListener(EVENT.COMPONENT_ADD, this.handleAttach);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.handleAttach);
 
-        public getFilter(): AudioFilter {
-            return this.filter;
-        }
-
-        public setDelay(_delay: AudioDelay): void {
-            this.delay = _delay;
-            this.isDelayed = true;
-        }
-
-        public getDelay(): AudioDelay {
-            return this.delay;
-        }
-
-        public setLocalisation(_localisation: AudioLocalisation): void {
-            this.localisation = _localisation;
-            this.isLocalised = true;
-        }
-
-        public getLocalisation(): AudioLocalisation {
-            return this.localisation;
-        }
-
-        /**
-         * Play Audio at current time of AudioContext
-         */
-        public playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void {
-            this.audio.initBufferSource(_audioSettings);
-            this.connectAudioNodes(_audioSettings);
-            this.audio.getBufferSourceNode().start(_audioSettings.getAudioContext().currentTime, _offset, _duration);
-        }
-
-        /**
-         * Adds an [[Audio]] to the [[ComponentAudio]]
-         * @param _audio Audio Data as [[Audio]]
-         */
-        public setAudio(_audio: Audio): void {
-            this.audio = _audio;
-        }
-
-        public getAudio(): Audio {
-            return this.audio;
-        }
-
-        //#region Transfer
-        public serialize(): Serialization {
-            let serialization: Serialization = {
-                isFiltered: this.isFiltered,
-                isDelayed: this.isDelayed,
-                isLocalised: this.isLocalised,
-                audio: this.audio,
-                filter: this.filter,
-                delay: this.delay,
-                localisation: this.localisation
-            };
-            return serialization;
-        }
-       
-        public deserialize(_serialization: Serialization): Serializable {
-            this.isFiltered = _serialization.isFiltered;
-            this.isDelayed = _serialization.isDelayed;
-            this.isLocalised = _serialization.isLocalised;
-            this.audio = _serialization.audio;
-            this.filter = _serialization.filter;
-            this.delay = _serialization.delay;
-
-            return this;
-        }
-
-        protected reduceMutator(_mutator: Mutator): void {
-            delete this.audio;
-            delete this.filter;
-            delete this.delay;
-            delete this.localisation;
-        }
-        //#endregion
-
-        /**
-         * Final attachments for the Audio Nodes in following order.
-         * This method needs to be called whenever there is a change of parts in the [[ComponentAudio]].
-         * 1. Local Gain
-         * 2. Localisation
-         * 3. Filter
-         * 4. Delay
-         * 5. Master Gain
-         */
-         private connectAudioNodes(_audioSettings: AudioSettings): void {
-            const bufferSource: AudioBufferSourceNode = this.audio.getBufferSourceNode();
-            const lGain: GainNode = this.audio.getLocalGain();
-            let panner: PannerNode;
-            let filt: BiquadFilterNode;
-            let delay: DelayNode;
-            const mGain: GainNode = _audioSettings.masterGain;
-
-            console.log("-------------------------------");
-            console.log("Connecting Properties for Audio");
-            console.log("-------------------------------");
-
-            bufferSource.connect(lGain);
-
-            if (this.isLocalised && this.localisation != null) {
-                console.log("Connect Localisation");
-                panner = this.localisation.pannerNode;
-                lGain.connect(panner);
-
-                if (this.isFiltered && this.filter != null) {
-                    console.log("Connect Filter");
-                    filt = this.filter.audioFilter;
-                    panner.connect(filt);
-
-                    if (this.isDelayed && this.delay != null) {
-                        console.log("Connect Delay");
-                        delay = this.delay.audioDelay;
-                        filt.connect(delay);
-                        console.log("Connect Master Gain");
-                        delay.connect(mGain);
-                    }
-                    else {
-                        console.log("Connect Master Gain");
-                        filt.connect(mGain);
-                    }
-                }
-                else {
-                    if (this.isDelayed && this.delay != null) {
-                        console.log("Connect Delay");
-                        delay = this.delay.audioDelay;
-                        panner.connect(delay);
-                        console.log("Connect Master Gain");
-                        delay.connect(mGain);
-                    }
-                    else {
-                        console.log("Connect Master Gain");
-                        panner.connect(mGain);
-                    }
-                }
-            }
-            else if (this.isFiltered && this.filter != null) {
-                console.log("Connect Filter");
-                filt = this.filter.audioFilter;
-                lGain.connect(filt);
-
-                if (this.isDelayed && this.delay != null) {
-                    console.log("Connect Delay");
-                    delay = this.delay.audioDelay;
-                    filt.connect(delay);
-                    console.log("Connect Master Gain");
-                    delay.connect(mGain);
-                }
-                else {
-                    console.log("Connect Master Gain");
-                    filt.connect(mGain);
-                }
-            }
-            else if (this.isDelayed && this.delay != null) {
-                console.log("Connect Delay");
-                delay = this.delay.audioDelay;
-                lGain.connect(delay);
-                console.log("Connect Master Gain");
-                delay.connect(mGain);
-            }
-            else {
-                console.log("Connect Only Master Gain");
-                lGain.connect(mGain);
-            }
-            console.log("-------------------------------");
-        }
+      if (_start)
+        this.play(_start);
     }
+
+    public set audio(_audio: Audio) {
+      this.source.buffer = _audio;
+    }
+
+    public get audio(): Audio {
+      return <Audio>this.source.buffer;
+    }
+
+    public play(_on: boolean): void {
+      if (_on) {
+        this.createSource(this.audio, this.source.loop);
+        this.source.start(0, 0);
+      }
+      else
+        this.source.stop();
+      this.playing = _on;
+    }
+
+    // public reset(): void {
+    //   this.source.re
+    // }
+
+    public get isPlaying(): boolean {
+      return this.playing;
+    }
+    public get isConnected(): boolean {
+      return this.connected;
+    }
+    public get isAttached(): boolean {
+      return this.getContainer() != null;
+    }
+    public get isListened(): boolean {
+      return this.listened;
+    }
+
+    // public get isConnected(): boolean {
+    //   return this.connected;
+    // }
+
+    /**
+     * Activate override. Connects or disconnects AudioNodes
+     */
+    public activate(_on: boolean): void {
+      super.activate(_on);
+      this.updateConnection();
+    }
+
+    public install(_audioManager: AudioManager = AudioManager.default): void {
+      let active: boolean = this.isActive;
+      this.activate(false);
+      this.audioManager = _audioManager;
+      this.panner = _audioManager.createPanner();
+      this.gain = _audioManager.createGain();
+      this.panner.connect(this.gain);
+      this.gain.connect(_audioManager.gain);
+      this.activate(active);
+    }
+
+    public createSource(_audio: Audio, _loop: boolean): void {
+      this.source = this.audioManager.createBufferSource();
+      this.source.connect(this.panner);
+
+      if (_audio)
+        this.audio = _audio;
+      this.source.loop = _loop;
+    }
+
+    public connect(_on: boolean): void {
+      if (_on)
+        this.gain.connect(this.audioManager.gain);
+      else
+        this.gain.disconnect(this.audioManager.gain);
+    }
+
+    private updateConnection(): void {
+      try {
+        this.connect(this.isActive && this.isAttached && this.listened);
+      } catch (_error) {
+        // nop
+      }
+    }
+
+    /** 
+     * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node. 
+     * Therefore unused AudioNodes may be garbage collected when an unused component is collected
+     */
+    private handleAttach = (_event: Event): void => {
+      // Debug.log(_event);
+      if (_event.type == EVENT.COMPONENT_ADD) {
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
+        this.listened = this.getContainer().isDescendantOf(AudioManager.default.getBranchListeningTo());
+      }
+      else {
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
+        this.listened = false;
+      }
+      this.updateConnection();
+    }
+
+    /** 
+     * Automatically connects/disconnects AudioNodes when appending/removing the branch the component is in. 
+     */
+    private handleBranch = (_event: Event): void => {
+      // Debug.log(_event);
+      this.listened = (_event.type == EVENT_AUDIO.CHILD_APPEND);
+      this.updateConnection();
+    }
+
+    /** 
+     * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
+     */
+    private updatePanner = (_event: Event): void => {
+      // Debug.log(_event);
+      let local: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+      // Debug.log(local.toString());
+      this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z);
+    }
+  }
 }

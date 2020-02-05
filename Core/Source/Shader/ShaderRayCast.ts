@@ -26,7 +26,7 @@ namespace FudgeCore {
                        float id = float(u_id)/ 256.0;
                        float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
                        float lowerbyte = fract(gl_FragCoord.z * 256.0);
-                       frag = vec4(id, id, upperbyte , lowerbyte);
+                       frag = vec4(gl_FragCoord.z, upperbyte, lowerbyte, 1.0);
                     }`;
         }
     }
