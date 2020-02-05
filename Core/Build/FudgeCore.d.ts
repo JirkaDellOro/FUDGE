@@ -2937,19 +2937,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Provides an empty Mesh Object
-     */
-    class MeshPoly extends Mesh {
-        constructor();
-        create(): void;
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
      *               4
@@ -2989,7 +2976,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Generate a UV Sphere with a given number of sectors and stacks.
+     * Generate a UV Sphere with a given number of sectors and stacks (clamped at 128*128)
+     * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
      * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
      */
     class MeshSphere extends Mesh {
@@ -3024,14 +3012,6 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
-}
-declare namespace FudgeCore {
-    enum MeshFormat {
-        OBJ = 0,
-        GLTF = 1
-    }
-    /** Returns a Mesh from given string (human readable file formats) */
-    function importMesh(meshformat: MeshFormat, _data: string): Mesh;
 }
 declare namespace FudgeCore {
     interface MapClassToComponents {
