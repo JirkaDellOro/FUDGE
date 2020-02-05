@@ -1,6 +1,9 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../Aid/Build/FudgeAid"/>
+
 namespace AudioSpace {
   import ƒ = FudgeCore;
+  import ƒAid = FudgeAid;
   let out: HTMLOutputElement;
 
   // tslint:disable-next-line: typedef
@@ -21,7 +24,8 @@ namespace AudioSpace {
     out = document.querySelector("output");
 
     let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, .5, .5, 1)));
-    const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+    // const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+    const body: ƒAid.NodeGeometry = new ƒAid.NodeGeometry("Body", material, new ƒ.MeshCube());
     const mtxBody: ƒ.Matrix4x4 = body.cmpTransform.local;
 
     ƒ.RenderManager.initialize();
@@ -45,7 +49,8 @@ namespace AudioSpace {
 
     // scene setup
     let branch: ƒ.Node = new ƒ.Node("Branch");
-    branch.appendChild(Scenes.createCoordinateSystem());
+    // branch.appendChild(Scenes.createCoordinateSystem());
+    branch.appendChild(new ƒAid.NodeCoordinateSystem());
     branch.appendChild(body);
     branch.appendChild(camera);
 

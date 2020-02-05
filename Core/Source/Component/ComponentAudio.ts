@@ -1,3 +1,5 @@
+/// <reference path="Component.ts"/>
+/// <reference path="../Math/Matrix4x4.ts"/>
 namespace FudgeCore {
   /**
    * Attaches a [[ComponentAudio]] to a [[Node]].
@@ -117,7 +119,7 @@ namespace FudgeCore {
      * Therefore unused AudioNodes may be garbage collected when an unused component is collected
      */
     private handleAttach = (_event: Event): void => {
-      Debug.log(_event);
+      // Debug.log(_event);
       if (_event.type == EVENT.COMPONENT_ADD) {
         this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
         this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
@@ -137,7 +139,7 @@ namespace FudgeCore {
      * Automatically connects/disconnects AudioNodes when appending/removing the branch the component is in. 
      */
     private handleBranch = (_event: Event): void => {
-      Debug.log(_event);
+      // Debug.log(_event);
       this.listened = (_event.type == EVENT_AUDIO.CHILD_APPEND);
       this.updateConnection();
     }
@@ -146,9 +148,9 @@ namespace FudgeCore {
      * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
      */
     private updatePanner = (_event: Event): void => {
-      Debug.log(_event);
+      // Debug.log(_event);
       let local: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
-      Debug.log(local.toString());
+      // Debug.log(local.toString());
       this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z);
     }
   }

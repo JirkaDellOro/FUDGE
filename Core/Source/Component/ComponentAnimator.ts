@@ -1,4 +1,6 @@
-/// <reference path="Component.ts"/>
+/// <reference path="../Time/Loop.ts"/>
+/// <reference path="../Animation/Animation.ts"/>
+
 namespace FudgeCore {
   /**
    * Holds different playmodes the animation uses to play back its animation.

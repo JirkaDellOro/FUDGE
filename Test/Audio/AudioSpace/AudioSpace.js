@@ -1,8 +1,11 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../Aid/Build/FudgeAid"/>
 var AudioSpace;
 /// <reference types="../../../Core/Build/FudgeCore"/>
+/// <reference types="../../../Aid/Build/FudgeAid"/>
 (function (AudioSpace) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     let out;
     // tslint:disable-next-line: typedef
     let parameter = {
@@ -18,7 +21,8 @@ var AudioSpace;
     async function init(_event) {
         out = document.querySelector("output");
         let material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, .5, .5, 1)));
-        const body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+        // const body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
+        const body = new ƒAid.NodeGeometry("Body", material, new ƒ.MeshCube());
         const mtxBody = body.cmpTransform.local;
         ƒ.RenderManager.initialize();
         // #region Audio Setup
@@ -37,7 +41,8 @@ var AudioSpace;
         // camera.addComponent(componentAudioListener);
         // scene setup
         let branch = new ƒ.Node("Branch");
-        branch.appendChild(Scenes.createCoordinateSystem());
+        // branch.appendChild(Scenes.createCoordinateSystem());
+        branch.appendChild(new ƒAid.NodeCoordinateSystem());
         branch.appendChild(body);
         branch.appendChild(camera);
         let viewport = new ƒ.Viewport();
