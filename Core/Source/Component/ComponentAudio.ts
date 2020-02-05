@@ -1,5 +1,3 @@
-/// <reference path="Component.ts"/>
-/// <reference path="../Math/Matrix4x4.ts"/>
 namespace FudgeCore {
   /**
    * Attaches a [[ComponentAudio]] to a [[Node]].

@@ -1,6 +1,3 @@
-///<reference path="../Node/Node.ts"/>
-///<reference path="../Event/EventAudio.ts"/>
-
 namespace FudgeCore {
   export class AudioManager extends AudioContext {
     public static readonly default: AudioManager = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
