@@ -35,9 +35,9 @@ namespace FudgeCore {
             let verts: Array<number> = [];
             
             let x: number;
-            let y: number;
-            let xy: number;
             let z: number;
+            let xz: number;
+            let y: number;
             
             let sectorStep: number = 2 * Math.PI / this._sectors;
             let stackStep: number = Math.PI / this._stacks;
@@ -49,8 +49,8 @@ namespace FudgeCore {
             but different tex coords */
             for (let i = 0; i <= this._stacks; ++i) {
                 stackAngle = Math.PI / 2 - i * stackStep;
-                xy = Math.cos(stackAngle);
-                z = Math.sin(stackAngle);
+                xz = Math.cos(stackAngle);
+                y = Math.sin(stackAngle);
                 
                 // add (sectorCount+1) vertices per stack
                 // the first and last vertices have same position and normal, but different tex coords
@@ -58,16 +58,16 @@ namespace FudgeCore {
                     sectorAngle = j * sectorStep;
 
                     //vertex position
-                    x = xy * Math.cos(sectorAngle);
-                    y = xy * Math.sin(sectorAngle);
+                    x = xz * Math.cos(sectorAngle);
+                    z = xz * Math.sin(sectorAngle);
                     verts.push(x);
-                    verts.push(z);
                     verts.push(y);
+                    verts.push(z);
 
                     //normals
                     this.normals.push(x);
-                    this.normals.push(z);
                     this.normals.push(y);
+                    this.normals.push(z);
                 }
             }
 
