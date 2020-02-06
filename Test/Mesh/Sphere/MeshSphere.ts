@@ -8,10 +8,9 @@ namespace MeshTest {
 
 
     function init(_event: Event): void {
-        let mymesh: ƒ.Mesh = new ƒ.MeshSphere(16, 12);
+        let mymesh: ƒ.Mesh = new ƒ.MeshSphere(48, 32);
         let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         object = Scenes.createCompleteMeshNode("Cube", material, mymesh);
-        object.cmpTransform.local.scale(new ƒ.Vector3(0.5,0.5,0.5));
         branch.appendChild(object);
 
         let body: ƒ.Node = new ƒ.Node("k");
@@ -38,13 +37,13 @@ namespace MeshTest {
         viewport.setFocus(true);
         viewport.draw();
 
-        
+        /*
         window.setInterval(function (): void {
             object.cmpTransform.local.rotateY(-0.4);
             object.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
         },                 20);
-        
+        */
     }
 }

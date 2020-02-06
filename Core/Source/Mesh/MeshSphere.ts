@@ -36,7 +36,7 @@ namespace FudgeCore {
             
             let x: number;
             let y: number;
-            let xz: number;
+            let xy: number;
             let z: number;
             
             let sectorStep: number = 2 * Math.PI / this._sectors;
@@ -47,17 +47,19 @@ namespace FudgeCore {
             /* add (sectorCount+1) vertices per stack.
             the first and last vertices have same position and normal, 
             but different tex coords */
-            for (let i = 0; i <= this._stacks; i++) {
+            for (let i = 0; i <= this._stacks; ++i) {
                 stackAngle = Math.PI / 2 - i * stackStep;
-                xz = Math.cos(stackAngle);
+                xy = Math.cos(stackAngle);
                 z = Math.sin(stackAngle);
                 
-                for (let j = 0; j <= this._sectors; j++) {
+                // add (sectorCount+1) vertices per stack
+                // the first and last vertices have same position and normal, but different tex coords
+                for (let j = 0; j <= this._sectors; ++j) {
                     sectorAngle = j * sectorStep;
 
                     //vertex position
-                    x = xz * Math.cos(sectorAngle);
-                    y = xz * Math.sin(sectorAngle);
+                    x = xy * Math.cos(sectorAngle);
+                    y = xy * Math.sin(sectorAngle);
                     verts.push(x);
                     verts.push(y);
                     verts.push(z);
@@ -70,7 +72,9 @@ namespace FudgeCore {
             }
 
             let vertices: Float32Array = new Float32Array(verts);
-            console.log(vertices.length);
+
+            // scale down
+            vertices = vertices.map(_value => _value / 2);
             return vertices;
         }
 
@@ -80,30 +84,28 @@ namespace FudgeCore {
             let k1: number;
             let k2: number;
             
-            for (let i = 0; i < this._stacks; i++) {
+            for (let i = 0; i < this._stacks; ++i) {
                 k1 = i * (this._sectors + 1);   // beginning of current stack
                 k2 = k1 + this._sectors + 1;    // beginning of next stack
 
-                for (let j = 0; j < this._sectors; j++, ++k1, ++k2) {
+                for (let j = 0; j < this._sectors; ++j, ++k1, ++k2) {
 
                     // 2 triangles per sector excluding first and last stacks
                     // k1 => k2 => k1+1
                     if (i != 0) {
+                        inds.push(k2 + 1);
+                        inds.push(k1 + 1);
                         inds.push(k1);
-                        inds.push(k2);
-                        inds.push(k1 + 1);
                     }
-
+                    
                     if (i != (this._stacks - 1)) {
-                        inds.push(k1 + 1);
                         inds.push(k2);
                         inds.push(k2 + 1);
+                        inds.push(k1);
                     }
                 }
             }
-
             let indices: Uint16Array = new Uint16Array(inds);
-            console.log(indices);
             return indices;
         }
         protected createTextureUVs(): Float32Array {

@@ -5,10 +5,9 @@ var MeshTest;
     let branch = new ƒ.Node("Branch");
     let object = new ƒ.Node("object");
     function init(_event) {
-        let mymesh = new ƒ.MeshSphere(16, 12);
+        let mymesh = new ƒ.MeshSphere(48, 32);
         let material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         object = Scenes.createCompleteMeshNode("Cube", material, mymesh);
-        object.cmpTransform.local.scale(new ƒ.Vector3(0.5, 0.5, 0.5));
         branch.appendChild(object);
         let body = new ƒ.Node("k");
         let cmpLightDirectionalRed = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0.8, 0.7)));
@@ -27,12 +26,14 @@ var MeshTest;
         Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);
         viewport.draw();
-        window.setInterval(function () {
+        /*
+        window.setInterval(function (): void {
             object.cmpTransform.local.rotateY(-0.4);
             object.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
-        }, 20);
+        },                 20);
+        */
     }
 })(MeshTest || (MeshTest = {}));
 //# sourceMappingURL=MeshSphere.js.map
