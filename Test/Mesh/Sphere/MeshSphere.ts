@@ -18,7 +18,7 @@ namespace MeshTest {
         let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
         let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         
-        let sphereMesh: ƒ.Mesh = new ƒ.MeshSphere(24, 16);
+        let sphereMesh: ƒ.Mesh = new ƒ.MeshSphere(32, 24);
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
 
@@ -55,7 +55,6 @@ namespace MeshTest {
         
         window.setInterval(function (): void {
             sphereTex.cmpTransform.local.rotateY(0.5);
-            sphereTex.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
         },                 20);

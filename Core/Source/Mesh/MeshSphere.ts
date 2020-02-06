@@ -72,7 +72,7 @@ namespace FudgeCore {
                     this._normals.push(z);
 
                     //UV Coords
-                    this._textureUVs.push(j / this._sectors);
+                    this._textureUVs.push(j / this._sectors * -1);
                     this._textureUVs.push(i / this._stacks);
                 }
             }
