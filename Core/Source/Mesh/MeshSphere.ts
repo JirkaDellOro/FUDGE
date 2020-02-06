@@ -61,13 +61,13 @@ namespace FudgeCore {
                     x = xy * Math.cos(sectorAngle);
                     y = xy * Math.sin(sectorAngle);
                     verts.push(x);
-                    verts.push(y);
                     verts.push(z);
+                    verts.push(y);
 
                     //normals
                     this.normals.push(x);
-                    this.normals.push(y);
                     this.normals.push(z);
+                    this.normals.push(y);
                 }
             }
 
@@ -93,15 +93,15 @@ namespace FudgeCore {
                     // 2 triangles per sector excluding first and last stacks
                     // k1 => k2 => k1+1
                     if (i != 0) {
-                        inds.push(k2 + 1);
-                        inds.push(k1 + 1);
                         inds.push(k1);
+                        inds.push(k1 + 1);
+                        inds.push(k2);
                     }
                     
                     if (i != (this._stacks - 1)) {
-                        inds.push(k2);
+                        inds.push(k1 + 1);
                         inds.push(k2 + 1);
-                        inds.push(k1);
+                        inds.push(k2);
                     }
                 }
             }

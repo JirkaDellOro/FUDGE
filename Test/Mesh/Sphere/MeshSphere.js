@@ -5,7 +5,7 @@ var MeshTest;
     let branch = new ƒ.Node("Branch");
     let object = new ƒ.Node("object");
     function init(_event) {
-        let mymesh = new ƒ.MeshSphere(48, 32);
+        let mymesh = new ƒ.MeshSphere(24, 16);
         let material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         object = Scenes.createCompleteMeshNode("Cube", material, mymesh);
         branch.appendChild(object);
@@ -26,14 +26,12 @@ var MeshTest;
         Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);
         viewport.draw();
-        /*
-        window.setInterval(function (): void {
-            object.cmpTransform.local.rotateY(-0.4);
+        window.setInterval(function () {
+            object.cmpTransform.local.rotateY(0.5);
             object.cmpTransform.local.rotateX(0.3);
             ƒ.RenderManager.update();
             viewport.draw();
-        },                 20);
-        */
+        }, 20);
     }
 })(MeshTest || (MeshTest = {}));
 //# sourceMappingURL=MeshSphere.js.map
