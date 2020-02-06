@@ -19,7 +19,6 @@ namespace AudioSpace {
   };
 
   let cmpAudio: ƒ.ComponentAudio;
-  let cmpAudioListener: ƒ.ComponentAudioListener;
 
   window.addEventListener("load", init);
 
@@ -32,16 +31,14 @@ namespace AudioSpace {
 
     ƒ.RenderManager.initialize();
 
-    // #region Audio Setup
+    // audio setup
     let audio: ƒ.Audio = await ƒ.Audio.load("hypnotic.mp3");
     cmpAudio = new ƒ.ComponentAudio(audio, true, true);
     body.addComponent(cmpAudio);
-    // #endregion
-
 
     // camera setup
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 3, 20);
+    camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 0.1, 20);
     camera.node.addComponent(new ƒ.ComponentAudioListener());
 
     // scene setup

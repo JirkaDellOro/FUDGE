@@ -18,7 +18,6 @@ var AudioSpace;
         cameraPosition: new ƒ.Vector3(0, 0, 5)
     };
     let cmpAudio;
-    let cmpAudioListener;
     window.addEventListener("load", init);
     async function init(_event) {
         out = document.querySelector("output");
@@ -26,14 +25,13 @@ var AudioSpace;
         const body = new ƒAid.NodeGeometry("Body", material, new ƒ.MeshPyramid());
         const mtxBody = body.cmpTransform.local;
         ƒ.RenderManager.initialize();
-        // #region Audio Setup
+        // audio setup
         let audio = await ƒ.Audio.load("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true, true);
         body.addComponent(cmpAudio);
-        // #endregion
         // camera setup
         let cmpCamera = new ƒ.ComponentCamera();
-        camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 3, 20);
+        camera = new ƒAid.CameraOrbit(cmpCamera, 1.5, 80, 0.1, 20);
         camera.node.addComponent(new ƒ.ComponentAudioListener());
         // scene setup
         let branch = new ƒ.Node("Branch");

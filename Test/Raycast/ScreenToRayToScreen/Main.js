@@ -1,6 +1,7 @@
 var ScreenToRayToScreen;
 (function (ScreenToRayToScreen) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     ScreenToRayToScreen.root = new ƒ.Node("Root");
     let viewport;
@@ -24,7 +25,7 @@ var ScreenToRayToScreen;
         createScene();
         // setup viewport
         viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", ScreenToRayToScreen.root, ScreenToRayToScreen.camera.cmpCamera, canvas);
+        viewport.initialize("Viewport", ScreenToRayToScreen.root, ScreenToRayToScreen.camera.component, canvas);
         ƒ.Debug.log("Viewport", viewport);
         // setup event handling
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
@@ -44,22 +45,22 @@ var ScreenToRayToScreen;
         }
         let posProjection = viewport.pointClientToProjection(new ƒ.Vector2(_event.pointerX, _event.pointerY));
         ƒ.Debug.clear();
-        let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
+        let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         console.group("original");
         ƒ.Debug.log("origin", ray.origin.toString());
         ƒ.Debug.log("direction", ray.direction.toString());
         console.groupEnd();
-        ray.direction.scale(ScreenToRayToScreen.camera.getDistance());
-        ray.origin.transform(ScreenToRayToScreen.camera.cmpCamera.pivot);
-        ray.origin.transform(ScreenToRayToScreen.camera.cmpCamera.getContainer().mtxWorld);
-        ray.direction.transform(ScreenToRayToScreen.camera.cmpCamera.pivot, false);
-        ray.direction.transform(ScreenToRayToScreen.camera.cmpCamera.getContainer().mtxWorld, false);
+        ray.direction.scale(ScreenToRayToScreen.camera.distance);
+        ray.origin.transform(ScreenToRayToScreen.camera.component.pivot);
+        ray.origin.transform(ScreenToRayToScreen.camera.component.getContainer().mtxWorld);
+        ray.direction.transform(ScreenToRayToScreen.camera.component.pivot, false);
+        ray.direction.transform(ScreenToRayToScreen.camera.component.getContainer().mtxWorld, false);
         console.group("transformed");
         ƒ.Debug.log("origin", ray.origin.toString());
         ƒ.Debug.log("direction", ray.direction.toString());
         console.groupEnd();
         let rayEnd = ƒ.Vector3.SUM(ray.origin, ray.direction);
-        let projection = ScreenToRayToScreen.camera.cmpCamera.project(rayEnd);
+        let projection = ScreenToRayToScreen.camera.component.project(rayEnd);
         // let screen: ƒ.Vector2 = ƒ.RenderManager.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
         let screen = viewport.pointClipToClient(projection.toVector2());
         console.group("end");
@@ -72,22 +73,23 @@ var ScreenToRayToScreen;
         updateDisplay();
     }
     function hndWheelMove(_event) {
-        ScreenToRayToScreen.camera.translate(_event.deltaY * speedCameraTranslation);
+        ScreenToRayToScreen.camera.distance += _event.deltaY * speedCameraTranslation;
         updateDisplay();
     }
     function createScene() {
+        ScreenToRayToScreen.root.appendChild(new ƒAid.NodeCoordinateSystem());
         // set lights
         let cmpLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-        cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.8));
-        // game.addComponent(cmpLight);
-        let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("DARK_GREY")));
+        cmpLight.pivot.lookAt(new ƒ.Vector3(-1, -3, -2));
+        ScreenToRayToScreen.root.addComponent(cmpLight);
+        let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("grey")));
         ScreenToRayToScreen.root.addComponent(cmpLightAmbient);
         // setup orbiting camera
-        ScreenToRayToScreen.camera = new ScreenToRayToScreen.CameraOrbit(75);
+        let cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.backgroundColor = ƒ.Color.CSS("white");
+        ScreenToRayToScreen.camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
         ScreenToRayToScreen.root.appendChild(ScreenToRayToScreen.camera);
-        // camera.setRotationX(-20);
-        ScreenToRayToScreen.camera.setRotationY(90);
-        ScreenToRayToScreen.camera.cmpCamera.getContainer().addComponent(cmpLight);
+        // camera.node.addComponent(cmpLight);
         let cube = new ƒ.Node("Cube");
         let cmpMesh = new ƒ.ComponentMesh(new ƒ.MeshCube());
         cube.addComponent(cmpMesh);
@@ -104,7 +106,7 @@ var ScreenToRayToScreen;
     ScreenToRayToScreen.updateDisplay = updateDisplay;
     function drawLabels() {
         let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].mtxWorld;
-        let projection = ScreenToRayToScreen.camera.cmpCamera.project(mtxCube.translation);
+        let projection = ScreenToRayToScreen.camera.component.project(mtxCube.translation);
         let posCanvas = viewport.pointClipToCanvas(projection.toVector2());
         let posClient = viewport.pointClipToClient(projection.toVector2());
         let posScreen = viewport.pointClientToScreen(posClient);
