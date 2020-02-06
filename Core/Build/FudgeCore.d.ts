@@ -2985,7 +2985,8 @@ declare namespace FudgeCore {
         readonly sectors: number;
         private _stacks;
         readonly stacks: number;
-        private normals;
+        private _normals;
+        private _textureUVs;
         constructor(_sectors?: number, _stacks?: number);
         create(): void;
         protected createVertices(): Float32Array;

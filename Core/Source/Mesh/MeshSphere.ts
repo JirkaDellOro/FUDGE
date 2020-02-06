@@ -10,7 +10,8 @@ namespace FudgeCore {
         private _stacks: number; get stacks(): number {return this._stacks;}
         
         // Dirty Workaround to have access to the normals from createVertices()
-        private normals: Array<number> = [];
+        private _normals: Array<number> = [];
+        private _textureUVs: Array<number> = [];
 
         public constructor(_sectors: number = 12, _stacks: number = 8) {
             super();
@@ -39,6 +40,7 @@ namespace FudgeCore {
             let xz: number;
             let y: number;
             
+
             let sectorStep: number = 2 * Math.PI / this._sectors;
             let stackStep: number = Math.PI / this._stacks;
             let stackAngle: number;
@@ -65,9 +67,13 @@ namespace FudgeCore {
                     verts.push(z);
 
                     //normals
-                    this.normals.push(x);
-                    this.normals.push(y);
-                    this.normals.push(z);
+                    this._normals.push(x);
+                    this._normals.push(y);
+                    this._normals.push(z);
+
+                    //UV Coords
+                    this._textureUVs.push(j / this._sectors);
+                    this._textureUVs.push(i / this._stacks);
                 }
             }
 
@@ -109,14 +115,12 @@ namespace FudgeCore {
             return indices;
         }
         protected createTextureUVs(): Float32Array {
-            let textureUVs: Float32Array = new Float32Array([
-                // TODO
-            ]);
+            let textureUVs: Float32Array = new Float32Array(this._textureUVs);
             return textureUVs;
         }
 
         protected createFaceNormals(): Float32Array {
-            let normals: Float32Array = new Float32Array(this.normals);
+            let normals: Float32Array = new Float32Array(this._normals);
             return normals;
         }
     }
