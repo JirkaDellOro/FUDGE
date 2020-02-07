@@ -27,25 +27,34 @@ Tests to verify functionality
 
 
 # Themen für Abschluss- und Studienarbeiten
+- Shader
+- Primitve 3D-Models and 2D-Shapes 
+- Light and Shadpw
+- Diegetic User-Interface
+- Runtime-Recording for Replay
+- Grapheditor/Wiring for Shader and Animation
+- Input-Manager
+- Selection-Sets to store temporary Groups
+- Advanced texturing
 - :pencil: Audiokomponenten 
 - :pencil: Physikengine 
 - :pencil: Modeller
-- Shader
-- Primitve 3D-Modelle und 2D-Shapes 
 - :pencil: Cameratransformation, Axonometrien und VR
-- ~~Spritesheet~~
 - :pencil: Partikelsysteme
-- Licht und Schatten
-- Diegetische User-Interface
-- Laufzeit-Aufzeichnung für Replay
-- Grapheditor/Wiring z.B. für Shader und Animation
-- Input-Manager
-- Selection-Sets zum Speichern temporärer Gruppierungen
-- Fortgeschrittene Texturierung
+- ~~Spritesheet~~
 
 
 # Contributors  
 
-|Name|Area|
-|---|---|
-|Robel Teklezgi|Foundation WebGL/Angular/Electron|
+| Name               | Area                              |
+|--------------------|-----------------------------------|
+| Robel Teklezgi     | Foundation WebGL/Angular/Electron |
+| Jascha Karagöl     | Foundation Scenetree              |
+| Kathrin Fuhrer     | AR-Core with FUDGE and Electron   |
+| Lukas Scheuerle    | Sketch- and Animation System      |
+| Thomas Dorner      | Foundation Audio                  |
+| Falco Böhnke       | Net-Components                    |
+| Monika Galkewitsch | UI-Components                     |
+| Lea Stegk          | UI-Design                         |
+| Elke Scherffius    | Tutorials                         |
+
