@@ -3,9 +3,9 @@
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
       "../Source/Camera/CameraOrbit.ts",
+      "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
-      "../Source/Geometry/NodeCoordinateSystem.ts",
-      "../Source/Geometry/NodeGeometry.ts"
+      "../Source/Geometry/NodeCoordinateSystem.ts"
     ],
     "js": {
       "sections": [
@@ -17,7 +17,7 @@
         },
         {
           "pos": 15,
-          "end": 5152,
+          "end": 5641,
           "kind": "text"
         }
       ],
@@ -51,7 +51,7 @@
         },
         {
           "pos": 58,
-          "end": 1309,
+          "end": 1504,
           "kind": "text"
         }
       ]

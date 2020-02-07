@@ -1,4 +1,15 @@
 namespace FudgeCore {
+  export enum AUDIO_PANNER {
+    CONE_INNERANGLE = "coneInnerAngle",
+    CONE_OUTERANGLE = "coneOuterAngle",
+    CONE_OUTERGAIN = "coneOuterGain",
+    DISTANCE_MODEL = "distanceModel",
+    MAX_DISTANCE = "maxDistance",
+    PANNING_MODEL = "panningModel",
+    REF_DISTANCE = "refDistance",
+    ROLL_OFFFACTOR = "rolloffFactor"
+  }
+
   /**
    * Attaches a [[ComponentAudio]] to a [[Node]].
    * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
@@ -36,6 +47,11 @@ namespace FudgeCore {
 
     public get audio(): Audio {
       return <Audio>this.source.buffer;
+    }
+
+    public setPanner(_prop: AUDIO_PANNER, _value: number): void {
+      Object.assign(this.panner, { [_prop]: _value });
+      // this.panner.coneOuterAngle = _value;
     }
 
     public play(_on: boolean): void {
@@ -121,13 +137,13 @@ namespace FudgeCore {
       if (_event.type == EVENT.COMPONENT_ADD) {
         this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
         this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
-        this.getContainer().addEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = this.getContainer().isDescendantOf(AudioManager.default.getBranchListeningTo());
       }
       else {
         this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
         this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
-        this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE_PANNER, this.updatePanner, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = false;
       }
       this.updateConnection();
@@ -145,11 +161,22 @@ namespace FudgeCore {
     /** 
      * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
      */
-    private updatePanner = (_event: Event): void => {
-      // Debug.log(_event);
-      let local: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
-      // Debug.log(local.toString());
-      this.panner.setPosition(local.translation.x, local.translation.y, local.translation.z);
+    private update = (_event: Event): void => {
+      let mtxResult: Matrix4x4 = this.pivot;
+      if (this.getContainer())
+        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+
+      // Debug.log(mtxResult.toString());
+      let position: Vector3 = mtxResult.translation;
+      let forward: Vector3 = Vector3.TRANSFORMATION(Vector3.Z(1), mtxResult, false);
+
+      this.panner.positionX.value = position.x;
+      this.panner.positionY.value = position.y;
+      this.panner.positionZ.value = position.z;
+
+      this.panner.orientationX.value = forward.x;
+      this.panner.orientationY.value = forward.y;
+      this.panner.orientationZ.value = forward.z;
     }
   }
 }

@@ -1230,6 +1230,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum AUDIO_PANNER {
+        CONE_INNERANGLE = "coneInnerAngle",
+        CONE_OUTERANGLE = "coneOuterAngle",
+        CONE_OUTERGAIN = "coneOuterGain",
+        DISTANCE_MODEL = "distanceModel",
+        MAX_DISTANCE = "maxDistance",
+        PANNING_MODEL = "panningModel",
+        REF_DISTANCE = "refDistance",
+        ROLL_OFFFACTOR = "rolloffFactor"
+    }
     /**
      * Attaches a [[ComponentAudio]] to a [[Node]].
      * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
@@ -1248,6 +1258,7 @@ declare namespace FudgeCore {
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean);
         set audio(_audio: Audio);
         get audio(): Audio;
+        setPanner(_prop: AUDIO_PANNER, _value: number): void;
         play(_on: boolean): void;
         get isPlaying(): boolean;
         get isConnected(): boolean;
@@ -1273,7 +1284,7 @@ declare namespace FudgeCore {
         /**
          * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component.
          */
-        private updatePanner;
+        private update;
     }
 }
 declare namespace FudgeCore {
@@ -1992,7 +2003,7 @@ declare namespace FudgeCore {
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
         CHILD_REMOVE = "childRemoveFromAudioBranch",
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch to update the panners in AudioComponents */
-        UPDATE_PANNER = "updateAudioBranch"
+        UPDATE = "updateAudioBranch"
     }
 }
 declare namespace FudgeCore {
