@@ -33,8 +33,8 @@ Tests to verify functionality
 - Shader
 - Primitve 3D-Modelle und 2D-Shapes 
 - :pencil: Cameratransformation, Axonometrien und VR
-- Spritesheet
-- Partikelsysteme
+- ~~Spritesheet~~
+- :pencil: Partikelsysteme
 - Licht und Schatten
 - Diegetische User-Interface
 - Laufzeit-Aufzeichnung für Replay
@@ -42,3 +42,10 @@ Tests to verify functionality
 - Input-Manager
 - Selection-Sets zum Speichern temporärer Gruppierungen
 - Fortgeschrittene Texturierung
+
+
+# Contributors  
+
+|Name|Area|
+|---|---|
+|Robel Teklezgi|Foundation WebGL/Angular/Electron|
