@@ -51,8 +51,13 @@ namespace FudgeCore {
 
     public setPanner(_prop: AUDIO_PANNER, _value: number): void {
       Object.assign(this.panner, { [_prop]: _value });
-      // this.panner.coneOuterAngle = _value;
     }
+
+    // TODO: 
+    // public getAudioMutator(): void {
+    //   let mutator: Mutator = getMutatorOfArbitrary(this.panner);
+    //   Debug.log(mutator);
+    // }
 
     public play(_on: boolean): void {
       if (_on) {
@@ -63,10 +68,6 @@ namespace FudgeCore {
         this.source.stop();
       this.playing = _on;
     }
-
-    // public reset(): void {
-    //   this.source.re
-    // }
 
     public get isPlaying(): boolean {
       return this.playing;
