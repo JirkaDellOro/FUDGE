@@ -14,6 +14,8 @@ var AudioSpace;
     let mtxRotatorX;
     let mtxRotatorY;
     let mtxTranslator;
+    let mtxInner;
+    let mtxOuter;
     // tslint:disable-next-line: typedef
     let parameter = {
         xAmplitude: 0,
@@ -24,11 +26,17 @@ var AudioSpace;
     window.addEventListener("load", init);
     async function init(_event) {
         out = document.querySelector("output");
-        const material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, .5, .5, 1)));
-        const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY, material, new ƒ.MeshPyramid());
-        const mtxMesh = speaker.pivot;
+        const mtrWhite = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+        const mtrGrey = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
+        const inner = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY, mtrWhite, new ƒ.MeshPyramid());
+        const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY, mtrGrey, new ƒ.MeshPyramid());
+        const mtxMesh = inner.pivot;
         mtxMesh.rotateX(-90);
         mtxMesh.translateZ(1);
+        outer.pivot.set(inner.pivot);
+        const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY);
+        speaker.appendChild(inner);
+        speaker.appendChild(outer);
         speaker.appendChild(new ƒAid.NodeCoordinateSystem("SpeakerSystem", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
         const rotator = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY);
         const translator = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY);
@@ -36,14 +44,19 @@ var AudioSpace;
         translator.appendChild(rotator);
         mtxRotatorX = speaker.local;
         mtxRotatorY = rotator.local;
-        mtxTranslator = rotator.local;
+        mtxTranslator = translator.local;
+        mtxInner = inner.local;
+        mtxOuter = outer.local;
         ƒ.RenderManager.initialize();
         // audio setup
         const audio = await ƒ.Audio.load("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true);
         speaker.addComponent(cmpAudio);
-        cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTERANGLE, 40);
-        cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_INNERANGLE, 20);
+        cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, 180);
+        cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_INNER_ANGLE, 30);
+        ƒ.Debug.log(cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.SOURCE));
+        ƒ.Debug.log(cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER));
+        ƒ.Debug.log(cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.GAIN));
         // camera setup
         const cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
@@ -76,6 +89,19 @@ var AudioSpace;
             //   position.x = parameter.xAmplitude * Math.sin(parameter.frequency * time);
             // if (parameter.zAmplitude)
             //   position.z = parameter.zAmplitude * Math.cos(parameter.frequency * time);
+            let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);
+            {
+                let sin = Math.sin(Math.PI * panner["coneInnerAngle"] / 360);
+                let cos = Math.cos(Math.PI * panner["coneInnerAngle"] / 360);
+                mtxInner.set(ƒ.Matrix4x4.IDENTITY);
+                mtxInner.scaling = new ƒ.Vector3(2 * sin, 2 * sin, cos);
+            }
+            {
+                let sin = Math.sin(Math.PI * panner["coneOuterAngle"] / 360);
+                let cos = Math.cos(Math.PI * panner["coneOuterAngle"] / 360);
+                mtxOuter.set(ƒ.Matrix4x4.IDENTITY);
+                mtxOuter.scaling = new ƒ.Vector3(2 * sin, 2 * sin, cos);
+            }
             // mtxTranslator.translation = position;
             ƒ.AudioManager.default.update();
             viewport.draw();
@@ -89,7 +115,17 @@ var AudioSpace;
         camera.rotateX(_event.movementY * speedCameraRotation);
     }
     function hndWheelMove(_event) {
-        camera.distance += _event.deltaY * speedCameraTranslation;
+        let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);
+        if (_event.shiftKey || _event.altKey) {
+            let inner = panner["coneInnerAngle"] - (_event.altKey ? _event.deltaY / 10 : 0);
+            inner = Math.min(360, Math.max(inner, 0));
+            cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_INNER_ANGLE, inner);
+            let outer = panner["coneOuterAngle"] - (_event.shiftKey ? _event.deltaY / 10 : 0);
+            outer = Math.min(360, Math.max(inner, outer));
+            cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, outer);
+        }
+        else
+            camera.distance += _event.deltaY * speedCameraTranslation;
     }
     // function printInfo(_mtxBody: ƒ.Matrix4x4, _mtxCamera: ƒ.Matrix4x4): void {
     //   // let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;
@@ -126,7 +162,7 @@ var AudioSpace;
                     mtxTranslator.set(ƒ.Matrix4x4.IDENTITY);
                     // parameter.xAmplitude = parameter.zAmplitude = 0;
                     break;
-                // case ƒ.KEYBOARD_CODE.X:
+                // case ƒ.KEYBOARD_CODE.PLUS+:
                 //   if (parameter.xAmplitude)
                 //     parameter.xAmplitude = 0;
                 //   else {

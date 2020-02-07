@@ -1235,14 +1235,19 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     enum AUDIO_PANNER {
-        CONE_INNERANGLE = "coneInnerAngle",
-        CONE_OUTERANGLE = "coneOuterAngle",
-        CONE_OUTERGAIN = "coneOuterGain",
+        CONE_INNER_ANGLE = "coneInnerAngle",
+        CONE_OUTER_ANGLE = "coneOuterAngle",
+        CONE_OUTER_GAIN = "coneOuterGain",
         DISTANCE_MODEL = "distanceModel",
         MAX_DISTANCE = "maxDistance",
         PANNING_MODEL = "panningModel",
         REF_DISTANCE = "refDistance",
-        ROLL_OFFFACTOR = "rolloffFactor"
+        ROLLOFF_FACTOR = "rolloffFactor"
+    }
+    enum AUDIO_NODE_TYPE {
+        SOURCE = 0,
+        PANNER = 1,
+        GAIN = 2
     }
     /**
      * Attaches a [[ComponentAudio]] to a [[Node]].
@@ -1263,6 +1268,8 @@ declare namespace FudgeCore {
         set audio(_audio: Audio);
         get audio(): Audio;
         setPanner(_prop: AUDIO_PANNER, _value: number): void;
+        getMutatorOfNode(_type: AUDIO_NODE_TYPE): Mutator;
+        getAudioNode(_type: AUDIO_NODE_TYPE): AudioNode;
         play(_on: boolean): void;
         get isPlaying(): boolean;
         get isConnected(): boolean;

@@ -1,13 +1,17 @@
 namespace FudgeCore {
   export enum AUDIO_PANNER {
-    CONE_INNERANGLE = "coneInnerAngle",
-    CONE_OUTERANGLE = "coneOuterAngle",
-    CONE_OUTERGAIN = "coneOuterGain",
+    CONE_INNER_ANGLE = "coneInnerAngle",
+    CONE_OUTER_ANGLE = "coneOuterAngle",
+    CONE_OUTER_GAIN = "coneOuterGain",
     DISTANCE_MODEL = "distanceModel",
     MAX_DISTANCE = "maxDistance",
     PANNING_MODEL = "panningModel",
     REF_DISTANCE = "refDistance",
-    ROLL_OFFFACTOR = "rolloffFactor"
+    ROLLOFF_FACTOR = "rolloffFactor"
+  }
+
+  export enum AUDIO_NODE_TYPE {
+    SOURCE, PANNER, GAIN
   }
 
   /**
@@ -53,11 +57,20 @@ namespace FudgeCore {
       Object.assign(this.panner, { [_prop]: _value });
     }
 
-    // TODO: 
-    // public getAudioMutator(): void {
-    //   let mutator: Mutator = getMutatorOfArbitrary(this.panner);
-    //   Debug.log(mutator);
-    // }
+    // TODO: may be used for serialization of AudioNodes
+    public getMutatorOfNode(_type: AUDIO_NODE_TYPE): Mutator {
+      let node: AudioNode = this.getAudioNode(_type);
+      let mutator: Mutator = getMutatorOfArbitrary(node);
+      return mutator;
+    }
+
+    public getAudioNode(_type: AUDIO_NODE_TYPE): AudioNode {
+      switch (_type) {
+        case AUDIO_NODE_TYPE.SOURCE: return this.source;
+        case AUDIO_NODE_TYPE.PANNER: return this.panner;
+        case AUDIO_NODE_TYPE.GAIN: return this.gain;
+      }
+    }
 
     public play(_on: boolean): void {
       if (_on) {
