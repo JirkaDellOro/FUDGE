@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>OscillatorWave | Fudge Core</title>
+	<title>EVENT_AUDIO | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,76 +59,77 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.oscillatorwave.html">OscillatorWave</a>
+					<a href="fudgecore.event_audio.html">EVENT_AUDIO</a>
 				</li>
 			</ul>
-			<h1>Interface OscillatorWave</h1>
+			<h1>Enumeration EVENT_AUDIO</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Interface to create Custom Oscillator Types.
-							Start-/Endpoint of a custum curve e.g. sine curve.
-						Both parameters need to be inbetween -1 and 1.</p>
-					</div>
-					<dl class="tsd-comment-tags">
-						<dt>param</dt>
-						<dd><p>startpoint of a curve</p>
-						</dd>
-						<dt>param</dt>
-						<dd><p>Endpoint of a curve</p>
-						</dd>
-					</dl>
-				</div>
-			</section>
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">OscillatorWave</span>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Properties</h3>
+						<section class="tsd-index-section ">
+							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="fudgecore.oscillatorwave.html#endpoint" class="tsd-kind-icon">endpoint</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="fudgecore.oscillatorwave.html#startpoint" class="tsd-kind-icon">startpoint</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#child_append" class="tsd-kind-icon">CHILD_<wbr>APPEND</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#update" class="tsd-kind-icon">UPDATE</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="endpoint" class="tsd-anchor"></a>
-					<h3>endpoint</h3>
-					<div class="tsd-signature tsd-kind-icon">endpoint<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Enumeration members</h2>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="child_append" class="tsd-anchor"></a>
+					<h3>CHILD_<wbr>APPEND</h3>
+					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>APPEND<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;childAppendToAudioBranch&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioOscillator.ts#L17">Audio/AudioOscillator.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/EventAudio.ts#L4">Event/EventAudio.ts:4</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>broadcast to a <a href="../classes/fudgecore.node.html">Node</a> and all [[Nodes]] in the branch it&#39;s the root of after it was appended to a parent</p>
+						</div>
+					</div>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="startpoint" class="tsd-anchor"></a>
-					<h3>startpoint</h3>
-					<div class="tsd-signature tsd-kind-icon">startpoint<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="child_remove" class="tsd-anchor"></a>
+					<h3>CHILD_<wbr>REMOVE</h3>
+					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>REMOVE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;childRemoveFromAudioBranch&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Audio/AudioOscillator.ts#L16">Audio/AudioOscillator.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/EventAudio.ts#L6">Event/EventAudio.ts:6</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>broadcast to a <a href="../classes/fudgecore.node.html">Node</a> and all [[Nodes]] in the branch it&#39;s the root of just before its being removed from its parent</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="update" class="tsd-anchor"></a>
+					<h3>UPDATE</h3>
+					<div class="tsd-signature tsd-kind-icon">UPDATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;updateAudioBranch&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/EventAudio.ts#L8">Event/EventAudio.ts:8</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>broadcast to a <a href="../classes/fudgecore.node.html">Node</a> and all [[Nodes]] in the branch to update the panners in AudioComponents</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -147,14 +148,17 @@
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
-						<a href="fudgecore.oscillatorwave.html" class="tsd-kind-icon">Oscillator<wbr>Wave</a>
+					<li class="current tsd-kind-enum tsd-parent-kind-module">
+						<a href="fudgecore.event_audio.html" class="tsd-kind-icon">EVENT_<wbr>AUDIO</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="fudgecore.oscillatorwave.html#endpoint" class="tsd-kind-icon">endpoint</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.event_audio.html#child_append" class="tsd-kind-icon">CHILD_<wbr>APPEND</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="fudgecore.oscillatorwave.html#startpoint" class="tsd-kind-icon">startpoint</a>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.event_audio.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.event_audio.html#update" class="tsd-kind-icon">UPDATE</a>
 							</li>
 						</ul>
 					</li>
