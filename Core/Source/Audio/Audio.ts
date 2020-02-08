@@ -1,13 +1,12 @@
 namespace FudgeCore {
   /**
+   * Holds an audio-buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Audio extends AudioBuffer {
-    // constructor(_url: string, _options: AudioBufferOptions) {
-    //   super(_options);
-    //   return await Audio.load(_url);
-    // return this;
-
+    /**
+     * Asynchronously loads the audio (mp3) from the given url
+     */
     public static async load(_url: string): Promise<Audio> {
       const response: Response = await window.fetch(_url);
       const arrayBuffer: ArrayBuffer = await response.arrayBuffer();

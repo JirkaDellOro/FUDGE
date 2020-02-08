@@ -255,7 +255,7 @@ namespace FudgeCore {
     public static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
       // const matrix: Matrix4x4 = new Matrix4x4;
       const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let zAxis: Vector3 = Vector3.DIFFERENCE(_transformPosition, _targetPosition);
+      let zAxis: Vector3 = Vector3.DIFFERENCE(_targetPosition, _transformPosition);
       zAxis.normalize();
       let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
       let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
@@ -370,6 +370,7 @@ namespace FudgeCore {
      * @param _direction The plane on which the fieldOfView-Angle is given 
      */
     public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
+      //TODO: camera looks down negative z-direction, should be positive
       let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
       let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
       let rangeInv: number = 1.0 / (_near - _far);
@@ -391,6 +392,9 @@ namespace FudgeCore {
         matrix.data[0] = f / _aspect;
       else //FOV_DIRECTION.HORIZONTAL
         matrix.data[5] = f * _aspect;
+
+      // HACK: matrix should look in positive z-direction, preferably the matrix should be calculated like that right away
+      matrix.rotateY(180);
 
       return matrix;
     }

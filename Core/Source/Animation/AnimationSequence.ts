@@ -1,6 +1,3 @@
-/// <reference path="../Transfer/Serializer.ts"/>
-/// <reference path="../Transfer/Mutable.ts"/>
-
 namespace FudgeCore {
   /**
    * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
