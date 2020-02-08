@@ -1,11 +1,15 @@
 namespace FudgeCore {
   /**
-   * Attaches an [[AudioListener]] to the node
+   * Serves to set the spatial location and orientation of AudioListeners relative to the
+   * world transform of the [[Node]] it is attached to.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentAudioListener extends Component {
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
 
+    /**
+     * Updates the position and orientation of the given AudioListener
+     */
     public update(_listener: AudioListener): void {
       let mtxResult: Matrix4x4 = this.pivot;
       if (this.getContainer())

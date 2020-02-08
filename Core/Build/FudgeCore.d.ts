@@ -510,9 +510,13 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Holds an audio-buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Audio extends AudioBuffer {
+        /**
+         * Asynchronously loads the audio (mp3) from the given url
+         */
         static load(_url: string): Promise<Audio>;
     }
 }
@@ -638,15 +642,34 @@ declare namespace FudgeCore {
     export {};
 }
 declare namespace FudgeCore {
+    /**
+     * Extends the standard AudioContext for integration with [[Node]]-branches
+     */
     class AudioManager extends AudioContext {
+        /** The default context that may be used throughout the project without the need to create others */
         static readonly default: AudioManager;
-        readonly gain: AudioNode;
+        /** The master volume all AudioNodes in the context should attach to */
+        readonly gain: GainNode;
         private branch;
         private cmpListener;
         constructor(contextOptions?: AudioContextOptions);
+        set volume(_value: number);
+        get volume(): number;
+        /**
+         * Determines branch to listen to. Each [[ComponentAudio]] in the branch will connect to this contexts master gain, all others disconnect.
+         */
         listenTo: (_branch: Node) => void;
+        /**
+         * Retrieve the branch currently listening to
+         */
         getBranchListeningTo: () => Node;
+        /**
+         * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
+         */
         listen: (_cmpListener: ComponentAudioListener) => void;
+        /**
+         * Updates the spatial settings of the AudioNodes effected in the current branch
+         */
         update: () => void;
     }
 }
@@ -1250,38 +1273,76 @@ declare namespace FudgeCore {
         GAIN = 2
     }
     /**
-     * Attaches a [[ComponentAudio]] to a [[Node]].
-     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+     * Builds a minimal audio graph (by default in [[AudioManager]].default) and synchronizes it with the containing [[Node]]
+     * ```plaintext
+     * ┌ AudioManager(.default) ────────────────────────┐
+     * │ ┌ ComponentAudio ───────────────────┐          │
+     * │ │    ┌──────┐   ┌──────┐   ┌──────┐ │ ┌──────┐ │
+     * │ │    │source│ → │panner│ → │ gain │ → │ gain │ │
+     * │ │    └──────┘   └──────┘   └──────┘ │ └──────┘ │
+     * │ └───────────────────────────────────┘          │
+     * └────────────────────────────────────────────────┘
+     * ```
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudio extends Component {
+        /** places and directs the panner relative to the world transform of the [[Node]]  */
         pivot: Matrix4x4;
-        gain: GainNode;
         protected singleton: boolean;
+        private gain;
         private panner;
         private source;
         private audioManager;
         private playing;
-        private connected;
         private listened;
-        constructor(_audio?: Audio, _loop?: boolean, _start?: boolean);
+        constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
         set audio(_audio: Audio);
         get audio(): Audio;
-        setPanner(_prop: AUDIO_PANNER, _value: number): void;
+        set volume(_value: number);
+        get volume(): number;
+        /**
+         * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
+         */
+        setPanner(_property: AUDIO_PANNER, _value: number): void;
         getMutatorOfNode(_type: AUDIO_NODE_TYPE): Mutator;
+        /**
+         * Returns the specified AudioNode of the standard graph for further manipulation
+         */
         getAudioNode(_type: AUDIO_NODE_TYPE): AudioNode;
+        /**
+         * Start or stop playing the audio
+         */
         play(_on: boolean): void;
         get isPlaying(): boolean;
-        get isConnected(): boolean;
         get isAttached(): boolean;
         get isListened(): boolean;
+        /**
+         * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
+         * _input and _output may be the same AudioNode, if there is only one to insert,
+         * or may have multiple AudioNode between them to create an effect-graph.\
+         * Note that [[ComponentAudio]] does not keep track of inserted AudioNodes!
+         * ```plaintext
+         * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
+         * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
+         * │ │    ┌──────┐   ┌──────┐   ┌──────┐          ┌───────┐   ┌──────┐ │ ┌──────┐ │
+         * │ │    │source│ → │panner│ → │_input│ → ...  → │_output│ → │ gain │ → │ gain │ │
+         * │ │    └──────┘   └──────┘   └──────┘          └───────┘   └──────┘ │ └──────┘ │
+         * │ └─────────────────────────────────────────────────────────────────┘          │
+         * └──────────────────────────────────────────────────────────────────────────────┘
+         * ```
+         */
+        insertAudioNodes(_input: AudioNode, _output: AudioNode): void;
         /**
          * Activate override. Connects or disconnects AudioNodes
          */
         activate(_on: boolean): void;
-        install(_audioManager?: AudioManager): void;
-        createSource(_audio: Audio, _loop: boolean): void;
+        /**
+         * Connects this components gain-node to the gain node of the AudioManager this component runs on.
+         * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
+         */
         connect(_on: boolean): void;
+        private install;
+        private createSource;
         private updateConnection;
         /**
          * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node.
@@ -1300,11 +1361,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches an [[AudioListener]] to the node
+     * Serves to set the spatial location and orientation of AudioListeners relative to the
+     * world transform of the [[Node]] it is attached to.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudioListener extends Component {
         pivot: Matrix4x4;
+        /**
+         * Updates the position and orientation of the given AudioListener
+         */
         update(_listener: AudioListener): void;
     }
 }
