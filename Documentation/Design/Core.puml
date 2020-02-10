@@ -12,6 +12,22 @@ left to right direction
 
 'package Fudge <<Rectangle>> {
   ' gl2: WebGL2RenderingContext
+  package " Ray" <<Folder>> {
+    file "Ray" {
+    class Ray {
+        + origin: Vector3;
+        + direction: Vector3;
+        + length: number;
+    }
+  }
+  file "RayHit" {
+    class RayHit {
+        + node: Node;
+        + face: number;
+        + zBuffer: number;
+    }
+  }
+ }
 
   package "Debug"{
     enum DEBUG_FILTER
@@ -24,19 +40,35 @@ left to right direction
       + {static} log(_message: Object, ..._args: Object[]): void
       + {static} warn(_message: Object, ..._args: Object[]): void
       + {static} error(_message: Object, ..._args: Object[]): void
+      + {static} clear(): void;
+      + {static} group(_name: string): void;
+      + {static} groupCollapsed(_name: string): void;
+      + {static} groupEnd(): void;
       - {static} delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void
     }
     abstract class DebugTarget {
       + delegates: MapDebugFilterToDelegate
+      + {static} mergeArguments(_message: Object, ..._args: Object[]): string;
     }
     class DebugConsole extends DebugTarget {
+      + {static} delegates: MapDebugFilterToDelegate;
     }
     class DebugAlert extends DebugTarget {
+      + {static} delegates: MapDebugFilterToDelegate;
+      + {static} createDelegate(_headline: string): Function;
     }
     class DebugDialog extends DebugTarget {
     }
     class DebugTextarea extends DebugTarget {
-
+      + {static} textArea: HTMLTextAreaElement = document.createElement("textarea");
+      + {static} delegates: MapDebugFilterToDelegate;
+      - {static} groups: string[];
+      + {static} clear(): void;
+      + {static} group(_name: string);
+      + {static} groupEnd(): void;
+      + {static} createDelegate(_headline: string): Function;
+      - {static} getIndentation(_level: number): string;
+      - {static} print(_text: string): void;
     }
   }
 
@@ -56,35 +88,116 @@ left to right direction
       interface Serialization {
         [type: string]: General
       }
-      class Serializer {
-        + {static} serialize(_object: Serializable): Serialization
-        + {static} deserialize(_serialization: Serialization): Serializable
+       interface NamespaceRegister {
+        [name: string]: Object;
+      }
+      abstract class Serializer {
+       - {static} namespaces: NamespaceRegister = { "ƒ": FudgeCore };
+       + {static} registerNamespace(_namespace: Object): void;
+       + {static} serialize(_object: Serializable): Serialization;
+       + {static} deserialize(_serialization: Serialization): Serializable;
+       + {static} prettify(_json: string): string { return _json; };
+       + {static} stringify(_serialization: Serialization): string;
+       + {static} prettify(_json: string): string { return _json; };
+       + {static} stringify(_serialization: Serialization): string;
+       + {static} parse(_json: string): Serialization;
+       - {static} reconstruct(_path: string): Serializable;
+       - {static} getFullPath(_object: Serializable): string;
+       - {static} getNamespace(_path: string): Object;
+       - {static} findNamespaceIn(_namespace: Object, _parent: Object): string;
       }
     }
     file "Mutable" {
       interface MutatorAttributeTypes
       interface Mutator
-
       interface MutatorForAnimation extends Mutator
       interface MutatorForUserInterface extends Mutator
       abstract class Mutable extends EventTarget {
+        + get type(): string;
         + getMutator(): Mutator
         + getMutatorForAnimation(): MutatorForAnimation
         + getMutatorForUserInterface(): MutatorForUserInterface
         + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes
         + updateMutator(_mutator: Mutator): void
         + mutate(_mutator: Mutator): void
+        # abstract reduceMutator(_mutator: Mutator): void;
+      }
+    }
+    file "FileIoBrowserLocal" {
+      interface MapFilenameToContent{
+       [filename: string]: string;
+      }
+      class FileIoBrowserLocal extends EventTargetStatic{
+        - {static} selector: HTMLInputElement;
+        + {static} load(): void;
+        + {static} save(_toSave: MapFilenameToContent): void;
+        + {static} async handleFileSelect(_event: Event): Promise<void>;
+        + {static} async loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
+      }    
+    }
+  }
+  package " Animation" <<Folder>> {
+    file "Animation" {
+      interface AnimationStructure{
+        [attribute: string]: Serialization | AnimationSequence;
+      }
+      interface AnimationLabel {
+        [name: string]: number;
+      }
+      interface AnimationEventTrigger {
+        [name: string]: number;
+      }
+      class NodeResource extends Node {
+      }
+      class NodeResourceInstance extends Node {
+        - idSource: string = undefined
+      }
+      class Animation extends Mutable implements SerializableResource {
+        + idResource: string;
+        + name: string;
+        + totalTime: number;
+        + labels: AnimationLabel;
+        + stepsPerSecond: number;
+        + animationStructure: AnimationStructure;
+        + events: AnimationEventTrigger;
+        + private framesPerSecond: number;
+      }
+    }
+    file "AnimationKey" {
+      class AnimationKey extends Mutable implements Serializable {
+
+        - time: number;
+        - value: number;
+        - constant: boolean = false;
+        - slopeIn: number = 0;
+        - slopeOut: number = 0;
+      }
+    }
+    file "AnimationFunction" {
+      class AnimationFunction {
+
+        - a: number = 0;
+        - b: number = 0;
+        - c: number = 0;
+        - d: number = 0;
+        - keyIn: AnimationKey;
+        - keyOut: AnimationKey;
+      }
+    }
+    file "AnimationSequence" {
+      class AnimationSequence extends Mutable implements Serializable {
+
+        - keys: AnimationKey[] = [];
       }
     }
   }
-
-  package "Scene" <<Folder>> {
+  package " Node" <<Folder>> {
     file "Node" {
       interface MapClassToComponents{
         [className: string]: Component[]
       }
-      
-      class Node extends EventTarget {
+
+      class Node extends EventTargetƒ implements Serializable {
         + name: string
         + mtxWorld: Matrix4x4
         + timestampUpdate: number
@@ -93,52 +206,153 @@ left to right direction
         - components: MapClassToComponents
         - listeners: MapEventTypeToListener
         - captures: MapEventTypeToListener
+        - active: boolean;
+        + activate(_on: boolean): void;
+        + get isActive(): boolean;
+        + getParent(): Node | null;
+        + getAncestor(): Node | null;
+        + get cmpTransform(): ComponentTransform, 
+        + getChildren(): Node;
+        + getChildrenByName(_name: string): Node[];
+        + appendChild(_node: Node): void ;
+        + removeChild(_node: Node): void;
+        + findChild(_node: Node): number;
+        + replaceChild(_replace: Node, _with: Node): boolean;
+        + get branch(): IterableIterator<Node>;
+        + applyAnimation(_mutator: Mutator): void;
+        + getAllComponents(): Component[];
+        + getComponents<T extends Component>(_class: new () => T): T[];
+        + getComponent<T extends Component>(_class: new () => T): T;
+        + addComponent(_component: Component): void;
+        + removeComponent(_component: Component): void;
+        + serialize(): Serialization;
+        + deserialize(_serialization: Serialization): Serializable;
+        + addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void;
+        + dispatchEvent(_event: Event): boolean;
+        + broadcastEvent(_event: Event): void;
+        - broadcastEventRecursive(_event: Event): void;
+        - *getBranchGenerator(): IterableIterator<Node>;
+
+
+
       }
+
     }
-    class NodeResource extends Node {
-    }
-    class NodeResourceInstance extends Node {
+    class NodeResource extends Node implements SerializableResource {
+      + idResource: string = undefined;
+   }
+    class NodeResourceInstance extends Node  {
       - idSource: string = undefined
+      + reset(): void;
+      + serialize(): Serialization;
+      + deserialize(_serialization: Serialization): Serializable;
+      # set(_nodeResource: NodeResource): void;
     }
   }
 
   package "Engine" <<Folder>> {
+    file "Color" {
     class Color extends Mutable{
+      - {static} crc2: CanvasRenderingContext2D;
       + r: number
       + g: number
       + b: number
       + a: number
+      + {static} getHexFromCSSKeyword(_keyword: string): string;
+      + {static} CSS(_keyword: string, _alpha: number = 1): Color;
+      + {static} MULTIPLY(_color1: Color, _color2: Color): Color;
+      + setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+      + setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
+      + getArray(): Float32Array;
+      + setArrayNormRGBA(_color: Float32Array): void;
+      + setArrayBytesRGBA(_color: Uint8ClampedArray): void;
+      + getArrayBytesRGBA(): Uint8ClampedArray;
+      + add(_color: Color): void;
+      + getCSS(): string;
+      # reduceMutator(_mutator: Mutator): void;
     }
-    class Material {
-      + name: string
+  }
+    file "Material" {
+    class Material extends Mutable implements SerializableResource {
+      + name: string;
+      + idResource: string;
       - shaderType: typeof Shader
       - coat: Coat
+      + createCoatMatchingShader(): Coat;
+      + setCoat(_coat: Coat): void;
+      + getCoat(): Coat;
+      + setShader(_shaderType: typeof Shader): void;
+      + getShader(): typeof Shader;
+      + serialize(): Serialization;
+      + deserialize(_serialization: Serialization): Serializable;
+      # reduceMutator(_mutator: Mutator): void;
     }
+   } 
 
-    class ObjectManager{
-      - {static} depot: {[type: string]:Object[]
+file "Recycler" {
+      abstract class Recycler {
+        - {static} depot: { [type: string]: Object[] };
+        + {static} get<T>(_T: new () => T): T;
+        + {static} store(_instance: Object): void; 
+        + {static} dump<T>(_T: new () => T): void;
+        + {static} dumpAll(): void;
+      }
     }
-
 
     file "Viewport" {
       interface MapLightTypeToLightList {
         [type: typeof Light]: ComponentLight[]
       }
-      class Viewport extends EventTarget {
+      class Viewport extends EventTargetf {
+        - {static} focus: Viewport;
         + name: string
         + camera: ComponentCamera
-        - branch: Node
         + rectSource: Rectangle
         + rectDestination: Rectangle
-        + frameClientToCanvas: Framing
-        + frameCanvasToDestination: Framing
-        + frameDestinationToSource: Framing
-        + frameSourceToRender: Framing
-        + adjustingFrames: boolean
-        + adjustingCamera: boolean
-        + lights: MapLightTypeToComponentLight
-        - canvas: HTMLCanvasElement
-        - crc2: CanvasRenderingContext2D
+        + frameClientToCanvas: FramingScaled = new FramingScaled();
+        + frameCanvasToDestination: FramingComplex = new FramingComplex();
+        + frameDestinationToSource: FramingScaled = new FramingScaled();
+        + frameSourceToRender: FramingScaled = new FramingScaled();
+        + adjustingFrames: boolean = true;
+        + adjustingCamera: boolean = true;
+        + lights: MapLightTypeToLightList = null;
+        - branch: Node = null;
+        - crc2: CanvasRenderingContext2D = null;
+        - canvas: HTMLCanvasElement = null;
+        - pickBuffers: PickBuffer[] = [];
+        + initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        + getContext(): CanvasRenderingContext2D;
+        + getCanvasRectangle(): Rectangle;
+        + getClientRectangle(): Rectangle;
+        + setBranch(_branch: Node): void;
+        + showSceneGraph(): void;
+        + draw(): void;
+        + createPickBuffers(): void;
+        + pickNodeAt(_pos: Vector2): RayHit[];
+        + adjustFrames(): void;
+        + adjustCamera(): void;
+        + pointClientToSource(_client: Vector2): Vector2;
+        + pointSourceToRender(_source: Vector2): Vector2;
+        + pointClientToRender(_client: Vector2): Vector2;
+        + pointClientToProjection(_client: Vector2): Vector2;
+        + pointClipToClient(_normed: Vector2): Vector2;
+        + pointClipToCanvas(_normed: Vector2): Vector2;
+        + pointClientToScreen(_client: Vector2): Vector2;
+        + get hasFocus(): boolean;
+        + setFocus(_on: boolean): void;
+        + activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        + activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        + activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;  
+        + activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        - hndDragDropEvent: EventListener;
+        - addCanvasPosition(event: EventPointer | EventDragDrop): void;
+        - hndPointerEvent: EventListener;
+        - hndKeyboardEvent: EventListener;
+        - hndWheelEvent: EventListener;
+        - activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void;
+        - hndComponentEvent(_event: Event): void;
+        - collectLights(): void;
+        - createSceneGraph(_fudgeNode: Node): string;
       }
     }
 
@@ -152,17 +366,20 @@ left to right direction
       interface SerializationOfResources {
         [idResource: string]: Serialization;
       }
-      class ResourceManager {
+      abstract class ResourceManager {
         + {static} resources: Resources
         + {static} serialization: SerializationOfResources
+        + {static} register(_resource: SerializableResource): void
+        + {static} generateId(_resource: SerializableResource): string
+        + {static} isResource(_object: Serializable): boolean
+        + {static} get(_idResource: string): SerializableResource
+        + {static} registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): NodeResource
+        + {static} serialize(): SerializationOfResources
+        + {static} deserialize(_serialization: SerializationOfResources): Resources
+        - {static} deserializeResource(_serialization: Serialization): SerializableResource
       }
-    }
-
-    class Loop extends EventTargetStatic {
-      - {static} running: boolean = false
-      + {static} start(): void
-    }
   }
+}
 
   package "Event " <<Folder>> {
     file "Event"{
@@ -171,106 +388,284 @@ left to right direction
       }
 
       enum EVENT
-      enum EVENT_POINTER
-      enum EVENT_DRAGDROP
-      enum EVENT_WHEEL
+      enum EventPointer
+      enum EventDragDrop
+      enum EventWheel
+      enum EventKeyboard;
+      enum EventListenerƒ;
 
-      
-      class PointerEventƒ extends PointerEvent {
-        + pointerX: number;
-        + pointerY: number;
-        + canvasX: number;
-        + canvasY: number;
-        + clientRect: ClientRect;
-      }
-      class DragDropEventƒ extends DragEvent {
-        + pointerX: number;
-        + pointerY: number;
-        + canvasX: number;
-        + canvasY: number;
-        + clientRect: ClientRect;
-      }
-      class WheelEventƒ extends WheelEvent {
-      }
-      class EventTargetStatic extends EventTarget {
-        #{static} targetStatic: EventTargetStatic
+
+      class EventTargetƒ extends EventTarget{
       }
 
+      class EventTargetStatic extends EventTargetƒ{
+       # {static} targetStatic: EventTargetStatic;
+       + {static} addEventListener(_type: string, _handler: EventListener): void; 
+       + {static} removeEventListener(_type: string, _handler: EventListener): void;
+       + {static} dispatchEvent(_event: Event): boolean;
+      }
     }
 
+    file "EventDragDrop" {
+
+      enum EVENT_DRAGDROP;
+
+      class EventDragDrop extends DragEvent {
+        + pointerX: number;
+        + pointerY: number;
+        + canvasX: number;
+        + canvasY: number;
+        + clientRect: ClientRect;
+  }
+ } 
     file "EventKeyboard" {
-      
-      class KeyboardEventƒ extends KeyboardEvent{
+
+      class EventKeyboard extends KeyboardEvent{
       }
       enum EVENT_KEYBOARD
       enum KEYBOARD_CODE
     }
-  }
+  
 
-  package "Render" <<Folder>> {
-    interface NodeReferences {
+    file "EventPointer" {
+      enum EVENT_POINTER
+     
+      class EventPointer extends PointerEvent {
+        + pointerX: number;
+        + pointerY: number;
+        + canvasX: number;
+        + canvasY: number;
+        + clientRect: ClientRect;
+      }   
+    }
+    file "EventTimer" {
+      enum EVENT_TIMER
+     
+      class EventTimer {
+        + type: EVENT_TIMER = EVENT_TIMER.CALL;
+        + target: Timer;
+        + arguments: Object[];
+        + firstCall: boolean = true;
+        + lastCall: boolean = false;
+      }   
+    }
+    file "EventWheel" {
+      enum EVENT_WHEEL
+     
+      class EventWheel extends WheelEvent {
+      }   
+    }
+  }
+ 
+
+  package " Render" <<Folder>> {
+    file "RenderInjector" {
+
+      class RenderInjector{
+        - {static} coatInjections: { [className: string]: CoatInjection };
+        + {static} decorateCoat(_constructor: Function): void;
+        - {static} injectRenderDataForCoatColored(this: Coat, _renderShader: RenderShader): void;
+        - {static} injectRenderDataForCoatTextured(this: Coat, _renderShader: RenderShader): void;
+        - {static} injectRenderDataForCoatMatCap(this: Coat, _renderShader: RenderShader): void;
+       
+      }
+    }
+    
+   file "RenderOperator" {
+  interface BufferSpecification {
+        size: number;
+        dataType: number;
+        normalize: boolean;
+        stride: number;
+        offset: number;
+    }
+    interface RenderShader {
+        program: WebGLProgram;
+        attributes: { [name: string]: number };
+        uniforms: { [name: string]: WebGLUniformLocation };
+    }
+    interface RenderBuffers {
+        vertices: WebGLBuffer;
+        indices: WebGLBuffer;
+        nIndices: number;
+        textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
+    }
+    interface RenderCoat {
+        coat: Coat;
+    }
+    interface RenderLights {
+        [type: string]: Float32Array;
+    }
+    abstract class RenderOperator {
+      # {static} crc3: WebGL2RenderingContext;
+      - {static} rectViewport: Rectangle;
+      - {static} renderShaderRayCast: RenderShader;
+      + {static} assert<T>(_value: T | null, _message: string = ""): T;
+      + {static} initialize(_antialias: boolean = false, _alpha: boolean = true): void;
+      + {static} getCanvas(): HTMLCanvasElement;
+      + {static} getRenderingContext(): WebGL2RenderingContext;
+      + {static} getCanvasRect(): Rectangle;
+      + {static} setCanvasSize(_width: number, _height: number): void;
+      + {static} setViewportRectangle(_rect: Rectangle): void;
+      + {static} getViewportRectangle(): Rectangle;
+      # {static} createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
+      # {static} setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void;
+      # {static} draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+      # {static} drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
+      # {static} createProgram(_shaderClass: typeof Shader): RenderShader;
+      # {static} useProgram(_shaderInfo: RenderShader): void;
+      # {static} deleteProgram(_program: RenderShader): void;
+      # {static} createBuffers(_mesh: Mesh): RenderBuffers;
+      # {static} useBuffers(_renderBuffers: RenderBuffers): void;
+      # {static} deleteBuffers(_renderBuffers: RenderBuffers): void;
+      # {static} createParameter(_coat: Coat): RenderCoat;
+      # {static} useParameter(_coatInfo: RenderCoat): void;
+      # {static} deleteParameter(_coatInfo: RenderCoat): void;
+      - {static} setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void; 
+   }
+  }
+  file "RenderManager" {
+      
+      interface NodeReferences {
       shader: typeof Shader;
       coat: Coat;
       mesh: Mesh;
-      doneTransformToWorld: boolean;
     }
-    interface BufferSpecification {
-      size: number
-      dataType: number
-      normalize: boolean
-      stride: number
-      offset: number
+      interface PickBuffer {
+      node: Node;
+      texture: WebGLTexture;
+      frameBuffer: WebGLFramebuffer;
     }
-    interface RenderShader {
-      program: WebGLProgram
-      attributes: MapNameToAttributeLocation
-      uniforms: MapNameToUniformLocation
+      class Reference_ {
+        - reference: T;
+        - count: number;
+        + getReference(): T;
+        + increaseCounter(): number;
+        + decreaseCounter(): number;
+      }
+      abstract class RenderManager extends RenderOperator{
+        + {static} rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
+        - {static} renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
+        - {static} renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
+        - {static} renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
+        - {static} nodes: MapNodeToNodeReferences = new Map();
+        - {static} timestampUpdate: number;
+        - {static} pickBuffers: PickBuffer[];
+        + {static} addNode(_node: Node): void;
+        + {static} addBranch(_node: Node): boolean;
+        + {static} removeNode(_node: Node): void;
+        + {static} removeBranch(_node: Node): void;
+        + {static} updateNode(_node: Node): void;
+        + {static} updateBranch(_node: Node): void;
+        + {static} setLights(_lights: MapLightTypeToLightList): void;
+        + {static} update(): void;
+        + {static} clear(_color: Color = null): void;
+        + {static} resetFrameBuffer(_color: Color = null): void;
+        + {static} drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void;  
+        + {static} drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        + {static} pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
+        - {static} drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void;
+        - {static} drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void;
+        - {static} getRayCastTexture(): WebGLTexture;
+        - {static} recalculateAllNodeTransforms(): void;
+        - {static} recalculateTransformsOfNodeAndChildren(_node: Node, _world: Matrix4x4): void;
+        - {static} removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void;
+        - {static} createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void;
     }
-    interface RenderBuffers {
-      vertices: WebGLBuffer;
-      indices: WebGLBuffer;
-      nIndices: number;
-      textureUVs: WebGLBuffer;
-      normalsFace: WebGLBuffer;
-    }
-    interface RenderCoat {
-      coat: Coat;
-    }
-    class Reference<T> {
-      - reference: T
-      - count: number = 0
-    }
-    class RenderManager extends RenderOperator {
-      - {static} renderShaders: Map<typeof Shader, Reference<RenderShader>>
-      - {static} renderCoats: Map<Material, Reference<RenderCoat>>
-      - {static} renderBuffers: Map<Mesh, Reference<RenderBuffers>>
-      - {static} nodes: MapNodeToNodeReferences
-    }
-    class RenderOperator {
-      # {static} crc3: WebGL2RenderingContext
-      - {static} rectViewport: Rectangle
-    }
+   } 
+}
 
 
-    interface CoatInjection {
-      typeof Coat,
-      renderShader: RenderShader
-    }
+  package " Component" <<Folder>> {
+    file "Component" {
 
-    class RenderInjector {
-      - {static} coatInjections
-      + {static} decorateCoat(_constructor: Function): void
+      abstract class Component extends Mutable implements Serializable{
+        # singleton: boolean
+        - container: Node | null
+        - active: boolean
+        + activate(_on: boolean): void;
+        + get isActive(): boolean;
+        + get isSingleton(): boolean;
+        + getContainer(): Node | null;
+        + setContainer(_container: Node | null): void;
+        + serialize(): Serialization;
+        + deserialize(_serialization: Serialization): Serializable;
+        # reduceMutator(_mutator: Mutator): void;
+      }
     }
-  }
+    file "ComponentAnimator" {
+      enum ANIMATION_PLAYMODE;
+      enum ANIMATION_PLAYBACK;
 
-  package "Component" <<Folder>> {
-    abstract class Component extends Mutable {
-      # singleton: boolean
-      - container: Node | null
-      - active: boolean
+      class ComponentAnimator extends Component {
+        animation: Animation;
+        playmode: ANIMATION_PLAYMODE;
+        playback: ANIMATION_PLAYBACK;
+        speedScalesWithGlobalSpeed: boolean
+        - localTime: Time;
+        - speedScale: number = 1;
+        - lastTime: number = 0;
+        - updateAnimationLoop(_e: Event, _time: number): [Mutator, number];
+        - executeEvents(events: string[]): void;
+        - applyPlaymodes(_time: number): number;
+        - calculateDirection(_time: number): number;
+        - updateScale(): void;
+      }
     }
+    file "ComponentAudio" {
+      class ComponentAudio extends Component {
+        + audio: Audio | null;
+        + audioOscillator: AudioOscillator;
+        + isLocalised: boolean;
+        + isFiltered: boolean;
+        + isDelayed: boolean;
+        # singleton: boolean;
+        - localisation: AudioLocalisation | null;
+        - filter: AudioFilter | null;
+        - delay: AudioDelay | null;
+        - playing: boolean = false;
+        + setFilter(_filter: AudioFilter): void;
+        + getFilter(): AudioFilter;
+        + setDelay(_delay: AudioDelay): void;
+        + getDelay(): AudioDelay;
+        + setLocalisation(_localisation: AudioLocalisation): void;
+        + getLocalisation(): AudioLocalisation;
+        + playAudio(_audioSettings: AudioSettings, _offset?: number, _duration?: number): void;
+        + stop(): void;
+        + get isPlaying(): boolean;
+        + setAudio(_audio: Audio): void;
+        + getAudio(): Audio;
+        # reduceMutator(_mutator: Mutator): void;
+        - connectAudioNodes(_audioSettings: AudioSettings): void;
+      }
+    }
+    file "ComponentAudioListener" {
+      class ComponentAudioListener extends Component {
+        - audioListener: AudioListener;
+        - positionBase: Vector3;
+        - positionUP: Vector3;
+        - positionFW: Vector3;
+        + setAudioListener(_audioSettings: AudioSettings): void;
+        + getAudioListener(): AudioListener;
+        + setListenerPosition(_position: Vector3): void;
+        + getListenerPosition(): Vector3;
+        + setListenerPositionForward(_position: Vector3): void;
+        + getListenerPositionForward(): Vector3;
+        + setListenerPostitionUp(_position: Vector3): void;
+        + getListenerPositionUp(): Vector3;
+        + updatePositions(_position: Vector3/*, _positionForward: Vector3, _positionUp: Vector3*/): void;
+        + showListenerSettings(): void;
+        + reduceMutator(_mutator: Mutator): void;
+      }
+    }
+    file "ComponentAudio" {
+      enum FIELD_OF_VIEW;
+      enum PROJECTION;
 
     class ComponentCamera extends Component {
+      + pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+      + backgroundColor: Color;
       - projection: PROJECTION
       - transform: Matrix4x4
       - fieldOfView: number
@@ -278,29 +673,43 @@ left to right direction
       - direction: FIELD_OF_VIEW;
       - backgroundColor: Color
       - backgroundEnabled: boolean
+      + getProjection(): PROJECTION;
+      + getBackgroundEnabled(): boolean;
+      + getAspect(): number;
+      + getFieldOfView(): number;
+      + getDirection(): FIELD_OF_VIEW ;
+      + get ViewProjectionMatrix(): Matrix4x4;
+      + projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void;
+      + projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void;
+      + getProjectionRectangle(): Rectangle;
+      + project(_pointInWorldSpace: Vector3): Vector3;
+      + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+      + mutate(_mutator: Mutator): void;
+      # reduceMutator(_mutator: Mutator): void;
     }
+   } 
     class ComponentMaterial extends Component {
       + material: Material;
     }
     class ComponentMesh extends Component {
-      + pivot: Matrix4x4
-      + mesh: Mesh
+      + pivot: Matrix4x4;
+      + mesh: Mesh;
     }
     class ComponentTransform extends Component {
       + local: Matrix4x4
     }
     class ComponentLight extends Component {
-      - light: Light
+      + pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+      + light: Light;
+      + setType<T extends Light>(_class: new () => T): void;
     }
     class ComponentScript extends Component {
     }
-    class ComponentScriptServer extends ComponentScript {
-      // to be designed
-    }
-    class ComponentScriptClient extends ComponentScript {
-      // to be designed
-    }
+    class ComponentTransform extends Component {
+      + local: Matrix4x4;
+      # reduceMutator(_mutator: Mutator): void;
   }
+}
 
   package "Mesh" <<Folder>> {
     class Mesh {
@@ -308,60 +717,286 @@ left to right direction
       + indices: Uint16Array;
       + textureUVs: Float32Array;
       + normalsFace: Float32Array;
+      + idResource: string;
+      + {static} getBufferSpecification(): BufferSpecification,
+      + getVertexCount(): number;
+      + getIndexCount(): number;
+      + serialize(): Serialization;
+      + deserialize(_serialization: Serialization): Serializable;
+      + abstract create(): void;
+      # abstract createVertices(): Float32Array;
+      # abstract createTextureUVs(): Float32Array;
+      # abstract createIndices(): Uint16Array;
+      # abstract createFaceNormals(): Float32Array;;
+
+
     }
     class MeshQuad extends Mesh {
+      + create(): void;
+      # createVertices(): Float32Array;
+      # createIndices(): Uint16Array;
+      # createTextureUVs(): Float32Array;
+      # createFaceNormals(): Float32Arra;
     }
     class MeshCube extends Mesh {
+      + create(): void;
+      # createVertices(): Float32Array;
+      # createIndices(): Uint16Array;
+      # createTextureUVs(): Float32Array;
+      # createFaceNormals(): Float32Array;
     }
     class MeshPyramid extends Mesh {
+      + create(): void;
+      # createVertices(): Float32Array;
+      # createIndices(): Uint16Array;
+      # createTextureUVs(): Float32Array;
+      # createFaceNormals(): Float32Array;
+    }
+    class MeshSprite extends Mesh {
+      + create(): void;
+      # createVertices(): Float32Array;
+      # createIndices(): Uint16Array;
+      # createTextureUVs(): Float32Array;
+      # createFaceNormals(): Float32Array;
     }
   }
 
   package "Math" <<Folder>> {
-    class Vector3 extends Mutable {
-      - data: Float32Array
-    }
-    class Matrix3x3 {
-      + data: number[]
-    }
-    class Matrix4x4 extends Mutable {
-      - data: Float32Array
-      - mutator: Mutator
-    }
-    file "Framing" {
-      interface Rectangle {
-        x: number
-        y: number
-        width: number
-        height: number
-      }
+   file "Matrix3x3" {
+     interface VectorRepresentation {
+        translation: Vector2;
+        rotation: number;
+        scaling: Vector2;
+  }
+     class Matrix3x3 extends Mutable implements Serializable{
+     - data: Float32Array;
+     - mutator: Mutator;
+     - vectors: VectorRepresentation;
+     + get translation(): Vector2;
+     + set translation(_translation: Vector2);
+     + get rotation(): number;
+     + set rotation(_rotation: number);
+     + get scaling(): Vector2;
+     + set scaling(_scaling: Vector2);
+     + {static} PROJECTION(_width: number, _height: number): Matrix3x3;
+     + {static} get IDENTITY(): Matrix3x3;
+     + {static} TRANSLATION(_translate: Vector2): Matrix3x3;
+     + {static} ROTATION(_angleInDegrees: number): Matrix3x3;
+     + {static} SCALING(_scalar: Vector2): Matrix3x3;
+     + {static} MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+     + translate(_by: Vector2): void;
+     + translateX(_x: number): void;
+     + translateY(_y: number): void;
+     + scale(_by: Vector2): void;
+     + scaleX(_by: number): void;
+     + scaleY(_by: number): void;
+     + rotate(_angleInDegrees: number): void;
+     + multiply(_matrix: Matrix3x3): void;
+     + getEulerAngles(): number;
+     + set(_to: Matrix3x3): void;
+     + toString(): string;
+     + get(): Float32Array;
+     + serialize(): Serialization;
+     + deserialize(_serialization: Serialization): Serializable;
+     + getMutator(): Mutator;
+     + mutate(_mutator: Mutator): void;
+     + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+     # reduceMutator(_mutator: Mutator): void;
+     - resetCache(): void;
+   }
+  } 
+   
+   file "Matrix4x4" {
+     interface VectorRepresentation {
+    translation: Vector3;
+    rotation: Vector3;
+    scaling: Vector3;
+  }
+     class Matrix4x4 extends Mutable implements Serializable{
+    - data: Float32Array = new Float32Array(16);
+    - mutator: Mutator = null; 
+    - vectors: VectorRepresentation;
+    + get translation(): Vector3;
+    + set translation(_translation: Vector3);
+    + get rotation(): Vector3;
+    + set rotation(_rotation: Vector3);
+    + get scaling(): Vector3;
+    + set scaling(_scaling: Vector3);
+    + {static} get IDENTITY(): Matrix4x4;
+    + {static} MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
+    + {static} INVERSION(_matrix: Matrix4x4): Matrix4x4;
+    + {static} LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4;
+    + {static} TRANSLATION(_translate: Vector3): Matrix4x4;
+    + {static} ROTATION_X(_angleInDegrees: number): Matrix4x4;
+    + {static} ROTATION_Y(_angleInDegrees: number): Matrix4x4;
+    + {static} ROTATION_Z(_angleInDegrees: number): Matrix4x4;
+    + {static} SCALING(_scalar: Vector3): Matrix4x4;
+    + {static} PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4;
+    + {static} PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near: number = -400, _far: number = 400): Matrix4x4;
+    + rotate(_by: Vector3, _fromLeft: boolean = false): void;
+    + rotateX(_angleInDegrees: number, _fromLeft: boolean = false): void;
+    + rotateY(_angleInDegrees: number, _fromLeft: boolean = false): void;
+    + rotateZ(_angleInDegrees: number, _fromLeft: boolean = false): void;
+    + lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void;
+    + translate(_by: Vector3): void;
+    + translateX(_x: number): void;
+    + translateY(_y: number): void;
+    + translateZ(_z: number): void;
+    + scale(_by: Vector3): void;
+    + scaleX(_by: number): void;
+    + scaleY(_by: number): void;
+    + scaleZ(_by: number): void;
+    + multiply(_matrix: Matrix4x4, _fromLeft: boolean = false): void;
+    + getEulerAngles(): Vector3;
+    + set(_to: Matrix4x4): void;
+    + toString(): string;
+    + get(): Float32Array
+    + serialize(): Serialization;
+    + deserialize(_serialization: Serialization): Serializable;
+    + public getMutator(): Mutator;
+    + mutate(_mutator: Mutator): void;
+    + getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+    # reduceMutator(_mutator: Mutator): void;
+    - resetCache(): void;
+   }
+  } 
+   
+   file "Random" {
+     class Random {
+    - generate: Function = Math.random;
+    + {static} createGenerator(_seed: number): Function;
+    + getNorm(): number;
+    + getRange(_min: number, _max: number): number;
+    + getRangeFloored(_min: number, _max: number): number;
+    + getBoolean(): boolean;
+    + getSign(): number;
+    + getIndex<T>(_array: Array<T>): number;
+    + getKey<T, U>(_map: Map<T, U>): T ;
+    + getPropertyName(_object: Object): string;
+    + getPropertySymbol(_object: Object): symbol
+
+    const random: Random;
+  }
+  } 
+   
+  file "Rectangle" {
+     enum ORIGIN2D
+     class Rectangle extends Mutable {
+    + position: Vector2 = Recycler.get(Vector2);
+    + size: Vector2 = Recycler.get(Vector2);
+    + public static GET(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT): Rectangle;
+    + setPositionAndSize(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT): void;
+    + pointToRect(_point: Vector2, _target: Rectangle): Vector2;
+    + get copy(): Rectangle;
+    + isInside(_point: Vector2): boolean;
+    + collides(_rect: Rectangle): boolean;
+    + toString(): string;
+    # reduceMutator(_mutator: Mutator): void;
+  }
+  }  
+   
+   file "Vector2" {
+     class Vector2 extends Mutable {
+    - data:Float32Array;
+    + {static} ZERO(): Vector2 ;
+    + {static} ONE(_scale: number = 1): Vector2;
+    + {static} Y(_scale: number = 1): Vector2;
+    + {static} X(_scale: number = 1): Vector2;
+    + {static} TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation: boolean = true): Vector2;
+    + {static} NORMALIZATION(_vector: Vector2, _length: number = 1): Vector2;
+    + {static} SCALE(_vector: Vector2, _scale: number): Vector2;
+    + {static} SUM(..._vectors: Vector2[]): Vector2;
+    + {static} DIFFERENCE(_a: Vector2, _b: Vector2): Vector2;
+    + {static} DOT(_a: Vector2, _b: Vector2): number;
+    + {static} CROSSPRODUCT(_a: Vector2, _b: Vector2): number;
+    + {static} ORTHOGONAL(_vector: Vector2, _clockwise: boolean = false): Vector2;
+    + equals(_compare: Vector2, _tolerance: number = Number.EPSILON): boolean ;
+    + add(_addend: Vector2): void;
+    + subtract(_subtrahend: Vector2): void;
+    + scale(_scale: number): void;
+    + normalize(_length: number = 1): void;
+    + set(_x: number = 0, _y: number = 0): void;
+    + get(): Float32Array;
+    + get copy(): Vector2;
+    + transform(_matrix: Matrix3x3, _includeTranslation: boolean = true): void;
+    + toVector3(): Vector3;
+    + toString(): string;
+    + getMutator(): Mutator;
+    # reduceMutator(_mutator: Mutator): void;
+   }
+  }  
+
+file "Vector3" {
+     class Vector3 extends Mutable {
+    - data: Float32Array;
+    + {static} X(_scale: number = 1): Vector3:
+    + {static} Y(_scale: number = 1): Vector3;
+    + {static} Z(_scale: number = 1): Vector3;
+    + {static} ZERO(): Vector3;
+    + {static} ONE(_scale: number = 1): Vector3;
+    + {static} TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3;
+    + {static} NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3;
+    + {static} SUM(..._vectors: Vector3[]): Vector3 ;
+    + {static} DIFFERENCE(_a: Vector3, _b: Vector3): Vector3;
+    + {static} SCALE(_vector: Vector3, _scaling: number): Vector3;
+    + {static} CROSS(_a: Vector3, _b: Vector3): Vector3;
+    + {static} DOT(_a: Vector3, _b: Vector3): number;
+    + {static} REFLECTION(_incoming: Vector3, _normal: Vector3): Vector3;
+    + equals(_compare: Vector3, _tolerance: number = Number.EPSILON): boolean;
+    + add(_addend: Vector3): void;
+    + subtract(_subtrahend: Vector3): void 
+    + scale(_scale: number): void;
+    + normalize(_length: number = 1): void;
+    + set(_x: number = 0, _y: number = 0, _z: number = 0): void;
+    + get(): Float32Array;
+    + get copy(): Vector3;
+    + transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void;
+    + toVector2(): Vector2;
+    + reflect(_normal: Vector3): void ;
+    + toString(): string;
+    + map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
+    + getMutator(): Mutator;
+    # reduceMutator(_mutator: Mutator): void;
+  }
+  }  
+
+   file "Framing" {
       interface Border {
         left: number
         right: number
         top: number
         bottom: number
       }
-      interface Vector2 {
-        x:number
-        y:number
-      }
-      abstract class Framing extends Mutable {
-        + getPoint(_pointInFrame: Point, _rectFrame: Rectangle): Point
-        + getPointInverse(_point: Point, _rect: Rectangle): Point
-        + getRect(_rectFrame: Rectangle): Rectangle
-      }
-      class FramingComplex extends Framing {
-        + margin: Border
-        + padding: Border
-      }
-      class FramingFixed extends Framing {
-        + width: number
-        + height: number
-      }
-      class FramingScaled extends Framing {
-        + normWidth: number
-        + normHeight: number
-      }
+      abstract class Framing extends Mutable{
+      + abstract getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;  
+      + abstract getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
+      + abstract getRect(_rectFrame: Rectangle): Rectangle;
+      # reduceMutator(_mutator: Mutator): void;
+     }  
+     class FramingFixed extends Framing  {
+      + width: number = 300;
+      + height: number = 150;
+      + setSize(_width: number, _height: number): void;
+      + getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+      + getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
+      + getRect(_rectFrame: Rectangle): Rectangle
+      } 
+     class FramingScaled extends Framing { 
+      + normWidth: number = 1.0;
+      + normHeight: number = 1.0;
+      + setScale(_normWidth: number, _normHeight: number): void;
+      + getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2
+      + getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
+      + getRect(_rectFrame: Rectangle): Rectangle;   
+     } 
+     class FramingComplex extends Framing {
+      + margin: Border = { left: 0, top: 0, right: 0, bottom: 0 };
+      + padding: Border = { left: 0, top: 0, right: 0, bottom: 0 };
+      + getPoint(_pointInFrame: Vector2, _rectFrame: Rectangle): Vector2;
+      + getPointInverse(_point: Vector2, _rect: Rectangle): Vector2;
+      + getRect(_rectFrame: Rectangle): Rectangle;
+      + getMutator(): Mutator;
+     }
     }
   }
 
@@ -372,107 +1007,224 @@ left to right direction
       + {static} getFragmentShaderSource(): string
     }
     class ShaderUniColor extends Shader {
+      + {static} getCoat(): typeof Coat;
+      + {static} getVertexShaderSource(): string;
+      + {static} getFragmentShaderSource(): string;
     }
     class ShaderTexture extends Shader {
+      + {static} getCoat(): typeof Coat;
+      + {static} getVertexShaderSource(): string;
+      + {static} getFragmentShaderSource(): string;
+    }
+    class ShaderMatCap extends Shader{
+      + {static} getCoat(): typeof Coat;
+      + {static} getVertexShaderSource(): string;
+      + {static} getFragmentShaderSource(): string;
+    }
+    class ShaderRayCast extends Shader {
+      + {static} getVertexShaderSource(): string;
+      + {static} getFragmentShaderSource(): string;
     }
     class ShaderFlat extends Shader {
+      + {static} getCoat(): typeof Coat;
+      + {static} getVertexShaderSource(): string;
+      + {static} getFragmentShaderSource(): string;
     }
   }
 
-  package "Coat" << Folder>> {
-    class Coat extends Mutable {
-      + name: string
-      # renderData: MapAttributeToUnknown
-      + useRenderData(_renderShader: RenderShader): void
+  package " Coat" << Folder>> {
+    file "Coat" {
+      class Coat extends Mutable implements Serializable {
+        + name: string
+        # renderData: {[key: string]: unknown;
+        + mutate(_mutator: Mutator): void;
+        + useRenderData(_renderShader: RenderShader): void;
+        + serialize(): Serialization;
+        + deserialize(_serialization: Serialization): Serializable;
+        # reduceMutator(): void
+      }
+      '@decorateCoatWithRenderExtension
+      class CoatColored extends Coat{
+        + color: Color;
+      }
+      class CoatMatCap extends Coat{
+        + texture: TextureImage;
+        + tintColor: Color = new Color(0.5, 0.5, 0.5, 1);
+        + flatMix: number;
+      }
     }
-    '@decorateCoatWithRenderExtension
-    class CoatColored extends Coat
-    class CoatTextured extends Coat
+    class CoatTextured extends Coat{
+    + texture: TextureImage;
+    + pivot: Matrix3x3 = Matrix3x3.IDENTITY;
+    + tilingX: number;
+    + tilingY: number;
+    + repetition: boolean;
   }
+}
 
-  package "Texture" << Folder>> {
-    abstract class Texture extends Mutable {
-    }
-    class TextureImage extends Texture {
-      + image: HTMLImageElement;
-    }
-    class TextureCanvas extends Texture {
-    }
-    class TextureSketch extends TextureCanvas {
-    }
-    class TextureHTML extends TextureCanvas {
-    }
+package "Texture" << Folder>> {
+  abstract class Texture extends Mutable {
+    # protected reduceMutator(): void;
   }
-
-  package "Light" << Folder>> {
-    abstract class Light extends Mutable {
-      + color: Color
-    }
-    class LightAmbient extends Light {
-    }
-    class LightDirectional extends Light {
-    }
-    class LightPoint extends Light {
-      + range: number
-    }
-    class LightSpot extends LightPoint {
-    }
+  class TextureImage extends Texture {
+    + image: HTMLImageElement;
   }
+  class TextureCanvas extends Texture {
+  }
+  class TextureSketch extends TextureCanvas {
+  }
+  class TextureHTML extends TextureCanvas {
+  }
+}
 
-  'Interface consumption
-  Mesh --() SerializableResource
-  Component --() Serializable
-  Node  --() Serializable
-  NodeResource --() SerializableResource
-  Matrix4x4 --() Serializable
-  Serializer  -(0- Serializable
-  Serializer  -(0- Serialization
-  Mutable -(0- Mutator
-  Mutable -(0- MutatorAttributeTypes
-  Node "1" -(0- "2" MapEventTypeToListener
-  Framing -(0- Rectangle
-  FramingComplex "1" -(0- "2" Border
-  Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
-  MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
-  Material --() SerializableResource
+package " Time" << Folder>> {
+  enum LOOP_MODE;
+  file "Loop" {
+     class Loop extends EventTargetStatic {
+          + {static} timeStartGame: number;
+          + {static} timeStartReal: number;
+          + {static} timeFrameGame: number;
+          + {static} timeFrameReal: number;
+          - {static} timeLastFrameGame: number;
+          - {static} timeLastFrameReal: number;
+          - {static} timeLastFrameGameAvg: number;
+          - {static} timeLastFrameRealAvg: number;
+          - {static} running: boolean;
+          - {static} mode: LOOP_MODE;
+          - {static} idIntervall: number;
+          - {static} idRequest: number;
+          - {static} fpsDesired: number;
+          - {static} framesToAverage: number;
+          - {static} syncWithAnimationFrame: boolean;
+          + {static} start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 60, _syncWithAnimationFrame: boolean = false): void;
+          + {static} stop(): void;
+          + {static} getFpsGameAverage(): number;
+          + {static} getFpsRealAverage(): number;
+          - {static} loop(): void;
+          - {static} loopFrame(): void;
+          - {static} loopTime(): void;
+  }
+ } 
+ file "Time" {
+   interface Timers extends Object {
+    [id: number]: Timer;
+  }
+   class Time extends EventTargetƒ{
+    - {static} gameTime: Time = new Time();
+    - start: number;
+    - scale: number;
+    - offset: number;
+    - lastCallToElapsed: number;
+    - timers: Timers = {};
+    - idTimerNext: number = 0;
+    + {static} get game(): Time;
+    + {static} getUnits(_milliseconds: number): TimeUnits;
+    + get(): number;
+    + getRemainder(_to: number): number
+    + set(_time: number = 0): void;
+    + setScale(_scale: number = 1.0): void;
+    + getScale(): number;
+    + getOffset(): number;
+    + getElapsedSincePreviousCall(): number;
+    + delay(_lapse: number): Promise<void>;
+    + clearAllTimers(): void;
+    + deleteTimerByItsInternalId(_id: number): void;
+    + setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
+    + deleteTimer(_id: number): void;
+    + getTimers(): Timers;
+    + hasTimers(): boolean;
+    - rescaleAllTimers(): void;   
+  } 
+ } 
+  file "Timer" {
+   class Timer {
+    + active: boolean;
+    + count: number;
+    - handler: TimerHandler;
+    - time: Time;
+    - elapse: number;
+    - event: EventTimer;
+    - timeoutReal: number;
+    - idWindow: number;
+    + get id(): number;
+    + get lapse(): number;
+    + installCopy(): Timer;
+    + clear(): void;
+   }   
+  }  
+}
 
-  'Associations, Compositions, Aggregations
-  Node "0..1 parent" o-- "n children" Node
-  Node "1 container" o-- "n components" Component
+package "Light" << Folder>> {
+  abstract class Light extends Mutable {
+    + color: Color
+    + getType(): TypeOfLight
+    # reduceMutator(): void
+  }
+  class LightAmbient extends Light {
+  }
+  class LightDirectional extends Light {
+  }
+  class LightPoint extends Light {
+    + range: number
+  }
+  class LightSpot extends LightPoint {
+  }
+}
 
-  ComponentMesh "n" ---> "1" Mesh : refers >
-  ComponentTransform --->"1" Matrix4x4
-  ComponentMaterial "n" ---> "1" Material : refers >
+'Interface consumption
+Mesh --() SerializableResource
+Component --() Serializable
+Node  --() Serializable
+NodeResource --() SerializableResource
+Matrix4x4 --() Serializable
+Serializer  -(0- Serializable
+Serializer  -(0- Serialization
+Mutable -(0- Mutator
+Mutable -(0- MutatorAttributeTypes
+Node "1" -(0- "2" MapEventTypeToListener
+Framing -(0- Rectangle
+FramingComplex "1" -(0- "2" Border
+Debug "1" -(0- "1" MapDebugTargetToDelegate : has >
+MapDebugFilterToDelegate "1" -0)- "1" DebugTarget : < has
+Material --() SerializableResource
 
-  Material "n"--->"1" Shader : references >
-  Material "n"--->"1" Coat : references >
-  Shader "n"--->"1" Coat : references >
-  CoatTextured "n" ---> Texture : references >
+'Associations, Compositions, Aggregations
+Node "0..1 parent" o-- "n children" Node
+Node "1 container" o-- "n components" Component
 
-  Viewport --->"1 root" Node : displays >
-  Viewport --->"1 camera" ComponentCamera : look through >
-  Viewport "n" ---> "1" CanvasRenderingContext2D : renders >
-  Viewport "n" ---> "1" RenderManager : feeds data and retrieves image >
-  Viewport "1" ---> "4" Framing : uses >
+ComponentMesh "n" ---> "1" Mesh : refers >
+ComponentTransform --->"1" Matrix4x4
+ComponentMaterial "n" ---> "1" Material : refers >
 
-  RenderManager "1" ---> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
-  RenderManager "1" o--> "n" NodeReferences : keeps >
-  RenderManager "1" o--> "n" Reference : keeps >
-  RenderInjector -(0- CoatInjection : provides >
-  RenderInjector --- Coat : decorates >
+Material "n"--->"1" Shader : references >
+Material "n"--->"1" Coat : references >
+Shader "n"--->"1" Coat : references >
+CoatTextured "n" ---> Texture : references >
 
-  Reference "1" ---> "1" RenderShader : shader uses >
-  Reference "1" ---> "1" RenderBuffers : mesh uses >
-  Reference "1" ---> "1" RenderCoat : material uses >
+Viewport --->"1 root" Node : displays >
+Viewport --->"1 camera" ComponentCamera : look through >
+Viewport "n" ---> "1" CanvasRenderingContext2D : renders >
+Viewport "n" ---> "1" RenderManager : feeds data and retrieves image >
+Viewport "1" ---> "4" Framing : uses >
 
-  Mesh ---> BufferSpecification : provides >
+RenderManager "1" ---> "1" WebGL2RenderingContext : store buffers\nrender offscreen >
+RenderManager "1" o--> "n" NodeReferences : keeps >
+RenderManager "1" o--> "n" Reference : keeps >
+RenderInjector -(0- CoatInjection : provides >
+RenderInjector --- Coat : decorates >
 
-  ResourceManager "1" o--> "n" NodeResource : register >
+Reference "1" ---> "1" RenderShader : shader uses >
+Reference "1" ---> "1" RenderBuffers : mesh uses >
+Reference "1" ---> "1" RenderCoat : material uses >
 
-  'improve layout
-  ' Node -[hidden]right- Mutable
-  'CoatTextured "n" -[hidden]up-> Texture
-  'Engine -[hidden]right- Component
-  Debug -[hidden]right- Event
+Mesh ---> BufferSpecification : provides >
 
-  @enduml
+ResourceManager "1" o--> "n" NodeResource : register >
+
+'improve layout
+' Node -[hidden]right- Mutable
+'CoatTextured "n" -[hidden]up-> Texture
+'Engine -[hidden]right- Component
+Debug -[hidden]right- Event
+
+@enduml

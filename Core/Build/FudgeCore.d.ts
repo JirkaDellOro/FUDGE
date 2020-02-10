@@ -77,6 +77,10 @@ declare namespace FudgeCore {
         readonly forUserInterface: null;
     }
     /**
+     * Collect applicable attributes of the instance and copies of their values in a Mutator-object
+     */
+    function getMutatorOfArbitrary(_object: Object): Mutator;
+    /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
      * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
@@ -500,272 +504,46 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Holds an audio-buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Audio extends AudioBuffer {
+        /**
+         * Asynchronously loads the audio (mp3) from the given url
+         */
         static load(_url: string): Promise<Audio>;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Add an [[AudioDelay]] to an [[Audio]]
-     * @authors Thomas Dorner, HFU, 2019
+     * Extends the standard AudioContext for integration with [[Node]]-branches
      */
-    class AudioDelay {
-        audioDelay: DelayNode;
-        private delay;
-        constructor(_audioSettings: AudioSettings, _delay: number);
-        setDelay(_audioSettings: AudioSettings, _delay: number): void;
-        getDelay(): number;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * All possible Filter Types of an Audio Filter
-     */
-    type FILTER_TYPE = "lowpass" | "highpass" | "bandpass" | "lowshelf" | "highshelf" | "peaking" | "notch" | "allpass";
-    /**
-     * Add an [[AudioFilter]] to an [[Audio]]
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    export class AudioFilter {
-        audioFilter: BiquadFilterNode;
-        private filterType;
-        constructor(_audioSettings: AudioSettings, _filterType: FILTER_TYPE, _frequency: number, _gain: number, _quality: number);
-        initFilter(_audioSettings: AudioSettings, _filterType: FILTER_TYPE, _frequency: number, _gain: number, _quality: number): void;
-        setFilterType(_filterType: FILTER_TYPE): void;
-        getFilterType(): FILTER_TYPE;
-        setFrequency(_audioSettings: AudioSettings, _frequency: number): void;
-        getFrequency(): number;
-        setGain(_audioSettings: AudioSettings, _gain: number): void;
-        getGain(): number;
-        setQuality(_quality: number): void;
-        getQuality(): number;
-    }
-    export {};
-}
-declare namespace FudgeCore {
-    /**
-     * Panning Model Type for 3D localisation of a [[ComponentAudio]].
-     * @param HRFT Usually used for 3D world space, this will be the default setting
-     */
-    type PANNING_MODEL_TYPE = "equalpower" | "HRTF";
-    /**
-     * Distance Model Type for 3D localisation of a [[ComponentAudio]].
-     * @param inverse Usually used for volume drop of sound in 3D world space
-     */
-    type DISTANCE_MODEL_TYPE = "linear" | "inverse" | "exponential";
-    /**
-     * [[AudioLocalisation]] describes the Audio Panner used in [[ComponentAudio]],
-     * which contains data for Position, Orientation and other data needed to localize the Audio in a 3D space.
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    export class AudioLocalisation {
-        pannerNode: PannerNode;
-        private panningModel;
-        private distanceModel;
-        private refDistance;
-        private maxDistance;
-        private rolloffFactor;
-        private coneInnerAngle;
-        private coneOuterAngle;
-        private coneOuterGain;
-        private position;
-        private orientation;
-        /**
-         * Constructor for the [[AudioLocalisation]] Class
-         * @param _audioContext from [[AudioSettings]]
-         */
-        constructor(_audioSettings: AudioSettings);
-        updatePositions(_position: Vector3, _orientation: Vector3): void;
-        /**
-        * We will call setPannerPosition whenever there is a need to change Positions.
-        * All the position values should be identical to the current Position this is attached to.
-        *
-        *      |
-        *      o---
-        *    /  __
-        *      |_| Position
-        *
-        */
-        setPannerPosition(_position: Vector3): void;
-        getPannerPosition(): Vector3;
-        /**
-         * Set Position for orientation target
-         *
-         *      |
-         *      o---
-         *    /  __
-         *      |_|
-         *        \
-         *       Target
-         */
-        setPannerOrientation(_orientation: Vector3): void;
-        getPannerOrientation(): Vector3;
-        setDistanceModel(_distanceModelType: DISTANCE_MODEL_TYPE): void;
-        getDistanceModel(): DISTANCE_MODEL_TYPE;
-        setPanningModel(_panningModelType: PANNING_MODEL_TYPE): void;
-        getPanningModel(): PANNING_MODEL_TYPE;
-        setRefDistance(_refDistance: number): void;
-        getRefDistance(): number;
-        setMaxDistance(_maxDistance: number): void;
-        getMaxDistance(): number;
-        setRolloffFactor(_rolloffFactor: number): void;
-        getRolloffFactor(): number;
-        setConeInnerAngle(_coneInnerAngle: number): void;
-        getConeInnerAngle(): number;
-        setConeOuterAngle(_coneOuterAngle: number): void;
-        getConeOuterAngle(): number;
-        setConeOuterGain(_coneOuterGain: number): void;
-        getConeOuterGain(): number;
-        /**
-         * Show all Settings inside of [[AudioLocalisation]].
-         * Use for Debugging purposes.
-         */
-        showLocalisationSettings(): void;
-        private initDefaultValues;
-    }
-    export {};
-}
-declare namespace FudgeCore {
     class AudioManager extends AudioContext {
+        /** The default context that may be used throughout the project without the need to create others */
         static readonly default: AudioManager;
-        readonly gain: AudioNode;
+        /** The master volume all AudioNodes in the context should attach to */
+        readonly gain: GainNode;
         private branch;
         private cmpListener;
         constructor(contextOptions?: AudioContextOptions);
+        set volume(_value: number);
+        get volume(): number;
+        /**
+         * Determines branch to listen to. Each [[ComponentAudio]] in the branch will connect to this contexts master gain, all others disconnect.
+         */
         listenTo: (_branch: Node) => void;
+        /**
+         * Retrieve the branch currently listening to
+         */
         getBranchListeningTo: () => Node;
+        /**
+         * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
+         */
         listen: (_cmpListener: ComponentAudioListener) => void;
+        /**
+         * Updates the spatial settings of the AudioNodes effected in the current branch
+         */
         update: () => void;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Enumerator for all possible Oscillator Types
-     */
-    type OSCILLATOR_TYPE = "sine" | "square" | "sawtooth" | "triangle" | "custom";
-    /**
-     * Interface to create Custom Oscillator Types.
-     * Start-/Endpoint of a custum curve e.g. sine curve.
-     * Both parameters need to be inbetween -1 and 1.
-     * @param startpoint startpoint of a curve
-     * @param endpoint Endpoint of a curve
-     */
-    interface OscillatorWave {
-        startpoint: number;
-        endpoint: number;
-    }
-    /**
-     * Add an [[AudioFilter]] to an [[Audio]]
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    export class AudioOscillator {
-        audioOscillator: OscillatorNode;
-        private frequency;
-        private oscillatorType;
-        private oscillatorWave;
-        private localGain;
-        private localGainValue;
-        constructor(_audioSettings: AudioSettings, _oscillatorType?: OSCILLATOR_TYPE);
-        setOscillatorType(_oscillatorType: OSCILLATOR_TYPE): void;
-        getOscillatorType(): OSCILLATOR_TYPE;
-        createPeriodicWave(_audioSettings: AudioSettings, _real: OscillatorWave, _imag: OscillatorWave): void;
-        setLocalGain(_localGain: GainNode): void;
-        getLocalGain(): GainNode;
-        setLocalGainValue(_localGainValue: number): void;
-        getLocalGainValue(): number;
-        setFrequency(_audioSettings: AudioSettings, _frequency: number): void;
-        getFrequency(): number;
-        createSnare(_audioSettings: AudioSettings): void;
-    }
-    export {};
-}
-declare namespace FudgeCore {
-    /**
-     * Interface to generate Data Pairs of URL and AudioBuffer
-     */
-    interface AudioData {
-        url: string;
-        buffer: AudioBuffer;
-    }
-    /**
-     * Describes Data Handler for all Audio Sources
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    export class AudioSessionData {
-        dataArray: AudioData[];
-        /**
-         * Constructor of the [[AudioSessionData]] Class.
-         */
-        constructor();
-        /**
-         * Decoding Audio Data
-         * Asynchronous Function to permit the loading of multiple Data Sources at the same time
-         * @param _audioContext AudioContext from AudioSettings
-         * @param _url URL as String for Data fetching
-         */
-        urlToBuffer(_audioContext: AudioContext, _url: string): Promise<AudioBuffer>;
-        /**
-         * Push URL into Data Array to create a Placeholder in which the Buffer can be placed at a later time
-         */
-        /**
-         *
-         * @param _url
-         * @param _audioBuffer
-         */
-        pushBufferInArray(_url: string, _audioBuffer: AudioBuffer): void;
-        /**
-         * Create a new log for the Data Array.
-         * Uses a url and creates a placeholder for the AudioBuffer.
-         * The AudioBuffer gets added as soon as it is created.
-         * @param _url Add a url to a wanted resource as a string
-         */
-        pushUrlInArray(_url: string): void;
-        /**
-         * Show all Data in Array.
-         * Use this for Debugging purposes.
-         */
-        showDataInArray(): void;
-        /**
-         * Error Message for Data Fetching
-         * @param e Error
-         */
-        private logErrorFetch;
-    }
-    export {};
-}
-declare namespace FudgeCore {
-    /**
-     * Describes Global Audio Settings.
-     * Is meant to be used as a Menu option.
-     * @authors Thomas Dorner, HFU, 2019
-     */
-    class AudioSettings {
-        masterGain: GainNode;
-        private masterGainValue;
-        private globalAudioContext;
-        private audioSessionData;
-        /**
-         * Constructor for the [[AudioSettings]] Class.
-         * Main class for all Audio Classes.
-         * Need to create this first, when working with sounds.
-         */
-        constructor();
-        setMasterGainValue(_masterGainValue: number): void;
-        getMasterGainValue(): number;
-        getAudioContext(): AudioContext;
-        setAudioContext(_audioContext: AudioContext): void;
-        getAudioSession(): AudioSessionData;
-        setAudioSession(_audioSession: AudioSessionData): void;
-        /**
-         * Pauses the progression of time of the AudioContext.
-         */
-        suspendAudioContext(): void;
-        /**
-         * Resumes the progression of time of the AudioContext after pausing it.
-         */
-        resumeAudioContext(): void;
     }
 }
 declare namespace FudgeCore {
@@ -1224,35 +1002,92 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum AUDIO_PANNER {
+        CONE_INNER_ANGLE = "coneInnerAngle",
+        CONE_OUTER_ANGLE = "coneOuterAngle",
+        CONE_OUTER_GAIN = "coneOuterGain",
+        DISTANCE_MODEL = "distanceModel",
+        MAX_DISTANCE = "maxDistance",
+        PANNING_MODEL = "panningModel",
+        REF_DISTANCE = "refDistance",
+        ROLLOFF_FACTOR = "rolloffFactor"
+    }
+    enum AUDIO_NODE_TYPE {
+        SOURCE = 0,
+        PANNER = 1,
+        GAIN = 2
+    }
     /**
-     * Attaches a [[ComponentAudio]] to a [[Node]].
-     * Only a single [[Audio]] can be used within a single [[ComponentAudio]]
+     * Builds a minimal audio graph (by default in [[AudioManager]].default) and synchronizes it with the containing [[Node]]
+     * ```plaintext
+     * ┌ AudioManager(.default) ────────────────────────┐
+     * │ ┌ ComponentAudio ───────────────────┐          │
+     * │ │    ┌──────┐   ┌──────┐   ┌──────┐ │ ┌──────┐ │
+     * │ │    │source│ → │panner│ → │ gain │ → │ gain │ │
+     * │ │    └──────┘   └──────┘   └──────┘ │ └──────┘ │
+     * │ └───────────────────────────────────┘          │
+     * └────────────────────────────────────────────────┘
+     * ```
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudio extends Component {
+        /** places and directs the panner relative to the world transform of the [[Node]]  */
         pivot: Matrix4x4;
-        gain: GainNode;
         protected singleton: boolean;
+        private gain;
         private panner;
         private source;
         private audioManager;
         private playing;
-        private connected;
         private listened;
-        constructor(_audio?: Audio, _loop?: boolean, _start?: boolean);
-        audio: Audio;
+        constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
+        set audio(_audio: Audio);
+        get audio(): Audio;
+        set volume(_value: number);
+        get volume(): number;
+        /**
+         * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
+         */
+        setPanner(_property: AUDIO_PANNER, _value: number): void;
+        getMutatorOfNode(_type: AUDIO_NODE_TYPE): Mutator;
+        /**
+         * Returns the specified AudioNode of the standard graph for further manipulation
+         */
+        getAudioNode(_type: AUDIO_NODE_TYPE): AudioNode;
+        /**
+         * Start or stop playing the audio
+         */
         play(_on: boolean): void;
-        readonly isPlaying: boolean;
-        readonly isConnected: boolean;
-        readonly isAttached: boolean;
-        readonly isListened: boolean;
+        get isPlaying(): boolean;
+        get isAttached(): boolean;
+        get isListened(): boolean;
+        /**
+         * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
+         * _input and _output may be the same AudioNode, if there is only one to insert,
+         * or may have multiple AudioNode between them to create an effect-graph.\
+         * Note that [[ComponentAudio]] does not keep track of inserted AudioNodes!
+         * ```plaintext
+         * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
+         * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
+         * │ │    ┌──────┐   ┌──────┐   ┌──────┐          ┌───────┐   ┌──────┐ │ ┌──────┐ │
+         * │ │    │source│ → │panner│ → │_input│ → ...  → │_output│ → │ gain │ → │ gain │ │
+         * │ │    └──────┘   └──────┘   └──────┘          └───────┘   └──────┘ │ └──────┘ │
+         * │ └─────────────────────────────────────────────────────────────────┘          │
+         * └──────────────────────────────────────────────────────────────────────────────┘
+         * ```
+         */
+        insertAudioNodes(_input: AudioNode, _output: AudioNode): void;
         /**
          * Activate override. Connects or disconnects AudioNodes
          */
         activate(_on: boolean): void;
-        install(_audioManager?: AudioManager): void;
-        createSource(_audio: Audio, _loop: boolean): void;
+        /**
+         * Connects this components gain-node to the gain node of the AudioManager this component runs on.
+         * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
+         */
         connect(_on: boolean): void;
+        private install;
+        private createSource;
         private updateConnection;
         /**
          * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node.
@@ -1266,16 +1101,20 @@ declare namespace FudgeCore {
         /**
          * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component.
          */
-        private updatePanner;
+        private update;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Attaches an [[AudioListener]] to the node
+     * Serves to set the spatial location and orientation of AudioListeners relative to the
+     * world transform of the [[Node]] it is attached to.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudioListener extends Component {
         pivot: Matrix4x4;
+        /**
+         * Updates the position and orientation of the given AudioListener
+         */
         update(_listener: AudioListener): void;
     }
 }
@@ -1977,7 +1816,7 @@ declare namespace FudgeCore {
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
         CHILD_REMOVE = "childRemoveFromAudioBranch",
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch to update the panners in AudioComponents */
-        UPDATE_PANNER = "updateAudioBranch"
+        UPDATE = "updateAudioBranch"
     }
 }
 declare namespace FudgeCore {

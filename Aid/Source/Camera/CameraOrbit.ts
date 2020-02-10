@@ -26,6 +26,7 @@ namespace FudgeAid {
       this.appendChild(this.rotatorX);
       this.translator = new ƒ.Node("CameraTranslate");
       this.translator.addComponent(new ƒ.ComponentTransform());
+      this.translator.cmpTransform.local.rotateY(180);
       this.rotatorX.appendChild(this.translator);
 
       this.translator.addComponent(_cmpCamera);

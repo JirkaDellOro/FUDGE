@@ -5,32 +5,40 @@ var AudioSounds;
     var ƒ = FudgeCore;
     window.addEventListener("click", start);
     window.addEventListener("keydown", handleKeydown);
-    // let nodes: ƒ.Node[] = [];
-    // let node: ƒ.Node;
     let cmpAudio;
+    let distortion = ƒ.AudioManager.default.createWaveShaper();
     async function start(_event) {
         let audioBeep = await ƒ.Audio.load("Sound/Beep.mp3");
         cmpAudio = new ƒ.ComponentAudio(audioBeep, false, false);
         cmpAudio.connect(true);
-        //ƒ.AudioManager.default.listenTo(nodes[0]);
-        // log();
+        cmpAudio.volume = 30;
+        function makeDistortionCurve(amount = 50) {
+            let samples = 44100;
+            let curve = new Float32Array(samples);
+            let deg = Math.PI / 180;
+            let x;
+            for (let i = 0; i < samples; ++i) {
+                x = i * 2 / samples - 1;
+                curve[i] = (3 + amount) * x * 20 * deg / (Math.PI + amount * Math.abs(x));
+            }
+            return curve;
+        }
+        distortion.curve = makeDistortionCurve(400);
+        distortion.oversample = "4x";
     }
-    // function log(): void {
-    //   ƒ.Debug.group(`Listening to ${ƒ.AudioManager.default.getBranchListeningTo().name}, controlling ${nodeControlled.name}`);
-    //   for (let node of nodes) {
-    //     let out: string = `node: ${node.name}`;
-    //     if (node.getParent())
-    //       out += ` [->${node.getParent().name}]`;
-    //     let cmpAudioList: ƒ.ComponentAudio[] = node.getComponents(ƒ.ComponentAudio);
-    //     for (let cmpAudio of cmpAudioList)
-    //       out += ` | active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
-    //     ƒ.Debug.log(out);
-    //   }
-    //   ƒ.Debug.groupEnd();
-    // }
     function handleKeydown(_event) {
-        ƒ.Debug.log("Hit");
-        cmpAudio.play(true);
+        switch (_event.code) {
+            case ƒ.KEYBOARD_CODE.ENTER:
+                ƒ.Debug.log("Hit");
+                cmpAudio.play(true);
+                break;
+            case ƒ.KEYBOARD_CODE.ARROW_UP:
+                cmpAudio.insertAudioNodes(distortion, distortion);
+                break;
+            case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                cmpAudio.insertAudioNodes(null, null);
+                break;
+        }
     }
 })(AudioSounds || (AudioSounds = {}));
 //# sourceMappingURL=AudioSounds.js.map

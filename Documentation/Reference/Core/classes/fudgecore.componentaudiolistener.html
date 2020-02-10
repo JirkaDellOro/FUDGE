@@ -72,11 +72,12 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Attaches an [[AudioListener]] to the node</p>
+						<p>Serves to set the spatial location and orientation of AudioListeners relative to the
+						world transform of the <a href="fudgecore.node.html">Node</a> it is attached to.</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
-						<dd><p>Thomas Dorner, HFU, 2019</p>
+						<dd><p>Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
 						</dd>
 					</dl>
 				</div>
@@ -105,9 +106,9 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Constructors</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#pivot" class="tsd-kind-icon">pivot</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-inherited">
@@ -123,62 +124,35 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#activate" class="tsd-kind-icon">activate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentaudiolistener.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#getaudiolistener" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#getlistenerposition" class="tsd-kind-icon">get<wbr>Listener<wbr>Position</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#getlistenerpositionforward" class="tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Forward</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#getlistenerpositionup" class="tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Up</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#mutate" class="tsd-kind-icon">mutate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentaudiolistener.html#serialize" class="tsd-kind-icon">serialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#setaudiolistener" class="tsd-kind-icon">set<wbr>Audio<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#serialize" class="tsd-kind-icon">serialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#setcontainer" class="tsd-kind-icon">set<wbr>Container</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#setlistenerposition" class="tsd-kind-icon">set<wbr>Listener<wbr>Position</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#setlistenerpositionforward" class="tsd-kind-icon">set<wbr>Listener<wbr>Position<wbr>Forward</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#setlistenerpostitionup" class="tsd-kind-icon">set<wbr>Listener<wbr>Postition<wbr>Up</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#showlistenersettings" class="tsd-kind-icon">show<wbr>Listener<wbr>Settings</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#update" class="tsd-kind-icon">update</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentaudiolistener.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.componentaudiolistener.html#updatepositions" class="tsd-kind-icon">update<wbr>Positions</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
-					<a name="constructor" class="tsd-anchor"></a>
-					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Component<wbr>Audio<wbr>Listener<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentaudiolistener.html" class="tsd-signature-type">ComponentAudioListener</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L11">Component/ComponentAudioListener.ts:11</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Constructor of the AudioListener class</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentaudiolistener.html" class="tsd-signature-type">ComponentAudioListener</a></h4>
-						</li>
-					</ul>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pivot" class="tsd-anchor"></a>
+					<h3>pivot</h3>
+					<div class="tsd-signature tsd-kind-icon">pivot<span class="tsd-signature-symbol">:</span> <a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a><span class="tsd-signature-symbol"> =&nbsp;Matrix4x4.IDENTITY</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/ComponentAudioListener.ts#L8">Component/ComponentAudioListener.ts:8</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
@@ -194,7 +168,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#isactive">isActive</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/Component.ts#L17">Component/Component.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L17">Component/Component.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -212,7 +186,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#issingleton">isSingleton</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/Component.ts#L24">Component/Component.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L24">Component/Component.ts:24</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -235,7 +209,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L35">Transfer/Mutable.ts:35</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L51">Transfer/Mutable.ts:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -262,7 +236,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#activate">activate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/Component.ts#L13">Component/Component.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L13">Component/Component.ts:13</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -287,7 +261,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
 								<p>Overrides EventTarget.addEventListener</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L56">Event/Event.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/Event.ts#L56">Event/Event.ts:56</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -306,19 +280,19 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="deserialize" class="tsd-anchor"></a>
 					<h3>deserialize</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#deserialize">deserialize</a></p>
-								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#deserialize">deserialize</a></p>
+								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L132">Component/ComponentAudioListener.ts:132</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L59">Component/Component.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -343,7 +317,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
 								<p>Overrides EventTarget.dispatchEvent</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L63">Event/Event.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/Event.ts#L63">Event/Event.ts:63</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -353,23 +327,6 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getaudiolistener" class="tsd-anchor"></a>
-					<h3>get<wbr>Audio<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Audio<wbr>Listener<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioListener</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L26">Component/ComponentAudioListener.ts:26</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">AudioListener</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -384,7 +341,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#getcontainer">getContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/Component.ts#L31">Component/Component.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L31">Component/Component.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -400,57 +357,6 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getlistenerposition" class="tsd-anchor"></a>
-					<h3>get<wbr>Listener<wbr>Position</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Listener<wbr>Position<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L51">Component/ComponentAudioListener.ts:51</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getlistenerpositionforward" class="tsd-anchor"></a>
-					<h3>get<wbr>Listener<wbr>Position<wbr>Forward</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Forward<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L73">Component/ComponentAudioListener.ts:73</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getlistenerpositionup" class="tsd-anchor"></a>
-					<h3>get<wbr>Listener<wbr>Position<wbr>Up</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Up<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L93">Component/ComponentAudioListener.ts:93</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
-						</li>
-					</ul>
-				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="getmutator" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator</h3>
@@ -462,7 +368,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L41">Transfer/Mutable.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L57">Transfer/Mutable.ts:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -485,7 +391,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L95">Transfer/Mutable.ts:95</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L111">Transfer/Mutable.ts:111</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -517,7 +423,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L73">Transfer/Mutable.ts:73</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L89">Transfer/Mutable.ts:89</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -541,7 +447,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L80">Transfer/Mutable.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L96">Transfer/Mutable.ts:96</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -565,7 +471,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L126">Transfer/Mutable.ts:126</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L142">Transfer/Mutable.ts:142</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -597,7 +503,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
 								<p>Overrides EventTarget.removeEventListener</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Event/Event.ts#L59">Event/Event.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Event/Event.ts#L59">Event/Event.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -616,45 +522,22 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="serialize" class="tsd-anchor"></a>
 					<h3>serialize</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#serialize">serialize</a></p>
-								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#serialize">serialize</a></p>
+								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L122">Component/ComponentAudioListener.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L53">Component/Component.ts:53</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setaudiolistener" class="tsd-anchor"></a>
-					<h3>set<wbr>Audio<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Audio<wbr>Listener<span class="tsd-signature-symbol">(</span>_audioSettings<span class="tsd-signature-symbol">: </span><a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L22">Component/ComponentAudioListener.ts:22</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_audioSettings: <a href="fudgecore.audiosettings.html" class="tsd-signature-type">AudioSettings</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -669,7 +552,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#setcontainer">setContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/Component.ts#L38">Component/Component.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/Component.ts#L38">Component/Component.ts:38</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -691,122 +574,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setlistenerposition" class="tsd-anchor"></a>
-					<h3>set<wbr>Listener<wbr>Position</h3>
+					<a name="update" class="tsd-anchor"></a>
+					<h3>update</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Listener<wbr>Position<span class="tsd-signature-symbol">(</span>_position<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<span class="tsd-signature-symbol">(</span>_listener<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">AudioListener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L41">Component/ComponentAudioListener.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Component/ComponentAudioListener.ts#L13">Component/ComponentAudioListener.ts:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>We will call setAudioListenerPosition whenever there is a need to change Positions.
-									All the position values should be identical to the current Position this is attached to.</p>
-								</div>
-								<pre><code><span class="hljs-variable">__</span>|<span class="hljs-variable">___</span></code></pre><p>   |  |  |
-									|  °--|--
-									|/____|
-								/</p>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_position: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setlistenerpositionforward" class="tsd-anchor"></a>
-					<h3>set<wbr>Listener<wbr>Position<wbr>Forward</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Listener<wbr>Position<wbr>Forward<span class="tsd-signature-symbol">(</span>_position<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L65">Component/ComponentAudioListener.ts:65</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>FUDGE SYSTEM</p>
-								</div>
-								<pre><code> <span class="hljs-attribute">UP</span> (Y)
- <span class="hljs-regexp"> ^</span>
-__|___</code></pre><p>   |  |  |
-									|  O--|--&gt; FORWARD (Z)
-								|_____|</p>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_position: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setlistenerpostitionup" class="tsd-anchor"></a>
-					<h3>set<wbr>Listener<wbr>Postition<wbr>Up</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Listener<wbr>Postition<wbr>Up<span class="tsd-signature-symbol">(</span>_position<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L85">Component/ComponentAudioListener.ts:85</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<pre><code> <span class="hljs-attribute">UP</span> (Z)
- <span class="hljs-regexp"> ^</span>
-__|___</code></pre><p>   |  |  |
-										|  O--|--&gt; FORWARD (X)
-									|_____|</p>
+									<p>Updates the position and orientation of the given AudioListener</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_position: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_listener: <span class="tsd-signature-type">AudioListener</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="showlistenersettings" class="tsd-anchor"></a>
-					<h3>show<wbr>Listener<wbr>Settings</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">show<wbr>Listener<wbr>Settings<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L111">Component/ComponentAudioListener.ts:111</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Show all Settings inside of <a href="fudgecore.componentaudiolistener.html">ComponentAudioListener</a>.
-									Method only for Debugging Purposes.</p>
-								</div>
-							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -822,7 +612,7 @@ __|___</code></pre><p>   |  |  |
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Transfer/Mutable.ts#L113">Transfer/Mutable.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/62391562/Core/Source/Transfer/Mutable.ts#L129">Transfer/Mutable.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -835,37 +625,6 @@ __|___</code></pre><p>   |  |  |
 								<li>
 									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
 									<div class="tsd-comment tsd-typography">
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="updatepositions" class="tsd-anchor"></a>
-					<h3>update<wbr>Positions</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Positions<span class="tsd-signature-symbol">(</span>_position<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/1ea40d45/Core/Source/Component/ComponentAudioListener.ts#L101">Component/ComponentAudioListener.ts:101</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Set all positional Values based on a single Position</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_position: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>position of the Object</p>
 									</div>
 								</li>
 							</ul>
@@ -893,8 +652,8 @@ __|___</code></pre><p>   |  |  |
 					<li class="current tsd-kind-class tsd-parent-kind-module">
 						<a href="fudgecore.componentaudiolistener.html" class="tsd-kind-icon">Component<wbr>Audio<wbr>Listener</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#constructor" class="tsd-kind-icon">constructor</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.componentaudiolistener.html#pivot" class="tsd-kind-icon">pivot</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#isactive" class="tsd-kind-icon">is<wbr>Active</a>
@@ -911,26 +670,14 @@ __|___</code></pre><p>   |  |  |
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#getaudiolistener" class="tsd-kind-icon">get<wbr>Audio<wbr>Listener</a>
-							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#getlistenerposition" class="tsd-kind-icon">get<wbr>Listener<wbr>Position</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#getlistenerpositionforward" class="tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Forward</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#getlistenerpositionup" class="tsd-kind-icon">get<wbr>Listener<wbr>Position<wbr>Up</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
@@ -950,32 +697,17 @@ __|___</code></pre><p>   |  |  |
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#serialize" class="tsd-kind-icon">serialize</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#setaudiolistener" class="tsd-kind-icon">set<wbr>Audio<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#setcontainer" class="tsd-kind-icon">set<wbr>Container</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#setlistenerposition" class="tsd-kind-icon">set<wbr>Listener<wbr>Position</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#setlistenerpositionforward" class="tsd-kind-icon">set<wbr>Listener<wbr>Position<wbr>Forward</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#setlistenerpostitionup" class="tsd-kind-icon">set<wbr>Listener<wbr>Postition<wbr>Up</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#showlistenersettings" class="tsd-kind-icon">show<wbr>Listener<wbr>Settings</a>
+								<a href="fudgecore.componentaudiolistener.html#update" class="tsd-kind-icon">update</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentaudiolistener.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.componentaudiolistener.html#updatepositions" class="tsd-kind-icon">update<wbr>Positions</a>
 							</li>
 						</ul>
 					</li>

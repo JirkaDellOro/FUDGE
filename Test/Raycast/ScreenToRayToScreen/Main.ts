@@ -1,10 +1,11 @@
 namespace ScreenToRayToScreen {
   import ƒ = FudgeCore;
+  import ƒAid = FudgeAid;
   window.addEventListener("load", init);
 
   export let root: ƒ.Node = new ƒ.Node("Root");
   export let args: URLSearchParams;
-  export let camera: CameraOrbit;
+  export let camera: ƒAid.CameraOrbit;
   let viewport: ƒ.Viewport;
   let speedCameraRotation: number = 0.2;
   let speedCameraTranslation: number = 0.02;
@@ -29,12 +30,11 @@ namespace ScreenToRayToScreen {
     labelDOM.appendChild(ƒ.DebugTextArea.textArea);
     document.body.appendChild(labelDOM);
 
-
     createScene();
 
     // setup viewport
     viewport = new ƒ.Viewport();
-    viewport.initialize("Viewport", root, camera.cmpCamera, canvas);
+    viewport.initialize("Viewport", root, camera.component, canvas);
     ƒ.Debug.log("Viewport", viewport);
 
     // setup event handling
@@ -62,24 +62,24 @@ namespace ScreenToRayToScreen {
 
     ƒ.Debug.clear();
 
-    let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
+    let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
     console.group("original");
     ƒ.Debug.log("origin", ray.origin.toString());
     ƒ.Debug.log("direction", ray.direction.toString());
     console.groupEnd();
 
-    ray.direction.scale(camera.getDistance());
-    ray.origin.transform(camera.cmpCamera.pivot);
-    ray.origin.transform(camera.cmpCamera.getContainer().mtxWorld);
-    ray.direction.transform(camera.cmpCamera.pivot, false);
-    ray.direction.transform(camera.cmpCamera.getContainer().mtxWorld, false);
+    ray.direction.scale(camera.distance);
+    ray.origin.transform(camera.component.pivot);
+    ray.origin.transform(camera.component.getContainer().mtxWorld);
+    ray.direction.transform(camera.component.pivot, false);
+    ray.direction.transform(camera.component.getContainer().mtxWorld, false);
     console.group("transformed");
     ƒ.Debug.log("origin", ray.origin.toString());
     ƒ.Debug.log("direction", ray.direction.toString());
     console.groupEnd();
 
     let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ray.direction);
-    let projection: ƒ.Vector3 = camera.cmpCamera.project(rayEnd);
+    let projection: ƒ.Vector3 = camera.component.project(rayEnd);
     // let screen: ƒ.Vector2 = ƒ.RenderManager.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
     let screen: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
     console.group("end");
@@ -96,25 +96,27 @@ namespace ScreenToRayToScreen {
   }
 
   function hndWheelMove(_event: WheelEvent): void {
-    camera.translate(_event.deltaY * speedCameraTranslation);
+    camera.distance += _event.deltaY * speedCameraTranslation;
     updateDisplay();
   }
 
 
   function createScene(): void {
+    root.appendChild(new ƒAid.NodeCoordinateSystem());
+
     // set lights
     let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, 1, 0.8));
-    // game.addComponent(cmpLight);
-    let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("DARK_GREY")));
+    cmpLight.pivot.lookAt(new ƒ.Vector3(-1, -3, -2));
+    root.addComponent(cmpLight);
+    let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("grey")));
     root.addComponent(cmpLightAmbient);
 
     // setup orbiting camera
-    camera = new CameraOrbit(75);
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.backgroundColor = ƒ.Color.CSS("white");
+    camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
     root.appendChild(camera);
-    // camera.setRotationX(-20);
-    camera.setRotationY(90);
-    camera.cmpCamera.getContainer().addComponent(cmpLight);
+    // camera.node.addComponent(cmpLight);
 
     let cube: ƒ.Node = new ƒ.Node("Cube");
     let cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(new ƒ.MeshCube());
@@ -139,7 +141,7 @@ namespace ScreenToRayToScreen {
 
   function drawLabels(): void {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxWorld;
-    let projection: ƒ.Vector3 = camera.cmpCamera.project(mtxCube.translation);
+    let projection: ƒ.Vector3 = camera.component.project(mtxCube.translation);
     let posCanvas: ƒ.Vector2 = viewport.pointClipToCanvas(projection.toVector2());
     let posClient: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
     let posScreen: ƒ.Vector2 = viewport.pointClientToScreen(posClient);

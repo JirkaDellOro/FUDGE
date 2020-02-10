@@ -5,6 +5,6 @@ namespace FudgeCore {
       /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of just before its being removed from its parent */
       CHILD_REMOVE = "childRemoveFromAudioBranch",
       /** broadcast to a [[Node]] and all [[Nodes]] in the branch to update the panners in AudioComponents */
-      UPDATE_PANNER = "updateAudioBranch"
+      UPDATE = "updateAudioBranch"
     }
 }

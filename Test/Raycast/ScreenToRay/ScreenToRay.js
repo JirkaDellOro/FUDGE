@@ -84,10 +84,12 @@ var ScreenToRay;
             output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
     }
     function adjustRayCamera() {
+        ƒ.Debug.group("Ray");
         let ray = computeRay();
-        // ray.direction.x *= 5;
-        // ray.direction.y *= 5;
+        ƒ.Debug.log(ray.direction.toString());
         ray.direction.transform(cmpCamera.pivot);
+        ƒ.Debug.log(ray.direction.toString());
+        ƒ.Debug.groupEnd();
         cameraRay.pivot.lookAt(ray.direction);
         cameraRay.projectCentral(1, 10);
         viewportRay.draw();
@@ -116,7 +118,7 @@ var ScreenToRay;
         let posProjection = viewport.pointClientToProjection(posMouse);
         let rectProjection = cmpCamera.getProjectionRectangle();
         setUiPoint("Projection", posProjection);
-        let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, -1));
+        let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         return ray;
     }
     function setCursorPosition(_event) {

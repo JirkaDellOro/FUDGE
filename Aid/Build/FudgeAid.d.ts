@@ -22,19 +22,23 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     import ƒ = FudgeCore;
-    class NodeArrow extends ƒ.Node {
+    class Node extends ƒ.Node {
+        private static count;
+        constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
+        private static getNextName;
+        get local(): ƒ.Matrix4x4;
+        get pivot(): ƒ.Matrix4x4;
+    }
+}
+declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    class NodeArrow extends Node {
         constructor(_name: string, _color: ƒ.Color);
     }
 }
 declare namespace FudgeAid {
     import ƒ = FudgeCore;
-    class NodeCoordinateSystem extends ƒ.Node {
-        constructor();
-    }
-}
-declare namespace FudgeAid {
-    import ƒ = FudgeCore;
-    class NodeGeometry extends ƒ.Node {
-        constructor(_name: string, _material: ƒ.Material, _mesh: ƒ.Mesh);
+    class NodeCoordinateSystem extends Node {
+        constructor(_name?: string, _transform?: ƒ.Matrix4x4);
     }
 }
