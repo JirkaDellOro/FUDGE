@@ -5,7 +5,8 @@
       "../Source/Camera/CameraOrbit.ts",
       "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
-      "../Source/Geometry/NodeCoordinateSystem.ts"
+      "../Source/Geometry/NodeCoordinateSystem.ts",
+      "../Source/Light/NodeLightSetup.ts"
     ],
     "js": {
       "sections": [
@@ -17,7 +18,7 @@
         },
         {
           "pos": 15,
-          "end": 5641,
+          "end": 6843,
           "kind": "text"
         }
       ],
@@ -51,11 +52,11 @@
         },
         {
           "pos": 58,
-          "end": 1504,
+          "end": 1602,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.7.5"
+  "version": "3.6.3"
 }

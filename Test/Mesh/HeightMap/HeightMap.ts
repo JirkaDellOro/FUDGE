@@ -1,5 +1,6 @@
 namespace MeshTest {
     import ƒ = FudgeCore;
+    import ƒa = FudgeAid;
 
     window.addEventListener("load", init);
     
@@ -37,7 +38,7 @@ namespace MeshTest {
 
         let body: ƒ.Node = new ƒ.Node("k");
 
-        let lights: ƒ.Node = Scenes.createThreePointLighting("lights", 110);
+        let lights: ƒ.Node = new ƒa.NodeThreePointLights("lights", 110);
         branch.appendChild(lights);
 
         branch.appendChild(body);

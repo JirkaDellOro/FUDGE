@@ -1,5 +1,6 @@
 namespace MeshTest {
     import ƒ = FudgeCore;
+    import ƒa = FudgeAid;
 
     window.addEventListener("load", init);
     
@@ -22,22 +23,17 @@ namespace MeshTest {
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
 
-        sphereFlat.cmpTransform.local.translateZ(0.6);
-        sphereTex.cmpTransform.local.translateZ(-0.6);
+        sphereFlat.cmpTransform.local.translateX(0.6);
+        sphereTex.cmpTransform.local.translateX(-0.6);
 
         branch.appendChild(sphereFlat);
         branch.appendChild(sphereTex);
-
+        
         let body: ƒ.Node = new ƒ.Node("k");
-
-        let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0.8, 0.7)));
-        cmpLightDirectionalRed.pivot.rotateY(-90);
-        branch.addComponent(cmpLightDirectionalRed);
-
-        let cmpLightDirectionalWhite: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-        cmpLightDirectionalWhite.pivot.rotateY(90);
-        branch.addComponent(cmpLightDirectionalWhite);
-
+        
+        let lights: ƒ.Node = new ƒa.NodeThreePointLights("lights", 0);
+        branch.appendChild(lights);
+        
         branch.appendChild(body);
 
         ƒ.RenderManager.initialize();
@@ -45,7 +41,7 @@ namespace MeshTest {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(2.3, 0, 0), new ƒ.Vector3(0, 0, 0));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 0, 2.3), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
 
         Scenes.dollyViewportCamera(viewport);

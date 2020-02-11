@@ -43,7 +43,7 @@ namespace FudgeCore {
                 for (let x: number = 0; x <= this._resolutionX; x++) {
                     // X
                     vertices[i] = x / this._resolutionX - 0.5;
-                    // Apply Heightmap on Y Coordinate
+                    // Apply heightmap to y coordinate
                     vertices[i + 1] = this._heigMapFunction(x / this._resolutionX, z / this._resolutionZ);
                     // Z
                     vertices[i + 2] = z / this._resolutionZ - 0.5;
@@ -83,8 +83,8 @@ namespace FudgeCore {
 
             for (let i: number = 0, z: number = 0; z <= this._resolutionZ; z++) {
                 for (let x: number = 0; x <= this._resolutionX; x++) {
-                    textureUVs[i]    = x / this._resolutionX ;
-                    textureUVs[i + 1] = z / this._resolutionZ ;
+                    textureUVs[i]    = x / this._resolutionX;
+                    textureUVs[i + 1] = z / this._resolutionZ;
                     i += 2;
                 }
             }
