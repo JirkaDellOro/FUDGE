@@ -6332,6 +6332,109 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     /**
+     * Generate a UV Sphere with a given number of sectors and stacks (clamped at 128*128)
+     * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshSphere extends FudgeCore.Mesh {
+        constructor(_sectors = 12, _stacks = 8) {
+            super();
+            // Dirty Workaround to have access to the normals from createVertices()
+            this._normals = [];
+            this._textureUVs = [];
+            //Clamp resolution to prevent performance issues
+            this._sectors = Math.min(_sectors, 128);
+            this._stacks = Math.min(_stacks, 128);
+            this.create();
+        }
+        get sectors() { return this._sectors; }
+        get stacks() { return this._stacks; }
+        create() {
+            this.vertices = this.createVertices();
+            this.indices = this.createIndices();
+            this.textureUVs = this.createTextureUVs();
+            this.normalsFace = this.createFaceNormals();
+        }
+        createVertices() {
+            let verts = [];
+            let x;
+            let z;
+            let xz;
+            let y;
+            let sectorStep = 2 * Math.PI / this._sectors;
+            let stackStep = Math.PI / this._stacks;
+            let stackAngle;
+            let sectorAngle;
+            /* add (sectorCount+1) vertices per stack.
+            the first and last vertices have same position and normal,
+            but different tex coords */
+            for (let i = 0; i <= this._stacks; ++i) {
+                stackAngle = Math.PI / 2 - i * stackStep;
+                xz = Math.cos(stackAngle);
+                y = Math.sin(stackAngle);
+                // add (sectorCount+1) vertices per stack
+                // the first and last vertices have same position and normal, but different tex coords
+                for (let j = 0; j <= this._sectors; ++j) {
+                    sectorAngle = j * sectorStep;
+                    //vertex position
+                    x = xz * Math.cos(sectorAngle);
+                    z = xz * Math.sin(sectorAngle);
+                    verts.push(x);
+                    verts.push(y);
+                    verts.push(z);
+                    //normals
+                    this._normals.push(x);
+                    this._normals.push(y);
+                    this._normals.push(z);
+                    //UV Coords
+                    this._textureUVs.push(j / this._sectors * -1);
+                    this._textureUVs.push(i / this._stacks);
+                }
+            }
+            let vertices = new Float32Array(verts);
+            // scale down
+            vertices = vertices.map(_value => _value / 2);
+            return vertices;
+        }
+        createIndices() {
+            let inds = [];
+            let k1;
+            let k2;
+            for (let i = 0; i < this._stacks; ++i) {
+                k1 = i * (this._sectors + 1); // beginning of current stack
+                k2 = k1 + this._sectors + 1; // beginning of next stack
+                for (let j = 0; j < this._sectors; ++j, ++k1, ++k2) {
+                    // 2 triangles per sector excluding first and last stacks
+                    // k1 => k2 => k1+1
+                    if (i != 0) {
+                        inds.push(k1);
+                        inds.push(k1 + 1);
+                        inds.push(k2);
+                    }
+                    if (i != (this._stacks - 1)) {
+                        inds.push(k1 + 1);
+                        inds.push(k2 + 1);
+                        inds.push(k2);
+                    }
+                }
+            }
+            let indices = new Uint16Array(inds);
+            return indices;
+        }
+        createTextureUVs() {
+            let textureUVs = new Float32Array(this._textureUVs);
+            return textureUVs;
+        }
+        createFaceNormals() {
+            let normals = new Float32Array(this._normals);
+            return normals;
+        }
+    }
+    FudgeCore.MeshSphere = MeshSphere;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    /**
      * Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed
      * ```plaintext
      *        0 __ 3
