@@ -114,6 +114,21 @@ var Scenes;
         return node;
     }
     Scenes.createCompleteMeshNode = createCompleteMeshNode;
+    function createThreePointLighting(_name, _rotation = 0) {
+        let lights = new ƒ.Node(_name);
+        let rimlight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1.3, 1.3, 1.7, 1.0, true)));
+        rimlight.pivot.rotate(new ƒ.Vector3(60, 0, -60));
+        let keylight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0.94, 0.87)));
+        keylight.pivot.rotate(new ƒ.Vector3(150, -20, 30));
+        let ambient = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.1, 0.1, 0.1)));
+        lights.addComponent(rimlight);
+        lights.addComponent(ambient);
+        lights.addComponent(keylight);
+        lights.addComponent(new ƒ.ComponentTransform);
+        lights.cmpTransform.local.rotateY(_rotation);
+        return lights;
+    }
+    Scenes.createThreePointLighting = createThreePointLighting;
     function createCanvas(_width = 800, _height = 600) {
         let canvas = document.createElement("canvas");
         canvas.id = "canvas";

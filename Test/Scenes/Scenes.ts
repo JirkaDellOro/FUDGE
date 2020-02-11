@@ -138,6 +138,26 @@ namespace Scenes {
         return node;
     }
 
+    export function createThreePointLighting(_name: string, _rotation: number = 0): ƒ.Node {
+        let lights: ƒ.Node = new ƒ.Node(_name);
+        let rimlight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1.3, 1.3, 1.7, 1.0, true)));
+        rimlight.pivot.rotate(new ƒ.Vector3(60, 0, -60));
+
+        let keylight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(1, 0.94, 0.87)));       
+        keylight.pivot.rotate(new ƒ.Vector3(150, -20, 30));
+
+        let ambient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.1, 0.1, 0.1)));
+
+        lights.addComponent(rimlight);
+        lights.addComponent(ambient);
+        lights.addComponent(keylight);
+
+        lights.addComponent(new ƒ.ComponentTransform);
+        lights.cmpTransform.local.rotateY(_rotation);
+
+        return lights;
+    }
+
     export function createCanvas(_width: number = 800, _height: number = 600): HTMLCanvasElement {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("canvas");
         canvas.id = "canvas";

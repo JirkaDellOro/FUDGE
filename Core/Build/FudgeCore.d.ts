@@ -526,8 +526,7 @@ declare namespace FudgeCore {
         private branch;
         private cmpListener;
         constructor(contextOptions?: AudioContextOptions);
-        set volume(_value: number);
-        get volume(): number;
+        volume: number;
         /**
          * Determines branch to listen to. Each [[ComponentAudio]] in the branch will connect to this contexts master gain, all others disconnect.
          */
@@ -1041,10 +1040,8 @@ declare namespace FudgeCore {
         private playing;
         private listened;
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
-        set audio(_audio: Audio);
-        get audio(): Audio;
-        set volume(_value: number);
-        get volume(): number;
+        audio: Audio;
+        volume: number;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */
@@ -1058,9 +1055,9 @@ declare namespace FudgeCore {
          * Start or stop playing the audio
          */
         play(_on: boolean): void;
-        get isPlaying(): boolean;
-        get isAttached(): boolean;
-        get isListened(): boolean;
+        readonly isPlaying: boolean;
+        readonly isAttached: boolean;
+        readonly isListened: boolean;
         /**
          * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
          * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -2773,6 +2770,30 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
+}
+declare namespace FudgeCore {
+    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
+     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * @authors Simon Storl-Schulke, HFU, 2020*/
+    type heightMapFunction = (x: number, z: number) => number;
+    /**
+     * Generates a planar Grid and applies a Heightmap-Function to it.
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshHeightMap extends Mesh {
+        private _resolutionX;
+        private _resolutionZ;
+        private _heigMapFunction;
+        constructor(_resolutionX?: number, _resolutionZ?: number, _heigMapFunction?: heightMapFunction);
+        create(): void;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    function calculateFaceNormals(_mesh: Mesh): Float32Array;
 }
 declare namespace FudgeCore {
     /**
