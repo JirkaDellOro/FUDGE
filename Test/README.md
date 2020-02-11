@@ -51,3 +51,10 @@ Hier soll in der Console eine Matrix als Unterpunkt verschiedener Funktionen zu 
 - [UserInterface](UserInterface/scr/app.html)
 ## Rectangle
 - [Collision](Rectangles/Collision)
+
+## Mesh Generierung
+- [Sphere](Mesh/Sphere/index.html)  
+Hier sollen zwei Kugeln zu sehen sein - eine mit Flat Shading und die andere mit einer Erde-Textur.
+
+- [HeightMap](Mesh/HeightMap/index.html)  
+Hier sollen zwei durch eine Sinusfunktion (anhand von X und Z Koordinaten des Grids) generierte Gridmeshes angezeigt werden. Eine mit Flat Shading und eines mit einer Erde-Textur.
