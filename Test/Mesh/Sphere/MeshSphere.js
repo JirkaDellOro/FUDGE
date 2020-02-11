@@ -1,7 +1,7 @@
 var MeshTest;
 (function (MeshTest) {
     var ƒ = FudgeCore;
-    var ƒa = FudgeAid;
+    var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let branch = new ƒ.Node("Branch");
     let sphereTex = new ƒ.Node("sphereTex");
@@ -22,7 +22,7 @@ var MeshTest;
         branch.appendChild(sphereFlat);
         branch.appendChild(sphereTex);
         let body = new ƒ.Node("k");
-        let lights = new ƒa.NodeThreePointLights("lights", 0);
+        let lights = new ƒAid.NodeThreePointLights("lights", 0);
         branch.appendChild(lights);
         branch.appendChild(body);
         ƒ.RenderManager.initialize();
