@@ -32,4 +32,4 @@ var MeshTest;
         }, 20);
     }
 })(MeshTest || (MeshTest = {}));
-//# sourceMappingURL=MeshGrid.js.map
+//# sourceMappingURL=HeightMap.js.map
