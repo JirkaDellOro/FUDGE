@@ -4,21 +4,36 @@ namespace MeshTest {
     window.addEventListener("load", init);
     
     let branch: ƒ.Node = new ƒ.Node("Branch");
-    let grid: ƒ.Node = new ƒ.Node("sphereTex");
+    let gridFlat: ƒ.Node = new ƒ.Node("sphereTex");
+    let gridTex: ƒ.Node = new ƒ.Node("sphereTex");
 
     function init(_event: Event): void {
 
         let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
-    
+        
+        let img: HTMLImageElement = document.querySelector("img");
+        let txtImage: ƒ.TextureImage = new ƒ.TextureImage();
+        txtImage.image = img;
+        let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+        coatTextured.texture = txtImage;
+
+        let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+
         const myHeightMapFunction: ƒ.heightMapFunction = function(x, y): number {
              return Math.sin(x * y * Math.PI * 2) * 0.2; 
             };
 
-        let gridMesh: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
+        let gridMeshFlat: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
+        let gridMeshTex: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
 
-        grid = Scenes.createCompleteMeshNode("Grid", matFlat, gridMesh);
+        gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
+        gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
 
-        branch.appendChild(grid);
+        branch.appendChild(gridFlat);
+        branch.appendChild(gridTex);
+
+        gridFlat.cmpTransform.local.translateX(-0.6);
+        gridTex.cmpTransform.local.translateX(0.6);
 
         let body: ƒ.Node = new ƒ.Node("k");
 
@@ -32,7 +47,7 @@ namespace MeshTest {
         ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(2, 1, 0), new ƒ.Vector3(0, 0, 0));
+        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
 
         Scenes.dollyViewportCamera(viewport);
@@ -41,7 +56,7 @@ namespace MeshTest {
 
         
         window.setInterval(function (): void {
-            grid.cmpTransform.local.rotateY(0.5);
+            gridFlat.cmpTransform.local.rotateY(0.5);
             ƒ.RenderManager.update();
             viewport.draw();
         },                 20);

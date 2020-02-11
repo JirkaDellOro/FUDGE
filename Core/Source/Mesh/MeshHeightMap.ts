@@ -80,7 +80,15 @@ namespace FudgeCore {
 
         protected createTextureUVs(): Float32Array {
             // Todo
-            let textureUVs: Float32Array = new Float32Array();
+            let textureUVs: Float32Array = new Float32Array(this.indices.length * 2);
+
+            for (let i: number = 0, z: number = 0; z <= this._resolutionZ; z++) {
+                for (let x: number = 0; x <= this._resolutionX; x++) {
+                    textureUVs[i]    = x / this._resolutionX ;
+                    textureUVs[i + 1] = z / this._resolutionZ ;
+                    i += 2;
+                }
+            }
             return textureUVs;
         }
 
