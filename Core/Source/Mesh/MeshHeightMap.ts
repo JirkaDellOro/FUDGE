@@ -19,10 +19,11 @@ namespace FudgeCore {
             this._resolutionX = _resolutionX;
             this._resolutionZ = _resolutionZ;
 
-            if (_resolutionZ || _resolutionX <= 0) Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
-            
-            this._resolutionX = Math.max(1,  this._resolutionX);
-            this._resolutionZ = Math.max(1,  this._resolutionZ);
+            if (_resolutionZ || _resolutionX <= 0) {
+                Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
+                this._resolutionX = Math.max(1,  this._resolutionX);
+                this._resolutionZ = Math.max(1,  this._resolutionZ);
+            }
 
             if (_heightMapFunction) this._heightMapFunction = _heightMapFunction;
             else this._heightMapFunction = function(x, y): number { return 0; }

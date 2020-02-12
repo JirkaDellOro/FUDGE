@@ -20,6 +20,12 @@ namespace FudgeCore {
             this._sectors = Math.min(_sectors, 128);
             this._stacks =  Math.min(_stacks, 128);
 
+            if (_sectors < 3 || _stacks < 2) {
+                Debug.warn("UV Sphere must have at least 3 sectors and 2 stacks to form a 3-dimensional shape.");
+                this._sectors = Math.max(5, _sectors);
+                this._stacks =  Math.max(2, _stacks);
+            }
+
             this.create();
         }
         
