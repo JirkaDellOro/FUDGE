@@ -2811,8 +2811,8 @@ declare namespace FudgeCore {
     class MeshHeightMap extends Mesh {
         private _resolutionX;
         private _resolutionZ;
-        private _heigMapFunction;
-        constructor(_resolutionX?: number, _resolutionZ?: number, _heigMapFunction?: heightMapFunction);
+        private _heightMapFunction;
+        constructor(_resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
         create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;

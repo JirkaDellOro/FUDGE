@@ -12,19 +12,21 @@ namespace FudgeCore {
     export class MeshHeightMap extends Mesh {
         private _resolutionX: number;
         private _resolutionZ: number;
-        private _heigMapFunction: heightMapFunction;
+        private _heightMapFunction: heightMapFunction;
 
-        public constructor(_resolutionX: number = 16, _resolutionZ: number = 16, _heigMapFunction?: heightMapFunction) {
+        public constructor(_resolutionX: number = 16, _resolutionZ: number = 16, _heightMapFunction?: heightMapFunction) {
             super();
             this._resolutionX = _resolutionX;
             this._resolutionZ = _resolutionZ;
 
-            if (_heigMapFunction) {
-                this._heigMapFunction = _heigMapFunction;
-            } else {
-                this._heigMapFunction = function(x, y): number { return 0; }
-            }
+            if (_resolutionZ || _resolutionX <= 0) Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
+            
+            this._resolutionX = Math.max(1,  this._resolutionX);
+            this._resolutionZ = Math.max(1,  this._resolutionZ);
 
+            if (_heightMapFunction) this._heightMapFunction = _heightMapFunction;
+            else this._heightMapFunction = function(x, y): number { return 0; }
+            
             this.create();
         }
         
@@ -44,7 +46,7 @@ namespace FudgeCore {
                     // X
                     vertices[i] = x / this._resolutionX - 0.5;
                     // Apply heightmap to y coordinate
-                    vertices[i + 1] = this._heigMapFunction(x / this._resolutionX, z / this._resolutionZ);
+                    vertices[i + 1] = this._heightMapFunction(x / this._resolutionX, z / this._resolutionZ);
                     // Z
                     vertices[i + 2] = z / this._resolutionZ - 0.5;
                     i += 3;
