@@ -8,11 +8,14 @@ declare namespace FudgeAid {
         private rotatorX;
         private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        readonly component: ƒ.ComponentCamera;
-        readonly node: ƒ.Node;
-        distance: number;
-        rotationY: number;
-        rotationX: number;
+        get component(): ƒ.ComponentCamera;
+        get node(): ƒ.Node;
+        set distance(_distance: number);
+        get distance(): number;
+        set rotationY(_angle: number);
+        get rotationY(): number;
+        set rotationX(_angle: number);
+        get rotationX(): number;
         rotateY(_delta: number): void;
         rotateX(_delta: number): void;
     }
@@ -23,8 +26,8 @@ declare namespace FudgeAid {
         private static count;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
-        readonly local: ƒ.Matrix4x4;
-        readonly pivot: ƒ.Matrix4x4;
+        get local(): ƒ.Matrix4x4;
+        get pivot(): ƒ.Matrix4x4;
     }
 }
 declare namespace FudgeAid {
