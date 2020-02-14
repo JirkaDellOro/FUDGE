@@ -2,6 +2,7 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
+      "../Source/Arithmetic/ArithIntervalSolver.ts",
       "../Source/Camera/CameraOrbit.ts",
       "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
@@ -17,7 +18,7 @@
         },
         {
           "pos": 15,
-          "end": 5641,
+          "end": 6855,
           "kind": "text"
         }
       ],
@@ -51,7 +52,7 @@
         },
         {
           "pos": 58,
-          "end": 1504,
+          "end": 2006,
           "kind": "text"
         }
       ]

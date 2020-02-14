@@ -1,5 +1,18 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeAid {
+    class ArithIntervalSolver<T> {
+        left: T;
+        right: T;
+        leftValue: boolean;
+        rightValue: boolean;
+        private function;
+        private divide;
+        private isSmaller;
+        constructor(_function: (_t: T) => boolean, _divide: (_left: T, _right: T) => T, _isSmaller: (_left: T, _right: T, _epsilon: T) => boolean);
+        solve(_left: T, _right: T, _epsilon: T, _leftValue?: boolean, _rightValue?: boolean): void;
+    }
+}
+declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class CameraOrbit extends ƒ.Node {
         private maxRotX;
