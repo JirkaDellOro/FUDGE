@@ -107,6 +107,7 @@ namespace FudgeCore {
           break;
       }
 
+      Loop.running = false;
       Debug.log("Loop stopped!");
     }
 
