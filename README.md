@@ -1,6 +1,4 @@
-document.querySelector('h1').style.visible = false  
-
-<img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="alert('Hallo');"/>
+<img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visible = false"/>
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
