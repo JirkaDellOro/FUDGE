@@ -1,4 +1,6 @@
-<a href="" onload="document.querySelector('h1').style.visible = false"></a>  
+<frame onload="alert('Hallo');"></frame>  
+
+document.querySelector('h1').style.visible = false
 
 ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
