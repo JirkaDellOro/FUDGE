@@ -1,4 +1,4 @@
-<a onload="alert('Hallo');"></a>  
+<link href="" onload="alert('Hallo');"></link>  
 
 document.querySelector('h1').style.visible = false
 
