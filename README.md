@@ -1,4 +1,5 @@
-<a onload="document.querySelector('h1').style.visible = false"></a>
+<a href="" onload="document.querySelector('h1').style.visible = false"></a>  
+
 ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
