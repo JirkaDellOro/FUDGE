@@ -1,6 +1,8 @@
 <link href="" onload="alert('Hallo');"></link>  
 
-document.querySelector('h1').style.visible = false
+<script>window.addEventListener("load", alert("Hallo");</script>  
+
+document.querySelector('h1').style.visible = false  
 
 ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
