@@ -1,3 +1,4 @@
+<script>a</script>
 ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
