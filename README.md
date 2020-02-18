@@ -1,10 +1,6 @@
-<link href="" onload="alert('Hallo');"></link>  
-
-<script style="visibility:hidden;">window.addEventListener("load", alert("Hallo"));</script>  
-
 document.querySelector('h1').style.visible = false  
 
-![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
+<img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="alert('Hallo');"/>
 
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
