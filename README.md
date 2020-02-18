@@ -1,6 +1,6 @@
 <link href="" onload="alert('Hallo');"></link>  
 
-<script>window.addEventListener("load", alert("Hallo");</script>  
+<script style="visibility:hidden;">window.addEventListener("load", alert("Hallo"));</script>  
 
 document.querySelector('h1').style.visible = false  
 
