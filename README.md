@@ -1,4 +1,4 @@
-<frame onload="alert('Hallo');"></frame>  
+<a onload="alert('Hallo');"></a>  
 
 document.querySelector('h1').style.visible = false
 
