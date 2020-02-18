@@ -1,4 +1,4 @@
-<script>a</script>
+<a onload="alert('Hallo');"></a>
 ![Logo](https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png)
 
 ## Modules
