@@ -46,7 +46,7 @@ namespace Fudge {
         });
         ipcRenderer.on("openAnimationPanel", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
             ƒ.Debug.log("Open Animation Panel");
-            openAnimationPanel();
+            // openAnimationPanel();
         });
         // HACK!
         ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -62,10 +62,10 @@ namespace Fudge {
         PanelManager.instance.addPanel(nodePanel);
     }
 
-    function openAnimationPanel(): void {
-      let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-      PanelManager.instance.addPanel(panel);
-    }
+    // function openAnimationPanel(): void {
+    //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+    //   PanelManager.instance.addPanel(panel);
+    // }
 
     function save(_node: ƒ.Node): void {
         let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);

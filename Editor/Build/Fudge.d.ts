@@ -4,8 +4,6 @@
 declare namespace Fudge {
 }
 declare namespace Fudge {
-}
-declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
      * Holds various views into the currently processed Fudge-project.

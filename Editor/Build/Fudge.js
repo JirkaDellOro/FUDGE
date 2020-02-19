@@ -42,7 +42,7 @@ var Fudge;
         });
         ipcRenderer.on("openAnimationPanel", (_event, _args) => {
             ƒ.Debug.log("Open Animation Panel");
-            openAnimationPanel();
+            // openAnimationPanel();
         });
         // HACK!
         ipcRenderer.on("updateNode", (_event, _args) => {
@@ -55,10 +55,10 @@ var Fudge;
         let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);
         Fudge.PanelManager.instance.addPanel(nodePanel);
     }
-    function openAnimationPanel() {
-        let panel = Fudge.PanelManager.instance.createPanelFromTemplate(new Fudge.ViewAnimationTemplate(), "Animation Panel");
-        Fudge.PanelManager.instance.addPanel(panel);
-    }
+    // function openAnimationPanel(): void {
+    //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+    //   PanelManager.instance.addPanel(panel);
+    // }
     function save(_node) {
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
@@ -80,8 +80,6 @@ var Fudge;
         return node;
     }
 })(Fudge || (Fudge = {}));
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
@@ -209,7 +207,7 @@ var Fudge;
                                 view = new Fudge.ViewCamera(this);
                                 break;
                             case Fudge.VIEW.ANIMATION:
-                                view = new Fudge.ViewAnimation(this);
+                                // view = new ViewAnimation(this);
                                 break;
                         }
                         let viewConfig = {
@@ -604,7 +602,7 @@ var Fudge;
                         break;
                 }
                 targetNode.appendChild(node);
-                let event = new Event("childAdd" /* CHILD_APPEND */);
+                let event = new Event("childAppend" /* CHILD_APPEND */);
                 targetNode.dispatchEvent(event);
                 this.setRoot(this.branch);
             };
@@ -725,7 +723,7 @@ var Fudge;
             ƒ.RenderManager.update();
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5), ƒ.Vector3.ZERO());
             let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
             this.canvas = Scenes.createCanvas();
