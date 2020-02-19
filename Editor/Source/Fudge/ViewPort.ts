@@ -47,7 +47,7 @@ namespace Fudge {
 
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5), ƒ.Vector3.ZERO());
             let cmpCamera: ƒ.ComponentCamera = camera.getComponent(ƒ.ComponentCamera);
             cmpCamera.projectCentral(1, 45);
             this.canvas = Scenes.createCanvas();

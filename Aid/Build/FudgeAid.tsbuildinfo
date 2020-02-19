@@ -2,10 +2,13 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
+      "../Source/Arithmetic/ArithIntervalSolver.ts",
       "../Source/Camera/CameraOrbit.ts",
       "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
-      "../Source/Geometry/NodeCoordinateSystem.ts"
+      "../Source/Geometry/NodeCoordinateSystem.ts",
+      "../Source/StateMachine/ComponentStateMachine.ts",
+      "../Source/StateMachine/StateMachine.ts"
     ],
     "js": {
       "sections": [
@@ -17,7 +20,7 @@
         },
         {
           "pos": 15,
-          "end": 5641,
+          "end": 11589,
           "kind": "text"
         }
       ],
@@ -45,13 +48,13 @@
       "sections": [
         {
           "pos": 0,
-          "end": 56,
-          "kind": "reference",
-          "data": "../../Core/Build/FudgeCore.d.ts"
+          "end": 55,
+          "kind": "type",
+          "data": "../../../core/build/fudgecore"
         },
         {
-          "pos": 58,
-          "end": 1504,
+          "pos": 57,
+          "end": 5495,
           "kind": "text"
         }
       ]

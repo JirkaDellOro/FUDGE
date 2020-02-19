@@ -1,5 +1,4 @@
-/// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
-/// <reference path="Node.ts"/>
+/// <reference types="../../../Core/Build/FudgeCore"/>
 
 namespace FudgeAid {
   import ƒ = FudgeCore;

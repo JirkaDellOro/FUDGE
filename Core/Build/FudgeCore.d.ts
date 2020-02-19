@@ -2840,6 +2840,27 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Generate a UV Sphere with a given number of sectors and stacks (clamped at 128*128)
+     * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshSphere extends Mesh {
+        private _sectors;
+        get sectors(): number;
+        private _stacks;
+        get stacks(): number;
+        private _normals;
+        private _textureUVs;
+        constructor(_sectors?: number, _stacks?: number);
+        create(): void;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Generate two quads placed back to back, the one facing in negative Z-direction is textured reversed
      * ```plaintext
      *        0 __ 3
