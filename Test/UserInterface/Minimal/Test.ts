@@ -8,17 +8,27 @@
 
 
 namespace UI_Minimal {
-    import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
+  import ƒ = FudgeCore;
+  import ƒUi = FudgeUserInterface;
+  let uiMatrix: HTMLDivElement;
+  let matrix: ƒ.Matrix4x4;
 
-    window.addEventListener("load", hndLoad);
+  window.addEventListener("load", hndLoad);
 
-    function hndLoad(_event: Event): void {
-        let root: HTMLFormElement = document.createElement("form");
-        let camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+  function hndLoad(_event: Event): void {
+    let uiCamera: HTMLDivElement = document.createElement("div");
+    uiMatrix = document.createElement("div");
+    let camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    matrix = ƒ.Matrix4x4.ROTATION_X(10);
 
-        ƒui.UIGenerator.createFromMutable(camera, root);
-        // this.root.addEventListener("input", this.mutateOnInput);
-        document.body.appendChild(root);
-    }
+    ƒUi.UIGenerator.createFromMutable(camera, uiCamera);
+    ƒUi.UIGenerator.createFromMutable(matrix, uiMatrix);
+    document.body.appendChild(uiCamera);
+    document.body.appendChild(uiMatrix);
+    uiMatrix.addEventListener("input", handleInput);
+  }
+
+  function handleInput(_event: Event): void {
+    ƒ.Debug.log(matrix.toString());
+  }
 }
