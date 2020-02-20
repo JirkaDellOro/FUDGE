@@ -17,9 +17,9 @@ namespace Fudge {
 
 
     window.addEventListener("load", initWindow);
-
+ 
     function initWindow(): void {
-        ƒ.Debug.log("Fudge started");
+        ƒ.Debug.log("Fudge started"); 
         PanelManager.instance.init();
         console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration

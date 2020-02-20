@@ -20,6 +20,7 @@ namespace FudgeCore {
                 else
                     this.setCoat(this.createCoatMatchingShader());
             }
+            ResourceManager.register(this);
         }
 
         /**

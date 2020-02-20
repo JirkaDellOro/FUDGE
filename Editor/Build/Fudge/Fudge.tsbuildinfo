@@ -1,16 +1,16 @@
 {
   "bundle": {
-    "commonSourceDirectory": "../Source/Fudge",
+    "commonSourceDirectory": "../../Source/Fudge",
     "sourceFiles": [
-      "../Source/Fudge/Fudge.ts",
-      "../Source/Fudge/Panel.ts",
-      "../Source/Fudge/PanelManager.ts",
-      "../Source/Fudge/PanelTemplate.ts",
-      "../Source/Fudge/View.ts",
-      "../Source/Fudge/ViewCamera.ts",
-      "../Source/Fudge/ViewData.ts",
-      "../Source/Fudge/ViewNode.ts",
-      "../Source/Fudge/ViewPort.ts"
+      "../../Source/Fudge/Fudge.ts",
+      "../../Source/Fudge/Panel.ts",
+      "../../Source/Fudge/PanelManager.ts",
+      "../../Source/Fudge/PanelTemplate.ts",
+      "../../Source/Fudge/View.ts",
+      "../../Source/Fudge/ViewCamera.ts",
+      "../../Source/Fudge/ViewData.ts",
+      "../../Source/Fudge/ViewNode.ts",
+      "../../Source/Fudge/ViewPort.ts"
     ],
     "js": {
       "sections": [
