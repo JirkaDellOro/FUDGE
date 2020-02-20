@@ -1,12 +1,15 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 var Fudge;
 ///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     const { ipcRenderer, remote } = require("electron");
     const fs = require("fs");
     ƒ.RenderManager.initialize();
@@ -51,7 +54,11 @@ var Fudge;
     }
     function openViewNode() {
         // node = Scenes.createAxisCross();
-        node = new ƒ.Node("Scene");
+        // node = new ƒ.Node("Scene");
+        node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+        let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY);
+        node.appendChild(node2);
+        node2.cmpTransform.local.translateZ(2);
         let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);
         Fudge.PanelManager.instance.addPanel(nodePanel);
     }
@@ -717,17 +724,13 @@ var Fudge;
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
         fillContent() {
-            let camera;
             // initialize RenderManager and transmit content
             ƒ.RenderManager.addBranch(this.branch);
             ƒ.RenderManager.update();
-            // initialize viewport
-            // TODO: create camera/canvas here without "Scenes"
-            camera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5), ƒ.Vector3.ZERO());
-            let cmpCamera = camera.getComponent(ƒ.ComponentCamera);
-            cmpCamera.projectCentral(1, 45);
-            this.canvas = Scenes.createCanvas();
-            document.body.appendChild(this.canvas);
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            this.canvas = this.createCanvas();
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
             this.viewport.draw();
@@ -738,6 +741,13 @@ var Fudge;
             let event = new CustomEvent("activeViewport" /* ACTIVEVIEWPORT */, { detail: this.viewport.camera, bubbles: false });
             this.parentPanel.dispatchEvent(event);
             this.canvas.addEventListener("click", this.activeViewport);
+        }
+        createCanvas(_name = "ViewportCanvas", _width = 800, _height = 600) {
+            let canvas = document.createElement("canvas");
+            canvas.id = _name;
+            canvas.width = _width;
+            canvas.height = _height;
+            return canvas;
         }
         /**
          * Set the root node for display in this view

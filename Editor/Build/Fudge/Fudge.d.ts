@@ -211,6 +211,7 @@ declare namespace Fudge {
         constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;
+        createCanvas(_name?: string, _width?: number, _height?: number): HTMLCanvasElement;
         /**
          * Set the root node for display in this view
          * @param _node
