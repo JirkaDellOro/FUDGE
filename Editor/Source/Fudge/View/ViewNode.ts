@@ -1,9 +1,4 @@
-// /<reference types="../../../Core/Build/FudgeCore"/>
-// /<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../../Examples/Code/Scenes"/>
-
-//<reference types="../../../../Examples/Code/Scenes"/>
-///<reference path="View.ts"/>
 
 namespace Fudge {
     import ƒ = FudgeCore;

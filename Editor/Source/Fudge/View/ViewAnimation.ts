@@ -1,6 +1,3 @@
-// /<reference types="../../../Core/Build/FudgeCore"/>
-// /<reference types="../../Build/Fudge"/>
-
 namespace Fudge {
   export interface ViewAnimationKey {
     key: FudgeCore.AnimationKey;

@@ -1,5 +1,3 @@
-// /<reference types="../../Build/Fudge/Fudge"/>
-
 namespace Fudge {
   export class ViewAnimationTemplate extends PanelTemplate {
     constructor() {

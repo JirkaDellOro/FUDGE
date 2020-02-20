@@ -1,13 +1,9 @@
-// /<reference types="../../../Core/Build/FudgeCore"/>
-
 /**
  * State machine offers a structure and fundamental functionality for state machines
  * <State> should be an enum defining the various states of the machine
  */
 
 namespace StateMachine {
-  // import ƒ = FudgeCore;
-
   /** Format of methods to be used as transitions or actions */
   type StateMachineMethod<State> = (_machine: StateMachine<State>) => void;
   /** Type for maps associating a state to a method */

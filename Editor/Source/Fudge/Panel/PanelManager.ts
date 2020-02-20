@@ -1,5 +1,3 @@
-// / <reference types="../@types/jquery"/>
-// / <reference types="../@types/golden-layout"/>
 namespace Fudge {
   /**
    * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.

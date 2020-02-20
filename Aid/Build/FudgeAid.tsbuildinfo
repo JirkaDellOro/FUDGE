@@ -2,6 +2,7 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
+      "../Source/References.ts",
       "../Source/Arithmetic/ArithIntervalSolver.ts",
       "../Source/Camera/CameraOrbit.ts",
       "../Source/Geometry/Node.ts",
@@ -20,7 +21,7 @@
         },
         {
           "pos": 15,
-          "end": 11589,
+          "end": 10829,
           "kind": "text"
         }
       ],
@@ -48,13 +49,13 @@
       "sections": [
         {
           "pos": 0,
-          "end": 55,
+          "end": 52,
           "kind": "type",
-          "data": "../../../core/build/fudgecore"
+          "data": "../../core/build/fudgecore"
         },
         {
-          "pos": 57,
-          "end": 5495,
+          "pos": 54,
+          "end": 5492,
           "kind": "text"
         }
       ]
