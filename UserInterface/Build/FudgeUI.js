@@ -316,7 +316,7 @@ var FudgeUserInterface;
         }
         setMutator(_mutator) {
             this.mutator = _mutator;
-            let hule = this.BuildFromMutator(this.mutator);
+            let hule = this.buildFromMutator(this.mutator);
             this.listRoot.replaceWith(hule);
             this.listRoot = hule;
         }
@@ -489,8 +489,6 @@ var FudgeUserInterface;
                     else {
                         let nodeToExpand = target.node;
                         let newList = this.BuildListFromNode(nodeToExpand);
-                        // if (targetParent == this.listRoot)
-                        // newList.addEventListener("click", this.toggleCollapse);
                         target.replaceWith(newList);
                     }
                 }
@@ -523,8 +521,7 @@ var FudgeUserInterface;
             let listRoot = new FudgeUserInterface.CollapsableNodeListElement(_node, _node.name, true);
             let nodeChildren = _node.getChildren();
             for (let child of nodeChildren) {
-                let hasChildren = (child.getChildren().length != 0 ? true : false);
-                let listItem = new FudgeUserInterface.CollapsableNodeListElement(child, child.name, hasChildren);
+                let listItem = new FudgeUserInterface.CollapsableNodeListElement(child, child.name);
                 listRoot.content.appendChild(listItem);
             }
             return listRoot;

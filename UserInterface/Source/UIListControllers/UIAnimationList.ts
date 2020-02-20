@@ -20,7 +20,7 @@ namespace FudgeUserInterface {
 
         public setMutator(_mutator: ƒ.Mutator): void {
             this.mutator = _mutator;
-            let hule: HTMLUListElement = this.BuildFromMutator(this.mutator);
+            let hule: HTMLUListElement = this.buildFromMutator(this.mutator);
             this.listRoot.replaceWith(hule);
             this.listRoot = hule;
         }
