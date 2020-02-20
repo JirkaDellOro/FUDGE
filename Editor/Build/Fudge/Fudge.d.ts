@@ -1,6 +1,6 @@
 /// <reference types="golden-layout" />
 /// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../../userinterface/build/fudgeui" />
+/// <reference types="../../../userinterface/build/fudgeui" />
 declare namespace Fudge {
 }
 declare namespace Fudge {
@@ -312,7 +312,6 @@ declare namespace Fudge {
         constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;
-        createCanvas(_name?: string, _width?: number, _height?: number): HTMLCanvasElement;
         /**
          * Set the root node for display in this view
          * @param _node

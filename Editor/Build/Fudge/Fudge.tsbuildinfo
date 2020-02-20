@@ -21,11 +21,7 @@
       "sections": [
         {
           "pos": 0,
-<<<<<<< HEAD
-          "end": 62108,
-=======
           "end": 59457,
->>>>>>> remotes/origin/FixEditor
           "kind": "text"
         }
       ]
@@ -34,15 +30,6 @@
       "sections": [
         {
           "pos": 0,
-<<<<<<< HEAD
-          "end": 49,
-          "kind": "type",
-          "data": "../@types/golden-layout"
-        },
-        {
-          "pos": 51,
-          "end": 106,
-=======
           "end": 39,
           "kind": "type",
           "data": "golden-layout"
@@ -50,21 +37,10 @@
         {
           "pos": 41,
           "end": 96,
->>>>>>> remotes/origin/FixEditor
           "kind": "type",
           "data": "../../../core/build/fudgecore"
         },
         {
-<<<<<<< HEAD
-          "pos": 108,
-          "end": 173,
-          "kind": "type",
-          "data": "../../../../userinterface/build/fudgeui"
-        },
-        {
-          "pos": 175,
-          "end": 11917,
-=======
           "pos": 98,
           "end": 160,
           "kind": "type",
@@ -73,7 +49,6 @@
         {
           "pos": 162,
           "end": 11811,
->>>>>>> remotes/origin/FixEditor
           "kind": "text"
         }
       ]
