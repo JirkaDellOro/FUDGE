@@ -3,20 +3,25 @@
     "commonSourceDirectory": "../../Source/Fudge",
     "sourceFiles": [
       "../../Source/Fudge/Fudge.ts",
-      "../../Source/Fudge/Panel.ts",
-      "../../Source/Fudge/PanelManager.ts",
-      "../../Source/Fudge/PanelTemplate.ts",
-      "../../Source/Fudge/View.ts",
-      "../../Source/Fudge/ViewCamera.ts",
-      "../../Source/Fudge/ViewData.ts",
-      "../../Source/Fudge/ViewNode.ts",
-      "../../Source/Fudge/ViewPort.ts"
+      "../../Source/Fudge/Panel/Panel.ts",
+      "../../Source/Fudge/Panel/PanelManager.ts",
+      "../../Source/Fudge/Panel/PanelTemplate.ts",
+      "../../Source/Fudge/View/View.ts",
+      "../../Source/Fudge/View/ViewAnimation.ts",
+      "../../Source/Fudge/View/ViewAnimationSheet.ts",
+      "../../Source/Fudge/View/ViewAnimationSheetCurve.ts",
+      "../../Source/Fudge/View/ViewAnimationSheetDope.ts",
+      "../../Source/Fudge/View/ViewAnimationTemplate.ts",
+      "../../Source/Fudge/View/ViewCamera.ts",
+      "../../Source/Fudge/View/ViewData.ts",
+      "../../Source/Fudge/View/ViewNode.ts",
+      "../../Source/Fudge/View/ViewPort.ts"
     ],
     "js": {
       "sections": [
         {
           "pos": 0,
-          "end": 32192,
+          "end": 62108,
           "kind": "text"
         }
       ]
@@ -37,13 +42,13 @@
         },
         {
           "pos": 108,
-          "end": 170,
+          "end": 173,
           "kind": "type",
-          "data": "../../../userinterface/build/fudgeui"
+          "data": "../../../../userinterface/build/fudgeui"
         },
         {
-          "pos": 172,
-          "end": 8135,
+          "pos": 175,
+          "end": 11917,
           "kind": "text"
         }
       ]

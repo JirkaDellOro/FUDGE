@@ -1,4 +1,4 @@
-/// <reference types="../../../Core/Build/FudgeCore"/>
+// / <reference types="../../../Core/Build/FudgeCore"/>
 
 namespace FudgeAid {
   export class ArithIntervalSolver<Interval, Epsilon> {

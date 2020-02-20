@@ -1,4 +1,4 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 
 namespace Fudge {
@@ -14,7 +14,7 @@ namespace Fudge {
         DATA = "ViewData",
         CAMERA = "ViewCamera"
     }
-
+ 
     /**
      * Base class for all Views to support generic functionality
      * @author Monika Galkewitsch, HFU, 2019
