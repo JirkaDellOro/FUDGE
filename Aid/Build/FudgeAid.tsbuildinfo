@@ -21,11 +21,7 @@
         },
         {
           "pos": 15,
-<<<<<<< HEAD
-          "end": 11599,
-=======
           "end": 10829,
->>>>>>> remotes/origin/FixEditor
           "kind": "text"
         }
       ],
