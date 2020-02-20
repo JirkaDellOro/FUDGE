@@ -496,7 +496,7 @@ var FudgeUserInterface;
                 }
             };
             this.nodeRoot = _node;
-            this.nodeRoot.addEventListener("childAdd" /* CHILD_APPEND */, this.updateList);
+            this.nodeRoot.addEventListener("childAppend" /* CHILD_APPEND */, this.updateList);
             this.nodeRoot.addEventListener("childRemove" /* CHILD_REMOVE */, this.updateList);
             this.listRoot = document.createElement("ul");
             this.listRoot.classList.add("NodeList");
