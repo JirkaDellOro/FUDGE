@@ -1,5 +1,5 @@
-/// <reference types="../@types/jquery"/>
-/// <reference types="../@types/golden-layout"/>
+// / <reference types="../@types/jquery"/>
+// / <reference types="../@types/golden-layout"/>
 namespace Fudge {
   /**
    * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
@@ -88,7 +88,7 @@ namespace Fudge {
    * @param container 
    * @param state 
    */
-  function welcome(container: GoldenLayout.Container, state: any): void {
+  function welcome(container: GoldenLayout.Container, state: Object): void {
     container.getElement().html("<div>Welcome</div>");
   }
   /**

@@ -10,7 +10,7 @@
     // "declaration": true,                   /* Generates corresponding '.d.ts' file. */
     // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
     "sourceMap": true, /* Generates corresponding '.map' file. */
-    "outFile": "../../Build/Fudge.js",        /* Concatenate and emit output to single file. */
+    "outFile": "../../Build/Fudge/Fudge.js",        /* Concatenate and emit output to single file. */
     //"outDir": "../../Build",                /* Redirect output structure to the directory. */
     // "sourceRoot": "./",
     //"rootDir": ".",                         /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */

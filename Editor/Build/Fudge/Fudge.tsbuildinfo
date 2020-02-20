@@ -1,0 +1,52 @@
+{
+  "bundle": {
+    "commonSourceDirectory": "../../Source/Fudge",
+    "sourceFiles": [
+      "../../Source/Fudge/Fudge.ts",
+      "../../Source/Fudge/Panel/Panel.ts",
+      "../../Source/Fudge/Panel/PanelManager.ts",
+      "../../Source/Fudge/Panel/PanelTemplate.ts",
+      "../../Source/Fudge/View/View.ts",
+      "../../Source/Fudge/View/ViewAnimation.ts",
+      "../../Source/Fudge/View/ViewAnimationSheet.ts",
+      "../../Source/Fudge/View/ViewAnimationSheetCurve.ts",
+      "../../Source/Fudge/View/ViewAnimationSheetDope.ts",
+      "../../Source/Fudge/View/ViewAnimationTemplate.ts",
+      "../../Source/Fudge/View/ViewCamera.ts",
+      "../../Source/Fudge/View/ViewData.ts",
+      "../../Source/Fudge/View/ViewNode.ts",
+      "../../Source/Fudge/View/ViewPort.ts"
+    ],
+    "js": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 61503,
+          "kind": "text"
+        }
+      ]
+    },
+    "dts": {
+      "sections": [
+        {
+          "pos": 0,
+          "end": 39,
+          "kind": "type",
+          "data": "golden-layout"
+        },
+        {
+          "pos": 41,
+          "end": 103,
+          "kind": "type",
+          "data": "../../../userinterface/build/fudgeui"
+        },
+        {
+          "pos": 105,
+          "end": 11754,
+          "kind": "text"
+        }
+      ]
+    }
+  },
+  "version": "3.7.5"
+}

@@ -1,4 +1,5 @@
-/// <reference types="../../build/fudge" />
+/// <reference types="../../../userinterface/build/fudgeui" />
+/// <reference types="../../build/fudge/fudge" />
 declare namespace Fudge {
     interface ViewAnimationKey {
         key: FudgeCore.AnimationKey;

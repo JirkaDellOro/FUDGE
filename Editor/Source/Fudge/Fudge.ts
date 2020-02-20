@@ -1,5 +1,6 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../Examples/Code/Scenes"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../Examples/Code/Scenes"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 
 namespace Fudge {
