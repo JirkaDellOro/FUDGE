@@ -93,7 +93,7 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    abstract class UIListController {
+    export abstract class UIListController {
         abstract listRoot: HTMLElement;
         protected abstract toggleCollapse(_event: MouseEvent): void;
     }
@@ -103,13 +103,13 @@ declare namespace FudgeUserInterface {
         constructor();
         collapse(element: HTMLElement): void;
     }
-    class CollapsableNodeListElement extends CollapsableListElement {
+    export class CollapsableNodeListElement extends CollapsableListElement {
         node: ƒ.Node;
         constructor(_node: ƒ.Node, _name: string, _unfolded?: boolean);
         selectNode: (_event: MouseEvent) => void;
         collapseEvent: (_event: MouseEvent) => void;
     }
-    class CollapsableAnimationListElement extends CollapsableListElement {
+    export class CollapsableAnimationListElement extends CollapsableListElement {
         mutator: ƒ.Mutator;
         name: string;
         index: ƒ.Mutator;
@@ -121,6 +121,7 @@ declare namespace FudgeUserInterface {
         getElementIndex(): ƒ.Mutator;
         private updateMutator;
     }
+    export {};
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;

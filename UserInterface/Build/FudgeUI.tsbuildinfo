@@ -1,16 +1,16 @@
 {
   "bundle": {
-    "commonSourceDirectory": "e:/DAta/GitHub/FUDGE/UserInterface/Source/",
+    "commonSourceDirectory": "../Source",
     "sourceFiles": [
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIElements/UIElements.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIEvent/UIEvent.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIGenerator/UIGenerator.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIAnimationList.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UIListElements.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIListControllers/UINodeList.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMultiLevelMenu/UIMultiLevelMenu.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UIMutable.ts",
-      "e:/DAta/GitHub/FUDGE/UserInterface/Source/UIMutable/UINodeData.ts"
+      "../Source/UIElements/UIElements.ts",
+      "../Source/UIEvent/UIEvent.ts",
+      "../Source/UIGenerator/UIGenerator.ts",
+      "../Source/UIListControllers/UIAnimationList.ts",
+      "../Source/UIListControllers/UIListElements.ts",
+      "../Source/UIListControllers/UINodeList.ts",
+      "../Source/UIMultiLevelMenu/UIMultiLevelMenu.ts",
+      "../Source/UIMutable/UIMutable.ts",
+      "../Source/UIMutable/UINodeData.ts"
     ],
     "js": {
       "sections": [
@@ -22,7 +22,7 @@
         },
         {
           "pos": 15,
-          "end": 31133,
+          "end": 30956,
           "kind": "text"
         }
       ],
@@ -56,11 +56,11 @@
         },
         {
           "pos": 58,
-          "end": 7121,
+          "end": 7158,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.5.3"
+  "version": "3.7.3"
 }

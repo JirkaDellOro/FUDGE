@@ -47,8 +47,6 @@ namespace FudgeUserInterface {
                 else {
                     let nodeToExpand: ƒ.Node = (<CollapsableNodeListElement>target).node;
                     let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
-                    // if (targetParent == this.listRoot)
-                        // newList.addEventListener("click", this.toggleCollapse);
                     target.replaceWith(newList);
                 }
             }
@@ -58,14 +56,10 @@ namespace FudgeUserInterface {
             let listRoot: CollapsableNodeListElement = new CollapsableNodeListElement(_node, _node.name, true);
             let nodeChildren: ƒ.Node[] = _node.getChildren();
             for (let child of nodeChildren) {
-                let hasChildren: boolean = (child.getChildren().length != 0 ? true : false);
-                let listItem: HTMLUListElement = new CollapsableNodeListElement(child, child.name, hasChildren);
+                let listItem: HTMLUListElement = new CollapsableNodeListElement(child, child.name);
                 listRoot.content.appendChild(listItem);
             }
             return listRoot;
         }
-
-
     }
-
 }
