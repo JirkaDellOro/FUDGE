@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../Examples/Code/Scenes"/>
@@ -7,6 +8,17 @@ var Fudge;
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+=======
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
+var Fudge;
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -87,6 +99,7 @@ var Fudge;
         return node;
     }
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 // /<reference types="../../../Core/Build/FudgeCore"/>
 // /<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
@@ -94,6 +107,9 @@ var Fudge;
 // /<reference types="../../../Core/Build/FudgeCore"/>
 // /<reference types="../../Examples/Code/Scenes"/>
 //<reference types="../../Examples/Code/Scenes"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     /**
@@ -242,11 +258,15 @@ var Fudge;
     }
     Fudge.NodePanel = NodePanel;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 /// <reference types="../@types/jquery"/>
 /// <reference types="../@types/golden-layout"/>
 var Fudge;
 /// <reference types="../@types/jquery"/>
 /// <reference types="../@types/golden-layout"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     /**
      * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
@@ -383,11 +403,15 @@ var Fudge;
     }
     Fudge.NodePanelTemplate = NodePanelTemplate;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 var Fudge;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     let VIEW;
@@ -431,6 +455,7 @@ var Fudge;
     }
     Fudge.View = View;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 // /<reference types="../../../../Core/Build/FudgeCore"/>
 // /<reference types="../../../../UserInterface/Build/FudgeUI"/>
 // /<reference types="../../../Build/Fudge/Fudge"/>
@@ -438,6 +463,9 @@ var Fudge;
 // /<reference types="../../../../Core/Build/FudgeCore"/>
 // /<reference types="../../../../UserInterface/Build/FudgeUI"/>
 // /<reference types="../../../Build/Fudge/Fudge"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     class ViewAnimation extends Fudge.View {
         constructor(_parent) {
@@ -1048,9 +1076,13 @@ var Fudge;
     }
     Fudge.ViewAnimationSheetDope = ViewAnimationSheetDope;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 // /<reference types="../../../Build/Fudge/Fudge"/>
 var Fudge;
 // /<reference types="../../../Build/Fudge/Fudge"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     class ViewAnimationTemplate extends Fudge.PanelTemplate {
         constructor() {
@@ -1084,6 +1116,7 @@ var Fudge;
     }
     Fudge.ViewAnimationTemplate = ViewAnimationTemplate;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
@@ -1091,6 +1124,9 @@ var Fudge;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
     /**
@@ -1122,6 +1158,7 @@ var Fudge;
     }
     Fudge.ViewCamera = ViewCamera;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
@@ -1129,6 +1166,9 @@ var Fudge;
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 //<reference types="../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
@@ -1210,6 +1250,7 @@ var Fudge;
     }
     Fudge.ViewData = ViewData;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../../Examples/Code/Scenes"/>
@@ -1221,6 +1262,11 @@ var Fudge;
 ///<reference types="../../../Examples/Code/Scenes"/>
 //<reference types="../../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
+=======
+///<reference types="../../../Examples/Code/Scenes"/>
+var Fudge;
+///<reference types="../../../Examples/Code/Scenes"/>
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
@@ -1327,6 +1373,7 @@ var Fudge;
     }
     Fudge.ViewNode = ViewNode;
 })(Fudge || (Fudge = {}));
+<<<<<<< HEAD
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../../Examples/Code/Scenes"/>
@@ -1336,6 +1383,9 @@ var Fudge;
 ///<reference types="../../../../UserInterface/Build/FudgeUI"/>
 ///<reference types="../../../Examples/Code/Scenes"/>
 ///<reference path="View.ts"/>
+=======
+var Fudge;
+>>>>>>> remotes/origin/FixEditor
 (function (Fudge) {
     var ƒ = FudgeCore;
     /**
@@ -1380,10 +1430,21 @@ var Fudge;
             // initialize RenderManager and transmit content
             ƒ.RenderManager.addBranch(this.branch);
             ƒ.RenderManager.update();
+<<<<<<< HEAD
             let cmpCamera = new ƒ.ComponentCamera();
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             this.canvas = this.createCanvas();
+=======
+            // initialize viewport
+            // TODO: create camera/canvas here without "Scenes"     
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
+            this.canvas = Scenes.createCanvas();
+            document.body.appendChild(this.canvas);
+>>>>>>> remotes/origin/FixEditor
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
             this.viewport.draw();
@@ -1395,6 +1456,7 @@ var Fudge;
             this.parentPanel.dispatchEvent(event);
             this.canvas.addEventListener("click", this.activeViewport);
         }
+<<<<<<< HEAD
         createCanvas(_name = "ViewportCanvas", _width = 800, _height = 600) {
             let canvas = document.createElement("canvas");
             canvas.id = _name;
@@ -1402,6 +1464,8 @@ var Fudge;
             canvas.height = _height;
             return canvas;
         }
+=======
+>>>>>>> remotes/origin/FixEditor
         /**
          * Set the root node for display in this view
          * @param _node

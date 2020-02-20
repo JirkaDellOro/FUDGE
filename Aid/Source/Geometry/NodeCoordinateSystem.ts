@@ -1,5 +1,3 @@
-// / <reference types="../../../Core/Build/FudgeCore"/>
-
 namespace FudgeAid {
   import ƒ = FudgeCore;
 

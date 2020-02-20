@@ -1,13 +1,6 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
-///<reference types="../../../../UserInterface/Build/FudgeUI"/>
-///<reference types="../../../Examples/Code/Scenes"/>
-///<reference path="View.ts"/>
-
-
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
-
 
   /**
    * View displaying a Node and the hierarchical relation to its parents and children.  
@@ -42,11 +35,14 @@ namespace Fudge {
       ƒ.RenderManager.addBranch(this.branch);
       ƒ.RenderManager.update();
 
+      // initialize viewport
+      // TODO: create camera/canvas here without "Scenes"     
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-
-      this.canvas = this.createCanvas();
+      cmpCamera.projectCentral(1, 45);
+      this.canvas = Scenes.createCanvas();
+      document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
@@ -64,13 +60,7 @@ namespace Fudge {
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-    createCanvas(_name: string = "ViewportCanvas", _width: number = 800, _height: number = 600): HTMLCanvasElement {
-      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.createElement("canvas");
-      canvas.id = _name;
-      canvas.width = _width;
-      canvas.height = _height;
-      return canvas;
-    }
+
 
     /**
      * Set the root node for display in this view
