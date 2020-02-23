@@ -8,13 +8,12 @@ namespace TestInstructions {
 
   let dialog: HTMLDialogElement;
 
-  export function display(_modal: boolean, _instructions: object): void {
+  export function display(_instructions: object): void {
     dialog = document.createElement("dialog");
     dialogPolyfill.registerDialog(dialog);
 
     dialog.innerHTML += "<small>Press Ctrl+F1 to toggle this dialog</small>";
     window.addEventListener("keyup", handleKeypress);
-    // makeModal(_modal);
 
     for (let key in _instructions) {
       let content: string | string[] = _instructions[key];
