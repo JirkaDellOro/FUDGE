@@ -6,33 +6,35 @@
 ## Audio
 - [Audio Graph Insertion](Audio/GraphInsertion/)  
 Test the insertion of a graph of arbitrary complexity into a ComponentAudio.    
-- [Branch Mixing](Audio/BranchMix/)
+- [Branch Mixing](Audio/BranchMix/)  
 Test the handling of the WebAudio context to mix the audiosignals of selected branches in the scene graph.    
-- [SpatialSound](Audio/SpatialSound/)
+- [SpatialSound](Audio/SpatialSound/)  
 Complex test for spatial stereo audio. Orbit the camera around the world origin, move an audio source and adjust the panner cones.
 
 ## Events
 - [EventPassing](Events/EventPassing/)   
 In der Konsole sollten mehrere Events angezeigt werden und der Fokus soll nach dem Anklicken eines Viewports mit den Pfeiltasten steuerbar sein.
 
-- [Propagation](Events/Propagation/index.html)   
+- [Propagation](Events/Propagation/)   
 Hier soll kein Fehler in der Konsole auftauchen, auch sollte unter jeder Überschrift etwas stehen.
 
-- [ScreenPoint](Events/ScreenPoint/index.html)  
+- [ScreenPoint](Events/ScreenPoint/)  
 Bei dem Anklicken an einer beliebigen Stelle des Viewports soll ein realistischer Wert in der Konsole ausgegeben werden.
 
 ## Scripting
-- [Script](Scripting/index.html)  
+- [Script](Scripting/Basic/)  
 In der Konsole soll ein Mutator bis 20 hochzählen und es sollen keine Fehler ausgegeben werden. Bei 11 startet ein zweiter Count bis 20.  
+- [State Machine](Scripting/StateMachine/)  
+To be described 
 
 ## Rendering
-- [MultiVieportMultiCanvas](WebGL/MultiViewportMultiCanvas/index.html)  
+- [MultiVieportMultiCanvas](WebGL/MultiViewportMultiCanvas/)  
   Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
 
-- [RectMapping](WebGL/TestRectMapping/index.html)  
+- [RectMapping](WebGL/TestRectMapping/)  
 Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)
 ## Resources
-- [NodeResource](Resources/NodeResource/index.html)   
+- [NodeResource](Resources/NodeResource/)   
 Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.
 ## Shading
 - [Light](Shading/Light/Light.html)  
@@ -43,24 +45,26 @@ Hier soll eine Pyramide gezeigt werden, um die sich mehrere Lichter in verschied
 - [Texture](Shading/Textures/TextureTest.html)   
 Hier sollen Würfel gezeigt werden, auf denen eine Fudge-Textur zu sehen ist.
 ## Time
-- [TimeLoop](Time/index.html)   
+- [TimeLoop](Time/)   
 Nachdem die FPS Zahl des Loops geändert wurde, soll sich der grüne Balken je nach Mode-Einstellung füllen. Der Loop kann an Animation-Requests (frame_request), Realtime (Systemzeit) oder Gametime (welche ein beliebiges Time-Objekt sein kann) gekoppelt werden (time.Game ist die automatisch startende GameTime)
 ## Transfer
-- [Serializer](Transfer/Serializer/index.html)  
+- [Serializer](Transfer/Serializer/)  
 Hier sollen keine Fehler ausgeworfen werden. Es muss geschaut werden, dass ein Originalobjekt erstellt wird und mit einem rekonstruiertem Objekt verglichen wird.
 
-- [ScriptSerialization](Transfer/ScriptSerialization/index.html)  
+- [ScriptSerialization](Transfer/ScriptSerialization/)  
 Bei diesem Test muss geschaut werden, das es keine Errors außer Mismatches gibt.
 
-- [Mutable](Transfer/Mutable/index.html)  
+- [Mutable](Transfer/Mutable/)  
 Hier soll ein Quader zu sehen sein, der sich verformt und seine Position ändert.
 
-- [MutateMatrix](Transfer/MutateMatrix/index.html)  
+- [MutateMatrix](Transfer/MutateMatrix/)  
 Hier soll in der Console eine Matrix als Unterpunkt verschiedener Funktionen zu sehen sein.  
 
 ## Animation
-- [AnimatorComponent](Animation/AnimatorComponent/index.html)  
+- [AnimatorComponent](Animation/AnimatorComponent/)  
+
 ## UserInterface
-- [UserInterface](UserInterface/scr/app.html)
+- [UserInterface](UserInterface/scr/app.html)  
+
 ## Rectangle
-- [Collision](Rectangles/Collision)
+- [Collision](Rectangles/Collision/)
