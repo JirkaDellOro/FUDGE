@@ -8,6 +8,7 @@ var AudioBranch;
     let nodes = [];
     let nodeControlled;
     async function start(_event) {
+        window.removeEventListener("click", start);
         let audioMario = await ƒ.Audio.load("Sound/mario_piano.mp3");
         let audioTrancy = await ƒ.Audio.load("Sound/trancyvania.mp3");
         let audioHypno = await ƒ.Audio.load("Sound/hypnotic.mp3");
@@ -31,10 +32,10 @@ var AudioBranch;
         for (let node of nodes) {
             let out = `node: ${node.name}`;
             if (node.getParent())
-                out += ` [->${node.getParent().name}]`;
+                out += ` [child of ${node.getParent().name}]`;
             let cmpAudioList = node.getComponents(ƒ.ComponentAudio);
             for (let cmpAudio of cmpAudioList)
-                out += ` | active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
+                out += ` | ComponentAudio is active: ${cmpAudio.isActive}, listened: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
             ƒ.Debug.log(out);
         }
         ƒ.Debug.groupEnd();

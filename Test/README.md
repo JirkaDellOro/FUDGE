@@ -1,4 +1,12 @@
 # FUDGE Tests
+- Open the console (F12 or Ctrl+Shift+I), since many test also or solely show output to the console!
+- Testing online on jirkadelloro.github.io/FUDGE only tests the master branch. Test other branches locally using a local server.
+- Use of markdown viewer is recommended when testing locally to use this README.md
+
+## Audio
+- [AudioSpace](Audio/AudioSpace/index.html)
+Complex test for spatial stereo audio. Orbit the camera around the world origin, move the audio source and adjust the panner cones.
+
 ## Events
 - [EventPassing](Events/EventPassing/index.html)   
 In der Konsole sollten mehrere Events angezeigt werden und der Fokus soll nach dem Anklicken eines Viewports mit den Pfeiltasten steuerbar sein.

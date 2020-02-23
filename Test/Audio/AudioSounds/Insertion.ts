@@ -1,7 +1,7 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
 namespace AudioSounds {
   import ƒ = FudgeCore;
-  window.addEventListener("click", start);
+  window.addEventListener("load", start);
   window.addEventListener("keydown", handleKeydown);
   let cmpAudio: ƒ.ComponentAudio;
   let distortion: WaveShaperNode = ƒ.AudioManager.default.createWaveShaper();
@@ -31,13 +31,15 @@ namespace AudioSounds {
   function handleKeydown(_event: KeyboardEvent): void {
     switch (_event.code) {
       case ƒ.KEYBOARD_CODE.ENTER:
-        ƒ.Debug.log("Hit");
+        ƒ.Debug.log("Play");
         cmpAudio.play(true);
         break;
       case ƒ.KEYBOARD_CODE.ARROW_UP:
+        ƒ.Debug.log("Insert")
         cmpAudio.insertAudioNodes(distortion, distortion);
         break;
-      case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+          ƒ.Debug.log("Remove")
         cmpAudio.insertAudioNodes(null, null);
         break;
     }

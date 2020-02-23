@@ -8,6 +8,7 @@ namespace AudioBranch {
 
 
   async function start(_event: Event): Promise<void> {
+    window.removeEventListener("click", start);
     let audioMario: ƒ.Audio = await ƒ.Audio.load("Sound/mario_piano.mp3");
     let audioTrancy: ƒ.Audio = await ƒ.Audio.load("Sound/trancyvania.mp3");
     let audioHypno: ƒ.Audio = await ƒ.Audio.load("Sound/hypnotic.mp3");
@@ -39,10 +40,10 @@ namespace AudioBranch {
     for (let node of nodes) {
       let out: string = `node: ${node.name}`;
       if (node.getParent())
-        out += ` [->${node.getParent().name}]`;
+        out += ` [child of ${node.getParent().name}]`;
       let cmpAudioList: ƒ.ComponentAudio[] = node.getComponents(ƒ.ComponentAudio);
       for (let cmpAudio of cmpAudioList)
-        out += ` | active: ${cmpAudio.isActive}, branched: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
+        out += ` | ComponentAudio is active: ${cmpAudio.isActive}, listened: ${cmpAudio.isListened}, attached: ${cmpAudio.isAttached}`;
 
       ƒ.Debug.log(out);
     }

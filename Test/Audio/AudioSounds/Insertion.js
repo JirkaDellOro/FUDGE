@@ -3,7 +3,7 @@ var AudioSounds;
 /// <reference types="../../../Core/Build/FudgeCore"/>
 (function (AudioSounds) {
     var ƒ = FudgeCore;
-    window.addEventListener("click", start);
+    window.addEventListener("load", start);
     window.addEventListener("keydown", handleKeydown);
     let cmpAudio;
     let distortion = ƒ.AudioManager.default.createWaveShaper();
@@ -29,16 +29,18 @@ var AudioSounds;
     function handleKeydown(_event) {
         switch (_event.code) {
             case ƒ.KEYBOARD_CODE.ENTER:
-                ƒ.Debug.log("Hit");
+                ƒ.Debug.log("Play");
                 cmpAudio.play(true);
                 break;
             case ƒ.KEYBOARD_CODE.ARROW_UP:
+                ƒ.Debug.log("Insert");
                 cmpAudio.insertAudioNodes(distortion, distortion);
                 break;
             case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                ƒ.Debug.log("Remove");
                 cmpAudio.insertAudioNodes(null, null);
                 break;
         }
     }
 })(AudioSounds || (AudioSounds = {}));
-//# sourceMappingURL=AudioSounds.js.map
+//# sourceMappingURL=Insertion.js.map
