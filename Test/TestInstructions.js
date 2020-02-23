@@ -5,6 +5,7 @@ var TestInstructions;
     let dialog;
     function display(_modal, _instructions) {
         dialog = document.createElement("dialog");
+        dialogPolyfill.registerDialog(dialog);
         dialog.innerHTML += "<small>Press Ctrl+F1 to toggle this dialog</small>";
         window.addEventListener("keyup", handleKeypress);
         // makeModal(_modal);

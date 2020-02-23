@@ -2,13 +2,13 @@
 namespace AudioBranch {
   import ƒ = FudgeCore;
   window.addEventListener("click", start);
-  window.addEventListener("keydown", handleKeydown);
   let nodes: ƒ.Node[] = [];
   let nodeControlled: ƒ.Node;
-
-
+  
+  
   async function start(_event: Event): Promise<void> {
     window.removeEventListener("click", start);
+    window.addEventListener("keydown", handleKeydown);
     let audioMario: ƒ.Audio = await ƒ.Audio.load("Sound/mario_piano.mp3");
     let audioTrancy: ƒ.Audio = await ƒ.Audio.load("Sound/trancyvania.mp3");
     let audioHypno: ƒ.Audio = await ƒ.Audio.load("Sound/hypnotic.mp3");

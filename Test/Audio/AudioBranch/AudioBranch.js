@@ -4,11 +4,11 @@ var AudioBranch;
 (function (AudioBranch) {
     var ƒ = FudgeCore;
     window.addEventListener("click", start);
-    window.addEventListener("keydown", handleKeydown);
     let nodes = [];
     let nodeControlled;
     async function start(_event) {
         window.removeEventListener("click", start);
+        window.addEventListener("keydown", handleKeydown);
         let audioMario = await ƒ.Audio.load("Sound/mario_piano.mp3");
         let audioTrancy = await ƒ.Audio.load("Sound/trancyvania.mp3");
         let audioHypno = await ƒ.Audio.load("Sound/hypnotic.mp3");
