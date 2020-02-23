@@ -4,11 +4,15 @@
 - Use of markdown viewer is recommended when testing locally to use this README.md
 
 ## Audio
-- [AudioSpace](Audio/AudioSpace/index.html)
-Complex test for spatial stereo audio. Orbit the camera around the world origin, move the audio source and adjust the panner cones.
+- [Audio Graph Insertion](Audio/GraphInsertion/)  
+Test the insertion of a graph of arbitrary complexity into a ComponentAudio.    
+- [Branch Mixing](Audio/BranchMix/)
+Test the handling of the WebAudio context to mix the audiosignals of selected branches in the scene graph.    
+- [SpatialSound](Audio/SpatialSound/)
+Complex test for spatial stereo audio. Orbit the camera around the world origin, move an audio source and adjust the panner cones.
 
 ## Events
-- [EventPassing](Events/EventPassing/index.html)   
+- [EventPassing](Events/EventPassing/)   
 In der Konsole sollten mehrere Events angezeigt werden und der Fokus soll nach dem Anklicken eines Viewports mit den Pfeiltasten steuerbar sein.
 
 - [Propagation](Events/Propagation/index.html)   
@@ -19,7 +23,8 @@ Bei dem Anklicken an einer beliebigen Stelle des Viewports soll ein realistische
 
 ## Scripting
 - [Script](Scripting/index.html)  
-In der Konsole soll ein Mutator bis 20 hochzählen und es sollen keine Fehler ausgegeben werden. Bei 11 startet ein zweiter Count bis 20.
+In der Konsole soll ein Mutator bis 20 hochzählen und es sollen keine Fehler ausgegeben werden. Bei 11 startet ein zweiter Count bis 20.  
+
 ## Rendering
 - [MultiVieportMultiCanvas](WebGL/MultiViewportMultiCanvas/index.html)  
   Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
