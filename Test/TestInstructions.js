@@ -3,7 +3,9 @@ var TestInstructions;
     // TODO: extend with form for comment. POST with automatically collected data to https://api.github.com/repos/JirkaDellOro/FUDGE/issues
     // see: https://developer.github.com/v3/issues/#create-an-issue
     let dialog;
+    let instructions;
     function display(_instructions) {
+        instructions = _instructions;
         dialog = document.createElement("dialog");
         dialogPolyfill.registerDialog(dialog);
         dialog.innerHTML += "<small>Press Ctrl+F1 to toggle this dialog</small>";
@@ -20,6 +22,7 @@ var TestInstructions;
                     let legend = document.createElement("legend");
                     legend.textContent = key;
                     let ul = document.createElement("ul");
+                    ul.id = key;
                     for (let element of content)
                         ul.innerHTML += "<li class='dialog'>" + element + "</h1>";
                     fieldset.className = "dialog";
@@ -43,5 +46,9 @@ var TestInstructions;
             else
                 dialog.show();
     }
+    function get(_key) {
+        return dialog.querySelector("ul#" + _key);
+    }
+    TestInstructions.get = get;
 })(TestInstructions || (TestInstructions = {}));
 //# sourceMappingURL=TestInstructions.js.map

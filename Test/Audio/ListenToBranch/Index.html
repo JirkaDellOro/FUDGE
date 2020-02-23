@@ -5,15 +5,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Audio Test Insertion</title>
+  <title>Test</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
   <script src="../../../Core/Build/FudgeCore.js"></script>
-  <script src="Insertion.js"></script>
+  
+  <script src="ListenToBranch.js"></script>
 </head>
 
 <body>
   <script>
     TestInstructions.display({
-      Name: "AudioManager",
+      Name: "Audio Branch",
       Test: [
         "The AudioManager handles AudioContexts, the default context is created automatically and used for this test",
         "A branch in the scene may be defined as the audio-branch, thus its audio components can be heard",
@@ -31,7 +35,7 @@
       Observe: [
         "Console to see hierarchy and component status",
         "<a href='https://chrome.google.com/webstore/detail/web-audio-inspector/cmhomipkklckpomafalojobppmmidlgl'>WebAudio-Plugin</a> to see Audio Nodes",
-        "Listen to output. Only the node the AudioManager listens to should be heard, including its children, if components are attached and active"
+        "Listen to output"
       ],
       Controls: [
         "Mouseclick to start",
@@ -41,9 +45,13 @@
         "P: append selected node as child to other node",
         "C: move component to other node",
         "U: update AudioManager"
+      ],
+      Expect: [
+        "Only the node the AudioManager listens to should be heard, including its children, if components are attached and active",
+        "In the WebAudio-View, the wiring between the nodes changes accordingly, the nodes remain the same"
       ]
     });
   </script>
-  </body>
+</body>
 
 </html>

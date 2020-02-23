@@ -2,11 +2,11 @@
 namespace AudioSounds {
   import ƒ = FudgeCore;
   window.addEventListener("load", start);
-  window.addEventListener("keydown", handleKeydown);
   let cmpAudio: ƒ.ComponentAudio;
   let distortion: WaveShaperNode = ƒ.AudioManager.default.createWaveShaper();
-
+  
   async function start(_event: Event): Promise<void> {
+    window.addEventListener("keydown", handleKeydown);
     let audioBeep: ƒ.Audio = await ƒ.Audio.load("Sound/Beep.mp3");
     cmpAudio = new ƒ.ComponentAudio(audioBeep, false, false);
     cmpAudio.connect(true);
@@ -38,8 +38,8 @@ namespace AudioSounds {
         ƒ.Debug.log("Insert")
         cmpAudio.insertAudioNodes(distortion, distortion);
         break;
-        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-          ƒ.Debug.log("Remove")
+      case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+        ƒ.Debug.log("Remove")
         cmpAudio.insertAudioNodes(null, null);
         break;
     }

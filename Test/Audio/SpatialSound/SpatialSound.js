@@ -208,4 +208,4 @@ var AudioSpace;
         }
     }
 })(AudioSpace || (AudioSpace = {}));
-//# sourceMappingURL=AudioSpace.js.map
+//# sourceMappingURL=SpatialSound.js.map

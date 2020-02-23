@@ -4,10 +4,10 @@ var AudioSounds;
 (function (AudioSounds) {
     var ƒ = FudgeCore;
     window.addEventListener("load", start);
-    window.addEventListener("keydown", handleKeydown);
     let cmpAudio;
     let distortion = ƒ.AudioManager.default.createWaveShaper();
     async function start(_event) {
+        window.addEventListener("keydown", handleKeydown);
         let audioBeep = await ƒ.Audio.load("Sound/Beep.mp3");
         cmpAudio = new ƒ.ComponentAudio(audioBeep, false, false);
         cmpAudio.connect(true);

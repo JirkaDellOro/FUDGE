@@ -7,8 +7,10 @@ namespace TestInstructions {
   }
 
   let dialog: HTMLDialogElement;
+  let instructions: object;
 
   export function display(_instructions: object): void {
+    instructions = _instructions;
     dialog = document.createElement("dialog");
     dialogPolyfill.registerDialog(dialog);
 
@@ -27,6 +29,7 @@ namespace TestInstructions {
           let legend: HTMLLegendElement = document.createElement("legend");
           legend.textContent = key;
           let ul: HTMLUListElement = document.createElement("ul");
+          ul.id = key;
           for (let element of content)
             ul.innerHTML += "<li class='dialog'>" + element + "</h1>";
           fieldset.className = "dialog";
@@ -49,5 +52,9 @@ namespace TestInstructions {
         dialog.close();
       else
         dialog.show();
+  }
+
+  export function get(_key: string): HTMLUListElement | string {
+    return <HTMLUListElement>dialog.querySelector("ul#" + _key);
   }
 } 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Test</title>
+    <link rel="stylesheet" href="../../TestInstructions.css">
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script src="../../../Core/Build/FudgeCore.js"></script>
+  
+  <script src="Insertion.js"></script>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Audio Graph Insertion",
+      Test: [
+        "Each ComponentAudio defines a small audio-graph consisting of three nodes: Source, Panner, Gain",
+        "Additional audio-nodes can be added between the panner and the gain to design special effects"
+      ],
+      Setup: [
+        "1 ComponentAudio not attached to a Fudge-Node",
+        "1 audio-node of the type WaveShaper with a distortion and reverb effect"
+      ],
+      Act: [
+        "Insert and remove the effect"
+      ],
+      Observe: [
+        "Console to see the status and feedback for your actions",
+        "<a href='https://chrome.google.com/webstore/detail/web-audio-inspector/cmhomipkklckpomafalojobppmmidlgl'>WebAudio-Plugin</a> to see Audio Nodes",
+        "Listen to output"
+      ],
+      Control: [
+        "Enter: play sound",
+        "Arrow Up: insert effect",
+        "Arrow Down: remove effect",
+      ],
+      Expect: [
+        "Hear a significant difference between effect inserted and removed",
+        "The effect node is visibly inserted and isolated",
+        "In the WebAudio-View, since the source needs to be recreated when restarting, unused sources pile up and will be garbage collected later (hopefully)",
+      ]
+    });
+  </script>
+  </body>
+
+</html>
