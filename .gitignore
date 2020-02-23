@@ -1,6 +1,5 @@
-FudgeCore.tsbuildinfo
+*.tsbuildinfo
 FudgeCore.js.map
-FudgeAid.tsbuildinfo
 FudgeAid.js.map
 node_modules
 !Editor/node_modules

@@ -1,6 +1,6 @@
-///<reference types="../../Build/Fudge"/>
+///<reference types="../../Build/Fudge/Fudge"/>
 var Fudge;
-///<reference types="../../Build/Fudge"/>
+///<reference types="../../Build/Fudge/Fudge"/>
 (function (Fudge) {
     class ViewAnimationTemplate extends Fudge.PanelTemplate {
         constructor() {

@@ -1,4 +1,3 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
 namespace AnimatorComponentTest {
   import ƒ = FudgeCore;
   window.addEventListener("DOMContentLoaded", init);

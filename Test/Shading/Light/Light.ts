@@ -10,7 +10,7 @@ namespace TextureTest {
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
         body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
-        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8)); 
 
         // let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
         // branch.addComponent(cmpLightAmbient);

@@ -13,14 +13,23 @@ var UI_Minimal;
 // /<reference path="../../Scenes/Scenes.ts"/>
 (function (UI_Minimal) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
+    var ƒUi = FudgeUserInterface;
+    let uiMatrix;
+    let matrix;
     window.addEventListener("load", hndLoad);
     function hndLoad(_event) {
-        let root = document.createElement("form");
+        let uiCamera = document.createElement("div");
+        uiMatrix = document.createElement("div");
         let camera = new ƒ.ComponentCamera();
-        ƒui.UIGenerator.createFromMutable(camera, root);
-        // this.root.addEventListener("input", this.mutateOnInput);
-        document.body.appendChild(root);
+        matrix = ƒ.Matrix4x4.ROTATION_X(10);
+        ƒUi.UIGenerator.createFromMutable(camera, uiCamera);
+        ƒUi.UIGenerator.createFromMutable(matrix, uiMatrix);
+        document.body.appendChild(uiCamera);
+        document.body.appendChild(uiMatrix);
+        uiMatrix.addEventListener("input", handleInput);
+    }
+    function handleInput(_event) {
+        ƒ.Debug.log(matrix.toString());
     }
 })(UI_Minimal || (UI_Minimal = {}));
 //# sourceMappingURL=Test.js.map

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Test</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  
+  <script src="BranchMix.js"></script>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Branch Mixing",
+      Test: [
+        "The AudioManager handles AudioContexts, the default context is created automatically and used for this test",
+        "A branch in the scene may be defined as the audio-branch, thus its audio components can be heard",
+        "The AudioManager sets up the AudioGraph for this"
+      ],
+      Setup: [
+        "10 Fudge-Nodes exist (0-9) at root level",
+        "3 audio components attached to nodes 0-2"
+      ],
+      Act: [
+        "Manipulate scenetree by appending nodes as children to others",
+        "Switch components between nodes and activate/deactivate them",
+        "Define audio branch to listen to"
+      ],
+      Observe: [
+        "Console to see hierarchy and component status",
+        "<a href='https://chrome.google.com/webstore/detail/web-audio-inspector/cmhomipkklckpomafalojobppmmidlgl'>WebAudio-Plugin</a> to see Audio Nodes",
+        "Listen to output"
+      ],
+      Controls: [
+        "Mouseclick to start",
+        "0-9: select node",
+        "L: listen to selected node",
+        "A: activate/deactivate ComponentAudio on selected node",
+        "P: append selected node as child to other node",
+        "C: move component to other node",
+        "U: update AudioManager"
+      ],
+      Expect: [
+        "Only the node the AudioManager listens to should be heard, including its children, if components are attached and active",
+        "In the WebAudio-View, the wiring between the nodes changes accordingly, the nodes remain the same"
+      ]
+    });
+  </script>
+</body>
+
+</html>

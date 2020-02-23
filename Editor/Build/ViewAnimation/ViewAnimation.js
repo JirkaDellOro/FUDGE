@@ -1,10 +1,10 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
-///<reference types="../../Build/Fudge"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../Build/Fudge"/>
 var Fudge;
-///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../UserInterface/Build/FudgeUI"/>
-///<reference types="../../Build/Fudge"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../Build/Fudge"/>
 (function (Fudge) {
     class ViewAnimation extends Fudge.View {
         constructor(_parent) {

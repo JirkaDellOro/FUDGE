@@ -14,6 +14,15 @@
         {
             "label": "auto-watch",
             "type": "shell",
+            "command": "tsc -watch -p Source/Fudge",
+            "runOptions": {
+                "runOn": "folderOpen",
+                "tsconfig": "Source/Fudge/tsconfig.json"
+            }
+        },
+        {
+            "label": "auto-watch",
+            "type": "shell",
             "command": "tsc -watch -p Source",
             "runOptions": {
                 "runOn": "folderOpen",

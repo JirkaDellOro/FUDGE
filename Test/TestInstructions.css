@@ -1,0 +1,13 @@
+.dialog {
+  margin: 0px;
+  padding: 0.1em 1em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+fieldset.dialog {
+  border: 2px #dddddd solid;
+}
+
+legend.dialog {
+  color: gray;
+}

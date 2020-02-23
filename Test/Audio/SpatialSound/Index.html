@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Test</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../Aid/Build/FudgeAid.js"></script>
+
+  <script src="SpatialSound.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Spatial Sound",
+      Test: [
+        "The panner-node of ComponentAudio supports positioning and orientation in world space and attributes to control the emission of sound",
+        "ComponentAudioListener respects the transformation of the node it is attached to and its pivot",
+        "WebAudio calculates the resulting audio at the listener, according to its position and orientation in stereo"
+      ],
+      Setup: [
+        "1 ƒAid.NodeCoordinateSystem symbolizing the worlds origin and coordinate system",
+        "1 ƒAid.Node called 'speaker' with visible pyramids to visualize the panners cones and a ƒAid.NodeCoordinateSystem for the local coordinate system",
+        "1 ƒ.ComponentAudio attached to the speaker",
+        "1 ƒAid.CameraOrbit moving around the worlds center",
+        "1 ƒ.ComponentAudioListener attached to the camera"
+      ],
+      Act: [
+        "Move the camera",
+        "Move the speaker",
+        "Adjust the cones"
+      ],
+      Observe: [
+        "Listen to output"
+      ],
+      Control: [
+        "<strong>Source</strong> WASDEX: translate | ARROWS: rotate | SPACE: center | ENTER: play/mute",
+        "<strong>Camera</strong> HOLD+MOVE MOUSE: orbit | WHEEL: move in/out",
+        "<strong>Cone</strong> SHIFT+WHEEL: expand/shrink outer | ALT+WHEEL: expand/shrink inner"
+      ],
+      Expect: [
+        "Hear a significant difference between effect inserted and removed",
+        "The effect node is visibly inserted and isolated",
+        "In the WebAudio-View, since the source needs to be recreated when restarting, unused sources pile up and will be garbage collected later (hopefully)",
+      ]
+    });
+  </script>
+
+  <fieldset>
+    <legend>Instructions</legend>
+    <script>document.write(TestInstructions.get("Control").innerHTML);</script>
+  </fieldset>
+  <canvas></canvas>
+  <output></output>
+</body>
+
+</html>
