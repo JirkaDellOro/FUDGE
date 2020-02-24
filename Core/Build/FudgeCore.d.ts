@@ -2776,7 +2776,7 @@ declare namespace FudgeCore {
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
-        protected abstract createFaceNormals(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -2817,11 +2817,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
-}
-declare namespace FudgeCore {
-    function calculateFaceNormals(_mesh: Mesh): Float32Array;
 }
 declare namespace FudgeCore {
     /**
@@ -2840,7 +2836,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -2877,7 +2872,6 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {

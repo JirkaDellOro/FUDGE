@@ -63,9 +63,5 @@ namespace FudgeCore {
             ]);
             return textureUVs;
         }
-
-        protected createFaceNormals(): Float32Array {
-            return new Float32Array(calculateFaceNormals(this));
-        }
     }
 }

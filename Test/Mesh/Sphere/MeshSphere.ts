@@ -19,7 +19,7 @@ namespace MeshTest {
         let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
         let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         
-        let sphereMesh: ƒ.Mesh = new ƒ.MeshSphere(32, 24);
+        let sphereMesh: ƒ.Mesh = new ƒ.MeshSphere(6, 6);
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
 
