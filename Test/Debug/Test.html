@@ -1,34 +1,25 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Debug</title>
+  <meta charset="utf-8" />
+  <title>Fudge Debug-Klasse</title>
+  <link rel="stylesheet" href="TestDebug.css" type="text/css" media="screen" />
   <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
   <script type="text/javascript" src="TestDebug.js"></script>
 </head>
 
 <body>
-  <h1>
-    Test: Debug-Class
-  </h1>
-  <p>
-    <h2>What</h2> Test the filtering and routing of debug-information to various channels and their formatting 
-  </p>
-  <p>
-    <h2>How</h2>
-    <ul>
-      <li>Open the debug console and press the start button</li>
-      <li>Observe output to the console, the alert window and the textfield</li>
-    </ul>
-  </p>
-  <p>
-    <h2>Expect</h2>
-    <ul>
-      <li>Messages appear in the output targets</li>
-      <li>Message format is [type] |  [targets] | [number of argument objects] | [argument objects]</li>
-      <li>Messages appear in the targets listet in [targets]</li>
-      <li>Messages are formatted, formating depends on target, e.g. no groups in alert</li>
-    </ul>
-  </p>
-  <button type="button">Start</button>
+  <fieldset>
+    <legend>Message</legend>
+    <textarea cols="80" rows="3"></textarea>
+  </fieldset>
+
+  <fieldset>
+    <legend>Output and Filters</legend>
+    <form>
+    </form>
+  </fieldset>
 </body>
+
+</html>
