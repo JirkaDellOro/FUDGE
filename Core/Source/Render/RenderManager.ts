@@ -1,4 +1,4 @@
-/// <reference path="RenderOperator.ts"/>
+// / <reference path="RenderOperator.ts"/>
 namespace FudgeCore {
   interface NodeReferences {
     shader: typeof Shader;

@@ -1,4 +1,4 @@
-/// <reference path="Component.ts"/>
+// / <reference path="Component.ts"/>
 namespace FudgeCore {
   export enum FIELD_OF_VIEW {
     HORIZONTAL, VERTICAL, DIAGONAL

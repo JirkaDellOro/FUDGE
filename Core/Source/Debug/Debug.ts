@@ -1,5 +1,5 @@
+// / <reference path="DebugTarget.ts"/>
 /// <reference path="DebugInterfaces.ts"/>
-/// <reference path="DebugAlert.ts"/>
 /// <reference path="DebugConsole.ts"/>
 namespace FudgeCore {
   /**

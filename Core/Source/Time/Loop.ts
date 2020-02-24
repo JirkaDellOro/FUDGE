@@ -1,5 +1,5 @@
-///<reference path="../Event/Event.ts"/>
-///<reference path="../Time/Time.ts"/>
+// /<reference path="../Event/Event.ts"/>
+// /<reference path="../Time/Time.ts"/>
 namespace FudgeCore {
   /**
    * Determines the mode a loop runs in

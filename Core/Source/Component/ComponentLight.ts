@@ -1,4 +1,4 @@
-///<reference path="../Light/Light.ts"/>
+// /<reference path="../Light/Light.ts"/>
 namespace FudgeCore {
     /**
      * Attaches a [[Light]] to the node

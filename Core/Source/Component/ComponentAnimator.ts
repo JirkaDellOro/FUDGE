@@ -1,5 +1,5 @@
-/// <reference path="../Time/Loop.ts"/>
-/// <reference path="../Animation/Animation.ts"/>
+// / <reference path="../Time/Loop.ts"/>
+// / <reference path="../Animation/Animation.ts"/>
 
 namespace FudgeCore {
   /**

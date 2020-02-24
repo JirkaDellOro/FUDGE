@@ -1,4 +1,4 @@
-/// <reference path="DebugTarget.ts"/>
+// / <reference path="DebugTarget.ts"/>
 namespace FudgeCore {
     /**
      * Routing to the standard-console

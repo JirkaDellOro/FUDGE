@@ -1,4 +1,4 @@
-/// <reference path="../Event/Event.ts"/>
+// / <reference path="../Event/Event.ts"/>
 namespace FudgeCore {
   /**
    * Interface describing the datatypes of the attributes a mutator as strings 
