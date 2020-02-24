@@ -2800,6 +2800,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
+     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * @authors Simon Storl-Schulke, HFU, 2020*/
+    type heightMapFunction = (x: number, z: number) => number;
+    /**
+     * Generates a planar Grid and applies a Heightmap-Function to it.
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshHeightMap extends Mesh {
+        private resolutionX;
+        private resolutionZ;
+        private heightMapFunction;
+        constructor(_resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
+        create(): void;
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    function calculateFaceNormals(_mesh: Mesh): Float32Array;
+}
+declare namespace FudgeCore {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
@@ -2842,19 +2866,16 @@ declare namespace FudgeCore {
     /**
      * Generate a UV Sphere with a given number of sectors and stacks (clamped at 128*128)
      * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
-     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class MeshSphere extends Mesh {
-        private _sectors;
-        get sectors(): number;
-        private _stacks;
-        get stacks(): number;
-        private _normals;
-        private _textureUVs;
+        normals: Float32Array;
+        private sectors;
+        private stacks;
         constructor(_sectors?: number, _stacks?: number);
         create(): void;
-        protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
+        protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }

@@ -146,8 +146,6 @@ namespace Scenes {
         return canvas;
     }
 
-
-
     export function dollyViewportCamera(_viewport: ƒ.Viewport): void {
         _viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);

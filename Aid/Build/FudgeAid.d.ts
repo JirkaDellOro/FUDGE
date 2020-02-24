@@ -1,3 +1,4 @@
+/// <reference path="../../core/build/fudgecore.d.ts" />
 /// <reference types="../../core/build/fudgecore" />
 declare namespace FudgeAid {
     class ArithIntervalSolver<Interval, Epsilon> {
@@ -54,6 +55,12 @@ declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class NodeCoordinateSystem extends Node {
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
+    }
+}
+declare namespace FudgeAid {
+    /** Three Point Light setup that by default illuminates the Scene from +Z */
+    class NodeThreePointLights extends Node {
+        constructor(_name: string, _rotationY: number);
     }
 }
 declare namespace StateMachine {

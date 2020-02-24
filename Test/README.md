@@ -32,10 +32,12 @@ To be described
   Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
 
 - [RectMapping](WebGL/TestRectMapping/Test.html)  
-Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)
+Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)  
+
 ## Resources
 - [NodeResource](Resources/NodeResource/Test.html)   
-Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.
+Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.  
+
 ## Shading
 - [Light](Shading/Light/Light.html)  
 Hier soll eine sich drehende Pyramide angezeigt werden, die ihre Farben auf den Seiten ändert.
@@ -43,10 +45,12 @@ Hier soll eine sich drehende Pyramide angezeigt werden, die ihre Farben auf den 
 Hier soll eine Pyramide gezeigt werden, um die sich mehrere Lichter in verschiedenen Farben drehen.
 
 - [Texture](Shading/Textures/TextureTest.html)   
-Hier sollen Würfel gezeigt werden, auf denen eine Fudge-Textur zu sehen ist.
+Hier sollen Würfel gezeigt werden, auf denen eine Fudge-Textur zu sehen ist.  
+
 ## Time
 - [TimeLoop](Time/Test.html)   
-Nachdem die FPS Zahl des Loops geändert wurde, soll sich der grüne Balken je nach Mode-Einstellung füllen. Der Loop kann an Animation-Requests (frame_request), Realtime (Systemzeit) oder Gametime (welche ein beliebiges Time-Objekt sein kann) gekoppelt werden (time.Game ist die automatisch startende GameTime)
+Nachdem die FPS Zahl des Loops geändert wurde, soll sich der grüne Balken je nach Mode-Einstellung füllen. Der Loop kann an Animation-Requests (frame_request), Realtime (Systemzeit) oder Gametime (welche ein beliebiges Time-Objekt sein kann) gekoppelt werden (time.Game ist die automatisch startende GameTime)  
+
 ## Transfer
 - [Serializer](Transfer/Serializer/Test.html)  
 Hier sollen keine Fehler ausgeworfen werden. Es muss geschaut werden, dass ein Originalobjekt erstellt wird und mit einem rekonstruiertem Objekt verglichen wird.
@@ -68,3 +72,10 @@ Hier soll in der Console eine Matrix als Unterpunkt verschiedener Funktionen zu 
 
 ## Rectangle
 - [Collision](Rectangles/Collision/Test.html)
+
+## Mesh Generierung
+- [Sphere](Mesh/Sphere/Test.html)  
+Hier sollen zwei Kugeln zu sehen sein - eine mit Flat Shading und die andere mit einer Erde-Textur.
+
+- [HeightMap](Mesh/HeightMap/Test.html)  
+Hier sollen zwei durch eine Sinusfunktion (anhand von X und Z Koordinaten des Grids) generierte Gridmeshes angezeigt werden. Eine mit Flat Shading und eines mit einer Erde-Textur.
