@@ -41,10 +41,10 @@ namespace FudgeCore {
         }
 
         public static async handleFileSelect(_event: Event): Promise<void> {
-            console.log("-------------------------------- handleFileSelect");
+            Debug.fudge("-------------------------------- handleFileSelect");
             document.body.removeChild(FileIoBrowserLocal.selector);
             let fileList: FileList = (<HTMLInputElement>_event.target).files;
-            console.log(fileList, fileList.length);
+            Debug.fudge(fileList, fileList.length);
             if (fileList.length == 0)
                 return;
 
