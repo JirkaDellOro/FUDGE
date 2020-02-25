@@ -13,7 +13,7 @@ namespace TestDebug {
     [ƒ.DEBUG_FILTER.GROUPEND, ƒ.Debug.groupEnd]
   ]);
   let targets: ƒ.DebugTarget[] = [ƒ.DebugConsole, ƒ.DebugTextArea, ƒ.DebugAlert];
-  
+
   window.addEventListener("load", init);
 
   function init(_event: Event): void {

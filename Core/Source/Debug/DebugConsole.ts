@@ -21,6 +21,9 @@ namespace FudgeCore {
      */
     public static fudge(_message: Object, ..._args: Object[]): void {
       console.debug("🎲", _message, ..._args);
+      // let trace: string[] = new Error("Test").stack.split("\n");
+      // console.log(trace[4]);
+      // console.trace("Test");
     }
   }
 }
