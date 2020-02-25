@@ -6,6 +6,7 @@ var TestDebug;
         [ƒ.DEBUG_FILTER.LOG, ƒ.Debug.log],
         [ƒ.DEBUG_FILTER.WARN, ƒ.Debug.warn],
         [ƒ.DEBUG_FILTER.ERROR, ƒ.Debug.error],
+        [ƒ.DEBUG_FILTER.FUDGE, ƒ.Debug.fudge],
         [ƒ.DEBUG_FILTER.CLEAR, ƒ.Debug.clear],
         [ƒ.DEBUG_FILTER.GROUP, ƒ.Debug.group],
         [ƒ.DEBUG_FILTER.GROUPCOLLAPSED, ƒ.Debug.groupCollapsed],

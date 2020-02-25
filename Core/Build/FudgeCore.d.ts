@@ -1106,13 +1106,14 @@ declare namespace FudgeCore {
         LOG = 2,
         WARN = 4,
         ERROR = 8,
-        CLEAR = 16,
-        GROUP = 32,
-        GROUPCOLLAPSED = 64,
-        GROUPEND = 128,
-        MESSAGES = 15,
-        FORMAT = 240,
-        ALL = 255
+        FUDGE = 16,
+        CLEAR = 256,
+        GROUP = 257,
+        GROUPCOLLAPSED = 258,
+        GROUPEND = 260,
+        MESSAGES = 31,
+        FORMAT = 263,
+        ALL = 287
     }
     type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
     interface MapDebugFilterToDelegate {
@@ -1125,6 +1126,10 @@ declare namespace FudgeCore {
      */
     class DebugConsole extends DebugTarget {
         static delegates: MapDebugFilterToDelegate;
+        /**
+         * Displays critical information about failures, which is emphasized e.g. by color
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
     }
 }
 declare namespace FudgeCore {
@@ -1159,6 +1164,10 @@ declare namespace FudgeCore {
          */
         static error(_message: Object, ..._args: Object[]): void;
         /**
+         * Displays messages from FUDGE
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
+        /**
          * Clears the output and removes previous messages if possible
          */
         static clear(): void;
@@ -1178,6 +1187,10 @@ declare namespace FudgeCore {
          * Lookup all delegates registered to the filter and call them using the given arguments
          */
         private static delegate;
+        /**
+         * setup routing to standard console
+         */
+        private static setupConsole;
     }
 }
 declare namespace FudgeCore {

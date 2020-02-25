@@ -6,13 +6,14 @@ namespace FudgeCore {
   export class DebugTextArea extends DebugTarget {
     public static textArea: HTMLTextAreaElement = document.createElement("textarea");
     public static autoScroll: boolean = true;
-    // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈
+    // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈 ▣ ◧ ♢ ♦ ⚂ ⛋ ❖ ⬓ ⬒ 🍩 🍫 🍬 🎲 ☕ 🧊
 
     public static delegates: MapDebugFilterToDelegate = {
       [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate("✓"),
       [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate("✎"),
       [DEBUG_FILTER.WARN]: DebugTextArea.createDelegate("⚠"),
       [DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate("❌"),
+      [DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate("🎲"),
       [DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
       [DEBUG_FILTER.GROUP]: DebugTextArea.group,
       [DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,

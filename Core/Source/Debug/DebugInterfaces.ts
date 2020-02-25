@@ -9,11 +9,12 @@ namespace FudgeCore {
     LOG = 0x02,
     WARN = 0x04,
     ERROR = 0x08,
-    CLEAR = 0x10,
-    GROUP = 0x20,
-    GROUPCOLLAPSED = 0x40,
-    GROUPEND = 0x80,
-    MESSAGES = INFO | LOG | WARN | ERROR,
+    FUDGE = 0x10,
+    CLEAR = 0x100,
+    GROUP = 0x101,
+    GROUPCOLLAPSED = 0x102,
+    GROUPEND = 0x104,
+    MESSAGES = INFO | LOG | WARN | ERROR | FUDGE,
     FORMAT = CLEAR | GROUP | GROUPCOLLAPSED | GROUPEND,
     ALL = MESSAGES | FORMAT
   }
