@@ -11,12 +11,13 @@ var TestDebug;
         [ƒ.DEBUG_FILTER.GROUPCOLLAPSED, ƒ.Debug.groupCollapsed],
         [ƒ.DEBUG_FILTER.GROUPEND, ƒ.Debug.groupEnd]
     ]);
-    let targets = [ƒ.DebugConsole, ƒ.DebugAlert];
+    let targets = [ƒ.DebugConsole, ƒ.DebugTextArea, ƒ.DebugAlert];
     window.addEventListener("load", init);
     function init(_event) {
         let form = document.forms[0];
         form.appendChild(createTable());
         form.addEventListener("change", createMessage);
+        ƒ.DebugTextArea.textArea = document.querySelector("textarea");
     }
     function createTable() {
         console.log(filters, targets);
@@ -83,7 +84,7 @@ var TestDebug;
             }
             ƒ.Debug.setFilter(target, filterResult);
         }
-        document.querySelector("textarea").value = JSON.stringify(message);
+        document.querySelector("p#Message").textContent = JSON.stringify(message);
         return message;
     }
     function hndClickCell(_event) {

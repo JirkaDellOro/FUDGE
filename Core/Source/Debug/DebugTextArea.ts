@@ -5,7 +5,9 @@ namespace FudgeCore {
    */
   export class DebugTextArea extends DebugTarget {
     public static textArea: HTMLTextAreaElement = document.createElement("textarea");
+    public static autoScroll: boolean = true;
     // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈
+
     public static delegates: MapDebugFilterToDelegate = {
       [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate("✓"),
       [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate("✎"),
@@ -47,6 +49,8 @@ namespace FudgeCore {
 
     private static print(_text: string): void {
       DebugTextArea.textArea.textContent += DebugTextArea.getIndentation(DebugTextArea.groups.length) + _text + "\n";
+      if (DebugTextArea.autoScroll)
+        DebugTextArea.textArea.scrollTop = DebugTextArea.textArea.scrollHeight;
     }
   }
 }

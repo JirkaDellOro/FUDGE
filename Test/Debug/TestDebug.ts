@@ -11,7 +11,7 @@ namespace TestDebug {
     [ƒ.DEBUG_FILTER.GROUPCOLLAPSED, ƒ.Debug.groupCollapsed],
     [ƒ.DEBUG_FILTER.GROUPEND, ƒ.Debug.groupEnd]
   ]);
-  let targets: ƒ.DebugTarget[] = [ƒ.DebugConsole, ƒ.DebugAlert];
+  let targets: ƒ.DebugTarget[] = [ƒ.DebugConsole, ƒ.DebugTextArea, ƒ.DebugAlert];
 
   window.addEventListener("load", init);
 
@@ -19,6 +19,7 @@ namespace TestDebug {
     let form: HTMLFormElement = document.forms[0];
     form.appendChild(createTable());
     form.addEventListener("change", createMessage);
+    ƒ.DebugTextArea.textArea = document.querySelector("textarea");
   }
 
   function createTable(): HTMLTableElement {
@@ -95,8 +96,8 @@ namespace TestDebug {
       }
       ƒ.Debug.setFilter(target, filterResult);
     }
-    
-    document.querySelector("textarea").value = JSON.stringify(message);
+
+    document.querySelector("p#Message").textContent = JSON.stringify(message);
     return message;
   }
 

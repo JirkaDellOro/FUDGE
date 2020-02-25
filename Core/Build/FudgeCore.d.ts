@@ -1202,6 +1202,7 @@ declare namespace FudgeCore {
      */
     class DebugTextArea extends DebugTarget {
         static textArea: HTMLTextAreaElement;
+        static autoScroll: boolean;
         static delegates: MapDebugFilterToDelegate;
         private static groups;
         static clear(): void;
