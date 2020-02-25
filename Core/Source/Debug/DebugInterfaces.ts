@@ -19,6 +19,7 @@ namespace FudgeCore {
     ALL = MESSAGES | FORMAT
   }
 
+  // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈 ▣ ◧ ♢ ♦ ⚂ ⛋ ❖ ⬓ ⬒ 🍩 🍫 🍬 🎲 ☕ 🧊
   export const DEBUG_SYMBOL: { [filter: number]: string; } = {
     [DEBUG_FILTER.INFO]: "✓",
     [DEBUG_FILTER.LOG]: "✎",

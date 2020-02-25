@@ -6,7 +6,6 @@ namespace FudgeCore {
   export class DebugTextArea extends DebugTarget {
     public static textArea: HTMLTextAreaElement = document.createElement("textarea");
     public static autoScroll: boolean = true;
-    // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈 ▣ ◧ ♢ ♦ ⚂ ⛋ ❖ ⬓ ⬒ 🍩 🍫 🍬 🎲 ☕ 🧊
 
     public static delegates: MapDebugFilterToDelegate = {
       [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.INFO]),
