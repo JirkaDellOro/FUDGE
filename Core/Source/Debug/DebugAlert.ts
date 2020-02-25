@@ -9,7 +9,7 @@ namespace FudgeCore {
       [DEBUG_FILTER.LOG]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.LOG]),
       [DEBUG_FILTER.WARN]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.WARN]),
       [DEBUG_FILTER.ERROR]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.ERROR]),
-      [DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.FUDGE]),
+      [DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.FUDGE])
     };
     public static createDelegate(_headline: string): Function {
       let delegate: Function = function (_message: Object, ..._args: Object[]): void {
