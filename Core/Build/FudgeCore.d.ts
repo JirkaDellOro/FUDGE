@@ -1115,6 +1115,9 @@ declare namespace FudgeCore {
         FORMAT = 263,
         ALL = 287
     }
+    const DEBUG_SYMBOL: {
+        [filter: number]: string;
+    };
     type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
     interface MapDebugFilterToDelegate {
         [filter: number]: Function;

@@ -9,11 +9,11 @@ namespace FudgeCore {
     // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈 ▣ ◧ ♢ ♦ ⚂ ⛋ ❖ ⬓ ⬒ 🍩 🍫 🍬 🎲 ☕ 🧊
 
     public static delegates: MapDebugFilterToDelegate = {
-      [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate("✓"),
-      [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate("✎"),
-      [DEBUG_FILTER.WARN]: DebugTextArea.createDelegate("⚠"),
-      [DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate("❌"),
-      [DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate("🎲"),
+      [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.INFO]),
+      [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.LOG]),
+      [DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.WARN]),
+      [DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.ERROR]),
+      [DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.FUDGE]),
       [DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
       [DEBUG_FILTER.GROUP]: DebugTextArea.group,
       [DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
