@@ -67,19 +67,21 @@ var TestDebug;
         return table;
     }
     function createMessage(_event) {
-        // reset all filters
         let message = {};
-        for (let target of targets) {
-            ƒ.Debug.setFilter(target, ƒ.DEBUG_FILTER.NONE);
+        for (let index in targets) {
+            let filterResult = ƒ.DEBUG_FILTER.NONE;
+            let target = targets[index];
             message[getTargetName(target)] = [];
-        }
-        let formData = new FormData(document.forms[0]);
-        for (let entry of formData) {
-            let pos = entry[0].split("|");
-            let target = targets[parseInt(pos[1])];
-            let filter = parseInt(pos[0]);
-            ƒ.Debug.setFilter(target, filter);
-            message[getTargetName(target)].push(ƒ.DEBUG_FILTER[filter]);
+            for (let filter of filters) {
+                let type = filter[0];
+                let checkbox = document.forms[0].querySelector(`input[name="${type}|${index}"]`);
+                // console.log(index, type, checkbox.checked);
+                if (checkbox.checked) {
+                    filterResult |= type;
+                    message[getTargetName(target)].push(ƒ.DEBUG_FILTER[type]);
+                }
+            }
+            ƒ.Debug.setFilter(target, filterResult);
         }
         document.querySelector("textarea").value = JSON.stringify(message);
         return message;

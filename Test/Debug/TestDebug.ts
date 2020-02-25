@@ -77,21 +77,25 @@ namespace TestDebug {
   }
 
   function createMessage(_event: Event): Object {
-    // reset all filters
     let message: Object = {};
-    for (let target of targets) {
-      ƒ.Debug.setFilter(target, ƒ.DEBUG_FILTER.NONE);
-      message[getTargetName(target)] = [];
-    }
-    let formData: FormData = new FormData(document.forms[0]);
-    for (let entry of formData) {
-      let pos: string[] = entry[0].split("|");
-      let target: ƒ.DebugTarget = targets[parseInt(pos[1])];
-      let filter: ƒ.DEBUG_FILTER = <ƒ.DEBUG_FILTER>parseInt(pos[0]);
-      ƒ.Debug.setFilter(target, filter);
 
-      message[getTargetName(target)].push(ƒ.DEBUG_FILTER[filter]);
+    for (let index in targets) {
+      let filterResult: number = ƒ.DEBUG_FILTER.NONE;
+      let target: ƒ.DebugTarget = targets[index];
+      message[getTargetName(target)] = [];
+
+      for (let filter of filters) {
+        let type: ƒ.DEBUG_FILTER = <ƒ.DEBUG_FILTER>filter[0];
+        let checkbox: HTMLInputElement = document.forms[0].querySelector(`input[name="${type}|${index}"]`);
+        // console.log(index, type, checkbox.checked);
+        if (checkbox.checked) {
+          filterResult |= type;
+          message[getTargetName(target)].push(ƒ.DEBUG_FILTER[type]);
+        }
+      }
+      ƒ.Debug.setFilter(target, filterResult);
     }
+    
     document.querySelector("textarea").value = JSON.stringify(message);
     return message;
   }
