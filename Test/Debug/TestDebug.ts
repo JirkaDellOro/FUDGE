@@ -118,7 +118,7 @@ namespace TestDebug {
     // console.log(debug);
     let message: Object = createMessage(null);
     debug(JSON.stringify(message), message);
-  }
+  } 
 
   function getTargetName(_target: ƒ.DebugTarget): string {
     return Reflect.getOwnPropertyDescriptor(_target, "name").value;
