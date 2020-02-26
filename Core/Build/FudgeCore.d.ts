@@ -644,7 +644,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds an audio-buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
+     * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Audio extends AudioBuffer {
@@ -656,7 +656,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Extends the standard AudioContext for integration with [[Node]]-branches
+     * Extends the standard AudioContext for integration with [[Node]]-branches.
+     * Creates a default object at startup to be addressed as AudioManager default.
+     * Other objects of this class may be create for special purposes.
      */
     class AudioManager extends AudioContext {
         /** The default context that may be used throughout the project without the need to create others */
@@ -666,7 +668,13 @@ declare namespace FudgeCore {
         private branch;
         private cmpListener;
         constructor(contextOptions?: AudioContextOptions);
+        /**
+         * Set the master volume
+         */
         set volume(_value: number);
+        /**
+         * Get the master volume
+         */
         get volume(): number;
         /**
          * Determines branch to listen to. Each [[ComponentAudio]] in the branch will connect to this contexts master gain, all others disconnect.

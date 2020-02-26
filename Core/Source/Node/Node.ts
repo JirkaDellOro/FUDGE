@@ -103,10 +103,11 @@ namespace FudgeCore {
         return;
 
       let inAudioBranch: boolean = false;
+      let branchListened: Node = AudioManager.default.getBranchListeningTo();
       let ancestor: Node = this;
       while (ancestor) {
         ancestor.timestampUpdate = 0;
-        inAudioBranch = inAudioBranch || (ancestor == AudioManager.default.getBranchListeningTo());
+        inAudioBranch = inAudioBranch || (ancestor == branchListened);
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else

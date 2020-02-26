@@ -1,6 +1,8 @@
 namespace FudgeCore {
   /**
-   * Extends the standard AudioContext for integration with [[Node]]-branches
+   * Extends the standard AudioContext for integration with [[Node]]-branches.
+   * Creates a default object at startup to be addressed as AudioManager default.
+   * Other objects of this class may be create for special purposes.
    */
   export class AudioManager extends AudioContext {
     /** The default context that may be used throughout the project without the need to create others */
@@ -16,10 +18,16 @@ namespace FudgeCore {
       this.gain.connect(this.destination);
     }
 
+    /**
+     * Set the master volume
+     */
     public set volume(_value: number) {
       this.gain.gain.value = _value;
     }
 
+    /**
+     * Get the master volume
+     */
     public get volume(): number {
       return this.gain.gain.value;
     }
