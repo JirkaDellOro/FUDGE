@@ -1310,14 +1310,8 @@ var Fudge;
                 this.parentPanel.dispatchEvent(event);
                 _event.cancelBubble = true;
             };
-            if (_parent instanceof Fudge.NodePanel) {
-                if (_parent.getNode() != null) {
-                    this.branch = _parent.getNode();
-                }
-                else {
-                    this.branch = new ƒ.Node("Scene");
-                }
-            }
+            if (_parent instanceof Fudge.NodePanel && _parent.getNode() != null)
+                this.branch = _parent.getNode();
             else {
                 this.branch = new ƒ.Node("Scene");
             }

@@ -1,16 +1,41 @@
 /// <reference path="../../core/build/fudgecore.d.ts" />
 /// <reference types="../../core/build/fudgecore" />
 declare namespace FudgeAid {
-    class ArithIntervalSolver<Interval, Epsilon> {
-        left: Interval;
-        right: Interval;
+    /**
+     * Within a given precision, an object of this class finds the parameter value at which a given function
+     * switches its boolean return value using interval splitting.
+     * Pass the type of the parameter and the type the precision is measured in.
+     */
+    class ArithIntervalSolver<Parameter, Epsilon> {
+        /** The left border of the interval found */
+        left: Parameter;
+        /** The right border of the interval found */
+        right: Parameter;
+        /** The function value at the left border of the interval found */
         leftValue: boolean;
+        /** The function value at the right border of the interval found */
         rightValue: boolean;
         private function;
         private divide;
         private isSmaller;
-        constructor(_function: (_t: Interval) => boolean, _divide: (_left: Interval, _right: Interval) => Interval, _isSmaller: (_left: Interval, _right: Interval, _epsilon: Epsilon) => boolean);
-        solve(_left: Interval, _right: Interval, _epsilon: Epsilon, _leftValue?: boolean, _rightValue?: boolean): void;
+        /**
+         * Creates a new Solver
+         * @param _function A function that takes an argument of the generic type <Parameter> and returns a boolean value.
+         * @param _divide A function splitting the interval to find a parameter for the next iteration, may simply be the arithmetic mean
+         * @param _isSmaller A function that determines a difference between the borders of the current interval and compares this to the given precision
+         */
+        constructor(_function: (_t: Parameter) => boolean, _divide: (_left: Parameter, _right: Parameter) => Parameter, _isSmaller: (_left: Parameter, _right: Parameter, _epsilon: Epsilon) => boolean);
+        /**
+         * Finds a solution with the given precision in the given interval using the functions this Solver was constructed with.
+         * After the method returns, find the data in this objects properties.
+         * @param _left The parameter on one side of the interval.
+         * @param _right The parameter on the other side, may be "smaller" than [[_left]].
+         * @param _epsilon The desired precision of the solution.
+         * @param _leftValue The value on the left side of the interval, omit if yet unknown or pass in if known for better performance.
+         * @param _rightValue The value on the right side of the interval, omit if yet unknown or pass in if known for better performance.
+         * @throws Error if both sides of the interval return the same value.
+         */
+        solve(_left: Parameter, _right: Parameter, _epsilon: Epsilon, _leftValue?: boolean, _rightValue?: boolean): void;
         toString(): string;
     }
 }

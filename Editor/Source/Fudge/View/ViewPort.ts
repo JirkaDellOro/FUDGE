@@ -13,14 +13,8 @@ namespace Fudge {
 
     constructor(_parent: NodePanel) {
       super(_parent);
-      if (_parent instanceof NodePanel) {
-        if (_parent.getNode() != null) {
-          this.branch = _parent.getNode();
-        }
-        else {
-          this.branch = new ƒ.Node("Scene");
-        }
-      }
+      if (_parent instanceof NodePanel && _parent.getNode() != null)
+        this.branch = _parent.getNode();
       else {
         this.branch = new ƒ.Node("Scene");
       }
