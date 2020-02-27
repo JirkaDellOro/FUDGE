@@ -109,6 +109,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.noderesource.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#mtxworld" class="tsd-kind-icon">mtx<wbr>World</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#name" class="tsd-kind-icon">name</a></li>
@@ -127,9 +128,9 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#activate" class="tsd-kind-icon">activate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#addchild" class="tsd-kind-icon">add<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#addcomponent" class="tsd-kind-icon">add<wbr>Component</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.noderesource.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#applyanimation" class="tsd-kind-icon">apply<wbr>Animation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#broadcastevent" class="tsd-kind-icon">broadcast<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.noderesource.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
@@ -167,7 +168,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L22">Node/Node.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L22">Node/Node.ts:22</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -193,6 +194,43 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="appendchild" class="tsd-anchor"></a>
+					<h3>append<wbr>Child</h3>
+					<div class="tsd-signature tsd-kind-icon">append<wbr>Child<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span><span class="tsd-signature-symbol"> =&nbsp;this.addChild</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#appendchild">appendChild</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L99">Node/Node.ts:99</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Simply calls <a href="fudgecore.noderesource.html#addchild">addChild</a>. This reference is here solely because appendChild is the equivalent method in DOM.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>_node: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="idresource" class="tsd-anchor"></a>
 					<h3>id<wbr>Resource</h3>
@@ -200,7 +238,7 @@
 					<aside class="tsd-sources">
 						<p>Implementation of <a href="../interfaces/fudgecore.serializableresource.html">SerializableResource</a>.<a href="../interfaces/fudgecore.serializableresource.html#idresource">idResource</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/NodeResource.ts#L6">Node/NodeResource.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/NodeResource.ts#L6">Node/NodeResource.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -211,7 +249,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#mtxworld">mtxWorld</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L12">Node/Node.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L12">Node/Node.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -222,7 +260,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#name">name</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L11">Node/Node.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L11">Node/Node.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -233,7 +271,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#timestampupdate">timestampUpdate</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L13">Node/Node.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L13">Node/Node.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -251,7 +289,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#branch">branch</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L179">Node/Node.ts:179</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L185">Node/Node.ts:185</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -274,7 +312,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#cmptransform">cmpTransform</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L61">Node/Node.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L61">Node/Node.ts:61</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -297,7 +335,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#isactive">isActive</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L37">Node/Node.ts:37</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L37">Node/Node.ts:37</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -318,13 +356,50 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#activate">activate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L33">Node/Node.ts:33</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L33">Node/Node.ts:33</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="addchild" class="tsd-anchor"></a>
+					<h3>add<wbr>Child</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Child<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#addchild">addChild</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L106">Node/Node.ts:106</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adds the given reference to a node to the list of children, if not already in</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>Error when trying to add an ancestor of this</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_node: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The node to be added as a child</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -342,7 +417,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#addcomponent">addComponent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L263">Node/Node.ts:263</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L269">Node/Node.ts:269</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -375,7 +450,7 @@
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#addeventlistener">addEventListener</a></p>
 								<p>Overrides <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L353">Node/Node.ts:353</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L359">Node/Node.ts:359</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -410,43 +485,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-					<a name="appendchild" class="tsd-anchor"></a>
-					<h3>append<wbr>Child</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">append<wbr>Child<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#appendchild">appendChild</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L100">Node/Node.ts:100</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Adds the given reference to a node to the list of children, if not already in</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>throws</dt>
-									<dd><p>Error when trying to add an ancestor of this</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_node: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The node to be added as a child</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="applyanimation" class="tsd-anchor"></a>
 					<h3>apply<wbr>Animation</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -457,7 +495,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#applyanimation">applyAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L198">Node/Node.ts:198</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L204">Node/Node.ts:204</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -489,7 +527,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#broadcastevent">broadcastEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L423">Node/Node.ts:423</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L429">Node/Node.ts:429</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -523,7 +561,7 @@
 								<p>Implementation of <a href="../interfaces/fudgecore.serializableresource.html">SerializableResource</a>.<a href="../interfaces/fudgecore.serializableresource.html#deserialize">deserialize</a></p>
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L323">Node/Node.ts:323</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L329">Node/Node.ts:329</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -548,7 +586,7 @@
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#dispatchevent">dispatchEvent</a></p>
 								<p>Overrides <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L378">Node/Node.ts:378</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L384">Node/Node.ts:384</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -582,7 +620,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#findchild">findChild</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L147">Node/Node.ts:147</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L153">Node/Node.ts:153</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -614,7 +652,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getallcomponents">getAllComponents</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L233">Node/Node.ts:233</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L239">Node/Node.ts:239</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -637,7 +675,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getancestor">getAncestor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L51">Node/Node.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L51">Node/Node.ts:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -663,7 +701,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getchildren">getChildren</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L81">Node/Node.ts:81</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L81">Node/Node.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -686,7 +724,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getchildrenbyname">getChildrenByName</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L89">Node/Node.ts:89</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L89">Node/Node.ts:89</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -719,7 +757,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getcomponent">getComponent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L252">Node/Node.ts:252</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L258">Node/Node.ts:258</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -759,7 +797,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getcomponents">getComponents</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L245">Node/Node.ts:245</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L251">Node/Node.ts:251</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -799,7 +837,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#getparent">getParent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L44">Node/Node.ts:44</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L44">Node/Node.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -825,7 +863,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#isdescendantof">isDescendantOf</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L187">Node/Node.ts:187</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L193">Node/Node.ts:193</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -849,7 +887,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#isupdated">isUpdated</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L183">Node/Node.ts:183</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L189">Node/Node.ts:189</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -873,7 +911,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#removechild">removeChild</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L131">Node/Node.ts:131</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L137">Node/Node.ts:137</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -905,7 +943,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#removecomponent">removeComponent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L282">Node/Node.ts:282</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L288">Node/Node.ts:288</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -943,7 +981,7 @@
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#removeeventlistener">removeEventListener</a></p>
 								<p>Overrides <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L365">Node/Node.ts:365</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L371">Node/Node.ts:371</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -987,7 +1025,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#replacechild">replaceChild</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L156">Node/Node.ts:156</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L162">Node/Node.ts:162</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1026,7 +1064,7 @@
 								<p>Implementation of <a href="../interfaces/fudgecore.serializableresource.html">SerializableResource</a>.<a href="../interfaces/fudgecore.serializableresource.html#serialize">serialize</a></p>
 								<p>Inherited from <a href="fudgecore.node.html">Node</a>.<a href="fudgecore.node.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Core/Source/Node/Node.ts#L298">Node/Node.ts:298</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f7dd4be/Core/Source/Node/Node.ts#L304">Node/Node.ts:304</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
@@ -1056,6 +1094,9 @@
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.noderesource.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.noderesource.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.noderesource.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
 							</li>
@@ -1081,13 +1122,13 @@
 								<a href="fudgecore.noderesource.html#activate" class="tsd-kind-icon">activate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.noderesource.html#addchild" class="tsd-kind-icon">add<wbr>Child</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.noderesource.html#addcomponent" class="tsd-kind-icon">add<wbr>Component</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.noderesource.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.noderesource.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.noderesource.html#applyanimation" class="tsd-kind-icon">apply<wbr>Animation</a>
