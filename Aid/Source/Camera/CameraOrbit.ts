@@ -21,11 +21,11 @@ namespace FudgeAid {
 
       this.rotatorX = new ƒ.Node("CameraRotationX");
       this.rotatorX.addComponent(new ƒ.ComponentTransform());
-      this.appendChild(this.rotatorX);
+      this.addChild(this.rotatorX);
       this.translator = new ƒ.Node("CameraTranslate");
       this.translator.addComponent(new ƒ.ComponentTransform());
       this.translator.cmpTransform.local.rotateY(180);
-      this.rotatorX.appendChild(this.translator);
+      this.rotatorX.addChild(this.translator);
 
       this.translator.addComponent(_cmpCamera);
       this.distance = _distanceStart;

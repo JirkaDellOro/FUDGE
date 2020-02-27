@@ -16,8 +16,8 @@ namespace FudgeAid {
       head.local.translateY(0.5);
       head.local.scale(new ƒ.Vector3(0.05, 0.1, 0.05));
 
-      this.appendChild(shaft);
-      this.appendChild(head);
+      this.addChild(shaft);
+      this.addChild(head);
     }
   }
 }
