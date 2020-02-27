@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>StateMachineMapStateToMethods | Fudge Aid</title>
+	<title>StateMachine | Fudge Aid</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,13 +56,13 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/statemachine.html">StateMachine</a>
+					<a href="../modules/fudgeaid.html">FudgeAid</a>
 				</li>
 				<li>
-					<a href="statemachine.statemachinemapstatetomethods.html">StateMachineMapStateToMethods</a>
+					<a href="fudgeaid.statemachine.html">StateMachine</a>
 				</li>
 			</ul>
-			<h1>Interface StateMachineMapStateToMethods&lt;State&gt;</h1>
+			<h1>Class StateMachine&lt;State&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -72,7 +72,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Interface mapping a state to one action multiple transitions</p>
+						<p>Core functionality of the state machine, holding solely the current state and, while in transition, the next state,
+						the instructions for the machine and comfort methods to transit and act.</p>
 					</div>
 				</div>
 			</section>
@@ -88,45 +89,112 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">StateMachineMapStateToMethods</span>
+						<span class="target">StateMachine</span>
 					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implemented by</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="fudgeaid.componentstatemachine.html" class="tsd-signature-type">ComponentStateMachine</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="statemachine.statemachinemapstatetomethods.html#action" class="tsd-kind-icon">action</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported"><a href="statemachine.statemachinemapstatetomethods.html#transitions" class="tsd-kind-icon">transitions</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.statemachine.html#statecurrent" class="tsd-kind-icon">state<wbr>Current</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.statemachine.html#statemachine" class="tsd-kind-icon">state<wbr>Machine</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.statemachine.html#statenext" class="tsd-kind-icon">state<wbr>Next</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.statemachine.html#act" class="tsd-kind-icon">act</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.statemachine.html#transit" class="tsd-kind-icon">transit</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="action" class="tsd-anchor"></a>
-					<h3>action</h3>
-					<div class="tsd-signature tsd-kind-icon">action<span class="tsd-signature-symbol">:</span> <a href="../modules/statemachine.html#statemachinemethod" class="tsd-signature-type">StateMachineMethod</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="statecurrent" class="tsd-anchor"></a>
+					<h3>state<wbr>Current</h3>
+					<div class="tsd-signature tsd-kind-icon">state<wbr>Current<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">State</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/StateMachine/StateMachine.ts#L13">StateMachine/StateMachine.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L22">StateMachine/StateMachine.ts:22</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-					<a name="transitions" class="tsd-anchor"></a>
-					<h3>transitions</h3>
-					<div class="tsd-signature tsd-kind-icon">transitions<span class="tsd-signature-symbol">:</span> <a href="../modules/statemachine.html#statemachinemapstatetomethod" class="tsd-signature-type">StateMachineMapStateToMethod</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="statemachine" class="tsd-anchor"></a>
+					<h3>state<wbr>Machine</h3>
+					<div class="tsd-signature tsd-kind-icon">state<wbr>Machine<span class="tsd-signature-symbol">:</span> <a href="fudgeaid.statemachineinstructions.html" class="tsd-signature-type">StateMachineInstructions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/StateMachine/StateMachine.ts#L14">StateMachine/StateMachine.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L24">StateMachine/StateMachine.ts:24</a></li>
 						</ul>
 					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="statenext" class="tsd-anchor"></a>
+					<h3>state<wbr>Next</h3>
+					<div class="tsd-signature tsd-kind-icon">state<wbr>Next<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">State</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L23">StateMachine/StateMachine.ts:23</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="act" class="tsd-anchor"></a>
+					<h3>act</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">act<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L30">StateMachine/StateMachine.ts:30</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="transit" class="tsd-anchor"></a>
+					<h3>transit</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">transit<span class="tsd-signature-symbol">(</span>_next<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L26">StateMachine/StateMachine.ts:26</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_next: <span class="tsd-signature-type">State</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -136,45 +204,75 @@
 					<li class="globals  ">
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-module tsd-is-not-exported">
-						<a href="../modules/fudgeaid.html">Fudge<wbr>Aid</a>
-					</li>
 					<li class="current tsd-kind-module tsd-is-not-exported">
-						<a href="../modules/statemachine.html">State<wbr>Machine</a>
+						<a href="../modules/fudgeaid.html">Fudge<wbr>Aid</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/statemachine.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a>
+					<li class=" tsd-kind-enum tsd-parent-kind-module">
+						<a href="../enums/fudgeaid.image_rendering.html" class="tsd-kind-icon">IMAGE_<wbr>RENDERING</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/statemachine.statemachine-1.html" class="tsd-kind-icon">State<wbr>Machine</a>
+						<a href="fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.cameraorbit.html" class="tsd-kind-icon">Camera<wbr>Orbit</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.canvas.html" class="tsd-kind-icon">Canvas</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/statemachine.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
+						<a href="fudgeaid.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.node.html" class="tsd-kind-icon">Node</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodearrow.html" class="tsd-kind-icon">Node<wbr>Arrow</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodecoordinatesystem.html" class="tsd-kind-icon">Node<wbr>Coordinate<wbr>System</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a>
 					</li>
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="statemachine.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a>
+					<li class="current tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="statemachine.statemachinemapstatetomethods.html#action" class="tsd-kind-icon">action</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgeaid.statemachine.html#statecurrent" class="tsd-kind-icon">state<wbr>Current</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface tsd-is-not-exported">
-								<a href="statemachine.statemachinemapstatetomethods.html#transitions" class="tsd-kind-icon">transitions</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgeaid.statemachine.html#statemachine" class="tsd-kind-icon">state<wbr>Machine</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgeaid.statemachine.html#statenext" class="tsd-kind-icon">state<wbr>Next</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgeaid.statemachine.html#act" class="tsd-kind-icon">act</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgeaid.statemachine.html#transit" class="tsd-kind-icon">transit</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="../modules/statemachine.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../interfaces/fudgeaid.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="../modules/statemachine.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
+						<a href="../modules/fudgeaid.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../modules/fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
 					</li>
 				</ul>
 			</nav>

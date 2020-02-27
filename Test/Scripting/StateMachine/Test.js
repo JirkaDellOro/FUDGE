@@ -1,6 +1,8 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 var StateMachine;
-///<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 (function (StateMachine) {
     let JOB;
     (function (JOB) {
@@ -8,7 +10,8 @@ var StateMachine;
         JOB[JOB["PATROL"] = 1] = "PATROL";
         JOB[JOB["CHASE"] = 2] = "CHASE";
     })(JOB || (JOB = {}));
-    class Guard extends StateMachine.StateMachine {
+    var ƒaid = FudgeAid;
+    class Guard extends ƒaid.StateMachine {
         constructor() {
             super();
             this.stateMachine = Guard.stateMachine;
@@ -31,7 +34,7 @@ var StateMachine;
             Guard.actDefault(_machine);
         }
         static setupStateMachine() {
-            let setup = new StateMachine.StateMachineInstructions();
+            let setup = new ƒaid.StateMachineInstructions();
             setup.transitDefault = Guard.transitDefault;
             setup.actDefault = Guard.actDefault;
             setup.setTransition(JOB.IDLE, JOB.IDLE, this.transit);
@@ -43,7 +46,7 @@ var StateMachine;
         }
     }
     Guard.stateMachine = Guard.setupStateMachine();
-    class ComponentGuard extends StateMachine.ComponentStateMachine {
+    class ComponentGuard extends ƒaid.ComponentStateMachine {
         constructor() {
             super();
             this.stateMachine = ComponentGuard.stateMachine;
@@ -55,7 +58,7 @@ var StateMachine;
             console.log("ComponentGuard acts on ", _machine.stateCurrent);
         }
         static setupStateMachine() {
-            let setup = new StateMachine.StateMachineInstructions();
+            let setup = new ƒaid.StateMachineInstructions();
             setup.setTransition(JOB.IDLE, JOB.PATROL, this.transit);
             setup.setTransition(JOB.PATROL, JOB.IDLE, this.transit);
             setup.setAction(JOB.IDLE, this.act);

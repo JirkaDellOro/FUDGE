@@ -3,7 +3,7 @@
  * <State> should be an enum defining the various states of the machine
  */
 
-namespace StateMachine {
+namespace FudgeAid {
   /** Format of methods to be used as transitions or actions */
   type StateMachineMethod<State> = (_machine: StateMachine<State>) => void;
   /** Type for maps associating a state to a method */

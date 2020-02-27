@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>FudgeAid | Fudge Aid</title>
+	<title>Canvas | Fudge Aid</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,13 @@
 					<a href="../index.html">Globals</a>
 				</li>
 				<li>
-					<a href="fudgeaid.html">FudgeAid</a>
+					<a href="../modules/fudgeaid.html">FudgeAid</a>
+				</li>
+				<li>
+					<a href="fudgeaid.canvas.html">Canvas</a>
 				</li>
 			</ul>
-			<h1>Module FudgeAid</h1>
+			<h1>Class Canvas</h1>
 		</div>
 	</div>
 </header>
@@ -69,116 +72,64 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>State machine offers a structure and fundamental functionality for state machines
-						<State> should be an enum defining the various states of the machine</p>
+						<p>Adds comfort methods to create a render canvas</p>
 					</div>
 				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">Canvas</span>
+					</li>
+				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumerations</h3>
+							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum tsd-parent-kind-module"><a href="../enums/fudgeaid.image_rendering.html" class="tsd-kind-icon">IMAGE_<wbr>RENDERING</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section ">
-							<h3>Classes</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter"><a href="../classes/fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.cameraorbit.html" class="tsd-kind-icon">Camera<wbr>Orbit</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.canvas.html" class="tsd-kind-icon">Canvas</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter"><a href="../classes/fudgeaid.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.node.html" class="tsd-kind-icon">Node</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.nodearrow.html" class="tsd-kind-icon">Node<wbr>Arrow</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.nodecoordinatesystem.html" class="tsd-kind-icon">Node<wbr>Coordinate<wbr>System</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module"><a href="../classes/fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter"><a href="../classes/fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter"><a href="../classes/fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Interfaces</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported"><a href="../interfaces/fudgeaid.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a></li>
-							</ul>
-						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Type aliases</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported"><a href="fudgeaid.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a></li>
-								<li class="tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported"><a href="fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeaid.canvas.html#create" class="tsd-kind-icon">create</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Type aliases</h2>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-					<a name="statemachinemapstatetomethod" class="tsd-anchor"></a>
-					<h3>State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</h3>
-					<div class="tsd-signature tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod&lt;State&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">, </span><a href="fudgeaid.html#statemachinemethod" class="tsd-signature-type">StateMachineMethod</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L10">StateMachine/StateMachine.ts:10</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Type for maps associating a state to a method</p>
-						</div>
-					</div>
-					<h4 class="tsd-type-parameters-title">Type parameters</h4>
-					<ul class="tsd-type-parameters">
-						<li>
-							<h4>State</h4>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="create" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> create</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span>_fillParent<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, _imageRendering<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgeaid.image_rendering.html" class="tsd-signature-type">IMAGE_RENDERING</a>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLCanvasElement</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Canvas/Canvas.ts#L13">Canvas/Canvas.ts:13</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _fillParent: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;true</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _imageRendering: <a href="../enums/fudgeaid.image_rendering.html" class="tsd-signature-type">IMAGE_RENDERING</a><span class="tsd-signature-symbol"> =&nbsp;IMAGE_RENDERING.AUTO</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;800</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;600</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">HTMLCanvasElement</span></h4>
 						</li>
 					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-					<a name="statemachinemethod" class="tsd-anchor"></a>
-					<h3>State<wbr>Machine<wbr>Method</h3>
-					<div class="tsd-signature tsd-kind-icon">State<wbr>Machine<wbr>Method&lt;State&gt;<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/StateMachine/StateMachine.ts#L8">StateMachine/StateMachine.ts:8</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Format of methods to be used as transitions or actions</p>
-						</div>
-					</div>
-					<h4 class="tsd-type-parameters-title">Type parameters</h4>
-					<ul class="tsd-type-parameters">
-						<li>
-							<h4>State</h4>
-						</li>
-					</ul>
-					<div class="tsd-type-declaration">
-						<h4>Type declaration</h4>
-						<ul class="tsd-parameters">
-							<li class="tsd-parameter-siganture">
-								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-type-alias tsd-is-not-exported">
-									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>_machine<span class="tsd-signature-symbol">: </span><a href="../classes/fudgeaid.statemachine.html" class="tsd-signature-type">StateMachine</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-								</ul>
-								<ul class="tsd-descriptions">
-									<li class="tsd-description">
-										<h4 class="tsd-parameters-title">Parameters</h4>
-										<ul class="tsd-parameters">
-											<li>
-												<h5>_machine: <a href="../classes/fudgeaid.statemachine.html" class="tsd-signature-type">StateMachine</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">State</span><span class="tsd-signature-symbol">&gt;</span></h5>
-											</li>
-										</ul>
-										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-									</li>
-								</ul>
-							</li>
-						</ul>
-					</div>
 				</section>
 			</section>
 		</div>
@@ -189,7 +140,7 @@
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-module tsd-is-not-exported">
-						<a href="fudgeaid.html">Fudge<wbr>Aid</a>
+						<a href="../modules/fudgeaid.html">Fudge<wbr>Aid</a>
 					</li>
 				</ul>
 			</nav>
@@ -199,43 +150,52 @@
 						<a href="../enums/fudgeaid.image_rendering.html" class="tsd-kind-icon">IMAGE_<wbr>RENDERING</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a>
+						<a href="fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.cameraorbit.html" class="tsd-kind-icon">Camera<wbr>Orbit</a>
+						<a href="fudgeaid.cameraorbit.html" class="tsd-kind-icon">Camera<wbr>Orbit</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.canvas.html" class="tsd-kind-icon">Canvas</a>
+						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgeaid.canvas.html#create" class="tsd-kind-icon">create</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.canvas.html" class="tsd-kind-icon">Canvas</a>
+						<a href="fudgeaid.node.html" class="tsd-kind-icon">Node</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodearrow.html" class="tsd-kind-icon">Node<wbr>Arrow</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodecoordinatesystem.html" class="tsd-kind-icon">Node<wbr>Coordinate<wbr>System</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/fudgeaid.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.node.html" class="tsd-kind-icon">Node</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.nodearrow.html" class="tsd-kind-icon">Node<wbr>Arrow</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.nodecoordinatesystem.html" class="tsd-kind-icon">Node<wbr>Coordinate<wbr>System</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
-						<a href="../classes/fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a>
+						<a href="fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a>
-					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="../classes/fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
+						<a href="fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="../interfaces/fudgeaid.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="fudgeaid.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a>
+						<a href="../modules/fudgeaid.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
-						<a href="fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
+						<a href="../modules/fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
 					</li>
 				</ul>
 			</nav>

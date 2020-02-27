@@ -101,6 +101,7 @@
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#mtxworld" class="tsd-kind-icon">mtx<wbr>World</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#name" class="tsd-kind-icon">name</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#timestampupdate" class="tsd-kind-icon">timestamp<wbr>Update</a></li>
@@ -123,9 +124,9 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#activate" class="tsd-kind-icon">activate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#addchild" class="tsd-kind-icon">add<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#addcomponent" class="tsd-kind-icon">add<wbr>Component</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#applyanimation" class="tsd-kind-icon">apply<wbr>Animation</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#broadcastevent" class="tsd-kind-icon">broadcast<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeaid.cameraorbit.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
@@ -165,7 +166,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides Node.__constructor</p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L9">Camera/CameraOrbit.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L9">Camera/CameraOrbit.ts:9</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -193,6 +194,43 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="appendchild" class="tsd-anchor"></a>
+					<h3>append<wbr>Child</h3>
+					<div class="tsd-signature tsd-kind-icon">append<wbr>Child<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">function</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from Node.appendChild</p>
+						<ul>
+							<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2814</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Simply calls <a href="fudgeaid.cameraorbit.html#addchild">addChild</a>. This reference is here solely because appendChild is the equivalent method in DOM.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-siganture">
+								<ul class="tsd-signatures tsd-kind-type-literal tsd-parent-kind-property tsd-is-not-exported">
+									<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+								</ul>
+								<ul class="tsd-descriptions">
+									<li class="tsd-description">
+										<h4 class="tsd-parameters-title">Parameters</h4>
+										<ul class="tsd-parameters">
+											<li>
+												<h5>_node: <span class="tsd-signature-type">Node</span></h5>
+											</li>
+										</ul>
+										<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 					<a name="mtxworld" class="tsd-anchor"></a>
 					<h3>mtx<wbr>World</h3>
@@ -240,7 +278,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.branch</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2836</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2840</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -285,7 +323,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L34">Camera/CameraOrbit.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L34">Camera/CameraOrbit.ts:34</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ƒ.ComponentCamera</span></h4>
@@ -303,7 +341,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L47">Camera/CameraOrbit.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L47">Camera/CameraOrbit.ts:47</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -311,7 +349,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L42">Camera/CameraOrbit.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L42">Camera/CameraOrbit.ts:42</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -352,7 +390,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L38">Camera/CameraOrbit.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L38">Camera/CameraOrbit.ts:38</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ƒ.Node</span></h4>
@@ -370,7 +408,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L64">Camera/CameraOrbit.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L64">Camera/CameraOrbit.ts:64</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -378,7 +416,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L59">Camera/CameraOrbit.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L59">Camera/CameraOrbit.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -402,7 +440,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L55">Camera/CameraOrbit.ts:55</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L55">Camera/CameraOrbit.ts:55</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -410,7 +448,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L51">Camera/CameraOrbit.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L51">Camera/CameraOrbit.ts:51</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -451,6 +489,43 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="addchild" class="tsd-anchor"></a>
+					<h3>add<wbr>Child</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Child<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from Node.addChild</p>
+								<ul>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2820</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adds the given reference to a node to the list of children, if not already in</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>Error when trying to add an ancestor of this</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_node: <span class="tsd-signature-type">Node</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The node to be added as a child</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="addcomponent" class="tsd-anchor"></a>
 					<h3>add<wbr>Component</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -461,7 +536,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.addComponent</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2862</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2866</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -494,7 +569,7 @@
 								<p>Inherited from Node.addEventListener</p>
 								<p>Overrides EventTargetƒ.addEventListener</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2878</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2882</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -529,43 +604,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-					<a name="appendchild" class="tsd-anchor"></a>
-					<h3>append<wbr>Child</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">append<wbr>Child<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Node</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from Node.appendChild</p>
-								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2816</li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Adds the given reference to a node to the list of children, if not already in</p>
-								</div>
-								<dl class="tsd-comment-tags">
-									<dt>throws</dt>
-									<dd><p>Error when trying to add an ancestor of this</p>
-									</dd>
-								</dl>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_node: <span class="tsd-signature-type">Node</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>The node to be added as a child</p>
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="applyanimation" class="tsd-anchor"></a>
 					<h3>apply<wbr>Animation</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -576,7 +614,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.applyAnimation</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2843</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2847</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -608,7 +646,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.broadcastEvent</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2898</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2902</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -641,7 +679,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.deserialize</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2870</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2874</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -666,7 +704,7 @@
 								<p>Inherited from Node.dispatchEvent</p>
 								<p>Overrides EventTargetƒ.dispatchEvent</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2892</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2896</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -700,7 +738,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.findChild</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2826</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2830</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -732,7 +770,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.getAllComponents</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2847</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2851</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -837,7 +875,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.getComponent</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2857</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2861</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -877,7 +915,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.getComponents</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2852</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2856</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -943,7 +981,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.isDescendantOf</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2838</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2842</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -967,7 +1005,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.isUpdated</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2837</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2841</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -991,7 +1029,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.removeChild</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2821</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2825</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1023,7 +1061,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.removeComponent</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2868</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2872</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1061,7 +1099,7 @@
 								<p>Inherited from Node.removeEventListener</p>
 								<p>Overrides EventTargetƒ.removeEventListener</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2885</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2889</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1105,7 +1143,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.replaceChild</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2832</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2836</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1142,7 +1180,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L72">Camera/CameraOrbit.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L72">Camera/CameraOrbit.ts:72</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1165,7 +1203,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/4f347983/Aid/Source/Camera/CameraOrbit.ts#L68">Camera/CameraOrbit.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Camera/CameraOrbit.ts#L68">Camera/CameraOrbit.ts:68</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1189,7 +1227,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from Node.serialize</p>
 								<ul>
-									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2869</li>
+									<li>Defined in C:/Users/jirka/Documents/HFU/FUDGE/core/build/fudgecore.d.ts:2873</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Serialization</span></h4>
@@ -1207,13 +1245,13 @@
 					<li class="current tsd-kind-module tsd-is-not-exported">
 						<a href="../modules/fudgeaid.html">Fudge<wbr>Aid</a>
 					</li>
-					<li class=" tsd-kind-module tsd-is-not-exported">
-						<a href="../modules/statemachine.html">State<wbr>Machine</a>
-					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-enum tsd-parent-kind-module">
+						<a href="../enums/fudgeaid.image_rendering.html" class="tsd-kind-icon">IMAGE_<wbr>RENDERING</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a>
 					</li>
@@ -1224,6 +1262,9 @@
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 								<a href="fudgeaid.cameraorbit.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgeaid.cameraorbit.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgeaid.cameraorbit.html#mtxworld" class="tsd-kind-icon">mtx<wbr>World</a>
@@ -1262,13 +1303,13 @@
 								<a href="fudgeaid.cameraorbit.html#activate" class="tsd-kind-icon">activate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgeaid.cameraorbit.html#addchild" class="tsd-kind-icon">add<wbr>Child</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgeaid.cameraorbit.html#addcomponent" class="tsd-kind-icon">add<wbr>Component</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgeaid.cameraorbit.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgeaid.cameraorbit.html#appendchild" class="tsd-kind-icon">append<wbr>Child</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgeaid.cameraorbit.html#applyanimation" class="tsd-kind-icon">apply<wbr>Animation</a>
@@ -1338,6 +1379,12 @@
 				</ul>
 				<ul class="after-current">
 					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.canvas.html" class="tsd-kind-icon">Canvas</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.componentstatemachine.html" class="tsd-kind-icon">Component<wbr>State<wbr>Machine</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudgeaid.node.html" class="tsd-kind-icon">Node</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
@@ -1348,6 +1395,21 @@
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../interfaces/fudgeaid.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../modules/fudgeaid.html#statemachinemapstatetomethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethod</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
+						<a href="../modules/fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
 					</li>
 				</ul>
 			</nav>

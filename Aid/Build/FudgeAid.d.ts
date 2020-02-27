@@ -103,7 +103,7 @@ declare namespace FudgeAid {
         constructor(_name: string, _rotationY: number);
     }
 }
-declare namespace StateMachine {
+declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {
         stateCurrent: State;
@@ -117,7 +117,7 @@ declare namespace StateMachine {
  * State machine offers a structure and fundamental functionality for state machines
  * <State> should be an enum defining the various states of the machine
  */
-declare namespace StateMachine {
+declare namespace FudgeAid {
     /** Format of methods to be used as transitions or actions */
     type StateMachineMethod<State> = (_machine: StateMachine<State>) => void;
     /** Type for maps associating a state to a method */
