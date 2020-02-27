@@ -89,7 +89,7 @@ namespace Fudge {
                     node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                     break;
             }
-            targetNode.appendChild(node);
+            targetNode.addChild(node);
             let event: Event = new Event(ƒ.EVENT.CHILD_APPEND);
             targetNode.dispatchEvent(event);
             this.setRoot(this.branch);

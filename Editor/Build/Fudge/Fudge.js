@@ -57,7 +57,7 @@ var Fudge;
         // node = new ƒ.Node("Scene");
         node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
         let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY);
-        node.appendChild(node2);
+        node.addChild(node2);
         node2.cmpTransform.local.translateZ(2);
         let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);
         Fudge.PanelManager.instance.addPanel(nodePanel);
@@ -1222,7 +1222,7 @@ var Fudge;
                         node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                         break;
                 }
-                targetNode.appendChild(node);
+                targetNode.addChild(node);
                 let event = new Event("childAppend" /* CHILD_APPEND */);
                 targetNode.dispatchEvent(event);
                 this.setRoot(this.branch);
