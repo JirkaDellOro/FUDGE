@@ -1,6 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
+  import ƒaid = FudgeAid;
 
   /**
    * View displaying a Node and the hierarchical relation to its parents and children.  
@@ -35,7 +36,9 @@ namespace Fudge {
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      this.canvas = Scenes.createCanvas();
+      this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+      let container: HTMLDivElement = document.createElement("div");
+      container.style.borderWidth = "0px";
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
@@ -77,6 +80,7 @@ namespace Fudge {
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }
+    
     private activeViewport = (_event: MouseEvent): void => {
       let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
       this.parentPanel.dispatchEvent(event);

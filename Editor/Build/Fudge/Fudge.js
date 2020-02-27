@@ -396,6 +396,9 @@ var Fudge;
         constructor(_parent) {
             ƒ.Debug.info("Create view " + this.constructor.name);
             this.content = document.createElement("div");
+            this.content.style.height = "100%";
+            this.content.style.overflow = "auto";
+            this.content.setAttribute("view", this.constructor.name);
             this.config = this.getLayout();
             this.parentPanel = _parent;
         }
@@ -1288,6 +1291,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    var ƒaid = FudgeAid;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
@@ -1330,7 +1334,9 @@ var Fudge;
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            this.canvas = Scenes.createCanvas();
+            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let container = document.createElement("div");
+            container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);

@@ -5,6 +5,7 @@
       "../Source/References.ts",
       "../Source/Arithmetic/ArithIntervalSolver.ts",
       "../Source/Camera/CameraOrbit.ts",
+      "../Source/Canvas/Canvas.ts",
       "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
       "../Source/Geometry/NodeCoordinateSystem.ts",
@@ -22,7 +23,7 @@
         },
         {
           "pos": 15,
-          "end": 13788,
+          "end": 14996,
           "kind": "text"
         }
       ],
@@ -62,7 +63,7 @@
         },
         {
           "pos": 112,
-          "end": 7624,
+          "end": 8091,
           "kind": "text"
         }
       ]

@@ -61,6 +61,21 @@ declare namespace FudgeAid {
     }
 }
 declare namespace FudgeAid {
+    enum IMAGE_RENDERING {
+        AUTO = "auto",
+        SMOOTH = "smooth",
+        HIGH_QUALITY = "high-quality",
+        CRISP_EDGES = "crisp-edges",
+        PIXELATED = "pixelated"
+    }
+    /**
+     * Adds comfort methods to create a render canvas
+     */
+    class Canvas {
+        static create(_fillParent?: boolean, _imageRendering?: IMAGE_RENDERING, _width?: number, _height?: number): HTMLCanvasElement;
+    }
+}
+declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class Node extends ƒ.Node {
         private static count;
