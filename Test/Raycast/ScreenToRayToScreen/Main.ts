@@ -102,7 +102,7 @@ namespace ScreenToRayToScreen {
 
 
   function createScene(): void {
-    root.appendChild(new ƒAid.NodeCoordinateSystem());
+    root.addChild(new ƒAid.NodeCoordinateSystem());
 
     // set lights
     let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
@@ -115,7 +115,7 @@ namespace ScreenToRayToScreen {
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.backgroundColor = ƒ.Color.CSS("white");
     camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
-    root.appendChild(camera);
+    root.addChild(camera);
     // camera.node.addComponent(cmpLight);
 
     let cube: ƒ.Node = new ƒ.Node("Cube");
@@ -130,7 +130,7 @@ namespace ScreenToRayToScreen {
     let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
     cube.addComponent(cmpTransform);
 
-    root.appendChild(cube);
+    root.addChild(cube);
   }
 
 

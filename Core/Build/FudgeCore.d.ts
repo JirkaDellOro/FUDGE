@@ -2809,11 +2809,15 @@ declare namespace FudgeCore {
          */
         getChildrenByName(_name: string): Node[];
         /**
+         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
+         */
+        readonly appendChild: (_node: Node) => void;
+        /**
          * Adds the given reference to a node to the list of children, if not already in
          * @param _node The node to be added as a child
          * @throws Error when trying to add an ancestor of this
          */
-        appendChild(_node: Node): void;
+        addChild(_node: Node): void;
         /**
          * Removes the reference to the give node from the list of children
          * @param _node The node to be removed.

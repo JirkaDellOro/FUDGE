@@ -140,7 +140,7 @@ var UITest;
                     node.mtxWorld.translate(randPos);
                     node.addComponent(cmpMesh);
                     node.addComponent(cmpMaterial);
-                    branch.appendChild(node);
+                    branch.addChild(node);
                     console.log(node);
                     break;
             }

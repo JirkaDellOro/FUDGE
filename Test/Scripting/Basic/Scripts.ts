@@ -47,7 +47,7 @@ namespace Scripts {
     function init(): void {
         let node: ƒ.Node = new ƒ.Node("Node");
         let child: ƒ.Node = new ƒ.Node("Child");
-        node.appendChild(child);
+        node.addChild(child);
 
         let test: Test = new Test();
         test.name = "Test_1";
@@ -61,7 +61,7 @@ namespace Scripts {
 
         node.removeChild(child);
         console.log("Children attached after remove", node.getChildren());
-        node.appendChild(child);
+        node.addChild(child);
         console.log("Children attached after append", node.getChildren());
 
         ƒ.Loop.start();

@@ -23,7 +23,7 @@ namespace ComponentParameters {
       quad.addComponent(cmpMesh);
       quad.addComponent(cmpMaterial);
 
-      root.appendChild(quad);
+      root.addChild(quad);
     }
 
     ƒ.RenderManager.initialize(true, true);

@@ -11,11 +11,11 @@ var NodeResource;
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
         // let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        // branch.appendChild(coSys);
+        // branch.addChild(coSys);
         let viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", branch, cmpCamera, canvas);
         let center = createCenterAndSatellite();
-        // branch.appendChild(center);
+        // branch.addChild(center);
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
         let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
@@ -24,7 +24,7 @@ var NodeResource;
             for (let y = -dim.y; y < dim.y + 1; y++)
                 for (let x = -dim.x; x < dim.x + 1; x++) {
                     let instance = new ƒ.NodeResourceInstance(resource);
-                    branch.appendChild(instance);
+                    branch.addChild(instance);
                     instance.cmpTransform.local.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));
@@ -57,7 +57,7 @@ var NodeResource;
         let center = Scenes.createCompleteMeshNode("Center", mtrOrange, pyramid);
         center.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
         let satellite = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);
-        center.appendChild(satellite);
+        center.addChild(satellite);
         satellite.addComponent(new NodeResource.AnimateSatellite());
         return center;
     }

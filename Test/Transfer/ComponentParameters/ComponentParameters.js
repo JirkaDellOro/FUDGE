@@ -20,7 +20,7 @@ var ComponentParameters;
             cmpMesh.pivot.rotateZ(i * 10);
             quad.addComponent(cmpMesh);
             quad.addComponent(cmpMaterial);
-            root.appendChild(quad);
+            root.addChild(quad);
         }
         ƒ.RenderManager.initialize(true, true);
         ƒ.RenderManager.update();

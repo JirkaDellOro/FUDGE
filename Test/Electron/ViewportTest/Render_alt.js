@@ -105,7 +105,7 @@ var ElectronViewport;
         // nodeCubeCaramel.addComponent(cmpMeshCream);
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
-        branch.appendChild(nodeCubeCoffee);
+        branch.addChild(nodeCubeCoffee);
     }
 })(ElectronViewport || (ElectronViewport = {}));
 //# sourceMappingURL=Render_alt.js.map

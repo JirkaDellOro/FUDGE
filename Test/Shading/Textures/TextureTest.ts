@@ -23,9 +23,9 @@ namespace TextureTest {
         pyramid.cmpTransform.local.translateX(-0.7);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
-        branch.appendChild(quad);
-        branch.appendChild(cube);
-        branch.appendChild(pyramid);
+        branch.addChild(quad);
+        branch.addChild(cube);
+        branch.addChild(pyramid);
 
         ƒ.RenderManager.initialize(true, true);
         ƒ.RenderManager.addBranch(branch);

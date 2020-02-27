@@ -20,7 +20,7 @@ namespace MeshTest {
 
         let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
-        const myHeightMapFunction: ƒ.heightMapFunction = function(x, y): number {
+        const myHeightMapFunction: ƒ.heightMapFunction = function(x: number, y: number): number {
              return Math.sin(x * y * Math.PI * 2) * 0.2; 
             };
 
@@ -30,8 +30,8 @@ namespace MeshTest {
         gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
         gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
 
-        branch.appendChild(gridFlat);
-        branch.appendChild(gridTex);
+        branch.addChild(gridFlat);
+        branch.addChild(gridTex);
 
         gridFlat.cmpTransform.local.translateX(-0.6);
         gridTex.cmpTransform.local.translateX(0.6);
@@ -39,9 +39,9 @@ namespace MeshTest {
         let body: ƒ.Node = new ƒ.Node("k");
 
         let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 110);
-        branch.appendChild(lights);
+        branch.addChild(lights);
 
-        branch.appendChild(body);
+        branch.addChild(body);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);

@@ -37,7 +37,7 @@ var Scripts;
     function init() {
         let node = new ƒ.Node("Node");
         let child = new ƒ.Node("Child");
-        node.appendChild(child);
+        node.addChild(child);
         let test = new Test();
         test.name = "Test_1";
         let test2 = new Test();
@@ -48,7 +48,7 @@ var Scripts;
         console.log("Test-scripts attached after remove", node.getComponents(Test));
         node.removeChild(child);
         console.log("Children attached after remove", node.getChildren());
-        node.appendChild(child);
+        node.addChild(child);
         console.log("Children attached after append", node.getChildren());
         ƒ.Loop.start();
         let mutator = test.getMutator();

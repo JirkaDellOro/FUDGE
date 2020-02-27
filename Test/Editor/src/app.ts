@@ -14,7 +14,7 @@ namespace UI {
     let camera: ƒ.Node;
     window.addEventListener("load", init);
 
-    function init() {
+    function init(): void {
         let config: GoldenLayout.Config = {
             content: [{
                 type: "row",
@@ -41,7 +41,7 @@ namespace UI {
         myLayout.init();
     }
 
-    function initViewport() {
+    function initViewport(): void {
         // create branch
         branch = new ƒ.Node("Scene");
         branch.addComponent(new ƒ.ComponentTransform());
@@ -74,18 +74,18 @@ namespace UI {
 
     }
 
-    function createViewportComponent(container: any, state: any) {
+    function createViewportComponent(container: any, state: any): void {
         container.getElement().append(canvas);
     }
 
-    function createInspectorComponent(container: any, state: any) {
+    function createInspectorComponent(container: any, state: any): void {
         console.log(branch.getChildren()[0].name);
-        let lbl_name: HTMLElement = document.createElement("label");
-        lbl_name.innerHTML = "Node Name";
-        let txt_name: HTMLInputElement = document.createElement("input");
-        txt_name.value = <string>branch.getChildren()[0].name;
-        container.getElement().append(lbl_name);
-        container.getElement().append(txt_name);
+        let lblName: HTMLElement = document.createElement("label");
+        lblName.innerHTML = "Node Name";
+        let txtName: HTMLInputElement = document.createElement("input");
+        txtName.value = <string>branch.getChildren()[0].name;
+        container.getElement().append(lblName);
+        container.getElement().append(txtName);
     }
 
     function animate(_event: Event): void {
@@ -95,7 +95,7 @@ namespace UI {
         viewPort.draw();
     }
 
-    function addCubeNode() {
+    function addCubeNode(): void {
         let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
         let clrCoffee: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
@@ -139,7 +139,7 @@ namespace UI {
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
 
-        branch.appendChild(nodeCubeCoffee);
+        branch.addChild(nodeCubeCoffee);
     }
 
 

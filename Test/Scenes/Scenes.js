@@ -24,9 +24,9 @@ var Scenes;
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
         // create branch
         let branch = new ƒ.Node("AxisCross");
-        branch.appendChild(cubeRed);
-        branch.appendChild(cubeGreen);
-        branch.appendChild(cubeBlue);
+        branch.addChild(cubeRed);
+        branch.addChild(cubeGreen);
+        branch.addChild(cubeBlue);
         return branch;
     }
     Scenes.createAxisCross = createAxisCross;
@@ -55,9 +55,9 @@ var Scenes;
         arrowRed.cmpTransform.local.rotateZ(-90);
         arrowBlue.cmpTransform.local.rotateX(90);
         let coordinates = new ƒ.Node("CoordinateSystem");
-        coordinates.appendChild(arrowRed);
-        coordinates.appendChild(arrowGreen);
-        coordinates.appendChild(arrowBlue);
+        coordinates.addChild(arrowRed);
+        coordinates.addChild(arrowGreen);
+        coordinates.addChild(arrowBlue);
         return coordinates;
     }
     Scenes.createCoordinateSystem = createCoordinateSystem;
@@ -67,7 +67,7 @@ var Scenes;
         let grandchild;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.local.translateX(2);
-        child.appendChild(grandchild);
+        child.addChild(grandchild);
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
@@ -77,7 +77,7 @@ var Scenes;
         cmpTransform.local.scaleX(2);
         Scenes.cmpCamera = createCamera();
         let child = new ƒ.Node("Child");
-        Scenes.node.appendChild(child);
+        Scenes.node.addChild(child);
     }
     Scenes.createMiniScene = createMiniScene;
     function createViewport(_canvas = null) {

@@ -34,9 +34,9 @@ namespace Scenes {
 
         // create branch
         let branch: ƒ.Node = new ƒ.Node("AxisCross");
-        branch.appendChild(cubeRed);
-        branch.appendChild(cubeGreen);
-        branch.appendChild(cubeBlue);
+        branch.addChild(cubeRed);
+        branch.addChild(cubeGreen);
+        branch.addChild(cubeBlue);
 
         return branch;
     }
@@ -72,9 +72,9 @@ namespace Scenes {
         arrowBlue.cmpTransform.local.rotateX(90);
 
         let coordinates: ƒ.Node = new ƒ.Node("CoordinateSystem");
-        coordinates.appendChild(arrowRed);
-        coordinates.appendChild(arrowGreen);
-        coordinates.appendChild(arrowBlue);
+        coordinates.addChild(arrowRed);
+        coordinates.addChild(arrowGreen);
+        coordinates.addChild(arrowBlue);
 
         return coordinates;
     }
@@ -87,7 +87,7 @@ namespace Scenes {
         let grandchild: ƒ.Node;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         grandchild.cmpTransform.local.translateX(2);
-        child.appendChild(grandchild);
+        child.addChild(grandchild);
     }
 
     export function createMiniScene(): void {
@@ -100,7 +100,7 @@ namespace Scenes {
         cmpCamera = createCamera();
 
         let child: ƒ.Node = new ƒ.Node("Child");
-        node.appendChild(child);
+        node.addChild(child);
     }
 
     export function createViewport(_canvas: HTMLCanvasElement = null): void {

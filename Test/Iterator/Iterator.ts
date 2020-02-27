@@ -15,7 +15,7 @@ namespace Iterator {
 
         let child2: ƒ.Node = Scenes.createCompleteMeshNode("Child2", new ƒ.Material("Blue", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         child2.cmpTransform.local.rotateX(45);
-        child.appendChild(child2);
+        child.addChild(child2);
         Scenes.createViewport();
         Scenes.viewport.draw();
 

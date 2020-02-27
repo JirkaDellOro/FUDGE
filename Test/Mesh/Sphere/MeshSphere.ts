@@ -26,15 +26,15 @@ namespace MeshTest {
         sphereFlat.cmpTransform.local.translateX(0.6);
         sphereTex.cmpTransform.local.translateX(-0.6);
 
-        branch.appendChild(sphereFlat);
-        branch.appendChild(sphereTex);
+        branch.addChild(sphereFlat);
+        branch.addChild(sphereTex);
         
         let body: ƒ.Node = new ƒ.Node("k");
         
         let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 0);
-        branch.appendChild(lights);
+        branch.addChild(lights);
         
-        branch.appendChild(body);
+        branch.addChild(body);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);

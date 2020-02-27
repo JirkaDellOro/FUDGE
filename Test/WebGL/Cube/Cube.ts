@@ -9,7 +9,7 @@ namespace Cube {
         let branch: ƒ.Node = new ƒ.Node("Branch");
 
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        branch.appendChild(coSys);
+        branch.addChild(coSys);
 
         let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
@@ -20,7 +20,7 @@ namespace Cube {
         let child: ƒ.Node = Scenes.createCompleteMeshNode("Child", material, new ƒ.MeshPyramid());
         child.cmpTransform.local.translateX(1.5);
         body.appendChild(child);
-        branch.appendChild(body);
+        branch.addChild(body);
 
         ƒ.RenderManager.initialize();
         // ƒ.RenderManager.addBranch(branch);

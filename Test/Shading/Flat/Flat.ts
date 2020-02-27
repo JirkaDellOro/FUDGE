@@ -12,7 +12,7 @@ namespace TextureTest {
         cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
-        branch.appendChild(cube);
+        branch.addChild(cube);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);

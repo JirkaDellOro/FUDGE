@@ -93,11 +93,17 @@ namespace FudgeCore {
     }
 
     /**
+     * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
+     */
+    // tslint:disable-next-line: member-ordering
+    public readonly appendChild: (_node: Node) => void = this.addChild;
+
+    /**
      * Adds the given reference to a node to the list of children, if not already in
      * @param _node The node to be added as a child
      * @throws Error when trying to add an ancestor of this 
      */
-    public appendChild(_node: Node): void {
+    public addChild(_node: Node): void {
       if (this.children.includes(_node))
         // _node is already a child of this
         return;

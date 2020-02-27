@@ -127,6 +127,6 @@ namespace ElectronViewport {
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
 
-        branch.appendChild(nodeCubeCoffee);
+        branch.addChild(nodeCubeCoffee);
     }
 }

@@ -30,9 +30,9 @@ namespace TextureTest {
         lights.addComponent(cmpLightDirectionalBlue);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
-        branch.appendChild(body);
-        branch.appendChild(Scenes.createCoordinateSystem());
-        branch.appendChild(lights);
+        branch.addChild(body);
+        branch.addChild(Scenes.createCoordinateSystem());
+        branch.addChild(lights);
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);

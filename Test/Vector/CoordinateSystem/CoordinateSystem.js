@@ -10,7 +10,7 @@ var TextureTest;
         //     new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1))),
         //     new ƒ.MeshQuad()
         // );
-        // coSys.appendChild(object);
+        // coSys.addChild(object);
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(coSys);
         let viewport = new ƒ.Viewport();

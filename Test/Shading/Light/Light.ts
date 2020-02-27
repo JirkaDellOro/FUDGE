@@ -30,8 +30,8 @@ namespace TextureTest {
         cmpLightDirectionalWhite.pivot.rotateY(90);
         branch.addComponent(cmpLightDirectionalWhite);
 
-        branch.appendChild(body);
-        branch.appendChild(Scenes.createCoordinateSystem());
+        branch.addChild(body);
+        branch.addChild(Scenes.createCoordinateSystem());
 
         ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);

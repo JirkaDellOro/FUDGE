@@ -12,11 +12,11 @@ namespace ScriptSerialization {
         let canvas: HTMLCanvasElement = Scenes.createCanvas();
         document.body.appendChild(canvas);
         let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        root.appendChild(coSys);
-        // root.appendChild(branch);
+        root.addChild(coSys);
+        // root.addChild(branch);
 
         let test: ƒ.Node = createTest();
-        branch.appendChild(test);
+        branch.addChild(test);
         test.name = "Original";
 
         let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(test, false);
@@ -24,7 +24,7 @@ namespace ScriptSerialization {
 
         let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
         instance.name = "Instance";
-        branch.appendChild(instance);
+        branch.addChild(instance);
 
         let cmpScript: Test = instance.getComponent(Test);
         let mutator: ƒ.Mutator = cmpScript.getMutator();
@@ -54,7 +54,7 @@ namespace ScriptSerialization {
         ƒ.Debug.log("Reconstructed branch", reconstruct);
         console.groupEnd();
         
-        root.appendChild(reconstruct);
+        root.addChild(reconstruct);
 
         ƒ.RenderManager.initialize();
         let viewport: ƒ.Viewport = new ƒ.Viewport();
@@ -82,7 +82,7 @@ namespace ScriptSerialization {
         let node: ƒ.Node = Scenes.createCompleteMeshNode("Test", mtrOrange, pyramid);
         // (<ƒ.ComponentMesh>center.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(0.5));
         // let satellite: ƒ.Node = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);
-        // center.appendChild(satellite);
+        // center.addChild(satellite);
         node.addComponent(new Test());
         return node;
     }

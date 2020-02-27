@@ -39,14 +39,14 @@ namespace AudioSpace {
     mtxMesh.translateZ(1);
     outer.pivot.set(inner.pivot);
     const speaker: ƒAid.Node = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY);
-    speaker.appendChild(inner);
-    speaker.appendChild(outer);
-    speaker.appendChild(new ƒAid.NodeCoordinateSystem("SpeakerSystem", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
+    speaker.addChild(inner);
+    speaker.addChild(outer);
+    speaker.addChild(new ƒAid.NodeCoordinateSystem("SpeakerSystem", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
 
     const rotator: ƒAid.Node = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY);
     const translator: ƒAid.Node = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY);
-    rotator.appendChild(speaker);
-    translator.appendChild(rotator);
+    rotator.addChild(speaker);
+    translator.addChild(rotator);
 
     mtxRotatorX = speaker.local;
     mtxRotatorY = rotator.local;
@@ -73,9 +73,9 @@ namespace AudioSpace {
 
     // scene setup
     const branch: ƒ.Node = new ƒ.Node("Branch");
-    branch.appendChild(new ƒAid.NodeCoordinateSystem());
-    branch.appendChild(translator);
-    branch.appendChild(camera);
+    branch.addChild(new ƒAid.NodeCoordinateSystem());
+    branch.addChild(translator);
+    branch.addChild(camera);
 
     const viewport: ƒ.Viewport = new ƒ.Viewport();
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
