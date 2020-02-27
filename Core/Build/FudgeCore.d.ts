@@ -1960,7 +1960,7 @@ declare namespace FudgeCore {
         get scaling(): Vector2;
         set scaling(_scaling: Vector2);
         static PROJECTION(_width: number, _height: number): Matrix3x3;
-        static get IDENTITY(): Matrix3x3;
+        static IDENTITY(): Matrix3x3;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
          */
