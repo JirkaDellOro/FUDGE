@@ -56,7 +56,7 @@ var Fudge;
         // node = Scenes.createAxisCross();
         // node = new ƒ.Node("Scene");
         node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-        let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY);
+        let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
         node.addChild(node2);
         node2.cmpTransform.local.translateZ(2);
         let nodePanel = new Fudge.NodePanel("Node Panel", new Fudge.NodePanelTemplate, node);

@@ -5,7 +5,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentAudioListener extends Component {
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /**
      * Updates the position and orientation of the given AudioListener

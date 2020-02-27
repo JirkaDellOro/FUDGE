@@ -9,7 +9,7 @@ namespace FudgeCore {
    */
   export class Node extends EventTargetƒ implements Serializable {
     public name: string; // The name to call this node by.
-    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
+    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
 
     private parent: Node | null = null; // The parent of this node.

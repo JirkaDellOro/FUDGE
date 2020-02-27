@@ -6,7 +6,7 @@ namespace FudgeCore {
     export class ComponentTransform extends Component {
         public local: Matrix4x4;
 
-        public constructor(_matrix: Matrix4x4 = Matrix4x4.IDENTITY) {
+        public constructor(_matrix: Matrix4x4 = Matrix4x4.IDENTITY()) {
             super();
             this.local = _matrix;
         }

@@ -89,7 +89,7 @@ namespace FudgeCore {
     /**
      * Retrieve a new identity matrix
      */
-    public static get IDENTITY(): Matrix4x4 {
+    public static IDENTITY(): Matrix4x4 {
       // const result: Matrix4x4 = new Matrix4x4();
       const result: Matrix4x4 = Recycler.get(Matrix4x4);
       result.data.set([
@@ -672,7 +672,7 @@ namespace FudgeCore {
       }
 
       // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
       if (vectors.translation)
         matrix.translate(vectors.translation);
       if (vectors.rotation) {

@@ -29,7 +29,7 @@ namespace FudgeCore {
    */
   export class ComponentAudio extends Component {
     /** places and directs the panner relative to the world transform of the [[Node]]  */
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
     
     protected singleton: boolean = false;
     

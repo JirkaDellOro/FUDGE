@@ -380,7 +380,7 @@ namespace FudgeCore {
         // TODO: check if nodes without meshes must be registered
 
         // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
-        let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
+        let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
         if (parent)
           matrix = parent.mtxWorld;
 

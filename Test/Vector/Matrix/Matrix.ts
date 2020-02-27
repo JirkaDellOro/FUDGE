@@ -104,7 +104,7 @@ namespace MarixTest {
     }
 
     function setTransform(_vectors: ƒ.Vector3[]): void {
-        let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY;
+        let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
         matrix.translate(_vectors[0]);
         matrix.rotateZ(_vectors[1].z);
         matrix.rotateY(_vectors[1].y);

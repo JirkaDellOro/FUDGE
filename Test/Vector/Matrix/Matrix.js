@@ -85,7 +85,7 @@ var MarixTest;
         setTransform(vectors);
     }
     function setTransform(_vectors) {
-        let matrix = ƒ.Matrix4x4.IDENTITY;
+        let matrix = ƒ.Matrix4x4.IDENTITY();
         matrix.translate(_vectors[0]);
         matrix.rotateZ(_vectors[1].z);
         matrix.rotateY(_vectors[1].y);

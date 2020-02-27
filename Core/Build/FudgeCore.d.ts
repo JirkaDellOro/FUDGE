@@ -1313,7 +1313,7 @@ declare namespace FudgeCore {
          * Returns an object of the requested type from the depot, or a new one, if the depot was empty
          * @param _T The class identifier of the desired object
          */
-        static get<T>(_T: new () => T): T;
+        static get<T>(_T: new (..._args: General[]) => T, ..._args: General[]): T;
         /**
          * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
@@ -2067,7 +2067,7 @@ declare namespace FudgeCore {
         /**
          * Retrieve a new identity matrix
          */
-        static get IDENTITY(): Matrix4x4;
+        static IDENTITY(): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _a The matrix to multiply.
