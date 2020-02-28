@@ -17,7 +17,7 @@ var Recycler;
             return recycler;
         }
     }
-    Recycler.depot = new Map(); //{ [type: string]: Object[] } = {};
+    Recycler.depot = new Map();
     Recycler.recyclers = new Map();
     class RecyclerSpecific extends Recycler {
         constructor(_constructor) {
@@ -50,6 +50,22 @@ var Recycler;
             console.log("Check", this.message, this.value);
         }
     }
+    class Test2 extends Test {
+        constructor(..._args) {
+            super(_args[0], 999);
+            console.log("construct", ..._args);
+            this.recycle(..._args);
+        }
+        // @ts-ignore
+        recycle(_message, _test) {
+            console.log("recycle " + _message);
+            this.message = _message;
+            this.test = _test;
+        }
+        check() {
+            console.log("Check", this.message, this.test);
+        }
+    }
     {
         console.group("Instantiate");
         let instantiated = new Test("Instantiated", 1);
@@ -58,7 +74,6 @@ var Recycler;
     }
     {
         console.group("Recycle fail");
-        // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
         let recycled = Recycler.for(Test).get("Recycled", 2);
         recycled.check();
         console.groupEnd();
@@ -66,45 +81,30 @@ var Recycler;
     }
     {
         console.group("Recycle success");
-        // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
         let recycled = Recycler.for(Test).get("Recycled again", 3);
         recycled.check();
         console.groupEnd();
         Recycler.store(recycled);
     }
+    {
+        console.group("Instantiate2");
+        let instantiated = new Test2("Instantiated", new Test("Hallo", 1));
+        instantiated.check();
+        console.groupEnd();
+    }
+    {
+        console.group("Recycle fail");
+        let recycled = Recycler.for(Test2).get("Recycled", new Test("Hallo2", 2));
+        recycled.check();
+        console.groupEnd();
+        Recycler.store(recycled);
+    }
+    {
+        console.group("Recycle success");
+        let recycled = Recycler.for(Test2).get("Recycled again", new Test("Hallo3", 3));
+        recycled.check();
+        console.groupEnd();
+        Recycler.store(recycled);
+    }
 })(Recycler || (Recycler = {}));
-/*
-    //Scope1
-    {
-      let test: Test = ƒ.Recycler.get(Test);
-      if (typeof (test.prop) != "string")
-        test.prop = "I've been newly created, the recycler had non of my kind";
-      test.check();
-    }
-    //Scope2
-    {
-      let test: Test = ƒ.Recycler.get(Test, "I received this message from the recycler on construction");
-      if (typeof (test.prop) != "string")
-        test.prop = "Something went wrong, I should have received a message";
-      test.check();
-      ƒ.Recycler.store(test);
-    }
-    //Scope3
-    {
-      let test: Test = ƒ.Recycler.get(Test);
-      if (typeof (test.prop) != "string")
-        test.prop = "Something went wrong, i should be a reycled object";
-      else
-        test.prop = "I'm a reycled object";
-      test.check();
-      ƒ.Recycler.store(test);
-    }
-    //Scope4
-    {
-      let test: Test = ƒ.Recycler.get(Test, "I received this message from the recycler on construction");
-      Object.call((<Function>test.constructor)("jnn"));
-      test.check();
-      ƒ.Recycler.store(test);
-    }
-  */ 
 //# sourceMappingURL=Recycler.js.map
