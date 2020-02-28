@@ -1,23 +1,65 @@
 namespace Recycler {
+  interface Recycable {
+    //tslint:disable-next-line: no-any
+    /* public*/ recycle(...args: any): any; // { /* */ }
+  }
 
-  class Recycler {
-    public static get<T>(_T: new (..._args: Parameters<Test["recycle"]>) => T, ...args: Parameters<Test["recycle"]>): T {
-      return new _T(...args);
+  abstract class Recycler {
+    protected static depot: Map<Function, Recycable[]> = new Map(); //{ [type: string]: Object[] } = {};
+    protected static recyclers: Map<Function, Recycler> = new Map();
+
+    public static store(_instance: Recycable): void {
+      let key: Function = _instance.constructor;
+      let instances: Recycable[] = Recycler.depot.get(key) || [];
+      instances.push(_instance);
+      Recycler.depot.set(key, instances);
     }
+
+    public static for<Class extends Recycable>(_constructor: new (..._args: Parameters<Class["recycle"]>) => Class): RecyclerSpecific<Class> {
+      let recycler: Recycler = Recycler.recyclers.get(_constructor);
+      if (!recycler) {
+        //tslint:disable-next-line: no-use-before-declare
+        recycler = new RecyclerSpecific(_constructor);
+        Recycler.recyclers.set(_constructor, recycler);
+      }
+
+      return recycler as RecyclerSpecific<Class>;
+    }
+
+    public abstract get(): Recycable;
 
   }
 
-  class Test {
+  class RecyclerSpecific<Class extends Recycable> extends Recycler {
+    public creator: new (..._args: Parameters<Class["recycle"]>) => Class;
+
+    constructor(_constructor: new (..._args: Parameters<Class["recycle"]>) => Class) {
+      super();
+      this.creator = _constructor;
+    }
+
+    public get(..._args: Parameters<Class["recycle"]>): Class {
+      let instances: Recycable[] = Recycler.depot.get(this.creator) || [];
+      if (instances && instances.length > 0) {
+        let instance: Class = instances.pop() as Class;
+        //@ts-ignore
+        instance.recycle(..._args);
+        return instance;
+      } 
+      else
+        return new this.creator(..._args);
+    }
+  }
+
+  class Test implements Recycable {
     public message: string;
     public value: number;
 
-    // constructor(..._args: Parameters<typeof Test.recycle>) {  // if recycle is a class method
-    constructor(..._args: Parameters<Test["recycle"]>) {  // if recycle is an object method
+    constructor(..._args: Parameters<Test["recycle"]>) {
       console.log("construct", ..._args);
       this.recycle(..._args);
     }
 
-    // public static recycle(_instance: Test, _message: string, _value: number): void {
     public recycle(_message: string, _value: number): void {
       console.log("recycle " + _message);
       this.message = _message;
@@ -29,8 +71,30 @@ namespace Recycler {
     }
   }
 
-  let recycled: Test = Recycler.get(Test, "asdvasdv", 2);
-  let instantiated: Test = new Test("Constructed", 1);
+  {
+    console.group("Instantiate");
+    let instantiated: Test = new Test("Instantiated", 1);
+    instantiated.check();
+    console.groupEnd();
+  }
+  {
+    console.group("Recycle fail");
+    // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
+    let recycled: Test = Recycler.for(Test).get("Recycled", 2);
+    recycled.check();
+    console.groupEnd();
+
+    Recycler.store(recycled);
+  }
+  {
+    console.group("Recycle success");
+    // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
+    let recycled: Test = Recycler.for(Test).get("Recycled again", 3);
+    recycled.check();
+    console.groupEnd();
+
+    Recycler.store(recycled);
+  }
 }
 
 

@@ -1,17 +1,46 @@
 var Recycler;
 (function (Recycler_1) {
     class Recycler {
-        static get(_T, ...args) {
-            return new _T(...args);
+        static store(_instance) {
+            let key = _instance.constructor;
+            let instances = Recycler.depot.get(key) || [];
+            instances.push(_instance);
+            Recycler.depot.set(key, instances);
+        }
+        static for(_constructor) {
+            let recycler = Recycler.recyclers.get(_constructor);
+            if (!recycler) {
+                //tslint:disable-next-line: no-use-before-declare
+                recycler = new RecyclerSpecific(_constructor);
+                Recycler.recyclers.set(_constructor, recycler);
+            }
+            return recycler;
+        }
+    }
+    Recycler.depot = new Map(); //{ [type: string]: Object[] } = {};
+    Recycler.recyclers = new Map();
+    class RecyclerSpecific extends Recycler {
+        constructor(_constructor) {
+            super();
+            this.creator = _constructor;
+        }
+        get(..._args) {
+            let instances = Recycler.depot.get(this.creator) || [];
+            if (instances && instances.length > 0) {
+                let instance = instances.pop();
+                //@ts-ignore
+                instance.recycle(..._args);
+                return instance;
+            }
+            else
+                return new this.creator(..._args);
         }
     }
     class Test {
-        // constructor(..._args: Parameters<typeof Test.recycle>) {  // if recycle is a class method
         constructor(..._args) {
             console.log("construct", ..._args);
             this.recycle(..._args);
         }
-        // public static recycle(_instance: Test, _message: string, _value: number): void {
         recycle(_message, _value) {
             console.log("recycle " + _message);
             this.message = _message;
@@ -21,8 +50,28 @@ var Recycler;
             console.log("Check", this.message, this.value);
         }
     }
-    let recycled = Recycler.get(Test, "asdvasdv", 2);
-    let instantiated = new Test("Constructed", 1);
+    {
+        console.group("Instantiate");
+        let instantiated = new Test("Instantiated", 1);
+        instantiated.check();
+        console.groupEnd();
+    }
+    {
+        console.group("Recycle fail");
+        // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
+        let recycled = Recycler.for(Test).get("Recycled", 2);
+        recycled.check();
+        console.groupEnd();
+        Recycler.store(recycled);
+    }
+    {
+        console.group("Recycle success");
+        // let recycler: RecyclerSpecific<Test> = new RecyclerSpecific(Test);
+        let recycled = Recycler.for(Test).get("Recycled again", 3);
+        recycled.check();
+        console.groupEnd();
+        Recycler.store(recycled);
+    }
 })(Recycler || (Recycler = {}));
 /*
     //Scope1
