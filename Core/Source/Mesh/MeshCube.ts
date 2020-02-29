@@ -10,7 +10,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class MeshCube extends Mesh {
-    public static iSubclass: number = Mesh.registerSubclass(MeshCube);
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshCube);
 
     public constructor() {
       super();

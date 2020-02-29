@@ -5,6 +5,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentAudioListener extends Component {
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentAudioListener);
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /**

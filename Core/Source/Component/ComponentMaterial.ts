@@ -4,6 +4,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentMaterial extends Component {
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);
     public material: Material;
     // public mutatorCoat: MutatorForComponent;
 

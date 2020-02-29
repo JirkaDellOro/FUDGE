@@ -3,12 +3,16 @@
 namespace FudgeCore {
   /** 
    * Superclass for all [[Component]]s that can be attached to [[Node]]s.
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
    */
   export abstract class Component extends Mutable implements Serializable {
+    public static readonly subclasses: typeof Component[] = [];
+
     protected singleton: boolean = true;
     private container: Node | null = null;
     private active: boolean = true;
+
+    protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
 
     public activate(_on: boolean): void {
       this.active = _on;

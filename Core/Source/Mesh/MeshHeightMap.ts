@@ -10,7 +10,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
    */
   export class MeshHeightMap extends Mesh {
-    public static iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
 
     private resolutionX: number;
     private resolutionZ: number;

@@ -28,6 +28,7 @@ namespace FudgeCore {
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentAudio extends Component {
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
     /** places and directs the panner relative to the world transform of the [[Node]]  */
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
     

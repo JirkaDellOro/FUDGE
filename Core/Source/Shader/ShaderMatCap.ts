@@ -1,17 +1,19 @@
 
 namespace FudgeCore {
-    /**
-     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material. 
-     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class ShaderMatCap extends Shader {
-        public static getCoat(): typeof Coat {
-            return CoatMatCap;
-        }
+  /**
+   * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material. 
+   * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
+   * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export class ShaderMatCap extends Shader {
+    public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
-        public static getVertexShaderSource(): string {
-            return `#version 300 es
+    public static getCoat(): typeof Coat {
+      return CoatMatCap;
+    }
+
+    public static getVertexShaderSource(): string {
+      return `#version 300 es
 
                     in vec3 a_position;
                     in vec3 a_normal;
@@ -39,9 +41,9 @@ namespace FudgeCore {
 
                         gl_Position = u_projection * vec4(a_position, 1.0);
                     }`;
-        }
-        public static getFragmentShaderSource(): string {
-            return `#version 300 es
+    }
+    public static getFragmentShaderSource(): string {
+      return `#version 300 es
                     precision mediump float;
                     
                     uniform vec4 u_tint_color;
@@ -57,6 +59,6 @@ namespace FudgeCore {
                         vec2 tc = mix(tex_coords_smooth, tex_coords_flat, u_flatmix);
                         frag = u_tint_color * texture(u_texture, tc) * 2.0;
                     }`;
-        }
     }
+  }
 }

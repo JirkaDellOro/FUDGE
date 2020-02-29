@@ -744,12 +744,14 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
      */
     abstract class Component extends Mutable implements Serializable {
+        static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         private container;
         private active;
+        protected static registerSubclass(_subclass: typeof Component): number;
         activate(_on: boolean): void;
         get isActive(): boolean;
         /**
@@ -801,6 +803,7 @@ declare namespace FudgeCore {
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Component {
+        static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
@@ -887,6 +890,7 @@ declare namespace FudgeCore {
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudio extends Component {
+        static readonly iSubclass: number;
         /** places and directs the panner relative to the world transform of the [[Node]]  */
         pivot: Matrix4x4;
         protected singleton: boolean;
@@ -967,6 +971,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudioListener extends Component {
+        static readonly iSubclass: number;
         pivot: Matrix4x4;
         /**
          * Updates the position and orientation of the given AudioListener
@@ -995,6 +1000,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        static readonly iSubclass: number;
         pivot: Matrix4x4;
         backgroundColor: Color;
         private projection;
@@ -1049,6 +1055,7 @@ declare namespace FudgeCore {
      * Defines identifiers for the various types of light this component can provide.
      */
     class ComponentLight extends Component {
+        static readonly iSubclass: number;
         pivot: Matrix4x4;
         light: Light;
         constructor(_light?: Light);
@@ -1061,6 +1068,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMaterial extends Component {
+        static readonly iSubclass: number;
         material: Material;
         constructor(_material?: Material);
         serialize(): Serialization;
@@ -1073,6 +1081,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
+        static readonly iSubclass: number;
         pivot: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
@@ -1086,6 +1095,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentScript extends Component {
+        static readonly iSubclass: number;
         constructor();
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
@@ -1097,6 +1107,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Component {
+        static readonly iSubclass: number;
         local: Matrix4x4;
         constructor(_matrix?: Matrix4x4);
         serialize(): Serialization;
@@ -2620,7 +2631,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Mesh implements SerializableResource {
-        static subclasses: typeof Mesh[];
+        static readonly subclasses: typeof Mesh[];
         vertices: Float32Array;
         indices: Uint16Array;
         textureUVs: Float32Array;
@@ -2652,7 +2663,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2671,7 +2682,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
      */
     class MeshHeightMap extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         private resolutionX;
         private resolutionZ;
         private heightMapFunction;
@@ -2697,7 +2708,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshPyramid extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2717,7 +2728,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2733,7 +2744,7 @@ declare namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class MeshSphere extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         normals: Float32Array;
         private sectors;
         private stacks;
@@ -2756,7 +2767,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class MeshSprite extends Mesh {
-        static iSubclass: number;
+        static readonly iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -3080,10 +3091,12 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Shader {
+        static readonly subclasses: typeof Shader[];
         /** The type of coat that can be used with this shader to create a material */
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        protected static registerSubclass(_subclass: typeof Shader): number;
     }
 }
 declare namespace FudgeCore {
@@ -3092,6 +3105,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderFlat extends Shader {
+        static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -3104,6 +3118,7 @@ declare namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderMatCap extends Shader {
+        static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -3125,6 +3140,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderTexture extends Shader {
+        static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -3136,6 +3152,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ShaderUniColor extends Shader {
+        static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

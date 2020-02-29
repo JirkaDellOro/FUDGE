@@ -9,7 +9,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class MeshSprite extends Mesh {
-    public static iSubclass: number = Mesh.registerSubclass(MeshSprite);
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshSprite);
 
     public constructor() {
       super();

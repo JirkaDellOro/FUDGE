@@ -6,7 +6,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export abstract class Mesh implements SerializableResource {
-    public static subclasses: typeof Mesh[] = [];
+    public static readonly subclasses: typeof Mesh[] = [];
 
     // TODO: check if these arrays must be cached like this or if calling the methods is better.
     public vertices: Float32Array;

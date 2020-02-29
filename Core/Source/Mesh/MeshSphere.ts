@@ -5,7 +5,7 @@ namespace FudgeCore {
    * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class MeshSphere extends Mesh {
-    public static iSubclass: number = Mesh.registerSubclass(MeshSphere);
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
 
     public normals: Float32Array;
 
