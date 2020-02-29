@@ -2620,17 +2620,20 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Mesh implements SerializableResource {
+        static subclasses: typeof Mesh[];
         vertices: Float32Array;
         indices: Uint16Array;
         textureUVs: Float32Array;
         normalsFace: Float32Array;
         idResource: string;
         static getBufferSpecification(): BufferSpecification;
+        protected static registerSubclass(_subclass: typeof Mesh): number;
         getVertexCount(): number;
         getIndexCount(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         abstract create(): void;
+        protected calculateFaceNormals(): Float32Array;
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
@@ -2649,6 +2652,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Mesh {
+        static iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2667,6 +2671,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
      */
     class MeshHeightMap extends Mesh {
+        static iSubclass: number;
         private resolutionX;
         private resolutionZ;
         private heightMapFunction;
@@ -2679,7 +2684,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    function calculateFaceNormals(_mesh: Mesh): Float32Array;
 }
 declare namespace FudgeCore {
     /**
@@ -2693,6 +2697,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshPyramid extends Mesh {
+        static iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2712,6 +2717,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshQuad extends Mesh {
+        static iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;
@@ -2727,6 +2733,7 @@ declare namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class MeshSphere extends Mesh {
+        static iSubclass: number;
         normals: Float32Array;
         private sectors;
         private stacks;
@@ -2749,6 +2756,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class MeshSprite extends Mesh {
+        static iSubclass: number;
         constructor();
         create(): void;
         protected createVertices(): Float32Array;

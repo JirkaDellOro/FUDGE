@@ -5,6 +5,8 @@ namespace FudgeCore {
    * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class MeshSphere extends Mesh {
+    public static iSubclass: number = Mesh.registerSubclass(MeshSphere);
+
     public normals: Float32Array;
 
     private sectors: number;
@@ -79,7 +81,7 @@ namespace FudgeCore {
 
       this.textureUVs = new Float32Array(textureUVs);
       this.normals = new Float32Array(normals);
-      this.vertices = new Float32Array(vertices);      
+      this.vertices = new Float32Array(vertices);
       this.normalsFace = this.createFaceNormals();
       this.indices = this.createIndices();
     }
