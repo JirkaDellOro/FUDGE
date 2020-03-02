@@ -1117,7 +1117,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     const enum EVENT_CONTROL {
-        INPUT = "input"
+        INPUT = "input",
+        OUTPUT = "output"
     }
     const enum AXIS_TYPE {
         PROPORTIONAL = 0,
@@ -1125,7 +1126,7 @@ declare namespace FudgeCore {
         DIFFERENTIAL = 2
     }
     class Axis extends EventTarget {
-        protected type: AXIS_TYPE;
+        readonly type: AXIS_TYPE;
         protected valueCurrent: number;
         protected valueDelta: number;
         protected inputTarget: number;

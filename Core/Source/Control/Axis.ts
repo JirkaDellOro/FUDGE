@@ -1,6 +1,7 @@
 namespace FudgeCore {
   export const enum EVENT_CONTROL {
-    INPUT = "input"
+    INPUT = "input",
+    OUTPUT = "output"
   }
 
   export const enum AXIS_TYPE {
@@ -8,7 +9,7 @@ namespace FudgeCore {
   }
 
   export class Axis extends EventTarget {
-    protected type: AXIS_TYPE = AXIS_TYPE.PROPORTIONAL;
+    public readonly type: AXIS_TYPE;
     protected valueCurrent: number = 0;
     protected valueDelta: number = 0;
     protected inputTarget: number = 0;

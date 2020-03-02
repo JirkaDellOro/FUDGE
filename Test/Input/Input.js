@@ -2,23 +2,24 @@ var Iterator;
 (function (Iterator) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    let axis = new ƒ.Axis(0.01, 0 /* PROPORTIONAL */);
-    // let axis: ƒ.Axis = new ƒ.Axis(0.01, ƒ.AXIS_TYPE.INTEGRAL);
+    let axisProportional = new ƒ.Axis(1, 0 /* PROPORTIONAL */);
+    let axisIntegral = new ƒ.Axis(1, 1 /* INTEGRAL */);
+    let axisDifferential = new ƒ.Axis(1, 2 /* DIFFERENTIAL */);
+    let input;
+    let output;
     function init(_event) {
+        input = document.querySelectorAll("fieldset")[0];
+        output = document.querySelectorAll("fieldset")[1];
         setup();
-        console.log(axis);
         document.addEventListener("keydown", hndKey);
         document.addEventListener("keyup", hndKey);
-        document.addEventListener("mousemove", hndMouseMove);
+        input.addEventListener("input", hndAxisInput);
+        // output.addEventListener("input", hndAxisOutput);
         update();
     }
     function setup() {
         let number = { min: "-2", max: "2", step: "0.1", value: "1" };
         let slider = { min: "-1", max: "1", step: "0.01", value: "0" };
-        let input = document.querySelectorAll("fieldset")[0];
-        input.addEventListener("input", hndInput);
-        let output = document.querySelectorAll("fieldset")[1];
-        output.addEventListener("input", hndOutput);
         let keyboard = createFieldset("Keys A-|D+", true, number, slider);
         input.appendChild(keyboard);
         let absolute = createFieldset("Absolute", false, number, slider);
@@ -31,9 +32,14 @@ var Iterator;
         output.appendChild(integral);
         let differential = createFieldset("Differential", true, number, slider);
         output.appendChild(differential);
+        axisProportional.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, proportional); });
+        axisIntegral.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, integral); });
+        axisDifferential.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, differential); });
+        // axisProportional.addEventListener(ƒ.EVENT_CONTROL.INPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
     }
     function createFieldset(_name, _readonly, _stepper, _slider) {
         let fieldset = document.createElement("fieldset");
+        fieldset.id = _name;
         let legend = document.createElement("legend");
         legend.innerHTML = `<strong>${_name}</strong>Factor: `;
         legend.append(createInputElement("number", _stepper));
@@ -57,24 +63,46 @@ var Iterator;
     function hndKey(_event) {
         if (_event.repeat)
             return;
-        axis.setInput(_event.type == "keydown" ? 0.1 : 0);
+        if (_event.code != ƒ.KEYBOARD_CODE.A && _event.code != ƒ.KEYBOARD_CODE.D)
+            return;
+        // TODO: integrate sophisticated key handling
+        let value = (_event.code == ƒ.KEYBOARD_CODE.A) ? -1 : 1;
+        if (_event.type == "keyup")
+            value = 0;
+        let slider = document.querySelector("input[type=range");
+        slider.value = value.toString();
+        slider.dispatchEvent(new InputEvent("input", { bubbles: true }));
     }
-    function hndMouseMove(_event) {
-        axis.setInput((_event.clientY - 100) * 0.1);
+    function updateFieldsetOutput(_slider) {
+        let factor = parseFloat(_slider.parentElement.querySelector("input").value);
+        let value = factor * parseFloat(_slider.value);
+        _slider.parentElement.querySelector("output").textContent = value.toFixed(2).padStart(5, "+");
+        return value;
     }
-    function hndInput(_event) {
+    function hndAxisInput(_event) {
         let target = _event.target;
         if (target.type == "range") {
-            let value = parseFloat(target.value).toFixed(2).padStart(5, "+");
-            target.parentElement.querySelector("output").textContent = value;
+            let value = updateFieldsetOutput(target);
+            axisProportional.setInput(value);
+            axisDifferential.setInput(value);
+            axisIntegral.setInput(value);
         }
     }
-    function hndOutput(_event) {
+    function hndOutputFactors(_event) {
         console.log(_event);
     }
+    function hndAxisOutput(_event, _fieldset) {
+        // console.log(_fieldset);
+        let axis = _event.target;
+        let slider = _fieldset.querySelector("input[type=range]");
+        slider.value = axis.getValue().toString();
+        updateFieldsetOutput(slider);
+    }
     function update() {
-        console.log(axis.getValue());
-        // window.setTimeout(update, 20);
+        axisProportional.dispatchEvent(new Event("output" /* OUTPUT */));
+        axisDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
+        axisIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
+        window.setTimeout(update, 20);
     }
 })(Iterator || (Iterator = {}));
 //# sourceMappingURL=Input.js.map
