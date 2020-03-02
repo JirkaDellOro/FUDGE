@@ -216,9 +216,4 @@ namespace FudgeCore {
     }
   }
   //#endregion
-
-  /**
-   * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
-   */
-  export const time: Time = Time.game; // TODO: eliminate Time.gameTime and use time solely
 }

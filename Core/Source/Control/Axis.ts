@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export const enum EVENT_AXIS {
+  export const enum EVENT_CONTROL {
     INPUT = "input"
   }
 
@@ -27,11 +27,14 @@ namespace FudgeCore {
 
     setTime(_time: Time): void {
       this.time = _time;
+      this.getValue();
     }
 
     setInput(_target: number): void {
+      this.getValue();
       this.inputTarget = _target;
-      this.timeInputTargetSet = time.get();
+      this.timeInputTargetSet = this.time.get();
+      this.dispatchEvent(new Event(EVENT_CONTROL.INPUT));
     }
 
     setDelay(_delay: number): void {
@@ -45,10 +48,12 @@ namespace FudgeCore {
 
       switch (this.type) {
         case AXIS_TYPE.INTEGRAL:
-          value = this.valueCurrent + this.inputTarget;
+          let timeCurrent: number = this.time.get();
+          value = this.valueCurrent + this.inputTarget * this.factor * (timeCurrent - this.timeInputTargetSet);
+          this.timeInputTargetSet = timeCurrent;
           break;
         case AXIS_TYPE.DIFFERENTIAL:
-          value = this.valueCurrent + this.inputTarget;
+          value = this.valueCurrent + this.inputTarget * this.factor;
           this.inputTarget = 0;
           break;
         case AXIS_TYPE.PROPORTIONAL:

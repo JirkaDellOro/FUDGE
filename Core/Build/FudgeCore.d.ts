@@ -1116,6 +1116,32 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    const enum EVENT_CONTROL {
+        INPUT = "input"
+    }
+    const enum AXIS_TYPE {
+        PROPORTIONAL = 0,
+        INTEGRAL = 1,
+        DIFFERENTIAL = 2
+    }
+    class Axis extends EventTarget {
+        protected type: AXIS_TYPE;
+        protected valueCurrent: number;
+        protected valueDelta: number;
+        protected inputTarget: number;
+        protected inputCurrent: number;
+        protected inputDelay: number;
+        protected factor: number;
+        protected timeInputTargetSet: number;
+        protected time: Time;
+        constructor(_factor?: number, _type?: AXIS_TYPE);
+        setTime(_time: Time): void;
+        setInput(_target: number): void;
+        setDelay(_delay: number): void;
+        getValue(): number;
+    }
+}
+declare namespace FudgeCore {
     /**
      * The filters corresponding to debug activities, more to come
      */
@@ -1816,32 +1842,6 @@ declare namespace FudgeCore {
     }
     class EventWheel extends WheelEvent {
         constructor(type: string, _event: EventWheel);
-    }
-}
-declare namespace FudgeCore {
-    const enum EVENT_AXIS {
-        INPUT = "input"
-    }
-    const enum AXIS_TYPE {
-        PROPORTIONAL = 0,
-        INTEGRAL = 1,
-        DIFFERENTIAL = 2
-    }
-    class Axis extends EventTarget {
-        protected type: AXIS_TYPE;
-        protected valueCurrent: number;
-        protected valueDelta: number;
-        protected inputTarget: number;
-        protected inputCurrent: number;
-        protected inputDelay: number;
-        protected factor: number;
-        protected timeInputTargetSet: number;
-        protected time: Time;
-        constructor(_factor?: number, _type?: AXIS_TYPE);
-        setTime(_time: Time): void;
-        setInput(_target: number): void;
-        setDelay(_delay: number): void;
-        getValue(): number;
     }
 }
 declare namespace FudgeCore {
@@ -3376,10 +3376,6 @@ declare namespace FudgeCore {
          */
         private rescaleAllTimers;
     }
-    /**
-     * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
-     */
-    const time: Time;
 }
 declare namespace FudgeCore {
     /**
