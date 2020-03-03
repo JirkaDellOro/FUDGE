@@ -1127,20 +1127,21 @@ declare namespace FudgeCore {
     }
     class Axis extends EventTarget {
         readonly type: AXIS_TYPE;
-        protected valueCurrent: number;
-        protected valueDelta: number;
+        protected valueBase: number;
         protected inputTarget: number;
-        protected inputCurrent: number;
-        protected inputDelay: number;
+        protected valuePrevious: number;
+        protected inputPrevious: number;
+        protected timeInputDelay: number;
         protected factor: number;
         protected timeInputTargetSet: number;
         protected time: Time;
         constructor(_factor?: number, _type?: AXIS_TYPE);
         setTime(_time: Time): void;
         setInput(_target: number): void;
-        setDelay(_delay: number): void;
+        setDelay(_time: number): void;
         setFactor(_factor: number): void;
         getValue(): number;
+        private getInputDelayed;
     }
 }
 declare namespace FudgeCore {

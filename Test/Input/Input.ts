@@ -2,9 +2,9 @@ namespace Iterator {
   import ƒ = FudgeCore;
   type Parameter = { min: string, max: string, step: string, value: string };
   window.addEventListener("DOMContentLoaded", init);
-  let axisProportional: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.PROPORTIONAL);
+  let axisProportional: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.PROPORTIONAL);
   let axisIntegral: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.INTEGRAL);
-  let axisDifferential: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.DIFFERENTIAL);
+  let axisDifferential: ƒ.Axis = new ƒ.Axis(2, ƒ.AXIS_TYPE.DIFFERENTIAL);
   let input: HTMLFieldSetElement;
   let output: HTMLFieldSetElement;
 
@@ -31,27 +31,31 @@ namespace Iterator {
     input.appendChild(keyboard);
     let absolute: HTMLFieldSetElement = createFieldset("Absolute", false, number, slider);
     input.appendChild(absolute);
+    number.value = "1";
     let relative: HTMLFieldSetElement = createFieldset("Relative", false, number, slider);
     input.appendChild(relative);
     relative.setAttribute("oldValue", "0");
 
     let proportional: HTMLFieldSetElement = createFieldset("Proportional", true, number, slider);
+    addDelayStepper(proportional);
     output.appendChild(proportional);
 
+    number.value = "0.1";
     let integral: HTMLFieldSetElement = createFieldset("Integral", true, number, slider);
+    addDelayStepper(integral);
     output.appendChild(integral);
 
+    number.value = "2";
     let differential: HTMLFieldSetElement = createFieldset("Differential", true, number, slider);
     output.appendChild(differential);
 
     axisProportional.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
     axisIntegral.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndAxisOutput(_event, integral); });
     axisDifferential.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndAxisOutput(_event, differential); });
-    // axisProportional.addEventListener(ƒ.EVENT_CONTROL.INPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
 
-    proportional.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisProportional); });
-    integral.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisIntegral); });
-    differential.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisDifferential); });
+    proportional.addEventListener("input", function (_event: InputEvent): void { hndAxisParameters(_event, axisProportional); });
+    integral.addEventListener("input", function (_event: InputEvent): void { hndAxisParameters(_event, axisIntegral); });
+    differential.addEventListener("input", function (_event: InputEvent): void { hndAxisParameters(_event, axisDifferential); });
   }
 
   function createFieldset(_name: string, _readonly: boolean, _stepper: Parameter, _slider: Parameter): HTMLFieldSetElement {
@@ -66,6 +70,10 @@ namespace Iterator {
     slider.disabled = _readonly;
     fieldset.append(slider);
     return fieldset;
+  }
+
+  function addDelayStepper(_fieldset: HTMLFieldSetElement): void {
+    _fieldset.querySelector("legend").innerHTML += ` | Delay <input type="number" min="0", max="1000" step="50" value="0" name="Delay"/>`;
   }
 
   function createInputElement(_type: string, _parameter: Parameter): HTMLInputElement {
@@ -127,13 +135,14 @@ namespace Iterator {
 
   }
 
-  function hndFactorChange(_event: InputEvent, _axis: ƒ.Axis): void {
+  function hndAxisParameters(_event: InputEvent, _axis: ƒ.Axis): void {
     let target: HTMLInputElement = <HTMLInputElement>_event.target;
     let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_event.currentTarget;
-    if (target.type == "number") {
-      let factor: number = parseFloat(fieldset.querySelector("input").value);
-      _axis.setFactor(factor);
-    }
+    let value: number = parseFloat(target.value);
+    if (target.name == "Delay")
+      _axis.setDelay(value);
+    else
+      _axis.setFactor(value);
   }
 
   function hndAxisOutput(_event: Event, _fieldset: HTMLFieldSetElement): void {
@@ -149,10 +158,10 @@ namespace Iterator {
     axisProportional.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     axisDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     axisIntegral.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
-    window.setTimeout(update, 20);
+    window.setTimeout(update, 10);
   }
 
   function format(_value: number): string {
-    return _value.toFixed(4).padStart(7, "+")
+    return _value.toFixed(4).padStart(7, "+");
   }
 } 

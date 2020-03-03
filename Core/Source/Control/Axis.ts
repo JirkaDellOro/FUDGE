@@ -10,11 +10,11 @@ namespace FudgeCore {
 
   export class Axis extends EventTarget {
     public readonly type: AXIS_TYPE;
-    protected valueCurrent: number = 0;
-    protected valueDelta: number = 0;
+    protected valueBase: number = 0;
     protected inputTarget: number = 0;
-    protected inputCurrent: number = 0;
-    protected inputDelay: number = 0;
+    protected valuePrevious: number = 0;
+    protected inputPrevious: number = 0;
+    protected timeInputDelay: number = 0;
     protected factor: number = 0;
     protected timeInputTargetSet: number = 0;
 
@@ -32,42 +32,65 @@ namespace FudgeCore {
     }
 
     setInput(_target: number): void {
-      this.getValue();
-      this.inputTarget = _target;
+      this.valueBase = this.getValue();
+      this.inputPrevious = this.getInputDelayed();
+      this.inputTarget = this.factor * _target;
       this.timeInputTargetSet = this.time.get();
       this.dispatchEvent(new Event(EVENT_CONTROL.INPUT));
     }
 
-    setDelay(_delay: number): void {
-      this.inputDelay = _delay;
+    setDelay(_time: number): void {
+      // TODO: check if this needs to be disallowed for type DIFFERENTIAL
+      this.timeInputDelay = Math.max(0, _time);
     }
 
     setFactor(_factor: number): void {
       this.factor = _factor;
     }
 
-    getValue(): number {
+    public getValue(): number {
       let value: number = 0;
-      // TODO: use delayed input
-      let input: number = this.inputTarget;
+      let input: number = this.getInputDelayed();
 
       switch (this.type) {
         case AXIS_TYPE.INTEGRAL:
           let timeCurrent: number = this.time.get();
-          value = this.valueCurrent + this.inputTarget * this.factor * (timeCurrent - this.timeInputTargetSet);
-          this.timeInputTargetSet = timeCurrent;
+          let timeElapsedSinceInput: number = timeCurrent - this.timeInputTargetSet;
+          value = this.valueBase;
+
+          if (this.timeInputDelay > 0) {
+            if (timeElapsedSinceInput < this.timeInputDelay) {
+              value += 0.5 * (this.inputPrevious + input) * timeElapsedSinceInput;
+              break;
+            }
+            else {
+              value += 0.5 * (this.inputPrevious + input) * this.timeInputDelay;
+              timeElapsedSinceInput -= this.timeInputDelay;
+            }
+          }
+          value += input * timeElapsedSinceInput;
+          // value += 0.5 * (this.inputPrevious - input) * this.timeInputDelay + input * timeElapsedSinceInput;
           break;
         case AXIS_TYPE.DIFFERENTIAL:
-          value = this.valueCurrent + this.inputTarget * this.factor;
+          value = this.valueBase + input;
           this.inputTarget = 0;
+          this.valueBase = value;
           break;
         case AXIS_TYPE.PROPORTIONAL:
         default:
-          value = input * this.factor;
+          value = input;
           break;
       }
-      this.valueCurrent = value;
       return value;
+    }
+
+    private getInputDelayed(): number {
+      if (this.timeInputDelay > 0) {
+        let timeElapsedSinceInput: number = this.time.get() - this.timeInputTargetSet;
+        if (timeElapsedSinceInput < this.timeInputDelay)
+          return this.inputPrevious + (this.inputTarget - this.inputPrevious) * timeElapsedSinceInput / this.timeInputDelay;
+      }
+      return this.inputTarget;
     }
   }
 }

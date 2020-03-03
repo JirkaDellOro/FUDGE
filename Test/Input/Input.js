@@ -2,9 +2,9 @@ var Iterator;
 (function (Iterator) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    let axisProportional = new ƒ.Axis(0.1, 0 /* PROPORTIONAL */);
+    let axisProportional = new ƒ.Axis(1, 0 /* PROPORTIONAL */);
     let axisIntegral = new ƒ.Axis(0.1, 1 /* INTEGRAL */);
-    let axisDifferential = new ƒ.Axis(0.1, 2 /* DIFFERENTIAL */);
+    let axisDifferential = new ƒ.Axis(2, 2 /* DIFFERENTIAL */);
     let input;
     let output;
     function init(_event) {
@@ -23,22 +23,26 @@ var Iterator;
         input.appendChild(keyboard);
         let absolute = createFieldset("Absolute", false, number, slider);
         input.appendChild(absolute);
+        number.value = "1";
         let relative = createFieldset("Relative", false, number, slider);
         input.appendChild(relative);
         relative.setAttribute("oldValue", "0");
         let proportional = createFieldset("Proportional", true, number, slider);
+        addDelayStepper(proportional);
         output.appendChild(proportional);
+        number.value = "0.1";
         let integral = createFieldset("Integral", true, number, slider);
+        addDelayStepper(integral);
         output.appendChild(integral);
+        number.value = "2";
         let differential = createFieldset("Differential", true, number, slider);
         output.appendChild(differential);
         axisProportional.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, proportional); });
         axisIntegral.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, integral); });
         axisDifferential.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, differential); });
-        // axisProportional.addEventListener(ƒ.EVENT_CONTROL.INPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
-        proportional.addEventListener("input", function (_event) { hndFactorChange(_event, axisProportional); });
-        integral.addEventListener("input", function (_event) { hndFactorChange(_event, axisIntegral); });
-        differential.addEventListener("input", function (_event) { hndFactorChange(_event, axisDifferential); });
+        proportional.addEventListener("input", function (_event) { hndAxisParameters(_event, axisProportional); });
+        integral.addEventListener("input", function (_event) { hndAxisParameters(_event, axisIntegral); });
+        differential.addEventListener("input", function (_event) { hndAxisParameters(_event, axisDifferential); });
     }
     function createFieldset(_name, _readonly, _stepper, _slider) {
         let fieldset = document.createElement("fieldset");
@@ -52,6 +56,9 @@ var Iterator;
         slider.disabled = _readonly;
         fieldset.append(slider);
         return fieldset;
+    }
+    function addDelayStepper(_fieldset) {
+        _fieldset.querySelector("legend").innerHTML += ` | Delay <input type="number" min="0", max="1000" step="50" value="0" name="Delay"/>`;
     }
     function createInputElement(_type, _parameter) {
         let input = document.createElement("input");
@@ -102,13 +109,14 @@ var Iterator;
         signals.textContent += target.parentElement.id + ": " + format(value) + "\n";
         signals.scrollTop = signals.scrollHeight;
     }
-    function hndFactorChange(_event, _axis) {
+    function hndAxisParameters(_event, _axis) {
         let target = _event.target;
         let fieldset = _event.currentTarget;
-        if (target.type == "number") {
-            let factor = parseFloat(fieldset.querySelector("input").value);
-            _axis.setFactor(factor);
-        }
+        let value = parseFloat(target.value);
+        if (target.name == "Delay")
+            _axis.setDelay(value);
+        else
+            _axis.setFactor(value);
     }
     function hndAxisOutput(_event, _fieldset) {
         // console.log(_fieldset);
@@ -122,7 +130,7 @@ var Iterator;
         axisProportional.dispatchEvent(new Event("output" /* OUTPUT */));
         axisDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
         axisIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
-        window.setTimeout(update, 20);
+        window.setTimeout(update, 10);
     }
     function format(_value) {
         return _value.toFixed(4).padStart(7, "+");
