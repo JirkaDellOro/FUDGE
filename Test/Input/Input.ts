@@ -2,9 +2,9 @@ namespace Iterator {
   import ƒ = FudgeCore;
   type Parameter = { min: string, max: string, step: string, value: string };
   window.addEventListener("DOMContentLoaded", init);
-  let axisProportional: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.PROPORTIONAL);
-  let axisIntegral: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.INTEGRAL);
-  let axisDifferential: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.DIFFERENTIAL);
+  let axisProportional: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.PROPORTIONAL);
+  let axisIntegral: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.INTEGRAL);
+  let axisDifferential: ƒ.Axis = new ƒ.Axis(0.1, ƒ.AXIS_TYPE.DIFFERENTIAL);
   let input: HTMLFieldSetElement;
   let output: HTMLFieldSetElement;
 
@@ -19,13 +19,12 @@ namespace Iterator {
     document.addEventListener("keydown", hndKey);
     document.addEventListener("keyup", hndKey);
     input.addEventListener("input", hndAxisInput);
-    // output.addEventListener("input", hndAxisOutput);
 
     update();
   }
 
   function setup(): void {
-    let number: Parameter = { min: "-2", max: "2", step: "0.1", value: "1" };
+    let number: Parameter = { min: "-2", max: "2", step: "0.1", value: "0.1" };
     let slider: Parameter = { min: "-1", max: "1", step: "0.01", value: "0" };
 
     let keyboard: HTMLFieldSetElement = createFieldset("Keys A-|D+", true, number, slider);
@@ -34,13 +33,14 @@ namespace Iterator {
     input.appendChild(absolute);
     let relative: HTMLFieldSetElement = createFieldset("Relative", false, number, slider);
     input.appendChild(relative);
+    relative.setAttribute("oldValue", "0");
 
     let proportional: HTMLFieldSetElement = createFieldset("Proportional", true, number, slider);
     output.appendChild(proportional);
-    
+
     let integral: HTMLFieldSetElement = createFieldset("Integral", true, number, slider);
     output.appendChild(integral);
-    
+
     let differential: HTMLFieldSetElement = createFieldset("Differential", true, number, slider);
     output.appendChild(differential);
 
@@ -48,6 +48,10 @@ namespace Iterator {
     axisIntegral.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndAxisOutput(_event, integral); });
     axisDifferential.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndAxisOutput(_event, differential); });
     // axisProportional.addEventListener(ƒ.EVENT_CONTROL.INPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
+
+    proportional.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisProportional); });
+    integral.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisIntegral); });
+    differential.addEventListener("input", function (_event: InputEvent): void { hndFactorChange(_event, axisDifferential); });
   }
 
   function createFieldset(_name: string, _readonly: boolean, _stepper: Parameter, _slider: Parameter): HTMLFieldSetElement {
@@ -93,32 +97,52 @@ namespace Iterator {
   }
 
   function updateFieldsetOutput(_slider: HTMLInputElement): number {
-    let factor: number = parseFloat(_slider.parentElement.querySelector("input").value);
-    let value: number = factor * parseFloat(_slider.value);
-    _slider.parentElement.querySelector("output").textContent = value.toFixed(2).padStart(5, "+");
+    let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_slider.parentElement;
+    let factor: number = parseFloat(fieldset.querySelector("input").value);
+    let value: number = parseFloat(_slider.value);
+    if (fieldset.id == "Relative") {
+      let old: number = parseFloat(fieldset.getAttribute("oldValue"));
+      let relative: number = value - old;
+      fieldset.setAttribute("oldValue", value.toString());
+      value = relative;
+    }
+    value *= factor;
+    fieldset.querySelector("output").textContent = format(value);
     return value;
   }
 
   function hndAxisInput(_event: Event): void {
     let target: HTMLInputElement = <HTMLInputElement>_event.target;
-    if (target.type == "range") {
-      let value: number = updateFieldsetOutput(target);
-      axisProportional.setInput(value);
-      axisDifferential.setInput(value);
-      axisIntegral.setInput(value);
-    }
+    if (target.type != "range")
+      return;
+
+    let value: number = updateFieldsetOutput(target);
+    axisProportional.setInput(value);
+    axisDifferential.setInput(value);
+    axisIntegral.setInput(value);
+
+    let signals: HTMLTextAreaElement = document.querySelector("textarea");
+    signals.textContent += target.parentElement.id + ": " + format(value) + "\n";
+    signals.scrollTop = signals.scrollHeight;
+
   }
 
-  function hndOutputFactors(_event: InputEvent): void {
-    console.log(_event);
+  function hndFactorChange(_event: InputEvent, _axis: ƒ.Axis): void {
+    let target: HTMLInputElement = <HTMLInputElement>_event.target;
+    let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_event.currentTarget;
+    if (target.type == "number") {
+      let factor: number = parseFloat(fieldset.querySelector("input").value);
+      _axis.setFactor(factor);
+    }
   }
 
   function hndAxisOutput(_event: Event, _fieldset: HTMLFieldSetElement): void {
     // console.log(_fieldset);
     let axis: ƒ.Axis = <ƒ.Axis>_event.target;
     let slider: HTMLInputElement = _fieldset.querySelector("input[type=range]");
-    slider.value = axis.getValue().toString();
-    updateFieldsetOutput(slider);
+    let value: number = axis.getValue();
+    slider.value = value.toString();
+    slider.parentElement.querySelector("output").textContent = format(value);
   }
 
   function update(): void {
@@ -126,5 +150,9 @@ namespace Iterator {
     axisDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     axisIntegral.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     window.setTimeout(update, 20);
+  }
+
+  function format(_value: number): string {
+    return _value.toFixed(4).padStart(7, "+")
   }
 } 

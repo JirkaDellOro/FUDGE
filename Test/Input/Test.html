@@ -4,8 +4,13 @@
   <meta charset="UTF-8">
   <title>Input</title>
   <style>
-    input[type=range] {
+    input[type=range],
+    textarea {
       width: 100%;
+    }
+
+    input[type=range]:enabled {
+      box-shadow: 0px 0px 1px #cccccc;
     }
 
     strong {
@@ -14,13 +19,18 @@
     }
 
     fieldset {
-      border: 2px #dddddd solid;
+      border: 0px #dddddd solid;
     }
+
     fieldset#Input {
       background-color: azure;
     }
+
     fieldset#Output {
       background-color: beige;
+    }
+    fieldset#Signal {
+      background-color: floralwhite;
     }
   </style>
   <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
@@ -34,6 +44,11 @@
 
   <fieldset id="Output">
     <legend>Output</legend>
+  </fieldset>
+
+  <fieldset id="Signal">
+    <legend>Signal</legend>
+    <textarea cols="80" rows="10"></textarea>
   </fieldset>
 
 </body>

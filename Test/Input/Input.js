@@ -2,9 +2,9 @@ var Iterator;
 (function (Iterator) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    let axisProportional = new ƒ.Axis(1, 0 /* PROPORTIONAL */);
-    let axisIntegral = new ƒ.Axis(1, 1 /* INTEGRAL */);
-    let axisDifferential = new ƒ.Axis(1, 2 /* DIFFERENTIAL */);
+    let axisProportional = new ƒ.Axis(0.1, 0 /* PROPORTIONAL */);
+    let axisIntegral = new ƒ.Axis(0.1, 1 /* INTEGRAL */);
+    let axisDifferential = new ƒ.Axis(0.1, 2 /* DIFFERENTIAL */);
     let input;
     let output;
     function init(_event) {
@@ -14,11 +14,10 @@ var Iterator;
         document.addEventListener("keydown", hndKey);
         document.addEventListener("keyup", hndKey);
         input.addEventListener("input", hndAxisInput);
-        // output.addEventListener("input", hndAxisOutput);
         update();
     }
     function setup() {
-        let number = { min: "-2", max: "2", step: "0.1", value: "1" };
+        let number = { min: "-2", max: "2", step: "0.1", value: "0.1" };
         let slider = { min: "-1", max: "1", step: "0.01", value: "0" };
         let keyboard = createFieldset("Keys A-|D+", true, number, slider);
         input.appendChild(keyboard);
@@ -26,6 +25,7 @@ var Iterator;
         input.appendChild(absolute);
         let relative = createFieldset("Relative", false, number, slider);
         input.appendChild(relative);
+        relative.setAttribute("oldValue", "0");
         let proportional = createFieldset("Proportional", true, number, slider);
         output.appendChild(proportional);
         let integral = createFieldset("Integral", true, number, slider);
@@ -36,6 +36,9 @@ var Iterator;
         axisIntegral.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, integral); });
         axisDifferential.addEventListener("output" /* OUTPUT */, function (_event) { hndAxisOutput(_event, differential); });
         // axisProportional.addEventListener(ƒ.EVENT_CONTROL.INPUT, function (_event: Event): void { hndAxisOutput(_event, proportional); });
+        proportional.addEventListener("input", function (_event) { hndFactorChange(_event, axisProportional); });
+        integral.addEventListener("input", function (_event) { hndFactorChange(_event, axisIntegral); });
+        differential.addEventListener("input", function (_event) { hndFactorChange(_event, axisDifferential); });
     }
     function createFieldset(_name, _readonly, _stepper, _slider) {
         let fieldset = document.createElement("fieldset");
@@ -74,35 +77,55 @@ var Iterator;
         slider.dispatchEvent(new InputEvent("input", { bubbles: true }));
     }
     function updateFieldsetOutput(_slider) {
-        let factor = parseFloat(_slider.parentElement.querySelector("input").value);
-        let value = factor * parseFloat(_slider.value);
-        _slider.parentElement.querySelector("output").textContent = value.toFixed(2).padStart(5, "+");
+        let fieldset = _slider.parentElement;
+        let factor = parseFloat(fieldset.querySelector("input").value);
+        let value = parseFloat(_slider.value);
+        if (fieldset.id == "Relative") {
+            let old = parseFloat(fieldset.getAttribute("oldValue"));
+            let relative = value - old;
+            fieldset.setAttribute("oldValue", value.toString());
+            value = relative;
+        }
+        value *= factor;
+        fieldset.querySelector("output").textContent = format(value);
         return value;
     }
     function hndAxisInput(_event) {
         let target = _event.target;
-        if (target.type == "range") {
-            let value = updateFieldsetOutput(target);
-            axisProportional.setInput(value);
-            axisDifferential.setInput(value);
-            axisIntegral.setInput(value);
-        }
+        if (target.type != "range")
+            return;
+        let value = updateFieldsetOutput(target);
+        axisProportional.setInput(value);
+        axisDifferential.setInput(value);
+        axisIntegral.setInput(value);
+        let signals = document.querySelector("textarea");
+        signals.textContent += target.parentElement.id + ": " + format(value) + "\n";
+        signals.scrollTop = signals.scrollHeight;
     }
-    function hndOutputFactors(_event) {
-        console.log(_event);
+    function hndFactorChange(_event, _axis) {
+        let target = _event.target;
+        let fieldset = _event.currentTarget;
+        if (target.type == "number") {
+            let factor = parseFloat(fieldset.querySelector("input").value);
+            _axis.setFactor(factor);
+        }
     }
     function hndAxisOutput(_event, _fieldset) {
         // console.log(_fieldset);
         let axis = _event.target;
         let slider = _fieldset.querySelector("input[type=range]");
-        slider.value = axis.getValue().toString();
-        updateFieldsetOutput(slider);
+        let value = axis.getValue();
+        slider.value = value.toString();
+        slider.parentElement.querySelector("output").textContent = format(value);
     }
     function update() {
         axisProportional.dispatchEvent(new Event("output" /* OUTPUT */));
         axisDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
         axisIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
         window.setTimeout(update, 20);
+    }
+    function format(_value) {
+        return _value.toFixed(4).padStart(7, "+");
     }
 })(Iterator || (Iterator = {}));
 //# sourceMappingURL=Input.js.map

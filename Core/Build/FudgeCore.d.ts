@@ -1139,6 +1139,7 @@ declare namespace FudgeCore {
         setTime(_time: Time): void;
         setInput(_target: number): void;
         setDelay(_delay: number): void;
+        setFactor(_factor: number): void;
         getValue(): number;
     }
 }

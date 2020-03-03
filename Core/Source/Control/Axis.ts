@@ -42,6 +42,10 @@ namespace FudgeCore {
       this.inputDelay = _delay;
     }
 
+    setFactor(_factor: number): void {
+      this.factor = _factor;
+    }
+
     getValue(): number {
       let value: number = 0;
       // TODO: use delayed input
