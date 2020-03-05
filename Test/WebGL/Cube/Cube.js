@@ -1,6 +1,7 @@
 var Cube;
 (function (Cube) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         ƒ.Debug.log("Refactored Cube");
@@ -16,7 +17,6 @@ var Cube;
         child.cmpTransform.local.translateX(1.5);
         body.appendChild(child);
         branch.addChild(body);
-        ƒ.RenderManager.initialize();
         // ƒ.RenderManager.addBranch(branch);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);

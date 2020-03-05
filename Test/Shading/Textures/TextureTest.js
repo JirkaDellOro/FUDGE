@@ -1,6 +1,7 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize(true, true);
     window.addEventListener("load", init);
     function init(_event) {
         let img = document.querySelector("img");
@@ -21,7 +22,6 @@ var TextureTest;
         branch.addChild(quad);
         branch.addChild(cube);
         branch.addChild(pyramid);
-        ƒ.RenderManager.initialize(true, true);
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();

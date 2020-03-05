@@ -2,6 +2,7 @@ var ScreenToRayToScreen;
 (function (ScreenToRayToScreen) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
+    ƒ.RenderManager.initialize(true);
     window.addEventListener("load", init);
     ScreenToRayToScreen.root = new ƒ.Node("Root");
     let viewport;
@@ -16,7 +17,6 @@ var ScreenToRayToScreen;
         const canvas = document.querySelector("canvas");
         ƒ.Debug.log("Canvas", canvas);
         crc2 = canvas.getContext("2d");
-        ƒ.RenderManager.initialize(true);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("click", canvas.requestPointerLock);
         labelDOM = document.createElement("span");

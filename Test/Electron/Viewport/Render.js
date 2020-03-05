@@ -1,12 +1,11 @@
 var ElectronViewport;
 (function (ElectronViewport) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         // create asset
         let branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewport

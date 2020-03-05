@@ -1,6 +1,7 @@
 var MeshTest;
 (function (MeshTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let branch = new ƒ.Node("Branch");
@@ -25,7 +26,6 @@ var MeshTest;
         let lights = new ƒAid.NodeThreePointLights("lights", 0);
         branch.addChild(lights);
         branch.addChild(body);
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();

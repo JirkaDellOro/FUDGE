@@ -1,6 +1,7 @@
 var ComponentParameters;
 (function (ComponentParameters) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize(true, true);
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let img = document.querySelector("img");
@@ -22,7 +23,6 @@ var ComponentParameters;
             quad.addComponent(cmpMaterial);
             root.addChild(quad);
         }
-        ƒ.RenderManager.initialize(true, true);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let cmpCamera = new ƒ.ComponentCamera();

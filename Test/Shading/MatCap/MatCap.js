@@ -1,6 +1,7 @@
 var MatCapTest;
 (function (MatCapTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     let branch = new ƒ.Node("Branch");
     window.addEventListener("load", init);
     function init() {
@@ -22,7 +23,6 @@ var MatCapTest;
         pyramidRed.cmpTransform.local.translateX(-1);
         branch.addChild(pyramidRed);
         branch.addChild(pyramidGreen);
-        ƒ.RenderManager.initialize();
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));

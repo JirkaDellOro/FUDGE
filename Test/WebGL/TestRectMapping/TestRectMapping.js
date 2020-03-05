@@ -1,6 +1,7 @@
 var TestRectMapping;
 (function (TestRectMapping) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let uiMaps = {};
     let uiClient;
@@ -13,7 +14,6 @@ var TestRectMapping;
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewports

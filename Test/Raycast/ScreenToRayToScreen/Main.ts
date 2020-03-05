@@ -1,6 +1,8 @@
 namespace ScreenToRayToScreen {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+  ƒ.RenderManager.initialize(true);
+
   window.addEventListener("load", init);
 
   export let root: ƒ.Node = new ƒ.Node("Root");
@@ -20,8 +22,6 @@ namespace ScreenToRayToScreen {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     ƒ.Debug.log("Canvas", canvas);
     crc2 = canvas.getContext("2d");
-
-    ƒ.RenderManager.initialize(true);
 
     // enable unlimited mouse-movement (user needs to click on canvas first)
     canvas.addEventListener("click", canvas.requestPointerLock);

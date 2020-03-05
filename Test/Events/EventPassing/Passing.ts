@@ -1,5 +1,7 @@
 namespace EventPassing {
     import ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
+    
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
     let viewPorts: ƒ.Viewport[] = [];
@@ -8,8 +10,6 @@ namespace EventPassing {
 
     function init(): void {
         let branch: ƒ.Node = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
 

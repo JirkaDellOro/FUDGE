@@ -84,6 +84,7 @@ namespace FudgeCore {
       this.vertices = new Float32Array(vertices);
       this.normalsFace = this.createFaceNormals();
       this.indices = this.createIndices();
+      this.createRenderBuffers();
     }
 
     protected createIndices(): Uint16Array {

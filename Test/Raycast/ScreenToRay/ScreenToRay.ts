@@ -1,6 +1,8 @@
 namespace ScreenToRay {
   import ƒ = FudgeCore;
+  ƒ.RenderManager.initialize();
   window.addEventListener("load", init);
+
   let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
   let uiClient: UI.Rectangle;
   let menu: HTMLDivElement;
@@ -20,8 +22,7 @@ namespace ScreenToRay {
     let branch: ƒ.Node = Scenes.createAxisCross();
     branch.addComponent(new ƒ.ComponentTransform());
 
-    // initialize RenderManager and transmit content
-    ƒ.RenderManager.initialize();
+    // transmit content
     ƒ.RenderManager.addBranch(branch);
     ƒ.RenderManager.update();
 
@@ -107,12 +108,12 @@ namespace ScreenToRay {
 
     let ray: ƒ.Ray = computeRay();
     ƒ.Debug.log(ray.direction.toString());
-    
+
     ray.direction.transform(cmpCamera.pivot);
     ƒ.Debug.log(ray.direction.toString());
-    
+
     ƒ.Debug.groupEnd();
-    
+
     cameraRay.pivot.lookAt(ray.direction);
     cameraRay.projectCentral(1, 10);
     viewportRay.draw();

@@ -1,5 +1,7 @@
 namespace ComponentParameters {
   import ƒ = FudgeCore;
+  ƒ.RenderManager.initialize(true, true);
+  
   window.addEventListener("DOMContentLoaded", init);
 
   function init(): void {
@@ -26,7 +28,6 @@ namespace ComponentParameters {
       root.addChild(quad);
     }
 
-    ƒ.RenderManager.initialize(true, true);
     ƒ.RenderManager.update();
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();

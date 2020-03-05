@@ -1,6 +1,7 @@
 namespace MatCapTest {
 
   import ƒ = FudgeCore;
+  ƒ.RenderManager.initialize();
 
   let branch: ƒ.Node = new ƒ.Node("Branch");
 
@@ -31,8 +32,6 @@ namespace MatCapTest {
     branch.addChild(pyramidRed);
     branch.addChild(pyramidGreen);
 
-
-    ƒ.RenderManager.initialize();
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));

@@ -1,6 +1,7 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         let coSys = Scenes.createCoordinateSystem();
@@ -11,7 +12,6 @@ var TextureTest;
         //     new ƒ.MeshQuad()
         // );
         // coSys.addChild(object);
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(coSys);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));

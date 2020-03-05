@@ -1,6 +1,7 @@
 var PerformanceLeak;
 (function (PerformanceLeak) {
     PerformanceLeak.ƒ = FudgeCore;
+    PerformanceLeak.ƒ.RenderManager.initialize(true, false);
     window.addEventListener("load", test);
     let game;
     let viewport;
@@ -11,7 +12,6 @@ var PerformanceLeak;
     let id = PerformanceLeak.ƒ.Matrix4x4.IDENTITY();
     function test() {
         let canvas = document.querySelector("canvas");
-        PerformanceLeak.ƒ.RenderManager.initialize(true, false);
         game = new PerformanceLeak.ƒ.Node("Game");
         createNode("Node");
         let cmpCamera = new PerformanceLeak.ƒ.ComponentCamera();

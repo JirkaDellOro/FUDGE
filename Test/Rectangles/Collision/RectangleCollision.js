@@ -1,11 +1,11 @@
 var RectangleCollision;
 (function (RectangleCollision) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", handleLoad);
     function handleLoad(_event) {
         let canvas = document.querySelector("canvas");
         let crc2 = canvas.getContext("2d");
-        ƒ.RenderManager.initialize();
         // crc2.translate(canvas.width / 2, canvas.height / 2);
         let rect0 = new ƒ.Rectangle(0, 0, 150, 100, ƒ.ORIGIN2D.CENTER);
         let rect1 = new ƒ.Rectangle(0, 0, 100, 150, ƒ.ORIGIN2D.CENTER);

@@ -60,7 +60,7 @@ namespace FudgeCore {
       crc3.uniformMatrix4fv(uProjection, false, _projection.get());
 
       // feed in face normals if shader accepts u_world. 
-      let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"]
+      let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
       if (uWorld) {
         crc3.uniformMatrix4fv(uWorld, false, _world.get());
       }

@@ -4,6 +4,8 @@
 namespace AudioSpace {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+  ƒ.RenderManager.initialize();
+  
   let out: HTMLOutputElement;
 
   let camera: ƒAid.CameraOrbit;
@@ -53,8 +55,6 @@ namespace AudioSpace {
     mtxTranslator = translator.local;
     mtxInner = inner.local;
     mtxOuter = outer.local;
-
-    ƒ.RenderManager.initialize();
 
     // audio setup
     const audio: ƒ.Audio = await ƒ.Audio.load("hypnotic.mp3");

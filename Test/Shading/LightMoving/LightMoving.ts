@@ -1,5 +1,6 @@
 namespace TextureTest {
     import ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
 
     window.addEventListener("load", init);
 
@@ -34,7 +35,6 @@ namespace TextureTest {
         branch.addChild(Scenes.createCoordinateSystem());
         branch.addChild(lights);
 
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
 

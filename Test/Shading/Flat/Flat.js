@@ -1,6 +1,7 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         let coatRed = new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1));
@@ -9,7 +10,6 @@ var TextureTest;
         cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         let branch = new ƒ.Node("Branch");
         branch.addChild(cube);
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();

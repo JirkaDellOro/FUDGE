@@ -1,6 +1,7 @@
 var ScreenToRay;
 (function (ScreenToRay) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let uiMaps = {};
     let uiClient;
@@ -17,8 +18,7 @@ var ScreenToRay;
         // create asset
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
+        // transmit content
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewports

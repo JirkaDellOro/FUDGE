@@ -1,14 +1,13 @@
 var EventPassing;
 (function (EventPassing) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     let canvas;
     let camera;
     let viewPorts = [];
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let posCameras = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];

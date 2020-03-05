@@ -286,33 +286,34 @@ namespace FudgeCore {
     }
     // #endregion
 
-    // #region Meshbuffer
-    protected static createBuffers(_mesh: Mesh): RenderBuffers {
-      let vertices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
-      RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
+    // // #region Meshbuffer
+    // protected static createBuffers(_mesh: Mesh): RenderBuffers {
+    //   let vertices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
+    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
 
-      let indices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
-      RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
+    //   let indices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
+    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
 
-      let textureUVs: WebGLBuffer = RenderOperator.crc3.createBuffer();
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
-      RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
+    //   let textureUVs: WebGLBuffer = RenderOperator.crc3.createBuffer();
+    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
+    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
 
-      let normalsFace: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
-      RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
+    //   let normalsFace: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
+    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
+    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
 
-      let bufferInfo: RenderBuffers = {
-        vertices: vertices,
-        indices: indices,
-        nIndices: _mesh.getIndexCount(),
-        textureUVs: textureUVs,
-        normalsFace: normalsFace
-      };
-      return bufferInfo;
-    }
+    //   let bufferInfo: RenderBuffers = {
+    //     vertices: vertices,
+    //     indices: indices,
+    //     nIndices: _mesh.getIndexCount(),
+    //     textureUVs: textureUVs,
+    //     normalsFace: normalsFace
+    //   };
+    //   return bufferInfo;
+    // }
+    
     protected static useBuffers(_renderBuffers: RenderBuffers): void {
       // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
       // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);

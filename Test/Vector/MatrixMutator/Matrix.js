@@ -1,6 +1,7 @@
 var MarixMutatorTest;
 (function (MarixMutatorTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
@@ -9,7 +10,6 @@ var MarixMutatorTest;
         createUI();
         coSys = Scenes.createCoordinateSystem();
         coSys.addComponent(new ƒ.ComponentTransform());
-        ƒ.RenderManager.initialize();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
         update();

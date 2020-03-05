@@ -1,10 +1,10 @@
 var Minimal;
 (function (Minimal) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", hndLoad);
     function hndLoad(_event) {
         const canvas = document.querySelector("canvas");
-        ƒ.RenderManager.initialize();
         let viewport = new ƒ.Viewport();
         let mesh = new ƒ.MeshQuad();
         let mtrSolidWhite = new ƒ.Material("SolidWhite", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));

@@ -6,6 +6,7 @@ var AudioSpace;
 (function (AudioSpace) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
+    ƒ.RenderManager.initialize();
     let out;
     let camera;
     let speedCameraRotation = 0.2;
@@ -47,7 +48,6 @@ var AudioSpace;
         mtxTranslator = translator.local;
         mtxInner = inner.local;
         mtxOuter = outer.local;
-        ƒ.RenderManager.initialize();
         // audio setup
         const audio = await ƒ.Audio.load("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true);

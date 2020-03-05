@@ -5,6 +5,8 @@
 
 namespace UI {
     import ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
+    
     let myLayout: GoldenLayout;
     let savedState: string;
 
@@ -47,7 +49,6 @@ namespace UI {
         branch.addComponent(new ƒ.ComponentTransform());
 
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
 

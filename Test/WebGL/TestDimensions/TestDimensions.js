@@ -1,6 +1,7 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let uiRectangles = {};
     let canvas;
@@ -12,7 +13,6 @@ var RenderManagerRendering;
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewports

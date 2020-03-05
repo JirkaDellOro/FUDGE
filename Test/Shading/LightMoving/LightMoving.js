@@ -1,6 +1,7 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         let coatWhite = new ƒ.CoatColored(ƒ.Color.CSS("WHITE"));
@@ -25,7 +26,6 @@ var TextureTest;
         branch.addChild(body);
         branch.addChild(Scenes.createCoordinateSystem());
         branch.addChild(lights);
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();

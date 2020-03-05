@@ -1,6 +1,7 @@
 namespace PerformanceLeak {
 
   export import ƒ = FudgeCore;
+  ƒ.RenderManager.initialize(true, false);
 
   window.addEventListener("load", test);
 
@@ -14,7 +15,6 @@ namespace PerformanceLeak {
 
   function test(): void {
     let canvas: HTMLCanvasElement = document.querySelector("canvas");
-    ƒ.RenderManager.initialize(true, false);
 
     game = new ƒ.Node("Game");
     createNode("Node");

@@ -11,18 +11,12 @@ namespace FudgeCore {
    */
   export class MeshCube extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshCube);
-
+   
     public constructor() {
       super();
       this.create();
     }
 
-    public create(): void {
-      this.vertices = this.createVertices();
-      this.indices = this.createIndices();
-      this.textureUVs = this.createTextureUVs();
-      this.normalsFace = this.createFaceNormals();
-    }
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array([

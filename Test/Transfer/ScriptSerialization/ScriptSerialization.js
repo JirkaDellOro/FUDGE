@@ -1,6 +1,7 @@
 var ScriptSerialization;
 (function (ScriptSerialization) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     ƒ.Serializer.registerNamespace(ScriptSerialization);
     window.addEventListener("DOMContentLoaded", init);
     function init() {
@@ -45,7 +46,6 @@ var ScriptSerialization;
         ƒ.Debug.log("Reconstructed branch", reconstruct);
         console.groupEnd();
         root.addChild(reconstruct);
-        ƒ.RenderManager.initialize();
         let viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", branch, cmpCamera, canvas);
         // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);

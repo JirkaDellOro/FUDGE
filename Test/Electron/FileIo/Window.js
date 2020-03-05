@@ -60,10 +60,10 @@ var ElectronFileIo;
     }
     ElectronFileIo.open = open;
     function createScene() {
-        // create asset
-        branch = Scenes.createAxisCross();
         // initialize RenderManager and transmit content
         ƒ.RenderManager.initialize();
+        // create asset
+        branch = Scenes.createAxisCross();
         // initialize viewport
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);

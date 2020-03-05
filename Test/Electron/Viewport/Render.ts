@@ -1,13 +1,11 @@
 namespace ElectronViewport {
     import ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
         // create asset
         let branch: ƒ.Node = Scenes.createAxisCross();
-
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
 

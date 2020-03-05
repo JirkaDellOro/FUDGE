@@ -1,11 +1,11 @@
 var NodeResource;
 (function (NodeResource) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     ƒ.Serializer.registerNamespace(NodeResource);
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         ƒ.Debug.log("Start");
-        ƒ.RenderManager.initialize();
         let branch = new ƒ.Node("Root");
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
         let canvas = Scenes.createCanvas();

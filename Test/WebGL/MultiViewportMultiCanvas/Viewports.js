@@ -1,12 +1,12 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init() {
         // create asset
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
-        ƒ.RenderManager.initialize();
         // initialize viewports
         let posCameras = [new ƒ.Vector3(0.1, 0, 5), new ƒ.Vector3(0.1, 5, 0), new ƒ.Vector3(5, 0.1, 0), new ƒ.Vector3(3, 3, 5)];
         let canvasList = document.getElementsByTagName("canvas");

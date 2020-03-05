@@ -350,7 +350,6 @@ declare namespace FudgeCore {
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
-        protected static createBuffers(_mesh: Mesh): RenderBuffers;
         protected static useBuffers(_renderBuffers: RenderBuffers): void;
         protected static deleteBuffers(_renderBuffers: RenderBuffers): void;
         protected static createParameter(_coat: Coat): RenderCoat;
@@ -2669,13 +2668,13 @@ declare namespace FudgeCore {
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
         useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
-        createRenderBuffers(_renderShader: RenderShader): void;
+        createRenderBuffers(): void;
         deleteRenderBuffers(_renderShader: RenderShader): void;
         getVertexCount(): number;
         getIndexCount(): number;
+        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
-        abstract create(): void;
         protected calculateFaceNormals(): Float32Array;
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
@@ -2697,7 +2696,6 @@ declare namespace FudgeCore {
     class MeshCube extends Mesh {
         static readonly iSubclass: number;
         constructor();
-        create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -2719,7 +2717,6 @@ declare namespace FudgeCore {
         private resolutionZ;
         private heightMapFunction;
         constructor(_resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
-        create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -2742,7 +2739,6 @@ declare namespace FudgeCore {
     class MeshPyramid extends Mesh {
         static readonly iSubclass: number;
         constructor();
-        create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -2762,7 +2758,6 @@ declare namespace FudgeCore {
     class MeshQuad extends Mesh {
         static readonly iSubclass: number;
         constructor();
-        create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -2801,7 +2796,6 @@ declare namespace FudgeCore {
     class MeshSprite extends Mesh {
         static readonly iSubclass: number;
         constructor();
-        create(): void;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
@@ -3019,7 +3013,6 @@ declare namespace FudgeCore {
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static renderBuffers;
         private static nodes;
         private static timestampUpdate;
         private static pickBuffers;

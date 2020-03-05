@@ -9,6 +9,7 @@ var UI;
 // console.log(Fudge);
 (function (UI) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize();
     let myLayout;
     let savedState;
     let branch;
@@ -44,7 +45,6 @@ var UI;
         branch = new ƒ.Node("Scene");
         branch.addComponent(new ƒ.ComponentTransform());
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         ƒ.RenderManager.addBranch(branch);
         ƒ.RenderManager.update();
         // initialize viewports
