@@ -236,11 +236,15 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class RenderInjector {
-        private static coatInjections;
-        static decorateCoat(_constructor: Function): void;
-        private static injectRenderDataForCoatColored;
-        private static injectRenderDataForCoatTextured;
-        private static injectRenderDataForCoatMatCap;
+        static inject(_constructor: Function, _injector: typeof RenderInjector): void;
+    }
+}
+declare namespace FudgeCore {
+    class RenderInjectorCoat extends RenderInjector {
+        static decorate(_constructor: Function): void;
+        protected static injectCoatColored(this: Coat, _renderShader: RenderShader): void;
+        protected static injectCoatTextured(this: Coat, _renderShader: RenderShader): void;
+        protected static injectCoatMatCap(this: Coat, _renderShader: RenderShader): void;
     }
 }
 declare namespace FudgeCore {
@@ -329,11 +333,11 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param _renderShader
          * @param _renderBuffers
-         * @param _renderCoat
+         * @param _coat
          * @param _world
          * @param _projection
          */
-        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
         /**
          * Draw a buffer with a special shader that uses an id instead of a color
          * @param _renderShader
@@ -3015,7 +3019,6 @@ declare namespace FudgeCore {
         /** Stores references to the compiled shader programs and makes them available via the references to shaders */
         private static renderShaders;
         /** Stores references to the vertex array objects and makes them available via the references to coats */
-        private static renderCoats;
         /** Stores references to the vertex buffers and makes them available via the references to meshes */
         private static renderBuffers;
         private static nodes;

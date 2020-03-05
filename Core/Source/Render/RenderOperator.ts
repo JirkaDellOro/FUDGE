@@ -1,3 +1,5 @@
+///<reference path="RenderInjector.ts"/>
+///<reference path="RenderInjectorCoat.ts"/>
 namespace FudgeCore {
     export interface BufferSpecification {
         size: number;   // The size of the datasample.
@@ -190,11 +192,11 @@ namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          * @param _renderShader 
          * @param _renderBuffers 
-         * @param _renderCoat 
+         * @param _coat 
          * @param _world 
          * @param _projection 
          */
-        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _renderCoat: RenderCoat, _world: Matrix4x4, _projection: Matrix4x4): void {
+        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void {
             RenderOperator.useProgram(_renderShader);
             // RenderOperator.useBuffers(_renderBuffers);
             // RenderOperator.useParameter(_renderCoat);
@@ -223,7 +225,7 @@ namespace FudgeCore {
                 RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
             }
             // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
-            _renderCoat.coat.useRenderData(_renderShader);
+            _coat.useRenderData(_renderShader);
 
             // Draw call
             // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);

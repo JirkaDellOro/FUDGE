@@ -2,7 +2,7 @@
 namespace FudgeCore {
   interface NodeReferences {
     shader: typeof Shader;
-    coat: Coat;
+    // coat: Coat;
     mesh: Mesh;
     // doneTransformToWorld: boolean;
   }
@@ -51,7 +51,7 @@ namespace FudgeCore {
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
     private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
-    private static renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
+    // private static renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
     private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
     private static nodes: MapNodeToNodeReferences = new Map();
@@ -74,13 +74,14 @@ namespace FudgeCore {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
 
-      let coat: Coat = cmpMaterial.material.getCoat();
-      RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
+      // let coat: Coat = cmpMaterial.material.getCoat();
+      // RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
 
       let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
       RenderManager.createReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, mesh, RenderManager.createBuffers);
 
-      let nodeReferences: NodeReferences = { shader: shader, coat: coat, mesh: mesh }; //, doneTransformToWorld: false };
+      // TODO: buffers for shaders, coats and meshes must be referenced by the nodes components/referenced instances directly!
+      let nodeReferences: NodeReferences = { shader: shader, /*coat: coat,*/ mesh: mesh }; //, doneTransformToWorld: false };
       RenderManager.nodes.set(_node, nodeReferences);
     }
 
@@ -115,7 +116,7 @@ namespace FudgeCore {
         return;
 
       RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
-      RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
+      // RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
       RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
 
       RenderManager.nodes.delete(_node);
@@ -150,12 +151,12 @@ namespace FudgeCore {
         nodeReferences.shader = shader;
       }
 
-      let coat: Coat = cmpMaterial.material.getCoat();
-      if (coat !== nodeReferences.coat) {
-        RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
-        RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
-        nodeReferences.coat = coat;
-      }
+      // let coat: Coat = cmpMaterial.material.getCoat();
+      // if (coat !== nodeReferences.coat) {
+      //   RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
+      //   RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
+      //   nodeReferences.coat = coat;
+      // }
 
       let mesh: Mesh = (<ComponentMesh>(_node.getComponent(ComponentMesh))).mesh;
       if (mesh !== nodeReferences.mesh) {
@@ -298,9 +299,12 @@ namespace FudgeCore {
         return; // TODO: deal with partial references
 
       let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
-      let coatInfo: RenderCoat = RenderManager.renderCoats.get(references.coat).getReference();
+      // let coatInfo: RenderCoat = RenderManager.renderCoats.get(references.coat).getReference();
+      // TODO: get coat from node
+      let coat: Coat = _node.getComponent(ComponentMaterial).material.getCoat();
       let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
-      RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+      RenderManager.draw(shaderInfo, bufferInfo, coat, _finalTransform, _projection);
+      // RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
     }
 
     private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba
