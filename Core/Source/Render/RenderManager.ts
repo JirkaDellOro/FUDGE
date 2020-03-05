@@ -79,6 +79,7 @@ namespace FudgeCore {
 
       let mesh: Mesh = (<ComponentMesh>_node.getComponent(ComponentMesh)).mesh;
       RenderManager.createReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, mesh, RenderManager.createBuffers);
+      mesh.createRenderBuffers(null);
 
       // TODO: buffers for shaders, coats and meshes must be referenced by the nodes components/referenced instances directly!
       let nodeReferences: NodeReferences = { shader: shader, /*coat: coat,*/ mesh: mesh }; //, doneTransformToWorld: false };
@@ -120,6 +121,8 @@ namespace FudgeCore {
       RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
 
       RenderManager.nodes.delete(_node);
+      
+      nodeReferences.mesh.deleteRenderBuffers(null);
     }
 
     /**
@@ -305,6 +308,7 @@ namespace FudgeCore {
       let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
       RenderManager.draw(shaderInfo, bufferInfo, coat, _finalTransform, _projection);
       // RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
+      references.mesh.useRenderBuffers(null);
     }
 
     private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba

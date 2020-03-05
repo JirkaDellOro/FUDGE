@@ -1,4 +1,3 @@
-// /<reference path="RenderInjectorCoat.ts"/>
 namespace FudgeCore {
   export class RenderInjector {
 

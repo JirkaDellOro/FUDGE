@@ -248,6 +248,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RenderInjectorMesh {
+        static decorate(_constructor: Function): void;
+        protected static createRenderBuffers(this: Mesh): void;
+        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader): void;
+        protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
+    }
+}
+declare namespace FudgeCore {
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -2670,8 +2678,12 @@ declare namespace FudgeCore {
         textureUVs: Float32Array;
         normalsFace: Float32Array;
         idResource: string;
+        renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
+        useRenderBuffers(_renderShader: RenderShader): void;
+        createRenderBuffers(_renderShader: RenderShader): void;
+        deleteRenderBuffers(_renderShader: RenderShader): void;
         getVertexCount(): number;
         getIndexCount(): number;
         serialize(): Serialization;

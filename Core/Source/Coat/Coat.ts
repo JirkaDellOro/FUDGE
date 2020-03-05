@@ -1,6 +1,3 @@
-// / <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderInjector.ts"/>
-// / <reference path="../Render/RenderOperator.ts"/>
 namespace FudgeCore {
     /**
      * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].  
