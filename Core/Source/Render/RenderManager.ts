@@ -1,7 +1,7 @@
 // / <reference path="RenderOperator.ts"/>
 namespace FudgeCore {
   interface NodeReferences {
-    shader: typeof Shader;
+    // shader: typeof Shader;
     // coat: Coat;
     // mesh: Mesh;
     // doneTransformToWorld: boolean;
@@ -71,8 +71,8 @@ namespace FudgeCore {
       if (!cmpMaterial)
         return;
 
-      let shader: typeof Shader = cmpMaterial.material.getShader();
-      RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
+      // let shader: typeof Shader = cmpMaterial.material.getShader();
+      // RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
 
       // let coat: Coat = cmpMaterial.material.getCoat();
       // RenderManager.createReference<Coat, RenderCoat>(RenderManager.renderCoats, coat, RenderManager.createParameter);
@@ -82,8 +82,8 @@ namespace FudgeCore {
       // mesh.createRenderBuffers(null);
 
       // TODO: buffers for shaders, coats and meshes must be referenced by the nodes components/referenced instances directly!
-      let nodeReferences: NodeReferences = { shader: shader /*coat: coat, mesh: mesh */}; //, doneTransformToWorld: false };
-      RenderManager.nodes.set(_node, nodeReferences);
+      // let nodeReferences: NodeReferences = { shader: shader /*coat: coat, mesh: mesh */}; //, doneTransformToWorld: false };
+      // RenderManager.nodes.set(_node, nodeReferences);
     }
 
     /**
@@ -116,12 +116,12 @@ namespace FudgeCore {
       if (!nodeReferences)
         return;
 
-      RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
+      // RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
       // RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
       // RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
 
       RenderManager.nodes.delete(_node);
-      
+
       // nodeReferences.mesh.deleteRenderBuffers(null);
     }
 
@@ -145,14 +145,14 @@ namespace FudgeCore {
       if (!nodeReferences)
         return;
 
-      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      // let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
 
-      let shader: typeof Shader = cmpMaterial.material.getShader();
-      if (shader !== nodeReferences.shader) {
-        RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
-        RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
-        nodeReferences.shader = shader;
-      }
+      // let shader: typeof Shader = cmpMaterial.material.getShader();
+      // if (shader !== nodeReferences.shader) {
+      //   RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
+      //   RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, shader, RenderManager.createProgram);
+      //   nodeReferences.shader = shader;
+      // }
 
       // let coat: Coat = cmpMaterial.material.getCoat();
       // if (coat !== nodeReferences.coat) {
@@ -263,8 +263,8 @@ namespace FudgeCore {
      */
     public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       RenderManager.pickBuffers = [];
-      if (!RenderManager.renderShaders.get(ShaderRayCast))
-        RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
+      // if (!RenderManager.renderShaders.get(ShaderRayCast))
+      //   RenderManager.createReference<typeof Shader, RenderShader>(RenderManager.renderShaders, ShaderRayCast, RenderManager.createProgram);
 
       //TODO: examine, why switching blendFunction is necessary 
       RenderOperator.crc3.blendFunc(1, 0);
@@ -297,14 +297,19 @@ namespace FudgeCore {
 
 
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
-      let references: NodeReferences = RenderManager.nodes.get(_node);
-      if (!references)
-        return; 
-        
-      let coat: Coat = _node.getComponent(ComponentMaterial).material.getCoat();
-      let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
-      let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-      RenderManager.draw(shaderInfo, mesh, coat, _finalTransform, _projection);
+      // let references: NodeReferences = RenderManager.nodes.get(_node);
+      // if (!references)
+      //   return; 
+      try {
+        let material: Material = _node.getComponent(ComponentMaterial).material;
+        let coat: Coat = material.getCoat();
+        let shader: typeof Shader = material.getShader();
+        let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+        RenderManager.draw(shader, mesh, coat, _finalTransform, _projection);
+      } catch (_error) {
+        //
+      }
+      // RenderManager.draw(shaderInfo, mesh, coat, _finalTransform, _projection);
       // RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
     }
 
@@ -422,41 +427,41 @@ namespace FudgeCore {
     // #endregion
 
     // #region Manage references to render data
-    /**
-     * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
-     * @param _in 
-     * @param _key 
-     * @param _deletor 
-     */
-    private static removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
-      let reference: Reference<ReferenceType>;
-      reference = _in.get(_key);
-      if (reference.decreaseCounter() == 0) {
-        // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
-        // If data should be used later again, it must then be reconstructed...
-        _deletor(reference.getReference());
-        _in.delete(_key);
-      }
-    }
+    // /**
+    //  * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
+    //  * @param _in 
+    //  * @param _key 
+    //  * @param _deletor 
+    //  */
+    // private static removeReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _deletor: Function): void {
+    //   let reference: Reference<ReferenceType>;
+    //   reference = _in.get(_key);
+    //   if (reference.decreaseCounter() == 0) {
+    //     // The following deletions may be an optimization, not necessary to start with and maybe counterproductive.
+    //     // If data should be used later again, it must then be reconstructed...
+    //     _deletor(reference.getReference());
+    //     _in.delete(_key);
+    //   }
+    // }
 
-    /**
-     * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
-     * @param _in 
-     * @param _key 
-     * @param _creator 
-     */
-    private static createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
-      let reference: Reference<ReferenceType>;
-      reference = _in.get(_key);
-      if (reference)
-        reference.increaseCounter();
-      else {
-        let content: ReferenceType = _creator(_key);
-        reference = new Reference<ReferenceType>(content);
-        reference.increaseCounter();
-        _in.set(_key, reference);
-      }
-    }
+    // /**
+    //  * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
+    //  * @param _in 
+    //  * @param _key 
+    //  * @param _creator 
+    //  */
+    // private static createReference<KeyType, ReferenceType>(_in: Map<KeyType, Reference<ReferenceType>>, _key: KeyType, _creator: Function): void {
+    //   let reference: Reference<ReferenceType>;
+    //   reference = _in.get(_key);
+    //   if (reference)
+    //     reference.increaseCounter();
+    //   else {
+    //     let content: ReferenceType = _creator(_key);
+    //     reference = new Reference<ReferenceType>(content);
+    //     reference.increaseCounter();
+    //     _in.set(_key, reference);
+    //   }
+    // }
     // #endregion
   }
 }

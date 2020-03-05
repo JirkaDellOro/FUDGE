@@ -240,6 +240,14 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RenderInjectorShader {
+        static decorate(_constructor: Function): void;
+        static useProgram(this: typeof Shader): void;
+        static deleteProgram(this: typeof Shader): void;
+        protected static createProgram(this: typeof Shader): void;
+    }
+}
+declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
         protected static injectCoatColored(this: Coat, _renderShader: RenderShader): void;
@@ -346,15 +354,10 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_renderShader: RenderShader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_renderShader: typeof Shader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
-        protected static useBuffers(_renderBuffers: RenderBuffers): void;
-        protected static deleteBuffers(_renderBuffers: RenderBuffers): void;
-        protected static createParameter(_coat: Coat): RenderCoat;
-        protected static useParameter(_coatInfo: RenderCoat): void;
-        protected static deleteParameter(_coatInfo: RenderCoat): void;
     }
 }
 declare namespace FudgeCore {
@@ -3093,20 +3096,6 @@ declare namespace FudgeCore {
          * @param _world
          */
         private static recalculateTransformsOfNodeAndChildren;
-        /**
-         * Removes a reference to a program, parameter or buffer by decreasing its reference counter and deleting it, if the counter reaches 0
-         * @param _in
-         * @param _key
-         * @param _deletor
-         */
-        private static removeReference;
-        /**
-         * Increases the counter of the reference to a program, parameter or buffer. Creates the reference, if it's not existent.
-         * @param _in
-         * @param _key
-         * @param _creator
-         */
-        private static createReference;
     }
 }
 declare namespace FudgeCore {
@@ -3116,10 +3105,20 @@ declare namespace FudgeCore {
      */
     class Shader {
         static readonly subclasses: typeof Shader[];
+        static program: WebGLProgram;
+        static attributes: {
+            [name: string]: number;
+        };
+        static uniforms: {
+            [name: string]: WebGLUniformLocation;
+        };
         /** The type of coat that can be used with this shader to create a material */
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static deleteProgram(this: typeof Shader): void;
+        static useProgram(this: typeof Shader): void;
+        static createProgram(this: typeof Shader): void;
         protected static registerSubclass(_subclass: typeof Shader): number;
     }
 }

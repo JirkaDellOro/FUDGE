@@ -1,4 +1,5 @@
 ///<reference path="RenderInjector.ts"/>
+///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
 namespace FudgeCore {
@@ -9,12 +10,12 @@ namespace FudgeCore {
     stride: number; // Number of indices that will be skipped each iteration.
     offset: number; // Index of the element to begin with.
   }
-  export interface RenderShader {
-    // TODO: examine, if this should be injected in shader class via RenderInjector, as done with Coat
-    program: WebGLProgram;
-    attributes: { [name: string]: number };
-    uniforms: { [name: string]: WebGLUniformLocation };
-  }
+  // export interface RenderShader {
+  //   // TODO: examine, if this should be injected in shader class via RenderInjector, as done with Coat
+  //   program: WebGLProgram;
+  //   attributes: { [name: string]: number };
+  //   uniforms: { [name: string]: WebGLUniformLocation };
+  // }
 
   export interface RenderBuffers {
     // TODO: examine, if this should be injected in mesh class via RenderInjector, as done with Coat
@@ -83,7 +84,7 @@ namespace FudgeCore {
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
       RenderOperator.rectViewport = RenderOperator.getCanvasRect();
 
-      RenderOperator.renderShaderRayCast = RenderOperator.createProgram(ShaderRayCast);
+      // RenderOperator.renderShaderRayCast = RenderOperator.createProgram(ShaderRayCast);
     }
 
     /**
@@ -201,8 +202,9 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static draw(_renderShader: RenderShader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void {
-      RenderOperator.useProgram(_renderShader);
+    protected static draw(_renderShader: typeof Shader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void {
+      // RenderOperator.useProgram(_renderShader);
+      _renderShader.useProgram();
       _mesh.useRenderBuffers(_renderShader, _world, _projection);
       _coat.useRenderData(_renderShader);
       RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
@@ -282,72 +284,6 @@ namespace FudgeCore {
         RenderOperator.crc3.deleteProgram(_program.program);
         delete _program.attributes;
         delete _program.uniforms;
-      }
-    }
-    // #endregion
-
-    // // #region Meshbuffer
-    // protected static createBuffers(_mesh: Mesh): RenderBuffers {
-    //   let vertices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
-    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.vertices, WebGL2RenderingContext.STATIC_DRAW);
-
-    //   let indices: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
-    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _mesh.indices, WebGL2RenderingContext.STATIC_DRAW);
-
-    //   let textureUVs: WebGLBuffer = RenderOperator.crc3.createBuffer();
-    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
-    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
-
-    //   let normalsFace: WebGLBuffer = RenderOperator.assert<WebGLBuffer>(RenderOperator.crc3.createBuffer());
-    //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
-    //   RenderOperator.crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, _mesh.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
-
-    //   let bufferInfo: RenderBuffers = {
-    //     vertices: vertices,
-    //     indices: indices,
-    //     nIndices: _mesh.getIndexCount(),
-    //     textureUVs: textureUVs,
-    //     normalsFace: normalsFace
-    //   };
-    //   return bufferInfo;
-    // }
-    
-    protected static useBuffers(_renderBuffers: RenderBuffers): void {
-      // TODO: currently unused, done specifically in draw. Could be saved in VAO within RenderBuffers
-      // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
-      // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-      // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
-
-    }
-    protected static deleteBuffers(_renderBuffers: RenderBuffers): void {
-      if (_renderBuffers) {
-        RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, null);
-        RenderOperator.crc3.deleteBuffer(_renderBuffers.vertices);
-        RenderOperator.crc3.deleteBuffer(_renderBuffers.textureUVs);
-        RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, null);
-        RenderOperator.crc3.deleteBuffer(_renderBuffers.indices);
-      }
-    }
-    // #endregion
-
-    // #region MaterialParameters
-    protected static createParameter(_coat: Coat): RenderCoat {
-      // let vao: WebGLVertexArrayObject = RenderOperator.assert<WebGLVertexArrayObject>(RenderOperator.crc3.createVertexArray());
-      let coatInfo: RenderCoat = {
-        //vao: null,
-        coat: _coat
-      };
-      return coatInfo;
-    }
-    protected static useParameter(_coatInfo: RenderCoat): void {
-      // RenderOperator.crc3.bindVertexArray(_coatInfo.vao);
-    }
-    protected static deleteParameter(_coatInfo: RenderCoat): void {
-      if (_coatInfo) {
-        RenderOperator.crc3.bindVertexArray(null);
-        // RenderOperator.crc3.deleteVertexArray(_coatInfo.vao);
       }
     }
     // #endregion

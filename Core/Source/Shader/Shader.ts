@@ -6,14 +6,23 @@ namespace FudgeCore {
    */
 
   // TODO: define attribute/uniforms as layout and use those consistently in shaders
-
+  @RenderInjectorShader.decorate
   export class Shader {
     public static readonly subclasses: typeof Shader[] = [];
+    public static program: WebGLProgram;
+    public static attributes: { [name: string]: number };
+    public static uniforms: { [name: string]: WebGLUniformLocation };
+
     /** The type of coat that can be used with this shader to create a material */
     public static getCoat(): typeof Coat { return null; }
     public static getVertexShaderSource(): string { return null; }
     public static getFragmentShaderSource(): string { return null; }
 
+    public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
+    public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
+    public static createProgram(this: typeof Shader): void {/* injected by decorator */ } 
+    
+    
     protected static registerSubclass(_subclass: typeof Shader): number { return Shader.subclasses.push(_subclass) - 1; }
   }
 }
