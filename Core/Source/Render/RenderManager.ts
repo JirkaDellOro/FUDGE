@@ -1,12 +1,12 @@
 // / <reference path="RenderOperator.ts"/>
 namespace FudgeCore {
-  interface NodeReferences {
-    // shader: typeof Shader;
-    // coat: Coat;
-    // mesh: Mesh;
-    // doneTransformToWorld: boolean;
-  }
-  type MapNodeToNodeReferences = Map<Node, NodeReferences>;
+  // interface NodeReferences {
+  //   // shader: typeof Shader;
+  //   // coat: Coat;
+  //   // mesh: Mesh;
+  //   // doneTransformToWorld: boolean;
+  // }
+  // type MapNodeToNodeReferences = Map<Node, NodeReferences>;
 
   export interface PickBuffer {
     node: Node;
@@ -54,7 +54,7 @@ namespace FudgeCore {
     // private static renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
     // private static renderBuffers: Map<Mesh, Reference<RenderBuffers>> = new Map();
-    private static nodes: MapNodeToNodeReferences = new Map();
+    // private static nodes: MapNodeToNodeReferences = new Map();
     private static timestampUpdate: number;
     private static pickBuffers: PickBuffer[];
 
@@ -64,8 +64,8 @@ namespace FudgeCore {
      * @param _node 
      */
     public static addNode(_node: Node): void {
-      if (RenderManager.nodes.get(_node))
-        return;
+      // if (RenderManager.nodes.get(_node))
+      //   return;
 
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       if (!cmpMaterial)
@@ -112,15 +112,15 @@ namespace FudgeCore {
      * @param _node 
      */
     public static removeNode(_node: Node): void {
-      let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
-      if (!nodeReferences)
-        return;
+      // let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
+      // if (!nodeReferences)
+      //   return;
 
       // RenderManager.removeReference<typeof Shader, RenderShader>(RenderManager.renderShaders, nodeReferences.shader, RenderManager.deleteProgram);
       // RenderManager.removeReference<Coat, RenderCoat>(RenderManager.renderCoats, nodeReferences.coat, RenderManager.deleteParameter);
       // RenderManager.removeReference<Mesh, RenderBuffers>(RenderManager.renderBuffers, nodeReferences.mesh, RenderManager.deleteBuffers);
 
-      RenderManager.nodes.delete(_node);
+      // RenderManager.nodes.delete(_node);
 
       // nodeReferences.mesh.deleteRenderBuffers(null);
     }
@@ -141,9 +141,9 @@ namespace FudgeCore {
      * @param _node
      */
     public static updateNode(_node: Node): void {
-      let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
-      if (!nodeReferences)
-        return;
+      // let nodeReferences: NodeReferences = RenderManager.nodes.get(_node);
+      // if (!nodeReferences)
+      //   return;
 
       // let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
 
@@ -200,8 +200,9 @@ namespace FudgeCore {
      * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
      */
     public static update(): void {
-      RenderManager.timestampUpdate = performance.now();
-      RenderManager.recalculateAllNodeTransforms();
+      // RenderManager.timestampUpdate = performance.now();
+      // RenderManager.recalculateTransformsOfNodeAndChildren(null);
+      // RenderManager.recalculateAllNodeTransforms();
     }
 
     /**
@@ -225,11 +226,16 @@ namespace FudgeCore {
      * @param _node 
      * @param _cmpCamera 
      */
-    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+      // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       if (!_node.isActive)
         return;
       if (_drawNode == RenderManager.drawNode)
         RenderManager.resetFrameBuffer();
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (_node.getParent())
+        matrix = _node.getParent().mtxWorld;
+      RenderManager.recalculateTransformsOfNodeAndChildren(_node, matrix);
 
       let finalTransform: Matrix4x4;
 
@@ -374,40 +380,41 @@ namespace FudgeCore {
     /**
      * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
      */
-    private static recalculateAllNodeTransforms(): void {
-      // inner function to be called in a for each node at the bottom of RenderManager function
-      // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
-      //     _nodeReferences.doneTransformToWorld = false;
-      // }
+    // private static recalculateAllNodeTransforms(): void {
+    //   // inner function to be called in a for each node at the bottom of RenderManager function
+    //   // function markNodeToBeTransformed(_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences): void {
+    //   //     _nodeReferences.doneTransformToWorld = false;
+    //   // }
 
-      // inner function to be called in a for each node at the bottom of RenderManager function
-      let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void = (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
-        // find uppermost ancestor not recalculated yet
-        let ancestor: Node = _node;
-        let parent: Node;
-        while (true) {
-          parent = ancestor.getParent();
-          if (!parent)
-            break;
-          if (_node.isUpdated(RenderManager.timestampUpdate))
-            break;
-          ancestor = parent;
-        }
-        // TODO: check if nodes without meshes must be registered
+    //   // inner function to be called in a for each node at the bottom of RenderManager function
+    //   let recalculateBranchContainingNode: (_r: NodeReferences, _n: Node, _m: MapNodeToNodeReferences) => void =
+    //     (_nodeReferences: NodeReferences, _node: Node, _map: MapNodeToNodeReferences) => {
+    //       // find uppermost ancestor not recalculated yet
+    //       let ancestor: Node = _node;
+    //       let parent: Node;
+    //       while (true) {
+    //         parent = ancestor.getParent();
+    //         if (!parent)
+    //           break;
+    //         if (_node.isUpdated(RenderManager.timestampUpdate))
+    //           break;
+    //         ancestor = parent;
+    //       }
+    //       // TODO: check if nodes without meshes must be registered
 
-        // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
-        let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-        if (parent)
-          matrix = parent.mtxWorld;
+    //       // use the ancestors parent world matrix to start with, or identity if no parent exists or it's missing a ComponenTransform
+    //       let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+    //       if (parent)
+    //         matrix = parent.mtxWorld;
 
-        // start recursive recalculation of the whole branch starting from the ancestor found
-        RenderManager.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
-      };
+    //       // start recursive recalculation of the whole branch starting from the ancestor found
+    //       RenderManager.recalculateTransformsOfNodeAndChildren(ancestor, matrix);
+    //     };
 
-      // call the functions above for each registered node
-      // RenderManager.nodes.forEach(markNodeToBeTransformed);
-      RenderManager.nodes.forEach(recalculateBranchContainingNode);
-    }
+    // call the functions above for each registered node
+    // RenderManager.nodes.forEach(markNodeToBeTransformed);
+    // RenderManager.nodes.forEach(recalculateBranchContainingNode);
+    // }
 
     /**
      * Recursive method receiving a childnode and its parents updated world transform.  

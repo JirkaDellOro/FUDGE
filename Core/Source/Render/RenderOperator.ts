@@ -2,6 +2,7 @@
 ///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
+
 namespace FudgeCore {
   export interface BufferSpecification {
     size: number;   // The size of the datasample.
