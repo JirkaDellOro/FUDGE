@@ -17,29 +17,29 @@ namespace FudgeCore {
   /**
    * This class manages the references to render data used by nodes.
    * Multiple nodes may refer to the same data via their references to shader, coat and mesh 
-   */
-  class Reference<T> {
-    private reference: T;
-    private count: number = 0;
+  //  */
+  // class Reference<T> {
+  //   private reference: T;
+  //   private count: number = 0;
 
-    constructor(_reference: T) {
-      this.reference = _reference;
-    }
+  //   constructor(_reference: T) {
+  //     this.reference = _reference;
+  //   }
 
-    public getReference(): T {
-      return this.reference;
-    }
+  //   public getReference(): T {
+  //     return this.reference;
+  //   }
 
-    public increaseCounter(): number {
-      this.count++;
-      return this.count;
-    }
-    public decreaseCounter(): number {
-      if (this.count == 0) throw (new Error("Negative reference counter"));
-      this.count--;
-      return this.count;
-    }
-  }
+  //   public increaseCounter(): number {
+  //     this.count++;
+  //     return this.count;
+  //   }
+  //   public decreaseCounter(): number {
+  //     if (this.count == 0) throw (new Error("Negative reference counter"));
+  //     this.count--;
+  //     return this.count;
+  //   }
+  // }
 
   /**
    * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
@@ -49,7 +49,7 @@ namespace FudgeCore {
   export abstract class RenderManager extends RenderOperator {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-    private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
+    // private static renderShaders: Map<typeof Shader, Reference<RenderShader>> = new Map();
     /** Stores references to the vertex array objects and makes them available via the references to coats */
     // private static renderCoats: Map<Coat, Reference<RenderCoat>> = new Map();
     /** Stores references to the vertex buffers and makes them available via the references to meshes */
@@ -185,14 +185,14 @@ namespace FudgeCore {
      * RenderManager passes it on to all shaders used that can process light
      * @param _lights
      */
-    public static setLights(_lights: MapLightTypeToLightList): void {
-      // let renderLights: RenderLights = RenderManager.createRenderLights(_lights);
-      for (let entry of RenderManager.renderShaders) {
-        let renderShader: RenderShader = entry[1].getReference();
-        RenderManager.setLightsInShader(renderShader, _lights);
-      }
-      // debugger;
-    }
+    // public static setLights(_lights: MapLightTypeToLightList): void {
+    //   // let renderLights: RenderLights = RenderManager.createRenderLights(_lights);
+    //   for (let entry of RenderManager.renderShaders) {
+    //     let renderShader: RenderShader = entry[1].getReference();
+    //     RenderManager.setLightsInShader(renderShader, _lights);
+    //   }
+    //   // debugger;
+    // }
     // #endregion
 
     // #region Rendering
@@ -324,20 +324,24 @@ namespace FudgeCore {
       const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
       RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
 
-      let references: NodeReferences = RenderManager.nodes.get(_node);
-      if (!references)
-        return; // TODO: deal with partial references
+      // let references: NodeReferences = RenderManager.nodes.get(_node);
+      // if (!references)
+      //   return; // TODO: deal with partial references
 
-      let pickBuffer: PickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
-      RenderManager.pickBuffers.push(pickBuffer);
 
-      let renderShader: RenderShader = RenderOperator.renderShaderRayCast;
-      RenderOperator.useProgram(renderShader);
-      let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-      mesh.useRenderBuffers(renderShader, _finalTransform, _projection, RenderManager.pickBuffers.length);
+      // let renderShader: RenderShader = RenderOperator.renderShaderRayCast;
+      // RenderOperator.useProgram(renderShader);
+      try {
+        let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+        ShaderRayCast.useProgram();
+        let pickBuffer: PickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
+        RenderManager.pickBuffers.push(pickBuffer);
+        mesh.useRenderBuffers(ShaderRayCast, _finalTransform, _projection, RenderManager.pickBuffers.length);
 
-      RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-
+        RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      } catch (_error) {
+        //
+      }
       // make texture available to onscreen-display
     }
 

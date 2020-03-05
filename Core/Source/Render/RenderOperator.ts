@@ -42,7 +42,7 @@ namespace FudgeCore {
    */
   export abstract class RenderOperator {
     protected static crc3: WebGL2RenderingContext;
-    protected static renderShaderRayCast: RenderShader;
+    // protected static renderShaderRayCast: RenderShader;
     private static rectViewport: Rectangle;
 
     /** 
@@ -164,40 +164,41 @@ namespace FudgeCore {
     /**
      * Set light data in shaders
      */
-    protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void {
-      RenderOperator.useProgram(_renderShader);
-      let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
+    // TODO: process lights in Shaders!
+    // protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void {
+    //   RenderOperator.useProgram(_renderShader);
+    //   let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
 
-      let ambient: WebGLUniformLocation = uni["u_ambient.color"];
-      if (ambient) {
-        let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
-        if (cmpLights) {
-          // TODO: add up ambient lights to a single color
-          let result: Color = new Color(0, 0, 0, 1);
-          for (let cmpLight of cmpLights)
-            result.add(cmpLight.light.color);
-          RenderOperator.crc3.uniform4fv(ambient, result.getArray());
-        }
-      }
+    //   let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+    //   if (ambient) {
+    //     let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
+    //     if (cmpLights) {
+    //       // TODO: add up ambient lights to a single color
+    //       let result: Color = new Color(0, 0, 0, 1);
+    //       for (let cmpLight of cmpLights)
+    //         result.add(cmpLight.light.color);
+    //       RenderOperator.crc3.uniform4fv(ambient, result.getArray());
+    //     }
+    //   }
 
-      let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
-      if (nDirectional) {
-        let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
-        if (cmpLights) {
-          let n: number = cmpLights.length;
-          RenderOperator.crc3.uniform1ui(nDirectional, n);
-          for (let i: number = 0; i < n; i++) {
-            let cmpLight: ComponentLight = cmpLights[i];
-            RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
-            let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.pivot);
-            direction.transform(cmpLight.getContainer().mtxWorld);
-            RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
-          }
-        }
-      }
-      // debugger;
-    }
+    //   let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
+    //   if (nDirectional) {
+    //     let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
+    //     if (cmpLights) {
+    //       let n: number = cmpLights.length;
+    //       RenderOperator.crc3.uniform1ui(nDirectional, n);
+    //       for (let i: number = 0; i < n; i++) {
+    //         let cmpLight: ComponentLight = cmpLights[i];
+    //         RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
+    //         let direction: Vector3 = Vector3.Z();
+    //         direction.transform(cmpLight.pivot);
+    //         direction.transform(cmpLight.getContainer().mtxWorld);
+    //         RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+    //       }
+    //     }
+    //   }
+    //   // debugger;
+    // }
 
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
@@ -211,81 +212,81 @@ namespace FudgeCore {
     }
 
     // #region Shaderprogram 
-    protected static createProgram(_shaderClass: typeof Shader): RenderShader {
-      let crc3: WebGL2RenderingContext = RenderOperator.crc3;
-      let program: WebGLProgram = crc3.createProgram();
-      let renderShader: RenderShader;
-      try {
-        crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
-        crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
-        crc3.linkProgram(program);
-        let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(program));
-        if (error !== "") {
-          throw new Error("Error linking Shader: " + error);
-        }
-        renderShader = {
-          program: program,
-          attributes: detectAttributes(),
-          uniforms: detectUniforms()
-        };
-      } catch (_error) {
-        Debug.error(_error);
-        debugger;
-      }
-      return renderShader;
+    // protected static createProgram(_shaderClass: typeof Shader): RenderShader {
+    //   let crc3: WebGL2RenderingContext = RenderOperator.crc3;
+    //   let program: WebGLProgram = crc3.createProgram();
+    //   let renderShader: RenderShader;
+    //   try {
+    //     crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+    //     crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(_shaderClass.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+    //     crc3.linkProgram(program);
+    //     let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(program));
+    //     if (error !== "") {
+    //       throw new Error("Error linking Shader: " + error);
+    //     }
+    //     renderShader = {
+    //       program: program,
+    //       attributes: detectAttributes(),
+    //       uniforms: detectUniforms()
+    //     };
+    //   } catch (_error) {
+    //     Debug.error(_error);
+    //     debugger;
+    //   }
+    //   return renderShader;
 
 
-      function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
-        let webGLShader: WebGLShader = crc3.createShader(_shaderType);
-        crc3.shaderSource(webGLShader, _shaderCode);
-        crc3.compileShader(webGLShader);
-        let error: string = RenderOperator.assert<string>(crc3.getShaderInfoLog(webGLShader));
-        if (error !== "") {
-          throw new Error("Error compiling shader: " + error);
-        }
-        // Check for any compilation errors.
-        if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
-          alert(crc3.getShaderInfoLog(webGLShader));
-          return null;
-        }
-        return webGLShader;
-      }
-      function detectAttributes(): { [name: string]: number } {
-        let detectedAttributes: { [name: string]: number } = {};
-        let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
-        for (let i: number = 0; i < attributeCount; i++) {
-          let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
-          if (!attributeInfo) {
-            break;
-          }
-          detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
-        }
-        return detectedAttributes;
-      }
-      function detectUniforms(): { [name: string]: WebGLUniformLocation } {
-        let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
-        let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
-        for (let i: number = 0; i < uniformCount; i++) {
-          let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
-          if (!info) {
-            break;
-          }
-          detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
-        }
-        return detectedUniforms;
-      }
-    }
-    protected static useProgram(_shaderInfo: RenderShader): void {
-      RenderOperator.crc3.useProgram(_shaderInfo.program);
-      RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
-    }
-    protected static deleteProgram(_program: RenderShader): void {
-      if (_program) {
-        RenderOperator.crc3.deleteProgram(_program.program);
-        delete _program.attributes;
-        delete _program.uniforms;
-      }
-    }
+    //   function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
+    //     let webGLShader: WebGLShader = crc3.createShader(_shaderType);
+    //     crc3.shaderSource(webGLShader, _shaderCode);
+    //     crc3.compileShader(webGLShader);
+    //     let error: string = RenderOperator.assert<string>(crc3.getShaderInfoLog(webGLShader));
+    //     if (error !== "") {
+    //       throw new Error("Error compiling shader: " + error);
+    //     }
+    //     // Check for any compilation errors.
+    //     if (!crc3.getShaderParameter(webGLShader, WebGL2RenderingContext.COMPILE_STATUS)) {
+    //       alert(crc3.getShaderInfoLog(webGLShader));
+    //       return null;
+    //     }
+    //     return webGLShader;
+    //   }
+    //   function detectAttributes(): { [name: string]: number } {
+    //     let detectedAttributes: { [name: string]: number } = {};
+    //     let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
+    //     for (let i: number = 0; i < attributeCount; i++) {
+    //       let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
+    //       if (!attributeInfo) {
+    //         break;
+    //       }
+    //       detectedAttributes[attributeInfo.name] = crc3.getAttribLocation(program, attributeInfo.name);
+    //     }
+    //     return detectedAttributes;
+    //   }
+    //   function detectUniforms(): { [name: string]: WebGLUniformLocation } {
+    //     let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
+    //     let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
+    //     for (let i: number = 0; i < uniformCount; i++) {
+    //       let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
+    //       if (!info) {
+    //         break;
+    //       }
+    //       detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
+    //     }
+    //     return detectedUniforms;
+    //   }
+    // }
+    // protected static useProgram(_shaderInfo: RenderShader): void {
+    //   RenderOperator.crc3.useProgram(_shaderInfo.program);
+    //   RenderOperator.crc3.enableVertexAttribArray(_shaderInfo.attributes["a_position"]);
+    // }
+    // protected static deleteProgram(_program: RenderShader): void {
+    //   if (_program) {
+    //     RenderOperator.crc3.deleteProgram(_program.program);
+    //     delete _program.attributes;
+    //     delete _program.uniforms;
+    //   }
+    // }
     // #endregion
   }
 }

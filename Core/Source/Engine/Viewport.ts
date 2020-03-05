@@ -120,7 +120,7 @@ namespace FudgeCore {
       if (RenderManager.addBranch(this.branch))
         // branch has not yet been processed fully by rendermanager -> update all registered nodes
         RenderManager.update();
-      RenderManager.setLights(this.lights);
+      // RenderManager.setLights(this.lights);
       RenderManager.drawBranch(this.branch, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
