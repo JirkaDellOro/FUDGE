@@ -301,14 +301,13 @@ namespace FudgeCore {
       if (!references)
         return; // TODO: deal with partial references
 
-      let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
+      // let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
       // let coatInfo: RenderCoat = RenderManager.renderCoats.get(references.coat).getReference();
       // TODO: get coat from node
       let coat: Coat = _node.getComponent(ComponentMaterial).material.getCoat();
       let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
-      RenderManager.draw(shaderInfo, bufferInfo, coat, _finalTransform, _projection);
+      RenderManager.draw(shaderInfo, references.mesh, coat, _finalTransform, _projection);
       // RenderManager.draw(shaderInfo, bufferInfo, coatInfo, _finalTransform, _projection);
-      references.mesh.useRenderBuffers(null);
     }
 
     private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba

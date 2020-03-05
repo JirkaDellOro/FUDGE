@@ -251,7 +251,7 @@ declare namespace FudgeCore {
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader): void;
+        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -293,6 +293,12 @@ declare namespace FudgeCore {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
         private static renderShaderRayCast;
+        /**
+         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
+         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         */
+        static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
         * @param _value // value to check against null
@@ -345,7 +351,7 @@ declare namespace FudgeCore {
          * @param _world
          * @param _projection
          */
-        protected static draw(_renderShader: RenderShader, _renderBuffers: RenderBuffers, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_renderShader: RenderShader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
         /**
          * Draw a buffer with a special shader that uses an id instead of a color
          * @param _renderShader
@@ -363,12 +369,6 @@ declare namespace FudgeCore {
         protected static createParameter(_coat: Coat): RenderCoat;
         protected static useParameter(_coatInfo: RenderCoat): void;
         protected static deleteParameter(_coatInfo: RenderCoat): void;
-        /**
-         * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
-         */
-        private static setAttributeStructure;
     }
 }
 declare namespace FudgeCore {
@@ -2681,7 +2681,7 @@ declare namespace FudgeCore {
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
-        useRenderBuffers(_renderShader: RenderShader): void;
+        useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void;
         createRenderBuffers(_renderShader: RenderShader): void;
         deleteRenderBuffers(_renderShader: RenderShader): void;
         getVertexCount(): number;
