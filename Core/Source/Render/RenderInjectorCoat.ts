@@ -4,13 +4,13 @@ namespace FudgeCore {
       RenderInjector.inject(_constructor, RenderInjectorCoat);
     }
 
-    protected static injectCoatColored(this: Coat, _renderShader: RenderShader): void {
+    protected static injectCoatColored(this: Coat, _renderShader: typeof Shader): void {
       let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_color"];
       let color: Float32Array = (<CoatColored>this).color.getArray();
       RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
     }
 
-    protected static injectCoatTextured(this: Coat, _renderShader: RenderShader): void {
+    protected static injectCoatTextured(this: Coat, _renderShader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
       if (this.renderData) {
         // buffers exist
@@ -45,7 +45,7 @@ namespace FudgeCore {
       }
     }
 
-    protected static injectCoatMatCap(this: Coat, _renderShader: RenderShader): void {
+    protected static injectCoatMatCap(this: Coat, _renderShader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
       let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_tint_color"];

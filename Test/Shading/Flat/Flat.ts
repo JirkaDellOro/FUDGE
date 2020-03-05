@@ -14,8 +14,6 @@ namespace TextureTest {
 
     let branch: ƒ.Node = new ƒ.Node("Branch");
     branch.addChild(cube);
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 3, 3), new ƒ.Vector3(0, 0, 0));
@@ -26,8 +24,8 @@ namespace TextureTest {
     window.setInterval(function (): void {
       cube.cmpTransform.local.rotateY(-1);
       cube.cmpTransform.local.rotateX(-2);
-      ƒ.RenderManager.update();
       viewport.draw();
-    }, 20);
+    }, 
+                       20);
   }
 }

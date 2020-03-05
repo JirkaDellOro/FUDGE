@@ -72,9 +72,6 @@ var UITest;
         // create asset
         branch = new ƒ.Node("Root");
         branch.addComponent(new ƒ.ComponentTransform());
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.createElement("canvas");
         canvas.height = 800;
@@ -91,7 +88,6 @@ var UITest;
         });
         function animate(_event) {
             branch.cmpTransform.local.rotateY(1);
-            ƒ.RenderManager.update();
             // prepare and draw viewport
             viewPort.draw();
         }

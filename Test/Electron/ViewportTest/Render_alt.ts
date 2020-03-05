@@ -46,8 +46,6 @@ namespace ElectronViewport {
     ƒ.RenderManager.initialize();
     // create asset
     branch = Scenes.createAxisCross();
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
 
     // initialize viewport
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
@@ -76,7 +74,6 @@ namespace ElectronViewport {
 
   function animate(_event: Event): void {
     branch.cmpTransform.local.rotateY(1);
-    ƒ.RenderManager.update();
     // prepare and draw viewport
     viewPort.draw();
   }

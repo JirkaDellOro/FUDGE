@@ -8,10 +8,6 @@ namespace RenderManagerRendering {
     // create asset
     let branch: ƒ.Node = Scenes.createAxisCross();
 
-    // initialize RenderManager and transmit content
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
-
     // initialize viewport
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
     cmpCamera.projectCentral(1, 45);

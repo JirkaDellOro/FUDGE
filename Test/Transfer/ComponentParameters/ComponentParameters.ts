@@ -28,8 +28,6 @@ namespace ComponentParameters {
       root.addChild(quad);
     }
 
-    ƒ.RenderManager.update();
-
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.pivot.translateZ(3);

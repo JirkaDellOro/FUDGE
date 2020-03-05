@@ -47,7 +47,6 @@ namespace MatCapTest {
       pyramidGreen.cmpTransform.local.rotateY(0.5);
       pyramidRed.cmpTransform.local.rotateX(0.6);
       pyramidRed.cmpTransform.local.rotateY(0.8);
-      ƒ.RenderManager.update();
       viewport.draw();
     }
 

@@ -58,10 +58,6 @@ var AnimationTest;
         // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
         // node.getComponent(ƒ.ComponentMesh).mutate(<ƒ.Mutator>(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]));
         node.applyAnimation(mutator);
-        // mesh.mutate(animation.animatedObject);
-        // console.clear();
-        // console.log(time % 4000, animation.animatedObject["pivot"]["rotation"]["x"]);
-        ƒ.RenderManager.update();
         Scenes.viewport.draw();
     }
     function hndlEv(_e) {

@@ -20,7 +20,7 @@ namespace TextureTest {
 
         let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("RED")));
         cmpLightDirectionalRed.pivot.lookAt(new ƒ.Vector3(-1, -1, 0));
-        lights.addComponent(cmpLightDirectionalRed);
+        lights.addComponent(cmpLightDirectionalRed); 
 
         let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("GREEN")));
         cmpLightDirectionalGreen.pivot.lookAt(new ƒ.Vector3(0, -1, -1));
@@ -34,9 +34,6 @@ namespace TextureTest {
         branch.addChild(body);
         branch.addChild(Scenes.createCoordinateSystem());
         branch.addChild(lights);
-
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
         let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 2), new ƒ.Vector3(0, 0, 0));
@@ -52,7 +49,6 @@ namespace TextureTest {
                 // body.cmpTransform.rotateY(-1.1);
                 lights.cmpTransform.local.rotateY(-1);
                 // body.cmpTransform.rotateZ(-0.9);
-                ƒ.RenderManager.update();
                 viewport.draw();
             },
             20);

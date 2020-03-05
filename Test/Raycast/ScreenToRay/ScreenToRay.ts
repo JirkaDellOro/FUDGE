@@ -22,10 +22,6 @@ namespace ScreenToRay {
     let branch: ƒ.Node = Scenes.createAxisCross();
     branch.addComponent(new ƒ.ComponentTransform());
 
-    // transmit content
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
-
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -77,7 +73,6 @@ namespace ScreenToRay {
 
     function animate(_event: Event): void {
       update();
-      ƒ.RenderManager.update();
       viewport.draw();
       adjustRayCamera();
       pickNodeAt(mouse);

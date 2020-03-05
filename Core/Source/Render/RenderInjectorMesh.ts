@@ -1,4 +1,12 @@
 namespace FudgeCore {
+  export interface RenderBuffers {
+    vertices: WebGLBuffer;
+    indices: WebGLBuffer;
+    nIndices: number;
+    textureUVs: WebGLBuffer;
+    normalsFace: WebGLBuffer;
+  }
+
   export class RenderInjectorMesh {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
@@ -44,7 +52,7 @@ namespace FudgeCore {
       this.renderBuffers = renderBuffers;
     }
 
-    protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
+    protected static useRenderBuffers(this: Mesh, _renderShader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
       // console.log("useRenderBuffers", this);
       // return;
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();

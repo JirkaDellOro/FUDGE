@@ -18,9 +18,6 @@ var ScreenToRay;
         // create asset
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
-        // transmit content
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -62,7 +59,6 @@ var ScreenToRay;
         // animate(null);
         function animate(_event) {
             update();
-            ƒ.RenderManager.update();
             viewport.draw();
             adjustRayCamera();
             pickNodeAt(mouse);

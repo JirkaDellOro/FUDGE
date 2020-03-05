@@ -28,9 +28,6 @@ namespace TextureTest {
     branch.addChild(cube);
     branch.addChild(pyramid);
 
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
-
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
     viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -41,8 +38,8 @@ namespace TextureTest {
       pyramid.cmpTransform.local.rotateX(1);
       cube.cmpTransform.local.rotateY(-1);
       quad.cmpTransform.local.rotateZ(1);
-      ƒ.RenderManager.update();
       viewport.draw();
-    }, 20);
+    }, 
+                       20);
   }
 }

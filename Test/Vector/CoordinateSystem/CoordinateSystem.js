@@ -12,7 +12,6 @@ var TextureTest;
         //     new ƒ.MeshQuad()
         // );
         // coSys.addChild(object);
-        ƒ.RenderManager.addBranch(coSys);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
@@ -20,7 +19,6 @@ var TextureTest;
             // body.cmpTransform.rotateY(-1.1);
             coSys.cmpTransform.local.rotateY(1);
             // body.cmpTransform.rotateZ(-0.9);
-            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
     }

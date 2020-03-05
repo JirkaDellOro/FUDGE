@@ -43,8 +43,7 @@ namespace MeshTest {
     branch.addChild(lights);
 
     branch.addChild(body);
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
+
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
@@ -57,9 +56,9 @@ namespace MeshTest {
 
     window.setInterval(function (): void {
       gridFlat.cmpTransform.local.rotateY(0.5);
-      ƒ.RenderManager.update();
       viewport.draw();
-    }, 20);
+    },
+                       20);
 
   }
 }

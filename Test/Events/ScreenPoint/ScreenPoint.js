@@ -7,8 +7,6 @@ var ScreenPoint;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let branch = Scenes.createAxisCross();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let posCamera = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
         let cmpCamera = Scenes.createCamera(posCamera);

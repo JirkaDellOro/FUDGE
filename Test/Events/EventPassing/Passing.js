@@ -8,8 +8,6 @@ var EventPassing;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let branch = Scenes.createAxisCross();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let posCameras = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList = document.getElementsByTagName("canvas");
         for (let i = 0; i < canvasList.length; i++) {

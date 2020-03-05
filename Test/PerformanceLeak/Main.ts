@@ -28,7 +28,6 @@ namespace PerformanceLeak {
     viewport.initialize("Viewport", game, cmpCamera, canvas);
     viewport.draw();
 
-    ƒ.RenderManager.update();
     game.broadcastEvent(new CustomEvent("registerHitBox"));
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -48,7 +47,6 @@ namespace PerformanceLeak {
         if (game.getChildren().length > 0) {
           let node: ƒ.Node = game.getChildren().pop();
           game.removeChild(node);
-          ƒ.RenderManager.removeNode(node);
         }
         // // create Node
         createNode("Node");

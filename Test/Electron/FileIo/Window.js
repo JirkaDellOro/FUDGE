@@ -31,7 +31,6 @@ var ElectronFileIo;
     function displayNode(_node) {
         if (!_node)
             return;
-        ƒ.RenderManager.removeBranch(branch);
         branch = _node;
         viewport.setBranch(branch);
         viewport.draw();

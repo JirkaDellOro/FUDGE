@@ -21,7 +21,6 @@ var PerformanceLeak;
         viewport = new PerformanceLeak.ƒ.Viewport();
         viewport.initialize("Viewport", game, cmpCamera, canvas);
         viewport.draw();
-        PerformanceLeak.ƒ.RenderManager.update();
         game.broadcastEvent(new CustomEvent("registerHitBox"));
         PerformanceLeak.ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         PerformanceLeak.ƒ.Loop.start(PerformanceLeak.ƒ.LOOP_MODE.TIME_GAME, 60);
@@ -37,7 +36,6 @@ var PerformanceLeak;
                 if (game.getChildren().length > 0) {
                     let node = game.getChildren().pop();
                     game.removeChild(node);
-                    PerformanceLeak.ƒ.RenderManager.removeNode(node);
                 }
                 // // create Node
                 createNode("Node");

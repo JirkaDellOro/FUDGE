@@ -250,16 +250,23 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectCoatColored(this: Coat, _renderShader: RenderShader): void;
-        protected static injectCoatTextured(this: Coat, _renderShader: RenderShader): void;
-        protected static injectCoatMatCap(this: Coat, _renderShader: RenderShader): void;
+        protected static injectCoatColored(this: Coat, _renderShader: typeof Shader): void;
+        protected static injectCoatTextured(this: Coat, _renderShader: typeof Shader): void;
+        protected static injectCoatMatCap(this: Coat, _renderShader: typeof Shader): void;
     }
 }
 declare namespace FudgeCore {
+    interface RenderBuffers {
+        vertices: WebGLBuffer;
+        indices: WebGLBuffer;
+        nIndices: number;
+        textureUVs: WebGLBuffer;
+        normalsFace: WebGLBuffer;
+    }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        protected static useRenderBuffers(this: Mesh, _renderShader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -271,25 +278,6 @@ declare namespace FudgeCore {
         stride: number;
         offset: number;
     }
-    interface RenderShader {
-        program: WebGLProgram;
-        attributes: {
-            [name: string]: number;
-        };
-        uniforms: {
-            [name: string]: WebGLUniformLocation;
-        };
-    }
-    interface RenderBuffers {
-        vertices: WebGLBuffer;
-        indices: WebGLBuffer;
-        nIndices: number;
-        textureUVs: WebGLBuffer;
-        normalsFace: WebGLBuffer;
-    }
-    interface RenderCoat {
-        coat: Coat;
-    }
     interface RenderLights {
         [type: string]: Float32Array;
     }
@@ -299,7 +287,6 @@ declare namespace FudgeCore {
      */
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
-        protected static renderShaderRayCast: RenderShader;
         private static rectViewport;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
@@ -346,18 +333,13 @@ declare namespace FudgeCore {
          * Convert light data to flat arrays
          * TODO: this method appears to be obsolete...?
          */
-        protected static createRenderLights(_lights: MapLightTypeToLightList): RenderLights;
         /**
          * Set light data in shaders
          */
-        protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static draw(_renderShader: typeof Shader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
-        protected static createProgram(_shaderClass: typeof Shader): RenderShader;
-        protected static useProgram(_shaderInfo: RenderShader): void;
-        protected static deleteProgram(_program: RenderShader): void;
     }
 }
 declare namespace FudgeCore {
@@ -707,7 +689,7 @@ declare namespace FudgeCore {
             [key: string]: unknown;
         };
         mutate(_mutator: Mutator): void;
-        useRenderData(_renderShader: RenderShader): void;
+        useRenderData(_renderShader: typeof Shader): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(): void;
@@ -1428,7 +1410,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
      * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -1448,7 +1429,6 @@ declare namespace FudgeCore {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
-        lights: MapLightTypeToLightList;
         private branch;
         private crc2;
         private canvas;
@@ -1585,10 +1565,6 @@ declare namespace FudgeCore {
         private hndWheelEvent;
         private activateEvent;
         private hndComponentEvent;
-        /**
-         * Collect all lights in the branch to pass to shaders
-         */
-        private collectLights;
         /**
          * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
          * @param _fudgeNode The node to create a scenegraphentry for.
@@ -2670,9 +2646,9 @@ declare namespace FudgeCore {
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
-        useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        useRenderBuffers(_renderShader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
-        deleteRenderBuffers(_renderShader: RenderShader): void;
+        deleteRenderBuffers(_renderShader: typeof Shader): void;
         getVertexCount(): number;
         getIndexCount(): number;
         create(): void;
@@ -3000,66 +2976,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     interface PickBuffer {
         node: Node;
         texture: WebGLTexture;
         frameBuffer: WebGLFramebuffer;
     }
-    /**
-     * Manages the handling of the ressources that are going to be rendered by [[RenderOperator]].
-     * Stores the references to the shader, the coat and the mesh used for each node registered.
-     * With these references, the already buffered data is retrieved when rendering.
-     */
     abstract class RenderManager extends RenderOperator {
         static rectClip: Rectangle;
-        /** Stores references to the compiled shader programs and makes them available via the references to shaders */
-        private static renderShaders;
-        /** Stores references to the vertex array objects and makes them available via the references to coats */
-        /** Stores references to the vertex buffers and makes them available via the references to meshes */
-        private static nodes;
         private static timestampUpdate;
         private static pickBuffers;
-        /**
-         * Register the node for rendering. Create a reference for it and increase the matching render-data references or create them first if necessary
-         * @param _node
-         */
-        static addNode(_node: Node): void;
-        /**
-         * Register the node and its valid successors in the branch for rendering using [[addNode]]
-         * @param _node
-         * @returns false, if the given node has a current timestamp thus having being processed during latest RenderManager.update and no addition is needed
-         */
-        static addBranch(_node: Node): boolean;
-        /**
-         * Unregister the node so that it won't be rendered any more. Decrease the render-data references and delete the node reference.
-         * @param _node
-         */
-        static removeNode(_node: Node): void;
-        /**
-         * Unregister the node and its valid successors in the branch to free renderer resources. Uses [[removeNode]]
-         * @param _node
-         */
-        static removeBranch(_node: Node): void;
-        /**
-         * Reflect changes in the node concerning shader, coat and mesh, manage the render-data references accordingly and update the node references
-         * @param _node
-         */
-        static updateNode(_node: Node): void;
-        /**
-         * Update the node and its valid successors in the branch using [[updateNode]]
-         * @param _node
-         */
-        static updateBranch(_node: Node): void;
-        /**
-         * Viewports collect the lights relevant to the branch to render and calls setLights to pass the collection.
-         * RenderManager passes it on to all shaders used that can process light
-         * @param _lights
-         */
-        static setLights(_lights: MapLightTypeToLightList): void;
-        /**
-         * Update all render data. After RenderManager, multiple viewports can render their associated data without updating the same data multiple times
-         */
-        static update(): void;
         /**
          * Clear the offscreen renderbuffer with the given [[Color]]
          * @param _color
@@ -3086,16 +3012,10 @@ declare namespace FudgeCore {
         private static drawNodeForRayCast;
         private static getRayCastTexture;
         /**
-         * Recalculate the world matrix of all registered nodes respecting their hierarchical relation.
-         */
-        private static recalculateAllNodeTransforms;
-        /**
          * Recursive method receiving a childnode and its parents updated world transform.
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
-         * @param _node
-         * @param _world
          */
-        private static recalculateTransformsOfNodeAndChildren;
+        private static getLightsAndUpdateBranch;
     }
 }
 declare namespace FudgeCore {

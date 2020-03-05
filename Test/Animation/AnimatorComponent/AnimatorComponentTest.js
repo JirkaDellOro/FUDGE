@@ -63,7 +63,6 @@ var AnimatorComponentTest;
         ƒ.Loop.start();
     }
     function frame() {
-        ƒ.RenderManager.update();
         Scenes.viewport.draw();
     }
     function hndlEv(_e) {

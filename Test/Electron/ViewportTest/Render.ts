@@ -6,8 +6,6 @@ namespace ElectronViewport {
     ƒ.RenderManager.initialize();
     // create asset
     let branch: ƒ.Node = Scenes.createAxisCross();
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
 
     // initialize viewport
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));

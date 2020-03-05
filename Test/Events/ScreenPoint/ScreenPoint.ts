@@ -10,8 +10,6 @@ namespace ScreenPoint {
 
     function init(): void {
         let branch: ƒ.Node = Scenes.createAxisCross();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         let posCamera: ƒ.Vector3 = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");

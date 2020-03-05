@@ -16,7 +16,6 @@ var Minimal;
         let camera = new ƒ.ComponentCamera();
         camera.pivot.translate(new ƒ.Vector3(0, 0, 2));
         viewport.initialize("Viewport", node, camera, canvas);
-        ƒ.RenderManager.update();
         viewport.draw();
     }
 })(Minimal || (Minimal = {}));

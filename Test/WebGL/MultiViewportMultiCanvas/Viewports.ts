@@ -27,7 +27,6 @@ namespace RenderManagerRendering {
 
     function animate(_event: Event): void {
       branch.cmpTransform.local.rotateY(1);
-      ƒ.RenderManager.update();
       // prepare and draw viewport
       for (let viewPort of viewPorts) {
         //viewPort.prepare();

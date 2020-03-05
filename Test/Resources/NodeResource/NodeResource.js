@@ -41,7 +41,6 @@ var NodeResource;
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
         function update(_event) {
-            ƒ.RenderManager.update();
             viewport.draw();
         }
     }

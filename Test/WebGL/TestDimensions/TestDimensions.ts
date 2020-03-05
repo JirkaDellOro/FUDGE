@@ -14,10 +14,6 @@ namespace RenderManagerRendering {
     let branch: ƒ.Node = Scenes.createAxisCross();
     branch.addComponent(new ƒ.ComponentTransform());
 
-    // initialize RenderManager and transmit content
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
-
     // initialize viewports
     canvas = document.getElementsByTagName("canvas")[0];
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -47,9 +43,6 @@ namespace RenderManagerRendering {
     function animate(_event: Event): void {
       update();
       branch.cmpTransform.local.rotateY(1);
-      ƒ.RenderManager.update();
-      // prepare and draw viewport
-      //viewPort.prepare();
       viewPort.draw();
     }
 

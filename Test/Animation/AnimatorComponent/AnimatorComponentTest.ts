@@ -73,13 +73,10 @@ namespace AnimatorComponentTest {
   }
 
   function frame(): void {
-    ƒ.RenderManager.update();
     Scenes.viewport.draw();
   }
 
   function hndlEv(_e: Event): void {
     console.log(_e.type/*, (<ƒ.ComponentAnimator>_e.target).getContainer().name*/);
   }
-
-
 }

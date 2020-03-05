@@ -25,9 +25,6 @@ var FudgeTest;
             let cmpCamera;
             // TODO: delete example scene
             this.branch = Scenes.createAxisCross();
-            // initialize RenderManager and transmit content
-            ƒ.RenderManager.addBranch(this.branch);
-            ƒ.RenderManager.update();
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
             cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));

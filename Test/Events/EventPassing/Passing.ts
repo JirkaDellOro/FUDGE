@@ -10,8 +10,6 @@ namespace EventPassing {
 
     function init(): void {
         let branch: ƒ.Node = Scenes.createAxisCross();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList: HTMLCollectionOf<HTMLCanvasElement> = document.getElementsByTagName("canvas");

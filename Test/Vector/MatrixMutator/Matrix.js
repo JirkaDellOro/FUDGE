@@ -25,7 +25,6 @@ var MarixMutatorTest;
         }, 20);
     }
     function update() {
-        ƒ.RenderManager.update();
         viewport.draw();
         let local = coSys.cmpTransform.local;
         displayMatrix(local);

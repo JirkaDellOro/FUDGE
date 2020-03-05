@@ -42,8 +42,6 @@ var ElectronViewport;
         ƒ.RenderManager.initialize();
         // create asset
         branch = Scenes.createAxisCross();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewport
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
@@ -67,7 +65,6 @@ var ElectronViewport;
     }
     function animate(_event) {
         branch.cmpTransform.local.rotateY(1);
-        ƒ.RenderManager.update();
         // prepare and draw viewport
         viewPort.draw();
     }

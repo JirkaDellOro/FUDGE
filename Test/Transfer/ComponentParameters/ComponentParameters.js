@@ -23,7 +23,6 @@ var ComponentParameters;
             quad.addComponent(cmpMaterial);
             root.addChild(quad);
         }
-        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.pivot.translateZ(3);

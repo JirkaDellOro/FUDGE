@@ -36,7 +36,6 @@ namespace MarixMutatorTest {
   }
 
   function update(): void {
-    ƒ.RenderManager.update();
     viewport.draw();
     let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
     displayMatrix(local);

@@ -25,8 +25,6 @@ var TextureTest;
         branch.addComponent(cmpLightDirectionalWhite);
         branch.addChild(body);
         branch.addChild(Scenes.createCoordinateSystem());
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -38,7 +36,6 @@ var TextureTest;
             // body.cmpTransform.rotateY(-1.1);
             body.cmpTransform.local.rotateY(-1);
             // body.cmpTransform.rotateZ(-0.9);
-            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
         //*/

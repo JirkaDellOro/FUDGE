@@ -24,7 +24,6 @@ namespace Minimal {
 
     viewport.initialize("Viewport", node, camera, canvas);
 
-    ƒ.RenderManager.update();
     viewport.draw();
   }
 }

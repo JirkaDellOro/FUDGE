@@ -37,9 +37,6 @@ namespace MeshTest {
 
     branch.addChild(body);
 
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
-
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 0, 2.3), new ƒ.Vector3(0, 0, 0));
     viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -51,9 +48,9 @@ namespace MeshTest {
 
     window.setInterval(function (): void {
       sphereTex.cmpTransform.local.rotateY(0.5);
-      ƒ.RenderManager.update();
       viewport.draw();
-    }, 20);
+    }, 
+                       20);
 
   }
 }

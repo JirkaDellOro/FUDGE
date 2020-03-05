@@ -66,7 +66,6 @@ namespace ScriptSerialization {
 
     update(null);
     function update(_event: Event): void {
-      ƒ.RenderManager.update();
       viewport.draw();
     }
   }

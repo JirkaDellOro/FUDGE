@@ -10,8 +10,6 @@ var TextureTest;
         cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
         let branch = new ƒ.Node("Branch");
         branch.addChild(cube);
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 3, 3), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -19,7 +17,6 @@ var TextureTest;
         window.setInterval(function () {
             cube.cmpTransform.local.rotateY(-1);
             cube.cmpTransform.local.rotateX(-2);
-            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
     }

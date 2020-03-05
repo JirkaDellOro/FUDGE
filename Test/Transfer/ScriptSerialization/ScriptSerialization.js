@@ -53,7 +53,6 @@ var ScriptSerialization;
         Compare.compare(branch, reconstruct);
         update(null);
         function update(_event) {
-            ƒ.RenderManager.update();
             viewport.draw();
         }
     }

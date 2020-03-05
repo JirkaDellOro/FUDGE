@@ -30,8 +30,6 @@ var MeshTest;
         let lights = new ƒAid.NodeThreePointLights("lights", 110);
         branch.addChild(lights);
         branch.addChild(body);
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -40,7 +38,6 @@ var MeshTest;
         viewport.draw();
         window.setInterval(function () {
             gridFlat.cmpTransform.local.rotateY(0.5);
-            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
     }
