@@ -17,17 +17,15 @@ namespace FudgeCore {
 
     public idResource: string = undefined;
 
-    //@ts-ignore
-    public renderBuffers: RenderBuffers = {}; /* defined by RenderInjector*/
+    public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
     public static getBufferSpecification(): BufferSpecification {
       return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
     }
 
-
     protected static registerSubclass(_subclass: typeof Mesh): number { return Mesh.subclasses.push(_subclass) - 1; }
 
-    public useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(_renderShader: RenderShader): void {/* injected by RenderInjector*/ }
     public deleteRenderBuffers(_renderShader: RenderShader): void {/* injected by RenderInjector*/ }
 

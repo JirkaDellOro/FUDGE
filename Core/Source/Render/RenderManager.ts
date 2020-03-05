@@ -299,11 +299,8 @@ namespace FudgeCore {
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void {
       let references: NodeReferences = RenderManager.nodes.get(_node);
       if (!references)
-        return; // TODO: deal with partial references
-
-      // let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
-      // let coatInfo: RenderCoat = RenderManager.renderCoats.get(references.coat).getReference();
-      // TODO: get coat from node
+        return; 
+        
       let coat: Coat = _node.getComponent(ComponentMaterial).material.getCoat();
       let shaderInfo: RenderShader = RenderManager.renderShaders.get(references.shader).getReference();
       RenderManager.draw(shaderInfo, references.mesh, coat, _finalTransform, _projection);
@@ -321,8 +318,6 @@ namespace FudgeCore {
       const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
       RenderManager.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
 
-      // set render target
-
       let references: NodeReferences = RenderManager.nodes.get(_node);
       if (!references)
         return; // TODO: deal with partial references
@@ -330,10 +325,13 @@ namespace FudgeCore {
       let pickBuffer: PickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
       RenderManager.pickBuffers.push(pickBuffer);
 
-      let bufferInfo: RenderBuffers = RenderManager.renderBuffers.get(references.mesh).getReference();
-      RenderManager.drawForRayCast(RenderManager.pickBuffers.length, bufferInfo, _finalTransform, _projection);
+      let renderShader: RenderShader = RenderOperator.renderShaderRayCast;
+      RenderOperator.useProgram(renderShader);
+      references.mesh.useRenderBuffers(renderShader, _finalTransform, _projection, RenderManager.pickBuffers.length);
+
+      RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, references.mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+
       // make texture available to onscreen-display
-      // IDEA: Iterate over textures, collect data if z indicates hit, sort by z
     }
 
     private static getRayCastTexture(): WebGLTexture {

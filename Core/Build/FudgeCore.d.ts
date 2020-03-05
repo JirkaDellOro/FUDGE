@@ -251,7 +251,7 @@ declare namespace FudgeCore {
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -291,8 +291,8 @@ declare namespace FudgeCore {
      */
     abstract class RenderOperator {
         protected static crc3: WebGL2RenderingContext;
+        protected static renderShaderRayCast: RenderShader;
         private static rectViewport;
-        private static renderShaderRayCast;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
@@ -345,21 +345,8 @@ declare namespace FudgeCore {
         protected static setLightsInShader(_renderShader: RenderShader, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
-         * @param _renderShader
-         * @param _renderBuffers
-         * @param _coat
-         * @param _world
-         * @param _projection
          */
         protected static draw(_renderShader: RenderShader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
-        /**
-         * Draw a buffer with a special shader that uses an id instead of a color
-         * @param _renderShader
-         * @param _renderBuffers
-         * @param _world
-         * @param _projection
-         */
-        protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void;
         protected static createProgram(_shaderClass: typeof Shader): RenderShader;
         protected static useProgram(_shaderInfo: RenderShader): void;
         protected static deleteProgram(_program: RenderShader): void;
@@ -2681,7 +2668,7 @@ declare namespace FudgeCore {
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
-        useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void;
+        useRenderBuffers(_renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(_renderShader: RenderShader): void;
         deleteRenderBuffers(_renderShader: RenderShader): void;
         getVertexCount(): number;

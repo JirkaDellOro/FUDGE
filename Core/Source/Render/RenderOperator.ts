@@ -41,8 +41,8 @@ namespace FudgeCore {
    */
   export abstract class RenderOperator {
     protected static crc3: WebGL2RenderingContext;
+    protected static renderShaderRayCast: RenderShader;
     private static rectViewport: Rectangle;
-    private static renderShaderRayCast: RenderShader;
 
     /** 
      * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
@@ -200,80 +200,12 @@ namespace FudgeCore {
 
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
-     * @param _renderShader 
-     * @param _renderBuffers 
-     * @param _coat 
-     * @param _world 
-     * @param _projection 
      */
     protected static draw(_renderShader: RenderShader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void {
       RenderOperator.useProgram(_renderShader);
-      // RenderOperator.useBuffers(_renderBuffers);
-      // RenderOperator.useParameter(_renderCoat);
-      {
-        // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
-        // RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
-        // RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
-
-        // RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-
-        // if (_renderShader.attributes["a_textureUVs"]) {
-        //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.textureUVs);
-        //   RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
-        //   RenderOperator.crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
-        // }
-        // // Supply matrixdata to shader. 
-        // let uProjection: WebGLUniformLocation = _renderShader.uniforms["u_projection"];
-        // RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.get());
-
-        // if (_renderShader.uniforms["u_world"]) {
-        //   let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
-        //   RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.get());
-
-        //   RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.normalsFace);
-        //   RenderOperator.crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
-        //   RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
-        // }
-      }
       _mesh.useRenderBuffers(_renderShader, _world, _projection);
-      // TODO: this is all that's left of coat handling in RenderOperator, due to injection. So extra reference from node to coat is unnecessary
       _coat.useRenderData(_renderShader);
-
-      // Draw call
-      // RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, Mesh.getBufferSpecification().offset, _renderBuffers.nIndices);
       RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-    }
-
-    /**
-     * Draw a buffer with a special shader that uses an id instead of a color
-     * @param _renderShader
-     * @param _renderBuffers 
-     * @param _world 
-     * @param _projection 
-     */
-    protected static drawForRayCast(_id: number, _renderBuffers: RenderBuffers, _world: Matrix4x4, _projection: Matrix4x4): void {
-      let renderShader: RenderShader = RenderOperator.renderShaderRayCast;
-      RenderOperator.useProgram(renderShader);
-
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _renderBuffers.vertices);
-      RenderOperator.crc3.enableVertexAttribArray(renderShader.attributes["a_position"]);
-      RenderOperator.setAttributeStructure(renderShader.attributes["a_position"], Mesh.getBufferSpecification());
-
-      RenderOperator.crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, _renderBuffers.indices);
-
-      // Supply matrixdata to shader. 
-      let uProjection: WebGLUniformLocation = renderShader.uniforms["u_projection"];
-      RenderOperator.crc3.uniformMatrix4fv(uProjection, false, _projection.get());
-
-      if (renderShader.uniforms["u_world"]) {
-        let uWorld: WebGLUniformLocation = renderShader.uniforms["u_world"];
-        RenderOperator.crc3.uniformMatrix4fv(uWorld, false, _world.get());
-      }
-
-      let idUniformLocation: WebGLUniformLocation = renderShader.uniforms["u_id"];
-      RenderOperator.getRenderingContext().uniform1i(idUniformLocation, _id);
-
-      RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
 
     // #region Shaderprogram 

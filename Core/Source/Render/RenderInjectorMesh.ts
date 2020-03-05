@@ -44,34 +44,46 @@ namespace FudgeCore {
       this.renderBuffers = renderBuffers;
     }
 
-    protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4): void {
+    protected static useRenderBuffers(this: Mesh, _renderShader: RenderShader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
       // console.log("useRenderBuffers", this);
       // return;
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
+      let aPosition: number = _renderShader.attributes["a_position"];
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.vertices);
-      crc3.enableVertexAttribArray(_renderShader.attributes["a_position"]);
-      RenderOperator.setAttributeStructure(_renderShader.attributes["a_position"], Mesh.getBufferSpecification());
+      crc3.enableVertexAttribArray(aPosition);
+      RenderOperator.setAttributeStructure(aPosition, Mesh.getBufferSpecification());
 
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderBuffers.indices);
 
-      if (_renderShader.attributes["a_textureUVs"]) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVs);
-        crc3.enableVertexAttribArray(_renderShader.attributes["a_textureUVs"]); // enable the buffer
-        crc3.vertexAttribPointer(_renderShader.attributes["a_textureUVs"], 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
-      }
-      // Supply matrixdata to shader. 
       let uProjection: WebGLUniformLocation = _renderShader.uniforms["u_projection"];
       crc3.uniformMatrix4fv(uProjection, false, _projection.get());
 
-      if (_renderShader.uniforms["u_world"]) {
-        let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"];
+      // feed in face normals if shader accepts u_world. 
+      let uWorld: WebGLUniformLocation = _renderShader.uniforms["u_world"]
+      if (uWorld) {
         crc3.uniformMatrix4fv(uWorld, false, _world.get());
-
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFace);
-        crc3.enableVertexAttribArray(_renderShader.attributes["a_normal"]);
-        RenderOperator.setAttributeStructure(_renderShader.attributes["a_normal"], Mesh.getBufferSpecification());
       }
+
+      let aNormal: number = _renderShader.attributes["a_normal"];
+      if (aNormal) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFace);
+        crc3.enableVertexAttribArray(aNormal);
+        RenderOperator.setAttributeStructure(aNormal, Mesh.getBufferSpecification());
+      }
+
+      // feed in texture coordinates if shader accepts a_textureUVs
+      let aTextureUVs: number = _renderShader.attributes["a_textureUVs"];
+      if (aTextureUVs) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVs);
+        crc3.enableVertexAttribArray(aTextureUVs); // enable the buffer
+        crc3.vertexAttribPointer(aTextureUVs, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
+      }
+
+      // feed in an id of the node if shader accepts u_id. Used for picking
+      let uId: WebGLUniformLocation = _renderShader.uniforms["u_id"];
+      if (uId)
+        RenderOperator.getRenderingContext().uniform1i(uId, _id);
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {
