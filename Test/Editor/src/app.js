@@ -9,7 +9,6 @@ var UI;
 // console.log(Fudge);
 (function (UI) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     let myLayout;
     let savedState;
     let branch;

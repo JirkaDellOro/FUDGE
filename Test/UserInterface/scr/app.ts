@@ -69,7 +69,7 @@ namespace UITest {
         myLayout.init();
     }
     function initViewport(): void {
-        ƒ.RenderManager.initialize();
+        
         counter = 0;
         // create asset
         branch = new ƒ.Node("Root");

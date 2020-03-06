@@ -71,7 +71,6 @@ var Scenes;
     }
     Scenes.createThreeLevelNodeHierarchy = createThreeLevelNodeHierarchy;
     function createMiniScene() {
-        ƒ.RenderManager.initialize();
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
         cmpTransform.local.scaleX(2);

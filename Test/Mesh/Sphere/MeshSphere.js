@@ -1,7 +1,7 @@
 var MeshTest;
 (function (MeshTest) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
+    ƒ.RenderManager.initialize(true, true);
     var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let branch = new ƒ.Node("Branch");

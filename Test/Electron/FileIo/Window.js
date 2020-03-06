@@ -60,7 +60,6 @@ var ElectronFileIo;
     ElectronFileIo.open = open;
     function createScene() {
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         // create asset
         branch = Scenes.createAxisCross();
         // initialize viewport

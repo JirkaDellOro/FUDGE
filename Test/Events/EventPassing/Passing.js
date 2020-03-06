@@ -1,7 +1,6 @@
 var EventPassing;
 (function (EventPassing) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     let canvas;
     let camera;
     let viewPorts = [];

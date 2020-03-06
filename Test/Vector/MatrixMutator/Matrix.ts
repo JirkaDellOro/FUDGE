@@ -1,6 +1,6 @@
 namespace MarixMutatorTest {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   let coSys: ƒ.Node;
   let viewport: ƒ.Viewport = new ƒ.Viewport();

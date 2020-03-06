@@ -4,7 +4,6 @@
 namespace AudioSpace {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  ƒ.RenderManager.initialize();
   
   let out: HTMLOutputElement;
 

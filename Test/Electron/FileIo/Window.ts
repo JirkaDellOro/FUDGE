@@ -65,7 +65,7 @@ namespace ElectronFileIo {
 
     function createScene(): ƒ.Viewport {
         // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
+        
         // create asset
         branch = Scenes.createAxisCross();
 

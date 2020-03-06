@@ -1,6 +1,6 @@
 namespace RectangleCollision {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
   window.addEventListener("load", handleLoad);
 
   function handleLoad(_event: Event): void {

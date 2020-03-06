@@ -1,7 +1,6 @@
 var TestRectMapping;
 (function (TestRectMapping) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let uiMaps = {};
     let uiClient;

@@ -1,7 +1,6 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         let coSys = Scenes.createCoordinateSystem();

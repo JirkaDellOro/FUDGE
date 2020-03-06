@@ -1,6 +1,6 @@
 namespace RenderManagerRendering {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   window.addEventListener("load", init);
   let uiRectangles: { [name: string]: UI.Rectangle } = {};

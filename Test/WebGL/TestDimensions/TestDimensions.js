@@ -1,7 +1,6 @@
 var RenderManagerRendering;
 (function (RenderManagerRendering) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let uiRectangles = {};
     let canvas;

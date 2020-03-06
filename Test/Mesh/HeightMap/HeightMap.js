@@ -2,7 +2,6 @@ var MeshTest;
 (function (MeshTest) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     let branch = new ƒ.Node("Branch");
     let gridFlat = new ƒ.Node("sphereTex");

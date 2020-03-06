@@ -1,7 +1,6 @@
 var NodeResource;
 (function (NodeResource) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     ƒ.Serializer.registerNamespace(NodeResource);
     window.addEventListener("DOMContentLoaded", init);
     function init() {

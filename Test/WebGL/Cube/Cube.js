@@ -1,7 +1,6 @@
 var Cube;
 (function (Cube) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", init);
     function init(_event) {
         ƒ.Debug.log("Refactored Cube");

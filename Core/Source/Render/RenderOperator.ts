@@ -2,8 +2,11 @@
 ///<reference path="RenderInjectorShader.ts"/>
 ///<reference path="RenderInjectorCoat.ts"/>
 ///<reference path="RenderInjectorMesh.ts"/>
+///<reference path="../Math/Rectangle.ts"/>
 
 namespace FudgeCore {
+  export declare let fudgeConfig: General;
+
   export interface BufferSpecification {
     size: number;   // The size of the datasample.
     dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
@@ -17,8 +20,9 @@ namespace FudgeCore {
    * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
    */
   export abstract class RenderOperator {
-    protected static crc3: WebGL2RenderingContext;
-    private static rectViewport: Rectangle;
+    protected static crc3: WebGL2RenderingContext = RenderOperator.initialize();
+    private static rectViewport: Rectangle = RenderOperator.getCanvasRect();
+
 
     /** 
      * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
@@ -43,22 +47,31 @@ namespace FudgeCore {
     /**
      * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
      */
-    public static initialize(_antialias: boolean = false, _alpha: boolean = true): void {
-      let contextAttributes: WebGLContextAttributes = { alpha: _alpha, antialias: _antialias, premultipliedAlpha: false };
+    public static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext {
+      fudgeConfig = fudgeConfig || {antialias: true};
+      let contextAttributes: WebGLContextAttributes = {
+        alpha: (_alpha != undefined) ? _alpha : fudgeConfig.alpha || false,
+        antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
+        premultipliedAlpha: false
+      };
+      console.log("Initialize RenderManager", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");
-      RenderOperator.crc3 = RenderOperator.assert<WebGL2RenderingContext>(
+      let crc3: WebGL2RenderingContext;
+      crc3 = RenderOperator.assert<WebGL2RenderingContext>(
         canvas.getContext("webgl2", contextAttributes),
         "WebGL-context couldn't be created"
       );
       // Enable backface- and zBuffer-culling.
-      RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
-      RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
-      RenderOperator.crc3.enable(WebGL2RenderingContext.BLEND);
-      RenderOperator.crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
-      RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+      crc3.enable(WebGL2RenderingContext.CULL_FACE);
+      crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+      crc3.enable(WebGL2RenderingContext.BLEND);
+      crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
+      crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
       // RenderOperator.crc3.enable(WebGL2RenderingContext.);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
+      RenderOperator.crc3 = crc3;
       RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+      return crc3;
     }
 
     /**

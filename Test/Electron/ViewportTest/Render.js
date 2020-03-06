@@ -3,7 +3,6 @@ var ElectronViewport;
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
-        ƒ.RenderManager.initialize();
         // create asset
         let branch = Scenes.createAxisCross();
         // initialize viewport

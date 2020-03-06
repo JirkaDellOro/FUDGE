@@ -1,6 +1,6 @@
 namespace Minimal {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   window.addEventListener("load", hndLoad);
 

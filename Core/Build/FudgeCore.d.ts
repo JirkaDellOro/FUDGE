@@ -271,6 +271,254 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Keeps a depot of objects that have been marked for reuse, sorted by type.
+     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
+     */
+    abstract class Recycler {
+        private static depot;
+        /**
+         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
+         * @param _T The class identifier of the desired object
+         */
+        static get<T>(_T: new () => T): T;
+        /**
+         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
+         * @param _instance
+         */
+        static store(_instance: Object): void;
+        /**
+         * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
+         * @param _T
+         */
+        static dump<T>(_T: new () => T): void;
+        /**
+         * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
+         */
+        static dumpAll(): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Stores and manipulates a twodimensional vector comprised of the components x and y
+     * ```plaintext
+     *            +y
+     *             |__ +x
+     * ```
+     * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Vector2 extends Mutable {
+        private data;
+        constructor(_x?: number, _y?: number);
+        get x(): number;
+        get y(): number;
+        set x(_x: number);
+        set y(_y: number);
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * A shorthand for writing `new Vector2(0, 0)`.
+         * @returns A new vector with the values (0, 0)
+         */
+        static ZERO(): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(_scale, _scale)`.
+         * @param _scale the scale of the vector. Default: 1
+         */
+        static ONE(_scale?: number): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(0, y)`.
+         * @param _scale The number to write in the y coordinate. Default: 1
+         * @returns A new vector with the values (0, _scale)
+         */
+        static Y(_scale?: number): Vector2;
+        /**
+         * A shorthand for writing `new Vector2(x, 0)`.
+         * @param _scale The number to write in the x coordinate. Default: 1
+         * @returns A new vector with the values (_scale, 0)
+         */
+        static X(_scale?: number): Vector2;
+        static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation?: boolean): Vector2;
+        /**
+         * Normalizes a given vector to the given length without editing the original vector.
+         * @param _vector the vector to normalize
+         * @param _length the length of the resulting vector. defaults to 1
+         * @returns a new vector representing the normalised vector scaled by the given length
+         */
+        static NORMALIZATION(_vector: Vector2, _length?: number): Vector2;
+        /**
+         * Scales a given vector by a given scale without changing the original vector
+         * @param _vector The vector to scale.
+         * @param _scale The scale to scale with.
+         * @returns A new vector representing the scaled version of the given vector
+         */
+        static SCALE(_vector: Vector2, _scale: number): Vector2;
+        /**
+         * Sums up multiple vectors.
+         * @param _vectors A series of vectors to sum up
+         * @returns A new vector representing the sum of the given vectors
+         */
+        static SUM(..._vectors: Vector2[]): Vector2;
+        /**
+         * Subtracts two vectors.
+         * @param _a The vector to subtract from.
+         * @param _b The vector to subtract.
+         * @returns A new vector representing the difference of the given vectors
+         */
+        static DIFFERENCE(_a: Vector2, _b: Vector2): Vector2;
+        /**
+         * Computes the dotproduct of 2 vectors.
+         * @param _a The vector to multiply.
+         * @param _b The vector to multiply by.
+         * @returns A new vector representing the dotproduct of the given vectors
+         */
+        static DOT(_a: Vector2, _b: Vector2): number;
+        /**
+         * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
+         * which implicitly is on the Z axis. It is also the signed magnitude of the result.
+         * @param _a Vector to compute the cross product on
+         * @param _b Vector to compute the cross product with
+         * @returns A number representing result of the cross product.
+         */
+        static CROSSPRODUCT(_a: Vector2, _b: Vector2): number;
+        /**
+         * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
+         * ```plaintext
+         * ↑ => ← => ↓ => → => ↑
+         * ```
+         * @param _vector Vector to get the orthogonal equivalent of
+         * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
+         * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
+         */
+        static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        /**
+         * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
+         * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
+         */
+        equals(_compare: Vector2, _tolerance?: number): boolean;
+        /**
+         * Adds the given vector to the executing vector, changing the executor.
+         * @param _addend The vector to add.
+         */
+        add(_addend: Vector2): void;
+        /**
+         * Subtracts the given vector from the executing vector, changing the executor.
+         * @param _subtrahend The vector to subtract.
+         */
+        subtract(_subtrahend: Vector2): void;
+        /**
+         * Scales the Vector by the _scale.
+         * @param _scale The scale to multiply the vector with.
+         */
+        scale(_scale: number): void;
+        /**
+         * Normalizes the vector.
+         * @param _length A modificator to get a different length of normalized vector.
+         */
+        normalize(_length?: number): void;
+        /**
+         * Sets the Vector to the given parameters. Ommitted parameters default to 0.
+         * @param _x new x to set
+         * @param _y new y to set
+         */
+        set(_x?: number, _y?: number): void;
+        /**
+         * @returns An array of the data of the vector
+         */
+        get(): Float32Array;
+        /**
+         * @returns A deep copy of the vector.
+         */
+        get copy(): Vector2;
+        transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
+        /**
+         * Adds a z-component to the vector and returns a new Vector3
+         */
+        toVector3(): Vector3;
+        toString(): string;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Defines the origin of a rectangle
+     */
+    enum ORIGIN2D {
+        TOPLEFT = 0,
+        TOPCENTER = 1,
+        TOPRIGHT = 2,
+        CENTERLEFT = 16,
+        CENTER = 17,
+        CENTERRIGHT = 18,
+        BOTTOMLEFT = 32,
+        BOTTOMCENTER = 33,
+        BOTTOMRIGHT = 34
+    }
+    /**
+     * Defines a rectangle with position and size and add comfortable methods to it
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Rectangle extends Mutable {
+        position: Vector2;
+        size: Vector2;
+        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
+        /**
+         * Returns a new rectangle created with the given parameters
+         */
+        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
+        /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
+        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
+        get x(): number;
+        get y(): number;
+        get width(): number;
+        get height(): number;
+        /**
+         * Return the leftmost expansion, respecting also negative values of width
+         */
+        get left(): number;
+        /**
+         * Return the topmost expansion, respecting also negative values of height
+         */
+        get top(): number;
+        /**
+         * Return the rightmost expansion, respecting also negative values of width
+         */
+        get right(): number;
+        /**
+         * Return the lowest expansion, respecting also negative values of height
+         */
+        get bottom(): number;
+        set x(_x: number);
+        set y(_y: number);
+        set width(_width: number);
+        set height(_height: number);
+        set left(_value: number);
+        set top(_value: number);
+        set right(_value: number);
+        set bottom(_value: number);
+        get copy(): Rectangle;
+        /**
+         * Returns true if the given point is inside of this rectangle or on the border
+         * @param _point
+         */
+        isInside(_point: Vector2): boolean;
+        collides(_rect: Rectangle): boolean;
+        toString(): string;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    let fudgeConfig: General;
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -300,7 +548,7 @@ declare namespace FudgeCore {
         /**
          * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
-        static initialize(_antialias?: boolean, _alpha?: boolean): void;
+        static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext;
         /**
          * Return a reference to the offscreen-canvas
          */
@@ -1316,34 +1564,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
-     */
-    abstract class Recycler {
-        private static depot;
-        /**
-         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
-         * @param _T The class identifier of the desired object
-         */
-        static get<T>(_T: new () => T): T;
-        /**
-         * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
-         * @param _instance
-         */
-        static store(_instance: Object): void;
-        /**
-         * Emptys the depot of a given type, leaving the objects for the garbage collector. May result in a short stall when many objects were in
-         * @param _T
-         */
-        static dump<T>(_T: new () => T): void;
-        /**
-         * Emptys all depots, leaving all objects to the garbage collector. May result in a short stall when many objects were in
-         */
-        static dumpAll(): void;
-    }
-}
-declare namespace FudgeCore {
     interface SerializableResource extends Serializable {
         idResource: string;
     }
@@ -2278,225 +2498,6 @@ declare namespace FudgeCore {
      * Standard [[Random]]-instance using Math.random().
      */
     const random: Random;
-}
-declare namespace FudgeCore {
-    /**
-     * Defines the origin of a rectangle
-     */
-    enum ORIGIN2D {
-        TOPLEFT = 0,
-        TOPCENTER = 1,
-        TOPRIGHT = 2,
-        CENTERLEFT = 16,
-        CENTER = 17,
-        CENTERRIGHT = 18,
-        BOTTOMLEFT = 32,
-        BOTTOMCENTER = 33,
-        BOTTOMRIGHT = 34
-    }
-    /**
-     * Defines a rectangle with position and size and add comfortable methods to it
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Rectangle extends Mutable {
-        position: Vector2;
-        size: Vector2;
-        constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
-        /**
-         * Returns a new rectangle created with the given parameters
-         */
-        static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
-        /**
-         * Sets the position and size of the rectangle according to the given parameters
-         */
-        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
-        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
-        get x(): number;
-        get y(): number;
-        get width(): number;
-        get height(): number;
-        /**
-         * Return the leftmost expansion, respecting also negative values of width
-         */
-        get left(): number;
-        /**
-         * Return the topmost expansion, respecting also negative values of height
-         */
-        get top(): number;
-        /**
-         * Return the rightmost expansion, respecting also negative values of width
-         */
-        get right(): number;
-        /**
-         * Return the lowest expansion, respecting also negative values of height
-         */
-        get bottom(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set width(_width: number);
-        set height(_height: number);
-        set left(_value: number);
-        set top(_value: number);
-        set right(_value: number);
-        set bottom(_value: number);
-        get copy(): Rectangle;
-        /**
-         * Returns true if the given point is inside of this rectangle or on the border
-         * @param _point
-         */
-        isInside(_point: Vector2): boolean;
-        collides(_rect: Rectangle): boolean;
-        toString(): string;
-        protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Stores and manipulates a twodimensional vector comprised of the components x and y
-     * ```plaintext
-     *            +y
-     *             |__ +x
-     * ```
-     * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Vector2 extends Mutable {
-        private data;
-        constructor(_x?: number, _y?: number);
-        get x(): number;
-        get y(): number;
-        set x(_x: number);
-        set y(_y: number);
-        /**
-         * Returns the length of the vector
-         */
-        get magnitude(): number;
-        /**
-         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-         */
-        get magnitudeSquared(): number;
-        /**
-         * A shorthand for writing `new Vector2(0, 0)`.
-         * @returns A new vector with the values (0, 0)
-         */
-        static ZERO(): Vector2;
-        /**
-         * A shorthand for writing `new Vector2(_scale, _scale)`.
-         * @param _scale the scale of the vector. Default: 1
-         */
-        static ONE(_scale?: number): Vector2;
-        /**
-         * A shorthand for writing `new Vector2(0, y)`.
-         * @param _scale The number to write in the y coordinate. Default: 1
-         * @returns A new vector with the values (0, _scale)
-         */
-        static Y(_scale?: number): Vector2;
-        /**
-         * A shorthand for writing `new Vector2(x, 0)`.
-         * @param _scale The number to write in the x coordinate. Default: 1
-         * @returns A new vector with the values (_scale, 0)
-         */
-        static X(_scale?: number): Vector2;
-        static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation?: boolean): Vector2;
-        /**
-         * Normalizes a given vector to the given length without editing the original vector.
-         * @param _vector the vector to normalize
-         * @param _length the length of the resulting vector. defaults to 1
-         * @returns a new vector representing the normalised vector scaled by the given length
-         */
-        static NORMALIZATION(_vector: Vector2, _length?: number): Vector2;
-        /**
-         * Scales a given vector by a given scale without changing the original vector
-         * @param _vector The vector to scale.
-         * @param _scale The scale to scale with.
-         * @returns A new vector representing the scaled version of the given vector
-         */
-        static SCALE(_vector: Vector2, _scale: number): Vector2;
-        /**
-         * Sums up multiple vectors.
-         * @param _vectors A series of vectors to sum up
-         * @returns A new vector representing the sum of the given vectors
-         */
-        static SUM(..._vectors: Vector2[]): Vector2;
-        /**
-         * Subtracts two vectors.
-         * @param _a The vector to subtract from.
-         * @param _b The vector to subtract.
-         * @returns A new vector representing the difference of the given vectors
-         */
-        static DIFFERENCE(_a: Vector2, _b: Vector2): Vector2;
-        /**
-         * Computes the dotproduct of 2 vectors.
-         * @param _a The vector to multiply.
-         * @param _b The vector to multiply by.
-         * @returns A new vector representing the dotproduct of the given vectors
-         */
-        static DOT(_a: Vector2, _b: Vector2): number;
-        /**
-         * Calculates the cross product of two Vectors. Due to them being only 2 Dimensional, the result is a single number,
-         * which implicitly is on the Z axis. It is also the signed magnitude of the result.
-         * @param _a Vector to compute the cross product on
-         * @param _b Vector to compute the cross product with
-         * @returns A number representing result of the cross product.
-         */
-        static CROSSPRODUCT(_a: Vector2, _b: Vector2): number;
-        /**
-         * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
-         * ```plaintext
-         * ↑ => ← => ↓ => → => ↑
-         * ```
-         * @param _vector Vector to get the orthogonal equivalent of
-         * @param _clockwise Should the rotation be clockwise instead of the default counterclockwise? default: false
-         * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
-         */
-        static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
-        /**
-         * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
-         * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
-         */
-        equals(_compare: Vector2, _tolerance?: number): boolean;
-        /**
-         * Adds the given vector to the executing vector, changing the executor.
-         * @param _addend The vector to add.
-         */
-        add(_addend: Vector2): void;
-        /**
-         * Subtracts the given vector from the executing vector, changing the executor.
-         * @param _subtrahend The vector to subtract.
-         */
-        subtract(_subtrahend: Vector2): void;
-        /**
-         * Scales the Vector by the _scale.
-         * @param _scale The scale to multiply the vector with.
-         */
-        scale(_scale: number): void;
-        /**
-         * Normalizes the vector.
-         * @param _length A modificator to get a different length of normalized vector.
-         */
-        normalize(_length?: number): void;
-        /**
-         * Sets the Vector to the given parameters. Ommitted parameters default to 0.
-         * @param _x new x to set
-         * @param _y new y to set
-         */
-        set(_x?: number, _y?: number): void;
-        /**
-         * @returns An array of the data of the vector
-         */
-        get(): Float32Array;
-        /**
-         * @returns A deep copy of the vector.
-         */
-        get copy(): Vector2;
-        transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
-        /**
-         * Adds a z-component to the vector and returns a new Vector3
-         */
-        toVector3(): Vector3;
-        toString(): string;
-        getMutator(): Mutator;
-        protected reduceMutator(_mutator: Mutator): void;
-    }
 }
 declare namespace FudgeCore {
     /**

@@ -1,6 +1,6 @@
 namespace NodeResource {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
   ƒ.Serializer.registerNamespace(NodeResource);
   window.addEventListener("DOMContentLoaded", init);
 

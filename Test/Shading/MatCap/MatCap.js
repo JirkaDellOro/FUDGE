@@ -1,7 +1,6 @@
 var MatCapTest;
 (function (MatCapTest) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     let branch = new ƒ.Node("Branch");
     window.addEventListener("load", init);
     function init() {

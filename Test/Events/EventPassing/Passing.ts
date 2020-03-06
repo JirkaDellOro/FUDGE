@@ -1,6 +1,6 @@
 namespace EventPassing {
     import ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
+    
     
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;

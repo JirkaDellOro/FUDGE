@@ -1,6 +1,6 @@
 namespace TextureTest {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   window.addEventListener("load", init);
 

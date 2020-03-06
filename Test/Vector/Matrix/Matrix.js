@@ -1,7 +1,6 @@
 var MarixTest;
 (function (MarixTest) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);

@@ -67,7 +67,6 @@ var UITest;
         myLayout.init();
     }
     function initViewport() {
-        ƒ.RenderManager.initialize();
         counter = 0;
         // create asset
         branch = new ƒ.Node("Root");

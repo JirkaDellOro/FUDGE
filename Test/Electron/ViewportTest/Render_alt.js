@@ -39,7 +39,6 @@ var ElectronViewport;
         myLayout.init();
     }
     function initViewport() {
-        ƒ.RenderManager.initialize();
         // create asset
         branch = Scenes.createAxisCross();
         // initialize viewport

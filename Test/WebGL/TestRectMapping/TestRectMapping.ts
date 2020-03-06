@@ -1,6 +1,6 @@
 namespace TestRectMapping {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   window.addEventListener("load", init);
   let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};

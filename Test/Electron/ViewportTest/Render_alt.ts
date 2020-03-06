@@ -43,7 +43,7 @@ namespace ElectronViewport {
   }
 
   function initViewport(): void {
-    ƒ.RenderManager.initialize();
+    
     // create asset
     branch = Scenes.createAxisCross();
 

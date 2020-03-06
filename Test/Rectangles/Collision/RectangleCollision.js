@@ -1,7 +1,6 @@
 var RectangleCollision;
 (function (RectangleCollision) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", handleLoad);
     function handleLoad(_event) {
         let canvas = document.querySelector("canvas");

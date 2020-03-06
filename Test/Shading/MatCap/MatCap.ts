@@ -1,7 +1,7 @@
 namespace MatCapTest {
 
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   let branch: ƒ.Node = new ƒ.Node("Branch");
 

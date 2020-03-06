@@ -1,6 +1,6 @@
 namespace ElectronViewport {
     import ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
+    
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {

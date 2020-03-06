@@ -5,7 +5,7 @@
 
 namespace UI {
     import ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
+    
     
     let myLayout: GoldenLayout;
     let savedState: string;

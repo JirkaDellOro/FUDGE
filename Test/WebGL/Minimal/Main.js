@@ -1,7 +1,6 @@
 var Minimal;
 (function (Minimal) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("load", hndLoad);
     function hndLoad(_event) {
         const canvas = document.querySelector("canvas");

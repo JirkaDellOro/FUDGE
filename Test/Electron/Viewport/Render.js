@@ -1,7 +1,6 @@
 var ElectronViewport;
 (function (ElectronViewport) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         // create asset

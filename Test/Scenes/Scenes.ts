@@ -91,7 +91,7 @@ namespace Scenes {
     }
 
     export function createMiniScene(): void {
-        ƒ.RenderManager.initialize();
+        
 
         node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;

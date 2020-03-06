@@ -1,6 +1,6 @@
 namespace ScreenPoint {
     import ƒ = FudgeCore;
-    ƒ.RenderManager.initialize();
+    
     
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;

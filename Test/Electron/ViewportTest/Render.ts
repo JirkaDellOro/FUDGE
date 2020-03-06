@@ -3,7 +3,7 @@ namespace ElectronViewport {
   window.addEventListener("DOMContentLoaded", init);
 
   function init(): void {
-    ƒ.RenderManager.initialize();
+    
     // create asset
     let branch: ƒ.Node = Scenes.createAxisCross();
 

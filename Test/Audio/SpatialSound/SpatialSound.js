@@ -6,7 +6,6 @@ var AudioSpace;
 (function (AudioSpace) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    ƒ.RenderManager.initialize();
     let out;
     let camera;
     let speedCameraRotation = 0.2;

@@ -1,6 +1,6 @@
 namespace ScriptSerialization {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize();
+  
 
   ƒ.Serializer.registerNamespace(ScriptSerialization);
   window.addEventListener("DOMContentLoaded", init);
