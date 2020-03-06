@@ -136,7 +136,7 @@ namespace FudgeCore {
       //   // branch has not yet been processed fully by rendermanager -> update all registered nodes
       //   RenderManager.update();
 
-      this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera, null);
+      this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
       Debug.log(this.pickBuffers[0].frameBuffer);
     }
 

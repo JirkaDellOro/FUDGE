@@ -2977,6 +2977,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    /**
+     * Rendered texture for each node for picking
+     */
     interface PickBuffer {
         node: Node;
         texture: WebGLTexture;
@@ -2988,7 +2991,6 @@ declare namespace FudgeCore {
         private static pickBuffers;
         /**
          * Clear the offscreen renderbuffer with the given [[Color]]
-         * @param _color
          */
         static clear(_color?: Color): void;
         /**
@@ -2996,26 +2998,40 @@ declare namespace FudgeCore {
          */
         static resetFrameBuffer(_color?: Color): void;
         /**
-         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
-         * @param _node
-         * @param _cmpCamera
-         */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _lights?: MapLightTypeToLightList, _drawNode?: Function): void;
-        /**
          * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
-         * @param _node
-         * @param _cmpCamera
          */
-        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera, _lights?: MapLightTypeToLightList): PickBuffer[];
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        /**
+         * Browses through the buffers (previously created with [[drawBranchForRayCast]]) of the size given
+         * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
+         */
         static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
+        /**
+         * The main rendering function to be called from [[Viewport]].
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         */
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        /**
+         * Recursivly iterates over the branch and renders each node and all successors with the given render function
+         */
+        private static drawBranchRecursive;
+        /**
+         * The standard render function for drawing a single node
+         */
         private static drawNode;
+        /**
+         * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
+         */
         private static drawNodeForRayCast;
+        /**
+         * Creates a texture buffer to be uses as pick-buffer
+         */
         private static getRayCastTexture;
         /**
-         * Recursive method receiving a childnode and its parents updated world transform.
-         * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+         * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
+         * collects all lights and feeds all shaders used in the branch with these lights
          */
-        private static getLightsAndUpdateBranch;
+        private static setupTransformAndLights;
         /**
          * Set light data in shaders
          */

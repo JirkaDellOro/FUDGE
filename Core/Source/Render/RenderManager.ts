@@ -2,6 +2,9 @@
 namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
 
+  /**
+   * Rendered texture for each node for picking
+   */
   export interface PickBuffer {
     node: Node;
     texture: WebGLTexture;
@@ -15,7 +18,6 @@ namespace FudgeCore {
 
     /**
      * Clear the offscreen renderbuffer with the given [[Color]]
-     * @param _color 
      */
     public static clear(_color: Color = null): void {
       RenderManager.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
@@ -29,65 +31,25 @@ namespace FudgeCore {
       RenderManager.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
     }
 
-    /**
-     * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
-     * @param _node 
-     * @param _cmpCamera 
-     */
-    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _lights: MapLightTypeToLightList = null, _drawNode: Function = RenderManager.drawNode): void {
-      // TODO: see if third parameter _world?: Matrix4x4 would be usefull
-      if (!_node.isActive)
-        return;
-      if (_drawNode == RenderManager.drawNode)
-        RenderManager.resetFrameBuffer();
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (_node.getParent())
-        matrix = _node.getParent().mtxWorld;
-
-      if (!_lights)
-        _lights = RenderManager.getLightsAndUpdateBranch(_node, matrix);
-
-      let finalTransform: Matrix4x4;
-
-      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh)
-        finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-      else
-        finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
-
-      // multiply camera matrix
-      let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
-      _drawNode(_node, finalTransform, projection, _lights);
-
-      for (let name in _node.getChildren()) {
-        let childNode: Node = _node.getChildren()[name];
-        RenderManager.drawBranch(childNode, _cmpCamera, _lights, _drawNode); //, world);
-      }
-
-      Recycler.store(projection);
-      if (finalTransform != _node.mtxWorld)
-        Recycler.store(finalTransform);
-    }
-
     //#region RayCast & Picking
-
     /**
      * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
-     * @param _node 
-     * @param _cmpCamera 
      */
-    public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera, _lights: MapLightTypeToLightList = null): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       RenderManager.pickBuffers = [];
       //TODO: examine, why switching blendFunction is necessary 
       RenderOperator.crc3.blendFunc(1, 0);
-      RenderManager.drawBranch(_node, _cmpCamera, _lights, RenderManager.drawNodeForRayCast);
+      RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
       RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
 
       RenderManager.resetFrameBuffer();
       return RenderManager.pickBuffers;
     }
 
+    /**
+     * Browses through the buffers (previously created with [[drawBranchForRayCast]]) of the size given
+     * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
+     */
     public static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[] {
       let hits: RayHit[] = [];
 
@@ -108,7 +70,58 @@ namespace FudgeCore {
       return hits;
     }
 
+    /**
+     * The main rendering function to be called from [[Viewport]].
+     * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+     */
+    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (_node.getParent())
+        matrix = _node.getParent().mtxWorld;
 
+      RenderManager.setupTransformAndLights(_node, matrix);
+
+      RenderManager.drawBranchRecursive(_node, _cmpCamera, _drawNode);
+    }
+
+    /**
+     * Recursivly iterates over the branch and renders each node and all successors with the given render function
+     */
+    private static drawBranchRecursive(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+      // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+      if (!_node.isActive)
+        return;
+
+      // move this to initial call drawBranch
+      if (_drawNode == RenderManager.drawNode)
+        RenderManager.resetFrameBuffer();
+
+      let finalTransform: Matrix4x4;
+
+      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+      if (cmpMesh)
+        finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+      else
+        finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
+
+      // multiply camera matrix
+      let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+
+      _drawNode(_node, finalTransform, projection);
+
+      for (let name in _node.getChildren()) {
+        let childNode: Node = _node.getChildren()[name];
+        RenderManager.drawBranchRecursive(childNode, _cmpCamera, _drawNode); //, world);
+      }
+
+      Recycler.store(projection);
+      if (finalTransform != _node.mtxWorld)
+        Recycler.store(finalTransform);
+    }
+
+    /**
+     * The standard render function for drawing a single node
+     */
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
       try {
         let material: Material = _node.getComponent(ComponentMaterial).material;
@@ -122,6 +135,9 @@ namespace FudgeCore {
       }
     }
 
+    /**
+     * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
+     */
     private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       // TODO: look into SSBOs!
       let target: WebGLTexture = RenderManager.getRayCastTexture();
@@ -147,6 +163,9 @@ namespace FudgeCore {
       // make texture available to onscreen-display
     }
 
+    /**
+     * Creates a texture buffer to be uses as pick-buffer
+     */
     private static getRayCastTexture(): WebGLTexture {
       // create to render to
       const targetTextureWidth: number = RenderManager.getViewportRectangle().width;
@@ -173,11 +192,13 @@ namespace FudgeCore {
     //#endregion
 
     /**
-     * Recursive method receiving a childnode and its parents updated world transform.  
-     * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
+     * Recursively iterates over the branch starting with the node given, recalculates all world transforms, 
+     * collects all lights and feeds all shaders used in the branch with these lights
      */
-    private static getLightsAndUpdateBranch(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map()): MapLightTypeToLightList {
+    private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = []): void {
+      let firstLevel: boolean = (_shadersUsed == null);
       let world: Matrix4x4 = _world;
+
       let cmpTransform: ComponentTransform = _node.cmpTransform;
       if (cmpTransform)
         world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
@@ -196,22 +217,30 @@ namespace FudgeCore {
         lightsOfType.push(cmpLight);
       }
 
-      for (let child of _node.getChildren()) {
-        _lights = RenderManager.getLightsAndUpdateBranch(child, world, _lights);
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      if (cmpMaterial) {
+        let shader: typeof Shader = cmpMaterial.material.getShader();
+        if (_shadersUsed.indexOf(shader) < 0)
+          _shadersUsed.push(shader);
       }
 
-      return _lights;
+      for (let child of _node.getChildren()) {
+        RenderManager.setupTransformAndLights(child, world, _lights, _shadersUsed);
+      }
+
+      if (firstLevel)
+        for (let shader of _shadersUsed)
+          RenderManager.setLightsInShader(shader, _lights);
     }
 
     /**
      * Set light data in shaders
      */
-    // TODO: process lights in Shaders!
-    // @ts-ignore
-    private static setLightsInShader(_renderShader: typeof Shader, _lights: MapLightTypeToLightList): void {
-      _renderShader.useProgram();
-      let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
+    private static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void {
+      _shader.useProgram();
+      let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
+      // Ambient
       let ambient: WebGLUniformLocation = uni["u_ambient.color"];
       if (ambient) {
         let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
@@ -224,6 +253,7 @@ namespace FudgeCore {
         }
       }
 
+      // Directional
       let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
       if (nDirectional) {
         let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
@@ -240,7 +270,6 @@ namespace FudgeCore {
           }
         }
       }
-      // debugger;
     }
   }
 }
