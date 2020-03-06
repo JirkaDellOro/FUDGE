@@ -3036,7 +3036,7 @@ declare namespace FudgeCore {
      * Static superclass for the representation of WebGl shaderprograms.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Shader {
+    abstract class Shader {
         static readonly subclasses: typeof Shader[];
         static program: WebGLProgram;
         static attributes: {
@@ -3060,7 +3060,7 @@ declare namespace FudgeCore {
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderFlat extends Shader {
+    abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
@@ -3073,7 +3073,7 @@ declare namespace FudgeCore {
      * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
      * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderMatCap extends Shader {
+    abstract class ShaderMatCap extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
@@ -3085,7 +3085,7 @@ declare namespace FudgeCore {
      * Renders for Raycasting
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderRayCast extends Shader {
+    abstract class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
@@ -3095,7 +3095,7 @@ declare namespace FudgeCore {
      * Textured shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderTexture extends Shader {
+    abstract class ShaderTexture extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
@@ -3107,7 +3107,7 @@ declare namespace FudgeCore {
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class ShaderUniColor extends Shader {
+    abstract class ShaderUniColor extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;

@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Single color shading
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ShaderUniColor extends Shader {
+  export abstract class ShaderUniColor extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderUniColor);
 
     public static getCoat(): typeof Coat {

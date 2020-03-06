@@ -7,7 +7,7 @@ namespace FudgeCore {
 
   // TODO: define attribute/uniforms as layout and use those consistently in shaders
   @RenderInjectorShader.decorate
-  export class Shader {
+  export abstract class Shader {
     public static readonly subclasses: typeof Shader[] = [];
     public static program: WebGLProgram;
     public static attributes: { [name: string]: number };

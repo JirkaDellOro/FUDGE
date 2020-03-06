@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Renders for Raycasting
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ShaderRayCast extends Shader {
+  export abstract class ShaderRayCast extends Shader {
     public static getVertexShaderSource(): string {
       return `#version 300 es
 

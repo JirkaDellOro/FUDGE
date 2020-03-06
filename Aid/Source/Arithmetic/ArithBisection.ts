@@ -1,10 +1,10 @@
 namespace FudgeAid {
   /**
    * Within a given precision, an object of this class finds the parameter value at which a given function 
-   * switches its boolean return value using interval splitting. 
+   * switches its boolean return value using interval splitting (bisection). 
    * Pass the type of the parameter and the type the precision is measured in.
    */
-  export class ArithIntervalSolver<Parameter, Epsilon> {
+  export class ArithBisection<Parameter, Epsilon> {
     /** The left border of the interval found */
     public left: Parameter;
     /** The right border of the interval found */
@@ -57,7 +57,7 @@ namespace FudgeAid {
 
       let between: Parameter = this.divide(_left, _right);
       let betweenValue: boolean = this.function(between);
-      if (betweenValue == _leftValue)
+      if (betweenValue == this.leftValue)
         this.solve(between, this.right, _epsilon, betweenValue, this.rightValue);
       else
         this.solve(this.left, between, _epsilon, this.leftValue, betweenValue);

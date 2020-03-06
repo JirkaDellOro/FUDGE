@@ -18,7 +18,7 @@ namespace TestDebug {
 
   function init(_event: Event): void {
     let form: HTMLFormElement = document.forms[0];
-    form.addChild(createTable());
+    form.appendChild(createTable());
     form.addEventListener("change", createMessage);
     ƒ.DebugTextArea.textArea = document.querySelector("textarea");
   }

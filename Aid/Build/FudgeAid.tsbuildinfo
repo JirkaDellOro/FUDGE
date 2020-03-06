@@ -3,7 +3,8 @@
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
       "../Source/References.ts",
-      "../Source/Arithmetic/ArithIntervalSolver.ts",
+      "../Source/Arithmetic/Arith.ts",
+      "../Source/Arithmetic/ArithBisection.ts",
       "../Source/Camera/CameraOrbit.ts",
       "../Source/Canvas/Canvas.ts",
       "../Source/Geometry/Node.ts",
@@ -23,7 +24,7 @@
         },
         {
           "pos": 15,
-          "end": 14931,
+          "end": 15600,
           "kind": "text"
         }
       ],
@@ -63,7 +64,7 @@
         },
         {
           "pos": 112,
-          "end": 8083,
+          "end": 8511,
           "kind": "text"
         }
       ]

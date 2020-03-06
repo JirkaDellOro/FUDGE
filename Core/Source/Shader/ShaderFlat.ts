@@ -4,7 +4,7 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
   @RenderInjectorShader.decorate
-  export class ShaderFlat extends Shader {
+  export abstract class ShaderFlat extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlat);
     // public static readonly renderShader: RenderShader = ShaderFlat.createProgram();
 

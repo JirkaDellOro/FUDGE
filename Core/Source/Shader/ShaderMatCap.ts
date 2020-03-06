@@ -5,7 +5,7 @@ namespace FudgeCore {
    * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
    * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ShaderMatCap extends Shader {
+  export abstract class ShaderMatCap extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
     public static getCoat(): typeof Coat {

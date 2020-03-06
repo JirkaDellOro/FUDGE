@@ -16,7 +16,7 @@ var TestDebug;
     window.addEventListener("load", init);
     function init(_event) {
         let form = document.forms[0];
-        form.addChild(createTable());
+        form.appendChild(createTable());
         form.addEventListener("change", createMessage);
         ƒ.DebugTextArea.textArea = document.querySelector("textarea");
     }

@@ -2,11 +2,22 @@
 /// <reference types="../../core/build/fudgecore" />
 declare namespace FudgeAid {
     /**
+     * Abstract class supporting versious arithmetical helper functions
+     */
+    abstract class Arith {
+        /**
+         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
+         */
+        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
+    }
+}
+declare namespace FudgeAid {
+    /**
      * Within a given precision, an object of this class finds the parameter value at which a given function
-     * switches its boolean return value using interval splitting.
+     * switches its boolean return value using interval splitting (bisection).
      * Pass the type of the parameter and the type the precision is measured in.
      */
-    class ArithIntervalSolver<Parameter, Epsilon> {
+    class ArithBisection<Parameter, Epsilon> {
         /** The left border of the interval found */
         left: Parameter;
         /** The right border of the interval found */

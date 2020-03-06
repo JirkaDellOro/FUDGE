@@ -5,7 +5,7 @@ namespace IntervalSolver {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
 
-  let arInSoNumber: ƒAid.ArithIntervalSolver<number, number> = new ƒAid.ArithIntervalSolver<number, number>(
+  let arInSoNumber: ƒAid.ArithBisection<number, number> = new ƒAid.ArithBisection<number, number>(
     (_num: number): boolean => { return _num < 3; },
     (_left: number, _right: number): number => { return (_left + _right) / 2; },
     (_left: number, _right: number, _epsilon: number): boolean => { return Math.abs(_right - _left) < _epsilon; }
@@ -15,7 +15,7 @@ namespace IntervalSolver {
   console.log(arInSoNumber.toString());
 
   let rect: ƒ.Rectangle = new ƒ.Rectangle(10, 10, 100, 100);
-  let arInSoV2: ƒAid.ArithIntervalSolver<ƒ.Vector2, number> = new ƒAid.ArithIntervalSolver<ƒ.Vector2, number>(
+  let arInSoV2: ƒAid.ArithBisection<ƒ.Vector2, number> = new ƒAid.ArithBisection<ƒ.Vector2, number>(
     (_v: ƒ.Vector2): boolean => { return rect.isInside(_v); },
     (_left: ƒ.Vector2, _right: ƒ.Vector2): ƒ.Vector2 => {
       return ƒ.Vector2.SCALE(ƒ.Vector2.SUM(_left, _right), 0.5);

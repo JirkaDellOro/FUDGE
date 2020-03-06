@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Textured shading
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class ShaderTexture extends Shader {
+  export abstract class ShaderTexture extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderTexture);
 
     public static getCoat(): typeof Coat {
