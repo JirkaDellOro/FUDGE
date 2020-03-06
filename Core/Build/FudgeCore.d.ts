@@ -278,9 +278,6 @@ declare namespace FudgeCore {
         stride: number;
         offset: number;
     }
-    interface RenderLights {
-        [type: string]: Float32Array;
-    }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
@@ -290,18 +287,18 @@ declare namespace FudgeCore {
         private static rectViewport;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
-         * @param _attributeLocation // The location of the attribute on the shader, to which they data will be passed.
-         * @param _bufferSpecification // Interface passing datapullspecifications to the buffer.
+         * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
+         * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
          */
         static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void;
         /**
         * Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null
-        * @param _value // value to check against null
-        * @param _message // optional, additional message for the exception
+        * @param _value  value to check against null
+        * @param _message  optional, additional message for the exception
         */
         static assert<T>(_value: T | null, _message?: string): T;
         /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport.
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
          */
         static initialize(_antialias?: boolean, _alpha?: boolean): void;
         /**
@@ -329,13 +326,6 @@ declare namespace FudgeCore {
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
         static getViewportRectangle(): Rectangle;
-        /**
-         * Convert light data to flat arrays
-         * TODO: this method appears to be obsolete...?
-         */
-        /**
-         * Set light data in shaders
-         */
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -2985,6 +2975,9 @@ declare namespace FudgeCore {
         texture: WebGLTexture;
         frameBuffer: WebGLFramebuffer;
     }
+    /**
+     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderOperator]]
+     */
     abstract class RenderManager extends RenderOperator {
         static rectClip: Rectangle;
         private static timestampUpdate;

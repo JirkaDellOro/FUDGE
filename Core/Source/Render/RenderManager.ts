@@ -1,4 +1,3 @@
-// / <reference path="RenderOperator.ts"/>
 namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
 
@@ -11,6 +10,9 @@ namespace FudgeCore {
     frameBuffer: WebGLFramebuffer;
   }
 
+  /**
+   * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderOperator]]
+   */
   export abstract class RenderManager extends RenderOperator {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     private static timestampUpdate: number;
@@ -69,7 +71,9 @@ namespace FudgeCore {
 
       return hits;
     }
+    //#endregion
 
+    //#region Drawing
     /**
      * The main rendering function to be called from [[Viewport]].
      * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
@@ -91,10 +95,6 @@ namespace FudgeCore {
       // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       if (!_node.isActive)
         return;
-
-      // move this to initial call drawBranch
-      if (_drawNode == RenderManager.drawNode)
-        RenderManager.resetFrameBuffer();
 
       let finalTransform: Matrix4x4;
 
@@ -128,13 +128,15 @@ namespace FudgeCore {
         let coat: Coat = material.getCoat();
         let shader: typeof Shader = material.getShader();
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-        RenderManager.setLightsInShader(shader, _lights);
+        // RenderManager.setLightsInShader(shader, _lights);
         RenderManager.draw(shader, mesh, coat, _finalTransform, _projection); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
     }
+    //#endregion
 
+    //#region Picking
     /**
      * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
      */
@@ -191,12 +193,16 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region Transformation & Lights
     /**
      * Recursively iterates over the branch starting with the node given, recalculates all world transforms, 
      * collects all lights and feeds all shaders used in the branch with these lights
      */
-    private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = []): void {
+    private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
+      if (firstLevel)
+        _shadersUsed = [];
+
       let world: Matrix4x4 = _world;
 
       let cmpTransform: ComponentTransform = _node.cmpTransform;
@@ -271,5 +277,6 @@ namespace FudgeCore {
         }
       }
     }
+    //#endregion
   }
 }
