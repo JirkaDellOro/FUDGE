@@ -339,7 +339,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_renderShader: typeof Shader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_shader: typeof Shader, _mesh: Mesh, _coat: Coat, _final: Matrix4x4, _projection: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
@@ -3000,13 +3000,13 @@ declare namespace FudgeCore {
          * @param _node
          * @param _cmpCamera
          */
-        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _lights?: MapLightTypeToLightList, _drawNode?: Function): void;
         /**
          * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          * @param _node
          * @param _cmpCamera
          */
-        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera, _lights?: MapLightTypeToLightList): PickBuffer[];
         static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         private static drawNode;
         private static drawNodeForRayCast;
@@ -3016,6 +3016,10 @@ declare namespace FudgeCore {
          * If the childnode owns a ComponentTransform, its worldmatrix is recalculated and passed on to its children, otherwise its parents matrix
          */
         private static getLightsAndUpdateBranch;
+        /**
+         * Set light data in shaders
+         */
+        private static setLightsInShader;
     }
 }
 declare namespace FudgeCore {

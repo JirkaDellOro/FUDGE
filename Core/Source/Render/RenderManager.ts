@@ -34,7 +34,7 @@ namespace FudgeCore {
      * @param _node 
      * @param _cmpCamera 
      */
-    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _lights: MapLightTypeToLightList = null, _drawNode: Function = RenderManager.drawNode): void {
       // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       if (!_node.isActive)
         return;
@@ -44,7 +44,8 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
-      let lights: MapLightTypeToLightList = RenderManager.getLightsAndUpdateBranch(_node, matrix);
+      if (!_lights)
+        _lights = RenderManager.getLightsAndUpdateBranch(_node, matrix);
 
       let finalTransform: Matrix4x4;
 
@@ -57,11 +58,11 @@ namespace FudgeCore {
       // multiply camera matrix
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
-      _drawNode(_node, finalTransform, projection, lights);
+      _drawNode(_node, finalTransform, projection, _lights);
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
-        RenderManager.drawBranch(childNode, _cmpCamera, _drawNode); //, world);
+        RenderManager.drawBranch(childNode, _cmpCamera, _lights, _drawNode); //, world);
       }
 
       Recycler.store(projection);
@@ -76,11 +77,11 @@ namespace FudgeCore {
      * @param _node 
      * @param _cmpCamera 
      */
-    public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera, _lights: MapLightTypeToLightList = null): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       RenderManager.pickBuffers = [];
       //TODO: examine, why switching blendFunction is necessary 
       RenderOperator.crc3.blendFunc(1, 0);
-      RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+      RenderManager.drawBranch(_node, _cmpCamera, _lights, RenderManager.drawNodeForRayCast);
       RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
 
       RenderManager.resetFrameBuffer();
@@ -114,13 +115,14 @@ namespace FudgeCore {
         let coat: Coat = material.getCoat();
         let shader: typeof Shader = material.getShader();
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-        RenderManager.draw(shader, mesh, coat, _finalTransform, _projection);
+        RenderManager.setLightsInShader(shader, _lights);
+        RenderManager.draw(shader, mesh, coat, _finalTransform, _projection); //, _lights);
       } catch (_error) {
-        //
+        // Debug.error(_error);
       }
     }
 
-    private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4): void { // create Texture to render to, int-rgba
+    private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       // TODO: look into SSBOs!
       let target: WebGLTexture = RenderManager.getRayCastTexture();
 
@@ -199,6 +201,46 @@ namespace FudgeCore {
       }
 
       return _lights;
+    }
+
+    /**
+     * Set light data in shaders
+     */
+    // TODO: process lights in Shaders!
+    // @ts-ignore
+    private static setLightsInShader(_renderShader: typeof Shader, _lights: MapLightTypeToLightList): void {
+      _renderShader.useProgram();
+      let uni: { [name: string]: WebGLUniformLocation } = _renderShader.uniforms;
+
+      let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+      if (ambient) {
+        let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
+        if (cmpLights) {
+          // TODO: add up ambient lights to a single color
+          let result: Color = new Color(0, 0, 0, 1);
+          for (let cmpLight of cmpLights)
+            result.add(cmpLight.light.color);
+          RenderOperator.crc3.uniform4fv(ambient, result.getArray());
+        }
+      }
+
+      let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
+      if (nDirectional) {
+        let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
+        if (cmpLights) {
+          let n: number = cmpLights.length;
+          RenderOperator.crc3.uniform1ui(nDirectional, n);
+          for (let i: number = 0; i < n; i++) {
+            let cmpLight: ComponentLight = cmpLights[i];
+            RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
+            let direction: Vector3 = Vector3.Z();
+            direction.transform(cmpLight.pivot);
+            direction.transform(cmpLight.getContainer().mtxWorld);
+            RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+          }
+        }
+      }
+      // debugger;
     }
   }
 }

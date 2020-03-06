@@ -12,12 +12,6 @@ namespace FudgeCore {
     offset: number; // Index of the element to begin with.
   }
 
-  // export interface RenderCoat {
-  //   //TODO: examine, if it makes sense to store a vao for each Coat, even though e.g. color won't be stored anyway...
-  //   //vao: WebGLVertexArrayObject;
-  //   coat: Coat;
-  // }
-
   export interface RenderLights {
     [type: string]: Float32Array;
   }
@@ -189,11 +183,11 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static draw(_renderShader: typeof Shader, _mesh: Mesh, _coat: Coat, _world: Matrix4x4, _projection: Matrix4x4): void {
+    protected static draw(_shader: typeof Shader, _mesh: Mesh, _coat: Coat, _final: Matrix4x4, _projection: Matrix4x4): void {
       // RenderOperator.useProgram(_renderShader);
-      _renderShader.useProgram();
-      _mesh.useRenderBuffers(_renderShader, _world, _projection);
-      _coat.useRenderData(_renderShader);
+      _shader.useProgram();
+      _mesh.useRenderBuffers(_shader, _final, _projection);
+      _coat.useRenderData(_shader);
       RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
   }
