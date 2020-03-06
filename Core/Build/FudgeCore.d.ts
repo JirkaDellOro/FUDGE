@@ -250,9 +250,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectCoatColored(this: Coat, _renderShader: typeof Shader): void;
-        protected static injectCoatTextured(this: Coat, _renderShader: typeof Shader): void;
-        protected static injectCoatMatCap(this: Coat, _renderShader: typeof Shader): void;
+        protected static injectCoatColored(this: Coat, _shader: typeof Shader): void;
+        protected static injectCoatTextured(this: Coat, _shader: typeof Shader): void;
+        protected static injectCoatMatCap(this: Coat, _shader: typeof Shader): void;
     }
 }
 declare namespace FudgeCore {
@@ -266,7 +266,7 @@ declare namespace FudgeCore {
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _renderShader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -679,7 +679,7 @@ declare namespace FudgeCore {
             [key: string]: unknown;
         };
         mutate(_mutator: Mutator): void;
-        useRenderData(_renderShader: typeof Shader): void;
+        useRenderData(_shader: typeof Shader): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(): void;
@@ -2636,9 +2636,9 @@ declare namespace FudgeCore {
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subclass: typeof Mesh): number;
-        useRenderBuffers(_renderShader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
-        deleteRenderBuffers(_renderShader: typeof Shader): void;
+        deleteRenderBuffers(_shader: typeof Shader): void;
         getVertexCount(): number;
         getIndexCount(): number;
         create(): void;

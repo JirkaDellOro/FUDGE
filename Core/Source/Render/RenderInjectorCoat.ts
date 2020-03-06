@@ -4,20 +4,20 @@ namespace FudgeCore {
       RenderInjector.inject(_constructor, RenderInjectorCoat);
     }
 
-    protected static injectCoatColored(this: Coat, _renderShader: typeof Shader): void {
-      let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_color"];
+    protected static injectCoatColored(this: Coat, _shader: typeof Shader): void {
+      let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
       let color: Float32Array = (<CoatColored>this).color.getArray();
       RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
     }
 
-    protected static injectCoatTextured(this: Coat, _renderShader: typeof Shader): void {
+    protected static injectCoatTextured(this: Coat, _shader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
       if (this.renderData) {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
-        crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
-        crc3.uniformMatrix3fv(_renderShader.uniforms["u_pivot"], false, (<CoatTextured>this).pivot.get());
+        crc3.uniform1i(_shader.uniforms["u_texture"], 0);
+        crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, (<CoatTextured>this).pivot.get());
       }
       else {
         this.renderData = {};
@@ -41,19 +41,19 @@ namespace FudgeCore {
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 
-        this.useRenderData(_renderShader);
+        this.useRenderData(_shader);
       }
     }
 
-    protected static injectCoatMatCap(this: Coat, _renderShader: typeof Shader): void {
+    protected static injectCoatMatCap(this: Coat, _shader: typeof Shader): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
-      let colorUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_tint_color"];
+      let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_tint_color"];
       let { r, g, b, a } = (<CoatMatCap>this).tintColor;
       let tintColorArray: Float32Array = new Float32Array([r, g, b, a]);
       crc3.uniform4fv(colorUniformLocation, tintColorArray);
 
-      let floatUniformLocation: WebGLUniformLocation = _renderShader.uniforms["u_flatmix"];
+      let floatUniformLocation: WebGLUniformLocation = _shader.uniforms["u_flatmix"];
       let flatMix: number = (<CoatMatCap>this).flatMix;
       crc3.uniform1f(floatUniformLocation, flatMix);
 
@@ -61,7 +61,7 @@ namespace FudgeCore {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
-        crc3.uniform1i(_renderShader.uniforms["u_texture"], 0);
+        crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       }
       else {
         this.renderData = {};
@@ -84,7 +84,7 @@ namespace FudgeCore {
         this.renderData["texture0"] = texture;
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-        this.useRenderData(_renderShader);
+        this.useRenderData(_shader);
       }
     }
   }

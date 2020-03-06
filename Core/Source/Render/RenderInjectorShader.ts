@@ -50,7 +50,6 @@ namespace FudgeCore {
         Debug.error(_error);
         debugger;
       }
-      // return renderShader;
 
 
       function compileShader(_shaderCode: string, _shaderType: GLenum): WebGLShader | null {
