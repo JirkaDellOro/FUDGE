@@ -137,7 +137,7 @@ namespace FudgeCore {
       //   RenderManager.update();
 
       this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
-      Debug.log(this.pickBuffers[0].frameBuffer);
+      // Debug.log(this.pickBuffers[0].frameBuffer);
     }
 
 
@@ -387,7 +387,7 @@ namespace FudgeCore {
     }
 
     private hndComponentEvent(_event: Event): void {
-      Debug.log(_event);
+      Debug.fudge(_event);
     }
     // #endregion
 

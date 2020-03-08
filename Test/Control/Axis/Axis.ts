@@ -1,4 +1,4 @@
-namespace Iterator {
+namespace Axis {
   import ƒ = FudgeCore;
   type Parameter = { min: string, max: string, step: string, value: string };
   window.addEventListener("DOMContentLoaded", init);

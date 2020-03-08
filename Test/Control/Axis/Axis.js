@@ -1,5 +1,5 @@
-var Iterator;
-(function (Iterator) {
+var Axis;
+(function (Axis) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let axisProportional = new ƒ.Axis(1, 0 /* PROPORTIONAL */);
@@ -135,5 +135,5 @@ var Iterator;
     function format(_value) {
         return _value.toFixed(4).padStart(7, "+");
     }
-})(Iterator || (Iterator = {}));
+})(Axis || (Axis = {}));
 //# sourceMappingURL=Axis.js.map

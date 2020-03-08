@@ -8,6 +8,106 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    enum DEBUG_FILTER {
+        NONE = 0,
+        INFO = 1,
+        LOG = 2,
+        WARN = 4,
+        ERROR = 8,
+        FUDGE = 16,
+        CLEAR = 256,
+        GROUP = 257,
+        GROUPCOLLAPSED = 258,
+        GROUPEND = 260,
+        MESSAGES = 31,
+        FORMAT = 263,
+        ALL = 287
+    }
+    const DEBUG_SYMBOL: {
+        [filter: number]: string;
+    };
+    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    interface MapDebugFilterToDelegate {
+        [filter: number]: Function;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+        /**
+         * Displays critical information about failures, which is emphasized e.g. by color
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
+     */
+    class Debug {
+        /**
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         */
+        private static delegates;
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         */
+        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        /**
+         * Info(...) displays additional information with low priority
+         */
+        static info(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays information with medium priority
+         */
+        static log(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays information about non-conformities in usage, which is emphasized e.g. by color
+         */
+        static warn(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays critical information about failures, which is emphasized e.g. by color
+         */
+        static error(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays messages from FUDGE
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
+        /**
+         * Clears the output and removes previous messages if possible
+         */
+        static clear(): void;
+        /**
+         * Opens a new group for messages
+         */
+        static group(_name: string): void;
+        /**
+         * Opens a new group for messages that is collapsed at first
+         */
+        static groupCollapsed(_name: string): void;
+        /**
+         * Closes the youngest group
+         */
+        static groupEnd(): void;
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         */
+        private static delegate;
+        /**
+         * setup routing to standard console
+         */
+        private static setupConsole;
+    }
+}
+declare namespace FudgeCore {
     interface MapEventTypeToListener {
         [eventType: string]: EventListener[];
     }
@@ -1367,106 +1467,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * The filters corresponding to debug activities, more to come
-     */
-    enum DEBUG_FILTER {
-        NONE = 0,
-        INFO = 1,
-        LOG = 2,
-        WARN = 4,
-        ERROR = 8,
-        FUDGE = 16,
-        CLEAR = 256,
-        GROUP = 257,
-        GROUPCOLLAPSED = 258,
-        GROUPEND = 260,
-        MESSAGES = 31,
-        FORMAT = 263,
-        ALL = 287
-    }
-    const DEBUG_SYMBOL: {
-        [filter: number]: string;
-    };
-    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
-    interface MapDebugFilterToDelegate {
-        [filter: number]: Function;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Routing to the standard-console
-     */
-    class DebugConsole extends DebugTarget {
-        static delegates: MapDebugFilterToDelegate;
-        /**
-         * Displays critical information about failures, which is emphasized e.g. by color
-         */
-        static fudge(_message: Object, ..._args: Object[]): void;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * The Debug-Class offers functions known from the console-object and additions,
-     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
-     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
-     */
-    class Debug {
-        /**
-         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
-         */
-        private static delegates;
-        /**
-         * De- / Activate a filter for the given DebugTarget.
-         */
-        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
-        /**
-         * Info(...) displays additional information with low priority
-         */
-        static info(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays information with medium priority
-         */
-        static log(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays information about non-conformities in usage, which is emphasized e.g. by color
-         */
-        static warn(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays critical information about failures, which is emphasized e.g. by color
-         */
-        static error(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays messages from FUDGE
-         */
-        static fudge(_message: Object, ..._args: Object[]): void;
-        /**
-         * Clears the output and removes previous messages if possible
-         */
-        static clear(): void;
-        /**
-         * Opens a new group for messages
-         */
-        static group(_name: string): void;
-        /**
-         * Opens a new group for messages that is collapsed at first
-         */
-        static groupCollapsed(_name: string): void;
-        /**
-         * Closes the youngest group
-         */
-        static groupEnd(): void;
-        /**
-         * Lookup all delegates registered to the filter and call them using the given arguments
-         */
-        private static delegate;
-        /**
-         * setup routing to standard console
-         */
-        private static setupConsole;
-    }
-}
-declare namespace FudgeCore {
-    /**
      * Routing to the alert box
      */
     class DebugAlert extends DebugTarget {
@@ -2811,8 +2811,9 @@ declare namespace FudgeCore {
         get cmpTransform(): ComponentTransform;
         /**
          * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Returns null if no [[ComponentTransform]] is attached
+         * Fails if no [[ComponentTransform]] is attached
          */
+        get mtxLocal(): Matrix4x4;
         /**
          * Returns a clone of the list of children
          */

@@ -30,7 +30,7 @@ namespace FudgeCore {
     }
 
     protected static createProgram(this: typeof Shader): void {
-      console.log("Create shader program", this);
+      Debug.fudge("Create shader program", this.name);
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
       let program: WebGLProgram = crc3.createProgram();
       try {
