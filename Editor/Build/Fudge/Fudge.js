@@ -1,3 +1,171 @@
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    let NODEMENU;
+    (function (NODEMENU) {
+        NODEMENU["EMPTY"] = "Empty Node";
+        NODEMENU["BOX"] = "Box Mesh Node";
+        NODEMENU["PYRAMID"] = "Pyramid Mesh Node";
+        NODEMENU["PLANE"] = "Plane Mesh Node";
+    })(NODEMENU = Fudge.NODEMENU || (Fudge.NODEMENU = {}));
+    let COMPONENTMENU;
+    (function (COMPONENTMENU) {
+        COMPONENTMENU["MESHBOX"] = "Mesh Component.Box Mesh Component";
+        COMPONENTMENU["MESHPLANE"] = "Mesh Component.Plane Mesh Component";
+        COMPONENTMENU["MESHPYRAMID"] = "Mesh Component.Pyramid Mesh Component";
+        COMPONENTMENU["AUDIOLISTENER"] = "Audio Listener Component";
+        COMPONENTMENU["AUDIO"] = "Audio Component";
+        COMPONENTMENU["ANIMATION"] = "Animation Component";
+        COMPONENTMENU["CAMERA"] = "Camera Component";
+        COMPONENTMENU["LIGHT"] = "Light Component";
+        COMPONENTMENU["SCRIPT"] = "Script Component";
+        COMPONENTMENU["TRANSFORM"] = "Transform Component";
+    })(COMPONENTMENU = Fudge.COMPONENTMENU || (Fudge.COMPONENTMENU = {}));
+    class UINodeList {
+        constructor(_node, _listContainer) {
+            this.updateList = (_event) => {
+                this.setNodeRoot(this.nodeRoot);
+            };
+            this.toggleCollapse = (_event) => {
+                _event.preventDefault();
+                if (event.target instanceof ƒui.CollapsableNodeListElement) {
+                    let target = _event.target;
+                    if (target.content.children.length > 1)
+                        target.collapse(target);
+                    else {
+                        let nodeToExpand = target.node;
+                        let newList = this.BuildListFromNode(nodeToExpand);
+                        target.replaceWith(newList);
+                    }
+                }
+            };
+            this.nodeRoot = _node;
+            this.nodeRoot.addEventListener("childAppend" /* CHILD_APPEND */, this.updateList);
+            this.nodeRoot.addEventListener("childRemove" /* CHILD_REMOVE */, this.updateList);
+            this.listRoot = document.createElement("ul");
+            this.listRoot.classList.add("NodeList");
+            let list = this.BuildListFromNode(this.nodeRoot);
+            this.listRoot.appendChild(list);
+            _listContainer.appendChild(this.listRoot);
+            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
+        }
+        getNodeRoot() {
+            return this.nodeRoot;
+        }
+        setSelection(_node) {
+            //TODO: Select Appropriate Entry
+        }
+        getSelection() {
+            return this.selectedEntry.node;
+        }
+        setNodeRoot(_node) {
+            this.nodeRoot = _node;
+            this.listRoot = this.BuildListFromNode(this.nodeRoot);
+            this.listRoot.classList.add("NodeList");
+        }
+        BuildListFromNode(_node) {
+            let listRoot = new ƒui.CollapsableNodeListElement(_node, _node.name, true);
+            let nodeChildren = _node.getChildren();
+            for (let child of nodeChildren) {
+                let listItem = new ƒui.CollapsableNodeListElement(child, child.name);
+                listRoot.content.appendChild(listItem);
+            }
+            return listRoot;
+        }
+    }
+    Fudge.UINodeList = UINodeList;
+    class UIAnimationList {
+        constructor(_mutator, _listContainer) {
+            this.collectMutator = () => {
+                let children = this.listRoot.children;
+                for (let child of children) {
+                    this.mutator[child.name] = child.mutator;
+                }
+                console.log(this.mutator);
+                return this.mutator;
+            };
+            this.toggleCollapse = (_event) => {
+                _event.preventDefault();
+                console.log(_event.target instanceof ƒui.CollapsableAnimationListElement);
+                if (_event.target instanceof ƒui.CollapsableAnimationListElement) {
+                    let target = _event.target;
+                    target.collapse(target);
+                }
+            };
+            this.mutator = _mutator;
+            this.listRoot = document.createElement("ul");
+            this.index = {};
+            this.listRoot = this.buildFromMutator(this.mutator);
+            _listContainer.append(this.listRoot);
+            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.collectMutator);
+        }
+        getMutator() {
+            return this.mutator;
+        }
+        setMutator(_mutator) {
+            this.mutator = _mutator;
+            let hule = this.buildFromMutator(this.mutator);
+            this.listRoot.replaceWith(hule);
+            this.listRoot = hule;
+        }
+        getElementIndex() {
+            return this.index;
+        }
+        updateMutator(_update) {
+            this.mutator = this.updateMutatorEntry(_update, this.mutator);
+            this.updateEntry(this.mutator, this.index);
+        }
+        updateEntry(_update, _index) {
+            for (let key in _update) {
+                if (typeof _update[key] == "object") {
+                    this.updateEntry(_update[key], _index[key]);
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    let element = _index[key];
+                    element.value = _update[key];
+                }
+            }
+        }
+        updateMutatorEntry(_update, _toUpdate) {
+            let updatedMutator = _toUpdate;
+            for (let key in _update) {
+                if (typeof updatedMutator[key] == "object") {
+                    if (typeof updatedMutator[key] == "object") {
+                        updatedMutator[key] = this.updateMutatorEntry(_update[key], updatedMutator[key]);
+                    }
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    if (typeof updatedMutator[key] == "string" || "number") {
+                        updatedMutator[key] = _update[key];
+                    }
+                }
+            }
+            return updatedMutator;
+        }
+        buildFromMutator(_mutator) {
+            let listRoot = document.createElement("ul");
+            for (let key in _mutator) {
+                let listElement = new ƒui.CollapsableAnimationListElement(this.mutator[key], key);
+                listRoot.append(listElement);
+                this.index[key] = listElement.getElementIndex();
+                console.log(this.index);
+            }
+            return listRoot;
+        }
+    }
+    Fudge.UIAnimationList = UIAnimationList;
+    class UINodeData extends ƒui.UIMutable {
+        constructor(_mutable, _container) {
+            super(_mutable);
+            this.root = document.createElement("form");
+            ƒui.UIGenerator.createFromMutable(_mutable, this.root);
+            this.root.addEventListener("input", this.mutateOnInput);
+            _container.append(this.root);
+        }
+    }
+    Fudge.UINodeData = UINodeData;
+})(Fudge || (Fudge = {}));
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
@@ -485,7 +653,7 @@ var Fudge;
             this.attributeList.style.width = "300px";
             this.attributeList.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.changeAttribute.bind(this));
             //TODO: Add Moni's custom Element here
-            this.controller = new FudgeUserInterface.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+            this.controller = new Fudge.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
             this.canvas = document.createElement("canvas");
             this.canvas.width = 1500;
             this.canvas.height = 500;
@@ -1067,7 +1235,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -1088,7 +1255,7 @@ var Fudge;
         }
         fillContent() {
             let div = document.createElement("div");
-            let inspector = new ƒui.UINodeData(this.camera, div);
+            let inspector = new Fudge.UINodeData(this.camera, div);
             this.content.replaceChild(div, this.content.firstChild);
         }
         deconstruct() {
@@ -1159,12 +1326,12 @@ var Fudge;
                     cntHeader.append(txtNodeName);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents = new ƒui.UINodeData(nodeComponent, cntComponents);
+                        let uiComponents = new Fudge.UINodeData(nodeComponent, cntComponents);
                     }
                     this.content.append(cntComponents);
                     let mutator = {};
-                    for (let member in ƒui.COMPONENTMENU) {
-                        ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.COMPONENTMENU[member], mutator);
+                    for (let member in Fudge.COMPONENTMENU) {
+                        ƒui.MultiLevelMenuManager.buildFromSignature(Fudge.COMPONENTMENU[member], mutator);
                     }
                     let menu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
                     menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.addComponent);
@@ -1206,18 +1373,18 @@ var Fudge;
                 let coatRed = new ƒ.CoatColored(clrRed);
                 let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
                 switch (_event.detail) {
-                    case Menu.NODE + "." + ƒui.NODEMENU.BOX:
+                    case Menu.NODE + "." + Fudge.NODEMENU.BOX:
                         let meshCube = new ƒ.MeshCube();
                         node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
                         break;
-                    case Menu.NODE + "." + ƒui.NODEMENU.EMPTY:
+                    case Menu.NODE + "." + Fudge.NODEMENU.EMPTY:
                         node.name = "Empty Node";
                         break;
-                    case Menu.NODE + "." + ƒui.NODEMENU.PLANE:
+                    case Menu.NODE + "." + Fudge.NODEMENU.PLANE:
                         let meshPlane = new ƒ.MeshQuad();
                         node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
                         break;
-                    case Menu.NODE + "." + ƒui.NODEMENU.PYRAMID:
+                    case Menu.NODE + "." + Fudge.NODEMENU.PYRAMID:
                         let meshPyramid = new ƒ.MeshPyramid();
                         node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                         break;
@@ -1255,7 +1422,7 @@ var Fudge;
             }
             this.selectedNode = null;
             this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
-            this.listController = new ƒui.UINodeList(this.branch, this.content);
+            this.listController = new Fudge.UINodeList(this.branch, this.content);
             this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
             this.fillContent();
         }
@@ -1264,8 +1431,8 @@ var Fudge;
         }
         fillContent() {
             let mutator = {};
-            for (let member in ƒui.NODEMENU) {
-                ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
+            for (let member in Fudge.NODEMENU) {
+                ƒui.MultiLevelMenuManager.buildFromSignature(Fudge.NODEMENU[member], mutator);
             }
             let menu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
             menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.createNode);
@@ -1304,8 +1471,8 @@ var Fudge;
              */
             this.animate = (_e) => {
                 this.viewport.setBranch(this.branch);
-                ƒ.RenderManager.updateBranch(this.branch);
-                ƒ.RenderManager.update();
+                // ƒ.RenderManager.updateBranch(this.branch);
+                // ƒ.RenderManager.update();
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();
             };
@@ -1326,8 +1493,8 @@ var Fudge;
         }
         fillContent() {
             // initialize RenderManager and transmit content
-            ƒ.RenderManager.addBranch(this.branch);
-            ƒ.RenderManager.update();
+            // ƒ.RenderManager.addBranch(this.branch);
+            // ƒ.RenderManager.update();
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"     
             let cmpCamera = new ƒ.ComponentCamera();

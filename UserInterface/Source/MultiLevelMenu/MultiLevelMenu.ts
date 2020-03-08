@@ -4,25 +4,6 @@ namespace FudgeUserInterface {
      */
     import ƒ = FudgeCore;
 
-    export enum NODEMENU {
-        EMPTY = "Empty Node",
-        BOX = "Box Mesh Node",
-        PYRAMID = "Pyramid Mesh Node",
-        PLANE = "Plane Mesh Node"
-    }
-    export enum COMPONENTMENU {
-        MESHBOX = "Mesh Component.Box Mesh Component",
-        MESHPLANE = "Mesh Component.Plane Mesh Component",
-        MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
-        AUDIOLISTENER = "Audio Listener Component",
-        AUDIO = "Audio Component",
-        ANIMATION = "Animation Component",
-        CAMERA = "Camera Component",
-        LIGHT = "Light Component",
-        SCRIPT = "Script Component",
-        TRANSFORM = "Transform Component"
-    }
-
     export class MultiLevelMenuManager {
 
         public static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator {
