@@ -1498,14 +1498,27 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Handles multiple controls as inputs and creates an output from that
+     * Handles multiple controls as inputs and creates an output from that.
+     * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
      */
     class Axis extends Control {
         private controls;
         private sumPrevious;
+        /**
+         * Add the control given to the list of controls feeding into this axis
+         */
         addControl(_control: Control): void;
+        /**
+         * Returns the control with the given name
+         */
         getControl(_name: string): Control;
+        /**
+         * Removes the control with the given name
+         */
         removeControl(_name: string): void;
+        /**
+         * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
+         */
         getValue(): number;
     }
 }
