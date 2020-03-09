@@ -10,7 +10,7 @@ namespace FudgeCore {
 
   /**
    * Processes input signals of type number and generates an output signal of the same type using 
-   * proportional, integral or differential mapping.
+   * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
    */
   export class Control extends EventTarget {
     public readonly type: CONTROL_TYPE;
@@ -43,7 +43,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Feed an input value into this control
+     * Feed an input value into this control and fire the [[EVENT_CONTROL.INPUT]]-event
      */
     public setInput(_input: number): void {
       this.valueBase = this.calculateValue();
