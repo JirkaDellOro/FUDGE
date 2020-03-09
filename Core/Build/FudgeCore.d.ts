@@ -1466,6 +1466,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class Keyboard {
+        private static keysPressed;
+        static isPressedOne(_keys: KEYBOARD_CODE[]): boolean;
+        static isPressedCombo(_keys: KEYBOARD_CODE[]): boolean;
+        static valueFor<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
+        private static initialize;
+        private static hndKeyInteraction;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Routing to the alert box
      */
@@ -2378,19 +2388,19 @@ declare namespace FudgeCore {
         /**
          * Add a translation by the given vector to this matrix
          */
-        translate(_by: Vector3): void;
+        translate(_by: Vector3, _local?: boolean): void;
         /**
          * Add a translation along the x-Axis by the given amount to this matrix
          */
-        translateX(_x: number): void;
+        translateX(_x: number, _local?: boolean): void;
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
          */
-        translateY(_y: number): void;
+        translateY(_y: number, _local?: boolean): void;
         /**
-         * Add a translation along the y-Axis by the given amount to this matrix
+         * Add a translation along the z-Axis by the given amount to this matrix
          */
-        translateZ(_z: number): void;
+        translateZ(_z: number, _local?: boolean): void;
         /**
          * Add a scaling by the given vector to this matrix
          */

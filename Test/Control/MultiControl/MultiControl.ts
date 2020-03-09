@@ -6,19 +6,31 @@ namespace MultiControl {
   let axisRotation: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.PROPORTIONAL);
   let cube: ƒ.Node;
   let viewport: ƒ.Viewport;
-  let maxSpeed: number = 2; // units per second
+  let maxSpeed: number = 5; // units per second
+  let maxRotSpeed: number = 180; // degrees per second
 
   function init(_event: Event): void {
     setupScene();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.FRAME_REQUEST, 60);
+
+    axisSpeed.setDelay(500);
+    axisRotation.setDelay(200);
   }
 
   function update(_event: Event): void {
-    let distance: number = maxSpeed * ƒ.Loop.timeFrameGame / 1000;
-    cube.mtxLocal.rotateY(0.5 , true);
+
+    axisSpeed.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.W]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.S]));
+    axisRotation.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.A]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.D]));
+
+    let timeFrame: number = ƒ.Loop.timeFrameGame / 1000;
+    let distance: number = axisSpeed.getValue() * maxSpeed * timeFrame ;
+    let angle: number = axisRotation.getValue() * maxRotSpeed * timeFrame;
     cube.mtxLocal.translateZ(distance);
+    cube.mtxLocal.rotateY(angle);
+
     viewport.draw();
+
   }
 
   function setupScene(): void {

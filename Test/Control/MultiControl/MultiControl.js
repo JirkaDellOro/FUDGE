@@ -7,16 +7,23 @@ var MultiControl;
     let axisRotation = new ƒ.Axis(1, 0 /* PROPORTIONAL */);
     let cube;
     let viewport;
-    let maxSpeed = 2; // units per second
+    let maxSpeed = 5; // units per second
+    let maxRotSpeed = 180; // degrees per second
     function init(_event) {
         setupScene();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.FRAME_REQUEST, 60);
+        axisSpeed.setDelay(500);
+        axisRotation.setDelay(200);
     }
     function update(_event) {
-        let distance = maxSpeed * ƒ.Loop.timeFrameGame / 1000;
-        cube.mtxLocal.rotateY(0.5, true);
+        axisSpeed.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.W]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.S]));
+        axisRotation.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.A]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.D]));
+        let timeFrame = ƒ.Loop.timeFrameGame / 1000;
+        let distance = axisSpeed.getValue() * maxSpeed * timeFrame;
+        let angle = axisRotation.getValue() * maxRotSpeed * timeFrame;
         cube.mtxLocal.translateZ(distance);
+        cube.mtxLocal.rotateY(angle);
         viewport.draw();
     }
     function setupScene() {
