@@ -1441,13 +1441,19 @@ declare namespace FudgeCore {
         INPUT = "input",
         OUTPUT = "output"
     }
-    const enum AXIS_TYPE {
+    const enum CONTROL_TYPE {
         PROPORTIONAL = 0,
         INTEGRAL = 1,
         DIFFERENTIAL = 2
     }
-    class Axis extends EventTarget {
-        readonly type: AXIS_TYPE;
+    /**
+     * Processes input signals of type number and generates an output signal of the same type using
+     * proportional, integral or differential mapping.
+     */
+    class Control extends EventTarget {
+        readonly type: CONTROL_TYPE;
+        active: boolean;
+        name: string;
         protected valueBase: number;
         protected inputTarget: number;
         protected valuePrevious: number;
@@ -1456,21 +1462,72 @@ declare namespace FudgeCore {
         protected factor: number;
         protected timeInputTargetSet: number;
         protected time: Time;
-        constructor(_factor?: number, _type?: AXIS_TYPE);
-        setTime(_time: Time): void;
-        setInput(_target: number): void;
+        constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
+        /**
+         * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
+         */
+        setTimebase(_time: Time): void;
+        /**
+         * Feed an input value into this control
+         */
+        setInput(_input: number): void;
+        /**
+         * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
+         */
         setDelay(_time: number): void;
+        /**
+         * Set the factor to multiply the input value given with [[setInput]] with
+         */
         setFactor(_factor: number): void;
+        /**
+         * Sets the base value to be applied for the following calculations of value.
+         * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
+         * TODO: check if inputTarget/inputPrevious must be adjusted too
+         */
+        setValue(_value: number): void;
+        /**
+         * Get the value from the output of this control
+         */
         getValue(): number;
+        /**
+         * Get the value from the output of this control
+         */
+        protected calculateValue(): number;
         private getInputDelayed;
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Handles multiple controls as inputs and creates an output from that
+     */
+    class Axis extends Control {
+        private controls;
+        private sumPrevious;
+        addControl(_control: Control): void;
+        getControl(_name: string): Control;
+        removeControl(_name: string): void;
+        getValue(): number;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Collects the keys pressed on the keyboard and stores their status.
+     */
     abstract class Keyboard {
         private static keysPressed;
+        /**
+         * Returns true if one of the given keys is is currently being pressed.
+         */
         static isPressedOne(_keys: KEYBOARD_CODE[]): boolean;
+        /**
+         * Returns true if all of the given keys are currently being pressed
+         */
         static isPressedCombo(_keys: KEYBOARD_CODE[]): boolean;
-        static valueFor<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
+        /**
+         * Returns the value given as _active if one or, when _combo is true, all of the given keys are pressed.
+         * Returns the value given as _inactive if not.
+         */
+        static mapToValue<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
         private static initialize;
         private static hndKeyInteraction;
     }

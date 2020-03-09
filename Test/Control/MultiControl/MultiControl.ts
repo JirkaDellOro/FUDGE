@@ -2,8 +2,8 @@ namespace MultiControl {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
   window.addEventListener("DOMContentLoaded", init);
-  let axisSpeed: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.PROPORTIONAL);
-  let axisRotation: ƒ.Axis = new ƒ.Axis(1, ƒ.AXIS_TYPE.PROPORTIONAL);
+  let axisSpeed: ƒ.Axis = new ƒ.Axis("Speed", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+  let axisRotation: ƒ.Axis = new ƒ.Axis("Rotation", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
   let cube: ƒ.Node;
   let viewport: ƒ.Viewport;
   let maxSpeed: number = 5; // units per second
@@ -11,6 +11,7 @@ namespace MultiControl {
 
   function init(_event: Event): void {
     setupScene();
+    setupControls();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.FRAME_REQUEST, 60);
 
@@ -19,18 +20,40 @@ namespace MultiControl {
   }
 
   function update(_event: Event): void {
-
-    axisSpeed.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.W]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.S]));
-    axisRotation.setInput(ƒ.Keyboard.valueFor(1, 0, [ƒ.KEYBOARD_CODE.A]) + ƒ.Keyboard.valueFor(-1, 0, [ƒ.KEYBOARD_CODE.D]));
-
+    hndKeyboardControls();
     let timeFrame: number = ƒ.Loop.timeFrameGame / 1000;
-    let distance: number = axisSpeed.getValue() * maxSpeed * timeFrame ;
+    let distance: number = axisSpeed.getValue() * maxSpeed * timeFrame;
     let angle: number = axisRotation.getValue() * maxRotSpeed * timeFrame;
     cube.mtxLocal.translateZ(distance);
     cube.mtxLocal.rotateY(angle);
 
     viewport.draw();
+  }
 
+  function setupControls(): void {
+    axisSpeed.addControl(new ƒ.Control("Keyboard", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true));
+    axisRotation.addControl(new ƒ.Control("Keyboard", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true));
+    axisSpeed.addControl(new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true));
+    axisRotation.addControl(new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true));
+
+    viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
+    viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
+  }
+
+  function hndPointerMove(_event: PointerEvent): void {
+    axisSpeed.getControl("Pointer").setInput(_event.movementY);
+    axisRotation.getControl("Pointer").setInput(_event.movementX);
+  }
+
+  function hndKeyboardControls(): void {
+    axisSpeed.getControl("Keyboard").setInput(
+      ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.W, ƒ.KEYBOARD_CODE.ARROW_UP])
+      + ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.S, ƒ.KEYBOARD_CODE.ARROW_DOWN])
+    );
+    axisRotation.getControl("Keyboard").setInput(
+      ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.A, ƒ.KEYBOARD_CODE.ARROW_LEFT])
+      + ƒ.Keyboard.mapToValue(-1, 0, [ƒ.KEYBOARD_CODE.D, ƒ.KEYBOARD_CODE.ARROW_RIGHT])
+    );
   }
 
   function setupScene(): void {
