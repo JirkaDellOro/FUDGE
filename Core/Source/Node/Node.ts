@@ -63,16 +63,11 @@ namespace FudgeCore {
     }
     /**
      * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
-     * Returns null if no [[ComponentTransform]] is attached
+     * Fails if no [[ComponentTransform]] is attached
      */
-    // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
-    // public get mtxLocal(): Matrix4x4 {
-    //     let cmpTransform: ComponentTransform = this.cmpTransform;
-    //     if (cmpTransform)
-    //         return cmpTransform.local;
-    //     else
-    //         return null;
-    // }
+    public get mtxLocal(): Matrix4x4 {
+            return this.cmpTransform.local;
+    }
 
     // #region Scenetree
     /**

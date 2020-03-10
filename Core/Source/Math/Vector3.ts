@@ -56,7 +56,8 @@ namespace FudgeCore {
      * Creates and returns a vector with the given length pointing in x-direction
      */
     public static X(_scale: number = 1): Vector3 {
-      const vector: Vector3 = new Vector3(_scale, 0, 0);
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([_scale, 0, 0]);
       return vector;
     }
 
@@ -64,7 +65,8 @@ namespace FudgeCore {
      * Creates and returns a vector with the given length pointing in y-direction
      */
     public static Y(_scale: number = 1): Vector3 {
-      const vector: Vector3 = new Vector3(0, _scale, 0);
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([0, _scale, 0]);
       return vector;
     }
 
@@ -72,7 +74,8 @@ namespace FudgeCore {
      * Creates and returns a vector with the given length pointing in z-direction
      */
     public static Z(_scale: number = 1): Vector3 {
-      const vector: Vector3 = new Vector3(0, 0, _scale);
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([0, 0, _scale]);
       return vector;
     }
 
@@ -80,7 +83,8 @@ namespace FudgeCore {
      * Creates and returns a vector with the value 0 on each axis
      */
     public static ZERO(): Vector3 {
-      const vector: Vector3 = new Vector3(0, 0, 0);
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([0, 0, 0]);
       return vector;
     }
 
@@ -88,7 +92,8 @@ namespace FudgeCore {
      * Creates and returns a vector of the given size on each of the three axis
      */
     public static ONE(_scale: number = 1): Vector3 {
-      const vector: Vector3 = new Vector3(_scale, _scale, _scale);
+      const vector: Vector3 = Recycler.get(Vector3);
+      vector.data.set([_scale, _scale, _scale]);
       return vector;
     }
 
@@ -96,9 +101,10 @@ namespace FudgeCore {
      * Creates and returns a vector through transformation of the given vector by the given matrix
      */
     public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
-      let result: Vector3 = new Vector3();
+      let result: Vector3 = Recycler.get(Vector3);
       let m: Float32Array = _matrix.get();
       let [x, y, z] = _vector.get();
+
       result.x = m[0] * x + m[4] * y + m[8] * z;
       result.y = m[1] * x + m[5] * y + m[9] * z;
       result.z = m[2] * x + m[6] * y + m[10] * z;
@@ -130,7 +136,7 @@ namespace FudgeCore {
      * @returns A new vector representing the sum of the given vectors
      */
     public static SUM(..._vectors: Vector3[]): Vector3 {
-      let result: Vector3 = new Vector3();
+      let result: Vector3 = Recycler.get(Vector3);
       for (let vector of _vectors)
         result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
       return result;
@@ -142,7 +148,7 @@ namespace FudgeCore {
      * @returns A new vector representing the difference of the given vectors
      */
     public static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3 {
-      let vector: Vector3 = new Vector3;
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y, _a.z - _b.z]);
       return vector;
     }
@@ -150,7 +156,7 @@ namespace FudgeCore {
      * Returns a new vector representing the given vector scaled by the given scaling factor
      */
     public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
-      let scaled: Vector3 = new Vector3();
+      let scaled: Vector3 = Recycler.get(Vector3);
       scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
       return scaled;
     }
@@ -161,7 +167,7 @@ namespace FudgeCore {
      * @returns A new vector representing the crossproduct of the given vectors
      */
     public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
-      let vector: Vector3 = new Vector3;
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.data = new Float32Array([
         _a.y * _b.z - _a.z * _b.y,
         _a.z * _b.x - _a.x * _b.z,
@@ -206,13 +212,13 @@ namespace FudgeCore {
     }
 
     public add(_addend: Vector3): void {
-      this.data = new Vector3(_addend.x + this.x, _addend.y + this.y, _addend.z + this.z).data;
+      this.data.set([_addend.x + this.x, _addend.y + this.y, _addend.z + this.z]);
     }
     public subtract(_subtrahend: Vector3): void {
-      this.data = new Vector3(this.x - _subtrahend.x, this.y - _subtrahend.y, this.z - _subtrahend.z).data;
+      this.data.set([this.x - _subtrahend.x, this.y - _subtrahend.y, this.z - _subtrahend.z]);
     }
     public scale(_scale: number): void {
-      this.data = new Vector3(_scale * this.x, _scale * this.y, _scale * this.z).data;
+      this.data.set([_scale * this.x, _scale * this.y, _scale * this.z]);
     }
 
     public normalize(_length: number = 1): void {
@@ -228,7 +234,9 @@ namespace FudgeCore {
     }
 
     public get copy(): Vector3 {
-      return new Vector3(this.x, this.y, this.z);
+      let copy: Vector3 = Recycler.get(Vector3);
+      copy.data.set(this.data);
+      return copy;
     }
 
     public transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void {

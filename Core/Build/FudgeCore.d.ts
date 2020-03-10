@@ -8,6 +8,106 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * The filters corresponding to debug activities, more to come
+     */
+    enum DEBUG_FILTER {
+        NONE = 0,
+        INFO = 1,
+        LOG = 2,
+        WARN = 4,
+        ERROR = 8,
+        FUDGE = 16,
+        CLEAR = 256,
+        GROUP = 257,
+        GROUPCOLLAPSED = 258,
+        GROUPEND = 260,
+        MESSAGES = 31,
+        FORMAT = 263,
+        ALL = 287
+    }
+    const DEBUG_SYMBOL: {
+        [filter: number]: string;
+    };
+    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
+    interface MapDebugFilterToDelegate {
+        [filter: number]: Function;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Routing to the standard-console
+     */
+    class DebugConsole extends DebugTarget {
+        static delegates: MapDebugFilterToDelegate;
+        /**
+         * Displays critical information about failures, which is emphasized e.g. by color
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * The Debug-Class offers functions known from the console-object and additions,
+     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
+     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
+     */
+    class Debug {
+        /**
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         */
+        private static delegates;
+        /**
+         * De- / Activate a filter for the given DebugTarget.
+         */
+        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
+        /**
+         * Info(...) displays additional information with low priority
+         */
+        static info(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays information with medium priority
+         */
+        static log(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays information about non-conformities in usage, which is emphasized e.g. by color
+         */
+        static warn(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays critical information about failures, which is emphasized e.g. by color
+         */
+        static error(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays messages from FUDGE
+         */
+        static fudge(_message: Object, ..._args: Object[]): void;
+        /**
+         * Clears the output and removes previous messages if possible
+         */
+        static clear(): void;
+        /**
+         * Opens a new group for messages
+         */
+        static group(_name: string): void;
+        /**
+         * Opens a new group for messages that is collapsed at first
+         */
+        static groupCollapsed(_name: string): void;
+        /**
+         * Closes the youngest group
+         */
+        static groupEnd(): void;
+        /**
+         * Lookup all delegates registered to the filter and call them using the given arguments
+         */
+        private static delegate;
+        /**
+         * setup routing to standard console
+         */
+        private static setupConsole;
+    }
+}
+declare namespace FudgeCore {
     interface MapEventTypeToListener {
         [eventType: string]: EventListener[];
     }
@@ -1341,13 +1441,26 @@ declare namespace FudgeCore {
         INPUT = "input",
         OUTPUT = "output"
     }
-    const enum AXIS_TYPE {
+    const enum CONTROL_TYPE {
         PROPORTIONAL = 0,
         INTEGRAL = 1,
         DIFFERENTIAL = 2
     }
-    class Axis extends EventTarget {
-        readonly type: AXIS_TYPE;
+    /**
+     * Processes input signals of type number and generates an output signal of the same type using
+     * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
+     * ```plaintext
+     *          ┌─────────────────────────────────────────────────────────────┐
+     *          │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+     *  Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+     *          │   └───────┘   └─────┘      pass change  (Differential)      │
+     *          └─────────────────────────────────────────────────────────────┘
+     * ```
+     */
+    class Control extends EventTarget {
+        readonly type: CONTROL_TYPE;
+        active: boolean;
+        name: string;
         protected valueBase: number;
         protected inputTarget: number;
         protected valuePrevious: number;
@@ -1356,113 +1469,100 @@ declare namespace FudgeCore {
         protected factor: number;
         protected timeInputTargetSet: number;
         protected time: Time;
-        constructor(_factor?: number, _type?: AXIS_TYPE);
-        setTime(_time: Time): void;
-        setInput(_target: number): void;
+        constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
+        /**
+         * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
+         */
+        setTimebase(_time: Time): void;
+        /**
+         * Feed an input value into this control and fire the [[EVENT_CONTROL.INPUT]]-event
+         */
+        setInput(_input: number): void;
+        /**
+         * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
+         */
         setDelay(_time: number): void;
+        /**
+         * Set the factor to multiply the input value given with [[setInput]] with
+         */
         setFactor(_factor: number): void;
+        /**
+         * Sets the base value to be applied for the following calculations of value.
+         * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
+         * TODO: check if inputTarget/inputPrevious must be adjusted too
+         */
+        setValue(_value: number): void;
+        /**
+         * Get the value from the output of this control
+         */
         getValue(): number;
+        /**
+         * Get the value from the output of this control
+         */
+        protected calculateValue(): number;
         private getInputDelayed;
     }
 }
 declare namespace FudgeCore {
     /**
-     * The filters corresponding to debug activities, more to come
+     * Handles multiple controls as inputs and creates an output from that.
+     * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
+     * ```plaintext
+     *           ┌───────────────────────────────────────────┐
+     *           │ ┌───────┐                                 │
+     *   Input → │ │control│\                                │
+     *           │ └───────┘ \                               │
+     *           │ ┌───────┐  \┌───┐   ┌─────────────────┐   │
+     *   Input → │ │control│---│sum│ → │internal control │ → │ → Output
+     *           │ └───────┘  /└───┘   └─────────────────┘   │
+     *           │ ┌───────┐ /                               │
+     *   Input → │ │control│/                                │
+     *           │ └───────┘                                 │
+     *           └───────────────────────────────────────────┘
+     * ```
      */
-    enum DEBUG_FILTER {
-        NONE = 0,
-        INFO = 1,
-        LOG = 2,
-        WARN = 4,
-        ERROR = 8,
-        FUDGE = 16,
-        CLEAR = 256,
-        GROUP = 257,
-        GROUPCOLLAPSED = 258,
-        GROUPEND = 260,
-        MESSAGES = 31,
-        FORMAT = 263,
-        ALL = 287
-    }
-    const DEBUG_SYMBOL: {
-        [filter: number]: string;
-    };
-    type MapDebugTargetToDelegate = Map<DebugTarget, Function>;
-    interface MapDebugFilterToDelegate {
-        [filter: number]: Function;
+    class Axis extends Control {
+        private controls;
+        private sumPrevious;
+        /**
+         * Add the control given to the list of controls feeding into this axis
+         */
+        addControl(_control: Control): void;
+        /**
+         * Returns the control with the given name
+         */
+        getControl(_name: string): Control;
+        /**
+         * Removes the control with the given name
+         */
+        removeControl(_name: string): void;
+        /**
+         * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
+         */
+        getValue(): number;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Routing to the standard-console
+     * Collects the keys pressed on the keyboard and stores their status.
      */
-    class DebugConsole extends DebugTarget {
-        static delegates: MapDebugFilterToDelegate;
+    abstract class Keyboard {
+        private static keysPressed;
         /**
-         * Displays critical information about failures, which is emphasized e.g. by color
+         * Returns true if one of the given keys is is currently being pressed.
          */
-        static fudge(_message: Object, ..._args: Object[]): void;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * The Debug-Class offers functions known from the console-object and additions,
-     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
-     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
-     */
-    class Debug {
+        static isPressedOne(_keys: KEYBOARD_CODE[]): boolean;
         /**
-         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         * Returns true if all of the given keys are currently being pressed
          */
-        private static delegates;
+        static isPressedCombo(_keys: KEYBOARD_CODE[]): boolean;
         /**
-         * De- / Activate a filter for the given DebugTarget.
+         * Returns the value given as _active if one or, when _combo is true, all of the given keys are pressed.
+         * Returns the value given as _inactive if not.
          */
-        static setFilter(_target: DebugTarget, _filter: DEBUG_FILTER): void;
-        /**
-         * Info(...) displays additional information with low priority
-         */
-        static info(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays information with medium priority
-         */
-        static log(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays information about non-conformities in usage, which is emphasized e.g. by color
-         */
-        static warn(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays critical information about failures, which is emphasized e.g. by color
-         */
-        static error(_message: Object, ..._args: Object[]): void;
-        /**
-         * Displays messages from FUDGE
-         */
-        static fudge(_message: Object, ..._args: Object[]): void;
-        /**
-         * Clears the output and removes previous messages if possible
-         */
-        static clear(): void;
-        /**
-         * Opens a new group for messages
-         */
-        static group(_name: string): void;
-        /**
-         * Opens a new group for messages that is collapsed at first
-         */
-        static groupCollapsed(_name: string): void;
-        /**
-         * Closes the youngest group
-         */
-        static groupEnd(): void;
-        /**
-         * Lookup all delegates registered to the filter and call them using the given arguments
-         */
-        private static delegate;
-        /**
-         * setup routing to standard console
-         */
-        private static setupConsole;
+        static mapToValue<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
+        private static initialize;
+        private static hndKeyInteraction;
     }
 }
 declare namespace FudgeCore {
@@ -2378,19 +2478,19 @@ declare namespace FudgeCore {
         /**
          * Add a translation by the given vector to this matrix
          */
-        translate(_by: Vector3): void;
+        translate(_by: Vector3, _local?: boolean): void;
         /**
          * Add a translation along the x-Axis by the given amount to this matrix
          */
-        translateX(_x: number): void;
+        translateX(_x: number, _local?: boolean): void;
         /**
          * Add a translation along the y-Axis by the given amount to this matrix
          */
-        translateY(_y: number): void;
+        translateY(_y: number, _local?: boolean): void;
         /**
-         * Add a translation along the y-Axis by the given amount to this matrix
+         * Add a translation along the z-Axis by the given amount to this matrix
          */
-        translateZ(_z: number): void;
+        translateZ(_z: number, _local?: boolean): void;
         /**
          * Add a scaling by the given vector to this matrix
          */
@@ -2811,8 +2911,9 @@ declare namespace FudgeCore {
         get cmpTransform(): ComponentTransform;
         /**
          * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Returns null if no [[ComponentTransform]] is attached
+         * Fails if no [[ComponentTransform]] is attached
          */
+        get mtxLocal(): Matrix4x4;
         /**
          * Returns a clone of the list of children
          */
