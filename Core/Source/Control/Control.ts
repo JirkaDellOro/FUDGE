@@ -11,6 +11,13 @@ namespace FudgeCore {
   /**
    * Processes input signals of type number and generates an output signal of the same type using 
    * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
+   * ```plaintext
+   *          ┌─────────────────────────────────────────────────────────────┐
+   *          │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+   *  Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+   *          │   └───────┘   └─────┘      pass change  (Differential)      │
+   *          └─────────────────────────────────────────────────────────────┘ 
+   * ```
    */
   export class Control extends EventTarget {
     public readonly type: CONTROL_TYPE;

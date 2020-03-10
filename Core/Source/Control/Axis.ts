@@ -3,6 +3,19 @@ namespace FudgeCore {
   /**
    * Handles multiple controls as inputs and creates an output from that.
    * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.  
+   * ```plaintext
+   *           ┌───────────────────────────────────────────┐
+   *           │ ┌───────┐                                 │
+   *   Input → │ │control│\                                │
+   *           │ └───────┘ \                               │
+   *           │ ┌───────┐  \┌───┐   ┌─────────────────┐   │
+   *   Input → │ │control│---│sum│ → │internal control │ → │ → Output
+   *           │ └───────┘  /└───┘   └─────────────────┘   │
+   *           │ ┌───────┐ /                               │
+   *   Input → │ │control│/                                │
+   *           │ └───────┘                                 │
+   *           └───────────────────────────────────────────┘  
+   * ```
    */
   export class Axis extends Control {
     private controls: Map<string, Control> = new Map();

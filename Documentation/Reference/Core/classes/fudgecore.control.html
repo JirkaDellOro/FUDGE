@@ -74,6 +74,11 @@
 					<div class="lead">
 						<p>Processes input signals of type number and generates an output signal of the same type using
 						proportional, integral or differential mapping, an amplification factor and a linear dampening/delay</p>
+						<pre><code class="language-plaintext">         ┌─────────────────────────────────────────────────────────────┐
+         │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+ Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+         │   └───────┘   └─────┘      pass change  (Differential)      │
+         └─────────────────────────────────────────────────────────────┘</code></pre>
 					</div>
 				</div>
 			</section>
@@ -143,7 +148,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L27">Control/Control.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L34">Control/Control.ts:34</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -174,7 +179,7 @@
 					<div class="tsd-signature tsd-kind-icon">active<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L17">Control/Control.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L24">Control/Control.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -184,7 +189,7 @@
 					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L18">Control/Control.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L25">Control/Control.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -194,7 +199,7 @@
 					<div class="tsd-signature tsd-kind-icon">type<span class="tsd-signature-symbol">:</span> <a href="../enums/fudgecore.control_type.html" class="tsd-signature-type">CONTROL_TYPE</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L16">Control/Control.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L23">Control/Control.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -313,7 +318,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L83">Control/Control.ts:83</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L90">Control/Control.ts:90</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -370,7 +375,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L59">Control/Control.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L66">Control/Control.ts:66</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -398,7 +403,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L67">Control/Control.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L74">Control/Control.ts:74</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -426,7 +431,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L48">Control/Control.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L55">Control/Control.ts:55</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -454,7 +459,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L40">Control/Control.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L47">Control/Control.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -482,7 +487,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L76">Control/Control.ts:76</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L83">Control/Control.ts:83</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

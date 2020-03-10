@@ -74,6 +74,17 @@
 					<div class="lead">
 						<p>Handles multiple controls as inputs and creates an output from that.
 						As a subclass of <a href="fudgecore.control.html">Control</a>, axis calculates the ouput summing up the inputs and processing the result using its own settings.</p>
+						<pre><code class="language-plaintext">          ┌───────────────────────────────────────────┐
+          │ ┌───────┐                                 │
+  Input → │ │control│\                                │
+          │ └───────┘ \                               │
+          │ ┌───────┐  \┌───┐   ┌─────────────────┐   │
+  Input → │ │control│---│sum│ → │internal control │ → │ → Output
+          │ └───────┘  /└───┘   └─────────────────┘   │
+          │ ┌───────┐ /                               │
+  Input → │ │control│/                                │
+          │ └───────┘                                 │
+          └───────────────────────────────────────────┘</code></pre>
 					</div>
 				</div>
 			</section>
@@ -141,7 +152,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L27">Control/Control.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L34">Control/Control.ts:34</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -173,7 +184,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#active">active</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L17">Control/Control.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L24">Control/Control.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -184,7 +195,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#name">name</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L18">Control/Control.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L25">Control/Control.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -195,7 +206,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#type">type</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L16">Control/Control.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L23">Control/Control.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -212,7 +223,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Axis.ts#L14">Control/Axis.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Axis.ts#L27">Control/Axis.ts:27</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +320,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Axis.ts#L21">Control/Axis.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Axis.ts#L34">Control/Axis.ts:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -338,7 +349,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#getvalue">getValue</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Axis.ts#L35">Control/Axis.ts:35</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Axis.ts#L48">Control/Axis.ts:48</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -360,7 +371,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Axis.ts#L28">Control/Axis.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Axis.ts#L41">Control/Axis.ts:41</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -424,7 +435,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#setdelay">setDelay</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L59">Control/Control.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L66">Control/Control.ts:66</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -453,7 +464,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#setfactor">setFactor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L67">Control/Control.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L74">Control/Control.ts:74</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -482,7 +493,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#setinput">setInput</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L48">Control/Control.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L55">Control/Control.ts:55</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -511,7 +522,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#settimebase">setTimebase</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L40">Control/Control.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L47">Control/Control.ts:47</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -540,7 +551,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#setvalue">setValue</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e5059216/Core/Source/Control/Control.ts#L76">Control/Control.ts:76</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Control/Control.ts#L83">Control/Control.ts:83</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

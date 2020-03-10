@@ -1449,6 +1449,13 @@ declare namespace FudgeCore {
     /**
      * Processes input signals of type number and generates an output signal of the same type using
      * proportional, integral or differential mapping, an amplification factor and a linear dampening/delay
+     * ```plaintext
+     *          ┌─────────────────────────────────────────────────────────────┐
+     *          │   ┌───────┐   ┌─────┐      pass through (Proportional)      │
+     *  Input → │ → │amplify│ → │delay│ → ⚟ sum up over time (Integral) ⚞ → │ → Output
+     *          │   └───────┘   └─────┘      pass change  (Differential)      │
+     *          └─────────────────────────────────────────────────────────────┘
+     * ```
      */
     class Control extends EventTarget {
         readonly type: CONTROL_TYPE;
@@ -1500,6 +1507,19 @@ declare namespace FudgeCore {
     /**
      * Handles multiple controls as inputs and creates an output from that.
      * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
+     * ```plaintext
+     *           ┌───────────────────────────────────────────┐
+     *           │ ┌───────┐                                 │
+     *   Input → │ │control│\                                │
+     *           │ └───────┘ \                               │
+     *           │ ┌───────┐  \┌───┐   ┌─────────────────┐   │
+     *   Input → │ │control│---│sum│ → │internal control │ → │ → Output
+     *           │ └───────┘  /└───┘   └─────────────────┘   │
+     *           │ ┌───────┐ /                               │
+     *   Input → │ │control│/                                │
+     *           │ └───────┘                                 │
+     *           └───────────────────────────────────────────┘
+     * ```
      */
     class Axis extends Control {
         private controls;
