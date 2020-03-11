@@ -45,8 +45,6 @@ namespace FudgeCore {
       let mutator: MutatorForUserInterface = <MutatorForUserInterface>this.getMutator();
       if (!this.mesh)
         mutator.mesh = Mesh;
-      else
-        mutator.mesh = this.mesh;
       return mutator;
     }
     //#endregion

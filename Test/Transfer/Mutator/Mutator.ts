@@ -31,9 +31,6 @@ namespace MutatorTypes {
       for (let subclass of <[]>mutator.mesh["subclasses"])
         console.dir(subclass);
     }
-
-    console.log(mutator.mesh["subclasses"]);
-
     console.groupEnd();
   }
 }
