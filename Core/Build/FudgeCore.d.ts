@@ -1408,6 +1408,7 @@ declare namespace FudgeCore {
         constructor(_mesh?: Mesh);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        getMutatorForUserInterface(): MutatorForUserInterface;
     }
 }
 declare namespace FudgeCore {
