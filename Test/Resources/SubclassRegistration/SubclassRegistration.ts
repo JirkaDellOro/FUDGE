@@ -3,18 +3,23 @@ namespace SubclassRegistration {
 
   console.group("Mesh");
   for (let subclass of ƒ.Mesh.subclasses)
-    console.dir(subclass);
+    log(subclass, ƒ.Mesh);
   console.groupEnd();
-  
+
   console.group("Component");
   for (let subclass of ƒ.Component.subclasses)
-    console.dir(subclass);
+    log(subclass, ƒ.Component);
   console.groupEnd();
 
   console.group("Shader");
   for (let subclass of ƒ.Shader.subclasses)
-    console.dir(subclass);
+    log(subclass, ƒ.Shader);
   console.groupEnd();
 
-  
+  function log(_class: Function, _baseclass: Function): void {
+    if (_class["baseClass"] == _baseclass)
+      console.dir(_class);
+    else
+      console.warn(_class);
+  }
 }

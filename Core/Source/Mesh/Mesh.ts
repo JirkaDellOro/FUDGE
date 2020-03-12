@@ -7,6 +7,9 @@ namespace FudgeCore {
    */
   @RenderInjectorMesh.decorate
   export abstract class Mesh implements SerializableResource {
+    /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+    public static readonly baseClass: typeof Mesh = Mesh;
+    /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Mesh[] = [];
 
     // TODO: check if these arrays must be cached like this or if calling the methods is better.
@@ -23,7 +26,7 @@ namespace FudgeCore {
       return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
     }
 
-    protected static registerSubclass(_subclass: typeof Mesh): number { return Mesh.subclasses.push(_subclass) - 1; }
+    protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }

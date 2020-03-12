@@ -1068,6 +1068,9 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
      */
     abstract class Component extends Mutable implements Serializable {
+        /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+        static readonly baseClass: typeof Component;
+        /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         private container;
@@ -2729,6 +2732,9 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Mesh implements SerializableResource {
+        /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+        static readonly baseClass: typeof Mesh;
+        /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Mesh[];
         vertices: Float32Array;
         indices: Uint16Array;
@@ -2737,7 +2743,7 @@ declare namespace FudgeCore {
         idResource: string;
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
-        protected static registerSubclass(_subclass: typeof Mesh): number;
+        protected static registerSubclass(_subClass: typeof Mesh): number;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
@@ -3140,6 +3146,9 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Shader {
+        /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+        static readonly baseClass: typeof Shader;
+        /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
         static program: WebGLProgram;
         static attributes: {

@@ -6,6 +6,9 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
    */
   export abstract class Component extends Mutable implements Serializable {
+    /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+    public static readonly baseClass: typeof Component = Component;
+    /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
 
     protected singleton: boolean = true;

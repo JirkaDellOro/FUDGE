@@ -24,8 +24,10 @@ namespace MutatorTypes {
     console.debug(types);
     console.groupEnd();
 
-    if (typeof mutator.mesh == "object")
-      console.log("Attribute mesh refers to an instance")
+    if (typeof mutator.mesh == "object") {
+      console.log("Attribute mesh refers to an instance of type", mutator.mesh.constructor.name);
+      console.log("baseClass", mutator.mesh.constructor["baseClass"].name);
+    }
     else {
       console.log("Attribute mesh refers to a class/function")
       for (let subclass of <[]>mutator.mesh["subclasses"])
