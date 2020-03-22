@@ -10,7 +10,7 @@ namespace TextureTest {
 
     let cube: ƒ.Node = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
 
-    cube.cmpTransform.local.translate(ƒ.Vector3.ZERO());
+    cube.mtxLocal.translate(ƒ.Vector3.ZERO());
 
     let branch: ƒ.Node = new ƒ.Node("Branch");
     branch.addChild(cube);
@@ -22,8 +22,8 @@ namespace TextureTest {
     viewport.draw();
 
     window.setInterval(function (): void {
-      cube.cmpTransform.local.rotateY(-1);
-      cube.cmpTransform.local.rotateX(-2);
+      cube.mtxLocal.rotateY(-1);
+      cube.mtxLocal.rotateX(-2);
       viewport.draw();
     }, 
                        20);

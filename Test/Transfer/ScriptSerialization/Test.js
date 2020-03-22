@@ -7,13 +7,13 @@ var ScriptSerialization;
             this.startPosition = ƒ.Vector3.ONE(0);
             this.hndAddComponent = (_event) => {
                 // ƒ.Debug.log(_event.type, this);
-                this.getContainer().cmpTransform.local.translate(this.startPosition);
+                this.getContainer().mtxLocal.translate(this.startPosition);
             };
             this.hndMutation = (_event) => {
                 ƒ.Debug.log(_event.type, this);
                 if (!this.getContainer())
                     return;
-                this.getContainer().cmpTransform.local.translate(this.startPosition);
+                this.getContainer().mtxLocal.translate(this.startPosition);
             };
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
             this.addEventListener("mutate" /* MUTATE */, this.hndMutation);

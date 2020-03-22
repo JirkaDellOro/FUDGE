@@ -23,8 +23,8 @@ var MeshTest;
         gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
         branch.addChild(gridFlat);
         branch.addChild(gridTex);
-        gridFlat.cmpTransform.local.translateX(-0.6);
-        gridTex.cmpTransform.local.translateX(0.6);
+        gridFlat.mtxLocal.translateX(-0.6);
+        gridTex.mtxLocal.translateX(0.6);
         let body = new ƒ.Node("k");
         let lights = new ƒAid.NodeThreePointLights("lights", 110);
         branch.addChild(lights);
@@ -36,7 +36,7 @@ var MeshTest;
         viewport.setFocus(true);
         viewport.draw();
         window.setInterval(function () {
-            gridFlat.cmpTransform.local.rotateY(0.5);
+            gridFlat.mtxLocal.rotateY(0.5);
             viewport.draw();
         }, 20);
     }

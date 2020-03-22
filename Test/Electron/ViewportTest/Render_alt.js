@@ -63,7 +63,7 @@ var ElectronViewport;
         container.getElement().append(txtName);
     }
     function animate(_event) {
-        branch.cmpTransform.local.rotateY(1);
+        branch.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }

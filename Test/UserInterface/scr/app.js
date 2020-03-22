@@ -86,7 +86,7 @@ var UITest;
             myLayout.emit("nodeSelectionEvent" /* SELECTION */, _event);
         });
         function animate(_event) {
-            branch.cmpTransform.local.rotateY(1);
+            branch.mtxLocal.rotateY(1);
             // prepare and draw viewport
             viewPort.draw();
         }

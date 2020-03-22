@@ -127,7 +127,7 @@ var AudioSpace;
             camera.distance += _event.deltaY * speedCameraTranslation;
     }
     // function printInfo(_mtxBody: ƒ.Matrix4x4, _mtxCamera: ƒ.Matrix4x4): void {
-    //   // let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;
+    //   // let posBody: ƒ.Vector3 = _body.mtxLocal.translation;
     //   let info: string = "<fieldset><legend>Info</legend>";
     //   info += `camera [${_mtxCamera.translation.toString()}] `;
     //   info += ` body [${_mtxBody.translation.toString()}]`;

@@ -34,8 +34,8 @@ namespace MeshTest {
     branch.addChild(gridFlat);
     branch.addChild(gridTex);
 
-    gridFlat.cmpTransform.local.translateX(-0.6);
-    gridTex.cmpTransform.local.translateX(0.6);
+    gridFlat.mtxLocal.translateX(-0.6);
+    gridTex.mtxLocal.translateX(0.6);
 
     let body: ƒ.Node = new ƒ.Node("k");
 
@@ -55,7 +55,7 @@ namespace MeshTest {
 
 
     window.setInterval(function (): void {
-      gridFlat.cmpTransform.local.rotateY(0.5);
+      gridFlat.mtxLocal.rotateY(0.5);
       viewport.draw();
     },
                        20);

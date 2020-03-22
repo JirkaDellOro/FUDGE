@@ -14,12 +14,12 @@ namespace Cube {
 
     let material: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
     let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
-    body.cmpTransform.local.rotateX(-30);
-    body.cmpTransform.local.translateX(1);
-    body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+    body.mtxLocal.rotateX(-30);
+    body.mtxLocal.translateX(1);
+    body.mtxLocal.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
     let child: ƒ.Node = Scenes.createCompleteMeshNode("Child", material, new ƒ.MeshPyramid());
-    child.cmpTransform.local.translateX(1.5);
+    child.mtxLocal.translateX(1.5);
     body.appendChild(child);
     branch.addChild(body);
 

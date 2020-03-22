@@ -24,7 +24,7 @@ namespace FudgeAid {
       this.addChild(this.rotatorX);
       this.translator = new ƒ.Node("CameraTranslate");
       this.translator.addComponent(new ƒ.ComponentTransform());
-      this.translator.cmpTransform.local.rotateY(180);
+      this.translator.mtxLocal.rotateY(180);
       this.rotatorX.addChild(this.translator);
 
       this.translator.addComponent(_cmpCamera);
@@ -41,36 +41,36 @@ namespace FudgeAid {
 
     public set distance(_distance: number) {
       let newDistance: number = Math.min(this.maxDistance, Math.max(this.minDistance, _distance));
-      this.translator.cmpTransform.local.translation = ƒ.Vector3.Z(newDistance);
+      this.translator.mtxLocal.translation = ƒ.Vector3.Z(newDistance);
     }
 
     public get distance(): number {
-      return this.translator.cmpTransform.local.translation.z;
+      return this.translator.mtxLocal.translation.z;
     }
 
     public set rotationY(_angle: number) {
-      this.cmpTransform.local.rotation = ƒ.Vector3.Y(_angle);
+      this.mtxLocal.rotation = ƒ.Vector3.Y(_angle);
     }
 
     public get rotationY(): number {
-      return this.cmpTransform.local.rotation.y;
+      return this.mtxLocal.rotation.y;
     }
 
     public set rotationX(_angle: number) {
       _angle = Math.min(Math.max(-this.maxRotX, _angle), this.maxRotX);
-      this.rotatorX.cmpTransform.local.rotation = ƒ.Vector3.X(_angle);
+      this.rotatorX.mtxLocal.rotation = ƒ.Vector3.X(_angle);
     }
 
     public get rotationX(): number {
-      return this.rotatorX.cmpTransform.local.rotation.x;
+      return this.rotatorX.mtxLocal.rotation.x;
     }
 
     public rotateY(_delta: number): void {
-      this.cmpTransform.local.rotateY(_delta);
+      this.mtxLocal.rotateY(_delta);
     }
 
     public rotateX(_delta: number): void {
-      this.rotationX = this.rotatorX.cmpTransform.local.rotation.x + _delta;
+      this.rotationX = this.rotatorX.mtxLocal.rotation.x + _delta;
     }
   }
 }

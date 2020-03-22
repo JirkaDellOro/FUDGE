@@ -19,7 +19,7 @@ namespace FudgeAid {
     }
 
     public get local(): ƒ.Matrix4x4 {
-      return this.cmpTransform ? this.cmpTransform.local : null;
+      return this.cmpTransform ? this.mtxLocal : null;
     }
 
     public get pivot(): ƒ.Matrix4x4 {

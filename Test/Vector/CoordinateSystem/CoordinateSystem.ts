@@ -22,7 +22,7 @@ namespace TextureTest {
 
     window.setInterval(function (): void {
       // body.cmpTransform.rotateY(-1.1);
-      coSys.cmpTransform.local.rotateY(1);
+      coSys.mtxLocal.rotateY(1);
       // body.cmpTransform.rotateZ(-0.9);
       viewport.draw();
     }, 

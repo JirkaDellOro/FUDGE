@@ -17,7 +17,7 @@ namespace MarixMutatorTest {
     viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
 
     update();
-    displayVectors(coSys.cmpTransform.local);
+    displayVectors(coSys.mtxLocal);
 
     animate();
   }
@@ -25,7 +25,7 @@ namespace MarixMutatorTest {
   function animate(): void {
     window.setInterval(
       function (): void {
-        let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+        let local: ƒ.Matrix4x4 = coSys.mtxLocal;
 
         mutator = local.getMutator();
         local.mutate(mutator);
@@ -37,7 +37,7 @@ namespace MarixMutatorTest {
 
   function update(): void {
     viewport.draw();
-    let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+    let local: ƒ.Matrix4x4 = coSys.mtxLocal;
     displayMatrix(local);
     displayVectors(local);
   }
@@ -67,7 +67,7 @@ namespace MarixMutatorTest {
   function hndInteraction(_event: Event): void {
     let input: HTMLInputElement = <HTMLInputElement>_event.target;
     if (input.name == "Interact") {
-      let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+      let local: ƒ.Matrix4x4 = coSys.mtxLocal;
       displayVectors(local);
       return;
     }
@@ -99,7 +99,7 @@ namespace MarixMutatorTest {
       mutator[transform] = vector;
     }
 
-    coSys.cmpTransform.local.mutate(mutator);
+    coSys.mtxLocal.mutate(mutator);
   }
 
   function interactRelative(_input: HTMLInputElement): void {
@@ -120,20 +120,20 @@ namespace MarixMutatorTest {
   function translate(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(0.1);
-    coSys.cmpTransform.local.translate(vector);
+    coSys.mtxLocal.translate(vector);
   }
   function scale(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(0.1);
     vector.add(new ƒ.Vector3(1, 1, 1));
-    coSys.cmpTransform.local.scale(vector);
+    coSys.mtxLocal.scale(vector);
   }
   function rotate(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(5);
-    coSys.cmpTransform.local.rotateY(vector.y);
-    coSys.cmpTransform.local.rotateX(vector.x);
-    coSys.cmpTransform.local.rotateZ(vector.z);
+    coSys.mtxLocal.rotateY(vector.y);
+    coSys.mtxLocal.rotateX(vector.x);
+    coSys.mtxLocal.rotateZ(vector.z);
   }
 
   function calcInputVector(_input: HTMLInputElement): ƒ.Vector3 {

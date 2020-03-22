@@ -18,8 +18,8 @@ var MatCapTest;
         let mtlGreen = new ƒ.Material("Material_Green", ƒ.ShaderMatCap, ctMatcapGreen);
         let pyramidRed = Scenes.createCompleteMeshNode("Cube", mtlRed, new ƒ.MeshPyramid());
         let pyramidGreen = Scenes.createCompleteMeshNode("Cube", mtlGreen, new ƒ.MeshPyramid());
-        pyramidGreen.cmpTransform.local.translateX(1);
-        pyramidRed.cmpTransform.local.translateX(-1);
+        pyramidGreen.mtxLocal.translateX(1);
+        pyramidRed.mtxLocal.translateX(-1);
         branch.addChild(pyramidRed);
         branch.addChild(pyramidGreen);
         let viewport = new ƒ.Viewport();
@@ -29,10 +29,10 @@ var MatCapTest;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
         ƒ.Loop.start(ƒ.LOOP_MODE["TIME_GAME"], 30, true);
         function handleFrame(_event) {
-            pyramidGreen.cmpTransform.local.rotateX(1);
-            pyramidGreen.cmpTransform.local.rotateY(0.5);
-            pyramidRed.cmpTransform.local.rotateX(0.6);
-            pyramidRed.cmpTransform.local.rotateY(0.8);
+            pyramidGreen.mtxLocal.rotateX(1);
+            pyramidGreen.mtxLocal.rotateY(0.5);
+            pyramidRed.mtxLocal.rotateX(0.6);
+            pyramidRed.mtxLocal.rotateY(0.8);
             viewport.draw();
         }
     }

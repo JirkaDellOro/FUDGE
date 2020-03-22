@@ -12,7 +12,7 @@ var NodeResource;
                 ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.update);
             };
             this.start = (_event) => {
-                this.mtxLocal = this.getContainer().cmpTransform.local;
+                this.mtxLocal = this.getContainer().mtxLocal;
                 this.mtxPivot = this.getContainer().getComponent(ƒ.ComponentMesh).pivot;
                 this.mtxPivot.translateZ(-0.5);
                 this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));

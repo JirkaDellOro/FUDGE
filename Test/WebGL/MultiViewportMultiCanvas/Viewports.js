@@ -20,7 +20,7 @@ var RenderManagerRendering;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
         function animate(_event) {
-            branch.cmpTransform.local.rotateY(1);
+            branch.mtxLocal.rotateY(1);
             // prepare and draw viewport
             for (let viewPort of viewPorts) {
                 //viewPort.prepare();

@@ -73,7 +73,7 @@ namespace ElectronViewport {
   }
 
   function animate(_event: Event): void {
-    branch.cmpTransform.local.rotateY(1);
+    branch.mtxLocal.rotateY(1);
     // prepare and draw viewport
     viewPort.draw();
   }

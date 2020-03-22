@@ -38,7 +38,7 @@ var TestRectMapping;
         ƒ.Loop.start();
         function animate(_event) {
             update();
-            branch.cmpTransform.local.rotateY(1);
+            branch.mtxLocal.rotateY(1);
             viewPort.draw();
         }
     }

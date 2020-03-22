@@ -38,7 +38,7 @@ namespace PerformanceLeak {
 
       // move nodes
       for (const node of game.getChildren()) {
-        node.cmpTransform.local.translateX(0.1);
+        node.mtxLocal.translateX(0.1);
       }
 
       if (elapsedTime > 100) {
@@ -51,7 +51,7 @@ namespace PerformanceLeak {
         // // create Node
         createNode("Node");
         // for (const node of game.getChildren())
-        //   node.cmpTransform.local = ƒ.Matrix4x4.IDENTITY();
+        //   node.mtxLocal = ƒ.Matrix4x4.IDENTITY();
         elapsedTime = 0;
       }
 
@@ -63,7 +63,7 @@ namespace PerformanceLeak {
       let node: ƒ.Node = new ƒ.Node(_name);
       node.addComponent(new ƒ.ComponentTransform());
       // node.addComponent(cmpTransform);
-      // cmpTransform.local.translation = ƒ.Vector3.ZERO();
+      // mtxLocal.translation = ƒ.Vector3.ZERO();
       node.addComponent(cmpMaterial);
       node.addComponent(cmpMesh);
       game.appendChild(node);

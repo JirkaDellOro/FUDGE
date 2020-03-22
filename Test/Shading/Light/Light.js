@@ -7,8 +7,8 @@ var TextureTest;
         let material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
         let branch = new ƒ.Node("Branch");
         let body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
-        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.mtxLocal.translate(ƒ.Vector3.ZERO());
+        body.mtxLocal.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
         // let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(ƒ.LIGHT_TYPE.AMBIENT, new ƒ.Color(.5, .5, .5, 1));
         // branch.addComponent(cmpLightAmbient);
         let cmpLightDirectionalRed = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("RED")));
@@ -33,7 +33,7 @@ var TextureTest;
         //*/
         window.setInterval(function () {
             // body.cmpTransform.rotateY(-1.1);
-            body.cmpTransform.local.rotateY(-1);
+            body.mtxLocal.rotateY(-1);
             // body.cmpTransform.rotateZ(-0.9);
             viewport.draw();
         }, 20);

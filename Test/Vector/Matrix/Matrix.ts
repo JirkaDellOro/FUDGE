@@ -1,4 +1,4 @@
-namespace MarixTest {
+namespace MatrixTest {
   import ƒ = FudgeCore;
   
 
@@ -17,7 +17,7 @@ namespace MarixTest {
     viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
 
     update();
-    displayVectors(coSys.cmpTransform.local);
+    displayVectors(coSys.mtxLocal);
 
     animate();
   }
@@ -25,7 +25,7 @@ namespace MarixTest {
   function animate(): void {
     window.setInterval(
       function (): void {
-        let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+        let local: ƒ.Matrix4x4 = coSys.mtxLocal;
 
         anim = [local.translation, local.rotation, local.scaling];
         // anim[2].x += 1;
@@ -40,7 +40,7 @@ namespace MarixTest {
 
   function update(): void {
     viewport.draw();
-    let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+    let local: ƒ.Matrix4x4 = coSys.mtxLocal;
     displayMatrix(local);
     displayVectors(local);
   }
@@ -69,7 +69,7 @@ namespace MarixTest {
   function hndInteraction(_event: Event): void {
     let input: HTMLInputElement = <HTMLInputElement>_event.target;
     if (input.name == "Interact") {
-      let local: ƒ.Matrix4x4 = coSys.cmpTransform.local;
+      let local: ƒ.Matrix4x4 = coSys.mtxLocal;
       displayVectors(local);
       return;
     }
@@ -111,7 +111,7 @@ namespace MarixTest {
     matrix.rotateX(_vectors[1].x);
     matrix.scale(_vectors[2]);
 
-    coSys.cmpTransform.local = matrix;
+    coSys.mtxLocal.set(matrix);
   }
 
   function interactRelative(_input: HTMLInputElement): void {
@@ -132,20 +132,20 @@ namespace MarixTest {
   function translate(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(0.1);
-    coSys.cmpTransform.local.translate(vector);
+    coSys.mtxLocal.translate(vector);
   }
   function scale(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(0.1);
     vector.add(new ƒ.Vector3(1, 1, 1));
-    coSys.cmpTransform.local.scale(vector);
+    coSys.mtxLocal.scale(vector);
   }
   function rotate(_input: HTMLInputElement): void {
     let vector: ƒ.Vector3 = calcInputVector(_input);
     vector.scale(5);
-    coSys.cmpTransform.local.rotateY(vector.y);
-    coSys.cmpTransform.local.rotateX(vector.x);
-    coSys.cmpTransform.local.rotateZ(vector.z);
+    coSys.mtxLocal.rotateY(vector.y);
+    coSys.mtxLocal.rotateX(vector.x);
+    coSys.mtxLocal.rotateZ(vector.z);
   }
 
   function calcInputVector(_input: HTMLInputElement): ƒ.Vector3 {

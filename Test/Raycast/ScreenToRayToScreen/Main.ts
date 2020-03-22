@@ -89,7 +89,7 @@ namespace ScreenToRayToScreen {
 
     console.groupEnd();
 
-    let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].cmpTransform.local;
+    let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxLocal;
     mtxCube.translation = rayEnd;
     updateDisplay();
 

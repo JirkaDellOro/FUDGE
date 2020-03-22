@@ -28,7 +28,7 @@ var PerformanceLeak;
             elapsedTime += PerformanceLeak.ƒ.Loop.timeFrameGame;
             // move nodes
             for (const node of game.getChildren()) {
-                node.cmpTransform.local.translateX(0.1);
+                node.mtxLocal.translateX(0.1);
             }
             if (elapsedTime > 100) {
                 // console.log(game.getChildren());
@@ -40,7 +40,7 @@ var PerformanceLeak;
                 // // create Node
                 createNode("Node");
                 // for (const node of game.getChildren())
-                //   node.cmpTransform.local = ƒ.Matrix4x4.IDENTITY();
+                //   node.mtxLocal = ƒ.Matrix4x4.IDENTITY();
                 elapsedTime = 0;
             }
             viewport.draw();
@@ -49,7 +49,7 @@ var PerformanceLeak;
             let node = new PerformanceLeak.ƒ.Node(_name);
             node.addComponent(new PerformanceLeak.ƒ.ComponentTransform());
             // node.addComponent(cmpTransform);
-            // cmpTransform.local.translation = ƒ.Vector3.ZERO();
+            // mtxLocal.translation = ƒ.Vector3.ZERO();
             node.addComponent(cmpMaterial);
             node.addComponent(cmpMesh);
             game.appendChild(node);

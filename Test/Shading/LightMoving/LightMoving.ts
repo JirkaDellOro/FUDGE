@@ -9,8 +9,8 @@ namespace TextureTest {
         let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
-        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.mtxLocal.translate(ƒ.Vector3.ZERO());
+        body.mtxLocal.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
         let lights: ƒ.Node = new ƒ.Node("Lights");
         lights.addComponent(new ƒ.ComponentTransform());
@@ -47,7 +47,7 @@ namespace TextureTest {
         window.setInterval(
             function (): void {
                 // body.cmpTransform.rotateY(-1.1);
-                lights.cmpTransform.local.rotateY(-1);
+                lights.mtxLocal.rotateY(-1);
                 // body.cmpTransform.rotateZ(-0.9);
                 viewport.draw();
             },

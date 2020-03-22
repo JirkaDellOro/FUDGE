@@ -24,8 +24,8 @@ namespace MeshTest {
     sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
     sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
 
-    sphereFlat.cmpTransform.local.translateX(0.6);
-    sphereTex.cmpTransform.local.translateX(-0.6);
+    sphereFlat.mtxLocal.translateX(0.6);
+    sphereTex.mtxLocal.translateX(-0.6);
 
     branch.addChild(sphereFlat);
     branch.addChild(sphereTex);
@@ -47,7 +47,7 @@ namespace MeshTest {
 
 
     window.setInterval(function (): void {
-      sphereTex.cmpTransform.local.rotateY(0.5);
+      sphereTex.mtxLocal.rotateY(0.5);
       viewport.draw();
     }, 
                        20);

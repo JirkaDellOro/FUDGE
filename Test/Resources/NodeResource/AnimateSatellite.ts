@@ -25,7 +25,7 @@ namespace NodeResource {
         }
 
         public start = (_event: Event) => {
-            this.mtxLocal = this.getContainer().cmpTransform.local;
+            this.mtxLocal = this.getContainer().mtxLocal;
             this.mtxPivot = (<ƒ.ComponentMesh>this.getContainer().getComponent(ƒ.ComponentMesh)).pivot;
 
             this.mtxPivot.translateZ(-0.5);

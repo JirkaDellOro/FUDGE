@@ -68,7 +68,7 @@ var ScreenToRayToScreen;
         ƒ.Debug.log("Projected", projection.toString());
         ƒ.Debug.log("Screen", screen.toString());
         console.groupEnd();
-        let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].cmpTransform.local;
+        let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].mtxLocal;
         mtxCube.translation = rayEnd;
         updateDisplay();
     }

@@ -24,8 +24,8 @@ namespace Scenes {
         let cubeGreen: ƒ.Node = Scenes.createCompleteMeshNode("Green", mtrGreen, meshCube);
         let cubeBlue: ƒ.Node = Scenes.createCompleteMeshNode("Blue", mtrBlue, meshCube);
 
-        cubeRed.cmpTransform.local.scaleX(2);
-        cubeGreen.cmpTransform.local.scaleY(2);
+        cubeRed.mtxLocal.scaleX(2);
+        cubeGreen.mtxLocal.scaleY(2);
         // cubeBlue.cmpTransform.scaleZ(2);
         // using mesh pivot on blue node, just for testing...
         let cmpMesh: ƒ.ComponentMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
@@ -50,8 +50,8 @@ namespace Scenes {
         let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
         let shaft: ƒ.Node = Scenes.createCompleteMeshNode("Shaft", material, meshCube);
         let head: ƒ.Node = Scenes.createCompleteMeshNode("Head", material, meshPyramid);
-        let mtxShaft: ƒ.Matrix4x4 = shaft.cmpTransform.local;
-        let mtxHead: ƒ.Matrix4x4 = head.cmpTransform.local;
+        let mtxShaft: ƒ.Matrix4x4 = shaft.mtxLocal;
+        let mtxHead: ƒ.Matrix4x4 = head.mtxLocal;
         mtxShaft.scale(new ƒ.Vector3(0.01, 1, 0.01));
         mtxHead.translateY(0.5);
         mtxHead.scale(new ƒ.Vector3(0.05, 0.1, 0.05));
@@ -68,8 +68,8 @@ namespace Scenes {
         let arrowGreen: ƒ.Node = createArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
         let arrowBlue: ƒ.Node = createArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
 
-        arrowRed.cmpTransform.local.rotateZ(-90);
-        arrowBlue.cmpTransform.local.rotateX(90);
+        arrowRed.mtxLocal.rotateZ(-90);
+        arrowBlue.mtxLocal.rotateX(90);
 
         let coordinates: ƒ.Node = new ƒ.Node("CoordinateSystem");
         coordinates.addChild(arrowRed);
@@ -86,7 +86,7 @@ namespace Scenes {
 
         let grandchild: ƒ.Node;
         grandchild = createCompleteMeshNode("Grandchild", new ƒ.Material("Green", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
-        grandchild.cmpTransform.local.translateX(2);
+        grandchild.mtxLocal.translateX(2);
         child.addChild(grandchild);
     }
 

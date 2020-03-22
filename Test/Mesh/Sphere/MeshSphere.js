@@ -18,8 +18,8 @@ var MeshTest;
         let sphereMesh = new ƒ.MeshSphere(32, 24);
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
-        sphereFlat.cmpTransform.local.translateX(0.6);
-        sphereTex.cmpTransform.local.translateX(-0.6);
+        sphereFlat.mtxLocal.translateX(0.6);
+        sphereTex.mtxLocal.translateX(-0.6);
         branch.addChild(sphereFlat);
         branch.addChild(sphereTex);
         let body = new ƒ.Node("k");
@@ -33,7 +33,7 @@ var MeshTest;
         viewport.setFocus(true);
         viewport.draw();
         window.setInterval(function () {
-            sphereTex.cmpTransform.local.rotateY(0.5);
+            sphereTex.mtxLocal.rotateY(0.5);
             viewport.draw();
         }, 20);
     }

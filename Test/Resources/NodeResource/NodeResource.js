@@ -24,7 +24,7 @@ var NodeResource;
                 for (let x = -dim.x; x < dim.x + 1; x++) {
                     let instance = new ƒ.NodeResourceInstance(resource);
                     branch.addChild(instance);
-                    instance.cmpTransform.local.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
+                    instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));
                 }

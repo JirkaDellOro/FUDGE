@@ -42,7 +42,7 @@ namespace RenderManagerRendering {
     ƒ.Loop.start();
     function animate(_event: Event): void {
       update();
-      branch.cmpTransform.local.rotateY(1);
+      branch.mtxLocal.rotateY(1);
       viewPort.draw();
     }
 

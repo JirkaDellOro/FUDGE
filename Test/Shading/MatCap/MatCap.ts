@@ -27,8 +27,8 @@ namespace MatCapTest {
 
     let pyramidRed: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtlRed, new ƒ.MeshPyramid());
     let pyramidGreen: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtlGreen, new ƒ.MeshPyramid());
-    pyramidGreen.cmpTransform.local.translateX(1);
-    pyramidRed.cmpTransform.local.translateX(-1);
+    pyramidGreen.mtxLocal.translateX(1);
+    pyramidRed.mtxLocal.translateX(-1);
     branch.addChild(pyramidRed);
     branch.addChild(pyramidGreen);
 
@@ -43,10 +43,10 @@ namespace MatCapTest {
     ƒ.Loop.start(ƒ.LOOP_MODE["TIME_GAME"], 30, true);
 
     function handleFrame(_event: Event): void {
-      pyramidGreen.cmpTransform.local.rotateX(1);
-      pyramidGreen.cmpTransform.local.rotateY(0.5);
-      pyramidRed.cmpTransform.local.rotateX(0.6);
-      pyramidRed.cmpTransform.local.rotateY(0.8);
+      pyramidGreen.mtxLocal.rotateX(1);
+      pyramidGreen.mtxLocal.rotateY(0.5);
+      pyramidRed.mtxLocal.rotateX(0.6);
+      pyramidRed.mtxLocal.rotateY(0.8);
       viewport.draw();
     }
 

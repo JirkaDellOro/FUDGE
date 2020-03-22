@@ -14,10 +14,10 @@ var TextureTest;
         let quad = Scenes.createCompleteMeshNode("Quad", material, new ƒ.MeshQuad());
         let cube = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
         let pyramid = Scenes.createCompleteMeshNode("Pyramid", material, new ƒ.MeshPyramid());
-        cube.cmpTransform.local.translateX(0.7);
+        cube.mtxLocal.translateX(0.7);
         // cube.cmpTransform.rotateX(-45);
-        cube.cmpTransform.local.rotateY(-45);
-        pyramid.cmpTransform.local.translateX(-0.7);
+        cube.mtxLocal.rotateY(-45);
+        pyramid.mtxLocal.translateX(-0.7);
         let branch = new ƒ.Node("Branch");
         branch.addChild(quad);
         branch.addChild(cube);
@@ -27,9 +27,9 @@ var TextureTest;
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         window.setInterval(function () {
-            pyramid.cmpTransform.local.rotateX(1);
-            cube.cmpTransform.local.rotateY(-1);
-            quad.cmpTransform.local.rotateZ(1);
+            pyramid.mtxLocal.rotateX(1);
+            cube.mtxLocal.rotateY(-1);
+            quad.mtxLocal.rotateZ(1);
             viewport.draw();
         }, 20);
     }

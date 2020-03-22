@@ -1,5 +1,5 @@
-var MarixTest;
-(function (MarixTest) {
+var MatrixTest;
+(function (MatrixTest) {
     var ƒ = FudgeCore;
     let coSys;
     let viewport = new ƒ.Viewport();
@@ -12,12 +12,12 @@ var MarixTest;
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
         update();
-        displayVectors(coSys.cmpTransform.local);
+        displayVectors(coSys.mtxLocal);
         animate();
     }
     function animate() {
         window.setInterval(function () {
-            let local = coSys.cmpTransform.local;
+            let local = coSys.mtxLocal;
             anim = [local.translation, local.rotation, local.scaling];
             // anim[2].x += 1;
             // anim[2].y += 1;
@@ -28,7 +28,7 @@ var MarixTest;
     }
     function update() {
         viewport.draw();
-        let local = coSys.cmpTransform.local;
+        let local = coSys.mtxLocal;
         displayMatrix(local);
         displayVectors(local);
     }
@@ -53,7 +53,7 @@ var MarixTest;
     function hndInteraction(_event) {
         let input = _event.target;
         if (input.name == "Interact") {
-            let local = coSys.cmpTransform.local;
+            let local = coSys.mtxLocal;
             displayVectors(local);
             return;
         }
@@ -89,7 +89,7 @@ var MarixTest;
         matrix.rotateY(_vectors[1].y);
         matrix.rotateX(_vectors[1].x);
         matrix.scale(_vectors[2]);
-        coSys.cmpTransform.local = matrix;
+        coSys.mtxLocal.set(matrix);
     }
     function interactRelative(_input) {
         switch (_input.id[0]) {
@@ -107,20 +107,20 @@ var MarixTest;
     function translate(_input) {
         let vector = calcInputVector(_input);
         vector.scale(0.1);
-        coSys.cmpTransform.local.translate(vector);
+        coSys.mtxLocal.translate(vector);
     }
     function scale(_input) {
         let vector = calcInputVector(_input);
         vector.scale(0.1);
         vector.add(new ƒ.Vector3(1, 1, 1));
-        coSys.cmpTransform.local.scale(vector);
+        coSys.mtxLocal.scale(vector);
     }
     function rotate(_input) {
         let vector = calcInputVector(_input);
         vector.scale(5);
-        coSys.cmpTransform.local.rotateY(vector.y);
-        coSys.cmpTransform.local.rotateX(vector.x);
-        coSys.cmpTransform.local.rotateZ(vector.z);
+        coSys.mtxLocal.rotateY(vector.y);
+        coSys.mtxLocal.rotateX(vector.x);
+        coSys.mtxLocal.rotateZ(vector.z);
     }
     function calcInputVector(_input) {
         let dimension = _input.id[1];
@@ -147,5 +147,5 @@ var MarixTest;
             }
         }
     }
-})(MarixTest || (MarixTest = {}));
+})(MatrixTest || (MatrixTest = {}));
 //# sourceMappingURL=Matrix.js.map
