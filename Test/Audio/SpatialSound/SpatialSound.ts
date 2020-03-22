@@ -39,7 +39,7 @@ namespace AudioSpace {
     const outer: ƒAid.Node = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
     const mtxMesh: ƒ.Matrix4x4 = inner.pivot;
     mtxMesh.rotateX(-90);
-    mtxMesh.translateZ(1);
+    mtxMesh.translateZ(1, false);
     outer.pivot.set(inner.pivot);
     const speaker: ƒAid.Node = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
     speaker.addChild(inner);

@@ -33,7 +33,7 @@ var AudioSpace;
         const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
         const mtxMesh = inner.pivot;
         mtxMesh.rotateX(-90);
-        mtxMesh.translateZ(1);
+        mtxMesh.translateZ(1, false);
         outer.pivot.set(inner.pivot);
         const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
         speaker.addChild(inner);
