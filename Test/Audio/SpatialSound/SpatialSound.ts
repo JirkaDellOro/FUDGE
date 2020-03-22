@@ -17,7 +17,7 @@ namespace AudioSpace {
   let mtxInner: ƒ.Matrix4x4;
   let mtxOuter: ƒ.Matrix4x4;
 
-  let cntRotX: ƒ.Control = new ƒ.Control("CameraRotationX", speedCameraRotation);
+  let cntCameraRotationX: ƒ.Control = new ƒ.Control("CameraRotationX", speedCameraRotation);
 
   // tslint:disable-next-line: typedef
   let parameter = {
@@ -71,7 +71,7 @@ namespace AudioSpace {
     const cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
     camera.node.addComponent(new ƒ.ComponentAudioListener());
-    camera.axisRotateX.addControl(cntRotX);
+    camera.axisRotateX.addControl(cntCameraRotationX);
 
     // scene setup
     const branch: ƒ.Node = new ƒ.Node("Branch");
@@ -134,9 +134,9 @@ namespace AudioSpace {
     if (!_event.buttons)
       return;
     camera.rotateY(_event.movementX * speedCameraRotation);
-    camera.rotateX(_event.movementY * speedCameraRotation);
+    // camera.rotateX(_event.movementY * speedCameraRotation);
 
-    cntRotX.setInput(_event.movementY);
+    cntCameraRotationX.setInput(_event.movementY);
   }
 
   function hndWheelMove(_event: WheelEvent): void {

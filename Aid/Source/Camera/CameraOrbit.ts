@@ -5,7 +5,7 @@ namespace FudgeAid {
     public readonly axisRotateX: ƒ.Axis = new ƒ.Axis("RotateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-    
+
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
@@ -35,12 +35,15 @@ namespace FudgeAid {
       this.translator.addComponent(_cmpCamera);
       this.distance = _distanceStart;
 
-      this.axisRotateX.addEventListener(ƒ.EVENT_CONTROL.INPUT, this.test);
-      this.axisRotateY.addEventListener(ƒ.EVENT_CONTROL.INPUT, this.test);
-      this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.INPUT, this.test);
+      this.axisRotateX.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
+      this.axisRotateY.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
+      this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
     }
 
-    public test = (_event: Event): void => { console.log("Test"); };
+    public hndAxisOutput: EventListener = (_event: Event): void => {
+      let output: number = (<CustomEvent>_event).detail.output;
+      this.rotateX(output);
+    }
 
     public get component(): ƒ.ComponentCamera {
       return this.translator.getComponent(ƒ.ComponentCamera);

@@ -62,7 +62,7 @@ declare namespace FudgeAid {
         private rotatorX;
         private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        test: (_event: Event) => void;
+        hndAxisOutput: EventListener;
         get component(): ƒ.ComponentCamera;
         get node(): ƒ.Node;
         set distance(_distance: number);

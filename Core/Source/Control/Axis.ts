@@ -26,6 +26,7 @@ namespace FudgeCore {
      */
     public addControl(_control: Control): void {
       this.controls.set(_control.name, _control);
+      _control.addEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
     }
 
     /**
@@ -39,7 +40,11 @@ namespace FudgeCore {
      * Removes the control with the given name
      */
     public removeControl(_name: string): void {
-      this.controls.delete(_name);
+      let control: Control = this.getControl(_name);
+      if (control) {
+        control.removeEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
+        this.controls.delete(_name);
+      }
     }
 
     /**
@@ -48,6 +53,7 @@ namespace FudgeCore {
     public getValue(): number {
       let sumOutput: number = 0;
       for (let control of this.controls) {
+
         if (control[1].active)
           sumOutput += control[1].getValue();
       }
@@ -58,6 +64,15 @@ namespace FudgeCore {
       this.sumPrevious = sumOutput;
 
       return super.getValue();
+    }
+
+    private hndInputEvent: EventListener = (_event: Event): void => {
+      let control: Control = (<Control>_event.target);
+      let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
+        input: control.name, 
+        output: this.getValue()
+      }});
+      this.dispatchEvent(event);
     }
   }
 }

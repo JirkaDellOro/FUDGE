@@ -16,7 +16,7 @@ var AudioSpace;
     let mtxTranslator;
     let mtxInner;
     let mtxOuter;
-    let cntRotX = new ƒ.Control("CameraRotationX", speedCameraRotation);
+    let cntCameraRotationX = new ƒ.Control("CameraRotationX", speedCameraRotation);
     // tslint:disable-next-line: typedef
     let parameter = {
         xAmplitude: 0,
@@ -61,7 +61,7 @@ var AudioSpace;
         const cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
         camera.node.addComponent(new ƒ.ComponentAudioListener());
-        camera.axisRotateX.addControl(cntRotX);
+        camera.axisRotateX.addControl(cntCameraRotationX);
         // scene setup
         const branch = new ƒ.Node("Branch");
         branch.addChild(new ƒAid.NodeCoordinateSystem());
@@ -113,8 +113,8 @@ var AudioSpace;
         if (!_event.buttons)
             return;
         camera.rotateY(_event.movementX * speedCameraRotation);
-        camera.rotateX(_event.movementY * speedCameraRotation);
-        cntRotX.setInput(_event.movementY);
+        // camera.rotateX(_event.movementY * speedCameraRotation);
+        cntCameraRotationX.setInput(_event.movementY);
     }
     function hndWheelMove(_event) {
         let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);

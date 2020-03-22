@@ -1544,6 +1544,7 @@ declare namespace FudgeCore {
          * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
          */
         getValue(): number;
+        private hndInputEvent;
     }
 }
 declare namespace FudgeCore {
