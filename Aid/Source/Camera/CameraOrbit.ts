@@ -42,7 +42,16 @@ namespace FudgeAid {
 
     public hndAxisOutput: EventListener = (_event: Event): void => {
       let output: number = (<CustomEvent>_event).detail.output;
-      this.rotateX(output);
+      switch ((<ƒ.Axis>_event.target).name) {
+        case "RotateX":
+          this.rotateX(output);
+          break;
+        case "RotateY":
+          this.rotateY(output);
+          break;
+        case "Distance":
+          this.distance += output;
+      }
     }
 
     public get component(): ƒ.ComponentCamera {

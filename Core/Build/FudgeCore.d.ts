@@ -1472,6 +1472,7 @@ declare namespace FudgeCore {
         protected timeInputDelay: number;
         protected factor: number;
         protected timeInputTargetSet: number;
+        protected rateDispatchOutput: number;
         protected time: Time;
         constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
         /**
@@ -1485,7 +1486,7 @@ declare namespace FudgeCore {
         /**
          * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
          */
-        setDelay(_time: number): void;
+        setDelay(_time: number, _rateDispatchOutput?: number): void;
         /**
          * Set the factor to multiply the input value given with [[setInput]] with
          */
@@ -1505,6 +1506,7 @@ declare namespace FudgeCore {
          */
         protected calculateValue(): number;
         private getInputDelayed;
+        private dispatchOutput;
     }
 }
 declare namespace FudgeCore {
@@ -1544,7 +1546,7 @@ declare namespace FudgeCore {
          * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
          */
         getValue(): number;
-        private hndInputEvent;
+        private hndControlEvent;
     }
 }
 declare namespace FudgeCore {

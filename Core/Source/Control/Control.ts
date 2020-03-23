@@ -30,6 +30,7 @@ namespace FudgeCore {
     protected timeInputDelay: number = 0;
     protected factor: number = 0;
     protected timeInputTargetSet: number = 0;
+    protected rateDispatchOutput: number = 0;
 
     protected time: Time = Time.game;
 
@@ -57,15 +58,18 @@ namespace FudgeCore {
       this.inputPrevious = this.getInputDelayed();
       this.inputTarget = this.factor * _input;
       this.timeInputTargetSet = this.time.get();
+
       this.dispatchEvent(new Event(EVENT_CONTROL.INPUT));
+      this.dispatchOutput(null);
     }
 
     /**
      * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
      */
-    public setDelay(_time: number): void {
+    public setDelay(_time: number, _rateDispatchOutput: number = 0): void {
       // TODO: check if this needs to be disallowed for type DIFFERENTIAL
       this.timeInputDelay = Math.max(0, _time);
+      this.rateDispatchOutput = _rateDispatchOutput;
     }
 
     /**
@@ -136,6 +140,26 @@ namespace FudgeCore {
           return this.inputPrevious + (this.inputTarget - this.inputPrevious) * timeElapsedSinceInput / this.timeInputDelay;
       }
       return this.inputTarget;
+    }
+
+    private dispatchOutput = (_event: EventTimer): void => {
+      let value: number = this.calculateValue();
+      if (value == this.valuePrevious)
+        return;
+      
+      this.valuePrevious = value;
+
+      let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
+        detail: {
+          value: value
+        }
+      });
+
+      if (this.rateDispatchOutput == 0)
+        return;
+
+      this.time.setTimer(1000 / this.rateDispatchOutput, 1, this.dispatchOutput);
+      this.dispatchEvent(event);
     }
   }
 }

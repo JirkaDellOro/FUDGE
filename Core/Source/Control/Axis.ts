@@ -26,7 +26,8 @@ namespace FudgeCore {
      */
     public addControl(_control: Control): void {
       this.controls.set(_control.name, _control);
-      _control.addEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
+      _control.addEventListener(EVENT_CONTROL.INPUT, this.hndControlEvent);
+      _control.addEventListener(EVENT_CONTROL.OUTPUT, this.hndControlEvent);
     }
 
     /**
@@ -42,7 +43,8 @@ namespace FudgeCore {
     public removeControl(_name: string): void {
       let control: Control = this.getControl(_name);
       if (control) {
-        control.removeEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
+        control.removeEventListener(EVENT_CONTROL.INPUT, this.hndControlEvent);
+        control.removeEventListener(EVENT_CONTROL.OUTPUT, this.hndControlEvent);
         this.controls.delete(_name);
       }
     }
@@ -51,22 +53,23 @@ namespace FudgeCore {
      * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
      */
     public getValue(): number {
-      let sumOutput: number = 0;
+      let sumInput: number = 0;
       for (let control of this.controls) {
 
         if (control[1].active)
-          sumOutput += control[1].getValue();
+          sumInput += control[1].getValue();
       }
 
-      if (sumOutput != this.sumPrevious)
-        super.setInput(sumOutput);
+      if (sumInput != this.sumPrevious)
+        super.setInput(sumInput);
 
-      this.sumPrevious = sumOutput;
+      this.sumPrevious = sumInput;
 
       return super.getValue();
     }
 
-    private hndInputEvent: EventListener = (_event: Event): void => {
+    private hndControlEvent: EventListener = (_event: Event): void => {
+      // console.log(_event);
       let control: Control = (<Control>_event.target);
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
         input: control.name, 
