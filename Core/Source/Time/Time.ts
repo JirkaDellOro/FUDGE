@@ -181,7 +181,10 @@ namespace FudgeCore {
      * Deletes the timer with the id given by this time object
      */
     public deleteTimer(_id: number): void {
-      this.timers[_id].clear();
+      let timer: Timer = this.timers[_id];
+      if (!timer)
+        return;
+      timer.clear();
       delete this.timers[_id];
     }
 

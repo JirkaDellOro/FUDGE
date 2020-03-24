@@ -5,20 +5,25 @@ namespace Controls {
   let controlProportional: ƒ.Control = new ƒ.Control("Proportional", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
   let controlIntegral: ƒ.Control = new ƒ.Control("Integral", 0.1, ƒ.CONTROL_TYPE.INTEGRAL);
   let controlDifferential: ƒ.Control = new ƒ.Control("Differential", 2, ƒ.CONTROL_TYPE.DIFFERENTIAL);
+
   let input: HTMLFieldSetElement;
   let output: HTMLFieldSetElement;
+  let mode: HTMLFieldSetElement;
+  let rateDispatchOutput: number = 20;
 
 
 
   function init(_event: Event): void {
-    input = document.querySelectorAll("fieldset")[0];
-    output = document.querySelectorAll("fieldset")[1];
+    input = document.querySelector("fieldset#Input");
+    output = document.querySelector("fieldset#Output");
+    mode = document.querySelector("fieldset#Mode");
 
     setup();
 
     document.addEventListener("keydown", hndKey);
     document.addEventListener("keyup", hndKey);
     input.addEventListener("input", hndControlInput);
+    mode.addEventListener("input", hndModeInput);
 
     update();
   }
@@ -119,6 +124,18 @@ namespace Controls {
     return value;
   }
 
+  function hndModeInput(_event: Event): void {
+    let target: HTMLInputElement = document.querySelector("input#Passive");
+    rateDispatchOutput = 20;
+    if (target.checked) {
+      rateDispatchOutput = 0;
+      update();
+    }
+    controlProportional.setRateDispatchOutput(rateDispatchOutput);
+    controlDifferential.setRateDispatchOutput(rateDispatchOutput);
+    controlIntegral.setRateDispatchOutput(rateDispatchOutput); 
+  }
+
   function hndControlInput(_event: Event): void {
     let target: HTMLInputElement = <HTMLInputElement>_event.target;
     if (target.type != "range")
@@ -155,10 +172,20 @@ namespace Controls {
   }
 
   function update(): void {
+    updateMeter();
+
     controlProportional.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     controlDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     controlIntegral.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
-    window.setTimeout(update, 10);
+
+    let target: HTMLInputElement = document.querySelector("input#Passive");
+    if (target.checked)
+      window.setTimeout(update, 10);
+  }
+
+  function updateMeter(): void {
+    let meter: HTMLMeterElement = document.querySelector("meter");
+    meter.value = (meter.value + 0.01) % 1;
   }
 
   function format(_value: number): string {

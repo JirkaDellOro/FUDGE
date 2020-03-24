@@ -7,13 +7,17 @@ var Controls;
     let controlDifferential = new ƒ.Control("Differential", 2, 2 /* DIFFERENTIAL */);
     let input;
     let output;
+    let mode;
+    let rateDispatchOutput = 20;
     function init(_event) {
-        input = document.querySelectorAll("fieldset")[0];
-        output = document.querySelectorAll("fieldset")[1];
+        input = document.querySelector("fieldset#Input");
+        output = document.querySelector("fieldset#Output");
+        mode = document.querySelector("fieldset#Mode");
         setup();
         document.addEventListener("keydown", hndKey);
         document.addEventListener("keyup", hndKey);
         input.addEventListener("input", hndControlInput);
+        mode.addEventListener("input", hndModeInput);
         update();
     }
     function setup() {
@@ -97,6 +101,17 @@ var Controls;
         fieldset.querySelector("output").textContent = format(value);
         return value;
     }
+    function hndModeInput(_event) {
+        let target = document.querySelector("input#Passive");
+        rateDispatchOutput = 20;
+        if (target.checked) {
+            rateDispatchOutput = 0;
+            update();
+        }
+        controlProportional.setRateDispatchOutput(rateDispatchOutput);
+        controlDifferential.setRateDispatchOutput(rateDispatchOutput);
+        controlIntegral.setRateDispatchOutput(rateDispatchOutput);
+    }
     function hndControlInput(_event) {
         let target = _event.target;
         if (target.type != "range")
@@ -127,10 +142,17 @@ var Controls;
         slider.parentElement.querySelector("output").textContent = format(value);
     }
     function update() {
+        updateMeter();
         controlProportional.dispatchEvent(new Event("output" /* OUTPUT */));
         controlDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
         controlIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
-        window.setTimeout(update, 10);
+        let target = document.querySelector("input#Passive");
+        if (target.checked)
+            window.setTimeout(update, 10);
+    }
+    function updateMeter() {
+        let meter = document.querySelector("meter");
+        meter.value = (meter.value + 0.01) % 1;
     }
     function format(_value) {
         return _value.toFixed(4).padStart(7, "+");

@@ -23,16 +23,18 @@ namespace FudgeCore {
     public readonly type: CONTROL_TYPE;
     public active: boolean;
     public name: string;
+
+    protected rateDispatchOutput: number = 0;
     protected valueBase: number = 0;
     protected inputTarget: number = 0;
     protected valuePrevious: number = 0;
     protected inputPrevious: number = 0;
-    protected timeInputDelay: number = 0;
     protected factor: number = 0;
-    protected timeInputTargetSet: number = 0;
-    protected rateDispatchOutput: number = 0;
 
     protected time: Time = Time.game;
+    protected timeInputDelay: number = 0;
+    protected timeInputTargetSet: number = 0;
+    protected idTimer: number = undefined;
 
     constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _active: boolean = true) {
       super();
@@ -66,10 +68,18 @@ namespace FudgeCore {
     /**
      * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
      */
-    public setDelay(_time: number, _rateDispatchOutput: number = 0): void {
+    public setDelay(_time: number): void {
       // TODO: check if this needs to be disallowed for type DIFFERENTIAL
       this.timeInputDelay = Math.max(0, _time);
+    }
+
+    /**
+     * Set the number of output-events to dispatch per second. 
+     * At the default of 0, the control value must be polled and will only actively dispatched once each time input occurs and the resulting value changes.
+     */
+    public setRateDispatchOutput(_rateDispatchOutput: number = 0): void {
       this.rateDispatchOutput = _rateDispatchOutput;
+      this.dispatchOutput(null);
     }
 
     /**
@@ -143,10 +153,16 @@ namespace FudgeCore {
     }
 
     private dispatchOutput = (_event: EventTimer): void => {
+      // TODO: reuse timer by setting count to 0, de-/activating, adjusting dispatchRate -> create Timer directly for more control
+      if (this.rateDispatchOutput > 0) {
+        this.time.deleteTimer(this.idTimer);
+        this.idTimer = this.time.setTimer(1000 / this.rateDispatchOutput, 1, this.dispatchOutput);
+      }
+
       let value: number = this.calculateValue();
       if (value == this.valuePrevious)
         return;
-      
+
       this.valuePrevious = value;
 
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
@@ -155,10 +171,6 @@ namespace FudgeCore {
         }
       });
 
-      if (this.rateDispatchOutput == 0)
-        return;
-
-      this.time.setTimer(1000 / this.rateDispatchOutput, 1, this.dispatchOutput);
       this.dispatchEvent(event);
     }
   }

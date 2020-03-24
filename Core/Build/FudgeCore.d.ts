@@ -1465,15 +1465,16 @@ declare namespace FudgeCore {
         readonly type: CONTROL_TYPE;
         active: boolean;
         name: string;
+        protected rateDispatchOutput: number;
         protected valueBase: number;
         protected inputTarget: number;
         protected valuePrevious: number;
         protected inputPrevious: number;
-        protected timeInputDelay: number;
         protected factor: number;
-        protected timeInputTargetSet: number;
-        protected rateDispatchOutput: number;
         protected time: Time;
+        protected timeInputDelay: number;
+        protected timeInputTargetSet: number;
+        protected idTimer: number;
         constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
         /**
          * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
@@ -1486,7 +1487,12 @@ declare namespace FudgeCore {
         /**
          * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
          */
-        setDelay(_time: number, _rateDispatchOutput?: number): void;
+        setDelay(_time: number): void;
+        /**
+         * Set the number of output-events to dispatch per second.
+         * At the default of 0, the control value must be polled and will only actively dispatched once each time input occurs and the resulting value changes.
+         */
+        setRateDispatchOutput(_rateDispatchOutput?: number): void;
         /**
          * Set the factor to multiply the input value given with [[setInput]] with
          */

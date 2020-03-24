@@ -9,6 +9,8 @@ var MultiControl;
     let cntKeyVertical = new ƒ.Control("Keyboard", 4, 0 /* PROPORTIONAL */, true);
     let cntMouseHorizontal = new ƒ.Control("Pointer", -0.01, 2 /* DIFFERENTIAL */, true);
     let cntMouseVertical = new ƒ.Control("Pointer", -0.01, 2 /* DIFFERENTIAL */, true);
+    cntKeyHorizontal.setDelay(500);
+    cntKeyVertical.setDelay(500);
     function init(_event) {
         setupScene();
         setupControls();

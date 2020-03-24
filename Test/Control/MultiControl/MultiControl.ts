@@ -4,10 +4,13 @@ namespace MultiControl {
   window.addEventListener("DOMContentLoaded", init);
   let controlled: Controlled;
   let viewport: ƒ.Viewport;
+
   let cntKeyHorizontal: ƒ.Control = new ƒ.Control("Keyboard", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: ƒ.Control = new ƒ.Control("Keyboard", 4, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
   let cntMouseHorizontal: ƒ.Control = new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true);
   let cntMouseVertical: ƒ.Control = new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true);
+  cntKeyHorizontal.setDelay(500);
+  cntKeyVertical.setDelay(500);
 
   function init(_event: Event): void {
     setupScene(); 

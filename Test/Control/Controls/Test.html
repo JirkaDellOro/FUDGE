@@ -29,6 +29,11 @@
     fieldset#Output {
       background-color: beige;
     }
+
+    fieldset#Mode {
+      background-color: rgb(245, 220, 220);
+    }
+
     fieldset#Signal {
       background-color: floralwhite;
     }
@@ -38,6 +43,15 @@
 </head>
 
 <body>
+  <fieldset id="Mode">
+    <legend>Mode</legend>
+      <meter></meter>
+      <input type="radio" name="Mode" id="Passive" checked></input>
+      <label for="Passive">Passive</label>
+      <input type="radio" name="Mode" id="Active"></input>
+      <label for="Active">Active</label>
+  </fieldset>
+
   <fieldset id="Input">
     <legend>Input</legend>
   </fieldset>
