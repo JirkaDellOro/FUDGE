@@ -47,6 +47,9 @@ namespace FudgeCore {
       this.timeoutReal = this.elapse / scale;
 
       let callback: Function = (): void => {
+        if (!this.active)
+          return;
+          
         this.event.lastCall = (this.count == 1);
         _handler(this.event);
         this.event.firstCall = false;

@@ -160,6 +160,7 @@ namespace FudgeCore {
         if (timer.id == _id) {
           timer.clear();
           delete this.timers[id];
+          // TODO: check if an early out is OK here... should be!
         }
       }
     }
@@ -186,6 +187,13 @@ namespace FudgeCore {
         return;
       timer.clear();
       delete this.timers[_id];
+    }
+
+    /**
+     * Returns a reference to the timer with the given id or null if not found.
+     */
+    public getTimer(_id: number): Timer {
+      return this.timers[_id];;
     }
 
     /**

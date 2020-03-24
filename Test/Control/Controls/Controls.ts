@@ -32,7 +32,7 @@ namespace Controls {
     let number: Parameter = { min: "-2", max: "2", step: "0.1", value: "0.1" };
     let slider: Parameter = { min: "-1", max: "1", step: "0.01", value: "0" };
 
-    let keyboard: HTMLFieldSetElement = createFieldset("Keys A-|D+", true, number, slider);
+    let keyboard: HTMLFieldSetElement = createFieldset("Keys A-|D+", true, number, slider, true);
     input.appendChild(keyboard);
     let absolute: HTMLFieldSetElement = createFieldset("Absolute", false, number, slider);
     input.appendChild(absolute);
@@ -63,17 +63,22 @@ namespace Controls {
     differential.addEventListener("input", function (_event: InputEvent): void { hndControlParameters(_event, controlDifferential); });
   }
 
-  function createFieldset(_name: string, _readonly: boolean, _stepper: Parameter, _slider: Parameter): HTMLFieldSetElement {
+  function createFieldset(_name: string, _readonly: boolean, _stepper: Parameter, _slider: Parameter, _nometer: boolean = false): HTMLFieldSetElement {
     let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
     fieldset.id = _name;
+
     let legend: HTMLLegendElement = document.createElement("legend");
     legend.innerHTML = `<strong>${_name}</strong>Factor: `;
     legend.append(createInputElement("number", _stepper));
     legend.innerHTML += " | Value: [<output>0</output>]";
+    if (_readonly && !_nometer)
+      legend.innerHTML += " | <meter></meter";
     fieldset.appendChild(legend);
+
     let slider: HTMLInputElement = createInputElement("range", _slider);
     slider.disabled = _readonly;
     fieldset.append(slider);
+
     return fieldset;
   }
 
@@ -126,14 +131,14 @@ namespace Controls {
 
   function hndModeInput(_event: Event): void {
     let target: HTMLInputElement = document.querySelector("input#Passive");
-    rateDispatchOutput = 20;
+    rateDispatchOutput = 100;
     if (target.checked) {
       rateDispatchOutput = 0;
       update();
     }
     controlProportional.setRateDispatchOutput(rateDispatchOutput);
     controlDifferential.setRateDispatchOutput(rateDispatchOutput);
-    controlIntegral.setRateDispatchOutput(rateDispatchOutput); 
+    controlIntegral.setRateDispatchOutput(rateDispatchOutput);
   }
 
   function hndControlInput(_event: Event): void {
@@ -169,10 +174,11 @@ namespace Controls {
     let value: number = control.getValue();
     slider.value = value.toString();
     slider.parentElement.querySelector("output").textContent = format(value);
+    updateMeter(_fieldset);
   }
 
   function update(): void {
-    updateMeter();
+    updateMeter(document);
 
     controlProportional.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     controlDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
@@ -183,8 +189,8 @@ namespace Controls {
       window.setTimeout(update, 10);
   }
 
-  function updateMeter(): void {
-    let meter: HTMLMeterElement = document.querySelector("meter");
+  function updateMeter(_ancestor: HTMLElement | HTMLDocument): void {
+    let meter: HTMLMeterElement = _ancestor.querySelector("meter");
     meter.value = (meter.value + 0.01) % 1;
   }
 

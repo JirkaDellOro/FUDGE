@@ -79,7 +79,10 @@ namespace FudgeCore {
      */
     public setRateDispatchOutput(_rateDispatchOutput: number = 0): void {
       this.rateDispatchOutput = _rateDispatchOutput;
-      this.dispatchOutput(null);
+      this.time.deleteTimer(this.idTimer);
+      this.idTimer = undefined;
+      if (this.rateDispatchOutput)
+        this.idTimer = this.time.setTimer(1000 / this.rateDispatchOutput, 0, this.dispatchOutput);
     }
 
     /**
@@ -153,14 +156,14 @@ namespace FudgeCore {
     }
 
     private dispatchOutput = (_event: EventTimer): void => {
-      // TODO: reuse timer by setting count to 0, de-/activating, adjusting dispatchRate -> create Timer directly for more control
-      if (this.rateDispatchOutput > 0) {
-        this.time.deleteTimer(this.idTimer);
-        this.idTimer = this.time.setTimer(1000 / this.rateDispatchOutput, 1, this.dispatchOutput);
-      }
-
       let value: number = this.calculateValue();
-      if (value == this.valuePrevious)
+      let timer: Timer = this.time.getTimer(this.idTimer);
+      let outputChanged: boolean = (value != this.valuePrevious);
+
+      if (timer)
+        timer.active = outputChanged;
+
+      if (!outputChanged)
         return;
 
       this.valuePrevious = value;

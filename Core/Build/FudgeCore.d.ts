@@ -3415,6 +3415,10 @@ declare namespace FudgeCore {
          */
         deleteTimer(_id: number): void;
         /**
+         * Returns a reference to the timer with the given id or null if not found.
+         */
+        getTimer(_id: number): Timer;
+        /**
          * Returns a copy of the list of timers currently installed on this time object
          */
         getTimers(): Timers;

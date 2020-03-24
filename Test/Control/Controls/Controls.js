@@ -23,7 +23,7 @@ var Controls;
     function setup() {
         let number = { min: "-2", max: "2", step: "0.1", value: "0.1" };
         let slider = { min: "-1", max: "1", step: "0.01", value: "0" };
-        let keyboard = createFieldset("Keys A-|D+", true, number, slider);
+        let keyboard = createFieldset("Keys A-|D+", true, number, slider, true);
         input.appendChild(keyboard);
         let absolute = createFieldset("Absolute", false, number, slider);
         input.appendChild(absolute);
@@ -48,13 +48,15 @@ var Controls;
         integral.addEventListener("input", function (_event) { hndControlParameters(_event, controlIntegral); });
         differential.addEventListener("input", function (_event) { hndControlParameters(_event, controlDifferential); });
     }
-    function createFieldset(_name, _readonly, _stepper, _slider) {
+    function createFieldset(_name, _readonly, _stepper, _slider, _nometer = false) {
         let fieldset = document.createElement("fieldset");
         fieldset.id = _name;
         let legend = document.createElement("legend");
         legend.innerHTML = `<strong>${_name}</strong>Factor: `;
         legend.append(createInputElement("number", _stepper));
         legend.innerHTML += " | Value: [<output>0</output>]";
+        if (_readonly && !_nometer)
+            legend.innerHTML += " | <meter></meter";
         fieldset.appendChild(legend);
         let slider = createInputElement("range", _slider);
         slider.disabled = _readonly;
@@ -103,7 +105,7 @@ var Controls;
     }
     function hndModeInput(_event) {
         let target = document.querySelector("input#Passive");
-        rateDispatchOutput = 20;
+        rateDispatchOutput = 100;
         if (target.checked) {
             rateDispatchOutput = 0;
             update();
@@ -140,9 +142,10 @@ var Controls;
         let value = control.getValue();
         slider.value = value.toString();
         slider.parentElement.querySelector("output").textContent = format(value);
+        updateMeter(_fieldset);
     }
     function update() {
-        updateMeter();
+        updateMeter(document);
         controlProportional.dispatchEvent(new Event("output" /* OUTPUT */));
         controlDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
         controlIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
@@ -150,8 +153,8 @@ var Controls;
         if (target.checked)
             window.setTimeout(update, 10);
     }
-    function updateMeter() {
-        let meter = document.querySelector("meter");
+    function updateMeter(_ancestor) {
+        let meter = _ancestor.querySelector("meter");
         meter.value = (meter.value + 0.01) % 1;
     }
     function format(_value) {
