@@ -102,6 +102,7 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.shaderflat.html#attributes" class="tsd-kind-icon">attributes</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.shaderflat.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.shaderflat.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.shaderflat.html#program" class="tsd-kind-icon">program</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.shaderflat.html#subclasses" class="tsd-kind-icon">subclasses</a></li>
@@ -131,7 +132,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#attributes">attributes</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L13">Shader/Shader.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L17">Shader/Shader.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -143,13 +144,29 @@
 						</ul>
 					</div>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="baseclass" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> base<wbr>Class</h3>
+					<div class="tsd-signature tsd-kind-icon">base<wbr>Class<span class="tsd-signature-symbol">:</span> <a href="fudgecore.shader.html" class="tsd-signature-type">Shader</a><span class="tsd-signature-symbol"> =&nbsp;Shader</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#baseclass">baseClass</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L12">Shader/Shader.ts:12</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>refers back to this class from any subclass e.g. in order to find compatible other resources</p>
+						</div>
+					</div>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="isubclass" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> i<wbr>Subclass</h3>
 					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;Shader.registerSubclass(ShaderFlat)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/ShaderFlat.ts#L8">Shader/ShaderFlat.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/ShaderFlat.ts#L8">Shader/ShaderFlat.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -160,7 +177,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#program">program</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L12">Shader/Shader.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L16">Shader/Shader.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -171,9 +188,14 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#subclasses">subclasses</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L11">Shader/Shader.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L14">Shader/Shader.ts:14</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>list of all the subclasses derived from this class, if they registered properly</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="uniforms" class="tsd-anchor"></a>
@@ -182,7 +204,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#uniforms">uniforms</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L14">Shader/Shader.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L18">Shader/Shader.ts:18</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -208,7 +230,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#createprogram">createProgram</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L23">Shader/Shader.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L27">Shader/Shader.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -232,7 +254,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#deleteprogram">deleteProgram</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L21">Shader/Shader.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L25">Shader/Shader.ts:25</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -256,7 +278,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#getcoat">getCoat</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/ShaderFlat.ts#L10">Shader/ShaderFlat.ts:10</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/ShaderFlat.ts#L10">Shader/ShaderFlat.ts:10</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.coat.html" class="tsd-signature-type">Coat</a></h4>
@@ -274,7 +296,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#getfragmentshadersource">getFragmentShaderSource</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/ShaderFlat.ts#L50">Shader/ShaderFlat.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/ShaderFlat.ts#L50">Shader/ShaderFlat.ts:50</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -292,7 +314,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#getvertexshadersource">getVertexShaderSource</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/ShaderFlat.ts#L14">Shader/ShaderFlat.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/ShaderFlat.ts#L14">Shader/ShaderFlat.ts:14</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -310,7 +332,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.shader.html">Shader</a>.<a href="fudgecore.shader.html#useprogram">useProgram</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ca3781da/Core/Source/Shader/Shader.ts#L22">Shader/Shader.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Shader/Shader.ts#L26">Shader/Shader.ts:26</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -345,6 +367,9 @@
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgecore.shaderflat.html#attributes" class="tsd-kind-icon">attributes</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.shaderflat.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.shaderflat.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a>

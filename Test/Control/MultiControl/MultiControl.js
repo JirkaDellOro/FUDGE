@@ -7,8 +7,8 @@ var MultiControl;
     let viewport;
     let cntKeyHorizontal = new ƒ.Control("Keyboard", 1, 0 /* PROPORTIONAL */, true);
     let cntKeyVertical = new ƒ.Control("Keyboard", 4, 0 /* PROPORTIONAL */, true);
-    let cntMouseHorizontal = new ƒ.Control("Pointer", -0.01, 2 /* DIFFERENTIAL */, true);
-    let cntMouseVertical = new ƒ.Control("Pointer", -0.01, 2 /* DIFFERENTIAL */, true);
+    let cntMouseHorizontal = new ƒ.Control("Pointer", -1e-2, 1 /* INTEGRAL */, true);
+    let cntMouseVertical = new ƒ.Control("Pointer", -0.1, 1 /* INTEGRAL */, true);
     cntKeyHorizontal.setDelay(500);
     cntKeyVertical.setDelay(500);
     function init(_event) {
@@ -26,6 +26,8 @@ var MultiControl;
     function hndPointerMove(_event) {
         cntMouseHorizontal.setInput(_event.movementX);
         cntMouseVertical.setInput(_event.movementY);
+        cntMouseHorizontal.setInput(0);
+        cntMouseVertical.setInput(0);
     }
     function hndKeyboardControls() {
         cntKeyVertical.setInput(ƒ.Keyboard.mapToValue(1, 0, [ƒ.KEYBOARD_CODE.W, ƒ.KEYBOARD_CODE.ARROW_UP])

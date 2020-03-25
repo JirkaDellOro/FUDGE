@@ -3,6 +3,7 @@ namespace FudgeCore {
   /**
    * Handles multiple controls as inputs and creates an output from that.
    * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.  
+   * Dispatches [[EVENT_CONTROL.OUTPUT]] and [[EVENT_CONTROL.INPUT]] when one of the controls dispatches them.
    * ```plaintext
    *           ┌───────────────────────────────────────────┐
    *           │ ┌───────┐                                 │
@@ -26,8 +27,8 @@ namespace FudgeCore {
      */
     public addControl(_control: Control): void {
       this.controls.set(_control.name, _control);
-      _control.addEventListener(EVENT_CONTROL.INPUT, this.hndControlEvent);
-      _control.addEventListener(EVENT_CONTROL.OUTPUT, this.hndControlEvent);
+      _control.addEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
+      _control.addEventListener(EVENT_CONTROL.OUTPUT, this.hndOutputEvent);
     }
 
     /**
@@ -43,8 +44,8 @@ namespace FudgeCore {
     public removeControl(_name: string): void {
       let control: Control = this.getControl(_name);
       if (control) {
-        control.removeEventListener(EVENT_CONTROL.INPUT, this.hndControlEvent);
-        control.removeEventListener(EVENT_CONTROL.OUTPUT, this.hndControlEvent);
+        control.removeEventListener(EVENT_CONTROL.INPUT, this.hndInputEvent);
+        control.removeEventListener(EVENT_CONTROL.OUTPUT, this.hndOutputEvent);
         this.controls.delete(_name);
       }
     }
@@ -68,13 +69,18 @@ namespace FudgeCore {
       return super.getOutput();
     }
 
-    private hndControlEvent: EventListener = (_event: Event): void => {
-      // console.log(_event);
+    private hndOutputEvent: EventListener = (_event: Event): void => {
       let control: Control = (<Control>_event.target);
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
-        input: control.name, 
+        control: control, 
+        input: (<CustomEvent>_event).detail.output;
         output: this.getOutput()
       }});
+      this.dispatchEvent(event);
+    }
+
+    private hndInputEvent: EventListener = (_event: Event): void => {
+      let event: Event = new Event(EVENT_CONTROL.INPUT, _event);
       this.dispatchEvent(event);
     }
   }

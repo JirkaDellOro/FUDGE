@@ -5,7 +5,12 @@ namespace FudgeCore {
   }
 
   export const enum CONTROL_TYPE {
-    PROPORTIONAL, INTEGRAL, DIFFERENTIAL
+    /** The output simply follows the scaled and delayed input */
+    PROPORTIONAL,
+    /** The output value changes over time with a rate given by the scaled and delayed input */
+    INTEGRAL,
+    /** The output value reacts to changes of the scaled input and drops to 0 with given delay, if input remains constant */
+    DIFFERENTIAL
   }
 
   /**
@@ -54,7 +59,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Feed an input value into this control and fire the [[EVENT_CONTROL.INPUT]]-event
+     * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
      */
     public setInput(_input: number): void {
       this.outputBase = this.calculateOutput();
@@ -76,16 +81,15 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
+     * Set the time to take for the internal linear dampening until the final ouput value is reached
      */
     public setDelay(_time: number): void {
-      // TODO: check if this needs to be disallowed for type DIFFERENTIAL
       this.timeValueDelay = Math.max(0, _time);
     }
 
     /**
      * Set the number of output-events to dispatch per second. 
-     * At the default of 0, the control value must be polled and will only actively dispatched once each time input occurs and the resulting value changes.
+     * At the default of 0, the control output must be polled and will only actively dispatched once each time input occurs and the output changes.
      */
     public setRateDispatchOutput(_rateDispatchOutput: number = 0): void {
       this.rateDispatchOutput = _rateDispatchOutput;
@@ -103,22 +107,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Sets the base value to be applied for the following calculations of output. 
-     * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
-     * TODO: check if inputTarget/inputPrevious must be adjusted too
-     */
-    // public setValue(_value: number): void {
-    //   this.outputBase = _value;
-    // }
-
-    /**
      * Get the value from the output of this control
      */
     public getOutput(): number {
       return this.calculateOutput();
     }
+
     /**
-     * Get the value from the output of this control
+     * Calculates the output of this control
      */
     protected calculateOutput(): number {
       let output: number = 0;

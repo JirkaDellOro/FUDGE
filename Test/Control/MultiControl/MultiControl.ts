@@ -7,8 +7,8 @@ namespace MultiControl {
 
   let cntKeyHorizontal: ƒ.Control = new ƒ.Control("Keyboard", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: ƒ.Control = new ƒ.Control("Keyboard", 4, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
-  let cntMouseHorizontal: ƒ.Control = new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true);
-  let cntMouseVertical: ƒ.Control = new ƒ.Control("Pointer", -0.01, ƒ.CONTROL_TYPE.DIFFERENTIAL, true);
+  let cntMouseHorizontal: ƒ.Control = new ƒ.Control("Pointer", -1e-2, ƒ.CONTROL_TYPE.INTEGRAL, true);
+  let cntMouseVertical: ƒ.Control = new ƒ.Control("Pointer", -0.1, ƒ.CONTROL_TYPE.INTEGRAL, true);
   cntKeyHorizontal.setDelay(500);
   cntKeyVertical.setDelay(500);
 
@@ -29,6 +29,8 @@ namespace MultiControl {
   function hndPointerMove(_event: PointerEvent): void {
     cntMouseHorizontal.setInput(_event.movementX);
     cntMouseVertical.setInput(_event.movementY);
+    cntMouseHorizontal.setInput(0);
+    cntMouseVertical.setInput(0);
   }
 
   function hndKeyboardControls(): void {

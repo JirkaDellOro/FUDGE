@@ -1446,8 +1446,11 @@ declare namespace FudgeCore {
         OUTPUT = "output"
     }
     const enum CONTROL_TYPE {
+        /** The output simply follows the scaled and delayed input */
         PROPORTIONAL = 0,
+        /** The output value changes over time with a rate given by the scaled and delayed input */
         INTEGRAL = 1,
+        /** The output value reacts to changes of the scaled input and drops to 0 with given delay, if input remains constant */
         DIFFERENTIAL = 2
     }
     /**
@@ -1482,16 +1485,16 @@ declare namespace FudgeCore {
          */
         setTimebase(_time: Time): void;
         /**
-         * Feed an input value into this control and fire the [[EVENT_CONTROL.INPUT]]-event
+         * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
          */
         setInput(_input: number): void;
         /**
-         * Set the time to take for the internal linear dampening until the input value given with [[setInput]] is reached
+         * Set the time to take for the internal linear dampening until the final ouput value is reached
          */
         setDelay(_time: number): void;
         /**
          * Set the number of output-events to dispatch per second.
-         * At the default of 0, the control value must be polled and will only actively dispatched once each time input occurs and the resulting value changes.
+         * At the default of 0, the control output must be polled and will only actively dispatched once each time input occurs and the output changes.
          */
         setRateDispatchOutput(_rateDispatchOutput?: number): void;
         /**
@@ -1499,16 +1502,11 @@ declare namespace FudgeCore {
          */
         setFactor(_factor: number): void;
         /**
-         * Sets the base value to be applied for the following calculations of output.
-         * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
-         * TODO: check if inputTarget/inputPrevious must be adjusted too
-         */
-        /**
          * Get the value from the output of this control
          */
         getOutput(): number;
         /**
-         * Get the value from the output of this control
+         * Calculates the output of this control
          */
         protected calculateOutput(): number;
         private getValueDelayed;
@@ -1519,6 +1517,7 @@ declare namespace FudgeCore {
     /**
      * Handles multiple controls as inputs and creates an output from that.
      * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
+     * Dispatches [[EVENT_CONTROL.OUTPUT]] and [[EVENT_CONTROL.INPUT]] when one of the controls dispatches them.
      * ```plaintext
      *           ┌───────────────────────────────────────────┐
      *           │ ┌───────┐                                 │
@@ -1552,7 +1551,8 @@ declare namespace FudgeCore {
          * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
          */
         getOutput(): number;
-        private hndControlEvent;
+        private hndOutputEvent;
+        private hndInputEvent;
     }
 }
 declare namespace FudgeCore {
