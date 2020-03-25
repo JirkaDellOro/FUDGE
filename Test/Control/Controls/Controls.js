@@ -137,10 +137,13 @@ var Controls;
             _control.setFactor(value);
     }
     function hndControlOutput(_event, _fieldset) {
-        // console.log(_fieldset);
         let control = _event.target;
         let slider = _fieldset.querySelector("input[type=range]");
-        let value = control.getOutput();
+        let value;
+        if (_event.detail)
+            value = _event.detail.output;
+        else
+            value = control.getOutput();
         slider.value = value.toString();
         slider.parentElement.querySelector("output").textContent = format(value);
         updateMeter(_fieldset);

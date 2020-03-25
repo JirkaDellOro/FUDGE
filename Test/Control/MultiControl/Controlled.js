@@ -15,8 +15,8 @@ var MultiControl;
             this.axisRotation.setDelay(200);
         }
         update(_timeFrame) {
-            let distance = this.axisSpeed.getValue() * this.maxSpeed * _timeFrame;
-            let angle = this.axisRotation.getValue() * this.maxRotSpeed * _timeFrame;
+            let distance = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
+            let angle = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
             this.mtxLocal.translateZ(distance);
             this.mtxLocal.rotateY(angle);
         }

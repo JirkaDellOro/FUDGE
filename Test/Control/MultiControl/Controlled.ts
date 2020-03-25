@@ -14,8 +14,8 @@ namespace MultiControl {
     }
 
     public update(_timeFrame: number): void {
-      let distance: number = this.axisSpeed.getValue() * this.maxSpeed * _timeFrame;
-      let angle: number = this.axisRotation.getValue() * this.maxRotSpeed * _timeFrame;
+      let distance: number = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
+      let angle: number = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
       this.mtxLocal.translateZ(distance);
       this.mtxLocal.rotateY(angle);
     }

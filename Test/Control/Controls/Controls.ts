@@ -55,9 +55,9 @@ namespace Controls {
     addDelayStepper(differential);
     output.appendChild(differential);
 
-    controlProportional.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndControlOutput(_event, proportional); });
-    controlIntegral.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndControlOutput(_event, integral); });
-    controlDifferential.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndControlOutput(_event, differential); });
+    controlProportional.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: CustomEvent): void { hndControlOutput(_event, proportional); });
+    controlIntegral.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: CustomEvent): void { hndControlOutput(_event, integral); });
+    controlDifferential.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: CustomEvent): void { hndControlOutput(_event, differential); });
 
     proportional.addEventListener("input", function (_event: InputEvent): void { hndControlParameters(_event, controlProportional); });
     integral.addEventListener("input", function (_event: InputEvent): void { hndControlParameters(_event, controlIntegral); });
@@ -168,11 +168,14 @@ namespace Controls {
       _control.setFactor(value);
   }
 
-  function hndControlOutput(_event: Event, _fieldset: HTMLFieldSetElement): void {
-    // console.log(_fieldset);
+  function hndControlOutput(_event: CustomEvent, _fieldset: HTMLFieldSetElement): void {
     let control: ƒ.Control = <ƒ.Control>_event.target;
     let slider: HTMLInputElement = _fieldset.querySelector("input[type=range]");
-    let value: number = control.getOutput();
+    let value: number;
+    if (_event.detail)
+      value = _event.detail.output;
+    else
+      value = control.getOutput();
     slider.value = value.toString();
     slider.parentElement.querySelector("output").textContent = format(value);
     updateMeter(_fieldset);

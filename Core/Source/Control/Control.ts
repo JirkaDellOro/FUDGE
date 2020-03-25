@@ -63,12 +63,16 @@ namespace FudgeCore {
       this.timeOutputTargetSet = this.time.get();
 
       if (this.type == CONTROL_TYPE.DIFFERENTIAL) {
-        this.valuePrevious = this.outputTarget;
+        this.valuePrevious = this.outputTarget - this.outputTargetPrevious;
+        this.outputTargetPrevious = this.outputTarget;
         this.outputTarget = 0;
       }
 
       this.dispatchEvent(new Event(EVENT_CONTROL.INPUT));
-      this.dispatchOutput(null);
+      if (this.type == CONTROL_TYPE.DIFFERENTIAL)
+        this.dispatchOutput(this.valuePrevious);
+      else
+        this.dispatchOutput(null);
     }
 
     /**
@@ -140,11 +144,6 @@ namespace FudgeCore {
           // value += 0.5 * (this.inputPrevious - input) * this.timeInputDelay + input * timeElapsedSinceInput;
           break;
         case CONTROL_TYPE.DIFFERENTIAL:
-          // output = this.outputBase + value;
-          // this.inputTargetPrevious = this.outputTarget;
-          // this.outputTarget = 0;
-          // this.outputBase = output;
-          // break;
         case CONTROL_TYPE.PROPORTIONAL:
         default:
           output = value;
@@ -162,9 +161,13 @@ namespace FudgeCore {
       return this.outputTarget;
     }
 
-    private dispatchOutput = (_event: EventTimer): void => {
-      let output: number = this.calculateOutput();
+    private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
       let timer: Timer = this.time.getTimer(this.idTimer);
+      let output: number;
+      if (typeof (_eventOrValue) == "number")
+        output = _eventOrValue;
+      else
+        output = this.calculateOutput();
       let outputChanged: boolean = (output != this.outputPrevious);
 
       if (timer)
