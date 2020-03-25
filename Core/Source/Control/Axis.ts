@@ -52,12 +52,12 @@ namespace FudgeCore {
     /**
      * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
      */
-    public getValue(): number {
+    public getOutput(): number {
       let sumInput: number = 0;
       for (let control of this.controls) {
 
         if (control[1].active)
-          sumInput += control[1].getValue();
+          sumInput += control[1].getOutput();
       }
 
       if (sumInput != this.sumPrevious)
@@ -65,7 +65,7 @@ namespace FudgeCore {
 
       this.sumPrevious = sumInput;
 
-      return super.getValue();
+      return super.getOutput();
     }
 
     private hndControlEvent: EventListener = (_event: Event): void => {
@@ -73,7 +73,7 @@ namespace FudgeCore {
       let control: Control = (<Control>_event.target);
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
         input: control.name, 
-        output: this.getValue()
+        output: this.getOutput()
       }});
       this.dispatchEvent(event);
     }

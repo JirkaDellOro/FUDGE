@@ -1466,14 +1466,15 @@ declare namespace FudgeCore {
         active: boolean;
         name: string;
         protected rateDispatchOutput: number;
-        protected valueBase: number;
-        protected inputTarget: number;
         protected valuePrevious: number;
-        protected inputPrevious: number;
+        protected outputBase: number;
+        protected outputTarget: number;
+        protected outputPrevious: number;
+        protected outputTargetPrevious: number;
         protected factor: number;
         protected time: Time;
-        protected timeInputDelay: number;
-        protected timeInputTargetSet: number;
+        protected timeValueDelay: number;
+        protected timeOutputTargetSet: number;
         protected idTimer: number;
         constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
         /**
@@ -1498,20 +1499,19 @@ declare namespace FudgeCore {
          */
         setFactor(_factor: number): void;
         /**
-         * Sets the base value to be applied for the following calculations of value.
+         * Sets the base value to be applied for the following calculations of output.
          * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
          * TODO: check if inputTarget/inputPrevious must be adjusted too
          */
-        setValue(_value: number): void;
         /**
          * Get the value from the output of this control
          */
-        getValue(): number;
+        getOutput(): number;
         /**
          * Get the value from the output of this control
          */
-        protected calculateValue(): number;
-        private getInputDelayed;
+        protected calculateOutput(): number;
+        private getValueDelayed;
         private dispatchOutput;
     }
 }
@@ -1551,7 +1551,7 @@ declare namespace FudgeCore {
         /**
          * Returns the value of this axis after summing up all inputs and processing the sum according to the axis' settings
          */
-        getValue(): number;
+        getOutput(): number;
         private hndControlEvent;
     }
 }

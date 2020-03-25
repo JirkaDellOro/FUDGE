@@ -25,15 +25,16 @@ namespace FudgeCore {
     public name: string;
 
     protected rateDispatchOutput: number = 0;
-    protected valueBase: number = 0;
-    protected inputTarget: number = 0;
     protected valuePrevious: number = 0;
-    protected inputPrevious: number = 0;
+    protected outputBase: number = 0;
+    protected outputTarget: number = 0;
+    protected outputPrevious: number = 0;
+    protected outputTargetPrevious: number = 0;
     protected factor: number = 0;
 
     protected time: Time = Time.game;
-    protected timeInputDelay: number = 0;
-    protected timeInputTargetSet: number = 0;
+    protected timeValueDelay: number = 0;
+    protected timeOutputTargetSet: number = 0;
     protected idTimer: number = undefined;
 
     constructor(_name: string, _factor: number = 1, _type: CONTROL_TYPE = CONTROL_TYPE.PROPORTIONAL, _active: boolean = true) {
@@ -49,17 +50,22 @@ namespace FudgeCore {
      */
     public setTimebase(_time: Time): void {
       this.time = _time;
-      this.calculateValue();
+      this.calculateOutput();
     }
 
     /**
      * Feed an input value into this control and fire the [[EVENT_CONTROL.INPUT]]-event
      */
     public setInput(_input: number): void {
-      this.valueBase = this.calculateValue();
-      this.inputPrevious = this.getInputDelayed();
-      this.inputTarget = this.factor * _input;
-      this.timeInputTargetSet = this.time.get();
+      this.outputBase = this.calculateOutput();
+      this.valuePrevious = this.getValueDelayed();
+      this.outputTarget = this.factor * _input;
+      this.timeOutputTargetSet = this.time.get();
+
+      if (this.type == CONTROL_TYPE.DIFFERENTIAL) {
+        this.valuePrevious = this.outputTarget;
+        this.outputTarget = 0;
+      }
 
       this.dispatchEvent(new Event(EVENT_CONTROL.INPUT));
       this.dispatchOutput(null);
@@ -70,7 +76,7 @@ namespace FudgeCore {
      */
     public setDelay(_time: number): void {
       // TODO: check if this needs to be disallowed for type DIFFERENTIAL
-      this.timeInputDelay = Math.max(0, _time);
+      this.timeValueDelay = Math.max(0, _time);
     }
 
     /**
@@ -93,72 +99,73 @@ namespace FudgeCore {
     }
 
     /**
-     * Sets the base value to be applied for the following calculations of value. 
+     * Sets the base value to be applied for the following calculations of output. 
      * Applicable to [[CONTROL_TYPE.INTEGRAL]] and [[CONTROL_TYPE.DIFFERENTIAL]] only.
      * TODO: check if inputTarget/inputPrevious must be adjusted too
      */
-    public setValue(_value: number): void {
-      this.valueBase = _value;
-    }
+    // public setValue(_value: number): void {
+    //   this.outputBase = _value;
+    // }
 
     /**
      * Get the value from the output of this control
      */
-    public getValue(): number {
-      return this.calculateValue();
+    public getOutput(): number {
+      return this.calculateOutput();
     }
     /**
      * Get the value from the output of this control
      */
-    protected calculateValue(): number {
-      let value: number = 0;
-      let input: number = this.getInputDelayed();
+    protected calculateOutput(): number {
+      let output: number = 0;
+      let value: number = this.getValueDelayed();
 
       switch (this.type) {
         case CONTROL_TYPE.INTEGRAL:
           let timeCurrent: number = this.time.get();
-          let timeElapsedSinceInput: number = timeCurrent - this.timeInputTargetSet;
-          value = this.valueBase;
+          let timeElapsedSinceInput: number = timeCurrent - this.timeOutputTargetSet;
+          output = this.outputBase;
 
-          if (this.timeInputDelay > 0) {
-            if (timeElapsedSinceInput < this.timeInputDelay) {
-              value += 0.5 * (this.inputPrevious + input) * timeElapsedSinceInput;
+          if (this.timeValueDelay > 0) {
+            if (timeElapsedSinceInput < this.timeValueDelay) {
+              output += 0.5 * (this.valuePrevious + value) * timeElapsedSinceInput;
               break;
             }
             else {
-              value += 0.5 * (this.inputPrevious + input) * this.timeInputDelay;
-              timeElapsedSinceInput -= this.timeInputDelay;
+              output += 0.5 * (this.valuePrevious + value) * this.timeValueDelay;
+              timeElapsedSinceInput -= this.timeValueDelay;
             }
           }
-          value += input * timeElapsedSinceInput;
+          output += value * timeElapsedSinceInput;
           // value += 0.5 * (this.inputPrevious - input) * this.timeInputDelay + input * timeElapsedSinceInput;
           break;
         case CONTROL_TYPE.DIFFERENTIAL:
-          value = this.valueBase + input;
-          this.inputTarget = 0;
-          this.valueBase = value;
-          break;
+          // output = this.outputBase + value;
+          // this.inputTargetPrevious = this.outputTarget;
+          // this.outputTarget = 0;
+          // this.outputBase = output;
+          // break;
         case CONTROL_TYPE.PROPORTIONAL:
         default:
-          value = input;
+          output = value;
           break;
       }
-      return value;
+      return output;
     }
 
-    private getInputDelayed(): number {
-      if (this.timeInputDelay > 0) {
-        let timeElapsedSinceInput: number = this.time.get() - this.timeInputTargetSet;
-        if (timeElapsedSinceInput < this.timeInputDelay)
-          return this.inputPrevious + (this.inputTarget - this.inputPrevious) * timeElapsedSinceInput / this.timeInputDelay;
+    private getValueDelayed(): number {
+      if (this.timeValueDelay > 0) {
+        let timeElapsedSinceInput: number = this.time.get() - this.timeOutputTargetSet;
+        if (timeElapsedSinceInput < this.timeValueDelay)
+          return this.valuePrevious + (this.outputTarget - this.valuePrevious) * timeElapsedSinceInput / this.timeValueDelay;
       }
-      return this.inputTarget;
+      return this.outputTarget;
     }
 
     private dispatchOutput = (_event: EventTimer): void => {
-      let value: number = this.calculateValue();
+      let output: number = this.calculateOutput();
       let timer: Timer = this.time.getTimer(this.idTimer);
-      let outputChanged: boolean = (value != this.valuePrevious);
+      let outputChanged: boolean = (output != this.outputPrevious);
 
       if (timer)
         timer.active = outputChanged;
@@ -166,11 +173,11 @@ namespace FudgeCore {
       if (!outputChanged)
         return;
 
-      this.valuePrevious = value;
+      this.outputPrevious = output;
 
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
         detail: {
-          value: value
+          output: output
         }
       });
 

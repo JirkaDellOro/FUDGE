@@ -52,6 +52,7 @@ namespace Controls {
 
     number.value = "2";
     let differential: HTMLFieldSetElement = createFieldset("Differential", true, number, slider);
+    addDelayStepper(differential);
     output.appendChild(differential);
 
     controlProportional.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event: Event): void { hndControlOutput(_event, proportional); });
@@ -171,7 +172,7 @@ namespace Controls {
     // console.log(_fieldset);
     let control: ƒ.Control = <ƒ.Control>_event.target;
     let slider: HTMLInputElement = _fieldset.querySelector("input[type=range]");
-    let value: number = control.getValue();
+    let value: number = control.getOutput();
     slider.value = value.toString();
     slider.parentElement.querySelector("output").textContent = format(value);
     updateMeter(_fieldset);
