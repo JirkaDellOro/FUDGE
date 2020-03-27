@@ -1,6 +1,12 @@
 var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
+    let EVENT_EDITOR;
+    (function (EVENT_EDITOR) {
+        EVENT_EDITOR["REMOVE"] = "nodeRemoveEvent";
+        EVENT_EDITOR["HIDE"] = "nodeHideEvent";
+        EVENT_EDITOR["ACTIVEVIEWPORT"] = "activeViewport";
+    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let NODEMENU;
     (function (NODEMENU) {
         NODEMENU["EMPTY"] = "Empty Node";
@@ -47,7 +53,7 @@ var Fudge;
             let list = this.BuildListFromNode(this.nodeRoot);
             this.listRoot.appendChild(list);
             _listContainer.appendChild(this.listRoot);
-            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
         }
         getNodeRoot() {
             return this.nodeRoot;
@@ -97,8 +103,8 @@ var Fudge;
             this.index = {};
             this.listRoot = this.buildFromMutator(this.mutator);
             _listContainer.append(this.listRoot);
-            _listContainer.addEventListener("listCollapseEvent" /* COLLAPSE */, this.toggleCollapse);
-            _listContainer.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.collectMutator);
+            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("update" /* UPDATE */, this.collectMutator);
         }
         getMutator() {
             return this.mutator;
@@ -155,16 +161,16 @@ var Fudge;
         }
     }
     Fudge.UIAnimationList = UIAnimationList;
-    class UINodeData extends ƒui.UIMutable {
+    class NodeData extends ƒui.Mutable {
         constructor(_mutable, _container) {
             super(_mutable);
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(_mutable, this.root);
+            ƒui.Generator.createFromMutable(_mutable, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             _container.append(this.root);
         }
     }
-    Fudge.UINodeData = UINodeData;
+    Fudge.NodeData = NodeData;
 })(Fudge || (Fudge = {}));
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
@@ -221,8 +227,6 @@ var Fudge;
         });
     }
     function openViewNode() {
-        // node = Scenes.createAxisCross();
-        // node = new ƒ.Node("Scene");
         node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
         let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
         node.addChild(node2);
@@ -364,7 +368,7 @@ var Fudge;
                         switch (item.componentName) {
                             case Fudge.VIEW.NODE:
                                 view = new Fudge.ViewNode(this);
-                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
+                                // view.content.addEventListener(ƒui.EVENT_USERINTERFACE.SELECTION, this.passEvent);
                                 break;
                             case Fudge.VIEW.DATA:
                                 view = new Fudge.ViewData(this);
@@ -411,73 +415,76 @@ var Fudge;
      * @author Monika Galkewitsch, 2019, HFU
      * @author Lukas Scheuerle, 2019, HFU
      */
-    class PanelManager extends EventTarget {
-        constructor() {
-            super();
-            this.panels = [];
-            /**
-             * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
-             * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is
-             * created and added to the Panel-List.
-             * During Initialization and addPanel function, this method is called already.
-             */
-            this.setActivePanel = () => {
-                let activeTab = this.editorLayout.root.contentItems[0].getActiveContentItem();
-                for (let panel of this.panels) {
-                    if (panel.config.id == activeTab.config.id) {
-                        this.activePanel = panel;
+    let PanelManager = /** @class */ (() => {
+        class PanelManager extends EventTarget {
+            constructor() {
+                super();
+                this.panels = [];
+                /**
+                 * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
+                 * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is
+                 * created and added to the Panel-List.
+                 * During Initialization and addPanel function, this method is called already.
+                 */
+                this.setActivePanel = () => {
+                    let activeTab = this.editorLayout.root.contentItems[0].getActiveContentItem();
+                    for (let panel of this.panels) {
+                        if (panel.config.id == activeTab.config.id) {
+                            this.activePanel = panel;
+                        }
                     }
-                }
-            };
+                };
+            }
+            /**
+             * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
+             * @param _p Panel to be added
+             */
+            addPanel(_p) {
+                this.panels.push(_p);
+                this.editorLayout.root.contentItems[0].addChild(_p.config);
+                this.activePanel = _p;
+            }
+            /**
+             * Add View to PanelManagers View List and add the view to the active panel
+             * @param _v View to be added
+             */
+            addView(_v) {
+                this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
+            }
+            /**
+             * Returns the currently active Panel
+             */
+            getActivePanel() {
+                return this.activePanel;
+            }
+            /**
+             * Initialize GoldenLayout Context of the PanelManager Instance
+             */
+            init() {
+                let config = {
+                    content: [{
+                            type: "stack",
+                            isClosable: false,
+                            content: [
+                                {
+                                    type: "component",
+                                    componentName: "welcome",
+                                    title: "Welcome",
+                                    componentState: {}
+                                }
+                            ]
+                        }]
+                };
+                this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
+                this.editorLayout.registerComponent("welcome", welcome);
+                this.editorLayout.registerComponent("View", registerViewComponent);
+                this.editorLayout.init();
+                this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
+            }
         }
-        /**
-         * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
-         * @param _p Panel to be added
-         */
-        addPanel(_p) {
-            this.panels.push(_p);
-            this.editorLayout.root.contentItems[0].addChild(_p.config);
-            this.activePanel = _p;
-        }
-        /**
-         * Add View to PanelManagers View List and add the view to the active panel
-         * @param _v View to be added
-         */
-        addView(_v) {
-            this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
-        }
-        /**
-         * Returns the currently active Panel
-         */
-        getActivePanel() {
-            return this.activePanel;
-        }
-        /**
-         * Initialize GoldenLayout Context of the PanelManager Instance
-         */
-        init() {
-            let config = {
-                content: [{
-                        type: "stack",
-                        isClosable: false,
-                        content: [
-                            {
-                                type: "component",
-                                componentName: "welcome",
-                                title: "Welcome",
-                                componentState: {}
-                            }
-                        ]
-                    }]
-            };
-            this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-            this.editorLayout.registerComponent("welcome", welcome);
-            this.editorLayout.registerComponent("View", registerViewComponent);
-            this.editorLayout.init();
-            this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
-        }
-    }
-    PanelManager.instance = new PanelManager();
+        PanelManager.instance = new PanelManager();
+        return PanelManager;
+    })();
     Fudge.PanelManager = PanelManager;
     //TODO: Give these Factory Functions a better home
     //TODO: Figure out a better way than any. So far it was the best way to get the attributes of componentState into it properly
@@ -495,7 +502,7 @@ var Fudge;
      * @param state
      */
     function registerViewComponent(container, state) {
-        container.getElement().append(state.content);
+        container.getElement().append(state["content"]);
     }
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -651,7 +658,7 @@ var Fudge;
             this.attributeList = document.createElement("div");
             this.attributeList.id = "attributeList";
             this.attributeList.style.width = "300px";
-            this.attributeList.addEventListener("mutatorUpdateEvent" /* UPDATE */, this.changeAttribute.bind(this));
+            this.attributeList.addEventListener("update" /* UPDATE */, this.changeAttribute.bind(this));
             //TODO: Add Moni's custom Element here
             this.controller = new Fudge.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
             this.canvas = document.createElement("canvas");
@@ -702,15 +709,15 @@ var Fudge;
                 return;
             if (obj["label"]) {
                 console.log(obj["label"]);
-                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+                this.parentPanel.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
             }
             else if (obj["event"]) {
                 console.log(obj["event"]);
-                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+                this.parentPanel.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
             }
             else if (obj["key"]) {
                 console.log(obj["key"]);
-                this.parentPanel.dispatchEvent(new CustomEvent("nodeSelectionEvent" /* SELECTION */, { detail: obj["key"] }));
+                this.parentPanel.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: obj["key"] }));
             }
             console.log(obj);
         }
@@ -1249,13 +1256,13 @@ var Fudge;
                 this.camera = _event.detail;
                 this.fillContent();
             };
-            this.parentPanel.addEventListener("activeViewport" /* ACTIVEVIEWPORT */, this.setCamera);
+            this.parentPanel.addEventListener(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, this.setCamera);
             let div = document.createElement("div");
             this.content.appendChild(div);
         }
         fillContent() {
             let div = document.createElement("div");
-            let inspector = new Fudge.UINodeData(this.camera, div);
+            let inspector = new Fudge.NodeData(this.camera, div);
             this.content.replaceChild(div, this.content.firstChild);
         }
         deconstruct() {
@@ -1305,7 +1312,7 @@ var Fudge;
                 switch (_event.detail) {
                 }
             };
-            this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setNode);
+            this.parentPanel.addEventListener("select" /* SELECT */, this.setNode);
             this.fillContent();
         }
         deconstruct() {
@@ -1326,7 +1333,7 @@ var Fudge;
                     cntHeader.append(txtNodeName);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents = new Fudge.UINodeData(nodeComponent, cntComponents);
+                        let uiComponents = new Fudge.NodeData(nodeComponent, cntComponents);
                     }
                     this.content.append(cntComponents);
                     let mutator = {};
@@ -1421,9 +1428,9 @@ var Fudge;
                 this.branch = new ƒ.Node("Scene");
             }
             this.selectedNode = null;
-            this.parentPanel.addEventListener("nodeSelectionEvent" /* SELECTION */, this.setSelectedNode);
+            this.parentPanel.addEventListener("select" /* SELECT */, this.setSelectedNode);
             this.listController = new Fudge.UINodeList(this.branch, this.content);
-            this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
+            this.listController.listRoot.addEventListener("select" /* SELECT */, this.passEventToPanel);
             this.fillContent();
         }
         deconstruct() {
@@ -1447,10 +1454,10 @@ var Fudge;
             if (!_node)
                 return;
             this.branch = _node;
-            this.listController.listRoot.removeEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
+            this.listController.listRoot.removeEventListener("select" /* SELECT */, this.passEventToPanel);
             this.listController.setNodeRoot(_node);
             this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
-            this.listController.listRoot.addEventListener("nodeSelectionEvent" /* SELECTION */, this.passEventToPanel);
+            this.listController.listRoot.addEventListener("select" /* SELECT */, this.passEventToPanel);
         }
     }
     Fudge.ViewNode = ViewNode;
@@ -1471,13 +1478,11 @@ var Fudge;
              */
             this.animate = (_e) => {
                 this.viewport.setBranch(this.branch);
-                // ƒ.RenderManager.updateBranch(this.branch);
-                // ƒ.RenderManager.update();
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();
             };
             this.activeViewport = (_event) => {
-                let event = new CustomEvent("activeViewport" /* ACTIVEVIEWPORT */, { detail: this.viewport.camera, bubbles: false });
+                let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
                 this.parentPanel.dispatchEvent(event);
                 _event.cancelBubble = true;
             };
@@ -1492,11 +1497,6 @@ var Fudge;
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
         fillContent() {
-            // initialize RenderManager and transmit content
-            // ƒ.RenderManager.addBranch(this.branch);
-            // ƒ.RenderManager.update();
-            // initialize viewport
-            // TODO: create camera/canvas here without "Scenes"     
             let cmpCamera = new ƒ.ComponentCamera();
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -1512,7 +1512,7 @@ var Fudge;
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
             //Focus cameracontrols on new viewport
-            let event = new CustomEvent("activeViewport" /* ACTIVEVIEWPORT */, { detail: this.viewport.camera, bubbles: false });
+            let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
             this.parentPanel.dispatchEvent(event);
             this.canvas.addEventListener("click", this.activeViewport);
         }

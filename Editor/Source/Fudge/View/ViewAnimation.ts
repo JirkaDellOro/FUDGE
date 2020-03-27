@@ -77,7 +77,7 @@ namespace Fudge {
             }
           ]
         }
-      }, 60);
+      },                                       60);
       this.animation.labels["One"] = 200;
       this.animation.labels["Two"] = 750;
       this.animation.setEvent("EventOne", 500);
@@ -101,7 +101,7 @@ namespace Fudge {
       this.attributeList = document.createElement("div");
       this.attributeList.id = "attributeList";
       this.attributeList.style.width = "300px";
-      this.attributeList.addEventListener(FudgeUserInterface.UIEVENT.UPDATE, this.changeAttribute.bind(this));
+      this.attributeList.addEventListener(FudgeUserInterface.EVENT_USERINTERFACE.UPDATE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
       this.controller = new UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
 
@@ -158,15 +158,15 @@ namespace Fudge {
       if (!obj) return;
       if (obj["label"]) {
         console.log(obj["label"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
       }
       else if (obj["event"]) {
         console.log(obj["event"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.UIEVENT.SELECTION, { detail: obj["key"] }));
+        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: obj["key"] }));
       }
       console.log(obj);
     }

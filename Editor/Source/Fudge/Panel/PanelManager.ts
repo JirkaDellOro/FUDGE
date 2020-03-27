@@ -94,7 +94,7 @@ namespace Fudge {
    * @param container 
    * @param state 
    */
-  function registerViewComponent(container: GoldenLayout.Container, state: any): void {
-    container.getElement().append(state.content);
+  function registerViewComponent(container: GoldenLayout.Container, state: Object): void {
+    container.getElement().append(state["content"]);
   }
 }

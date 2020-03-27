@@ -26,12 +26,6 @@ namespace Fudge {
     }
 
     fillContent(): void {
-      // initialize RenderManager and transmit content
-      // ƒ.RenderManager.addBranch(this.branch);
-      // ƒ.RenderManager.update();
-
-      // initialize viewport
-      // TODO: create camera/canvas here without "Scenes"     
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -51,7 +45,7 @@ namespace Fudge {
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
-      let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
       this.parentPanel.dispatchEvent(event);
 
       this.canvas.addEventListener("click", this.activeViewport);
@@ -73,14 +67,12 @@ namespace Fudge {
      */
     private animate = (_e: Event) => {
       this.viewport.setBranch(this.branch);
-      // ƒ.RenderManager.updateBranch(this.branch);
-      // ƒ.RenderManager.update();
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }
     
     private activeViewport = (_event: MouseEvent): void => {
-      let event: CustomEvent = new CustomEvent(ƒui.UIEVENT.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
       this.parentPanel.dispatchEvent(event);
 
       _event.cancelBubble = true;

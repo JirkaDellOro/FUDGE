@@ -117,7 +117,7 @@ namespace Fudge {
                         switch (item.componentName) {
                             case VIEW.NODE:
                                 view = new ViewNode(this);
-                                // view.content.addEventListener(ƒui.UIEVENT.SELECTION, this.passEvent);
+                                // view.content.addEventListener(ƒui.EVENT_USERINTERFACE.SELECTION, this.passEvent);
                                 break;
                             case VIEW.DATA:
                                 view = new ViewData(this);

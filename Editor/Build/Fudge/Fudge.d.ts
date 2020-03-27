@@ -4,6 +4,11 @@
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
+    enum EVENT_EDITOR {
+        REMOVE = "nodeRemoveEvent",
+        HIDE = "nodeHideEvent",
+        ACTIVEVIEWPORT = "activeViewport"
+    }
     enum NODEMENU {
         EMPTY = "Empty Node",
         BOX = "Box Mesh Node",
@@ -50,7 +55,7 @@ declare namespace Fudge {
         private buildFromMutator;
         private toggleCollapse;
     }
-    class UINodeData extends ƒui.UIMutable {
+    class NodeData extends ƒui.Mutable {
         constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
     }
 }

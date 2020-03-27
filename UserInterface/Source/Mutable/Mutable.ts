@@ -1,7 +1,7 @@
 // / <reference types="../../../Core/Build/FudgeCore"/>
 namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    export abstract class UIMutable {
+    export abstract class Mutable {
         protected timeUpdate: number = 190;
         protected root: HTMLElement;
         protected mutable: ƒ.Mutable;
@@ -11,7 +11,7 @@ namespace FudgeUserInterface {
             this.root = document.createElement("div");
             this.mutable = mutable;
             this.mutator = mutable.getMutator();
-            window.setInterval(this.refreshUI, this.timeUpdate);
+            window.setInterval(this.refresh, this.timeUpdate);
             this.root.addEventListener("input", this.mutateOnInput);
         }
 
@@ -21,9 +21,9 @@ namespace FudgeUserInterface {
 
         }
 
-        protected refreshUI = (_e: Event) => {
+        protected refresh = (_e: Event) => {
             this.mutable.updateMutator(this.mutator);
-            this.updateUI(this.mutable, this.root);
+            this.update(this.mutable, this.root);
         }
 
         protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
@@ -61,7 +61,7 @@ namespace FudgeUserInterface {
             return mutator;
         }
 
-        protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void {
+        protected update(_mutable: ƒ.Mutable, _root: HTMLElement): void {
             let mutator: ƒ.Mutator = _mutable.getMutator();
             let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
@@ -89,8 +89,8 @@ namespace FudgeUserInterface {
                                 break;
                             default:
                                 let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_root.querySelector("#" + key);
-                                let subMutable: ƒ.Mutable = (<any>_mutable)[key];
-                                this.updateUI(subMutable, fieldset);
+                                let subMutable: ƒ.Mutable = <ƒ.Mutable>Reflect.getOwnPropertyDescriptor(_mutable, key).value;
+                                this.update(subMutable, fieldset);
                                 break;
                         }
                     }

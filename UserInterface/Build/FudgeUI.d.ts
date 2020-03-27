@@ -1,46 +1,5 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    export abstract class UIListController {
-        abstract listRoot: HTMLElement;
-        protected abstract toggleCollapse(_event: MouseEvent): void;
-    }
-    abstract class CollapsableListElement extends HTMLUListElement {
-        header: HTMLLIElement;
-        content: HTMLElement;
-        constructor();
-        collapse(element: HTMLElement): void;
-    }
-    export class CollapsableNodeListElement extends CollapsableListElement {
-        node: ƒ.Node;
-        constructor(_node: ƒ.Node, _name: string, _unfolded?: boolean);
-        selectNode: (_event: MouseEvent) => void;
-        collapseEvent: (_event: MouseEvent) => void;
-    }
-    export class CollapsableAnimationListElement extends CollapsableListElement {
-        mutator: ƒ.Mutator;
-        name: string;
-        index: ƒ.Mutator;
-        constructor(_mutator: ƒ.Mutator, _name: string, _unfolded?: boolean);
-        collapseEvent: (_event: MouseEvent) => void;
-        buildContent(_mutator: ƒ.Mutator): void;
-        getMutator(): ƒ.Mutator;
-        setMutator(_mutator: ƒ.Mutator): void;
-        getElementIndex(): ƒ.Mutator;
-        private updateMutator;
-    }
-    export {};
-}
-declare namespace FudgeUserInterface {
-    /**
-     * <select><option>Hallo</option></select>
-     */
-    import ƒ = FudgeCore;
-    class MultiLevelMenuManager {
-        static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
-    }
-}
-declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
@@ -78,20 +37,17 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    const enum UIEVENT {
-        SELECTION = "nodeSelectionEvent",
-        COLLAPSE = "listCollapseEvent",
-        REMOVE = "nodeRemoveEvent",
-        HIDE = "nodeHideEvent",
-        UPDATE = "mutatorUpdateEvent",
+    const enum EVENT_USERINTERFACE {
+        SELECT = "select",
+        COLLAPSE = "collapse",
+        UPDATE = "update",
         DROPMENUCLICK = "dropMenuClick",
-        DROPMENUCOLLAPSE = "dropMenuCollapse",
-        ACTIVEVIEWPORT = "activeViewport"
+        DROPMENUCOLLAPSE = "dropMenuCollapse"
     }
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    class UIGenerator {
+    class Generator {
         static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void;
         static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
         static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
@@ -116,15 +72,52 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    abstract class UIMutable {
+    abstract class CollapsableListElement extends HTMLUListElement {
+        header: HTMLLIElement;
+        content: HTMLElement;
+        constructor();
+        collapse(element: HTMLElement): void;
+    }
+    export class CollapsableNodeListElement extends CollapsableListElement {
+        node: ƒ.Node;
+        constructor(_node: ƒ.Node, _name: string, _unfolded?: boolean);
+        selectNode: (_event: MouseEvent) => void;
+        collapseEvent: (_event: MouseEvent) => void;
+    }
+    export class CollapsableAnimationListElement extends CollapsableListElement {
+        mutator: ƒ.Mutator;
+        name: string;
+        index: ƒ.Mutator;
+        constructor(_mutator: ƒ.Mutator, _name: string, _unfolded?: boolean);
+        collapseEvent: (_event: MouseEvent) => void;
+        buildContent(_mutator: ƒ.Mutator): void;
+        getMutator(): ƒ.Mutator;
+        setMutator(_mutator: ƒ.Mutator): void;
+        getElementIndex(): ƒ.Mutator;
+        private updateMutator;
+    }
+    export {};
+}
+declare namespace FudgeUserInterface {
+    /**
+     * <select><option>Hallo</option></select>
+     */
+    import ƒ = FudgeCore;
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    abstract class Mutable {
         protected timeUpdate: number;
         protected root: HTMLElement;
         protected mutable: ƒ.Mutable;
         protected mutator: ƒ.Mutator;
         constructor(mutable: ƒ.Mutable);
         protected mutateOnInput: (_e: Event) => void;
-        protected refreshUI: (_e: Event) => void;
+        protected refresh: (_e: Event) => void;
         protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        protected updateUI(_mutable: ƒ.Mutable, _root: HTMLElement): void;
+        protected update(_mutable: ƒ.Mutable, _root: HTMLElement): void;
     }
 }

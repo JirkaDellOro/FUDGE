@@ -30,9 +30,9 @@ namespace Fudge {
                 this.branch = new ƒ.Node("Scene");
             }
             this.selectedNode = null;
-            this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setSelectedNode);
+            this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
             this.listController = new UINodeList(this.branch, this.content);
-            this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
+            this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
             this.fillContent();
         }
         deconstruct(): void {
@@ -45,7 +45,7 @@ namespace Fudge {
                 ƒui.MultiLevelMenuManager.buildFromSignature(NODEMENU[member], mutator);
             }
             let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
-            menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.createNode);
+            menu.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, this.createNode);
             this.content.append(this.listController.listRoot);
             this.content.append(menu);
         }
@@ -58,10 +58,10 @@ namespace Fudge {
             if (!_node)
                 return;
             this.branch = _node;
-            this.listController.listRoot.removeEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
+            this.listController.listRoot.removeEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
             this.listController.setNodeRoot(_node);
             this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
-            this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
+            this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
         }
         /**
          * Add new Node to Node Structure

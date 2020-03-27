@@ -1,136 +1,6 @@
 "use strict";
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    class UIListController {
-    }
-    FudgeUserInterface.UIListController = UIListController;
-    class CollapsableListElement extends HTMLUListElement {
-        constructor() {
-            super();
-            this.header = document.createElement("li");
-            this.content = document.createElement("ul");
-            this.appendChild(this.header);
-            this.appendChild(this.content);
-        }
-        collapse(element) {
-            element.content.classList.toggle("folded");
-        }
-    }
-    class CollapsableNodeListElement extends CollapsableListElement {
-        constructor(_node, _name, _unfolded = false) {
-            super();
-            this.selectNode = (_event) => {
-                let event = new CustomEvent("nodeSelectionEvent" /* SELECTION */, { bubbles: true, detail: this.node });
-                this.dispatchEvent(event);
-            };
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.node = _node;
-            let buttonState;
-            if (this.node.getChildren().length != 0)
-                buttonState = "FoldButton";
-            else
-                buttonState = "invisible";
-            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            lblName.addEventListener("click", this.selectNode);
-            this.header.appendChild(lblName);
-        }
-    }
-    FudgeUserInterface.CollapsableNodeListElement = CollapsableNodeListElement;
-    class CollapsableAnimationListElement extends CollapsableListElement {
-        constructor(_mutator, _name, _unfolded = false) {
-            super();
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("listCollapseEvent" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.updateMutator = (_event) => {
-                let target = _event.target;
-                this.mutator[target.id] = parseFloat(target.value);
-                _event.cancelBubble = true;
-                let event = new CustomEvent("mutatorUpdateEvent" /* UPDATE */, { bubbles: true, detail: this.mutator });
-                this.dispatchEvent(event);
-            };
-            this.mutator = _mutator;
-            this.name = _name;
-            this.index = {};
-            let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            this.header.appendChild(lblName);
-            this.buildContent(_mutator);
-            this.content.addEventListener("input", this.updateMutator);
-        }
-        buildContent(_mutator) {
-            for (let key in _mutator) {
-                if (typeof _mutator[key] == "object") {
-                    let newList = new CollapsableAnimationListElement(_mutator[key], key);
-                    this.content.append(newList);
-                    this.index[key] = newList.getElementIndex();
-                }
-                else {
-                    let listEntry = document.createElement("li");
-                    FudgeUserInterface.UIGenerator.createLabelElement(key, listEntry);
-                    let inputEntry = FudgeUserInterface.UIGenerator.createStepperElement(key, listEntry, { _value: _mutator[key] });
-                    this.content.append(listEntry);
-                    this.index[key] = inputEntry;
-                }
-            }
-        }
-        getMutator() {
-            return this.mutator;
-        }
-        setMutator(_mutator) {
-            this.collapse(this.content);
-            this.mutator = _mutator;
-            this.buildContent(_mutator);
-        }
-        getElementIndex() {
-            return this.index;
-        }
-    }
-    FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;
-    customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
-    customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    class MultiLevelMenuManager {
-        static buildFromSignature(_signature, _mutator) {
-            let mutator = _mutator || {};
-            let signatureLevels = _signature.split(".");
-            if (signatureLevels.length > 1) {
-                let subSignature = signatureLevels[1];
-                for (let i = 2; i < signatureLevels.length; i++) {
-                    subSignature = subSignature + "." + signatureLevels[i];
-                }
-                if (mutator[signatureLevels[0]] != null) {
-                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature, mutator[signatureLevels[0]]);
-                }
-                else {
-                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature);
-                }
-            }
-            else {
-                mutator[signatureLevels[0]] = signatureLevels[0];
-            }
-            return mutator;
-        }
-    }
-    FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
     class ToggleButton extends HTMLButtonElement {
         constructor(style) {
             super();
@@ -290,19 +160,18 @@ var FudgeUserInterface;
     customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-// / <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
-    class UIGenerator {
+    class Generator {
         static createFromMutable(_mutable, _element, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let parent = UIGenerator.createFoldableFieldset(name, _element);
-            UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
+            let parent = Generator.createFoldableFieldset(name, _element);
+            Generator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
         static createFromMutator(_mutator, _mutatorTypes, _parent, _mutable) {
             try {
@@ -311,31 +180,31 @@ var FudgeUserInterface;
                     let value = _mutator[key].toString();
                     if (type instanceof Object) {
                         //Type is Enum
-                        UIGenerator.createLabelElement(key, _parent);
-                        UIGenerator.createDropdown(key, type, value, _parent);
+                        Generator.createLabelElement(key, _parent);
+                        Generator.createDropdown(key, type, value, _parent);
                     }
                     else {
                         switch (type) {
                             case "Number":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
-                                // UIGenerator.createTextElement(key, _parent, { _value: value })
+                                Generator.createLabelElement(key, _parent, { _value: key });
+                                // Generator.createTextElement(key, _parent, { _value: value })
                                 let numValue = parseInt(value);
-                                UIGenerator.createStepperElement(key, _parent, { _value: numValue });
+                                Generator.createStepperElement(key, _parent, { _value: numValue });
                                 break;
                             case "Boolean":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createLabelElement(key, _parent, { _value: key });
                                 let enabled = value == "true" ? true : false;
-                                UIGenerator.createCheckboxElement(key, enabled, _parent);
+                                Generator.createCheckboxElement(key, enabled, _parent);
                                 break;
                             case "String":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
-                                UIGenerator.createTextElement(key, _parent, { _value: value });
+                                Generator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createTextElement(key, _parent, { _value: value });
                                 break;
                             // Some other complex subclass of Mutable
                             default:
                                 let subMutable;
                                 subMutable = _mutable[key];
-                                UIGenerator.createFromMutable(subMutable, _parent, key, _mutator[key]);
+                                Generator.createFromMutable(subMutable, _parent, key, _mutator[key]);
                                 break;
                         }
                     }
@@ -417,27 +286,158 @@ var FudgeUserInterface;
             return stepper;
         }
     }
-    FudgeUserInterface.UIGenerator = UIGenerator;
+    FudgeUserInterface.Generator = Generator;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    // export abstract class ListController {
+    //     abstract listRoot: HTMLElement;
+    //     protected abstract toggleCollapse(_event: MouseEvent): void;
+    // }
+    class CollapsableListElement extends HTMLUListElement {
+        constructor() {
+            super();
+            this.header = document.createElement("li");
+            this.content = document.createElement("ul");
+            this.appendChild(this.header);
+            this.appendChild(this.content);
+        }
+        collapse(element) {
+            element.content.classList.toggle("folded");
+        }
+    }
+    class CollapsableNodeListElement extends CollapsableListElement {
+        constructor(_node, _name, _unfolded = false) {
+            super();
+            this.selectNode = (_event) => {
+                let event = new CustomEvent("select" /* SELECT */, { bubbles: true, detail: this.node });
+                this.dispatchEvent(event);
+            };
+            this.collapseEvent = (_event) => {
+                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
+                this.dispatchEvent(event);
+            };
+            this.node = _node;
+            let buttonState;
+            if (this.node.getChildren().length != 0)
+                buttonState = "FoldButton";
+            else
+                buttonState = "invisible";
+            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
+            btnToggle.setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
+            this.header.appendChild(btnToggle);
+            let lblName = document.createElement("span");
+            lblName.textContent = _name;
+            lblName.addEventListener("click", this.selectNode);
+            this.header.appendChild(lblName);
+        }
+    }
+    FudgeUserInterface.CollapsableNodeListElement = CollapsableNodeListElement;
+    class CollapsableAnimationListElement extends CollapsableListElement {
+        constructor(_mutator, _name, _unfolded = false) {
+            super();
+            this.collapseEvent = (_event) => {
+                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
+                this.dispatchEvent(event);
+            };
+            this.updateMutator = (_event) => {
+                let target = _event.target;
+                this.mutator[target.id] = parseFloat(target.value);
+                _event.cancelBubble = true;
+                let event = new CustomEvent("update" /* UPDATE */, { bubbles: true, detail: this.mutator });
+                this.dispatchEvent(event);
+            };
+            this.mutator = _mutator;
+            this.name = _name;
+            this.index = {};
+            let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
+            btnToggle.setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
+            this.header.appendChild(btnToggle);
+            let lblName = document.createElement("span");
+            lblName.textContent = _name;
+            this.header.appendChild(lblName);
+            this.buildContent(_mutator);
+            this.content.addEventListener("input", this.updateMutator);
+        }
+        buildContent(_mutator) {
+            for (let key in _mutator) {
+                if (typeof _mutator[key] == "object") {
+                    let newList = new CollapsableAnimationListElement(_mutator[key], key);
+                    this.content.append(newList);
+                    this.index[key] = newList.getElementIndex();
+                }
+                else {
+                    let listEntry = document.createElement("li");
+                    FudgeUserInterface.Generator.createLabelElement(key, listEntry);
+                    let inputEntry = FudgeUserInterface.Generator.createStepperElement(key, listEntry, { _value: _mutator[key] });
+                    this.content.append(listEntry);
+                    this.index[key] = inputEntry;
+                }
+            }
+        }
+        getMutator() {
+            return this.mutator;
+        }
+        setMutator(_mutator) {
+            this.collapse(this.content);
+            this.mutator = _mutator;
+            this.buildContent(_mutator);
+        }
+        getElementIndex() {
+            return this.index;
+        }
+    }
+    FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;
+    customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
+    customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature, _mutator) {
+            let mutator = _mutator || {};
+            let signatureLevels = _signature.split(".");
+            if (signatureLevels.length > 1) {
+                let subSignature = signatureLevels[1];
+                for (let i = 2; i < signatureLevels.length; i++) {
+                    subSignature = subSignature + "." + signatureLevels[i];
+                }
+                if (mutator[signatureLevels[0]] != null) {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature, mutator[signatureLevels[0]]);
+                }
+                else {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature);
+                }
+            }
+            else {
+                mutator[signatureLevels[0]] = signatureLevels[0];
+            }
+            return mutator;
+        }
+    }
+    FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
 // / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
-    class UIMutable {
+    class Mutable {
         constructor(mutable) {
             this.timeUpdate = 190;
             this.mutateOnInput = (_e) => {
                 this.mutator = this.updateMutator(this.mutable, this.root);
                 this.mutable.mutate(this.mutator);
             };
-            this.refreshUI = (_e) => {
+            this.refresh = (_e) => {
                 this.mutable.updateMutator(this.mutator);
-                this.updateUI(this.mutable, this.root);
+                this.update(this.mutable, this.root);
             };
             this.root = document.createElement("div");
             this.mutable = mutable;
             this.mutator = mutable.getMutator();
-            window.setInterval(this.refreshUI, this.timeUpdate);
+            window.setInterval(this.refresh, this.timeUpdate);
             this.root.addEventListener("input", this.mutateOnInput);
         }
         updateMutator(_mutable, _root, _mutator, _types) {
@@ -474,7 +474,7 @@ var FudgeUserInterface;
             }
             return mutator;
         }
-        updateUI(_mutable, _root) {
+        update(_mutable, _root) {
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
@@ -502,8 +502,8 @@ var FudgeUserInterface;
                                 break;
                             default:
                                 let fieldset = _root.querySelector("#" + key);
-                                let subMutable = _mutable[key];
-                                this.updateUI(subMutable, fieldset);
+                                let subMutable = Reflect.getOwnPropertyDescriptor(_mutable, key).value;
+                                this.update(subMutable, fieldset);
                                 break;
                         }
                     }
@@ -511,6 +511,6 @@ var FudgeUserInterface;
             }
         }
     }
-    FudgeUserInterface.UIMutable = UIMutable;
+    FudgeUserInterface.Mutable = Mutable;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 //# sourceMappingURL=FudgeUI.js.map

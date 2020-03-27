@@ -1,10 +1,12 @@
 namespace FudgeUserInterface {
     import ƒ = FudgeCore;
 
-    export abstract class UIListController {
-        abstract listRoot: HTMLElement;
-        protected abstract toggleCollapse(_event: MouseEvent): void;
-    }
+    // export abstract class ListController {
+    //     abstract listRoot: HTMLElement;
+    //     protected abstract toggleCollapse(_event: MouseEvent): void;
+    // }
+
+
     abstract class CollapsableListElement extends HTMLUListElement {
         header: HTMLLIElement;
         content: HTMLElement;
@@ -22,6 +24,8 @@ namespace FudgeUserInterface {
             (<CollapsableListElement>element).content.classList.toggle("folded");
         }
     }
+
+
     export class CollapsableNodeListElement extends CollapsableListElement {
         node: ƒ.Node;
         constructor(_node: ƒ.Node, _name: string, _unfolded: boolean = false) {
@@ -42,14 +46,16 @@ namespace FudgeUserInterface {
             this.header.appendChild(lblName);
         }
         public selectNode = (_event: MouseEvent): void => {
-            let event: Event = new CustomEvent(UIEVENT.SELECTION, { bubbles: true, detail: this.node });
+            let event: Event = new CustomEvent(EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: this.node });
             this.dispatchEvent(event);
         }
         public collapseEvent = (_event: MouseEvent): void => {
-            let event: Event = new CustomEvent(UIEVENT.COLLAPSE, { bubbles: true, detail: this });
+            let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
             this.dispatchEvent(event);
         }
     }
+
+
     export class CollapsableAnimationListElement extends CollapsableListElement {
         mutator: ƒ.Mutator;
         name: string;
@@ -71,7 +77,7 @@ namespace FudgeUserInterface {
             this.content.addEventListener("input", this.updateMutator);
         }
         public collapseEvent = (_event: MouseEvent): void => {
-            let event: Event = new CustomEvent(UIEVENT.COLLAPSE, { bubbles: true, detail: this });
+            let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
             this.dispatchEvent(event);
         }
         public buildContent(_mutator: ƒ.Mutator): void {
@@ -83,8 +89,8 @@ namespace FudgeUserInterface {
                 }
                 else {
                     let listEntry: HTMLLIElement = document.createElement("li");
-                    UIGenerator.createLabelElement(key, listEntry);
-                    let inputEntry: HTMLSpanElement = UIGenerator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
+                    Generator.createLabelElement(key, listEntry);
+                    let inputEntry: HTMLSpanElement = Generator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
                     this.content.append(listEntry);
                     this.index[key] = inputEntry;
                 }
@@ -106,10 +112,12 @@ namespace FudgeUserInterface {
             let target: HTMLInputElement = <HTMLInputElement>_event.target;
             this.mutator[target.id] = parseFloat(target.value);
             _event.cancelBubble = true;
-            let event: Event = new CustomEvent(UIEVENT.UPDATE, { bubbles: true, detail: this.mutator });
+            let event: Event = new CustomEvent(EVENT_USERINTERFACE.UPDATE, { bubbles: true, detail: this.mutator });
             this.dispatchEvent(event);
         }
     }
+
+    
     customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
     customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
 }

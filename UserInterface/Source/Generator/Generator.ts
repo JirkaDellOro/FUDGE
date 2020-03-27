@@ -3,14 +3,14 @@
 namespace FudgeUserInterface {
 
     import ƒ = FudgeCore;
-    export class UIGenerator {
+    export class Generator {
         public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void {
             let name: string = _name || _mutable.constructor.name;
             let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
             let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let parent: HTMLElement = UIGenerator.createFoldableFieldset(name, _element);
+            let parent: HTMLElement = Generator.createFoldableFieldset(name, _element);
 
-            UIGenerator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
+            Generator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
         }
 
         public static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
@@ -21,31 +21,31 @@ namespace FudgeUserInterface {
                     let value: string = _mutator[key].toString();
                     if (type instanceof Object) {
                         //Type is Enum
-                        UIGenerator.createLabelElement(key, _parent);
-                        UIGenerator.createDropdown(key, type, value, _parent);
+                        Generator.createLabelElement(key, _parent);
+                        Generator.createDropdown(key, type, value, _parent);
                     }
                     else {
                         switch (type) {
                             case "Number":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
-                                // UIGenerator.createTextElement(key, _parent, { _value: value })
+                                Generator.createLabelElement(key, _parent, { _value: key });
+                                // Generator.createTextElement(key, _parent, { _value: value })
                                 let numValue: number = parseInt(value);
-                                UIGenerator.createStepperElement(key, _parent, { _value: numValue });
+                                Generator.createStepperElement(key, _parent, { _value: numValue });
                                 break;
                             case "Boolean":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createLabelElement(key, _parent, { _value: key });
                                 let enabled: boolean = value == "true" ? true : false;
-                                UIGenerator.createCheckboxElement(key, enabled, _parent);
+                                Generator.createCheckboxElement(key, enabled, _parent);
                                 break;
                             case "String":
-                                UIGenerator.createLabelElement(key, _parent, { _value: key });
-                                UIGenerator.createTextElement(key, _parent, { _value: value });
+                                Generator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createTextElement(key, _parent, { _value: value });
                                 break;
                             // Some other complex subclass of Mutable
                             default:
                                 let subMutable: ƒ.Mutable;
                                 subMutable = (<ƒ.General>_mutable)[key];
-                                UIGenerator.createFromMutable(subMutable, _parent, key, <ƒ.Mutator>_mutator[key]);
+                                Generator.createFromMutable(subMutable, _parent, key, <ƒ.Mutator>_mutator[key]);
                                 break;
                         }
                     }

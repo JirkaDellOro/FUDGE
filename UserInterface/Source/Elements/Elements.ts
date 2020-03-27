@@ -89,7 +89,7 @@ namespace FudgeUserInterface {
             button.addEventListener("click", this.resolveClick);
         }
         private resolveClick = (_event: MouseEvent): void => {
-            let event: CustomEvent = new CustomEvent(UIEVENT.DROPMENUCLICK, { detail: this.signature, bubbles: true });
+            let event: CustomEvent = new CustomEvent(EVENT_USERINTERFACE.DROPMENUCLICK, { detail: this.signature, bubbles: true });
             this.dispatchEvent(event);
         }
 

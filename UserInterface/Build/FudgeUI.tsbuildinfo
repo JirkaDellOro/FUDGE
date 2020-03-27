@@ -2,12 +2,12 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
+      "../Source/Elements/Elements.ts",
+      "../Source/Event/Event.ts",
+      "../Source/Generator/Generator.ts",
       "../Source/ListControllers/ListElements.ts",
       "../Source/MultiLevelMenu/MultiLevelMenu.ts",
-      "../Source/UIElements/UIElements.ts",
-      "../Source/UIEvent/UIEvent.ts",
-      "../Source/UIGenerator/UIGenerator.ts",
-      "../Source/UIMutable/UIMutable.ts"
+      "../Source/Mutable/Mutable.ts"
     ],
     "js": {
       "sections": [
@@ -19,7 +19,7 @@
         },
         {
           "pos": 15,
-          "end": 23303,
+          "end": 23267,
           "kind": "text"
         }
       ],
@@ -53,11 +53,11 @@
         },
         {
           "pos": 58,
-          "end": 5149,
+          "end": 4839,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.7.3"
+  "version": "3.9.0-dev.20200327"
 }
