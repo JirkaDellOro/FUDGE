@@ -384,8 +384,8 @@ declare namespace FudgeCore {
         static get<T>(_T: new () => T): T;
         /**
          * Returns a reference to an object of the requested type in the depot, but does not remove it there.
-         * For short term usage of objects in a local scope.
          * If no object of the requested type was in the depot, one is created, stored and borrowed.
+         * For short term usage of objects in a local scope, when there will be no other call to Recycler.get or .borrow!
          * @param _T The class identifier of the desired object
          */
         static borrow<T>(_T: new () => T): T;
