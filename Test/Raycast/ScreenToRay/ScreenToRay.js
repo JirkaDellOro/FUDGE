@@ -221,6 +221,7 @@ var ScreenToRay;
         let clientRect = canvas.getBoundingClientRect();
         uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
+        viewport.createPickBuffers();
     }
 })(ScreenToRay || (ScreenToRay = {}));
 //# sourceMappingURL=ScreenToRay.js.map
