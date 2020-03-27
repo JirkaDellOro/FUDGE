@@ -57,8 +57,6 @@ namespace Fudge {
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-
-
     /**
      * Set the root node for display in this view
      * @param _node 
