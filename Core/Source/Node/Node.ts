@@ -32,6 +32,7 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       this.active = _on;
+      // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
     public get isActive(): boolean {
