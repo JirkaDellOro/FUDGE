@@ -34,12 +34,12 @@ namespace Fudge {
                     cntHeader.append(txtNodeName);
                     let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(nodeComponent, cntComponents);
+                        let uiComponents: UINodeData = new UINodeData(nodeComponent, cntComponents);
                     }
                     this.content.append(cntComponents);
                     let mutator: ƒ.Mutator = {};
-                    for (let member in ƒui.COMPONENTMENU) {
-                        ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.COMPONENTMENU[member], mutator);
+                    for (let member in COMPONENTMENU) {
+                        ƒui.MultiLevelMenuManager.buildFromSignature(COMPONENTMENU[member], mutator);
                     }
                     let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
                     menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.addComponent);

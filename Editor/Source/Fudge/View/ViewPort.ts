@@ -27,8 +27,8 @@ namespace Fudge {
 
     fillContent(): void {
       // initialize RenderManager and transmit content
-      ƒ.RenderManager.addBranch(this.branch);
-      ƒ.RenderManager.update();
+      // ƒ.RenderManager.addBranch(this.branch);
+      // ƒ.RenderManager.update();
 
       // initialize viewport
       // TODO: create camera/canvas here without "Scenes"     
@@ -57,8 +57,6 @@ namespace Fudge {
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-
-
     /**
      * Set the root node for display in this view
      * @param _node 
@@ -75,8 +73,8 @@ namespace Fudge {
      */
     private animate = (_e: Event) => {
       this.viewport.setBranch(this.branch);
-      ƒ.RenderManager.updateBranch(this.branch);
-      ƒ.RenderManager.update();
+      // ƒ.RenderManager.updateBranch(this.branch);
+      // ƒ.RenderManager.update();
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }

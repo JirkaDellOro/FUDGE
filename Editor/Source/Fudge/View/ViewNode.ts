@@ -14,7 +14,7 @@ namespace Fudge {
     export class ViewNode extends View {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
-        listController: ƒui.UINodeList;
+        listController: UINodeList;
 
         constructor(_parent: NodePanel) {
             super(_parent);
@@ -31,7 +31,7 @@ namespace Fudge {
             }
             this.selectedNode = null;
             this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setSelectedNode);
-            this.listController = new ƒui.UINodeList(this.branch, this.content);
+            this.listController = new UINodeList(this.branch, this.content);
             this.listController.listRoot.addEventListener(ƒui.UIEVENT.SELECTION, this.passEventToPanel);
             this.fillContent();
         }
@@ -41,8 +41,8 @@ namespace Fudge {
 
         fillContent(): void {
             let mutator: ƒ.Mutator = {};
-            for (let member in ƒui.NODEMENU) {
-                ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.NODEMENU[member], mutator);
+            for (let member in NODEMENU) {
+                ƒui.MultiLevelMenuManager.buildFromSignature(NODEMENU[member], mutator);
             }
             let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
             menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.createNode);
@@ -73,18 +73,18 @@ namespace Fudge {
             let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
             let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
             switch (_event.detail) {
-                case Menu.NODE + "." + ƒui.NODEMENU.BOX:
+                case Menu.NODE + "." + NODEMENU.BOX:
                     let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
                     node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
                     break;
-                case Menu.NODE + "." + ƒui.NODEMENU.EMPTY:
+                case Menu.NODE + "." + NODEMENU.EMPTY:
                     node.name = "Empty Node";
                     break;
-                case Menu.NODE + "." + ƒui.NODEMENU.PLANE:
+                case Menu.NODE + "." + NODEMENU.PLANE:
                     let meshPlane: ƒ.MeshQuad = new ƒ.MeshQuad();
                     node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
                     break;
-                case Menu.NODE + "." + ƒui.NODEMENU.PYRAMID:
+                case Menu.NODE + "." + NODEMENU.PYRAMID:
                     let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
                     node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
                     break;

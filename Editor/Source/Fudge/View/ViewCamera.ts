@@ -20,7 +20,7 @@ namespace Fudge {
 
         fillContent(): void {
             let div: HTMLDivElement = document.createElement("div");
-            let inspector: ƒui.UINodeData = new ƒui.UINodeData(this.camera, div);
+            let inspector: UINodeData = new UINodeData(this.camera, div);
             this.content.replaceChild(div, this.content.firstChild);
         }        
         
