@@ -231,7 +231,7 @@ namespace FudgeCore {
     public scaleY(_by: number): void {
       let vector: Vector2 = Recycler.borrow(Vector2);
       vector.set(1, _by);
-      this.scale(vectory);
+      this.scale(vector);
     }
     //#endregion
 
