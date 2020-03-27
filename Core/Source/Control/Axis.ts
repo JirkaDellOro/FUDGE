@@ -73,7 +73,7 @@ namespace FudgeCore {
       let control: Control = (<Control>_event.target);
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
         control: control, 
-        input: (<CustomEvent>_event).detail.output;
+        input: (<CustomEvent>_event).detail.output,
         output: this.getOutput()
       }});
       this.dispatchEvent(event);

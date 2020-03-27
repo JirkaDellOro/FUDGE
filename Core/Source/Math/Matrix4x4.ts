@@ -536,23 +536,30 @@ namespace FudgeCore {
       this.set(matrix);
       Recycler.store(matrix);
     }
+
     /**
      * Add a scaling along the x-Axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      this.scale(Vector3.X(_by));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(_by, 1, 1);
+      this.scale(vector);
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      this.scale(Vector3.Y(_by));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(1, _by, 1);
+      this.scale(vector);
     }
     /**
      * Add a scaling along the z-Axis by the given amount to this matrix 
      */
     public scaleZ(_by: number): void {
-      this.scale(Vector3.Z(_by));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(1, 1, _by);
+      this.scale(vector);
     }
     //#endregion
 

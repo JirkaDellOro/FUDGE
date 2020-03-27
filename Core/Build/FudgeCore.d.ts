@@ -378,10 +378,17 @@ declare namespace FudgeCore {
     abstract class Recycler {
         private static depot;
         /**
-         * Returns an object of the requested type from the depot, or a new one, if the depot was empty
+         * Fetches an object of the requested type from the depot, or returns a new one, if the depot was empty
          * @param _T The class identifier of the desired object
          */
         static get<T>(_T: new () => T): T;
+        /**
+         * Returns a reference to an object of the requested type in the depot, but does not remove it there.
+         * For short term usage of objects in a local scope.
+         * If no object of the requested type was in the depot, one is created, stored and borrowed.
+         * @param _T The class identifier of the desired object
+         */
+        static borrow<T>(_T: new () => T): T;
         /**
          * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
