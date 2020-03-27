@@ -3,10 +3,14 @@
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
       "../Source/Elements/Elements.ts",
+      "../Source/Elements/FoldableFieldSet.ts",
+      "../Source/Elements/ListElements.ts",
+      "../Source/Elements/Menu.ts",
+      "../Source/Elements/MultiLevelMenu.ts",
+      "../Source/Elements/Stepper.ts",
+      "../Source/Elements/Toggle.ts",
       "../Source/Event/Event.ts",
       "../Source/Generator/Generator.ts",
-      "../Source/ListControllers/ListElements.ts",
-      "../Source/MultiLevelMenu/MultiLevelMenu.ts",
       "../Source/Mutable/Mutable.ts"
     ],
     "js": {
@@ -19,7 +23,7 @@
         },
         {
           "pos": 15,
-          "end": 23267,
+          "end": 31280,
           "kind": "text"
         }
       ],
@@ -53,7 +57,7 @@
         },
         {
           "pos": 58,
-          "end": 4839,
+          "end": 4867,
           "kind": "text"
         }
       ]

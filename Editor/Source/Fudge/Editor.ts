@@ -52,7 +52,7 @@ namespace Fudge {
     }
 
     public getSelection(): ƒ.Node {
-      return (<ƒui.CollapsableNodeListElement>this.selectedEntry).node;
+      return (<ƒui.CollapsableNodeList>this.selectedEntry).node;
     }
 
     public updateList = (_event: Event): void => {
@@ -66,12 +66,12 @@ namespace Fudge {
     public toggleCollapse = (_event: Event): void => {
       _event.preventDefault();
 
-      if (event.target instanceof ƒui.CollapsableNodeListElement) {
-        let target: ƒui.CollapsableNodeListElement = <ƒui.CollapsableNodeListElement>_event.target;
+      if (event.target instanceof ƒui.CollapsableNodeList) {
+        let target: ƒui.CollapsableNodeList = <ƒui.CollapsableNodeList>_event.target;
         if (target.content.children.length > 1)
           target.collapse(target);
         else {
-          let nodeToExpand: ƒ.Node = (<ƒui.CollapsableNodeListElement>target).node;
+          let nodeToExpand: ƒ.Node = (<ƒui.CollapsableNodeList>target).node;
           let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
           target.replaceWith(newList);
         }
@@ -79,10 +79,10 @@ namespace Fudge {
     }
 
     private BuildListFromNode(_node: ƒ.Node): HTMLUListElement {
-      let listRoot: ƒui.CollapsableNodeListElement = new ƒui.CollapsableNodeListElement(_node, _node.name, true);
+      let listRoot: ƒui.CollapsableNodeList = new ƒui.CollapsableNodeList(_node, _node.name, true);
       let nodeChildren: ƒ.Node[] = _node.getChildren();
       for (let child of nodeChildren) {
-        let listItem: HTMLUListElement = new ƒui.CollapsableNodeListElement(child, child.name);
+        let listItem: HTMLUListElement = new ƒui.CollapsableNodeList(child, child.name);
         listRoot.content.appendChild(listItem);
       }
       return listRoot;
@@ -117,7 +117,7 @@ namespace Fudge {
     public collectMutator = (): ƒ.Mutator => {
       let children: HTMLCollection = this.listRoot.children;
       for (let child of children) {
-        this.mutator[(<ƒui.CollapsableAnimationListElement>child).name] = (<ƒui.CollapsableAnimationListElement>child).mutator;
+        this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
       }
       console.log(this.mutator);
       return this.mutator;
@@ -162,7 +162,7 @@ namespace Fudge {
     private buildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
       let listRoot: HTMLUListElement = document.createElement("ul");
       for (let key in _mutator) {
-        let listElement: ƒui.CollapsableAnimationListElement = new ƒui.CollapsableAnimationListElement((<ƒ.Mutator>this.mutator[key]), key);
+        let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
         listRoot.append(listElement);
         this.index[key] = listElement.getElementIndex();
         console.log(this.index);
@@ -172,9 +172,9 @@ namespace Fudge {
 
     private toggleCollapse = (_event: Event): void => {
       _event.preventDefault();
-      console.log(_event.target instanceof ƒui.CollapsableAnimationListElement);
-      if (_event.target instanceof ƒui.CollapsableAnimationListElement) {
-        let target: ƒui.CollapsableAnimationListElement = <ƒui.CollapsableAnimationListElement>_event.target;
+      console.log(_event.target instanceof ƒui.CollapsableAnimationList);
+      if (_event.target instanceof ƒui.CollapsableAnimationList) {
+        let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
         target.collapse(target);
       }
     }

@@ -7,7 +7,7 @@ namespace FudgeUserInterface {
     // }
 
 
-    abstract class CollapsableListElement extends HTMLUListElement {
+    abstract class CollapsableList extends HTMLUListElement {
         header: HTMLLIElement;
         content: HTMLElement;
 
@@ -21,12 +21,12 @@ namespace FudgeUserInterface {
         }
 
         public collapse(element: HTMLElement): void {
-            (<CollapsableListElement>element).content.classList.toggle("folded");
+            (<CollapsableList>element).content.classList.toggle("folded");
         }
     }
 
 
-    export class CollapsableNodeListElement extends CollapsableListElement {
+    export class CollapsableNodeList extends CollapsableList {
         node: ƒ.Node;
         constructor(_node: ƒ.Node, _name: string, _unfolded: boolean = false) {
             super();
@@ -56,7 +56,7 @@ namespace FudgeUserInterface {
     }
 
 
-    export class CollapsableAnimationListElement extends CollapsableListElement {
+    export class CollapsableAnimationList extends CollapsableList {
         mutator: ƒ.Mutator;
         name: string;
         index: ƒ.Mutator;
@@ -83,7 +83,7 @@ namespace FudgeUserInterface {
         public buildContent(_mutator: ƒ.Mutator): void {
             for (let key in _mutator) {
                 if (typeof _mutator[key] == "object") {
-                    let newList: CollapsableAnimationListElement = new CollapsableAnimationListElement(<ƒ.Mutator>_mutator[key], key);
+                    let newList: CollapsableAnimationList = new CollapsableAnimationList(<ƒ.Mutator>_mutator[key], key);
                     this.content.append(newList);
                     this.index[key] = newList.getElementIndex();
                 }
@@ -97,9 +97,11 @@ namespace FudgeUserInterface {
 
             }
         }
+
         public getMutator(): ƒ.Mutator {
             return this.mutator;
         }
+        
         public setMutator(_mutator: ƒ.Mutator): void {
             this.collapse(this.content);
             this.mutator = _mutator;
@@ -118,6 +120,6 @@ namespace FudgeUserInterface {
     }
 
     
-    customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
-    customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
+    customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
+    customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
 }

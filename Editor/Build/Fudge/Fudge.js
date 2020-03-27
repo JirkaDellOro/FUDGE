@@ -34,7 +34,7 @@ var Fudge;
             };
             this.toggleCollapse = (_event) => {
                 _event.preventDefault();
-                if (event.target instanceof ƒui.CollapsableNodeListElement) {
+                if (event.target instanceof ƒui.CollapsableNodeList) {
                     let target = _event.target;
                     if (target.content.children.length > 1)
                         target.collapse(target);
@@ -70,10 +70,10 @@ var Fudge;
             this.listRoot.classList.add("NodeList");
         }
         BuildListFromNode(_node) {
-            let listRoot = new ƒui.CollapsableNodeListElement(_node, _node.name, true);
+            let listRoot = new ƒui.CollapsableNodeList(_node, _node.name, true);
             let nodeChildren = _node.getChildren();
             for (let child of nodeChildren) {
-                let listItem = new ƒui.CollapsableNodeListElement(child, child.name);
+                let listItem = new ƒui.CollapsableNodeList(child, child.name);
                 listRoot.content.appendChild(listItem);
             }
             return listRoot;
@@ -92,8 +92,8 @@ var Fudge;
             };
             this.toggleCollapse = (_event) => {
                 _event.preventDefault();
-                console.log(_event.target instanceof ƒui.CollapsableAnimationListElement);
-                if (_event.target instanceof ƒui.CollapsableAnimationListElement) {
+                console.log(_event.target instanceof ƒui.CollapsableAnimationList);
+                if (_event.target instanceof ƒui.CollapsableAnimationList) {
                     let target = _event.target;
                     target.collapse(target);
                 }
@@ -152,7 +152,7 @@ var Fudge;
         buildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
             for (let key in _mutator) {
-                let listElement = new ƒui.CollapsableAnimationListElement(this.mutator[key], key);
+                let listElement = new ƒui.CollapsableAnimationList(this.mutator[key], key);
                 listRoot.append(listElement);
                 this.index[key] = listElement.getElementIndex();
                 console.log(this.index);

@@ -1,48 +1,172 @@
 "use strict";
+// namespace FudgeUserInterface {
+//     /**
+//      * <select><option>Hallo</option></select>
+//      */
+//     import ƒ = FudgeCore;
+//     export class ToggleButton extends HTMLButtonElement {
+//         private toggleState: boolean;
+//         public constructor(style: string) {
+//             super();
+//             this.type = "button";
+//             this.toggleState = true;
+//             this.classList.add(style);
+//             this.classList.add("ToggleOn");
+//             this.addEventListener("click", this.switchToggleState);
+//         }
+//         public setToggleState(toggleState: boolean): void {
+//             this.toggleState = toggleState;
+//             if (this.toggleState == true) {
+//                 this.classList.add("ToggleOn");
+//                 this.classList.remove("ToggleOff");
+//             }
+//             else {
+//                 this.classList.remove("ToggleOn");
+//                 this.classList.add("ToggleOff");
+//             }
+//         }
+//         public getToggleState(): boolean {
+//             return this.toggleState;
+//         }
+//         public toggle(): void {
+//             this.setToggleState(!this.toggleState);
+//         }
+//         private switchToggleState = (_event: MouseEvent): void => {
+//             this.setToggleState(!this.toggleState);
+//         }
+//     }
+//     export class Stepper extends HTMLInputElement {
+//         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
+//             super();
+//             this.name = _label;
+//             this.type = "number";
+//             this.value = params.value.toString();
+//             this.id = _label;
+//             this.step = String(params.step) || "1";
+//         }
+//     }
+//     export class FoldableFieldSet extends HTMLFieldSetElement {
+//         public constructor(_legend: string) {
+//             super();
+//             let cntLegend: HTMLLegendElement = document.createElement("legend");
+//             cntLegend.classList.add("unfoldable");
+//             let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
+//             btnFoldButton.addEventListener("click", this.toggleFoldElement);
+//             // btnfoldButton.classList.add("unfoldable");
+//             let lblTitle: HTMLSpanElement = document.createElement("span");
+//             lblTitle.textContent = _legend;
+//             // lblTitle.classList.add("unfoldable");
+//             cntLegend.appendChild(btnFoldButton);
+//             cntLegend.appendChild(lblTitle);
+//             this.appendChild(cntLegend);
+//         }
+//         private toggleFoldElement = (_event: MouseEvent): void => {
+//             _event.preventDefault();
+//             if (_event.target != _event.currentTarget) return;
+//             //Get the fieldset the button belongs to
+//             let children: HTMLCollection = this.children;
+//             //fold or unfold all children that aren't unfoldable
+//             for (let child of children) {
+//                 if (!child.classList.contains("unfoldable")) {
+//                     child.classList.toggle("folded");
+//                 }
+//             }
+//         }
+//     }
+//     class MenuButton extends HTMLDivElement {
+//         name: string;
+//         private signature: string;
+//         public constructor(_name: string, textcontent: string, parentSignature: string) {
+//             super();
+//             this.name = _name;
+//             this.signature = parentSignature + "." + _name;
+//             let button: HTMLButtonElement = document.createElement("button");
+//             button.textContent = textcontent;
+//             this.append(button);
+//             button.addEventListener("click", this.resolveClick);
+//         }
+//         private resolveClick = (_event: MouseEvent): void => {
+//             let event: CustomEvent = new CustomEvent(EVENT_USERINTERFACE.DROPMENUCLICK, { detail: this.signature, bubbles: true });
+//             this.dispatchEvent(event);
+//         }
+//     }
+//     class MenuContent extends HTMLDivElement {
+//         public constructor(_submenu?: boolean) {
+//             super();
+//             if (_submenu) {
+//                 this.classList.add("submenu-content");
+//             }
+//             else {
+//                 this.classList.add("dropdown-content");
+//             }
+//         }
+//     }
+//     export class DropMenu extends HTMLDivElement {
+//         name: string;
+//         private content: MenuContent;
+//         private signature: string;
+//         public constructor(_name: string, _contentList: ƒ.Mutator, params: { _parentSignature?: string, _text?: string }) {
+//             super();
+//             let button: HTMLButtonElement = document.createElement("button");
+//             button.name = _name;
+//             if (params._text) {
+//                 button.textContent = params._text;
+//             }
+//             else {
+//                 button.textContent = _name;
+//             }
+//             button.addEventListener("click", this.toggleFoldContent);
+//             window.addEventListener("click", this.collapseMenu);
+//             let isSubmenu: boolean = (params._parentSignature != null);
+//             if (params._parentSignature) {
+//                 this.signature = params._parentSignature + "." + _name;
+//             }
+//             else {
+//                 this.signature = _name;
+//             }
+//             this.append(button);
+//             this.content = new MenuContent(isSubmenu);
+//             if (params._parentSignature) {
+//                 this.classList.add("submenu");
+//             }
+//             else {
+//                 this.classList.add("dropdown");
+//             }
+//             this.content.classList.toggle("folded");
+//             this.name = _name;
+//             for (let key in _contentList) {
+//                 if (typeof _contentList[key] == "object") {
+//                     let subMenu: DropMenu = new DropMenu(key, <ƒ.Mutator>_contentList[key], { _parentSignature: this.signature });
+//                     this.content.append(subMenu);
+//                 }
+//                 else if (typeof _contentList[key] == "string") {
+//                     let contentEntry: MenuButton = new MenuButton(key, <string>_contentList[key], this.signature);
+//                     this.content.append(contentEntry);
+//                 }
+//             }
+//             this.append(this.content);
+//         }
+//         private toggleFoldContent = (_event: MouseEvent): void => {
+//             this.content.classList.toggle("folded");
+//         }
+//         private collapseMenu = (_event: MouseEvent): void => {
+//             if (!(this.contains(<HTMLElement>_event.target))) {
+//                 if (!this.content.classList.contains("folded")) {
+//                     this.toggleFoldContent(_event);
+//                 }
+//             }
+//         }
+//     }
+//     customElements.define("ui-stepper", Stepper, { extends: "input" });
+//     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
+//     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+//     customElements.define("ui-dropdown", DropMenu, { extends: "div" });
+//     customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
+//     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
+// }
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    class ToggleButton extends HTMLButtonElement {
-        constructor(style) {
-            super();
-            this.switchToggleState = (_event) => {
-                this.setToggleState(!this.toggleState);
-            };
-            this.type = "button";
-            this.toggleState = true;
-            this.classList.add(style);
-            this.classList.add("ToggleOn");
-            this.addEventListener("click", this.switchToggleState);
-        }
-        setToggleState(toggleState) {
-            this.toggleState = toggleState;
-            if (this.toggleState == true) {
-                this.classList.add("ToggleOn");
-                this.classList.remove("ToggleOff");
-            }
-            else {
-                this.classList.remove("ToggleOn");
-                this.classList.add("ToggleOff");
-            }
-        }
-        getToggleState() {
-            return this.toggleState;
-        }
-        toggle() {
-            this.setToggleState(!this.toggleState);
-        }
-    }
-    FudgeUserInterface.ToggleButton = ToggleButton;
-    class Stepper extends HTMLInputElement {
-        constructor(_label, params = {}) {
-            super();
-            this.name = _label;
-            this.type = "number";
-            this.value = params.value.toString();
-            this.id = _label;
-            this.step = String(params.step) || "1";
-        }
-    }
-    FudgeUserInterface.Stepper = Stepper;
+    //import ƒ = FudgeCore;
     class FoldableFieldSet extends HTMLFieldSetElement {
         constructor(_legend) {
             super();
@@ -61,7 +185,7 @@ var FudgeUserInterface;
             };
             let cntLegend = document.createElement("legend");
             cntLegend.classList.add("unfoldable");
-            let btnFoldButton = new ToggleButton("FoldButton");
+            let btnFoldButton = new FudgeUserInterface.ToggleButton("FoldButton");
             btnFoldButton.addEventListener("click", this.toggleFoldElement);
             // btnfoldButton.classList.add("unfoldable");
             let lblTitle = document.createElement("span");
@@ -73,6 +197,115 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
+    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    // export abstract class ListController {
+    //     abstract listRoot: HTMLElement;
+    //     protected abstract toggleCollapse(_event: MouseEvent): void;
+    // }
+    class CollapsableList extends HTMLUListElement {
+        constructor() {
+            super();
+            this.header = document.createElement("li");
+            this.content = document.createElement("ul");
+            this.appendChild(this.header);
+            this.appendChild(this.content);
+        }
+        collapse(element) {
+            element.content.classList.toggle("folded");
+        }
+    }
+    class CollapsableNodeList extends CollapsableList {
+        constructor(_node, _name, _unfolded = false) {
+            super();
+            this.selectNode = (_event) => {
+                let event = new CustomEvent("select" /* SELECT */, { bubbles: true, detail: this.node });
+                this.dispatchEvent(event);
+            };
+            this.collapseEvent = (_event) => {
+                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
+                this.dispatchEvent(event);
+            };
+            this.node = _node;
+            let buttonState;
+            if (this.node.getChildren().length != 0)
+                buttonState = "FoldButton";
+            else
+                buttonState = "invisible";
+            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
+            btnToggle.setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
+            this.header.appendChild(btnToggle);
+            let lblName = document.createElement("span");
+            lblName.textContent = _name;
+            lblName.addEventListener("click", this.selectNode);
+            this.header.appendChild(lblName);
+        }
+    }
+    FudgeUserInterface.CollapsableNodeList = CollapsableNodeList;
+    class CollapsableAnimationList extends CollapsableList {
+        constructor(_mutator, _name, _unfolded = false) {
+            super();
+            this.collapseEvent = (_event) => {
+                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
+                this.dispatchEvent(event);
+            };
+            this.updateMutator = (_event) => {
+                let target = _event.target;
+                this.mutator[target.id] = parseFloat(target.value);
+                _event.cancelBubble = true;
+                let event = new CustomEvent("update" /* UPDATE */, { bubbles: true, detail: this.mutator });
+                this.dispatchEvent(event);
+            };
+            this.mutator = _mutator;
+            this.name = _name;
+            this.index = {};
+            let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
+            btnToggle.setToggleState(_unfolded);
+            btnToggle.addEventListener("click", this.collapseEvent);
+            this.header.appendChild(btnToggle);
+            let lblName = document.createElement("span");
+            lblName.textContent = _name;
+            this.header.appendChild(lblName);
+            this.buildContent(_mutator);
+            this.content.addEventListener("input", this.updateMutator);
+        }
+        buildContent(_mutator) {
+            for (let key in _mutator) {
+                if (typeof _mutator[key] == "object") {
+                    let newList = new CollapsableAnimationList(_mutator[key], key);
+                    this.content.append(newList);
+                    this.index[key] = newList.getElementIndex();
+                }
+                else {
+                    let listEntry = document.createElement("li");
+                    FudgeUserInterface.Generator.createLabelElement(key, listEntry);
+                    let inputEntry = FudgeUserInterface.Generator.createStepperElement(key, listEntry, { _value: _mutator[key] });
+                    this.content.append(listEntry);
+                    this.index[key] = inputEntry;
+                }
+            }
+        }
+        getMutator() {
+            return this.mutator;
+        }
+        setMutator(_mutator) {
+            this.collapse(this.content);
+            this.mutator = _mutator;
+            this.buildContent(_mutator);
+        }
+        getElementIndex() {
+            return this.index;
+        }
+    }
+    FudgeUserInterface.CollapsableAnimationList = CollapsableAnimationList;
+    customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
+    customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
     class MenuButton extends HTMLDivElement {
         constructor(_name, textcontent, parentSignature) {
             super();
@@ -153,12 +386,87 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.DropMenu = DropMenu;
-    customElements.define("ui-stepper", Stepper, { extends: "input" });
-    customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
-    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
     customElements.define("ui-dropdown", DropMenu, { extends: "div" });
     customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class MultiLevelMenuManager {
+        static buildFromSignature(_signature, _mutator) {
+            let mutator = _mutator || {};
+            let signatureLevels = _signature.split(".");
+            if (signatureLevels.length > 1) {
+                let subSignature = signatureLevels[1];
+                for (let i = 2; i < signatureLevels.length; i++) {
+                    subSignature = subSignature + "." + signatureLevels[i];
+                }
+                if (mutator[signatureLevels[0]] != null) {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature, mutator[signatureLevels[0]]);
+                }
+                else {
+                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature);
+                }
+            }
+            else {
+                mutator[signatureLevels[0]] = signatureLevels[0];
+            }
+            return mutator;
+        }
+    }
+    FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    // import ƒ = FudgeCore;
+    class Stepper extends HTMLInputElement {
+        constructor(_label, params = {}) {
+            super();
+            this.name = _label;
+            this.type = "number";
+            this.value = params.value.toString();
+            this.id = _label;
+            this.step = String(params.step) || "1";
+        }
+    }
+    FudgeUserInterface.Stepper = Stepper;
+    customElements.define("ui-stepper", Stepper, { extends: "input" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    // import ƒ = FudgeCore;
+    class ToggleButton extends HTMLButtonElement {
+        constructor(style) {
+            super();
+            this.switchToggleState = (_event) => {
+                this.setToggleState(!this.toggleState);
+            };
+            this.type = "button";
+            this.toggleState = true;
+            this.classList.add(style);
+            this.classList.add("ToggleOn");
+            this.addEventListener("click", this.switchToggleState);
+        }
+        setToggleState(toggleState) {
+            this.toggleState = toggleState;
+            if (this.toggleState == true) {
+                this.classList.add("ToggleOn");
+                this.classList.remove("ToggleOff");
+            }
+            else {
+                this.classList.remove("ToggleOn");
+                this.classList.add("ToggleOff");
+            }
+        }
+        getToggleState() {
+            return this.toggleState;
+        }
+        toggle() {
+            this.setToggleState(!this.toggleState);
+        }
+    }
+    FudgeUserInterface.ToggleButton = ToggleButton;
+    customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 /// <reference path="../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
@@ -288,137 +596,6 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.Generator = Generator;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    // export abstract class ListController {
-    //     abstract listRoot: HTMLElement;
-    //     protected abstract toggleCollapse(_event: MouseEvent): void;
-    // }
-    class CollapsableListElement extends HTMLUListElement {
-        constructor() {
-            super();
-            this.header = document.createElement("li");
-            this.content = document.createElement("ul");
-            this.appendChild(this.header);
-            this.appendChild(this.content);
-        }
-        collapse(element) {
-            element.content.classList.toggle("folded");
-        }
-    }
-    class CollapsableNodeListElement extends CollapsableListElement {
-        constructor(_node, _name, _unfolded = false) {
-            super();
-            this.selectNode = (_event) => {
-                let event = new CustomEvent("select" /* SELECT */, { bubbles: true, detail: this.node });
-                this.dispatchEvent(event);
-            };
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.node = _node;
-            let buttonState;
-            if (this.node.getChildren().length != 0)
-                buttonState = "FoldButton";
-            else
-                buttonState = "invisible";
-            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            lblName.addEventListener("click", this.selectNode);
-            this.header.appendChild(lblName);
-        }
-    }
-    FudgeUserInterface.CollapsableNodeListElement = CollapsableNodeListElement;
-    class CollapsableAnimationListElement extends CollapsableListElement {
-        constructor(_mutator, _name, _unfolded = false) {
-            super();
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.updateMutator = (_event) => {
-                let target = _event.target;
-                this.mutator[target.id] = parseFloat(target.value);
-                _event.cancelBubble = true;
-                let event = new CustomEvent("update" /* UPDATE */, { bubbles: true, detail: this.mutator });
-                this.dispatchEvent(event);
-            };
-            this.mutator = _mutator;
-            this.name = _name;
-            this.index = {};
-            let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            this.header.appendChild(lblName);
-            this.buildContent(_mutator);
-            this.content.addEventListener("input", this.updateMutator);
-        }
-        buildContent(_mutator) {
-            for (let key in _mutator) {
-                if (typeof _mutator[key] == "object") {
-                    let newList = new CollapsableAnimationListElement(_mutator[key], key);
-                    this.content.append(newList);
-                    this.index[key] = newList.getElementIndex();
-                }
-                else {
-                    let listEntry = document.createElement("li");
-                    FudgeUserInterface.Generator.createLabelElement(key, listEntry);
-                    let inputEntry = FudgeUserInterface.Generator.createStepperElement(key, listEntry, { _value: _mutator[key] });
-                    this.content.append(listEntry);
-                    this.index[key] = inputEntry;
-                }
-            }
-        }
-        getMutator() {
-            return this.mutator;
-        }
-        setMutator(_mutator) {
-            this.collapse(this.content);
-            this.mutator = _mutator;
-            this.buildContent(_mutator);
-        }
-        getElementIndex() {
-            return this.index;
-        }
-    }
-    FudgeUserInterface.CollapsableAnimationListElement = CollapsableAnimationListElement;
-    customElements.define("ui-node-list", CollapsableNodeListElement, { extends: "ul" });
-    customElements.define("ui-animation-list", CollapsableAnimationListElement, { extends: "ul" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    class MultiLevelMenuManager {
-        static buildFromSignature(_signature, _mutator) {
-            let mutator = _mutator || {};
-            let signatureLevels = _signature.split(".");
-            if (signatureLevels.length > 1) {
-                let subSignature = signatureLevels[1];
-                for (let i = 2; i < signatureLevels.length; i++) {
-                    subSignature = subSignature + "." + signatureLevels[i];
-                }
-                if (mutator[signatureLevels[0]] != null) {
-                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature, mutator[signatureLevels[0]]);
-                }
-                else {
-                    mutator[signatureLevels[0]] = this.buildFromSignature(subSignature);
-                }
-            }
-            else {
-                mutator[signatureLevels[0]] = signatureLevels[0];
-            }
-            return mutator;
-        }
-    }
-    FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
 // / <reference types="../../../Core/Build/FudgeCore"/>
 var FudgeUserInterface;
 // / <reference types="../../../Core/Build/FudgeCore"/>
@@ -502,7 +679,8 @@ var FudgeUserInterface;
                                 break;
                             default:
                                 let fieldset = _root.querySelector("#" + key);
-                                let subMutable = Reflect.getOwnPropertyDescriptor(_mutable, key).value;
+                                // tslint:disable no-any
+                                let subMutable = _mutable[key];
                                 this.update(subMutable, fieldset);
                                 break;
                         }
