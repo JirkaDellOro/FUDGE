@@ -5,6 +5,8 @@ namespace TreeControl {
   export interface TreeEntry {
     display: string;
     children?: TreeEntry[];
+    cssClasses?: string[];
+    data?: Object;
   }
 
   /**
@@ -41,6 +43,36 @@ namespace TreeControl {
           _item.appendChild(new Tree(children));
       }
       (<HTMLInputElement>_item.querySelector("input[type='checkbox']")).checked = _open;
+    }
+
+    public show(_entries: TreeEntry[], _path: number[], _focus: boolean = true): void {
+      let currentTree: Tree = this;
+
+      for (let iEntry of _path) {
+        if (!_entries)
+          return;
+        let entry: TreeEntry = _entries[iEntry];
+        let item: HTMLLIElement = currentTree.findOpen(entry);
+        item.focus();
+        let content: Tree = currentTree.getBranch(item);
+        if (!content) {
+          currentTree.open(item, true);
+          content = currentTree.getBranch(item);
+        }
+        currentTree = content;
+        _entries = entry.children;
+      }
+    }
+
+    public getBranch(_item: HTMLLIElement): Tree {
+      return <Tree>_item.querySelector("ul");
+    }
+
+    public findOpen(_entry: TreeEntry): HTMLLIElement {
+      for (let entry of this.backlink)
+        if (entry[1] == _entry)
+          return entry[0];
+      return null;
     }
 
     private create(_entries: TreeEntry[]): void {
@@ -168,7 +200,8 @@ namespace TreeControl {
 
   customElements.define("ul-tree", Tree, { extends: "ul" });
 
-  let list: Tree = new Tree(data);
-  document.body.appendChild(list);
-  console.log(document.querySelectorAll("[tabindex]"));
+  export let tree: Tree = new Tree(data);
+  document.body.appendChild(tree);
+
+  tree.show(data, [0, 1, 1, 0]);
 }

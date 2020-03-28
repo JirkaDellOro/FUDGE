@@ -112,6 +112,32 @@ var TreeControl;
             }
             _item.querySelector("input[type='checkbox']").checked = _open;
         }
+        show(_entries, _path, _focus = true) {
+            let currentTree = this;
+            for (let iEntry of _path) {
+                if (!_entries)
+                    return;
+                let entry = _entries[iEntry];
+                let item = currentTree.findOpen(entry);
+                item.focus();
+                let content = currentTree.getBranch(item);
+                if (!content) {
+                    currentTree.open(item, true);
+                    content = currentTree.getBranch(item);
+                }
+                currentTree = content;
+                _entries = entry.children;
+            }
+        }
+        getBranch(_item) {
+            return _item.querySelector("ul");
+        }
+        findOpen(_entry) {
+            for (let entry of this.backlink)
+                if (entry[1] == _entry)
+                    return entry[0];
+            return null;
+        }
         create(_entries) {
             for (let entry of _entries) {
                 let item = this.createItem(entry);
@@ -147,8 +173,8 @@ var TreeControl;
         }
     }
     customElements.define("ul-tree", Tree, { extends: "ul" });
-    let list = new Tree(TreeControl.data);
-    document.body.appendChild(list);
-    console.log(document.querySelectorAll("[tabindex]"));
+    TreeControl.tree = new Tree(TreeControl.data);
+    document.body.appendChild(TreeControl.tree);
+    TreeControl.tree.show(TreeControl.data, [0, 1, 1, 0]);
 })(TreeControl || (TreeControl = {}));
 //# sourceMappingURL=Main.js.map
