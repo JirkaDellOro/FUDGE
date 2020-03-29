@@ -2,13 +2,6 @@
 namespace TreeControl {
   import ƒ = FudgeCore;
 
-  export interface TreeEntry {
-    display: string;
-    children?: TreeEntry[];
-    cssClasses?: string[];
-    data?: Object;
-  }
-
   export enum TREE_CLASSES {
     SELECTED = "selected"
   }
@@ -29,41 +22,46 @@ namespace TreeControl {
     public hasChildren: boolean = false;
 
     private checkbox: HTMLInputElement;
-    private text: HTMLInputElement;
+    private label: HTMLInputElement;
 
     constructor(_display: string, _data: Object, _hasChildren: boolean, _classes?: TREE_CLASSES[]) {
       super();
-      this.update(_display, _data, _hasChildren);
+      this.display = _display;
+      this.data = _data;
+      this.hasChildren = _hasChildren;
       // TODO: handle cssClasses
       this.create();
 
       this.addEventListener("change", this.hndChange);
+      this.addEventListener("dblclick", this.hndDblClick);
       // this.addEventListener("focusin", this.hndFocus);
     }
 
-    public update(_display: string, _data: Object, _hasChildren: boolean, _classes?: TREE_CLASSES[]): void {
-      this.display = _display;
-      this.data = _data;
-      this.hasChildren = _hasChildren;
+    public setLabel(_text: string): void {
+      this.label.value = _text;
+    }
+
+    public getLabel(): string {
+      return this.label.value;
     }
 
     public open(_open: boolean): void {
       this.removeContent();
-      if (_open) {
-        // TODO: fire "open" - Event, handler must take care of creating new branch
-        this.dispatchEvent(new Event(EVENT_TREE.OPEN, {bubbles: true}));
-        // let entry: TreeEntry = this.backlink.get(_item);
-        // let children: TreeEntry[] = entry.children;
-        // if (children)
-        //   _item.appendChild(new TreeList(children));
-      }
+
+      if (_open)
+        this.dispatchEvent(new Event(EVENT_TREE.OPEN, { bubbles: true }));
+
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
-    public add(_items: TreeItem[]): void {
+    public addBranch(_items: TreeItem[]): void {
       // tslint:disable no-use-before-declare
       let list: TreeList = new TreeList(_items);
       this.appendChild(list);
+    }
+
+    public getBranch(): TreeList {
+      return <TreeList>this.querySelector("ul");
     }
 
     private removeContent(): void {
@@ -78,22 +76,19 @@ namespace TreeControl {
       this.checkbox.type = "checkbox";
       this.appendChild(this.checkbox);
       if (!this.hasChildren)
-      this.checkbox.style.visibility = "hidden";
+        this.checkbox.style.visibility = "hidden";
 
-      this.text = document.createElement("input");
-      this.text.type = "text";
-      // text.readOnly = true;
-      this.text.disabled = true;
-      this.text.value = this.display;
-      this.text.draggable = true;
-      this.appendChild(this.text);
+      this.label = document.createElement("input");
+      this.label.type = "text";
+      this.label.disabled = true;
+      this.label.value = this.display;
+      this.label.draggable = true;
+      this.appendChild(this.label);
 
       this.addEventListener("keydown", this.hndKey);
       this.addEventListener("focusNext", this.hndFocus);
       this.addEventListener("focusPrevious", this.hndFocus);
       this.tabIndex = 0;
-      // this.backlink.set(item, _entry);
-      // return item;
     }
 
     private hndFocus = (_event: Event): void => {
@@ -122,16 +117,11 @@ namespace TreeControl {
         default:
           break;
       }
-      // console.log(_event);
-      // console.log(document.activeElement);
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
-      // console.log(_event);
       _event.stopPropagation();
-      let target: HTMLInputElement = <HTMLInputElement>_event.target;
-      let item: HTMLLIElement = <HTMLLIElement>_event.currentTarget;
-      let content: TreeList = <TreeList>item.querySelector("ul");
+      let content: TreeList = <TreeList>this.querySelector("ul");
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
@@ -150,17 +140,26 @@ namespace TreeControl {
           if (content)
             (<HTMLElement>content.firstChild).focus();
           else
-            item.dispatchEvent(new Event("focusNext", { bubbles: true }));
+            this.dispatchEvent(new Event("focusNext", { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
-          item.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
+          this.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.F2:
-          let text: HTMLInputElement = item.querySelector("input[type=text]");
-          text.disabled = false;
-          text.focus();
+          this.startTypingLabel();
           break;
       }
+    }
+
+    private startTypingLabel(): void {
+      let text: HTMLInputElement = this.querySelector("input[type=text]");
+      text.disabled = false;
+      text.focus();
+    }
+
+    private hndDblClick = (_event: Event): void => {
+      _event.stopPropagation();
+      this.startTypingLabel();
     }
 
     private hndChange = (_event: Event): void => {
@@ -174,7 +173,6 @@ namespace TreeControl {
           this.open(target.checked);
           break;
         case "text":
-          console.log(target.value);
           target.disabled = true;
           item.focus();
           target.dispatchEvent(new Event("rename", { bubbles: true }));
@@ -187,8 +185,7 @@ namespace TreeControl {
   }
 
   /**
-   * Extension of ul-element that builds a tree structure with interactive controls from an array of type TreeEntry. 
-   * Creates an [[TreeItem]]-Element for each entry
+   * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
    *  
    * ```plaintext
    * treeList <ul>
@@ -201,40 +198,32 @@ namespace TreeControl {
    * ```
    */
   class TreeList extends HTMLUListElement {
-    // private backlink: Map<HTMLLIElement, TreeEntry> = new Map();
 
     constructor(_items: TreeItem[]) {
       super();
       this.add(_items);
     }
 
-    public show(_entries: TreeEntry[], _path: number[], _focus: boolean = true): void {
-      // let currentTree: TreeList = this;
+    public show(_path: Object[], _focus: boolean = true): void {
+      let currentTree: TreeList = this;
 
-      // for (let iEntry of _path) {
-      //   if (!_entries)
-      //     return;
-      //   let entry: TreeEntry = _entries[iEntry];
-      //   let item: HTMLLIElement = currentTree.findOpen(entry);
-      //   item.focus();
-      //   let content: TreeList = currentTree.getBranch(item);
-      //   if (!content) {
-      //     currentTree.open(true);
-      //     content = currentTree.getBranch(item);
-      //   }
-      //   currentTree = content;
-      //   _entries = entry.children;
-      // }
+      for (let data of _path) {
+        let item: TreeItem = currentTree.findItem(data);
+        item.focus();
+        let content: TreeList = item.getBranch();
+        if (!content) {
+          item.open(true);
+          content = item.getBranch();
+        }
+        currentTree = content;
+      }
     }
 
-    public getBranch(_item: HTMLLIElement): TreeList {
-      return <TreeList>_item.querySelector("ul");
-    }
+    public findItem(_data: Object): TreeItem {
+      for (let item of this.children)
+        if ((<TreeItem>item).data == _data)
+          return <TreeItem>item;
 
-    public findOpen(_entry: TreeEntry): HTMLLIElement {
-      // for (let entry of this.backlink)
-      //   if (entry[1] == _entry)
-      //     return entry[0];
       return null;
     }
 
@@ -249,30 +238,43 @@ namespace TreeControl {
   customElements.define("ul-tree-item", TreeItem, { extends: "li" });
 
   let treeItem: TreeItem = new TreeItem(data[0].display, data[0], data[0].children != undefined);
-  export let tree: TreeList = new TreeList([treeItem]);
+  let tree: TreeList = new TreeList([treeItem]);
   tree.addEventListener(EVENT_TREE.RENAME, hndRename);
   tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
   document.body.appendChild(tree);
 
-  // tree.show(data, [0, 1, 1, 0]);
+  show(0, 1, 1, 0);
+
+  export function show(..._index: number[]): void {
+    let path: TreeEntry[] = [];
+    let branch: TreeEntry[] = data;
+    for (let i of _index) {
+      path.push(branch[i]);
+      branch = branch[i].children;
+    }
+    tree.show(path, true);
+  }
 
   function hndRename(_event: Event): void {
-    let target: TreeItem = <TreeItem>_event.target;
-    console.log(target.value);
+    let item: TreeItem = <TreeItem>(<HTMLInputElement>_event.target).parentNode;
+    let data: TreeEntry = <TreeEntry>item.data;
+    data.display = item.getLabel();
+    item.setLabel(data.display);
   }
+
   function hndOpen(_event: Event): void {
     let target: TreeItem = <TreeItem>_event.target;
     let children: TreeEntry[] = target.data["children"];
-    
+
     if (!children)
-    return;
-    
+      return;
+
     let list: TreeItem[] = [];
     for (let child of children) {
       list.push(new TreeItem(child.display, child, child.children != undefined));
     }
 
-    target.add(list);
+    target.addBranch(list);
     console.log(_event);
   }
 }

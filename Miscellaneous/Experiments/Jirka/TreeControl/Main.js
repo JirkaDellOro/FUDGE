@@ -48,15 +48,10 @@ var TreeControl;
                     default:
                         break;
                 }
-                // console.log(_event);
-                // console.log(document.activeElement);
             };
             this.hndKey = (_event) => {
-                // console.log(_event);
                 _event.stopPropagation();
-                let target = _event.target;
-                let item = _event.currentTarget;
-                let content = item.querySelector("ul");
+                let content = this.querySelector("ul");
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         if (content)
@@ -74,17 +69,19 @@ var TreeControl;
                         if (content)
                             content.firstChild.focus();
                         else
-                            item.dispatchEvent(new Event("focusNext", { bubbles: true }));
+                            this.dispatchEvent(new Event("focusNext", { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        item.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
+                        this.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.F2:
-                        let text = item.querySelector("input[type=text]");
-                        text.disabled = false;
-                        text.focus();
+                        this.startTypingLabel();
                         break;
                 }
+            };
+            this.hndDblClick = (_event) => {
+                _event.stopPropagation();
+                this.startTypingLabel();
             };
             this.hndChange = (_event) => {
                 console.log(_event);
@@ -96,7 +93,6 @@ var TreeControl;
                         this.open(target.checked);
                         break;
                     case "text":
-                        console.log(target.value);
                         target.disabled = true;
                         item.focus();
                         target.dispatchEvent(new Event("rename", { bubbles: true }));
@@ -106,33 +102,34 @@ var TreeControl;
                         break;
                 }
             };
-            this.update(_display, _data, _hasChildren);
-            // TODO: handle cssClasses
-            this.create();
-            this.addEventListener("change", this.hndChange);
-            // this.addEventListener("focusin", this.hndFocus);
-        }
-        update(_display, _data, _hasChildren, _classes) {
             this.display = _display;
             this.data = _data;
             this.hasChildren = _hasChildren;
+            // TODO: handle cssClasses
+            this.create();
+            this.addEventListener("change", this.hndChange);
+            this.addEventListener("dblclick", this.hndDblClick);
+            // this.addEventListener("focusin", this.hndFocus);
+        }
+        setLabel(_text) {
+            this.label.value = _text;
+        }
+        getLabel() {
+            return this.label.value;
         }
         open(_open) {
             this.removeContent();
-            if (_open) {
-                // TODO: fire "open" - Event, handler must take care of creating new branch
+            if (_open)
                 this.dispatchEvent(new Event(EVENT_TREE.OPEN, { bubbles: true }));
-                // let entry: TreeEntry = this.backlink.get(_item);
-                // let children: TreeEntry[] = entry.children;
-                // if (children)
-                //   _item.appendChild(new TreeList(children));
-            }
             this.querySelector("input[type='checkbox']").checked = _open;
         }
-        add(_items) {
+        addBranch(_items) {
             // tslint:disable no-use-before-declare
             let list = new TreeList(_items);
             this.appendChild(list);
+        }
+        getBranch() {
+            return this.querySelector("ul");
         }
         removeContent() {
             let content = this.querySelector("ul");
@@ -146,24 +143,25 @@ var TreeControl;
             this.appendChild(this.checkbox);
             if (!this.hasChildren)
                 this.checkbox.style.visibility = "hidden";
-            this.text = document.createElement("input");
-            this.text.type = "text";
-            // text.readOnly = true;
-            this.text.disabled = true;
-            this.text.value = this.display;
-            this.text.draggable = true;
-            this.appendChild(this.text);
+            this.label = document.createElement("input");
+            this.label.type = "text";
+            this.label.disabled = true;
+            this.label.value = this.display;
+            this.label.draggable = true;
+            this.appendChild(this.label);
             this.addEventListener("keydown", this.hndKey);
             this.addEventListener("focusNext", this.hndFocus);
             this.addEventListener("focusPrevious", this.hndFocus);
             this.tabIndex = 0;
-            // this.backlink.set(item, _entry);
-            // return item;
+        }
+        startTypingLabel() {
+            let text = this.querySelector("input[type=text]");
+            text.disabled = false;
+            text.focus();
         }
     }
     /**
-     * Extension of ul-element that builds a tree structure with interactive controls from an array of type TreeEntry.
-     * Creates an [[TreeItem]]-Element for each entry
+     * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
      *
      * ```plaintext
      * treeList <ul>
@@ -176,35 +174,27 @@ var TreeControl;
      * ```
      */
     class TreeList extends HTMLUListElement {
-        // private backlink: Map<HTMLLIElement, TreeEntry> = new Map();
         constructor(_items) {
             super();
             this.add(_items);
         }
-        show(_entries, _path, _focus = true) {
-            // let currentTree: TreeList = this;
-            // for (let iEntry of _path) {
-            //   if (!_entries)
-            //     return;
-            //   let entry: TreeEntry = _entries[iEntry];
-            //   let item: HTMLLIElement = currentTree.findOpen(entry);
-            //   item.focus();
-            //   let content: TreeList = currentTree.getBranch(item);
-            //   if (!content) {
-            //     currentTree.open(true);
-            //     content = currentTree.getBranch(item);
-            //   }
-            //   currentTree = content;
-            //   _entries = entry.children;
-            // }
+        show(_path, _focus = true) {
+            let currentTree = this;
+            for (let data of _path) {
+                let item = currentTree.findItem(data);
+                item.focus();
+                let content = item.getBranch();
+                if (!content) {
+                    item.open(true);
+                    content = item.getBranch();
+                }
+                currentTree = content;
+            }
         }
-        getBranch(_item) {
-            return _item.querySelector("ul");
-        }
-        findOpen(_entry) {
-            // for (let entry of this.backlink)
-            //   if (entry[1] == _entry)
-            //     return entry[0];
+        findItem(_data) {
+            for (let item of this.children)
+                if (item.data == _data)
+                    return item;
             return null;
         }
         add(_items) {
@@ -216,14 +206,26 @@ var TreeControl;
     customElements.define("ul-tree-list", TreeList, { extends: "ul" });
     customElements.define("ul-tree-item", TreeItem, { extends: "li" });
     let treeItem = new TreeItem(TreeControl.data[0].display, TreeControl.data[0], TreeControl.data[0].children != undefined);
-    TreeControl.tree = new TreeList([treeItem]);
-    TreeControl.tree.addEventListener(EVENT_TREE.RENAME, hndRename);
-    TreeControl.tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
-    document.body.appendChild(TreeControl.tree);
-    // tree.show(data, [0, 1, 1, 0]);
+    let tree = new TreeList([treeItem]);
+    tree.addEventListener(EVENT_TREE.RENAME, hndRename);
+    tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
+    document.body.appendChild(tree);
+    show(0, 1, 1, 0);
+    function show(..._index) {
+        let path = [];
+        let branch = TreeControl.data;
+        for (let i of _index) {
+            path.push(branch[i]);
+            branch = branch[i].children;
+        }
+        tree.show(path, true);
+    }
+    TreeControl.show = show;
     function hndRename(_event) {
-        let target = _event.target;
-        console.log(target.value);
+        let item = _event.target.parentNode;
+        let data = item.data;
+        data.display = item.getLabel();
+        item.setLabel(data.display);
     }
     function hndOpen(_event) {
         let target = _event.target;
@@ -234,7 +236,7 @@ var TreeControl;
         for (let child of children) {
             list.push(new TreeItem(child.display, child, child.children != undefined));
         }
-        target.add(list);
+        target.addBranch(list);
         console.log(_event);
     }
 })(TreeControl || (TreeControl = {}));

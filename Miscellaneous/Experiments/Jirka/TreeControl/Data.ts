@@ -1,4 +1,10 @@
 namespace TreeControl {
+  export interface TreeEntry {
+    display: string;
+    children?: TreeEntry[];
+    cssClasses?: string[];
+    data?: Object;
+  }
 
   export let data: TreeEntry[] = [
     {
