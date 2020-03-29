@@ -9,131 +9,92 @@ namespace TreeControl {
     data?: Object;
   }
 
-  /**
-   * Extension of ul-Element that builds a tree structure with interactive controls from an array of type TreeEntry. 
-   * Creates an li-Element called item for each entry, with a checkbox and a textinput as content.
-   * Additional content of an item is again an instance of Tree, if the corresponding entry has children.
-   *  
-   * ```plaintext
-   * tree
-   * ├ item
-   * ├ item
-   * │ └ tree
-   * │   ├ item
-   * │   └ item
-   * └ item
-   * ```
-   */
-  class Tree extends HTMLUListElement {
-    private backlink: Map<HTMLLIElement, TreeEntry> = new Map();
+  export enum TREE_CLASSES {
+    SELECTED = "selected"
+  }
 
-    constructor(_entries: TreeEntry[]) {
+  export enum EVENT_TREE {
+    RENAME = "rename",
+    OPEN = "open"
+  }
+
+  /**
+   * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
+   * Additionally, may hold an instance of [[TreeList]] if the corresponding object appears to have children.
+   */
+  class TreeItem extends HTMLLIElement {
+    public display: string = "TreeItem";
+    public classes: TREE_CLASSES[] = [];
+    public data: Object = null;
+    public hasChildren: boolean = false;
+
+    private checkbox: HTMLInputElement;
+    private text: HTMLInputElement;
+
+    constructor(_display: string, _data: Object, _hasChildren: boolean, _classes?: TREE_CLASSES[]) {
       super();
-      this.create(_entries);
+      this.update(_display, _data, _hasChildren);
+      // TODO: handle cssClasses
+      this.create();
+
       this.addEventListener("change", this.hndChange);
       // this.addEventListener("focusin", this.hndFocus);
     }
 
-    public open(_item: HTMLLIElement, _open: boolean): void {
-      this.removeContent(_item);
+    public update(_display: string, _data: Object, _hasChildren: boolean, _classes?: TREE_CLASSES[]): void {
+      this.display = _display;
+      this.data = _data;
+      this.hasChildren = _hasChildren;
+    }
+
+    public open(_open: boolean): void {
+      this.removeContent();
       if (_open) {
-        let entry: TreeEntry = this.backlink.get(_item);
-        let children: TreeEntry[] = entry.children;
-        if (children)
-          _item.appendChild(new Tree(children));
+        // TODO: fire "open" - Event, handler must take care of creating new branch
+        this.dispatchEvent(new Event(EVENT_TREE.OPEN, {bubbles: true}));
+        // let entry: TreeEntry = this.backlink.get(_item);
+        // let children: TreeEntry[] = entry.children;
+        // if (children)
+        //   _item.appendChild(new TreeList(children));
       }
-      (<HTMLInputElement>_item.querySelector("input[type='checkbox']")).checked = _open;
+      (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
-    public show(_entries: TreeEntry[], _path: number[], _focus: boolean = true): void {
-      let currentTree: Tree = this;
-
-      for (let iEntry of _path) {
-        if (!_entries)
-          return;
-        let entry: TreeEntry = _entries[iEntry];
-        let item: HTMLLIElement = currentTree.findOpen(entry);
-        item.focus();
-        let content: Tree = currentTree.getBranch(item);
-        if (!content) {
-          currentTree.open(item, true);
-          content = currentTree.getBranch(item);
-        }
-        currentTree = content;
-        _entries = entry.children;
-      }
+    public add(_items: TreeItem[]): void {
+      // tslint:disable no-use-before-declare
+      let list: TreeList = new TreeList(_items);
+      this.appendChild(list);
     }
 
-    public getBranch(_item: HTMLLIElement): Tree {
-      return <Tree>_item.querySelector("ul");
-    }
-
-    public findOpen(_entry: TreeEntry): HTMLLIElement {
-      for (let entry of this.backlink)
-        if (entry[1] == _entry)
-          return entry[0];
-      return null;
-    }
-
-    private create(_entries: TreeEntry[]): void {
-      for (let entry of _entries) {
-        let item: HTMLLIElement = this.createItem(entry);
-        this.appendChild(item);
-      }
-    }
-
-    private createItem(_entry: TreeEntry): HTMLLIElement {
-      let item: HTMLLIElement = document.createElement("li");
-
-      let checkbox: HTMLInputElement = document.createElement("input");
-      checkbox.type = "checkbox";
-      item.appendChild(checkbox);
-      if (!_entry.children)
-        checkbox.style.visibility = "hidden";
-
-      let text: HTMLInputElement = document.createElement("input");
-      text.type = "text";
-      // text.readOnly = true;
-      text.disabled = true;
-      text.value = _entry.display;
-      text.draggable = true;
-      item.appendChild(text);
-
-      item.addEventListener("keydown", this.hndKey);
-      item.addEventListener("focusNext", this.hndFocus);
-      item.addEventListener("focusPrevious", this.hndFocus);
-      item.tabIndex = 0;
-      this.backlink.set(item, _entry);
-      return item;
-    }
-
-    private hndChange = (_event: Event): void => {
-      console.log(_event);
-      let target: HTMLInputElement = <HTMLInputElement>_event.target;
-      // TODO: check if listener is better attached to item than to tree
-      let item: HTMLLIElement = <HTMLLIElement>target.parentElement;
-      _event.stopPropagation();
-
-      switch (target.type) {
-        case "checkbox":
-          this.open(item, target.checked);
-          break;
-        case "text":
-          console.log(target.value);
-          break;
-        case "default":
-          console.log(target);
-          break;
-      }
-    }
-
-    private removeContent(_item: HTMLLIElement): void {
-      let content: HTMLUListElement = _item.querySelector("ul");
+    private removeContent(): void {
+      let content: HTMLUListElement = this.querySelector("ul");
       if (!content)
         return;
-      _item.removeChild(content);
+      this.removeChild(content);
     }
 
+    private create(): void {
+      this.checkbox = document.createElement("input");
+      this.checkbox.type = "checkbox";
+      this.appendChild(this.checkbox);
+      if (!this.hasChildren)
+      this.checkbox.style.visibility = "hidden";
+
+      this.text = document.createElement("input");
+      this.text.type = "text";
+      // text.readOnly = true;
+      this.text.disabled = true;
+      this.text.value = this.display;
+      this.text.draggable = true;
+      this.appendChild(this.text);
+
+      this.addEventListener("keydown", this.hndKey);
+      this.addEventListener("focusNext", this.hndFocus);
+      this.addEventListener("focusPrevious", this.hndFocus);
+      this.tabIndex = 0;
+      // this.backlink.set(item, _entry);
+      // return item;
+    }
 
     private hndFocus = (_event: Event): void => {
       let listening: HTMLElement = <HTMLElement>_event.currentTarget;
@@ -170,18 +131,18 @@ namespace TreeControl {
       _event.stopPropagation();
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       let item: HTMLLIElement = <HTMLLIElement>_event.currentTarget;
-      let content: Tree = <Tree>item.querySelector("ul");
+      let content: TreeList = <TreeList>item.querySelector("ul");
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
           if (content)
             (<HTMLElement>content.firstChild).focus();
           else
-            this.open(item, true);
+            this.open(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (content)
-            this.open(item, false);
+            this.open(false);
           else
             this.parentElement.focus();
           break;
@@ -194,14 +155,124 @@ namespace TreeControl {
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           item.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
           break;
+        case ƒ.KEYBOARD_CODE.F2:
+          let text: HTMLInputElement = item.querySelector("input[type=text]");
+          text.disabled = false;
+          text.focus();
+          break;
+      }
+    }
+
+    private hndChange = (_event: Event): void => {
+      console.log(_event);
+      let target: HTMLInputElement = <HTMLInputElement>_event.target;
+      let item: HTMLLIElement = <HTMLLIElement>target.parentElement;
+      _event.stopPropagation();
+
+      switch (target.type) {
+        case "checkbox":
+          this.open(target.checked);
+          break;
+        case "text":
+          console.log(target.value);
+          target.disabled = true;
+          item.focus();
+          target.dispatchEvent(new Event("rename", { bubbles: true }));
+          break;
+        case "default":
+          console.log(target);
+          break;
       }
     }
   }
 
-  customElements.define("ul-tree", Tree, { extends: "ul" });
+  /**
+   * Extension of ul-element that builds a tree structure with interactive controls from an array of type TreeEntry. 
+   * Creates an [[TreeItem]]-Element for each entry
+   *  
+   * ```plaintext
+   * treeList <ul>
+   * ├ treeItem <li>
+   * ├ treeItem <li>
+   * │ └ treeList <ul>
+   * │   ├ treeItem <li>
+   * │   └ treeItem <li>
+   * └ treeItem <li>
+   * ```
+   */
+  class TreeList extends HTMLUListElement {
+    // private backlink: Map<HTMLLIElement, TreeEntry> = new Map();
 
-  export let tree: Tree = new Tree(data);
+    constructor(_items: TreeItem[]) {
+      super();
+      this.add(_items);
+    }
+
+    public show(_entries: TreeEntry[], _path: number[], _focus: boolean = true): void {
+      // let currentTree: TreeList = this;
+
+      // for (let iEntry of _path) {
+      //   if (!_entries)
+      //     return;
+      //   let entry: TreeEntry = _entries[iEntry];
+      //   let item: HTMLLIElement = currentTree.findOpen(entry);
+      //   item.focus();
+      //   let content: TreeList = currentTree.getBranch(item);
+      //   if (!content) {
+      //     currentTree.open(true);
+      //     content = currentTree.getBranch(item);
+      //   }
+      //   currentTree = content;
+      //   _entries = entry.children;
+      // }
+    }
+
+    public getBranch(_item: HTMLLIElement): TreeList {
+      return <TreeList>_item.querySelector("ul");
+    }
+
+    public findOpen(_entry: TreeEntry): HTMLLIElement {
+      // for (let entry of this.backlink)
+      //   if (entry[1] == _entry)
+      //     return entry[0];
+      return null;
+    }
+
+    private add(_items: TreeItem[]): void {
+      for (let item of _items) {
+        this.appendChild(item);
+      }
+    }
+  }
+
+  customElements.define("ul-tree-list", TreeList, { extends: "ul" });
+  customElements.define("ul-tree-item", TreeItem, { extends: "li" });
+
+  let treeItem: TreeItem = new TreeItem(data[0].display, data[0], data[0].children != undefined);
+  export let tree: TreeList = new TreeList([treeItem]);
+  tree.addEventListener(EVENT_TREE.RENAME, hndRename);
+  tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
   document.body.appendChild(tree);
 
-  tree.show(data, [0, 1, 1, 0]);
+  // tree.show(data, [0, 1, 1, 0]);
+
+  function hndRename(_event: Event): void {
+    let target: TreeItem = <TreeItem>_event.target;
+    console.log(target.value);
+  }
+  function hndOpen(_event: Event): void {
+    let target: TreeItem = <TreeItem>_event.target;
+    let children: TreeEntry[] = target.data["children"];
+    
+    if (!children)
+    return;
+    
+    let list: TreeItem[] = [];
+    for (let child of children) {
+      list.push(new TreeItem(child.display, child, child.children != undefined));
+    }
+
+    target.add(list);
+    console.log(_event);
+  }
 }
