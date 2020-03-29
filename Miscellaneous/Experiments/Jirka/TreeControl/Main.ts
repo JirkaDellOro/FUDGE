@@ -8,7 +8,10 @@ namespace TreeControl {
 
   export enum EVENT_TREE {
     RENAME = "rename",
-    OPEN = "open"
+    OPEN = "open",
+    FOCUS_NEXT = "focusNext",
+    FOCUS_PREVIOUS = "focusPrevious",
+    DELETE = "delete"
   }
 
   /**
@@ -54,10 +57,9 @@ namespace TreeControl {
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
-    public addBranch(_items: TreeItem[]): void {
+    public addBranch(_branch: TreeList): void {
       // tslint:disable no-use-before-declare
-      let list: TreeList = new TreeList(_items);
-      this.appendChild(list);
+      this.appendChild(_branch);
     }
 
     public getBranch(): TreeList {
@@ -86,22 +88,22 @@ namespace TreeControl {
       this.appendChild(this.label);
 
       this.addEventListener("keydown", this.hndKey);
-      this.addEventListener("focusNext", this.hndFocus);
-      this.addEventListener("focusPrevious", this.hndFocus);
+      this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+      this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
       this.tabIndex = 0;
     }
 
     private hndFocus = (_event: Event): void => {
       let listening: HTMLElement = <HTMLElement>_event.currentTarget;
       switch (_event.type) {
-        case "focusNext":
+        case EVENT_TREE.FOCUS_NEXT:
           let next: HTMLElement = <HTMLElement>listening.nextElementSibling;
           if (!next)
             return;
           next.focus();
           _event.stopPropagation();
           break;
-        case "focusPrevious":
+        case EVENT_TREE.FOCUS_PREVIOUS:
           if (listening == _event.target)
             return;
           let items: NodeListOf<HTMLLIElement> = listening.querySelectorAll("li");
@@ -140,13 +142,16 @@ namespace TreeControl {
           if (content)
             (<HTMLElement>content.firstChild).focus();
           else
-            this.dispatchEvent(new Event("focusNext", { bubbles: true }));
+            this.dispatchEvent(new Event(EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
-          this.dispatchEvent(new Event("focusPrevious", { bubbles: true }));
+          this.dispatchEvent(new Event(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.F2:
           this.startTypingLabel();
+          break;
+        case ƒ.KEYBOARD_CODE.DELETE:
+          this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
           break;
       }
     }
@@ -175,7 +180,7 @@ namespace TreeControl {
         case "text":
           target.disabled = true;
           item.focus();
-          target.dispatchEvent(new Event("rename", { bubbles: true }));
+          target.dispatchEvent(new Event(EVENT_TREE.RENAME, { bubbles: true }));
           break;
         case "default":
           console.log(target);
@@ -199,11 +204,16 @@ namespace TreeControl {
    */
   class TreeList extends HTMLUListElement {
 
-    constructor(_items: TreeItem[]) {
+    constructor(_items: TreeItem[] = []) {
       super();
-      this.add(_items);
+      this.addItems(_items);
     }
 
+    /**
+     * Opens the tree along the given path to show the objects the path includes
+     * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
+     * @param _focus If true (default) the last object found in the tree gets the focus
+     */
     public show(_path: Object[], _focus: boolean = true): void {
       let currentTree: TreeList = this;
 
@@ -219,6 +229,33 @@ namespace TreeControl {
       }
     }
 
+    /**
+     * Restructures the list to sync with the given list. 
+     * [[TreeItem]]s referencing the same object remain in the list, new items get added in the order of appearance, obsolete ones are deleted.
+     * @param _tree A list to sync this with
+     */
+    public restructure(_tree: TreeList): void {
+      let items: TreeItem[] = [];
+      for (let item of _tree.getItems()) {
+        let found: TreeItem = this.findItem(item.data);
+        if (found) {
+          found.setLabel(item.display);
+          found.hasChildren = item.hasChildren;
+          if (!found.hasChildren)
+            found.open(false);
+          items.push(found);
+        }
+        else
+          items.push(item);
+      }
+
+      this.innerHTML = "";
+      this.addItems(items);
+    }
+
+    /**
+     * Returns the [[TreeItem]] of this list referencing the given object or null, if not found
+     */
     public findItem(_data: Object): TreeItem {
       for (let item of this.children)
         if ((<TreeItem>item).data == _data)
@@ -227,10 +264,20 @@ namespace TreeControl {
       return null;
     }
 
-    private add(_items: TreeItem[]): void {
+    /**
+     * Adds the given [[TreeItem]]s at the end of this list
+     */
+    public addItems(_items: TreeItem[]): void {
       for (let item of _items) {
         this.appendChild(item);
       }
+    }
+
+    /**
+     * Returns the content of this list as array of [[TreeItem]]s
+     */
+    public getItems(): TreeItem[] {
+      return <TreeItem[]><unknown>this.children;
     }
   }
 
@@ -241,6 +288,7 @@ namespace TreeControl {
   let tree: TreeList = new TreeList([treeItem]);
   tree.addEventListener(EVENT_TREE.RENAME, hndRename);
   tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
+  tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
   document.body.appendChild(tree);
 
   show(0, 1, 1, 0);
@@ -263,18 +311,25 @@ namespace TreeControl {
   }
 
   function hndOpen(_event: Event): void {
-    let target: TreeItem = <TreeItem>_event.target;
-    let children: TreeEntry[] = target.data["children"];
+    let item: TreeItem = <TreeItem>_event.target;
+    let children: TreeEntry[] = item.data["children"];
 
     if (!children)
       return;
 
-    let list: TreeItem[] = [];
+    let branch: TreeList = new TreeList([]);
     for (let child of children) {
-      list.push(new TreeItem(child.display, child, child.children != undefined));
+      branch.addItems([new TreeItem(child.display, child, child.children != undefined)]);
     }
 
-    target.addBranch(list);
+    item.addBranch(branch);
     console.log(_event);
+  }
+
+  function hndDelete(_event: Event): void {
+    let item: TreeItem = <TreeItem>_event.target;
+    let tree: TreeList = <TreeList>item.parentElement;
+    tree.removeChild(item);
+    tree.restructure(tree);
   }
 }
