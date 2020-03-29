@@ -16,7 +16,7 @@ namespace TreeControl {
 
   /**
    * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
-   * Additionally, may hold an instance of [[TreeList]] if the corresponding object appears to have children.
+   * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
    */
   class TreeItem extends HTMLLIElement {
     public display: string = "TreeItem";
@@ -40,16 +40,28 @@ namespace TreeControl {
       // this.addEventListener("focusin", this.hndFocus);
     }
 
+    /**
+     * Set the label text to show
+     */
     public setLabel(_text: string): void {
       this.label.value = _text;
     }
 
+    /**
+     * Get the label text shown
+     */
     public getLabel(): string {
       return this.label.value;
     }
 
+    /**
+     * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+     * The user of the tree needs to add an event listener to the tree 
+     * in order to create that [[TreeList]] and add it as branch to this item
+     * @param _open If false, the item will be closed
+     */
     public open(_open: boolean): void {
-      this.removeContent();
+      this.removeBranch();
 
       if (_open)
         this.dispatchEvent(new Event(EVENT_TREE.OPEN, { bubbles: true }));
@@ -57,16 +69,26 @@ namespace TreeControl {
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
-    public addBranch(_branch: TreeList): void {
+    /**
+     * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
+     */
+    public setBranch(_branch: TreeList): void {
       // tslint:disable no-use-before-declare
+      this.removeBranch();
       this.appendChild(_branch);
     }
 
+    /**
+     * Returns the branch of children of this item.
+     */
     public getBranch(): TreeList {
       return <TreeList>this.querySelector("ul");
     }
 
-    private removeContent(): void {
+    /**
+     * Removes the branch of children from this item
+     */
+    private removeBranch(): void {
       let content: HTMLUListElement = this.querySelector("ul");
       if (!content)
         return;
@@ -322,7 +344,7 @@ namespace TreeControl {
       branch.addItems([new TreeItem(child.display, child, child.children != undefined)]);
     }
 
-    item.addBranch(branch);
+    item.setBranch(branch);
     console.log(_event);
   }
 

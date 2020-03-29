@@ -16,7 +16,7 @@ var TreeControl;
     })(EVENT_TREE = TreeControl.EVENT_TREE || (TreeControl.EVENT_TREE = {}));
     /**
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
-     * Additionally, may hold an instance of [[TreeList]] if the corresponding object appears to have children.
+     * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
         constructor(_display, _data, _hasChildren, _classes) {
@@ -117,26 +117,48 @@ var TreeControl;
             this.addEventListener("dblclick", this.hndDblClick);
             // this.addEventListener("focusin", this.hndFocus);
         }
+        /**
+         * Set the label text to show
+         */
         setLabel(_text) {
             this.label.value = _text;
         }
+        /**
+         * Get the label text shown
+         */
         getLabel() {
             return this.label.value;
         }
+        /**
+         * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+         * The user of the tree needs to add an event listener to the tree
+         * in order to create that [[TreeList]] and add it as branch to this item
+         * @param _open If false, the item will be closed
+         */
         open(_open) {
-            this.removeContent();
+            this.removeBranch();
             if (_open)
                 this.dispatchEvent(new Event(EVENT_TREE.OPEN, { bubbles: true }));
             this.querySelector("input[type='checkbox']").checked = _open;
         }
-        addBranch(_branch) {
+        /**
+         * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
+         */
+        setBranch(_branch) {
             // tslint:disable no-use-before-declare
+            this.removeBranch();
             this.appendChild(_branch);
         }
+        /**
+         * Returns the branch of children of this item.
+         */
         getBranch() {
             return this.querySelector("ul");
         }
-        removeContent() {
+        /**
+         * Removes the branch of children from this item
+         */
+        removeBranch() {
             let content = this.querySelector("ul");
             if (!content)
                 return;
@@ -281,7 +303,7 @@ var TreeControl;
         for (let child of children) {
             branch.addItems([new TreeItem(child.display, child, child.children != undefined)]);
         }
-        item.addBranch(branch);
+        item.setBranch(branch);
         console.log(_event);
     }
     function hndDelete(_event) {
