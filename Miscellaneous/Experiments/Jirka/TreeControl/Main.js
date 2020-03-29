@@ -12,7 +12,11 @@ var TreeControl;
         EVENT_TREE["OPEN"] = "open";
         EVENT_TREE["FOCUS_NEXT"] = "focusNext";
         EVENT_TREE["FOCUS_PREVIOUS"] = "focusPrevious";
+        EVENT_TREE["FOCUS_IN"] = "focusin";
+        EVENT_TREE["FOCUS_OUT"] = "focusout";
         EVENT_TREE["DELETE"] = "delete";
+        EVENT_TREE["CHANGE"] = "change";
+        EVENT_TREE["DOUBLE_CLICK"] = "dblclick";
     })(EVENT_TREE = TreeControl.EVENT_TREE || (TreeControl.EVENT_TREE = {}));
     /**
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
@@ -47,6 +51,10 @@ var TreeControl;
                         }
                         prev.focus();
                         _event.stopPropagation();
+                        break;
+                    case EVENT_TREE.FOCUS_OUT:
+                        if (_event.target == this.label)
+                            this.label.disabled = true;
                         break;
                     default:
                         break;
@@ -87,7 +95,8 @@ var TreeControl;
             };
             this.hndDblClick = (_event) => {
                 _event.stopPropagation();
-                this.startTypingLabel();
+                if (_event.target != this.checkbox)
+                    this.startTypingLabel();
             };
             this.hndChange = (_event) => {
                 console.log(_event);
@@ -113,9 +122,9 @@ var TreeControl;
             this.hasChildren = _hasChildren;
             // TODO: handle cssClasses
             this.create();
-            this.addEventListener("change", this.hndChange);
-            this.addEventListener("dblclick", this.hndDblClick);
-            // this.addEventListener("focusin", this.hndFocus);
+            this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
+            this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
+            this.addEventListener(EVENT_TREE.FOCUS_OUT, this.hndFocus);
         }
         /**
          * Set the label text to show
@@ -182,9 +191,8 @@ var TreeControl;
             this.tabIndex = 0;
         }
         startTypingLabel() {
-            let text = this.querySelector("input[type=text]");
-            text.disabled = false;
-            text.focus();
+            this.label.disabled = false;
+            this.label.focus();
         }
     }
     /**
@@ -309,6 +317,9 @@ var TreeControl;
     function hndDelete(_event) {
         let item = _event.target;
         let tree = item.parentElement;
+        let parentItem = tree.parentElement;
+        let siblings = parentItem.data["children"];
+        console.log(siblings.splice(siblings.indexOf(item.data), 1));
         tree.removeChild(item);
         tree.restructure(tree);
     }

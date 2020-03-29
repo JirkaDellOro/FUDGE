@@ -11,7 +11,11 @@ namespace TreeControl {
     OPEN = "open",
     FOCUS_NEXT = "focusNext",
     FOCUS_PREVIOUS = "focusPrevious",
-    DELETE = "delete"
+    FOCUS_IN = "focusin",
+    FOCUS_OUT = "focusout",
+    DELETE = "delete",
+    CHANGE = "change",
+    DOUBLE_CLICK = "dblclick"
   }
 
   /**
@@ -35,9 +39,9 @@ namespace TreeControl {
       // TODO: handle cssClasses
       this.create();
 
-      this.addEventListener("change", this.hndChange);
-      this.addEventListener("dblclick", this.hndDblClick);
-      // this.addEventListener("focusin", this.hndFocus);
+      this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
+      this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
+      this.addEventListener(EVENT_TREE.FOCUS_OUT, this.hndFocus);
     }
 
     /**
@@ -138,6 +142,10 @@ namespace TreeControl {
           prev.focus();
           _event.stopPropagation();
           break;
+        case EVENT_TREE.FOCUS_OUT:
+          if (_event.target == this.label)
+            this.label.disabled = true;
+          break;
         default:
           break;
       }
@@ -179,14 +187,14 @@ namespace TreeControl {
     }
 
     private startTypingLabel(): void {
-      let text: HTMLInputElement = this.querySelector("input[type=text]");
-      text.disabled = false;
-      text.focus();
+      this.label.disabled = false;
+      this.label.focus();
     }
 
     private hndDblClick = (_event: Event): void => {
       _event.stopPropagation();
-      this.startTypingLabel();
+      if (_event.target != this.checkbox)
+        this.startTypingLabel();
     }
 
     private hndChange = (_event: Event): void => {
@@ -351,6 +359,10 @@ namespace TreeControl {
   function hndDelete(_event: Event): void {
     let item: TreeItem = <TreeItem>_event.target;
     let tree: TreeList = <TreeList>item.parentElement;
+    let parentItem: TreeItem = <TreeItem>tree.parentElement;
+    let siblings: Object[] = parentItem.data["children"];
+
+    console.log(siblings.splice(siblings.indexOf(item.data), 1));
     tree.removeChild(item);
     tree.restructure(tree);
   }
