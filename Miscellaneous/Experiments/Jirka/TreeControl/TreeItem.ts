@@ -3,7 +3,8 @@ namespace TreeControl {
   import ƒ = FudgeCore;
 
   export enum TREE_CLASSES {
-    SELECTED = "selected"
+    SELECTED = "selected",
+    INACTIVE = "inactive"
   }
 
   export enum EVENT_TREE {
@@ -15,12 +16,12 @@ namespace TreeControl {
     FOCUS_OUT = "focusout",
     DELETE = "delete",
     CHANGE = "change",
-    RESTRUCTURE = "restructure",
     DOUBLE_CLICK = "dblclick",
-    KEYDOWN = "keydown",
+    KEY_DOWN = "keydown",
     DRAG_START = "dragstart",
     DRAG_OVER = "dragover",
-    DROP = "drop"
+    DROP = "drop",
+    POINTER_UP = "pointerup"
   }
 
   /**
@@ -46,7 +47,7 @@ namespace TreeControl {
       this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
       this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
       this.addEventListener(EVENT_TREE.FOCUS_OUT, this.hndFocus);
-      this.addEventListener(EVENT_TREE.KEYDOWN, this.hndKey);
+      this.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
       this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
       this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
 
@@ -54,7 +55,7 @@ namespace TreeControl {
       this.addEventListener(EVENT_TREE.DRAG_START, this.hndDragStart);
       this.addEventListener(EVENT_TREE.DRAG_OVER, this.hndDragOver);
 
-      this.addEventListener(EVENT_TREE.RESTRUCTURE, this.hndRestructure);
+      this.addEventListener(EVENT_TREE.POINTER_UP, this.hndPointerUp);
     }
 
     public get hasChildren(): boolean {
@@ -109,6 +110,25 @@ namespace TreeControl {
      */
     public getBranch(): TreeList {
       return <TreeList>this.querySelector("ul");
+    }
+
+    public select(_select: boolean, _additive: boolean = false): void {
+      globalThis.selection = globalThis.selection || [];
+
+      if (_select) {
+        this.classList.add(TREE_CLASSES.SELECTED);
+        if (!_additive) {
+          // TODO: store data-objects in selection and use events for control
+          for (let i: number = globalThis.selection.length - 1; i >= 0; i--)
+            globalThis.selection[i].select(false);
+        }
+        globalThis.selection.push(this);
+      }
+      else {
+        this.classList.remove(TREE_CLASSES.SELECTED);
+        if (globalThis.selection.length)
+          globalThis.selection.splice(globalThis.selection.indexOf(this), 1);
+      }
     }
 
     /**
@@ -248,8 +268,13 @@ namespace TreeControl {
       _event.dataTransfer.dropEffect = "move";
     }
 
-    private hndRestructure = (_event: Event): void => {
+    private hndPointerUp = (_event: PointerEvent): void => {
       _event.stopPropagation();
+      if (_event.target == this.checkbox)
+        return;
+
+      let additive: boolean = _event.ctrlKey;
+      this.select(true, additive);
     }
   }
 

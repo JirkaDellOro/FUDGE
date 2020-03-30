@@ -5,6 +5,7 @@ var TreeControl;
     let TREE_CLASSES;
     (function (TREE_CLASSES) {
         TREE_CLASSES["SELECTED"] = "selected";
+        TREE_CLASSES["INACTIVE"] = "inactive";
     })(TREE_CLASSES = TreeControl.TREE_CLASSES || (TreeControl.TREE_CLASSES = {}));
     let EVENT_TREE;
     (function (EVENT_TREE) {
@@ -16,12 +17,12 @@ var TreeControl;
         EVENT_TREE["FOCUS_OUT"] = "focusout";
         EVENT_TREE["DELETE"] = "delete";
         EVENT_TREE["CHANGE"] = "change";
-        EVENT_TREE["RESTRUCTURE"] = "restructure";
         EVENT_TREE["DOUBLE_CLICK"] = "dblclick";
-        EVENT_TREE["KEYDOWN"] = "keydown";
+        EVENT_TREE["KEY_DOWN"] = "keydown";
         EVENT_TREE["DRAG_START"] = "dragstart";
         EVENT_TREE["DRAG_OVER"] = "dragover";
         EVENT_TREE["DROP"] = "drop";
+        EVENT_TREE["POINTER_UP"] = "pointerup";
     })(EVENT_TREE = TreeControl.EVENT_TREE || (TreeControl.EVENT_TREE = {}));
     /**
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
@@ -132,8 +133,12 @@ var TreeControl;
                 globalThis.dragTarget = this;
                 _event.dataTransfer.dropEffect = "move";
             };
-            this.hndRestructure = (_event) => {
+            this.hndPointerUp = (_event) => {
                 _event.stopPropagation();
+                if (_event.target == this.checkbox)
+                    return;
+                let additive = _event.ctrlKey;
+                this.select(true, additive);
             };
             this.display = _display;
             this.data = _data;
@@ -143,13 +148,13 @@ var TreeControl;
             this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
             this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
             this.addEventListener(EVENT_TREE.FOCUS_OUT, this.hndFocus);
-            this.addEventListener(EVENT_TREE.KEYDOWN, this.hndKey);
+            this.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
             this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
             this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
             this.draggable = true;
             this.addEventListener(EVENT_TREE.DRAG_START, this.hndDragStart);
             this.addEventListener(EVENT_TREE.DRAG_OVER, this.hndDragOver);
-            this.addEventListener(EVENT_TREE.RESTRUCTURE, this.hndRestructure);
+            this.addEventListener(EVENT_TREE.POINTER_UP, this.hndPointerUp);
         }
         get hasChildren() {
             return this.checkbox.style.visibility != "hidden";
@@ -195,6 +200,23 @@ var TreeControl;
          */
         getBranch() {
             return this.querySelector("ul");
+        }
+        select(_select, _additive = false) {
+            globalThis.selection = globalThis.selection || [];
+            if (_select) {
+                this.classList.add(TREE_CLASSES.SELECTED);
+                if (!_additive) {
+                    // TODO: store data-objects in selection and use events for control
+                    for (let i = globalThis.selection.length - 1; i >= 0; i--)
+                        globalThis.selection[i].select(false);
+                }
+                globalThis.selection.push(this);
+            }
+            else {
+                this.classList.remove(TREE_CLASSES.SELECTED);
+                if (globalThis.selection.length)
+                    globalThis.selection.splice(globalThis.selection.indexOf(this), 1);
+            }
         }
         /**
          * Removes the branch of children from this item
