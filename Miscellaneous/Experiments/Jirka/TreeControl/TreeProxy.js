@@ -3,6 +3,9 @@ var TreeControl;
 (function (TreeControl) {
     // import ƒ = FudgeCore;
     class TreeProxy {
+        constructor() {
+            this.selection = [];
+        }
     }
     TreeControl.TreeProxy = TreeProxy;
 })(TreeControl || (TreeControl = {}));

@@ -6,22 +6,24 @@ namespace TreeControl {
    * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
    * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
    */
-  export class TreeItem extends HTMLLIElement {
+  export class TreeItem<T> extends HTMLLIElement {
     public display: string = "TreeItem";
     public classes: TREE_CLASSES[] = [];
-    public data: Object = null;
-    public treeList: TreeList = null;
+    public data: T = null;
+    public treeList: TreeList<T> = null;
+    public proxy: TreeProxy<T>;
 
     private checkbox: HTMLInputElement;
     private label: HTMLInputElement;
 
-    protected constructor(_data: Object) {
+    public constructor(_proxy: TreeProxy<T>, _data: T) {
       super();
-      this.display = _display;
+      this.proxy = _proxy;
       this.data = _data;
+      this.display = this.proxy.getLabel(_data);
       // TODO: handle cssClasses
       this.create();
-      this.hasChildren = _hasChildren;
+      this.hasChildren = this.proxy.hasChildren(_data);
 
       this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
       this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
@@ -77,7 +79,7 @@ namespace TreeControl {
     /**
      * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
      */
-    public setBranch(_branch: TreeList): void {
+    public setBranch(_branch: TreeList<T>): void {
       // tslint:disable no-use-before-declare
       this.removeBranch();
       if (_branch)
@@ -87,8 +89,8 @@ namespace TreeControl {
     /**
      * Returns the branch of children of this item.
      */
-    public getBranch(): TreeList {
-      return <TreeList>this.querySelector("ul");
+    public getBranch(): TreeList<T> {
+      return <TreeList<T>>this.querySelector("ul");
     }
 
     public set selected(_on: boolean) {
@@ -165,7 +167,7 @@ namespace TreeControl {
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
-      let content: TreeList = <TreeList>this.querySelector("ul");
+      let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
@@ -175,7 +177,7 @@ namespace TreeControl {
             this.open(true);
 
           if (_event.shiftKey)
-            (<TreeItem>document.activeElement).select(true);
+            (<TreeItem<T>>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (content)
@@ -184,7 +186,7 @@ namespace TreeControl {
             this.parentElement.focus();
 
           if (_event.shiftKey)
-            (<TreeItem>document.activeElement).select(true);
+            (<TreeItem<T>>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           if (content)
@@ -193,13 +195,13 @@ namespace TreeControl {
             this.dispatchEvent(new Event(EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
 
           if (_event.shiftKey)
-            (<TreeItem>document.activeElement).select(true);
+            (<TreeItem<T>>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           this.dispatchEvent(new Event(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
 
           if (_event.shiftKey)
-            (<TreeItem>document.activeElement).select(true);
+            (<TreeItem<T>>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.F2:
           this.startTypingLabel();

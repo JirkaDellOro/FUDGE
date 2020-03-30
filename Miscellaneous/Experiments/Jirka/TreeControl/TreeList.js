@@ -116,6 +116,13 @@ var TreeControl;
                     deleted.push(item.parentNode.removeChild(item));
             return deleted;
         }
+        findOpen(_data) {
+            let items = this.querySelectorAll("li");
+            for (let item of items)
+                if (_data == item.data)
+                    return item;
+            return null;
+        }
     }
     TreeControl.TreeList = TreeList;
     customElements.define("ul-tree-list", TreeList, { extends: "ul" });

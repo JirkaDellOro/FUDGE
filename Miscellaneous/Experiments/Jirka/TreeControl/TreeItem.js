@@ -7,7 +7,7 @@ var TreeControl;
      * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
-        constructor(_data) {
+        constructor(_proxy, _data) {
             super();
             this.display = "TreeItem";
             this.classes = [];
@@ -128,11 +128,12 @@ var TreeControl;
                     return;
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
-            this.display = _display;
+            this.proxy = _proxy;
             this.data = _data;
+            this.display = this.proxy.getLabel(_data);
             // TODO: handle cssClasses
             this.create();
-            this.hasChildren = _hasChildren;
+            this.hasChildren = this.proxy.hasChildren(_data);
             this.addEventListener(TreeControl.EVENT_TREE.CHANGE, this.hndChange);
             this.addEventListener(TreeControl.EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
             this.addEventListener(TreeControl.EVENT_TREE.FOCUS_OUT, this.hndFocus);

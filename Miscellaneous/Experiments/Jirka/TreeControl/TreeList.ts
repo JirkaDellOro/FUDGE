@@ -14,9 +14,9 @@ namespace TreeControl {
   * └ treeItem <li>
   * ```
   */
-  export class TreeList extends HTMLUListElement {
+  export class TreeList<T> extends HTMLUListElement {
 
-    constructor(_items: TreeItem[] = []) {
+    constructor(_items: TreeItem<T>[] = []) {
       super();
       this.addItems(_items);
     }
@@ -26,13 +26,13 @@ namespace TreeControl {
      * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
      * @param _focus If true (default) the last object found in the tree gets the focus
      */
-    public show(_path: Object[], _focus: boolean = true): void {
-      let currentTree: TreeList = this;
+    public show(_path: T[], _focus: boolean = true): void {
+      let currentTree: TreeList<T> = this;
 
       for (let data of _path) {
-        let item: TreeItem = currentTree.findItem(data);
+        let item: TreeItem<T> = currentTree.findItem(data);
         item.focus();
-        let content: TreeList = item.getBranch();
+        let content: TreeList<T> = item.getBranch();
         if (!content) {
           item.open(true);
           content = item.getBranch();
@@ -46,10 +46,10 @@ namespace TreeControl {
      * [[TreeItem]]s referencing the same object remain in the list, new items get added in the order of appearance, obsolete ones are deleted.
      * @param _tree A list to sync this with
      */
-    public restructure(_tree: TreeList): void {
-      let items: TreeItem[] = [];
+    public restructure(_tree: TreeList<T>): void {
+      let items: TreeItem<T>[] = [];
       for (let item of _tree.getItems()) {
-        let found: TreeItem = this.findItem(item.data);
+        let found: TreeItem<T> = this.findItem(item.data);
         if (found) {
           found.setLabel(item.display);
           found.hasChildren = item.hasChildren;
@@ -68,10 +68,10 @@ namespace TreeControl {
     /**
      * Returns the [[TreeItem]] of this list referencing the given object or null, if not found
      */
-    public findItem(_data: Object): TreeItem {
+    public findItem(_data: T): TreeItem<T> {
       for (let item of this.children)
-        if ((<TreeItem>item).data == _data)
-          return <TreeItem>item;
+        if ((<TreeItem<T>>item).data == _data)
+          return <TreeItem<T>>item;
 
       return null;
     }
@@ -79,7 +79,7 @@ namespace TreeControl {
     /**
      * Adds the given [[TreeItem]]s at the end of this list
      */
-    public addItems(_items: TreeItem[]): void {
+    public addItems(_items: TreeItem<T>[]): void {
       for (let item of _items) {
         this.appendChild(item);
       }
@@ -88,20 +88,20 @@ namespace TreeControl {
     /**
      * Returns the content of this list as array of [[TreeItem]]s
      */
-    public getItems(): TreeItem[] {
-      return <TreeItem[]><unknown>this.children;
+    public getItems(): TreeItem<T>[] {
+      return <TreeItem<T>[]><unknown>this.children;
     }
 
-    public displaySelection(_data: Object[]): void {
-      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
+    public displaySelection(_data: T[]): void {
+      let items: NodeListOf<TreeItem<T>> = <NodeListOf<TreeItem<T>>>this.querySelectorAll("li");
       for (let item of items)
         item.selected = (_data != null && _data.indexOf(item.data) > -1);
     }
 
-    public selectInterval(_dataStart: Object, _dataEnd: Object): void {
-      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
+    public selectInterval(_dataStart: T, _dataEnd: T): void {
+      let items: NodeListOf<TreeItem<T>> = <NodeListOf<TreeItem<T>>>this.querySelectorAll("li");
       let selecting: boolean = false;
-      let end: Object = null;
+      let end: T = null;
       for (let item of items) {
         if (!selecting) {
           selecting = true;
@@ -120,15 +120,23 @@ namespace TreeControl {
       }
     }
 
-    public delete(_data: Object[]): TreeItem[] {
-      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
-      let deleted: TreeItem[] = [];
+    public delete(_data: T[]): TreeItem<T>[] {
+      let items: NodeListOf<TreeItem<T>> = <NodeListOf<TreeItem<T>>>this.querySelectorAll("li");
+      let deleted: TreeItem<T>[] = [];
 
       for (let item of items)
         if (_data.indexOf(item.data) > -1)
           deleted.push(item.parentNode.removeChild(item));
 
       return deleted;
+    }
+
+    public findOpen(_data: T): TreeItem<T> {
+      let items: NodeListOf<TreeItem<T>> = <NodeListOf<TreeItem<T>>>this.querySelectorAll("li");
+      for (let item of items)
+        if (_data == item.data)
+          return item;
+      return null;
     }
   }
 

@@ -28,13 +28,74 @@ var TreeControl;
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
      * Additionally, it holds an instance of [[TreeList]] to display children of the corresponding object.
      */
-    class Tree extends TreeControl.TreeItem {
+    class Tree extends TreeControl.TreeList {
         constructor(_proxy, _root) {
-            super(_root);
+            super([]);
             this.proxy = _proxy;
+            let root = new TreeControl.TreeItem(this.proxy, _root);
+            this.appendChild(root);
+            this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
+            this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
+            this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
+        }
+        clearSelection() {
+            this.proxy.selection.splice(0);
+            this.displaySelection(this.proxy.selection);
+        }
+        hndOpen(_event) {
+            let item = _event.target;
+            let children = this.proxy.getChildren(item.data);
+            if (!children)
+                return;
+            let branch = this.createBranch(children);
+            item.setBranch(branch);
+            // tree.displaySelection(globalThis.selection);
+        }
+        createBranch(_data) {
+            let branch = new TreeControl.TreeList([]);
+            for (let child of _data) {
+                branch.addItems([new TreeControl.TreeItem(this.proxy, child)]);
+            }
+            return branch;
+        }
+        hndRename(_event) {
+            let item = _event.target.parentNode;
+            let renamed = this.proxy.rename(item.data, item.getLabel());
+            if (renamed)
+                item.setLabel(this.proxy.getLabel(item.data));
+        }
+        // Callback / Eventhandler in Tree
+        hndSelect(_event) {
+            _event.stopPropagation();
+            let index = this.proxy.selection.indexOf(_event.detail.data);
+            if (_event.detail.interval) {
+                let dataStart = this.proxy.selection[0];
+                let dataEnd = _event.detail.data;
+                this.clearSelection();
+                this.selectInterval(dataStart, dataEnd);
+                return;
+            }
+            if (index >= 0 && _event.detail.additive)
+                this.proxy.selection.splice(index, 1);
+            else {
+                if (!_event.detail.additive)
+                    this.clearSelection();
+                this.proxy.selection.push(_event.detail.data);
+            }
+            this.displaySelection(this.proxy.selection);
         }
     }
     TreeControl.Tree = Tree;
-    customElements.define("li-tree", Tree, { extends: "li" });
+    customElements.define("ul-tree", Tree, { extends: "ul" });
 })(TreeControl || (TreeControl = {}));
+// IDEA to stuff the proxy into the tree class
+// export abstract class Tree<T> extends TreeItem<T> {
+//   // private proxy: TreeProxy<T>;
+//   constructor(_root: T) {
+//     super(_root);
+//   }
+//   public abstract objGetLabel(_object: T): string;
+//   public abstract objHasChildren(_object: T): boolean;
+//   public abstract objGetChildren(_object: T): T[];
+// }
 //# sourceMappingURL=Tree.js.map
