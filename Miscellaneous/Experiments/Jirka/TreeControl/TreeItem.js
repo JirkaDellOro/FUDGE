@@ -112,14 +112,16 @@ var TreeControl;
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
                 // TODO: send custom event with this as item and data as load
-                globalThis.dragSource = this;
+                this.proxy.dragSource.splice(0);
+                this.proxy.dragSource.push(this.data);
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
                 _event.preventDefault();
                 // TODO: send custom event with this as item and data as load
-                globalThis.dragTarget = this;
+                this.proxy.dropTarget.splice(0);
+                this.proxy.dropTarget.push(this.data);
                 _event.dataTransfer.dropEffect = "move";
             };
             this.hndPointerUp = (_event) => {

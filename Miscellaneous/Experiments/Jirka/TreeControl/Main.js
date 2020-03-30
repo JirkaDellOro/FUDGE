@@ -3,10 +3,14 @@ var TreeControl;
 (function (TreeControl) {
     var ƒ = FudgeCore;
     let selection = [];
+    let dragSource = [];
+    let dropTarget = [];
     class Proxy extends TreeControl.TreeProxy {
         constructor() {
             super(...arguments);
             this.selection = selection;
+            this.dragSource = dragSource;
+            this.dropTarget = dropTarget;
         }
         getLabel(_object) { return _object.display; }
         hasChildren(_object) { return _object.children && _object.children.length > 0; }
@@ -15,12 +19,15 @@ var TreeControl;
             _object.display = _new;
             return true;
         }
+        delete(_objects) {
+            // disallow deletion
+            return false;
+        }
     }
     TreeControl.Proxy = Proxy;
     let tree = new TreeControl.Tree(new Proxy(), TreeControl.data[0]);
     document.body.appendChild(tree);
     // // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
-    // tree.addEventListener(EVENT_TREE.DROP, hndDrop);
     document.addEventListener("pointerup", (_event) => tree.clearSelection());
     document.addEventListener("keyup", hndKey);
     show(0, 1, 1, 0);
@@ -54,27 +61,5 @@ var TreeControl;
         }
         let deleted = tree.delete(_objects);
     }
-    // // EventHandler / Callback, partially in tree?
-    // function hndDrop(_event: DragEvent): void {
-    //   _event.stopPropagation();
-    //   if (globalThis.dragSource == globalThis.dragTarget)
-    //     return;
-    //   // let removed: TreeEntry = deleteItem(globalThis.dragSource);
-    //   tree.delete([globalThis.dragSource.data]);
-    //   let targetItem: TreeItem = globalThis.dragTarget;
-    //   let targetData: TreeEntry = <TreeEntry>targetItem.data;
-    //   let children: TreeEntry[] = targetData["children"] || [];
-    //   children.push(globalThis.dragSource.data);
-    //   targetData["children"] = children;
-    //   let branch: TreeList = createBranch(children);
-    //   let old: TreeList = targetItem.getBranch();
-    //   if (old)
-    //     old.restructure(branch);
-    //   else
-    //     targetItem.open(true);
-    //   targetItem.hasChildren = true;
-    //   globalThis.dragSource = null;
-    //   globalThis.dragTarget = null;
-    // }
 })(TreeControl || (TreeControl = {}));
 //# sourceMappingURL=Main.js.map

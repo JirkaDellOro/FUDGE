@@ -5,6 +5,8 @@ var TreeControl;
     class TreeProxy {
         constructor() {
             this.selection = [];
+            this.dragSource = [];
+            this.dropTarget = [];
         }
     }
     TreeControl.TreeProxy = TreeProxy;

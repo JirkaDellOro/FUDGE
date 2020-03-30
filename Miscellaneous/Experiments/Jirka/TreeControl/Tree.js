@@ -37,6 +37,7 @@ var TreeControl;
             this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
             this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
+            this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
         }
         clearSelection() {
             this.proxy.selection.splice(0);
@@ -49,7 +50,7 @@ var TreeControl;
                 return;
             let branch = this.createBranch(children);
             item.setBranch(branch);
-            // tree.displaySelection(globalThis.selection);
+            // tree.displaySelection(this.proxy.selection);
         }
         createBranch(_data) {
             let branch = new TreeControl.TreeList([]);
@@ -83,6 +84,29 @@ var TreeControl;
                 this.proxy.selection.push(_event.detail.data);
             }
             this.displaySelection(this.proxy.selection);
+        }
+        // Use proxy to manage drop...
+        hndDrop(_event) {
+            _event.stopPropagation();
+            if (this.proxy.dragSource[0] == this.proxy.dropTarget[0])
+                return;
+            // let removed: TreeEntry = deleteItem(this.proxy.dragSource);
+            this.delete(this.proxy.dragSource);
+            let targetData = this.proxy.dropTarget[0];
+            let targetItem = this.findOpen(targetData);
+            let children = this.proxy.getChildren(targetData) || [];
+            children.push(this.proxy.dragSource[0]);
+            // HACK!!
+            targetData["children"] = children;
+            let branch = this.createBranch(children);
+            let old = targetItem.getBranch();
+            if (old)
+                old.restructure(branch);
+            else
+                targetItem.open(true);
+            targetItem.hasChildren = true;
+            this.proxy.dragSource.splice(0);
+            this.proxy.dropTarget.splice(0);
         }
     }
     TreeControl.Tree = Tree;

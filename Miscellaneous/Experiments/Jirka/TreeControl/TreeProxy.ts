@@ -4,6 +4,8 @@ namespace TreeControl {
 
   export abstract class TreeProxy<T> {
     public selection: Object[] = [];
+    public dragSource: Object[] = [];
+    public dropTarget: Object[] = [];
     
     public abstract getLabel(_object: T): string;
     public abstract hasChildren(_object: T): boolean;

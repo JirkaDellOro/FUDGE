@@ -2,9 +2,13 @@
 namespace TreeControl {
   import ƒ = FudgeCore;
   let selection: Object[] = [];
+  let dragSource: Object[] = [];
+  let dropTarget: Object[] = [];
 
   export class Proxy extends TreeProxy<TreeEntry> {
     public selection: Object[] = selection;
+    public dragSource: Object[] = dragSource;
+    public dropTarget: Object[] = dropTarget;
 
     public getLabel(_object: TreeEntry): string { return _object.display; }
     public hasChildren(_object: TreeEntry): boolean { return _object.children && _object.children.length > 0; }
@@ -13,15 +17,16 @@ namespace TreeControl {
       _object.display = _new;
       return true;
     }
+    public delete(_objects: TreeEntry[]): boolean {
+      // disallow deletion
+      return false;
+    }
   }
 
   let tree: Tree<TreeEntry> = new Tree(new Proxy(), data[0]);
   document.body.appendChild(tree);
 
-
   // // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
-  // tree.addEventListener(EVENT_TREE.DROP, hndDrop);
-
   document.addEventListener("pointerup", (_event: Event): void => tree.clearSelection());
   document.addEventListener("keyup", hndKey);
 
@@ -58,31 +63,4 @@ namespace TreeControl {
     }
     let deleted: TreeItem<TreeEntry>[] = tree.delete(<TreeEntry[]>_objects);
   }
-
-  // // EventHandler / Callback, partially in tree?
-  // function hndDrop(_event: DragEvent): void {
-  //   _event.stopPropagation();
-  //   if (globalThis.dragSource == globalThis.dragTarget)
-  //     return;
-
-  //   // let removed: TreeEntry = deleteItem(globalThis.dragSource);
-  //   tree.delete([globalThis.dragSource.data]);
-
-  //   let targetItem: TreeItem = globalThis.dragTarget;
-  //   let targetData: TreeEntry = <TreeEntry>targetItem.data;
-  //   let children: TreeEntry[] = targetData["children"] || [];
-  //   children.push(globalThis.dragSource.data);
-  //   targetData["children"] = children;
-
-  //   let branch: TreeList = createBranch(children);
-  //   let old: TreeList = targetItem.getBranch();
-  //   if (old)
-  //     old.restructure(branch);
-  //   else
-  //     targetItem.open(true);
-  //   targetItem.hasChildren = true;
-
-  //   globalThis.dragSource = null;
-  //   globalThis.dragTarget = null;
-  // }
 }
