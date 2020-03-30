@@ -87,6 +87,27 @@ var TreeControl;
             for (let item of items)
                 item.selected = (_data != null && _data.indexOf(item.data) > -1);
         }
+        selectInterval(_dataStart, _dataEnd) {
+            let items = this.querySelectorAll("li");
+            let selecting = false;
+            let end = null;
+            for (let item of items) {
+                if (!selecting) {
+                    selecting = true;
+                    if (item.data == _dataStart)
+                        end = _dataEnd;
+                    else if (item.data == _dataEnd)
+                        end = _dataStart;
+                    else
+                        selecting = false;
+                }
+                if (selecting) {
+                    item.select(true, false);
+                    if (item.data == end)
+                        break;
+                }
+            }
+        }
     }
     TreeControl.TreeList = TreeList;
     customElements.define("ul-tree-list", TreeList, { extends: "ul" });

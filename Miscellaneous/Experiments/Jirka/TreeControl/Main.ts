@@ -1,5 +1,7 @@
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 namespace TreeControl {
+  import ƒ = FudgeCore;
+
   let treeItem: TreeItem = new TreeItem(data[0].display, data[0], data[0].children != undefined);
   let tree: TreeList = new TreeList([treeItem]);
   tree.addEventListener(EVENT_TREE.RENAME, hndRename);
@@ -8,6 +10,8 @@ namespace TreeControl {
   tree.addEventListener(EVENT_TREE.DROP, hndDrop);
   tree.addEventListener(EVENT_TREE.SELECT, hndSelect);
   document.body.appendChild(tree);
+  document.body.addEventListener("pointerup", dropSelection);
+  document.body.addEventListener("keyup", hndKey);
 
   show(0, 1, 1, 0);
 
@@ -19,6 +23,14 @@ namespace TreeControl {
       branch = branch[i].children;
     }
     tree.show(path, true);
+  }
+
+  function hndKey(_event: KeyboardEvent): void {
+    switch (_event.code) {
+      case ƒ.KEYBOARD_CODE.ESC:
+        dropSelection();
+        break;
+    }
   }
 
   function hndRename(_event: Event): void {
@@ -94,12 +106,20 @@ namespace TreeControl {
     globalThis.dragSource = null;
     globalThis.dragTarget = null;
   }
-  
+
   function hndSelect(_event: CustomEvent): void {
     _event.stopPropagation();
     globalThis.selection = globalThis.selection || [];
-    let item: TreeItem = <TreeItem>_event.target;
+    // let item: TreeItem = <TreeItem>_event.target;
     let index: number = globalThis.selection.indexOf(_event.detail.data);
+
+    if (_event.detail.interval) {
+      let dataStart: Object = globalThis.selection[0];
+      let dataEnd: Object = _event.detail.data;
+      globalThis.selection = [];
+      tree.selectInterval(dataStart, dataEnd);
+      return;
+    }
 
     if (index >= 0 && _event.detail.additive)
       globalThis.selection.splice(index, 1);
@@ -109,6 +129,11 @@ namespace TreeControl {
       globalThis.selection.push(_event.detail.data);
     }
 
+    tree.displaySelection(globalThis.selection);
+  }
+
+  function dropSelection(): void {
+    globalThis.selection = []
     tree.displaySelection(globalThis.selection);
   }
 }

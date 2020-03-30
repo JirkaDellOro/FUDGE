@@ -124,6 +124,11 @@ namespace TreeControl {
       return this.classList.contains(TREE_CLASSES.SELECTED);
     }
 
+    public select(_additive: boolean, _interval: boolean = false): void {
+      let event: CustomEvent = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive, interval: _interval } });
+      this.dispatchEvent(event);
+    }
+
     /**
      * Removes the branch of children from this item
      */
@@ -190,21 +195,33 @@ namespace TreeControl {
             (<HTMLElement>content.firstChild).focus();
           else
             this.open(true);
+
+          if (_event.shiftKey)
+            (<TreeItem>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (content)
             this.open(false);
           else
             this.parentElement.focus();
+
+          if (_event.shiftKey)
+            (<TreeItem>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           if (content)
             (<HTMLElement>content.firstChild).focus();
           else
             this.dispatchEvent(new Event(EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
+
+          if (_event.shiftKey)
+            (<TreeItem>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           this.dispatchEvent(new Event(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
+
+          if (_event.shiftKey)
+            (<TreeItem>document.activeElement).select(true);
           break;
         case ƒ.KEYBOARD_CODE.F2:
           this.startTypingLabel();
@@ -213,7 +230,7 @@ namespace TreeControl {
           this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.SPACE:
-          this.select(_event.ctrlKey);
+          this.select(_event.ctrlKey, _event.shiftKey);
           break;
       }
     }
@@ -270,13 +287,9 @@ namespace TreeControl {
       _event.stopPropagation();
       if (_event.target == this.checkbox)
         return;
-      this.select(_event.ctrlKey);
+      this.select(_event.ctrlKey, _event.shiftKey);
     }
 
-    private select(_additive: boolean, _toggle: boolean = false): void {
-      let event: CustomEvent = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive } });
-      this.dispatchEvent(event);
-    }
   }
 
   customElements.define("ul-tree-item", TreeItem, { extends: "li" });

@@ -1,6 +1,7 @@
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var TreeControl;
 (function (TreeControl) {
+    var ƒ = FudgeCore;
     let treeItem = new TreeControl.TreeItem(TreeControl.data[0].display, TreeControl.data[0], TreeControl.data[0].children != undefined);
     let tree = new TreeControl.TreeList([treeItem]);
     tree.addEventListener(TreeControl.EVENT_TREE.RENAME, hndRename);
@@ -9,6 +10,8 @@ var TreeControl;
     tree.addEventListener(TreeControl.EVENT_TREE.DROP, hndDrop);
     tree.addEventListener(TreeControl.EVENT_TREE.SELECT, hndSelect);
     document.body.appendChild(tree);
+    document.body.addEventListener("pointerup", dropSelection);
+    document.body.addEventListener("keyup", hndKey);
     show(0, 1, 1, 0);
     function show(..._index) {
         let path = [];
@@ -20,6 +23,13 @@ var TreeControl;
         tree.show(path, true);
     }
     TreeControl.show = show;
+    function hndKey(_event) {
+        switch (_event.code) {
+            case ƒ.KEYBOARD_CODE.ESC:
+                dropSelection();
+                break;
+        }
+    }
     function hndRename(_event) {
         let item = _event.target.parentNode;
         let data = item.data;
@@ -85,8 +95,15 @@ var TreeControl;
     function hndSelect(_event) {
         _event.stopPropagation();
         globalThis.selection = globalThis.selection || [];
-        let item = _event.target;
+        // let item: TreeItem = <TreeItem>_event.target;
         let index = globalThis.selection.indexOf(_event.detail.data);
+        if (_event.detail.interval) {
+            let dataStart = globalThis.selection[0];
+            let dataEnd = _event.detail.data;
+            globalThis.selection = [];
+            tree.selectInterval(dataStart, dataEnd);
+            return;
+        }
         if (index >= 0 && _event.detail.additive)
             globalThis.selection.splice(index, 1);
         else {
@@ -94,6 +111,10 @@ var TreeControl;
                 globalThis.selection = [];
             globalThis.selection.push(_event.detail.data);
         }
+        tree.displaySelection(globalThis.selection);
+    }
+    function dropSelection() {
+        globalThis.selection = [];
         tree.displaySelection(globalThis.selection);
     }
 })(TreeControl || (TreeControl = {}));

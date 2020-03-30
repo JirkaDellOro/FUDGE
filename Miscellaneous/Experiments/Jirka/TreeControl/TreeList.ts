@@ -91,14 +91,36 @@ namespace TreeControl {
     public getItems(): TreeItem[] {
       return <TreeItem[]><unknown>this.children;
     }
-    
+
     public displaySelection(_data: Object[]): void {
       let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
-      for (let item of items) 
+      for (let item of items)
         item.selected = (_data != null && _data.indexOf(item.data) > -1);
+    }
+
+    public selectInterval(_dataStart: Object, _dataEnd: Object): void {
+      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
+      let selecting: boolean = false;
+      let end: Object = null;
+      for (let item of items) {
+        if (!selecting) {
+          selecting = true;
+          if (item.data == _dataStart)
+            end = _dataEnd;
+          else if (item.data == _dataEnd)
+            end = _dataStart;
+          else
+            selecting = false;
+        }
+        if (selecting) {
+          item.select(true, false);
+          if (item.data == end)
+            break;
+        }
+      }
     }
   }
 
-  
+
   customElements.define("ul-tree-list", TreeList, { extends: "ul" });
 }

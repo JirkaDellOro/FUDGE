@@ -75,21 +75,29 @@ var TreeControl;
                             content.firstChild.focus();
                         else
                             this.open(true);
+                        if (_event.shiftKey)
+                            document.activeElement.select(true);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                         if (content)
                             this.open(false);
                         else
                             this.parentElement.focus();
+                        if (_event.shiftKey)
+                            document.activeElement.select(true);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         if (content)
                             content.firstChild.focus();
                         else
                             this.dispatchEvent(new Event(EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
+                        if (_event.shiftKey)
+                            document.activeElement.select(true);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
                         this.dispatchEvent(new Event(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
+                        if (_event.shiftKey)
+                            document.activeElement.select(true);
                         break;
                     case ƒ.KEYBOARD_CODE.F2:
                         this.startTypingLabel();
@@ -98,7 +106,7 @@ var TreeControl;
                         this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.SPACE:
-                        this.select(_event.ctrlKey);
+                        this.select(_event.ctrlKey, _event.shiftKey);
                         break;
                 }
             };
@@ -143,7 +151,7 @@ var TreeControl;
                 _event.stopPropagation();
                 if (_event.target == this.checkbox)
                     return;
-                this.select(_event.ctrlKey);
+                this.select(_event.ctrlKey, _event.shiftKey);
             };
             this.display = _display;
             this.data = _data;
@@ -215,6 +223,10 @@ var TreeControl;
         get selected() {
             return this.classList.contains(TREE_CLASSES.SELECTED);
         }
+        select(_additive, _interval = false) {
+            let event = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive, interval: _interval } });
+            this.dispatchEvent(event);
+        }
         /**
          * Removes the branch of children from this item
          */
@@ -238,10 +250,6 @@ var TreeControl;
         startTypingLabel() {
             this.label.disabled = false;
             this.label.focus();
-        }
-        select(_additive, _toggle = false) {
-            let event = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive } });
-            this.dispatchEvent(event);
         }
     }
     TreeControl.TreeItem = TreeItem;
