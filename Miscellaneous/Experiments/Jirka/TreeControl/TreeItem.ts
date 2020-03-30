@@ -2,29 +2,6 @@
 namespace TreeControl {
   import ƒ = FudgeCore;
 
-  export enum TREE_CLASSES {
-    SELECTED = "selected",
-    INACTIVE = "inactive"
-  }
-
-  export enum EVENT_TREE {
-    RENAME = "rename",
-    OPEN = "open",
-    FOCUS_NEXT = "focusNext",
-    FOCUS_PREVIOUS = "focusPrevious",
-    FOCUS_IN = "focusin",
-    FOCUS_OUT = "focusout",
-    DELETE = "delete",
-    CHANGE = "change",
-    DOUBLE_CLICK = "dblclick",
-    KEY_DOWN = "keydown",
-    DRAG_START = "dragstart",
-    DRAG_OVER = "dragover",
-    DROP = "drop",
-    POINTER_UP = "pointerup",
-    SELECT = "itemselect"
-  }
-
   /**
    * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
    * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
@@ -33,11 +10,12 @@ namespace TreeControl {
     public display: string = "TreeItem";
     public classes: TREE_CLASSES[] = [];
     public data: Object = null;
+    public treeList: TreeList = null;
 
     private checkbox: HTMLInputElement;
     private label: HTMLInputElement;
 
-    constructor(_display: string, _data: Object, _hasChildren: boolean, _classes?: TREE_CLASSES[]) {
+    protected constructor(_data: Object) {
       super();
       this.display = _display;
       this.data = _data;
@@ -226,9 +204,6 @@ namespace TreeControl {
         case ƒ.KEYBOARD_CODE.F2:
           this.startTypingLabel();
           break;
-        case ƒ.KEYBOARD_CODE.DELETE:
-          this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
-          break;
         case ƒ.KEYBOARD_CODE.SPACE:
           this.select(_event.ctrlKey, _event.shiftKey);
           break;
@@ -292,5 +267,5 @@ namespace TreeControl {
 
   }
 
-  customElements.define("ul-tree-item", TreeItem, { extends: "li" });
+  customElements.define("li-tree-item", TreeItem, { extends: "li" });
 }

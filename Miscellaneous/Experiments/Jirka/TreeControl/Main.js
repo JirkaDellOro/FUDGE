@@ -2,15 +2,20 @@
 var TreeControl;
 (function (TreeControl) {
     var ƒ = FudgeCore;
-    let treeItem = new TreeControl.TreeItem(TreeControl.data[0].display, TreeControl.data[0], TreeControl.data[0].children != undefined);
-    let tree = new TreeControl.TreeList([treeItem]);
+    class Proxy extends TreeControl.TreeProxy {
+        getLabel(_object) { return "Test"; }
+        hasChildren(_object) { return true; }
+        getChildren(_object) { return []; }
+    }
+    TreeControl.Proxy = Proxy;
+    let tree = new TreeControl.Tree(new Proxy(), TreeControl.data[0]);
     tree.addEventListener(TreeControl.EVENT_TREE.RENAME, hndRename);
     tree.addEventListener(TreeControl.EVENT_TREE.OPEN, hndOpen);
-    tree.addEventListener(TreeControl.EVENT_TREE.DELETE, hndDelete);
+    // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
     tree.addEventListener(TreeControl.EVENT_TREE.DROP, hndDrop);
     tree.addEventListener(TreeControl.EVENT_TREE.SELECT, hndSelect);
     document.body.appendChild(tree);
-    document.body.addEventListener("pointerup", dropSelection);
+    document.body.addEventListener("pointerup", forgetSelection);
     document.body.addEventListener("keyup", hndKey);
     show(0, 1, 1, 0);
     function show(..._index) {
@@ -26,7 +31,11 @@ var TreeControl;
     function hndKey(_event) {
         switch (_event.code) {
             case ƒ.KEYBOARD_CODE.ESC:
-                dropSelection();
+                forgetSelection();
+                break;
+            case ƒ.KEYBOARD_CODE.DELETE:
+                deleteObjects(globalThis.selection);
+                forgetSelection();
                 break;
         }
     }
@@ -43,9 +52,9 @@ var TreeControl;
             return;
         let branch = createBranch(children);
         item.setBranch(branch);
-        // console.log(_event);
         tree.displaySelection(globalThis.selection);
     }
+    // Independent helper function
     function createBranch(_data) {
         let branch = new TreeControl.TreeList([]);
         for (let child of _data) {
@@ -53,34 +62,35 @@ var TreeControl;
         }
         return branch;
     }
-    function hndDelete(_event) {
-        deleteItem(_event.target);
-    }
-    function deleteItem(_item) {
-        let tree = _item.parentElement;
-        let parentItem = tree.parentElement;
-        let siblings = parentItem.data["children"];
-        let removed = siblings.splice(siblings.indexOf(_item.data), 1);
-        if (siblings.length) {
-            tree.removeChild(_item);
-            tree.restructure(tree);
-        }
-        else {
-            parentItem.data["children"] = undefined;
-            parentItem.setBranch(null);
-            parentItem.hasChildren = false;
-        }
-        return removed[0];
-    }
+    // function hndDelete(_event: Event): void {
+    //   deleteItem(<TreeItem>_event.target);
+    // }
+    // function deleteItem(_item: TreeItem): TreeEntry {
+    //   let tree: TreeList = <TreeList>_item.parentElement;
+    //   let parentItem: TreeItem = <TreeItem>tree.parentElement;
+    //   let siblings: TreeEntry[] = parentItem.data["children"];
+    //   let removed: TreeEntry[] = siblings.splice(siblings.indexOf(<TreeEntry>_item.data), 1);
+    //   if (siblings.length) {
+    //     tree.removeChild(_item);
+    //     tree.restructure(tree);
+    //   } else {
+    //     parentItem.data["children"] = undefined;
+    //     parentItem.setBranch(null);
+    //     parentItem.hasChildren = false;
+    //   }
+    //   return removed[0];
+    // }
+    // EventHandler / Callback, partially in tree?
     function hndDrop(_event) {
         _event.stopPropagation();
         if (globalThis.dragSource == globalThis.dragTarget)
             return;
-        let removed = deleteItem(globalThis.dragSource);
+        // let removed: TreeEntry = deleteItem(globalThis.dragSource);
+        tree.delete([globalThis.dragSource.data]);
         let targetItem = globalThis.dragTarget;
         let targetData = targetItem.data;
         let children = targetData["children"] || [];
-        children.push(removed);
+        children.push(globalThis.dragSource.data);
         targetData["children"] = children;
         let branch = createBranch(children);
         let old = targetItem.getBranch();
@@ -92,6 +102,7 @@ var TreeControl;
         globalThis.dragSource = null;
         globalThis.dragTarget = null;
     }
+    // Callback / Eventhandler in Tree
     function hndSelect(_event) {
         _event.stopPropagation();
         globalThis.selection = globalThis.selection || [];
@@ -113,9 +124,19 @@ var TreeControl;
         }
         tree.displaySelection(globalThis.selection);
     }
-    function dropSelection() {
+    // Independent
+    function forgetSelection() {
         globalThis.selection = [];
         tree.displaySelection(globalThis.selection);
+    }
+    // Independent
+    function deleteObjects(_objects) {
+        let deleted = tree.delete(_objects);
+        for (let item of deleted) {
+            let list = item.parentElement.parentElement;
+            let siblings = list.data["children"];
+            let removed = siblings.splice(siblings.indexOf(item.data), 1);
+        }
     }
 })(TreeControl || (TreeControl = {}));
 //# sourceMappingURL=Main.js.map

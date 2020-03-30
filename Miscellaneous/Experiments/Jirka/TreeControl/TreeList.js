@@ -108,6 +108,14 @@ var TreeControl;
                 }
             }
         }
+        delete(_data) {
+            let items = this.querySelectorAll("li");
+            let deleted = [];
+            for (let item of items)
+                if (_data.indexOf(item.data) > -1)
+                    deleted.push(item.parentNode.removeChild(item));
+            return deleted;
+        }
     }
     TreeControl.TreeList = TreeList;
     customElements.define("ul-tree-list", TreeList, { extends: "ul" });

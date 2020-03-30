@@ -119,6 +119,17 @@ namespace TreeControl {
         }
       }
     }
+
+    public delete(_data: Object[]): TreeItem[] {
+      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
+      let deleted: TreeItem[] = [];
+
+      for (let item of items)
+        if (_data.indexOf(item.data) > -1)
+          deleted.push(item.parentNode.removeChild(item));
+
+      return deleted;
+    }
   }
 
 
