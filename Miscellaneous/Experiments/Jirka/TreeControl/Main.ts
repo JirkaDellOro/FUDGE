@@ -6,6 +6,7 @@ namespace TreeControl {
   tree.addEventListener(EVENT_TREE.OPEN, hndOpen);
   tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
   tree.addEventListener(EVENT_TREE.DROP, hndDrop);
+  tree.addEventListener(EVENT_TREE.SELECT, hndSelect);
   document.body.appendChild(tree);
 
   show(0, 1, 1, 0);
@@ -37,6 +38,7 @@ namespace TreeControl {
     let branch: TreeList = createBranch(children);
     item.setBranch(branch);
     // console.log(_event);
+    tree.displaySelection(globalThis.selection);
   }
 
   function createBranch(_data: TreeEntry[]): TreeList {
@@ -91,5 +93,22 @@ namespace TreeControl {
 
     globalThis.dragSource = null;
     globalThis.dragTarget = null;
+  }
+  
+  function hndSelect(_event: CustomEvent): void {
+    _event.stopPropagation();
+    globalThis.selection = globalThis.selection || [];
+    let item: TreeItem = <TreeItem>_event.target;
+    let index: number = globalThis.selection.indexOf(_event.detail.data);
+
+    if (index >= 0 && _event.detail.additive)
+      globalThis.selection.splice(index, 1);
+    else {
+      if (!_event.detail.additive)
+        globalThis.selection = [];
+      globalThis.selection.push(_event.detail.data);
+    }
+
+    tree.displaySelection(globalThis.selection);
   }
 }

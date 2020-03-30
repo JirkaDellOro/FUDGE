@@ -7,6 +7,7 @@ var TreeControl;
     tree.addEventListener(TreeControl.EVENT_TREE.OPEN, hndOpen);
     tree.addEventListener(TreeControl.EVENT_TREE.DELETE, hndDelete);
     tree.addEventListener(TreeControl.EVENT_TREE.DROP, hndDrop);
+    tree.addEventListener(TreeControl.EVENT_TREE.SELECT, hndSelect);
     document.body.appendChild(tree);
     show(0, 1, 1, 0);
     function show(..._index) {
@@ -33,6 +34,7 @@ var TreeControl;
         let branch = createBranch(children);
         item.setBranch(branch);
         // console.log(_event);
+        tree.displaySelection(globalThis.selection);
     }
     function createBranch(_data) {
         let branch = new TreeControl.TreeList([]);
@@ -79,6 +81,20 @@ var TreeControl;
         targetItem.hasChildren = true;
         globalThis.dragSource = null;
         globalThis.dragTarget = null;
+    }
+    function hndSelect(_event) {
+        _event.stopPropagation();
+        globalThis.selection = globalThis.selection || [];
+        let item = _event.target;
+        let index = globalThis.selection.indexOf(_event.detail.data);
+        if (index >= 0 && _event.detail.additive)
+            globalThis.selection.splice(index, 1);
+        else {
+            if (!_event.detail.additive)
+                globalThis.selection = [];
+            globalThis.selection.push(_event.detail.data);
+        }
+        tree.displaySelection(globalThis.selection);
     }
 })(TreeControl || (TreeControl = {}));
 //# sourceMappingURL=Main.js.map

@@ -21,7 +21,8 @@ namespace TreeControl {
     DRAG_START = "dragstart",
     DRAG_OVER = "dragover",
     DROP = "drop",
-    POINTER_UP = "pointerup"
+    POINTER_UP = "pointerup",
+    SELECT = "itemselect"
   }
 
   /**
@@ -112,23 +113,15 @@ namespace TreeControl {
       return <TreeList>this.querySelector("ul");
     }
 
-    public select(_select: boolean, _additive: boolean = false): void {
-      globalThis.selection = globalThis.selection || [];
-
-      if (_select) {
+    public set selected(_on: boolean) {
+      if (_on)
         this.classList.add(TREE_CLASSES.SELECTED);
-        if (!_additive) {
-          // TODO: store data-objects in selection and use events for control
-          for (let i: number = globalThis.selection.length - 1; i >= 0; i--)
-            globalThis.selection[i].select(false);
-        }
-        globalThis.selection.push(this);
-      }
-      else {
+      else
         this.classList.remove(TREE_CLASSES.SELECTED);
-        if (globalThis.selection.length)
-          globalThis.selection.splice(globalThis.selection.indexOf(this), 1);
-      }
+    }
+
+    public get selected(): boolean {
+      return this.classList.contains(TREE_CLASSES.SELECTED);
     }
 
     /**
@@ -219,6 +212,9 @@ namespace TreeControl {
         case ƒ.KEYBOARD_CODE.DELETE:
           this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
           break;
+        case ƒ.KEYBOARD_CODE.SPACE:
+          this.select(_event.ctrlKey);
+          break;
       }
     }
 
@@ -257,6 +253,7 @@ namespace TreeControl {
 
     private hndDragStart = (_event: DragEvent): void => {
       _event.stopPropagation();
+      // TODO: send custom event with this as item and data as load
       globalThis.dragSource = this;
       _event.dataTransfer.effectAllowed = "all";
     }
@@ -264,6 +261,7 @@ namespace TreeControl {
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
       _event.preventDefault();
+      // TODO: send custom event with this as item and data as load
       globalThis.dragTarget = this;
       _event.dataTransfer.dropEffect = "move";
     }
@@ -272,9 +270,12 @@ namespace TreeControl {
       _event.stopPropagation();
       if (_event.target == this.checkbox)
         return;
+      this.select(_event.ctrlKey);
+    }
 
-      let additive: boolean = _event.ctrlKey;
-      this.select(true, additive);
+    private select(_additive: boolean, _toggle: boolean = false): void {
+      let event: CustomEvent = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive } });
+      this.dispatchEvent(event);
     }
   }
 

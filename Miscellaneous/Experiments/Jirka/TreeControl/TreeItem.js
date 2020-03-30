@@ -23,6 +23,7 @@ var TreeControl;
         EVENT_TREE["DRAG_OVER"] = "dragover";
         EVENT_TREE["DROP"] = "drop";
         EVENT_TREE["POINTER_UP"] = "pointerup";
+        EVENT_TREE["SELECT"] = "itemselect";
     })(EVENT_TREE = TreeControl.EVENT_TREE || (TreeControl.EVENT_TREE = {}));
     /**
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
@@ -96,6 +97,9 @@ var TreeControl;
                     case ƒ.KEYBOARD_CODE.DELETE:
                         this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
                         break;
+                    case ƒ.KEYBOARD_CODE.SPACE:
+                        this.select(_event.ctrlKey);
+                        break;
                 }
             };
             this.hndDblClick = (_event) => {
@@ -124,12 +128,14 @@ var TreeControl;
             };
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
+                // TODO: send custom event with this as item and data as load
                 globalThis.dragSource = this;
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
                 _event.preventDefault();
+                // TODO: send custom event with this as item and data as load
                 globalThis.dragTarget = this;
                 _event.dataTransfer.dropEffect = "move";
             };
@@ -137,8 +143,7 @@ var TreeControl;
                 _event.stopPropagation();
                 if (_event.target == this.checkbox)
                     return;
-                let additive = _event.ctrlKey;
-                this.select(true, additive);
+                this.select(_event.ctrlKey);
             };
             this.display = _display;
             this.data = _data;
@@ -201,22 +206,14 @@ var TreeControl;
         getBranch() {
             return this.querySelector("ul");
         }
-        select(_select, _additive = false) {
-            globalThis.selection = globalThis.selection || [];
-            if (_select) {
+        set selected(_on) {
+            if (_on)
                 this.classList.add(TREE_CLASSES.SELECTED);
-                if (!_additive) {
-                    // TODO: store data-objects in selection and use events for control
-                    for (let i = globalThis.selection.length - 1; i >= 0; i--)
-                        globalThis.selection[i].select(false);
-                }
-                globalThis.selection.push(this);
-            }
-            else {
+            else
                 this.classList.remove(TREE_CLASSES.SELECTED);
-                if (globalThis.selection.length)
-                    globalThis.selection.splice(globalThis.selection.indexOf(this), 1);
-            }
+        }
+        get selected() {
+            return this.classList.contains(TREE_CLASSES.SELECTED);
         }
         /**
          * Removes the branch of children from this item
@@ -241,6 +238,10 @@ var TreeControl;
         startTypingLabel() {
             this.label.disabled = false;
             this.label.focus();
+        }
+        select(_additive, _toggle = false) {
+            let event = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive } });
+            this.dispatchEvent(event);
         }
     }
     TreeControl.TreeItem = TreeItem;

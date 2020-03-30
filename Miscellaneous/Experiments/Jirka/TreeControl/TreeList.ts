@@ -91,6 +91,12 @@ namespace TreeControl {
     public getItems(): TreeItem[] {
       return <TreeItem[]><unknown>this.children;
     }
+    
+    public displaySelection(_data: Object[]): void {
+      let items: NodeListOf<TreeItem> = <NodeListOf<TreeItem>>this.querySelectorAll("li");
+      for (let item of items) 
+        item.selected = (_data != null && _data.indexOf(item.data) > -1);
+    }
   }
 
   

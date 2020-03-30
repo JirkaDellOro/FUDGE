@@ -82,6 +82,11 @@ var TreeControl;
         getItems() {
             return this.children;
         }
+        displaySelection(_data) {
+            let items = this.querySelectorAll("li");
+            for (let item of items)
+                item.selected = (_data != null && _data.indexOf(item.data) > -1);
+        }
     }
     TreeControl.TreeList = TreeList;
     customElements.define("ul-tree-list", TreeList, { extends: "ul" });
