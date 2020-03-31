@@ -4,7 +4,7 @@ var TreeControl;
     var ƒ = FudgeCore;
     let selection = [];
     let dragDrop = { source: [], target: null };
-    class Proxy extends TreeControl.TreeProxy {
+    class Broker extends TreeControl.TreeBroker {
         constructor() {
             super(...arguments);
             this.selection = selection;
@@ -32,8 +32,8 @@ var TreeControl;
             return true;
         }
     }
-    TreeControl.Proxy = Proxy;
-    let tree = new TreeControl.Tree(new Proxy(), TreeControl.data[0]);
+    TreeControl.Broker = Broker;
+    let tree = new TreeControl.Tree(new Broker(), TreeControl.data[0]);
     document.body.appendChild(tree);
     // // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
     document.addEventListener("pointerup", (_event) => tree.clearSelection());

@@ -7,7 +7,7 @@ var TreeControl;
      * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
-        constructor(_proxy, _data) {
+        constructor(_broker, _data) {
             super();
             this.display = "TreeItem";
             this.classes = [];
@@ -110,17 +110,17 @@ var TreeControl;
             };
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
-                this.proxy.dragDrop.source = [];
+                this.broker.dragDrop.source = [];
                 if (this.selected)
-                    this.proxy.dragDrop.source = this.proxy.selection;
+                    this.broker.dragDrop.source = this.broker.selection;
                 else
-                    this.proxy.dragDrop.source = [this.data];
+                    this.broker.dragDrop.source = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
                 _event.preventDefault();
-                this.proxy.dragDrop.target = this.data;
+                this.broker.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
             };
             this.hndPointerUp = (_event) => {
@@ -129,12 +129,12 @@ var TreeControl;
                     return;
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
-            this.proxy = _proxy;
+            this.broker = _broker;
             this.data = _data;
-            this.display = this.proxy.getLabel(_data);
+            this.display = this.broker.getLabel(_data);
             // TODO: handle cssClasses
             this.create();
-            this.hasChildren = this.proxy.hasChildren(_data);
+            this.hasChildren = this.broker.hasChildren(_data);
             this.addEventListener(TreeControl.EVENT_TREE.CHANGE, this.hndChange);
             this.addEventListener(TreeControl.EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
             this.addEventListener(TreeControl.EVENT_TREE.FOCUS_OUT, this.hndFocus);
@@ -182,6 +182,9 @@ var TreeControl;
                 this.dispatchEvent(new Event(TreeControl.EVENT_TREE.OPEN, { bubbles: true }));
             this.querySelector("input[type='checkbox']").checked = _open;
         }
+        /**
+         * Returns a list of all data referenced by the items succeeding this
+         */
         getOpenData() {
             let list = this.querySelectorAll("li");
             let data = [];

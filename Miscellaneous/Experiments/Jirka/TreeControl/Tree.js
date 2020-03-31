@@ -25,87 +25,88 @@ var TreeControl;
         EVENT_TREE["SELECT"] = "itemselect";
     })(EVENT_TREE = TreeControl.EVENT_TREE || (TreeControl.EVENT_TREE = {}));
     /**
-     * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
-     * Additionally, it holds an instance of [[TreeList]] to display children of the corresponding object.
+     * Extension of [[TreeItem]] that represents the root of a tree control
      */
     class Tree extends TreeControl.TreeList {
-        constructor(_proxy, _root) {
+        constructor(_broker, _root) {
             super([]);
-            this.proxy = _proxy;
-            let root = new TreeControl.TreeItem(this.proxy, _root);
+            this.broker = _broker;
+            let root = new TreeControl.TreeItem(this.broker, _root);
             this.appendChild(root);
             this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
             this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
             this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
         }
+        /**
+         * Clear the current selection
+         */
         clearSelection() {
-            this.proxy.selection.splice(0);
-            this.displaySelection(this.proxy.selection);
+            this.broker.selection.splice(0);
+            this.displaySelection(this.broker.selection);
         }
         hndOpen(_event) {
             let item = _event.target;
-            let children = this.proxy.getChildren(item.data);
+            let children = this.broker.getChildren(item.data);
             if (!children)
                 return;
             let branch = this.createBranch(children);
             item.setBranch(branch);
-            // tree.displaySelection(this.proxy.selection);
+            this.displaySelection(this.broker.selection);
         }
         createBranch(_data) {
             let branch = new TreeControl.TreeList([]);
             for (let child of _data) {
-                branch.addItems([new TreeControl.TreeItem(this.proxy, child)]);
+                branch.addItems([new TreeControl.TreeItem(this.broker, child)]);
             }
             return branch;
         }
         hndRename(_event) {
             let item = _event.target.parentNode;
-            let renamed = this.proxy.rename(item.data, item.getLabel());
+            let renamed = this.broker.rename(item.data, item.getLabel());
             if (renamed)
-                item.setLabel(this.proxy.getLabel(item.data));
+                item.setLabel(this.broker.getLabel(item.data));
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
             _event.stopPropagation();
-            let index = this.proxy.selection.indexOf(_event.detail.data);
+            let index = this.broker.selection.indexOf(_event.detail.data);
             if (_event.detail.interval) {
-                let dataStart = this.proxy.selection[0];
+                let dataStart = this.broker.selection[0];
                 let dataEnd = _event.detail.data;
                 this.clearSelection();
                 this.selectInterval(dataStart, dataEnd);
                 return;
             }
             if (index >= 0 && _event.detail.additive)
-                this.proxy.selection.splice(index, 1);
+                this.broker.selection.splice(index, 1);
             else {
                 if (!_event.detail.additive)
                     this.clearSelection();
-                this.proxy.selection.push(_event.detail.data);
+                this.broker.selection.push(_event.detail.data);
             }
-            this.displaySelection(this.proxy.selection);
+            this.displaySelection(this.broker.selection);
         }
-        // Use proxy to manage drop...
         hndDrop(_event) {
             _event.stopPropagation();
             // if drop target included in drag source -> no drag&drop possible
-            if (this.proxy.dragDrop.source.indexOf(this.proxy.dragDrop.target) > -1)
+            if (this.broker.dragDrop.source.indexOf(this.broker.dragDrop.target) > -1)
                 return;
-            // let removed: TreeEntry = deleteItem(this.proxy.dragSource);
-            if (!this.proxy.drop(this.proxy.dragDrop.source, this.proxy.dragDrop.target))
+            // if the drop method of the broker returns falls -> no drag&drop possible
+            if (!this.broker.drop(this.broker.dragDrop.source, this.broker.dragDrop.target))
                 return;
-            this.delete(this.proxy.dragDrop.source);
-            let targetData = this.proxy.dragDrop.target;
+            this.delete(this.broker.dragDrop.source);
+            let targetData = this.broker.dragDrop.target;
             let targetItem = this.findOpen(targetData);
-            let branch = this.createBranch(this.proxy.getChildren(targetData));
+            let branch = this.createBranch(this.broker.getChildren(targetData));
             let old = targetItem.getBranch();
             targetItem.hasChildren = true;
             if (old)
                 old.restructure(branch);
             else
                 targetItem.open(true);
-            this.proxy.dragDrop.source = [];
-            this.proxy.dragDrop.target = null;
+            this.broker.dragDrop.source = [];
+            this.broker.dragDrop.target = null;
         }
     }
     TreeControl.Tree = Tree;

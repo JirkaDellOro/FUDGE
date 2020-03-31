@@ -10,19 +10,19 @@ namespace TreeControl {
     public display: string = "TreeItem";
     public classes: TREE_CLASS[] = [];
     public data: T = null;
-    public proxy: TreeProxy<T>;
+    public broker: TreeBroker<T>;
 
     private checkbox: HTMLInputElement;
     private label: HTMLInputElement;
 
-    public constructor(_proxy: TreeProxy<T>, _data: T) {
+    public constructor(_broker: TreeBroker<T>, _data: T) {
       super();
-      this.proxy = _proxy;
+      this.broker = _broker;
       this.data = _data;
-      this.display = this.proxy.getLabel(_data);
+      this.display = this.broker.getLabel(_data);
       // TODO: handle cssClasses
       this.create();
-      this.hasChildren = this.proxy.hasChildren(_data);
+      this.hasChildren = this.broker.hasChildren(_data);
 
       this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
       this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
@@ -81,6 +81,9 @@ namespace TreeControl {
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
+    /**
+     * Returns a list of all data referenced by the items succeeding this
+     */
     public getOpenData(): T[] {
       let list: NodeListOf<HTMLLIElement> = this.querySelectorAll("li");
       let data: T[] = [];
@@ -269,18 +272,18 @@ namespace TreeControl {
 
     private hndDragStart = (_event: DragEvent): void => {
       _event.stopPropagation();
-      this.proxy.dragDrop.source = [];
+      this.broker.dragDrop.source = [];
       if (this.selected)
-        this.proxy.dragDrop.source = this.proxy.selection;
+        this.broker.dragDrop.source = this.broker.selection;
       else
-        this.proxy.dragDrop.source = [this.data];
+        this.broker.dragDrop.source = [this.data];
       _event.dataTransfer.effectAllowed = "all";
     }
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
       _event.preventDefault();
-      this.proxy.dragDrop.target = this.data;
+      this.broker.dragDrop.target = this.data;
       _event.dataTransfer.dropEffect = "move";
     }
 

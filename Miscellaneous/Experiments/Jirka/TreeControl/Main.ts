@@ -4,7 +4,7 @@ namespace TreeControl {
   let selection: Object[] = [];
   let dragDrop: { source: Object[], target: Object } = { source: [], target: null };
 
-  export class Proxy extends TreeProxy<TreeEntry> {
+  export class Broker extends TreeBroker<TreeEntry> {
     public selection: Object[] = selection;
     public dragDrop: { source: Object[], target: Object } = dragDrop;
 
@@ -32,7 +32,7 @@ namespace TreeControl {
     }
   }
 
-  let tree: Tree<TreeEntry> = new Tree<TreeEntry>(new Proxy(), data[0]);
+  let tree: Tree<TreeEntry> = new Tree<TreeEntry>(new Broker(), data[0]);
   document.body.appendChild(tree);
 
   // // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);
