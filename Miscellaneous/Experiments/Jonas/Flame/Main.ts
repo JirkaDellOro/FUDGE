@@ -8,13 +8,19 @@ namespace Flame {
     window.addEventListener("load", hndLoad);
 
     let root: f.Node = new f.Node("Root");
-    let particles: f.Node = new f.Node("Particles");
     let viewport: f.Viewport;
     let camera: fAid.CameraOrbit;
     let speedCameraRotation: number = 0.2;
     let speedCameraTranslation: number = 0.02;
 
+    let input: HTMLInputElement;
+
+    let particleNum: number;
+    let particleOffset: number;
+    let randomNumbers: number[] = [];
+
     function hndLoad(_event: Event): void {
+        input = <HTMLInputElement>document.getElementById("particleNum");
         const canvas: HTMLCanvasElement = document.querySelector("canvas");
         f.RenderManager.initialize(false, true);
         f.Debug.log("Canvas", canvas);
@@ -42,20 +48,27 @@ namespace Flame {
         viewport.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
         viewport.addEventListener(f.EVENT_WHEEL.WHEEL, hndWheelMove);
 
+        // setup random 100 random numbers
+        for (let i = 0; i < 100; i++) {
+            randomNumbers.push(Math.random());
+        }
+
         // setup particles
         let mesh: f.Mesh = new f.MeshCube();
         let material: f.Material = new f.Material("Alpha", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("YELLOW")));
-        particles.addComponent(new f.ComponentTransform());
-        particles.cmpTransform.local.translateY(-0.5);
-        root.addChild(particles);
+        particleNum = input.valueAsNumber;
+        particleOffset = 1 / particleNum;
+        root.addChild(createParticles(mesh, material));
 
-        particles.addChild(createParticle(mesh, material));
+        // setup input
+        input.addEventListener("input", (_event: Event) => {
+            particleNum = input.valueAsNumber;
+            particleOffset = 1 / particleNum;
+            let newParticles: f.Node = createParticles(mesh, material);
+            root.replaceChild(getParticles(), newParticles);
+        });
 
         viewport.draw();
-
-        f.Time.game.setTimer(500, 20, () => {
-            particles.addChild(createParticle(mesh, material));
-        });
 
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         f.Loop.start(f.LOOP_MODE.TIME_GAME, 60);
@@ -63,27 +76,49 @@ namespace Flame {
         function update(_event: f.Eventƒ): void {
             let time: number = f.Time.game.get() / 1000;
             updateParticles(time);
-            // console.log(time);
             viewport.draw();
         }
 
     }
 
     function updateParticles(_time: number): void {
-        let effectFactor: number = _time % 1;
-        for (const child of particles.getChildren()) {
-            let x: number = 0;
-            let y: number = effectFactor;
+        let effectFactor: number = _time *.7 % 1;
+        let particleIndex: number = 1;
+        for (const child of getParticles().getChildren()) {
+            // console.log("Child: " + particleIndex + "-------");
+            let currentOffset: number = particleIndex * particleOffset - particleOffset / 2;
+            // console.log("Offset: " + currentOffset);
+            let y: number = (effectFactor + currentOffset + randomNumbers[(particleIndex - 1) % 100]) % 1;
+            let x: number = ((-2 + currentOffset * 4) * Math.pow(1 - y, 3) + (2 - currentOffset * 4) * Math.pow(1 - y, 2));
             let z: number = 0;
+            // y = slowDown(y);
             let translation: f.Vector3 = new f.Vector3(x, y, z);
+            // console.log(translation.toString());
             child.cmpTransform.local.translation = translation;
+            particleIndex++;
         }
+
+        // function slowDown(_value: number): number {
+        //     return _value * _value;
+        // }
     }
 
     function createParticle(_mesh: f.Mesh, _material: f.Material): f.Node {
         let node: f.Node = new fAid.Node("Alpha", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0, 0)), _material, _mesh);
         node.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.05, 0.05, 0.05));
         return node;
+    }
+
+    function createParticles(_mesh: f.Mesh, _material: f.Material): f.Node {
+        let newParticles: f.Node = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, -.5, 0)));
+        for (let i = 0; i < particleNum; i++) {
+            newParticles.addChild(createParticle(_mesh, _material));
+        }
+        return newParticles;
+    }
+
+    function getParticles(): f.Node {
+        return root.getChildrenByName("Particles")[0];
     }
 
     function hndPointerMove(_event: f.EventPointer): void {
