@@ -20,8 +20,15 @@ var TreeControl;
             return true;
         }
         delete(_objects) {
-            // disallow deletion
+            // disallow deletion if necessary
             return false;
+        }
+        drop(_source, _target) {
+            let children = this.getChildren(_target) || [];
+            children.push(..._source);
+            _target["children"] = children;
+            deleteObjects(_source);
+            return true;
         }
     }
     TreeControl.Proxy = Proxy;

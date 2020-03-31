@@ -88,23 +88,22 @@ var TreeControl;
         // Use proxy to manage drop...
         hndDrop(_event) {
             _event.stopPropagation();
-            if (this.proxy.dragSource[0] == this.proxy.dropTarget[0])
+            // if drop target included in drag source -> no drag&drop possible
+            if (this.proxy.dragSource.indexOf(this.proxy.dropTarget[0]) > -1)
                 return;
             // let removed: TreeEntry = deleteItem(this.proxy.dragSource);
+            if (!this.proxy.drop(this.proxy.dragSource, this.proxy.dropTarget[0]))
+                return;
             this.delete(this.proxy.dragSource);
             let targetData = this.proxy.dropTarget[0];
             let targetItem = this.findOpen(targetData);
-            let children = this.proxy.getChildren(targetData) || [];
-            children.push(this.proxy.dragSource[0]);
-            // HACK!!
-            targetData["children"] = children;
-            let branch = this.createBranch(children);
+            let branch = this.createBranch(this.proxy.getChildren(targetData));
             let old = targetItem.getBranch();
+            targetItem.hasChildren = true;
             if (old)
                 old.restructure(branch);
             else
                 targetItem.open(true);
-            targetItem.hasChildren = true;
             this.proxy.dragSource.splice(0);
             this.proxy.dropTarget.splice(0);
         }

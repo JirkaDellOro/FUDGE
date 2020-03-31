@@ -18,12 +18,19 @@ namespace TreeControl {
       return true;
     }
     public delete(_objects: TreeEntry[]): boolean {
-      // disallow deletion
+      // disallow deletion if necessary
       return false;
+    }    
+    public drop(_source: Object[], _target: Object): boolean {
+      let children: TreeEntry[] = this.getChildren(<TreeEntry>_target) || [];
+      children.push(...<TreeEntry[]>_source);
+      _target["children"] = children;
+      deleteObjects(_source);
+      return true;
     }
   }
 
-  let tree: Tree<TreeEntry> = new Tree(new Proxy(), data[0]);
+  let tree: Tree<TreeEntry> = new Tree<TreeEntry>(new Proxy(), data[0]);
   document.body.appendChild(tree);
 
   // // tree.addEventListener(EVENT_TREE.DELETE, hndDelete);

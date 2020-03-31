@@ -249,7 +249,10 @@ namespace TreeControl {
       _event.stopPropagation();
       // TODO: send custom event with this as item and data as load
       this.proxy.dragSource.splice(0);
-      this.proxy.dragSource.push(this.data);
+      if(this.selected)
+        this.proxy.dragSource.push(...this.proxy.selection);
+      else
+        this.proxy.dragSource.push(this.data);
       _event.dataTransfer.effectAllowed = "all";
     }
 

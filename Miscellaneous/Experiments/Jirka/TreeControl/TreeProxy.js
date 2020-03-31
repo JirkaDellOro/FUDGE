@@ -5,6 +5,7 @@ var TreeControl;
     class TreeProxy {
         constructor() {
             this.selection = [];
+            // TODO: stuff sources and target into one dragDrop-Object
             this.dragSource = [];
             this.dropTarget = [];
         }
