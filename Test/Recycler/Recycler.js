@@ -1,24 +1,27 @@
 var Recycler;
 (function (Recycler_1) {
-    class Recycler {
-        static store(_instance) {
-            let key = _instance.constructor;
-            let instances = Recycler.depot.get(key) || [];
-            instances.push(_instance);
-            Recycler.depot.set(key, instances);
-        }
-        static for(_constructor) {
-            let recycler = Recycler.recyclers.get(_constructor);
-            if (!recycler) {
-                //tslint:disable-next-line: no-use-before-declare
-                recycler = new RecyclerSpecific(_constructor);
-                Recycler.recyclers.set(_constructor, recycler);
+    let Recycler = /** @class */ (() => {
+        class Recycler {
+            static store(_instance) {
+                let key = _instance.constructor;
+                let instances = Recycler.depot.get(key) || [];
+                instances.push(_instance);
+                Recycler.depot.set(key, instances);
             }
-            return recycler;
+            static for(_constructor) {
+                let recycler = Recycler.recyclers.get(_constructor);
+                if (!recycler) {
+                    //tslint:disable-next-line: no-use-before-declare
+                    recycler = new RecyclerSpecific(_constructor);
+                    Recycler.recyclers.set(_constructor, recycler);
+                }
+                return recycler;
+            }
         }
-    }
-    Recycler.depot = new Map();
-    Recycler.recyclers = new Map();
+        Recycler.depot = new Map();
+        Recycler.recyclers = new Map();
+        return Recycler;
+    })();
     class RecyclerSpecific extends Recycler {
         constructor(_constructor) {
             super();

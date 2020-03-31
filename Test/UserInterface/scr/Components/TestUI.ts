@@ -4,7 +4,7 @@
 namespace UITest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    export class TestUI extends ƒui.UIMutable {
+    export class TestUI extends ƒui.Mutable {
         protected root: HTMLFormElement;
         private camera: ƒ.ComponentCamera;
 
@@ -12,7 +12,7 @@ namespace UITest {
             super(_camera);
             this.camera = _camera;
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>this.camera, this.root);
+            ƒui.Generator.createFromMutable(<ƒ.Mutable>this.camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }

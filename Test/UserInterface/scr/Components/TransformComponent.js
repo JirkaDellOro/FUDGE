@@ -5,11 +5,11 @@ var UITest;
 /// <reference types="../../../../UserInterface/Build/FudgeUI"/>
 (function (UITest) {
     var ƒui = FudgeUserInterface;
-    class TransformUI extends ƒui.UIMutable {
+    class TransformUI extends ƒui.Mutable {
         constructor(container, state, _component) {
             super(_component);
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(_component, this.root);
+            ƒui.Generator.createFromMutable(_component, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             // this.root.querySelector("#_r").textContent = "Red";
             container.getElement().html(this.root);

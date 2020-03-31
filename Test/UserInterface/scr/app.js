@@ -82,8 +82,8 @@ var UITest;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
-        document.body.addEventListener("nodeSelectionEvent" /* SELECTION */, function (_event) {
-            myLayout.emit("nodeSelectionEvent" /* SELECTION */, _event);
+        document.body.addEventListener("select" /* SELECT */, function (_event) {
+            myLayout.emit("select" /* SELECT */, _event);
         });
         function animate(_event) {
             branch.mtxLocal.rotateY(1);
@@ -100,9 +100,9 @@ var UITest;
     function createTestComponent(container, state) {
         let content = document.createElement("div");
         let components = branch.getAllComponents();
-        for (let component of components) {
-            let uiComponents = new ƒui.UINodeData(component, content);
-        }
+        // for (let component of components) {
+        //     let uiComponents: ƒui.NodeData = new ƒui.NodeData(component, content);
+        // }
         container.getElement().append(content);
         let mutator = {
             Primitives: {
@@ -144,10 +144,10 @@ var UITest;
     }
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
-        let treeController = new ƒui.UINodeList(branch, listContainer);
-        myLayout.on("nodeSelectionEvent" /* SELECTION */, function (_event) {
-            treeController.setNodeRoot(branch);
-        });
+        // let treeController: ƒui.NodeList = new ƒui.NodeList(branch, listContainer);
+        // myLayout.on(ƒui.EVENT_USERINTERFACE.SELECT, function (_event: Event): void {
+        //     treeController.setNodeRoot(branch);
+        // });
         container.getElement().html(listContainer);
     }
     function createAnimTreeComponent(container, state) {
@@ -168,7 +168,7 @@ var UITest;
                 }
             }
         };
-        let treeController = new ƒui.UIAnimationList(testMutator, listContainer);
+        // let treeController: ƒui.AnimationList = new ƒui.AnimationList(testMutator, listContainer);
         container.getElement().html(listContainer);
     }
 })(UITest || (UITest = {}));

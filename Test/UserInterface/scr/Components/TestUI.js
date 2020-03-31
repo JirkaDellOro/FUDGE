@@ -5,12 +5,12 @@ var UITest;
 /// <reference path="../../../../UserInterface/Build/FudgeUI.d.ts"/>
 (function (UITest) {
     var ƒui = FudgeUserInterface;
-    class TestUI extends ƒui.UIMutable {
+    class TestUI extends ƒui.Mutable {
         constructor(container, state, _camera) {
             super(_camera);
             this.camera = _camera;
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(this.camera, this.root);
+            ƒui.Generator.createFromMutable(this.camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             container.getElement().html(this.root);
         }

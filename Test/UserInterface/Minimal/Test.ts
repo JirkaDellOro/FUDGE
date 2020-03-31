@@ -1,12 +1,3 @@
-// <reference path="../../../Core/src/Transfer/Serializer.ts"/>
-// <reference path="../../../Core/Build/Fudge.d.ts"/>
-// / <reference types="../../@types/golden-layout"/>
-// / <reference types="../../../Core/Build/FudgeCore"/>
-// / <reference types="../../../UserInterface/Build/FudgeUI"/>
-// /<reference path="../../Scenes/Scenes.ts"/>
-
-
-
 namespace UI_Minimal {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
@@ -21,8 +12,8 @@ namespace UI_Minimal {
     let camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     matrix = ƒ.Matrix4x4.ROTATION_X(10);
 
-    ƒUi.UIGenerator.createFromMutable(camera, uiCamera);
-    ƒUi.UIGenerator.createFromMutable(matrix, uiMatrix);
+    ƒUi.Generator.createFromMutable(camera, uiCamera);
+    ƒUi.Generator.createFromMutable(matrix, uiMatrix);
     document.body.appendChild(uiCamera);
     document.body.appendChild(uiMatrix);
     uiMatrix.addEventListener("input", handleInput);

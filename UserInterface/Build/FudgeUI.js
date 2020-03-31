@@ -723,8 +723,10 @@ var FudgeUserInterface;
      */
     class TreeBroker {
         constructor() {
+            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
             this.selection = [];
-            this.dragDrop = { source: [], target: null };
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            this.dragDrop = { sources: [], target: null };
         }
     }
     FudgeUserInterface.TreeBroker = TreeBroker;
