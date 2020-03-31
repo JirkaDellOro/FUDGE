@@ -9,6 +9,10 @@
       "../Source/Elements/MultiLevelMenu.ts",
       "../Source/Elements/Stepper.ts",
       "../Source/Elements/Toggle.ts",
+      "../Source/Elements/Tree/TreeList.ts",
+      "../Source/Elements/Tree/Tree.ts",
+      "../Source/Elements/Tree/TreeBroker.ts",
+      "../Source/Elements/Tree/TreeItem.ts",
       "../Source/Event/Event.ts",
       "../Source/Generator/Generator.ts",
       "../Source/Mutable/Mutable.ts"
@@ -23,7 +27,7 @@
         },
         {
           "pos": 15,
-          "end": 31280,
+          "end": 52995,
           "kind": "text"
         }
       ],
@@ -57,7 +61,7 @@
         },
         {
           "pos": 58,
-          "end": 4867,
+          "end": 11457,
           "kind": "text"
         }
       ]

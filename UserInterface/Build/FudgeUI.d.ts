@@ -77,6 +77,187 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    /**
+    * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
+    *
+    * ```plaintext
+    * treeList <ul>
+    * ├ treeItem <li>
+    * ├ treeItem <li>
+    * │ └ treeList <ul>
+    * │   ├ treeItem <li>
+    * │   └ treeItem <li>
+    * └ treeItem <li>
+    * ```
+    */
+    class TreeList<T> extends HTMLUListElement {
+        constructor(_items?: TreeItem<T>[]);
+        /**
+         * Opens the tree along the given path to show the objects the path includes
+         * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
+         * @param _focus If true (default) the last object found in the tree gets the focus
+         */
+        show(_path: T[], _focus?: boolean): void;
+        /**
+         * Restructures the list to sync with the given list.
+         * [[TreeItem]]s referencing the same object remain in the list, new items get added in the order of appearance, obsolete ones are deleted.
+         * @param _tree A list to sync this with
+         */
+        restructure(_tree: TreeList<T>): void;
+        /**
+         * Returns the [[TreeItem]] of this list referencing the given object or null, if not found
+         */
+        findItem(_data: T): TreeItem<T>;
+        /**
+         * Adds the given [[TreeItem]]s at the end of this list
+         */
+        addItems(_items: TreeItem<T>[]): void;
+        /**
+         * Returns the content of this list as array of [[TreeItem]]s
+         */
+        getItems(): TreeItem<T>[];
+        displaySelection(_data: T[]): void;
+        selectInterval(_dataStart: T, _dataEnd: T): void;
+        delete(_data: T[]): TreeItem<T>[];
+        findOpen(_data: T): TreeItem<T>;
+    }
+}
+declare namespace FudgeUserInterface {
+    enum TREE_CLASS {
+        SELECTED = "selected",
+        INACTIVE = "inactive"
+    }
+    enum EVENT_TREE {
+        RENAME = "rename",
+        OPEN = "open",
+        FOCUS_NEXT = "focusNext",
+        FOCUS_PREVIOUS = "focusPrevious",
+        FOCUS_IN = "focusin",
+        FOCUS_OUT = "focusout",
+        DELETE = "delete",
+        CHANGE = "change",
+        DOUBLE_CLICK = "dblclick",
+        KEY_DOWN = "keydown",
+        DRAG_START = "dragstart",
+        DRAG_OVER = "dragover",
+        DROP = "drop",
+        POINTER_UP = "pointerup",
+        SELECT = "itemselect"
+    }
+    /**
+     * Extension of [[TreeItem]] that represents the root of a tree control
+     */
+    class Tree<T> extends TreeList<T> {
+        broker: TreeBroker<T>;
+        constructor(_broker: TreeBroker<T>, _root: T);
+        /**
+         * Clear the current selection
+         */
+        clearSelection(): void;
+        private hndOpen;
+        private createBranch;
+        private hndRename;
+        private hndSelect;
+        private hndDrop;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
+     * The [[Tree]] doesn't know how your data is structured and how to handle it, the broker implements the methods needed
+     * // TODO: check if this could be achieved more elegantly using decorators
+     */
+    abstract class TreeBroker<T> {
+        selection: Object[];
+        dragDrop: {
+            source: Object[];
+            target: Object;
+        };
+        abstract getLabel(_object: T): string;
+        abstract hasChildren(_object: T): boolean;
+        abstract getChildren(_object: T): T[];
+        abstract rename(_object: T, _new: string): boolean;
+        abstract drop(_source: T[], _target: T): boolean;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
+     * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
+     */
+    class TreeItem<T> extends HTMLLIElement {
+        display: string;
+        classes: TREE_CLASS[];
+        data: T;
+        broker: TreeBroker<T>;
+        private checkbox;
+        private label;
+        constructor(_broker: TreeBroker<T>, _data: T);
+        /**
+         * Returns true, when this item has a visible checkbox in front to open the subsequent branch
+         */
+        get hasChildren(): boolean;
+        /**
+         * Shows or hides the checkbox for opening the subsequent branch
+         */
+        set hasChildren(_has: boolean);
+        /**
+         * Set the label text to show
+         */
+        setLabel(_text: string): void;
+        /**
+         * Get the label text shown
+         */
+        getLabel(): string;
+        /**
+         * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+         * The user of the tree needs to add an event listener to the tree
+         * in order to create that [[TreeList]] and add it as branch to this item
+         * @param _open If false, the item will be closed
+         */
+        open(_open: boolean): void;
+        /**
+         * Returns a list of all data referenced by the items succeeding this
+         */
+        getOpenData(): T[];
+        /**
+         * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
+         */
+        setBranch(_branch: TreeList<T>): void;
+        /**
+         * Returns the branch of children of this item.
+         */
+        getBranch(): TreeList<T>;
+        /**
+         * Returns attaches or detaches the [[TREE_CLASS.SELECTED]] to this item
+         */
+        set selected(_on: boolean);
+        /**
+         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+         */
+        get selected(): boolean;
+        /**
+         * Dispatches the [[EVENT_TREE.SELECT]] event
+         * @param _additive For multiple selection (+Ctrl)
+         * @param _interval For selection over interval (+Shift)
+         */
+        select(_additive: boolean, _interval?: boolean): void;
+        /**
+         * Removes the branch of children from this item
+         */
+        private removeBranch;
+        private create;
+        private hndFocus;
+        private hndKey;
+        private startTypingLabel;
+        private hndDblClick;
+        private hndChange;
+        private hndDragStart;
+        private hndDragOver;
+        private hndPointerUp;
+    }
+}
+declare namespace FudgeUserInterface {
     const enum EVENT_USERINTERFACE {
         SELECT = "select",
         COLLAPSE = "collapse",
