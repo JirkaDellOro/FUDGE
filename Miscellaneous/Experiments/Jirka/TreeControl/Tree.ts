@@ -2,7 +2,7 @@
 namespace TreeControl {
   import ƒ = FudgeCore;
 
-  export enum TREE_CLASSES {
+  export enum TREE_CLASS {
     SELECTED = "selected",
     INACTIVE = "inactive"
   }
@@ -104,16 +104,16 @@ namespace TreeControl {
       _event.stopPropagation();
 
       // if drop target included in drag source -> no drag&drop possible
-      if (this.proxy.dragSource.indexOf(this.proxy.dropTarget[0]) > -1)
+      if (this.proxy.dragDrop.source.indexOf(this.proxy.dragDrop.target) > -1)
         return;
 
       // let removed: TreeEntry = deleteItem(this.proxy.dragSource);
-      if (!this.proxy.drop(<T[]>this.proxy.dragSource, <T>this.proxy.dropTarget[0]))
+      if (!this.proxy.drop(<T[]>this.proxy.dragDrop.source, <T>this.proxy.dragDrop.target))
         return;
 
-      this.delete(<T[]>this.proxy.dragSource);
+      this.delete(<T[]>this.proxy.dragDrop.source);
 
-      let targetData: T = <T>this.proxy.dropTarget[0];
+      let targetData: T = <T>this.proxy.dragDrop.target;
       let targetItem: TreeItem<T> = this.findOpen(targetData);
 
       let branch: TreeList<T> = this.createBranch(this.proxy.getChildren(targetData));
@@ -124,24 +124,10 @@ namespace TreeControl {
       else
         targetItem.open(true);
 
-      this.proxy.dragSource.splice(0);
-      this.proxy.dropTarget.splice(0);
+      this.proxy.dragDrop.source = [];
+      this.proxy.dragDrop.target = null;
     }
   }
 
-  customElements.define("ul-tree", Tree, { extends: "ul" });
+  customElements.define("ul-tree", <CustomElementConstructor><unknown>Tree, { extends: "ul" });
 }
-
-// IDEA to stuff the proxy into the tree class
-// export abstract class Tree<T> extends TreeItem<T> {
-//   // private proxy: TreeProxy<T>;
-
-//   constructor(_root: T) {
-//     super(_root);
-//   }
-
-//   public abstract objGetLabel(_object: T): string;
-//   public abstract objHasChildren(_object: T): boolean;
-//   public abstract objGetChildren(_object: T): T[];
-// }
-

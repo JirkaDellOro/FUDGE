@@ -2,13 +2,11 @@
 namespace TreeControl {
   import ƒ = FudgeCore;
   let selection: Object[] = [];
-  let dragSource: Object[] = [];
-  let dropTarget: Object[] = [];
+  let dragDrop: { source: Object[], target: Object } = { source: [], target: null };
 
   export class Proxy extends TreeProxy<TreeEntry> {
     public selection: Object[] = selection;
-    public dragSource: Object[] = dragSource;
-    public dropTarget: Object[] = dropTarget;
+    public dragDrop: { source: Object[], target: Object } = dragDrop;
 
     public getLabel(_object: TreeEntry): string { return _object.display; }
     public hasChildren(_object: TreeEntry): boolean { return _object.children && _object.children.length > 0; }
@@ -20,12 +18,16 @@ namespace TreeControl {
     public delete(_objects: TreeEntry[]): boolean {
       // disallow deletion if necessary
       return false;
-    }    
+    }
     public drop(_source: Object[], _target: Object): boolean {
+      // if dropTarget is child of one of the dropSources -> no drag&drop possible
+      if (isChild(<TreeEntry>_target, <TreeEntry[]>_source))
+        return false;
+
       let children: TreeEntry[] = this.getChildren(<TreeEntry>_target) || [];
       children.push(...<TreeEntry[]>_source);
       _target["children"] = children;
-      deleteObjects(_source);
+      deleteObjects(<TreeEntry[]>_source);
       return true;
     }
   }
@@ -55,19 +57,29 @@ namespace TreeControl {
         tree.clearSelection();
         break;
       case ƒ.KEYBOARD_CODE.DELETE:
-        deleteObjects(selection);
+        deleteObjects(<TreeEntry[]>selection);
         selection.splice(0);
         break;
     }
-  }  
+  }
 
-  function deleteObjects(_objects: Object[]): void {
+  function deleteObjects(_objects: TreeEntry[]): void {
     for (let object of _objects) {
-      let item: TreeItem<TreeEntry> = tree.findOpen(<TreeEntry>object);
+      let item: TreeItem<TreeEntry> = tree.findOpen(object);
       let list: TreeItem<TreeEntry> = <TreeItem<TreeEntry>>item.parentElement.parentElement;
       let siblings: TreeEntry[] = list.data["children"];
-      let removed: TreeEntry[] = siblings.splice(siblings.indexOf(<TreeEntry>item.data), 1);
+      siblings.splice(siblings.indexOf(item.data), 1);
     }
-    let deleted: TreeItem<TreeEntry>[] = tree.delete(<TreeEntry[]>_objects);
+    tree.delete(_objects);
+  }
+
+  function isChild(_child: TreeEntry, _parents: TreeEntry[]): boolean {
+    for (let parent of _parents) {
+      let itemParent: TreeItem<TreeEntry> = tree.findOpen(parent);
+      let openSuccessors: TreeEntry[] = itemParent.getOpenData();
+      if (openSuccessors.indexOf(_child) > -1)
+        return true;
+    }
+    return false;
   }
 }

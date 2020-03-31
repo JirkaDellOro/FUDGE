@@ -4,13 +4,12 @@ namespace TreeControl {
 
   /**
    * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
-   * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
+   * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
    */
   export class TreeItem<T> extends HTMLLIElement {
     public display: string = "TreeItem";
-    public classes: TREE_CLASSES[] = [];
+    public classes: TREE_CLASS[] = [];
     public data: T = null;
-    public treeList: TreeList<T> = null;
     public proxy: TreeProxy<T>;
 
     private checkbox: HTMLInputElement;
@@ -39,10 +38,16 @@ namespace TreeControl {
       this.addEventListener(EVENT_TREE.POINTER_UP, this.hndPointerUp);
     }
 
+    /**
+     * Returns true, when this item has a visible checkbox in front to open the subsequent branch 
+     */
     public get hasChildren(): boolean {
       return this.checkbox.style.visibility != "hidden";
     }
 
+    /**
+     * Shows or hides the checkbox for opening the subsequent branch
+     */
     public set hasChildren(_has: boolean) {
       this.checkbox.style.visibility = _has ? "visible" : "hidden";
     }
@@ -76,11 +81,18 @@ namespace TreeControl {
       (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
     }
 
+    public getOpenData(): T[] {
+      let list: NodeListOf<HTMLLIElement> = this.querySelectorAll("li");
+      let data: T[] = [];
+      for (let item of list)
+        data.push((<TreeItem<T>>item).data);
+      return data;
+    }
+
     /**
      * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
      */
     public setBranch(_branch: TreeList<T>): void {
-      // tslint:disable no-use-before-declare
       this.removeBranch();
       if (_branch)
         this.appendChild(_branch);
@@ -93,17 +105,28 @@ namespace TreeControl {
       return <TreeList<T>>this.querySelector("ul");
     }
 
+    /**
+     * Returns attaches or detaches the [[TREE_CLASS.SELECTED]] to this item
+     */
     public set selected(_on: boolean) {
       if (_on)
-        this.classList.add(TREE_CLASSES.SELECTED);
+        this.classList.add(TREE_CLASS.SELECTED);
       else
-        this.classList.remove(TREE_CLASSES.SELECTED);
+        this.classList.remove(TREE_CLASS.SELECTED);
     }
 
+    /**
+     * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+     */
     public get selected(): boolean {
-      return this.classList.contains(TREE_CLASSES.SELECTED);
+      return this.classList.contains(TREE_CLASS.SELECTED);
     }
 
+    /**
+     * Dispatches the [[EVENT_TREE.SELECT]] event
+     * @param _additive For multiple selection (+Ctrl) 
+     * @param _interval For selection over interval (+Shift)
+     */
     public select(_additive: boolean, _interval: boolean = false): void {
       let event: CustomEvent = new CustomEvent(EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive, interval: _interval } });
       this.dispatchEvent(event);
@@ -113,7 +136,7 @@ namespace TreeControl {
      * Removes the branch of children from this item
      */
     private removeBranch(): void {
-      let content: HTMLUListElement = this.querySelector("ul");
+      let content: TreeList<T> = this.getBranch();
       if (!content)
         return;
       this.removeChild(content);
@@ -244,24 +267,20 @@ namespace TreeControl {
       }
     }
 
-
     private hndDragStart = (_event: DragEvent): void => {
       _event.stopPropagation();
-      // TODO: send custom event with this as item and data as load
-      this.proxy.dragSource.splice(0);
-      if(this.selected)
-        this.proxy.dragSource.push(...this.proxy.selection);
+      this.proxy.dragDrop.source = [];
+      if (this.selected)
+        this.proxy.dragDrop.source = this.proxy.selection;
       else
-        this.proxy.dragSource.push(this.data);
+        this.proxy.dragDrop.source = [this.data];
       _event.dataTransfer.effectAllowed = "all";
     }
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
       _event.preventDefault();
-      // TODO: send custom event with this as item and data as load
-      this.proxy.dropTarget.splice(0);
-      this.proxy.dropTarget.push(this.data);
+      this.proxy.dragDrop.target = this.data;
       _event.dataTransfer.dropEffect = "move";
     }
 
@@ -271,8 +290,7 @@ namespace TreeControl {
         return;
       this.select(_event.ctrlKey, _event.shiftKey);
     }
-
   }
 
-  customElements.define("li-tree-item", TreeItem, { extends: "li" });
+  customElements.define("li-tree-item", <CustomElementConstructor><unknown>TreeItem, { extends: "li" });
 }

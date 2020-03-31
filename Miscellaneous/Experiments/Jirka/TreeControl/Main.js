@@ -3,14 +3,12 @@ var TreeControl;
 (function (TreeControl) {
     var ƒ = FudgeCore;
     let selection = [];
-    let dragSource = [];
-    let dropTarget = [];
+    let dragDrop = { source: [], target: null };
     class Proxy extends TreeControl.TreeProxy {
         constructor() {
             super(...arguments);
             this.selection = selection;
-            this.dragSource = dragSource;
-            this.dropTarget = dropTarget;
+            this.dragDrop = dragDrop;
         }
         getLabel(_object) { return _object.display; }
         hasChildren(_object) { return _object.children && _object.children.length > 0; }
@@ -24,6 +22,9 @@ var TreeControl;
             return false;
         }
         drop(_source, _target) {
+            // if dropTarget is child of one of the dropSources -> no drag&drop possible
+            if (isChild(_target, _source))
+                return false;
             let children = this.getChildren(_target) || [];
             children.push(..._source);
             _target["children"] = children;
@@ -64,9 +65,18 @@ var TreeControl;
             let item = tree.findOpen(object);
             let list = item.parentElement.parentElement;
             let siblings = list.data["children"];
-            let removed = siblings.splice(siblings.indexOf(item.data), 1);
+            siblings.splice(siblings.indexOf(item.data), 1);
         }
-        let deleted = tree.delete(_objects);
+        tree.delete(_objects);
+    }
+    function isChild(_child, _parents) {
+        for (let parent of _parents) {
+            let itemParent = tree.findOpen(parent);
+            let openSuccessors = itemParent.getOpenData();
+            if (openSuccessors.indexOf(_child) > -1)
+                return true;
+        }
+        return false;
     }
 })(TreeControl || (TreeControl = {}));
 //# sourceMappingURL=Main.js.map

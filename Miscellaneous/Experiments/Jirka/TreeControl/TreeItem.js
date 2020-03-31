@@ -4,7 +4,7 @@ var TreeControl;
     var ƒ = FudgeCore;
     /**
      * Extension of li-element that represents an object in a [[TreeList]] with a checkbox and a textinput as content.
-     * Additionally, may hold an instance of [[TreeList]] to display children of the corresponding object.
+     * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
         constructor(_proxy, _data) {
@@ -12,7 +12,6 @@ var TreeControl;
             this.display = "TreeItem";
             this.classes = [];
             this.data = null;
-            this.treeList = null;
             this.hndFocus = (_event) => {
                 let listening = _event.currentTarget;
                 switch (_event.type) {
@@ -111,20 +110,17 @@ var TreeControl;
             };
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
-                // TODO: send custom event with this as item and data as load
-                this.proxy.dragSource.splice(0);
+                this.proxy.dragDrop.source = [];
                 if (this.selected)
-                    this.proxy.dragSource.push(...this.proxy.selection);
+                    this.proxy.dragDrop.source = this.proxy.selection;
                 else
-                    this.proxy.dragSource.push(this.data);
+                    this.proxy.dragDrop.source = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
                 _event.preventDefault();
-                // TODO: send custom event with this as item and data as load
-                this.proxy.dropTarget.splice(0);
-                this.proxy.dropTarget.push(this.data);
+                this.proxy.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
             };
             this.hndPointerUp = (_event) => {
@@ -150,9 +146,15 @@ var TreeControl;
             this.addEventListener(TreeControl.EVENT_TREE.DRAG_OVER, this.hndDragOver);
             this.addEventListener(TreeControl.EVENT_TREE.POINTER_UP, this.hndPointerUp);
         }
+        /**
+         * Returns true, when this item has a visible checkbox in front to open the subsequent branch
+         */
         get hasChildren() {
             return this.checkbox.style.visibility != "hidden";
         }
+        /**
+         * Shows or hides the checkbox for opening the subsequent branch
+         */
         set hasChildren(_has) {
             this.checkbox.style.visibility = _has ? "visible" : "hidden";
         }
@@ -180,11 +182,17 @@ var TreeControl;
                 this.dispatchEvent(new Event(TreeControl.EVENT_TREE.OPEN, { bubbles: true }));
             this.querySelector("input[type='checkbox']").checked = _open;
         }
+        getOpenData() {
+            let list = this.querySelectorAll("li");
+            let data = [];
+            for (let item of list)
+                data.push(item.data);
+            return data;
+        }
         /**
          * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
          */
         setBranch(_branch) {
-            // tslint:disable no-use-before-declare
             this.removeBranch();
             if (_branch)
                 this.appendChild(_branch);
@@ -195,15 +203,26 @@ var TreeControl;
         getBranch() {
             return this.querySelector("ul");
         }
+        /**
+         * Returns attaches or detaches the [[TREE_CLASS.SELECTED]] to this item
+         */
         set selected(_on) {
             if (_on)
-                this.classList.add(TreeControl.TREE_CLASSES.SELECTED);
+                this.classList.add(TreeControl.TREE_CLASS.SELECTED);
             else
-                this.classList.remove(TreeControl.TREE_CLASSES.SELECTED);
+                this.classList.remove(TreeControl.TREE_CLASS.SELECTED);
         }
+        /**
+         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+         */
         get selected() {
-            return this.classList.contains(TreeControl.TREE_CLASSES.SELECTED);
+            return this.classList.contains(TreeControl.TREE_CLASS.SELECTED);
         }
+        /**
+         * Dispatches the [[EVENT_TREE.SELECT]] event
+         * @param _additive For multiple selection (+Ctrl)
+         * @param _interval For selection over interval (+Shift)
+         */
         select(_additive, _interval = false) {
             let event = new CustomEvent(TreeControl.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.data, additive: _additive, interval: _interval } });
             this.dispatchEvent(event);
@@ -212,7 +231,7 @@ var TreeControl;
          * Removes the branch of children from this item
          */
         removeBranch() {
-            let content = this.querySelector("ul");
+            let content = this.getBranch();
             if (!content)
                 return;
             this.removeChild(content);

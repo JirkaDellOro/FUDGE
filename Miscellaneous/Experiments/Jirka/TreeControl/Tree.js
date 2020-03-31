@@ -1,11 +1,11 @@
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var TreeControl;
 (function (TreeControl) {
-    let TREE_CLASSES;
-    (function (TREE_CLASSES) {
-        TREE_CLASSES["SELECTED"] = "selected";
-        TREE_CLASSES["INACTIVE"] = "inactive";
-    })(TREE_CLASSES = TreeControl.TREE_CLASSES || (TreeControl.TREE_CLASSES = {}));
+    let TREE_CLASS;
+    (function (TREE_CLASS) {
+        TREE_CLASS["SELECTED"] = "selected";
+        TREE_CLASS["INACTIVE"] = "inactive";
+    })(TREE_CLASS = TreeControl.TREE_CLASS || (TreeControl.TREE_CLASS = {}));
     let EVENT_TREE;
     (function (EVENT_TREE) {
         EVENT_TREE["RENAME"] = "rename";
@@ -89,13 +89,13 @@ var TreeControl;
         hndDrop(_event) {
             _event.stopPropagation();
             // if drop target included in drag source -> no drag&drop possible
-            if (this.proxy.dragSource.indexOf(this.proxy.dropTarget[0]) > -1)
+            if (this.proxy.dragDrop.source.indexOf(this.proxy.dragDrop.target) > -1)
                 return;
             // let removed: TreeEntry = deleteItem(this.proxy.dragSource);
-            if (!this.proxy.drop(this.proxy.dragSource, this.proxy.dropTarget[0]))
+            if (!this.proxy.drop(this.proxy.dragDrop.source, this.proxy.dragDrop.target))
                 return;
-            this.delete(this.proxy.dragSource);
-            let targetData = this.proxy.dropTarget[0];
+            this.delete(this.proxy.dragDrop.source);
+            let targetData = this.proxy.dragDrop.target;
             let targetItem = this.findOpen(targetData);
             let branch = this.createBranch(this.proxy.getChildren(targetData));
             let old = targetItem.getBranch();
@@ -104,21 +104,11 @@ var TreeControl;
                 old.restructure(branch);
             else
                 targetItem.open(true);
-            this.proxy.dragSource.splice(0);
-            this.proxy.dropTarget.splice(0);
+            this.proxy.dragDrop.source = [];
+            this.proxy.dragDrop.target = null;
         }
     }
     TreeControl.Tree = Tree;
     customElements.define("ul-tree", Tree, { extends: "ul" });
 })(TreeControl || (TreeControl = {}));
-// IDEA to stuff the proxy into the tree class
-// export abstract class Tree<T> extends TreeItem<T> {
-//   // private proxy: TreeProxy<T>;
-//   constructor(_root: T) {
-//     super(_root);
-//   }
-//   public abstract objGetLabel(_object: T): string;
-//   public abstract objHasChildren(_object: T): boolean;
-//   public abstract objGetChildren(_object: T): T[];
-// }
 //# sourceMappingURL=Tree.js.map
