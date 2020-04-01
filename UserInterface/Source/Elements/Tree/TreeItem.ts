@@ -36,6 +36,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT_TREE.DRAG_OVER, this.hndDragOver);
 
       this.addEventListener(EVENT_TREE.POINTER_UP, this.hndPointerUp);
+      this.addEventListener(EVENT_TREE.UPDATE, this.hndUpdate);
     }
 
     /**
@@ -235,6 +236,12 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.SPACE:
           this.select(_event.ctrlKey, _event.shiftKey);
           break;
+        case ƒ.KEYBOARD_CODE.DELETE:
+          this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.ESC:
+          this.dispatchEvent(new Event(EVENT_TREE.ESCAPE, { bubbles: true }));
+          break;
       }
     }
 
@@ -250,7 +257,6 @@ namespace FudgeUserInterface {
     }
 
     private hndChange = (_event: Event): void => {
-      console.log(_event);
       let target: HTMLInputElement = <HTMLInputElement>_event.target;
       let item: HTMLLIElement = <HTMLLIElement>target.parentElement;
       _event.stopPropagation();
@@ -272,11 +278,11 @@ namespace FudgeUserInterface {
 
     private hndDragStart = (_event: DragEvent): void => {
       _event.stopPropagation();
-      this.broker.dragDrop.source = [];
+      this.broker.dragDrop.sources = [];
       if (this.selected)
-        this.broker.dragDrop.source = this.broker.selection;
+        this.broker.dragDrop.sources = this.broker.selection;
       else
-        this.broker.dragDrop.source = [this.data];
+        this.broker.dragDrop.sources = [this.data];
       _event.dataTransfer.effectAllowed = "all";
     }
 
@@ -292,6 +298,13 @@ namespace FudgeUserInterface {
       if (_event.target == this.checkbox)
         return;
       this.select(_event.ctrlKey, _event.shiftKey);
+    }
+
+    private hndUpdate = (_event: Event): void => {
+      if (_event.currentTarget == _event.target)
+        return;
+      _event.stopPropagation();
+      this.hasChildren = this.broker.hasChildren(this.data);
     }
   }
 

@@ -1073,6 +1073,7 @@ declare namespace FudgeCore {
     /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     abstract class Component extends Mutable implements Serializable {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
@@ -1425,6 +1426,7 @@ declare namespace FudgeCore {
     /**
      * Base class for scripts the user writes
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     class ComponentScript extends Component {
         static readonly iSubclass: number;
@@ -2219,6 +2221,8 @@ declare namespace FudgeCore {
     /**
      * Framing describes how to map a rectangle into a given frame
      * and how points in the frame correspond to points in the resulting rectangle and vice versa
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Framing
      */
     abstract class Framing extends Mutable {
         /**
@@ -2902,6 +2906,7 @@ declare namespace FudgeCore {
     /**
      * Represents a node in the scenetree.
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
      */
     class Node extends EventTargetƒ implements Serializable {
         name: string;
@@ -3047,6 +3052,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
     class NodeResource extends Node implements SerializableResource {
         idResource: string;
@@ -3056,6 +3063,8 @@ declare namespace FudgeCore {
     /**
      * An instance of a [[NodeResource]].
      * This node keeps a reference to its resource an can thus optimize serialization
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
     class NodeResourceInstance extends Node {
         /** id of the resource that instance was created from */

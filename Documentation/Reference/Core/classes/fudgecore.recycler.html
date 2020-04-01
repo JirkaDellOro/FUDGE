@@ -92,6 +92,7 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static"><a href="fudgecore.recycler.html#borrow" class="tsd-kind-icon">borrow</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static"><a href="fudgecore.recycler.html#dump" class="tsd-kind-icon">dump</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.recycler.html#dumpall" class="tsd-kind-icon">dump<wbr>All</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static"><a href="fudgecore.recycler.html#get" class="tsd-kind-icon">get</a></li>
@@ -104,6 +105,47 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
+					<a name="borrow" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> borrow</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">borrow&lt;T&gt;<span class="tsd-signature-symbol">(</span>_T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Engine/Recycler.ts#L28">Engine/Recycler.ts:28</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a reference to an object of the requested type in the depot, but does not remove it there.
+										If no object of the requested type was in the depot, one is created, stored and borrowed.
+									For short term usage of objects in a local scope, when there will be no other call to Recycler.get or .borrow!</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_T: <span class="tsd-signature-type">object</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The class identifier of the desired object</p>
+									</div>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
 					<a name="dump" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> dump</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
@@ -113,7 +155,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Engine/Recycler.ts#L40">Engine/Recycler.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Engine/Recycler.ts#L58">Engine/Recycler.ts:58</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -151,7 +193,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Engine/Recycler.ts#L48">Engine/Recycler.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Engine/Recycler.ts#L66">Engine/Recycler.ts:66</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -173,12 +215,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Engine/Recycler.ts#L13">Engine/Recycler.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Engine/Recycler.ts#L13">Engine/Recycler.ts:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns an object of the requested type from the depot, or a new one, if the depot was empty</p>
+									<p>Fetches an object of the requested type from the depot, or returns a new one, if the depot was empty</p>
 								</div>
 							</div>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -212,7 +254,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/085e7713/Core/Source/Engine/Recycler.ts#L26">Engine/Recycler.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Engine/Recycler.ts#L44">Engine/Recycler.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -252,6 +294,9 @@
 					<li class="current tsd-kind-class tsd-parent-kind-module">
 						<a href="fudgecore.recycler.html" class="tsd-kind-icon">Recycler</a>
 						<ul>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
+								<a href="fudgecore.recycler.html#borrow" class="tsd-kind-icon">borrow</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
 								<a href="fudgecore.recycler.html#dump" class="tsd-kind-icon">dump</a>
 							</li>

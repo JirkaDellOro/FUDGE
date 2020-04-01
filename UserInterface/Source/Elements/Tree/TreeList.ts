@@ -2,17 +2,7 @@
 namespace FudgeUserInterface {
 
   /**
-  * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
-  *  
-  * ```plaintext
-  * treeList <ul>
-  * ├ treeItem <li>
-  * ├ treeItem <li>
-  * │ └ treeList <ul>
-  * │   ├ treeItem <li>
-  * │   └ treeItem <li>
-  * └ treeItem <li>
-  * ```
+  * Extension of ul-element that keeps a list of [[TreeItem]]s to represent a branch in a tree
   */
   export class TreeList<T> extends HTMLUListElement {
 
@@ -125,8 +115,10 @@ namespace FudgeUserInterface {
       let deleted: TreeItem<T>[] = [];
 
       for (let item of items)
-        if (_data.indexOf(item.data) > -1)
+        if (_data.indexOf(item.data) > -1) {
+          item.dispatchEvent(new Event(EVENT_TREE.UPDATE, {bubbles: true}));
           deleted.push(item.parentNode.removeChild(item));
+        }
 
       return deleted;
     }

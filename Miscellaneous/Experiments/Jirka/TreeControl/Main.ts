@@ -69,7 +69,7 @@ namespace TreeControl {
       let list: TreeItem<TreeEntry> = <TreeItem<TreeEntry>>item.parentElement.parentElement;
       let siblings: TreeEntry[] = list.data["children"];
       siblings.splice(siblings.indexOf(item.data), 1);
-    }
+    } 
     tree.delete(_objects);
   }
 

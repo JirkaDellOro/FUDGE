@@ -473,17 +473,7 @@ var FudgeUserInterface;
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeUserInterface) {
     /**
-    * Extension of ul-element that builds a tree structure with interactive controls from an array of type [[TreeItem]]
-    *
-    * ```plaintext
-    * treeList <ul>
-    * ├ treeItem <li>
-    * ├ treeItem <li>
-    * │ └ treeList <ul>
-    * │   ├ treeItem <li>
-    * │   └ treeItem <li>
-    * └ treeItem <li>
-    * ```
+    * Extension of ul-element that keeps a list of [[TreeItem]]s to represent a branch in a tree
     */
     class TreeList extends HTMLUListElement {
         constructor(_items = []) {
@@ -583,8 +573,10 @@ var FudgeUserInterface;
             let items = this.querySelectorAll("li");
             let deleted = [];
             for (let item of items)
-                if (_data.indexOf(item.data) > -1)
+                if (_data.indexOf(item.data) > -1) {
+                    item.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.UPDATE, { bubbles: true }));
                     deleted.push(item.parentNode.removeChild(item));
+                }
             return deleted;
         }
         findOpen(_data) {
@@ -624,13 +616,33 @@ var FudgeUserInterface;
         EVENT_TREE["DROP"] = "drop";
         EVENT_TREE["POINTER_UP"] = "pointerup";
         EVENT_TREE["SELECT"] = "itemselect";
+        EVENT_TREE["UPDATE"] = "update";
+        EVENT_TREE["ESCAPE"] = "escape";
     })(EVENT_TREE = FudgeUserInterface.EVENT_TREE || (FudgeUserInterface.EVENT_TREE = {}));
     /**
-     * Extension of [[TreeItem]] that represents the root of a tree control
+     * Extension of [[TreeList]] that represents the root of a tree control
+     * ```plaintext
+     * tree <ul>
+     * ├ treeItem <li>
+     * ├ treeItem <li>
+     * │ └ treeList <ul>
+     * │   ├ treeItem <li>
+     * │   └ treeItem <li>
+     * └ treeItem <li>
+     * ```
      */
     class Tree extends FudgeUserInterface.TreeList {
         constructor(_broker, _root) {
             super([]);
+            this.hndDelete = (_event) => {
+                let target = _event.target;
+                _event.stopPropagation();
+                let remove = this.broker.delete(target.data);
+                this.delete(remove);
+            };
+            this.hndEscape = (_event) => {
+                this.clearSelection();
+            };
             this.broker = _broker;
             let root = new FudgeUserInterface.TreeItem(this.broker, _root);
             this.appendChild(root);
@@ -638,6 +650,8 @@ var FudgeUserInterface;
             this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
             this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
+            this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
+            this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
         }
         /**
          * Clear the current selection
@@ -649,7 +663,7 @@ var FudgeUserInterface;
         hndOpen(_event) {
             let item = _event.target;
             let children = this.broker.getChildren(item.data);
-            if (!children)
+            if (!children || children.length == 0)
                 return;
             let branch = this.createBranch(children);
             item.setBranch(branch);
@@ -692,12 +706,13 @@ var FudgeUserInterface;
         hndDrop(_event) {
             _event.stopPropagation();
             // if drop target included in drag source -> no drag&drop possible
-            if (this.broker.dragDrop.source.indexOf(this.broker.dragDrop.target) > -1)
+            if (this.broker.dragDrop.sources.indexOf(this.broker.dragDrop.target) > -1)
                 return;
-            // if the drop method of the broker returns falls -> no drag&drop possible
-            if (!this.broker.drop(this.broker.dragDrop.source, this.broker.dragDrop.target))
+            // move only the objects the drop-method of the broker returns
+            let move = this.broker.drop(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+            if (!move || move.length == 0)
                 return;
-            this.delete(this.broker.dragDrop.source);
+            this.delete(move);
             let targetData = this.broker.dragDrop.target;
             let targetItem = this.findOpen(targetData);
             let branch = this.createBranch(this.broker.getChildren(targetData));
@@ -707,7 +722,7 @@ var FudgeUserInterface;
                 old.restructure(branch);
             else
                 targetItem.open(true);
-            this.broker.dragDrop.source = [];
+            this.broker.dragDrop.sources = [];
             this.broker.dragDrop.target = null;
         }
     }
@@ -816,6 +831,12 @@ var FudgeUserInterface;
                     case ƒ.KEYBOARD_CODE.SPACE:
                         this.select(_event.ctrlKey, _event.shiftKey);
                         break;
+                    case ƒ.KEYBOARD_CODE.DELETE:
+                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.DELETE, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ESC:
+                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.ESCAPE, { bubbles: true }));
+                        break;
                 }
             };
             this.hndDblClick = (_event) => {
@@ -824,7 +845,6 @@ var FudgeUserInterface;
                     this.startTypingLabel();
             };
             this.hndChange = (_event) => {
-                console.log(_event);
                 let target = _event.target;
                 let item = target.parentElement;
                 _event.stopPropagation();
@@ -844,11 +864,11 @@ var FudgeUserInterface;
             };
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
-                this.broker.dragDrop.source = [];
+                this.broker.dragDrop.sources = [];
                 if (this.selected)
-                    this.broker.dragDrop.source = this.broker.selection;
+                    this.broker.dragDrop.sources = this.broker.selection;
                 else
-                    this.broker.dragDrop.source = [this.data];
+                    this.broker.dragDrop.sources = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
@@ -862,6 +882,12 @@ var FudgeUserInterface;
                 if (_event.target == this.checkbox)
                     return;
                 this.select(_event.ctrlKey, _event.shiftKey);
+            };
+            this.hndUpdate = (_event) => {
+                if (_event.currentTarget == _event.target)
+                    return;
+                _event.stopPropagation();
+                this.hasChildren = this.broker.hasChildren(this.data);
             };
             this.broker = _broker;
             this.data = _data;
@@ -879,6 +905,7 @@ var FudgeUserInterface;
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DRAG_START, this.hndDragStart);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DRAG_OVER, this.hndDragOver);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.POINTER_UP, this.hndPointerUp);
+            this.addEventListener(FudgeUserInterface.EVENT_TREE.UPDATE, this.hndUpdate);
         }
         /**
          * Returns true, when this item has a visible checkbox in front to open the subsequent branch

@@ -16,10 +16,26 @@ var UI_Tree;
         getChildren(_node) {
             return _node.getChildren();
         }
+        delete(_object) {
+            // delete selection independend of focussed item
+            let deleted = [];
+            for (let node of this.selection)
+                if (node.getParent()) {
+                    node.getParent().removeChild(node);
+                    deleted.push(node);
+                }
+            this.selection.splice(0);
+            return deleted;
+        }
         drop(_sources, _target) {
+            // disallow drop for sources being ancestor to target
+            let move = [];
             for (let source of _sources)
-                _target.addChild(source);
-            return true;
+                if (!_target.isDescendantOf(source))
+                    move.push(source);
+            for (let node of move)
+                _target.addChild(node);
+            return move;
         }
     }
     UI_Tree.TreeBrokerNode = TreeBrokerNode;

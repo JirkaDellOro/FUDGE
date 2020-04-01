@@ -20,10 +20,29 @@ namespace UI_Tree {
       return _node.getChildren();
     }
 
-    public drop(_sources: ƒ.Node[], _target: ƒ.Node): boolean {
+    public delete(_object: ƒ.Node): ƒ.Node[] {
+      // delete selection independend of focussed item
+      let deleted: ƒ.Node[] = [];
+      for (let node of this.selection)
+        if (node.getParent()) {
+          node.getParent().removeChild(node);
+          deleted.push(node);
+        }
+      this.selection.splice(0);
+      return deleted;
+    }
+
+    public drop(_sources: ƒ.Node[], _target: ƒ.Node): ƒ.Node[] {
+      // disallow drop for sources being ancestor to target
+      let move: ƒ.Node[] = [];
       for (let source of _sources)
-        _target.addChild(source);
-      return true;
+        if (!_target.isDescendantOf(source))
+          move.push(source);
+
+      for (let node of move)
+        _target.addChild(node);
+
+      return move;
     }
   }
 }
