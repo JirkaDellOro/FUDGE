@@ -648,10 +648,11 @@ var FudgeUserInterface;
             };
             this.hndCopyPaste = (_event) => {
                 console.log(_event);
+                _event.stopPropagation();
                 let target = _event.target;
                 switch (_event.type) {
                     case EVENT_TREE.COPY:
-                        this.broker.copyPaste.sources = [...this.broker.selection];
+                        this.broker.copyPaste.sources = this.broker.copy([...this.broker.selection]);
                         break;
                     case EVENT_TREE.PASTE:
                         this.addChildren(this.broker.copyPaste.sources, target.data);
@@ -861,13 +862,21 @@ var FudgeUserInterface;
                         this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.DELETE, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.C:
-                        if (_event.ctrlKey)
-                            this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.COPY, { bubbles: true }));
+                        if (!_event.ctrlKey)
+                            break;
+                        event.preventDefault();
+                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.COPY, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.V:
+                        if (!_event.ctrlKey)
+                            break;
+                        event.preventDefault();
                         this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.PASTE, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.X:
+                        if (!_event.ctrlKey)
+                            break;
+                        event.preventDefault();
                         this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.CUT, { bubbles: true }));
                         break;
                 }

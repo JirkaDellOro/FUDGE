@@ -1,5 +1,6 @@
 var UI_Tree;
 (function (UI_Tree) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class TreeBrokerNode extends ƒUi.TreeBroker {
         getLabel(_node) {
@@ -35,6 +36,16 @@ var UI_Tree;
             for (let node of move)
                 _target.addChild(node);
             return move;
+        }
+        copy(_originals) {
+            // try to create copies and return them for paste operation
+            let copies = [];
+            for (let original of _originals) {
+                let serialization = ƒ.Serializer.serialize(original);
+                let copy = ƒ.Serializer.deserialize(serialization);
+                copies.push(copy);
+            }
+            return copies;
         }
     }
     UI_Tree.TreeBrokerNode = TreeBrokerNode;

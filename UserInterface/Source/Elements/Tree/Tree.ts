@@ -170,7 +170,7 @@ namespace FudgeUserInterface {
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       switch (_event.type) {
         case EVENT_TREE.COPY:
-          this.broker.copyPaste.sources = [...this.broker.selection];
+          this.broker.copyPaste.sources = this.broker.copy([...this.broker.selection]);
           break;
         case EVENT_TREE.PASTE:
           this.addChildren(this.broker.copyPaste.sources, target.data);

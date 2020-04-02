@@ -43,5 +43,16 @@ namespace UI_Tree {
 
       return move;
     }
+
+    public copy(_originals: ƒ.Node[]): ƒ.Node[] {
+      // try to create copies and return them for paste operation
+      let copies: ƒ.Node[] = [];
+      for (let original of _originals) {
+        let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
+        let copy: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
+        copies.push(copy);
+      }
+      return copies;
+    }
   }
 }
