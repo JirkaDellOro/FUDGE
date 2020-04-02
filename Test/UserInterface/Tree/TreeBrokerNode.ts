@@ -1,7 +1,6 @@
 namespace UI_Tree {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
-  // import ƒAid = FudgeAid;
 
   export class TreeBrokerNode extends ƒUi.TreeBroker<ƒ.Node> {
     public getLabel(_node: ƒ.Node): string {
@@ -32,12 +31,12 @@ namespace UI_Tree {
       return deleted;
     }
 
-    public drop(_sources: ƒ.Node[], _target: ƒ.Node): ƒ.Node[] {
+    public addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[] {
       // disallow drop for sources being ancestor to target
       let move: ƒ.Node[] = [];
-      for (let source of _sources)
-        if (!_target.isDescendantOf(source))
-          move.push(source);
+      for (let child of _children)
+        if (!_target.isDescendantOf(child))
+          move.push(child);
 
       for (let node of move)
         _target.addChild(node);

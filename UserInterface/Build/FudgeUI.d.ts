@@ -134,7 +134,10 @@ declare namespace FudgeUserInterface {
         POINTER_UP = "pointerup",
         SELECT = "itemselect",
         UPDATE = "update",
-        ESCAPE = "escape"
+        ESCAPE = "escape",
+        COPY = "copy",
+        CUT = "cut",
+        PASTE = "paste"
     }
     /**
      * Extension of [[TreeList]] that represents the root of a tree control
@@ -160,8 +163,10 @@ declare namespace FudgeUserInterface {
         private hndRename;
         private hndSelect;
         private hndDrop;
+        private addChildren;
         private hndDelete;
         private hndEscape;
+        private hndCopyPaste;
     }
 }
 declare namespace FudgeUserInterface {
@@ -178,27 +183,32 @@ declare namespace FudgeUserInterface {
             sources: T[];
             target: T;
         };
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        copyPaste: {
+            sources: T[];
+            target: T;
+        };
         /** Retrieve a string to create a label for the tree item representing the object  */
         abstract getLabel(_object: T): string;
+        /** Return false to disallow renaming the item/object, or processes the proposed new label */
+        abstract rename(_object: T, _new: string): boolean;
         /** Return true if the object has children that must be shown when unfolding the tree item */
         abstract hasChildren(_object: T): boolean;
         /** Return the object's children to show when unfolding the tree item */
         abstract getChildren(_object: T): T[];
-        /** Return false to disallow renaming the item/object, or processes the proposed new label */
-        abstract rename(_object: T, _new: string): boolean;
+        /**
+         * Process the list of source objects to be addedAsChildren when dropping or pasting onto the target item/object,
+         * return the list of objects that should visibly become the children of the target item/object
+         * @param _children A list of objects the tree tries to add to the _target
+         * @param _target The object referenced by the item the drop occurs on
+         */
+        abstract addChildren(_sources: T[], _target: T): T[];
         /**
          * Remove the objects to be deleted, e.g. the current selection, from the data structure the tree refers to and
          * return a list of those objects in order for the according [[TreeItems]] to be deleted also
          * @param _focussed The object currently having focus
          */
         abstract delete(_focussed: T): T[];
-        /**
-         * Process the list of source objects to be dropped onto the target item/object,
-         * return the list of objects that should visibly become the children of the target item/object
-         * @param _sources A list of objects the tree tries to drop on the _target
-         * @param _target The object referenced by the item the drop occurs on
-         */
-        abstract drop(_sources: T[], _target: T): T[];
     }
 }
 declare namespace FudgeUserInterface {

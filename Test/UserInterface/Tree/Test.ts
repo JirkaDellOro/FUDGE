@@ -1,3 +1,6 @@
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 namespace UI_Tree {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;

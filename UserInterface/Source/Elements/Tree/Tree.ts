@@ -22,7 +22,10 @@ namespace FudgeUserInterface {
     POINTER_UP = "pointerup",
     SELECT = "itemselect",
     UPDATE = "update",
-    ESCAPE = "escape"
+    ESCAPE = "escape",
+    COPY = "copy",
+    CUT = "cut",
+    PASTE = "paste"
   }
 
   /**
@@ -52,6 +55,9 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
       this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
       this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
+      this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
+      this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
+      this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
     }
 
     /**
@@ -115,19 +121,23 @@ namespace FudgeUserInterface {
 
     private hndDrop(_event: DragEvent): void {
       _event.stopPropagation();
+      this.addChildren(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+    }
 
-      // if drop target included in drag source -> no drag&drop possible
-      if (this.broker.dragDrop.sources.indexOf(this.broker.dragDrop.target) > -1)
+    private addChildren(_children: T[], _target: T): void {
+      // if drop target included in children -> refuse
+      if (_children.indexOf(_target) > -1)
         return;
 
-      // move only the objects the drop-method of the broker returns
-      let move: T[] = this.broker.drop(<T[]>this.broker.dragDrop.sources, <T>this.broker.dragDrop.target);
+      // add only the objects the addChildren-method of the broker returns
+      let move: T[] = this.broker.addChildren(<T[]>_children, <T>_target);
       if (!move || move.length == 0)
         return;
 
+      // TODO: don't, when copying or coming from another source
       this.delete(move);
 
-      let targetData: T = <T>this.broker.dragDrop.target;
+      let targetData: T = <T>_target;
       let targetItem: TreeItem<T> = this.findOpen(targetData);
 
       let branch: TreeList<T> = this.createBranch(this.broker.getChildren(targetData));
@@ -138,20 +148,36 @@ namespace FudgeUserInterface {
       else
         targetItem.open(true);
 
-      this.broker.dragDrop.sources = [];
-      this.broker.dragDrop.target = null;
+      _children = [];
+      _target = null;
     }
 
     private hndDelete = (_event: Event): void => {
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       _event.stopPropagation();
       let remove: T[] = this.broker.delete(target.data);
-
+      
       this.delete(remove);
     }
-
+    
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
+    }
+    
+    private hndCopyPaste = (_event: Event): void => {
+      console.log(_event);
+      _event.stopPropagation();
+      let target: TreeItem<T> = <TreeItem<T>>_event.target;
+      switch (_event.type) {
+        case EVENT_TREE.COPY:
+          this.broker.copyPaste.sources = [...this.broker.selection];
+          break;
+        case EVENT_TREE.PASTE:
+          this.addChildren(this.broker.copyPaste.sources, target.data);
+          break;
+        case EVENT_TREE.CUT:
+          break;
+      }
     }
   }
 

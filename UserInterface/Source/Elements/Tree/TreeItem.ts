@@ -239,8 +239,15 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.DELETE:
           this.dispatchEvent(new Event(EVENT_TREE.DELETE, { bubbles: true }));
           break;
-        case ƒ.KEYBOARD_CODE.ESC:
-          this.dispatchEvent(new Event(EVENT_TREE.ESCAPE, { bubbles: true }));
+        case ƒ.KEYBOARD_CODE.C:
+          if (_event.ctrlKey)
+          this.dispatchEvent(new Event(EVENT_TREE.COPY, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.V:
+          this.dispatchEvent(new Event(EVENT_TREE.PASTE, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.X:
+          this.dispatchEvent(new Event(EVENT_TREE.CUT, { bubbles: true }));
           break;
       }
     }

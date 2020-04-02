@@ -1,7 +1,6 @@
 var UI_Tree;
 (function (UI_Tree) {
     var ƒUi = FudgeUserInterface;
-    // import ƒAid = FudgeAid;
     class TreeBrokerNode extends ƒUi.TreeBroker {
         getLabel(_node) {
             return _node.name;
@@ -27,12 +26,12 @@ var UI_Tree;
             this.selection.splice(0);
             return deleted;
         }
-        drop(_sources, _target) {
+        addChildren(_children, _target) {
             // disallow drop for sources being ancestor to target
             let move = [];
-            for (let source of _sources)
-                if (!_target.isDescendantOf(source))
-                    move.push(source);
+            for (let child of _children)
+                if (!_target.isDescendantOf(child))
+                    move.push(child);
             for (let node of move)
                 _target.addChild(node);
             return move;

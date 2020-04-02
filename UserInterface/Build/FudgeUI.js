@@ -618,6 +618,9 @@ var FudgeUserInterface;
         EVENT_TREE["SELECT"] = "itemselect";
         EVENT_TREE["UPDATE"] = "update";
         EVENT_TREE["ESCAPE"] = "escape";
+        EVENT_TREE["COPY"] = "copy";
+        EVENT_TREE["CUT"] = "cut";
+        EVENT_TREE["PASTE"] = "paste";
     })(EVENT_TREE = FudgeUserInterface.EVENT_TREE || (FudgeUserInterface.EVENT_TREE = {}));
     /**
      * Extension of [[TreeList]] that represents the root of a tree control
@@ -643,6 +646,20 @@ var FudgeUserInterface;
             this.hndEscape = (_event) => {
                 this.clearSelection();
             };
+            this.hndCopyPaste = (_event) => {
+                console.log(_event);
+                let target = _event.target;
+                switch (_event.type) {
+                    case EVENT_TREE.COPY:
+                        this.broker.copyPaste.sources = [...this.broker.selection];
+                        break;
+                    case EVENT_TREE.PASTE:
+                        this.addChildren(this.broker.copyPaste.sources, target.data);
+                        break;
+                    case EVENT_TREE.CUT:
+                        break;
+                }
+            };
             this.broker = _broker;
             let root = new FudgeUserInterface.TreeItem(this.broker, _root);
             this.appendChild(root);
@@ -652,6 +669,9 @@ var FudgeUserInterface;
             this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
             this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
             this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
+            this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
+            this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
+            this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
         }
         /**
          * Clear the current selection
@@ -705,15 +725,19 @@ var FudgeUserInterface;
         }
         hndDrop(_event) {
             _event.stopPropagation();
-            // if drop target included in drag source -> no drag&drop possible
-            if (this.broker.dragDrop.sources.indexOf(this.broker.dragDrop.target) > -1)
+            this.addChildren(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+        }
+        addChildren(_children, _target) {
+            // if drop target included in children -> refuse
+            if (_children.indexOf(_target) > -1)
                 return;
-            // move only the objects the drop-method of the broker returns
-            let move = this.broker.drop(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+            // add only the objects the addChildren-method of the broker returns
+            let move = this.broker.addChildren(_children, _target);
             if (!move || move.length == 0)
                 return;
+            // TODO: don't, when copying or coming from another source
             this.delete(move);
-            let targetData = this.broker.dragDrop.target;
+            let targetData = _target;
             let targetItem = this.findOpen(targetData);
             let branch = this.createBranch(this.broker.getChildren(targetData));
             let old = targetItem.getBranch();
@@ -722,8 +746,8 @@ var FudgeUserInterface;
                 old.restructure(branch);
             else
                 targetItem.open(true);
-            this.broker.dragDrop.sources = [];
-            this.broker.dragDrop.target = null;
+            _children = [];
+            _target = null;
         }
     }
     FudgeUserInterface.Tree = Tree;
@@ -742,6 +766,8 @@ var FudgeUserInterface;
             this.selection = [];
             /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
             this.dragDrop = { sources: [], target: null };
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            this.copyPaste = { sources: [], target: null };
         }
     }
     FudgeUserInterface.TreeBroker = TreeBroker;
@@ -834,8 +860,15 @@ var FudgeUserInterface;
                     case ƒ.KEYBOARD_CODE.DELETE:
                         this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.DELETE, { bubbles: true }));
                         break;
-                    case ƒ.KEYBOARD_CODE.ESC:
-                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.ESCAPE, { bubbles: true }));
+                    case ƒ.KEYBOARD_CODE.C:
+                        if (_event.ctrlKey)
+                            this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.COPY, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.V:
+                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.PASTE, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.X:
+                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.CUT, { bubbles: true }));
                         break;
                 }
             };

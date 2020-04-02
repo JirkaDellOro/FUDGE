@@ -1,4 +1,10 @@
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 var UI_Tree;
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUI"/>
 (function (UI_Tree) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
