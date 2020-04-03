@@ -2,7 +2,7 @@ namespace UI_Tree {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class TreeBrokerNode extends ƒUi.TreeBroker<ƒ.Node> {
+  export class TreeControllerNode extends ƒUi.TreeController<ƒ.Node> {
     public getLabel(_node: ƒ.Node): string {
       return _node.name;
     }
@@ -19,7 +19,7 @@ namespace UI_Tree {
       return _node.getChildren();
     }
 
-    public delete(_object: ƒ.Node): ƒ.Node[] {
+    public delete(_object: ƒ.Node[]): ƒ.Node[] {
       // delete selection independend of focussed item
       let deleted: ƒ.Node[] = [];
       for (let node of this.selection)

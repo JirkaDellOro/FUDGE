@@ -1,10 +1,9 @@
 namespace FudgeUserInterface {
   /**
    * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-   * The [[Tree]] doesn't know how your data is structured and how to handle it, the broker implements the methods needed
-   * // TODO: check if this could be achieved more elegantly using decorators
+   * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
    */
-  export abstract class TreeBroker<T> {
+  export abstract class TreeController<T> {
     /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
     public selection: T[] = [];
     /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
@@ -36,7 +35,7 @@ namespace FudgeUserInterface {
      * return a list of those objects in order for the according [[TreeItems]] to be deleted also   
      * @param _focussed The object currently having focus
      */
-    public abstract delete(_focussed: T): T[];
+    public abstract delete(_focussed: T[]): T[];
 
     /** 
      * Return a list of copies of the objects given for copy & paste

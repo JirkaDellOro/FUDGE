@@ -22,7 +22,7 @@ namespace UI_Tree {
     cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 3));
     cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
 
-    let tree: ƒUi.Tree<ƒ.Node> = new ƒUi.Tree<ƒ.Node>(new TreeBrokerNode(), node);
+    let tree: ƒUi.Tree<ƒ.Node> = new ƒUi.Tree<ƒ.Node>(new TreeControllerNode(), node);
     document.body.appendChild(tree);
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);

@@ -41,12 +41,12 @@ namespace FudgeUserInterface {
    * ```
    */
   export class Tree<T> extends TreeList<T> {
-    public broker: TreeBroker<T>;
+    public controller: TreeController<T>;
 
-    constructor(_broker: TreeBroker<T>, _root: T) {
+    constructor(_controller: TreeController<T>, _root: T) {
       super([]);
-      this.broker = _broker;
-      let root: TreeItem<T> = new TreeItem<T>(this.broker, _root);
+      this.controller = _controller;
+      let root: TreeItem<T> = new TreeItem<T>(this.controller, _root);
       this.appendChild(root);
 
       this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
@@ -68,44 +68,44 @@ namespace FudgeUserInterface {
      * Clear the current selection
      */
     public clearSelection(): void {
-      this.broker.selection.splice(0);
-      this.displaySelection(<T[]>this.broker.selection);
+      this.controller.selection.splice(0);
+      this.displaySelection(<T[]>this.controller.selection);
     }
 
     private hndOpen(_event: Event): void {
       let item: TreeItem<T> = <TreeItem<T>>_event.target;
-      let children: T[] = this.broker.getChildren(item.data);
+      let children: T[] = this.controller.getChildren(item.data);
       if (!children || children.length == 0)
         return;
 
       let branch: TreeList<T> = this.createBranch(children);
       item.setBranch(branch);
-      this.displaySelection(<T[]>this.broker.selection);
+      this.displaySelection(<T[]>this.controller.selection);
     }
 
     private createBranch(_data: T[]): TreeList<T> {
       let branch: TreeList<T> = new TreeList<T>([]);
       for (let child of _data) {
-        branch.addItems([new TreeItem(this.broker, child)]);
+        branch.addItems([new TreeItem(this.controller, child)]);
       }
       return branch;
     }
 
     private hndRename(_event: Event): void {
       let item: TreeItem<T> = <TreeItem<T>>(<HTMLInputElement>_event.target).parentNode;
-      let renamed: boolean = this.broker.rename(item.data, item.getLabel());
+      let renamed: boolean = this.controller.rename(item.data, item.getLabel());
       if (renamed)
-        item.setLabel(this.broker.getLabel(item.data));
+        item.setLabel(this.controller.getLabel(item.data));
     }
 
     // Callback / Eventhandler in Tree
     private hndSelect(_event: Event): void {
       _event.stopPropagation();
       let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
-      let index: number = this.broker.selection.indexOf(<T>detail.data);
+      let index: number = this.controller.selection.indexOf(<T>detail.data);
 
       if (detail.interval) {
-        let dataStart: T = <T>this.broker.selection[0];
+        let dataStart: T = <T>this.controller.selection[0];
         let dataEnd: T = <T>detail.data;
         this.clearSelection();
         this.selectInterval(dataStart, dataEnd);
@@ -113,19 +113,19 @@ namespace FudgeUserInterface {
       }
 
       if (index >= 0 && detail.additive)
-        this.broker.selection.splice(index, 1);
+        this.controller.selection.splice(index, 1);
       else {
         if (!detail.additive)
           this.clearSelection();
-        this.broker.selection.push(<T>detail.data);
+        this.controller.selection.push(<T>detail.data);
       }
 
-      this.displaySelection(<T[]>this.broker.selection);
+      this.displaySelection(<T[]>this.controller.selection);
     }
 
     private hndDrop(_event: DragEvent): void {
       _event.stopPropagation();
-      this.addChildren(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+      this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
     }
 
     private addChildren(_children: T[], _target: T): void {
@@ -133,8 +133,8 @@ namespace FudgeUserInterface {
       if (_children.indexOf(_target) > -1)
         return;
 
-      // add only the objects the addChildren-method of the broker returns
-      let move: T[] = this.broker.addChildren(<T[]>_children, <T>_target);
+      // add only the objects the addChildren-method of the controller returns
+      let move: T[] = this.controller.addChildren(<T[]>_children, <T>_target);
       if (!move || move.length == 0)
         return;
 
@@ -144,7 +144,7 @@ namespace FudgeUserInterface {
       let targetData: T = <T>_target;
       let targetItem: TreeItem<T> = this.findOpen(targetData);
 
-      let branch: TreeList<T> = this.createBranch(this.broker.getChildren(targetData));
+      let branch: TreeList<T> = this.createBranch(this.controller.getChildren(targetData));
       let old: TreeList<T> = targetItem.getBranch();
       targetItem.hasChildren = true;
       if (old)
@@ -159,7 +159,7 @@ namespace FudgeUserInterface {
     private hndDelete = (_event: Event): void => {
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       _event.stopPropagation();
-      let remove: T[] = this.broker.delete(target.data);
+      let remove: T[] = this.controller.delete([target.data]);
 
       this.delete(remove);
     }
@@ -174,12 +174,15 @@ namespace FudgeUserInterface {
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       switch (_event.type) {
         case EVENT_TREE.COPY:
-          this.broker.copyPaste.sources = this.broker.copy([...this.broker.selection]);
+          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
           break;
         case EVENT_TREE.PASTE:
-          this.addChildren(this.broker.copyPaste.sources, target.data);
+          this.addChildren(this.controller.copyPaste.sources, target.data);
           break;
         case EVENT_TREE.CUT:
+          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+          let cut: T[] = this.controller.delete(this.controller.selection);
+          this.delete(cut);
           break;
       }
     }
@@ -192,7 +195,7 @@ namespace FudgeUserInterface {
       if (index < 0)
         return;
 
-      if (_event.shiftKey && this.broker.selection.length == 0)
+      if (_event.shiftKey && this.controller.selection.length == 0)
         target.select(true);
 
       switch (_event.type) {

@@ -635,12 +635,12 @@ var FudgeUserInterface;
      * ```
      */
     class Tree extends FudgeUserInterface.TreeList {
-        constructor(_broker, _root) {
+        constructor(_controller, _root) {
             super([]);
             this.hndDelete = (_event) => {
                 let target = _event.target;
                 _event.stopPropagation();
-                let remove = this.broker.delete(target.data);
+                let remove = this.controller.delete([target.data]);
                 this.delete(remove);
             };
             this.hndEscape = (_event) => {
@@ -652,12 +652,15 @@ var FudgeUserInterface;
                 let target = _event.target;
                 switch (_event.type) {
                     case EVENT_TREE.COPY:
-                        this.broker.copyPaste.sources = this.broker.copy([...this.broker.selection]);
+                        this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
                         break;
                     case EVENT_TREE.PASTE:
-                        this.addChildren(this.broker.copyPaste.sources, target.data);
+                        this.addChildren(this.controller.copyPaste.sources, target.data);
                         break;
                     case EVENT_TREE.CUT:
+                        this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+                        let cut = this.controller.delete(this.controller.selection);
+                        this.delete(cut);
                         break;
                 }
             };
@@ -668,7 +671,7 @@ var FudgeUserInterface;
                 let index = items.indexOf(target);
                 if (index < 0)
                     return;
-                if (_event.shiftKey && this.broker.selection.length == 0)
+                if (_event.shiftKey && this.controller.selection.length == 0)
                     target.select(true);
                 switch (_event.type) {
                     case EVENT_TREE.FOCUS_NEXT:
@@ -687,8 +690,8 @@ var FudgeUserInterface;
                 else if (!_event.ctrlKey)
                     this.clearSelection();
             };
-            this.broker = _broker;
-            let root = new FudgeUserInterface.TreeItem(this.broker, _root);
+            this.controller = _controller;
+            let root = new FudgeUserInterface.TreeItem(this.controller, _root);
             this.appendChild(root);
             this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
             this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
@@ -708,69 +711,69 @@ var FudgeUserInterface;
          * Clear the current selection
          */
         clearSelection() {
-            this.broker.selection.splice(0);
-            this.displaySelection(this.broker.selection);
+            this.controller.selection.splice(0);
+            this.displaySelection(this.controller.selection);
         }
         hndOpen(_event) {
             let item = _event.target;
-            let children = this.broker.getChildren(item.data);
+            let children = this.controller.getChildren(item.data);
             if (!children || children.length == 0)
                 return;
             let branch = this.createBranch(children);
             item.setBranch(branch);
-            this.displaySelection(this.broker.selection);
+            this.displaySelection(this.controller.selection);
         }
         createBranch(_data) {
             let branch = new FudgeUserInterface.TreeList([]);
             for (let child of _data) {
-                branch.addItems([new FudgeUserInterface.TreeItem(this.broker, child)]);
+                branch.addItems([new FudgeUserInterface.TreeItem(this.controller, child)]);
             }
             return branch;
         }
         hndRename(_event) {
             let item = _event.target.parentNode;
-            let renamed = this.broker.rename(item.data, item.getLabel());
+            let renamed = this.controller.rename(item.data, item.getLabel());
             if (renamed)
-                item.setLabel(this.broker.getLabel(item.data));
+                item.setLabel(this.controller.getLabel(item.data));
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
             _event.stopPropagation();
             let detail = _event.detail;
-            let index = this.broker.selection.indexOf(detail.data);
+            let index = this.controller.selection.indexOf(detail.data);
             if (detail.interval) {
-                let dataStart = this.broker.selection[0];
+                let dataStart = this.controller.selection[0];
                 let dataEnd = detail.data;
                 this.clearSelection();
                 this.selectInterval(dataStart, dataEnd);
                 return;
             }
             if (index >= 0 && detail.additive)
-                this.broker.selection.splice(index, 1);
+                this.controller.selection.splice(index, 1);
             else {
                 if (!detail.additive)
                     this.clearSelection();
-                this.broker.selection.push(detail.data);
+                this.controller.selection.push(detail.data);
             }
-            this.displaySelection(this.broker.selection);
+            this.displaySelection(this.controller.selection);
         }
         hndDrop(_event) {
             _event.stopPropagation();
-            this.addChildren(this.broker.dragDrop.sources, this.broker.dragDrop.target);
+            this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         }
         addChildren(_children, _target) {
             // if drop target included in children -> refuse
             if (_children.indexOf(_target) > -1)
                 return;
-            // add only the objects the addChildren-method of the broker returns
-            let move = this.broker.addChildren(_children, _target);
+            // add only the objects the addChildren-method of the controller returns
+            let move = this.controller.addChildren(_children, _target);
             if (!move || move.length == 0)
                 return;
             // TODO: don't, when copying or coming from another source
             this.delete(move);
             let targetData = _target;
             let targetItem = this.findOpen(targetData);
-            let branch = this.createBranch(this.broker.getChildren(targetData));
+            let branch = this.createBranch(this.controller.getChildren(targetData));
             let old = targetItem.getBranch();
             targetItem.hasChildren = true;
             if (old)
@@ -788,10 +791,9 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
      * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the broker implements the methods needed
-     * // TODO: check if this could be achieved more elegantly using decorators
+     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
-    class TreeBroker {
+    class TreeController {
         constructor() {
             /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
             this.selection = [];
@@ -801,7 +803,7 @@ var FudgeUserInterface;
             this.copyPaste = { sources: [], target: null };
         }
     }
-    FudgeUserInterface.TreeBroker = TreeBroker;
+    FudgeUserInterface.TreeController = TreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
@@ -813,7 +815,7 @@ var FudgeUserInterface;
      * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
-        constructor(_broker, _data) {
+        constructor(_controller, _data) {
             super();
             this.display = "TreeItem";
             this.classes = [];
@@ -898,17 +900,17 @@ var FudgeUserInterface;
             };
             this.hndDragStart = (_event) => {
                 _event.stopPropagation();
-                this.broker.dragDrop.sources = [];
+                this.controller.dragDrop.sources = [];
                 if (this.selected)
-                    this.broker.dragDrop.sources = this.broker.selection;
+                    this.controller.dragDrop.sources = this.controller.selection;
                 else
-                    this.broker.dragDrop.sources = [this.data];
+                    this.controller.dragDrop.sources = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
                 _event.preventDefault();
-                this.broker.dragDrop.target = this.data;
+                this.controller.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
             };
             this.hndPointerUp = (_event) => {
@@ -921,14 +923,14 @@ var FudgeUserInterface;
                 if (_event.currentTarget == _event.target)
                     return;
                 _event.stopPropagation();
-                this.hasChildren = this.broker.hasChildren(this.data);
+                this.hasChildren = this.controller.hasChildren(this.data);
             };
-            this.broker = _broker;
+            this.controller = _controller;
             this.data = _data;
-            this.display = this.broker.getLabel(_data);
+            this.display = this.controller.getLabel(_data);
             // TODO: handle cssClasses
             this.create();
-            this.hasChildren = this.broker.hasChildren(_data);
+            this.hasChildren = this.controller.hasChildren(_data);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.CHANGE, this.hndChange);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_OUT, this.hndFocus);

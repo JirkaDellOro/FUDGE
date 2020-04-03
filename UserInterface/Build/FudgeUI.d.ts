@@ -152,8 +152,8 @@ declare namespace FudgeUserInterface {
      * ```
      */
     class Tree<T> extends TreeList<T> {
-        broker: TreeBroker<T>;
-        constructor(_broker: TreeBroker<T>, _root: T);
+        controller: TreeController<T>;
+        constructor(_controller: TreeController<T>, _root: T);
         /**
          * Clear the current selection
          */
@@ -173,10 +173,9 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     /**
      * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the broker implements the methods needed
-     * // TODO: check if this could be achieved more elegantly using decorators
+     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
-    abstract class TreeBroker<T> {
+    abstract class TreeController<T> {
         /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
         selection: T[];
         /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
@@ -209,7 +208,7 @@ declare namespace FudgeUserInterface {
          * return a list of those objects in order for the according [[TreeItems]] to be deleted also
          * @param _focussed The object currently having focus
          */
-        abstract delete(_focussed: T): T[];
+        abstract delete(_focussed: T[]): T[];
         /**
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus
@@ -226,10 +225,10 @@ declare namespace FudgeUserInterface {
         display: string;
         classes: TREE_CLASS[];
         data: T;
-        broker: TreeBroker<T>;
+        controller: TreeController<T>;
         private checkbox;
         private label;
-        constructor(_broker: TreeBroker<T>, _data: T);
+        constructor(_controller: TreeController<T>, _data: T);
         /**
          * Returns true, when this item has a visible checkbox in front to open the subsequent branch
          */

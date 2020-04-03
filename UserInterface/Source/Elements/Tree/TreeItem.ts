@@ -10,19 +10,19 @@ namespace FudgeUserInterface {
     public display: string = "TreeItem";
     public classes: TREE_CLASS[] = [];
     public data: T = null;
-    public broker: TreeBroker<T>;
+    public controller: TreeController<T>;
 
     private checkbox: HTMLInputElement;
     private label: HTMLInputElement;
 
-    public constructor(_broker: TreeBroker<T>, _data: T) {
+    public constructor(_controller: TreeController<T>, _data: T) {
       super();
-      this.broker = _broker;
+      this.controller = _controller;
       this.data = _data;
-      this.display = this.broker.getLabel(_data);
+      this.display = this.controller.getLabel(_data);
       // TODO: handle cssClasses
       this.create();
-      this.hasChildren = this.broker.hasChildren(_data);
+      this.hasChildren = this.controller.hasChildren(_data);
 
       this.addEventListener(EVENT_TREE.CHANGE, this.hndChange);
       this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
@@ -252,18 +252,18 @@ namespace FudgeUserInterface {
 
     private hndDragStart = (_event: DragEvent): void => {
       _event.stopPropagation();
-      this.broker.dragDrop.sources = [];
+      this.controller.dragDrop.sources = [];
       if (this.selected)
-        this.broker.dragDrop.sources = this.broker.selection;
+        this.controller.dragDrop.sources = this.controller.selection;
       else
-        this.broker.dragDrop.sources = [this.data];
+        this.controller.dragDrop.sources = [this.data];
       _event.dataTransfer.effectAllowed = "all";
     }
 
     private hndDragOver = (_event: DragEvent): void => {
       _event.stopPropagation();
       _event.preventDefault();
-      this.broker.dragDrop.target = this.data;
+      this.controller.dragDrop.target = this.data;
       _event.dataTransfer.dropEffect = "move";
     }
 
@@ -278,7 +278,7 @@ namespace FudgeUserInterface {
       if (_event.currentTarget == _event.target)
         return;
       _event.stopPropagation();
-      this.hasChildren = this.broker.hasChildren(this.data);
+      this.hasChildren = this.controller.hasChildren(this.data);
     }
   }
 

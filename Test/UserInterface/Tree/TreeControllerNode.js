@@ -2,7 +2,7 @@ var UI_Tree;
 (function (UI_Tree) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class TreeBrokerNode extends ƒUi.TreeBroker {
+    class TreeControllerNode extends ƒUi.TreeController {
         getLabel(_node) {
             return _node.name;
         }
@@ -48,6 +48,6 @@ var UI_Tree;
             return copies;
         }
     }
-    UI_Tree.TreeBrokerNode = TreeBrokerNode;
+    UI_Tree.TreeControllerNode = TreeControllerNode;
 })(UI_Tree || (UI_Tree = {}));
-//# sourceMappingURL=TreeBrokerNode.js.map
+//# sourceMappingURL=TreeControllerNode.js.map

@@ -21,7 +21,7 @@ var UI_Tree;
         viewport.initialize("Viewport", node, cmpCamera, canvas);
         cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 3));
         cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-        let tree = new ƒUi.Tree(new UI_Tree.TreeBrokerNode(), node);
+        let tree = new ƒUi.Tree(new UI_Tree.TreeControllerNode(), node);
         document.body.appendChild(tree);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL, 10);
