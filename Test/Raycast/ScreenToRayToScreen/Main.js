@@ -2,6 +2,7 @@ var ScreenToRayToScreen;
 (function (ScreenToRayToScreen) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
+    ƒ.RenderManager.initialize(true);
     window.addEventListener("load", init);
     ScreenToRayToScreen.root = new ƒ.Node("Root");
     let viewport;
@@ -16,7 +17,6 @@ var ScreenToRayToScreen;
         const canvas = document.querySelector("canvas");
         ƒ.Debug.log("Canvas", canvas);
         crc2 = canvas.getContext("2d");
-        ƒ.RenderManager.initialize(true);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("click", canvas.requestPointerLock);
         labelDOM = document.createElement("span");
@@ -68,7 +68,7 @@ var ScreenToRayToScreen;
         ƒ.Debug.log("Projected", projection.toString());
         ƒ.Debug.log("Screen", screen.toString());
         console.groupEnd();
-        let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].cmpTransform.local;
+        let mtxCube = ScreenToRayToScreen.root.getChildrenByName("Cube")[0].mtxLocal;
         mtxCube.translation = rayEnd;
         updateDisplay();
     }
@@ -77,7 +77,7 @@ var ScreenToRayToScreen;
         updateDisplay();
     }
     function createScene() {
-        ScreenToRayToScreen.root.appendChild(new ƒAid.NodeCoordinateSystem());
+        ScreenToRayToScreen.root.addChild(new ƒAid.NodeCoordinateSystem());
         // set lights
         let cmpLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
         cmpLight.pivot.lookAt(new ƒ.Vector3(-1, -3, -2));
@@ -88,7 +88,7 @@ var ScreenToRayToScreen;
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.backgroundColor = ƒ.Color.CSS("white");
         ScreenToRayToScreen.camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
-        ScreenToRayToScreen.root.appendChild(ScreenToRayToScreen.camera);
+        ScreenToRayToScreen.root.addChild(ScreenToRayToScreen.camera);
         // camera.node.addComponent(cmpLight);
         let cube = new ƒ.Node("Cube");
         let cmpMesh = new ƒ.ComponentMesh(new ƒ.MeshCube());
@@ -97,7 +97,7 @@ var ScreenToRayToScreen;
         cube.addComponent(cmpMaterial);
         let cmpTransform = new ƒ.ComponentTransform();
         cube.addComponent(cmpTransform);
-        ScreenToRayToScreen.root.appendChild(cube);
+        ScreenToRayToScreen.root.addChild(cube);
     }
     function updateDisplay() {
         viewport.draw();

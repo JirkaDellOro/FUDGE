@@ -1,4 +1,4 @@
-/// <reference path="../Event/Event.ts"/>
+// / <reference path="../Event/Event.ts"/>
 namespace FudgeCore {
   /**
    * Interface describing the datatypes of the attributes a mutator as strings 
@@ -62,7 +62,7 @@ namespace FudgeCore {
         let value: Object = this[attribute];
         if (value instanceof Function)
           continue;
-        if (value instanceof Object && !(value instanceof Mutable))
+        if (value instanceof Object && !(value instanceof Mutable) && !(value.hasOwnProperty("idResource")))
           continue;
         mutator[attribute] = this[attribute];
       }
@@ -116,6 +116,8 @@ namespace FudgeCore {
         if (_mutator[attribute] != undefined)
           if (typeof (value) == "object")
             type = (<General>this)[attribute].constructor.name;
+          else if (typeof (value) == "function")
+            type = value["name"];
           else
             type = _mutator[attribute].constructor.name;
         types[attribute] = type;

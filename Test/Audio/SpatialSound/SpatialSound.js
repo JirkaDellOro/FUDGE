@@ -16,6 +16,8 @@ var AudioSpace;
     let mtxTranslator;
     let mtxInner;
     let mtxOuter;
+    let cntMouseX = new ƒ.Control("MouseX", speedCameraRotation);
+    let cntMouseY = new ƒ.Control("MouseY", speedCameraRotation);
     // tslint:disable-next-line: typedef
     let parameter = {
         xAmplitude: 0,
@@ -28,26 +30,25 @@ var AudioSpace;
         out = document.querySelector("output");
         const mtrWhite = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
         const mtrGrey = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
-        const inner = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY, mtrWhite, new ƒ.MeshPyramid());
-        const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY, mtrGrey, new ƒ.MeshPyramid());
+        const inner = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
+        const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
         const mtxMesh = inner.pivot;
         mtxMesh.rotateX(-90);
-        mtxMesh.translateZ(1);
+        mtxMesh.translateZ(1, false);
         outer.pivot.set(inner.pivot);
-        const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY);
-        speaker.appendChild(inner);
-        speaker.appendChild(outer);
-        speaker.appendChild(new ƒAid.NodeCoordinateSystem("SpeakerSystem", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
-        const rotator = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY);
-        const translator = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY);
-        rotator.appendChild(speaker);
-        translator.appendChild(rotator);
+        const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
+        speaker.addChild(inner);
+        speaker.addChild(outer);
+        speaker.addChild(new ƒAid.NodeCoordinateSystem("SpeakerSystem", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
+        const rotator = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY());
+        const translator = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY());
+        rotator.addChild(speaker);
+        translator.addChild(rotator);
         mtxRotatorX = speaker.local;
         mtxRotatorY = rotator.local;
         mtxTranslator = translator.local;
         mtxInner = inner.local;
         mtxOuter = outer.local;
-        ƒ.RenderManager.initialize();
         // audio setup
         const audio = await ƒ.Audio.load("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true);
@@ -61,11 +62,13 @@ var AudioSpace;
         const cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
         camera.node.addComponent(new ƒ.ComponentAudioListener());
+        camera.axisRotateX.addControl(cntMouseY);
+        camera.axisRotateY.addControl(cntMouseX);
         // scene setup
         const branch = new ƒ.Node("Branch");
-        branch.appendChild(new ƒAid.NodeCoordinateSystem());
-        branch.appendChild(translator);
-        branch.appendChild(camera);
+        branch.addChild(new ƒAid.NodeCoordinateSystem());
+        branch.addChild(translator);
+        branch.addChild(camera);
         const viewport = new ƒ.Viewport();
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", branch, cmpCamera, canvas);
@@ -93,13 +96,13 @@ var AudioSpace;
             {
                 let sin = Math.sin(Math.PI * panner["coneInnerAngle"] / 360);
                 let cos = Math.cos(Math.PI * panner["coneInnerAngle"] / 360);
-                mtxInner.set(ƒ.Matrix4x4.IDENTITY);
+                mtxInner.set(ƒ.Matrix4x4.IDENTITY());
                 mtxInner.scaling = new ƒ.Vector3(2 * sin, 2 * sin, cos);
             }
             {
                 let sin = Math.sin(Math.PI * panner["coneOuterAngle"] / 360);
                 let cos = Math.cos(Math.PI * panner["coneOuterAngle"] / 360);
-                mtxOuter.set(ƒ.Matrix4x4.IDENTITY);
+                mtxOuter.set(ƒ.Matrix4x4.IDENTITY());
                 mtxOuter.scaling = new ƒ.Vector3(2 * sin, 2 * sin, cos);
             }
             // mtxTranslator.translation = position;
@@ -111,8 +114,10 @@ var AudioSpace;
     function hndPointerMove(_event) {
         if (!_event.buttons)
             return;
-        camera.rotateY(_event.movementX * speedCameraRotation);
-        camera.rotateX(_event.movementY * speedCameraRotation);
+        // camera.rotateY(_event.movementX * speedCameraRotation);
+        // camera.rotateX(_event.movementY * speedCameraRotation);
+        cntMouseX.setInput(_event.movementX);
+        cntMouseY.setInput(_event.movementY);
     }
     function hndWheelMove(_event) {
         let panner = cmpAudio.getMutatorOfNode(ƒ.AUDIO_NODE_TYPE.PANNER);
@@ -128,7 +133,7 @@ var AudioSpace;
             camera.distance += _event.deltaY * speedCameraTranslation;
     }
     // function printInfo(_mtxBody: ƒ.Matrix4x4, _mtxCamera: ƒ.Matrix4x4): void {
-    //   // let posBody: ƒ.Vector3 = _body.cmpTransform.local.translation;
+    //   // let posBody: ƒ.Vector3 = _body.mtxLocal.translation;
     //   let info: string = "<fieldset><legend>Info</legend>";
     //   info += `camera [${_mtxCamera.translation.toString()}] `;
     //   info += ` body [${_mtxBody.translation.toString()}]`;
@@ -157,9 +162,9 @@ var AudioSpace;
                         0));
             switch (_event.code) {
                 case ƒ.KEYBOARD_CODE.SPACE:
-                    mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY);
-                    mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY);
-                    mtxTranslator.set(ƒ.Matrix4x4.IDENTITY);
+                    mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
+                    mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
+                    mtxTranslator.set(ƒ.Matrix4x4.IDENTITY());
                     // parameter.xAmplitude = parameter.zAmplitude = 0;
                     break;
                 // case ƒ.KEYBOARD_CODE.PLUS+:

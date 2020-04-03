@@ -4,11 +4,9 @@ var FudgeTest;
 /// <reference types="../../../Core/Build/FudgeCore"/>
 /// <reference types="../../../UserInterface/Build/FudgeUI"/>
 (function (FudgeTest) {
-    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let pm = FudgeTest.PanelManager.instance;
     function init() {
-        ƒ.RenderManager.initialize();
         // TODO: At this point of time, the project is just a single node. A project is much more complex...
         let node = null;
         console.log("createPanel");

@@ -1,5 +1,6 @@
 namespace TextureTest {
     import ƒ = FudgeCore;
+    
 
     window.addEventListener("load", init);
 
@@ -8,8 +9,8 @@ namespace TextureTest {
         let material: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
 
         let body: ƒ.Node = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
-        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.mtxLocal.translate(ƒ.Vector3.ZERO());
+        body.mtxLocal.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
 
         let lights: ƒ.Node = new ƒ.Node("Lights");
         lights.addComponent(new ƒ.ComponentTransform());
@@ -19,7 +20,7 @@ namespace TextureTest {
 
         let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("RED")));
         cmpLightDirectionalRed.pivot.lookAt(new ƒ.Vector3(-1, -1, 0));
-        lights.addComponent(cmpLightDirectionalRed);
+        lights.addComponent(cmpLightDirectionalRed); 
 
         let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("GREEN")));
         cmpLightDirectionalGreen.pivot.lookAt(new ƒ.Vector3(0, -1, -1));
@@ -30,13 +31,9 @@ namespace TextureTest {
         lights.addComponent(cmpLightDirectionalBlue);
 
         let branch: ƒ.Node = new ƒ.Node("Branch");
-        branch.appendChild(body);
-        branch.appendChild(Scenes.createCoordinateSystem());
-        branch.appendChild(lights);
-
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+        branch.addChild(body);
+        branch.addChild(Scenes.createCoordinateSystem());
+        branch.addChild(lights);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
         let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 2), new ƒ.Vector3(0, 0, 0));
@@ -50,9 +47,8 @@ namespace TextureTest {
         window.setInterval(
             function (): void {
                 // body.cmpTransform.rotateY(-1.1);
-                lights.cmpTransform.local.rotateY(-1);
+                lights.mtxLocal.rotateY(-1);
                 // body.cmpTransform.rotateZ(-0.9);
-                ƒ.RenderManager.update();
                 viewport.draw();
             },
             20);

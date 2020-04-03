@@ -1,4 +1,4 @@
-namespace StateMachine {
+namespace FudgeAid {
   import ƒ = FudgeCore;
   
   export class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {

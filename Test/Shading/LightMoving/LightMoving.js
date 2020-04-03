@@ -6,8 +6,8 @@ var TextureTest;
         let coatWhite = new ƒ.CoatColored(ƒ.Color.CSS("WHITE"));
         let material = new ƒ.Material("White", ƒ.ShaderFlat, coatWhite);
         let body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshPyramid());
-        body.cmpTransform.local.translate(ƒ.Vector3.ZERO());
-        body.cmpTransform.local.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
+        body.mtxLocal.translate(ƒ.Vector3.ZERO());
+        body.mtxLocal.scale(new ƒ.Vector3(0.8, 0.8, 0.8));
         let lights = new ƒ.Node("Lights");
         lights.addComponent(new ƒ.ComponentTransform());
         let cmpLightAmbient = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(.1, .0, .0, 1)));
@@ -22,12 +22,9 @@ var TextureTest;
         cmpLightDirectionalBlue.pivot.lookAt(new ƒ.Vector3(0.5, -1, 0.5));
         lights.addComponent(cmpLightDirectionalBlue);
         let branch = new ƒ.Node("Branch");
-        branch.appendChild(body);
-        branch.appendChild(Scenes.createCoordinateSystem());
-        branch.appendChild(lights);
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+        branch.addChild(body);
+        branch.addChild(Scenes.createCoordinateSystem());
+        branch.addChild(lights);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 2), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -37,9 +34,8 @@ var TextureTest;
         //*/
         window.setInterval(function () {
             // body.cmpTransform.rotateY(-1.1);
-            lights.cmpTransform.local.rotateY(-1);
+            lights.mtxLocal.rotateY(-1);
             // body.cmpTransform.rotateZ(-0.9);
-            ƒ.RenderManager.update();
             viewport.draw();
         }, 20);
         //*/

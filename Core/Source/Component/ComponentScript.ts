@@ -1,21 +1,25 @@
 namespace FudgeCore {
-    /**
-     * Base class for scripts the user writes
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class ComponentScript extends Component {
-        constructor() {
-            super();
-            this.singleton = false;
-        }
-
-        public serialize(): Serialization {
-            return this.getMutator();
-        }
-
-        public deserialize(_serialization: Serialization): Serializable {
-            this.mutate(_serialization);
-            return this;
-        }
+  /**
+   * Base class for scripts the user writes
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+   */
+  export class ComponentScript extends Component {
+    // registering this doesn't make sense, only its subclasses. Or this component must refer to scripts to be attached to this component
+    // TODO: rethink & refactor
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentScript);
+    constructor() {
+      super();
+      this.singleton = false;
     }
+
+    public serialize(): Serialization {
+      return this.getMutator();
+    }
+
+    public deserialize(_serialization: Serialization): Serializable {
+      this.mutate(_serialization);
+      return this;
+    }
+  }
 }

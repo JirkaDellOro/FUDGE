@@ -160,6 +160,7 @@ namespace FudgeCore {
         if (timer.id == _id) {
           timer.clear();
           delete this.timers[id];
+          // TODO: check if an early out is OK here... should be!
         }
       }
     }
@@ -181,8 +182,18 @@ namespace FudgeCore {
      * Deletes the timer with the id given by this time object
      */
     public deleteTimer(_id: number): void {
-      this.timers[_id].clear();
+      let timer: Timer = this.timers[_id];
+      if (!timer)
+        return;
+      timer.clear();
       delete this.timers[_id];
+    }
+
+    /**
+     * Returns a reference to the timer with the given id or null if not found.
+     */
+    public getTimer(_id: number): Timer {
+      return this.timers[_id];
     }
 
     /**
@@ -216,9 +227,4 @@ namespace FudgeCore {
     }
   }
   //#endregion
-
-  /**
-   * Standard [[Time]]-instance. Starts running when Fudge starts up and may be used as the main game-time object
-   */
-  export const time: Time = Time.game; // TODO: eliminate Time.gameTime and use time solely
 }

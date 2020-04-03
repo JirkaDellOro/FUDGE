@@ -41,7 +41,6 @@ namespace Mutable {
 
         cmpTransform.local.mutate(mutator);
 
-        ƒ.RenderManager.update();
         Scenes.viewport.draw();
     }
 }

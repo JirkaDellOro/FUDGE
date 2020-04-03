@@ -108,7 +108,7 @@ namespace FudgeCore {
         let factor: number = _length / Math.hypot(x, y);
         vector.data = new Float32Array([_vector.x * factor, _vector.y * factor]);
       } catch (_error) {
-        console.warn(_error);
+        Debug.fudge(_error);
       }
       return vector;
     }

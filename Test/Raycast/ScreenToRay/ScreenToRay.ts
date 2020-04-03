@@ -1,6 +1,8 @@
 namespace ScreenToRay {
   import ƒ = FudgeCore;
+  
   window.addEventListener("load", init);
+
   let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
   let uiClient: UI.Rectangle;
   let menu: HTMLDivElement;
@@ -19,11 +21,6 @@ namespace ScreenToRay {
     // create asset
     let branch: ƒ.Node = Scenes.createAxisCross();
     branch.addComponent(new ƒ.ComponentTransform());
-
-    // initialize RenderManager and transmit content
-    ƒ.RenderManager.initialize();
-    ƒ.RenderManager.addBranch(branch);
-    ƒ.RenderManager.update();
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
@@ -76,7 +73,6 @@ namespace ScreenToRay {
 
     function animate(_event: Event): void {
       update();
-      ƒ.RenderManager.update();
       viewport.draw();
       adjustRayCamera();
       pickNodeAt(mouse);
@@ -107,12 +103,12 @@ namespace ScreenToRay {
 
     let ray: ƒ.Ray = computeRay();
     ƒ.Debug.log(ray.direction.toString());
-    
+
     ray.direction.transform(cmpCamera.pivot);
     ƒ.Debug.log(ray.direction.toString());
-    
+
     ƒ.Debug.groupEnd();
-    
+
     cameraRay.pivot.lookAt(ray.direction);
     cameraRay.projectCentral(1, 10);
     viewportRay.draw();
@@ -268,5 +264,6 @@ namespace ScreenToRay {
     uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
 
     uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
+    viewport.createPickBuffers();
   }
 }

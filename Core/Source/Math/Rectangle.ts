@@ -1,3 +1,6 @@
+///<reference path="../Engine/Recycler.ts"/>
+///<reference path="Vector2.ts"/>
+
 namespace FudgeCore {
   /**
    * Defines the origin of a rectangle

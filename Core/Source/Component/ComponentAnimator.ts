@@ -1,5 +1,5 @@
-/// <reference path="../Time/Loop.ts"/>
-/// <reference path="../Animation/Animation.ts"/>
+// / <reference path="../Time/Loop.ts"/>
+// / <reference path="../Animation/Animation.ts"/>
 
 namespace FudgeCore {
   /**
@@ -35,6 +35,7 @@ namespace FudgeCore {
    * @authors Lukas Scheuerle, HFU, 2019
    */
   export class ComponentAnimator extends Component {
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentAnimator);
     //TODO: add functionality to blend from one animation to another.
     animation: Animation;
     playmode: ANIMATION_PLAYMODE;

@@ -1,15 +1,18 @@
 namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class ShaderFlat extends Shader {
-        public static getCoat(): typeof Coat {
-            return CoatColored;
-        }
+  /**
+   * Single color shading
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  @RenderInjectorShader.decorate
+  export abstract class ShaderFlat extends Shader {
+    public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlat);
 
-        public static getVertexShaderSource(): string {
-            return `#version 300 es
+    public static getCoat(): typeof Coat {
+      return CoatColored;
+    }
+
+    public static getVertexShaderSource(): string {
+      return `#version 300 es
 
                     struct LightAmbient {
                         vec4 color;
@@ -43,9 +46,9 @@ namespace FudgeCore {
                         }
                         v_color.a = 1.0;
                     }`;
-        }
-        public static getFragmentShaderSource(): string {
-            return `#version 300 es
+    }
+    public static getFragmentShaderSource(): string {
+      return `#version 300 es
                     precision mediump float;
 
                     uniform vec4 u_color;
@@ -55,6 +58,6 @@ namespace FudgeCore {
                     void main() {
                         frag = u_color * v_color;
                     }`;
-        }
     }
+  }
 }

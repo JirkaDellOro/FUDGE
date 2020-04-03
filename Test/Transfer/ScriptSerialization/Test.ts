@@ -12,13 +12,13 @@ namespace ScriptSerialization {
 
         hndAddComponent = (_event: Event) => {
             // ƒ.Debug.log(_event.type, this);
-            this.getContainer().cmpTransform.local.translate(this.startPosition);
+            this.getContainer().mtxLocal.translate(this.startPosition);
         }
 
         hndMutation = (_event: Event) => {
             ƒ.Debug.log(_event.type, this);
             if (!this.getContainer()) return;
-            this.getContainer().cmpTransform.local.translate(this.startPosition);
+            this.getContainer().mtxLocal.translate(this.startPosition);
         }
 
         protected reduceMutator(_mutator: ƒ.Mutator): void {

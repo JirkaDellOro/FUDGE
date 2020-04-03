@@ -5,7 +5,7 @@
 
 .lm_content {
     background-color: #414141;
-    overflow: auto;
+    /* overflow: auto; */
     position: relative;
 }
 

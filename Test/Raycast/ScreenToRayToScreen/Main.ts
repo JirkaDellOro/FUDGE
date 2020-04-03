@@ -1,6 +1,8 @@
 namespace ScreenToRayToScreen {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+  ƒ.RenderManager.initialize(true);
+
   window.addEventListener("load", init);
 
   export let root: ƒ.Node = new ƒ.Node("Root");
@@ -20,8 +22,6 @@ namespace ScreenToRayToScreen {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     ƒ.Debug.log("Canvas", canvas);
     crc2 = canvas.getContext("2d");
-
-    ƒ.RenderManager.initialize(true);
 
     // enable unlimited mouse-movement (user needs to click on canvas first)
     canvas.addEventListener("click", canvas.requestPointerLock);
@@ -89,7 +89,7 @@ namespace ScreenToRayToScreen {
 
     console.groupEnd();
 
-    let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].cmpTransform.local;
+    let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxLocal;
     mtxCube.translation = rayEnd;
     updateDisplay();
 
@@ -102,7 +102,7 @@ namespace ScreenToRayToScreen {
 
 
   function createScene(): void {
-    root.appendChild(new ƒAid.NodeCoordinateSystem());
+    root.addChild(new ƒAid.NodeCoordinateSystem());
 
     // set lights
     let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
@@ -115,7 +115,7 @@ namespace ScreenToRayToScreen {
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.backgroundColor = ƒ.Color.CSS("white");
     camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
-    root.appendChild(camera);
+    root.addChild(camera);
     // camera.node.addComponent(cmpLight);
 
     let cube: ƒ.Node = new ƒ.Node("Cube");
@@ -130,7 +130,7 @@ namespace ScreenToRayToScreen {
     let cmpTransform: ƒ.ComponentTransform = new ƒ.ComponentTransform();
     cube.addComponent(cmpTransform);
 
-    root.appendChild(cube);
+    root.addChild(cube);
   }
 
 

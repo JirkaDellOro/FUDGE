@@ -1,4 +1,4 @@
-/// <reference path="Component.ts"/>
+// / <reference path="Component.ts"/>
 namespace FudgeCore {
   export enum FIELD_OF_VIEW {
     HORIZONTAL, VERTICAL, DIAGONAL
@@ -18,7 +18,8 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentCamera extends Component {
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+    public static readonly iSubclass: number = Component.registerSubclass(ComponentCamera);
+    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     private projection: PROJECTION = PROJECTION.CENTRAL;

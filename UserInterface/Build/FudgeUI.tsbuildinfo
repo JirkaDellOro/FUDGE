@@ -2,15 +2,20 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
-      "../Source/UIElements/UIElements.ts",
-      "../Source/UIEvent/UIEvent.ts",
-      "../Source/UIGenerator/UIGenerator.ts",
-      "../Source/UIListControllers/UIAnimationList.ts",
-      "../Source/UIListControllers/UIListElements.ts",
-      "../Source/UIListControllers/UINodeList.ts",
-      "../Source/UIMultiLevelMenu/UIMultiLevelMenu.ts",
-      "../Source/UIMutable/UIMutable.ts",
-      "../Source/UIMutable/UINodeData.ts"
+      "../Source/Elements/Elements.ts",
+      "../Source/Elements/FoldableFieldSet.ts",
+      "../Source/Elements/ListElements.ts",
+      "../Source/Elements/Menu.ts",
+      "../Source/Elements/MultiLevelMenu.ts",
+      "../Source/Elements/Stepper.ts",
+      "../Source/Elements/Toggle.ts",
+      "../Source/Elements/Tree/TreeList.ts",
+      "../Source/Elements/Tree/Tree.ts",
+      "../Source/Elements/Tree/TreeBroker.ts",
+      "../Source/Elements/Tree/TreeItem.ts",
+      "../Source/Event/Event.ts",
+      "../Source/Generator/Generator.ts",
+      "../Source/Mutable/Mutable.ts"
     ],
     "js": {
       "sections": [
@@ -22,7 +27,7 @@
         },
         {
           "pos": 15,
-          "end": 30956,
+          "end": 56815,
           "kind": "text"
         }
       ],
@@ -56,11 +61,11 @@
         },
         {
           "pos": 58,
-          "end": 7158,
+          "end": 13634,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.7.3"
+  "version": "3.9.0-dev.20200327"
 }

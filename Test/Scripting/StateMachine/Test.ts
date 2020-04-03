@@ -1,12 +1,15 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
 
 namespace StateMachine {
   enum JOB {
     IDLE, PATROL, CHASE
   }
 
-  class Guard extends StateMachine<JOB> {
-    private static stateMachine: StateMachineInstructions<JOB> = Guard.setupStateMachine();
+  import ƒaid = FudgeAid;
+
+  class Guard extends ƒaid.StateMachine<JOB> {
+    private static stateMachine: ƒaid.StateMachineInstructions<JOB> = Guard.setupStateMachine();
 
     public constructor() {
       super();
@@ -34,8 +37,8 @@ namespace StateMachine {
       Guard.actDefault(_machine);
     }
 
-    private static setupStateMachine(): StateMachineInstructions<JOB> {
-      let setup: StateMachineInstructions<JOB> = new StateMachineInstructions();
+    private static setupStateMachine(): ƒaid.StateMachineInstructions<JOB> {
+      let setup: ƒaid.StateMachineInstructions<JOB> = new ƒaid.StateMachineInstructions();
       setup.transitDefault = Guard.transitDefault ;
       setup.actDefault = Guard.actDefault;
       setup.setTransition(JOB.IDLE, JOB.IDLE, this.transit);
@@ -47,8 +50,8 @@ namespace StateMachine {
     }
   }
 
-  class ComponentGuard extends ComponentStateMachine<JOB> {
-    private static stateMachine: StateMachineInstructions<JOB> = ComponentGuard.setupStateMachine();
+  class ComponentGuard extends ƒaid.ComponentStateMachine<JOB> {
+    private static stateMachine: ƒaid.StateMachineInstructions<JOB> = ComponentGuard.setupStateMachine();
 
     public constructor() {
       super();
@@ -62,8 +65,8 @@ namespace StateMachine {
       console.log("ComponentGuard acts on ", _machine.stateCurrent);
     }
 
-    private static setupStateMachine(): StateMachineInstructions<JOB> {
-      let setup: StateMachineInstructions<JOB> = new StateMachineInstructions();
+    private static setupStateMachine(): ƒaid.StateMachineInstructions<JOB> {
+      let setup: ƒaid.StateMachineInstructions<JOB> = new ƒaid.StateMachineInstructions();
       setup.setTransition(JOB.IDLE, JOB.PATROL, this.transit);
       setup.setTransition(JOB.PATROL, JOB.IDLE, this.transit);
       setup.setAction(JOB.IDLE, this.act);

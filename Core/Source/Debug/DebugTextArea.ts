@@ -1,16 +1,18 @@
-/// <reference path="DebugTarget.ts"/>
+// / <reference path="DebugTarget.ts"/>
 namespace FudgeCore {
   /**
    * Route to an HTMLTextArea, may be obsolete when using HTMLDialogElement
    */
   export class DebugTextArea extends DebugTarget {
     public static textArea: HTMLTextAreaElement = document.createElement("textarea");
-    // Ⓘ Ⓛ Ⓦ Ⓔ ☠ ☢ ⚠ ✎ ✔ ✓ ❌ ⭍ ☈ 🛈
+    public static autoScroll: boolean = true;
+
     public static delegates: MapDebugFilterToDelegate = {
-      [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate("✓"),
-      [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate("✎"),
-      [DEBUG_FILTER.WARN]: DebugTextArea.createDelegate("⚠"),
-      [DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate("❌"),
+      [DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.INFO]),
+      [DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.LOG]),
+      [DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.WARN]),
+      [DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.ERROR]),
+      [DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.FUDGE]),
       [DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
       [DEBUG_FILTER.GROUP]: DebugTextArea.group,
       [DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
@@ -47,6 +49,8 @@ namespace FudgeCore {
 
     private static print(_text: string): void {
       DebugTextArea.textArea.textContent += DebugTextArea.getIndentation(DebugTextArea.groups.length) + _text + "\n";
+      if (DebugTextArea.autoScroll)
+        DebugTextArea.textArea.scrollTop = DebugTextArea.textArea.scrollHeight;
     }
   }
 }

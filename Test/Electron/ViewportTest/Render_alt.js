@@ -41,10 +41,6 @@ var ElectronViewport;
     function initViewport() {
         // create asset
         branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewport
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
@@ -67,8 +63,7 @@ var ElectronViewport;
         container.getElement().append(txtName);
     }
     function animate(_event) {
-        branch.cmpTransform.local.rotateY(1);
-        ƒ.RenderManager.update();
+        branch.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }
@@ -105,7 +100,7 @@ var ElectronViewport;
         // nodeCubeCaramel.addComponent(cmpMeshCream);
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
-        branch.appendChild(nodeCubeCoffee);
+        branch.addChild(nodeCubeCoffee);
     }
 })(ElectronViewport || (ElectronViewport = {}));
 //# sourceMappingURL=Render_alt.js.map

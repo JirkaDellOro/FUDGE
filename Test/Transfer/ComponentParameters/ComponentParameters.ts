@@ -1,5 +1,7 @@
 namespace ComponentParameters {
   import ƒ = FudgeCore;
+  ƒ.RenderManager.initialize(true, true);
+  
   window.addEventListener("DOMContentLoaded", init);
 
   function init(): void {
@@ -23,11 +25,8 @@ namespace ComponentParameters {
       quad.addComponent(cmpMesh);
       quad.addComponent(cmpMaterial);
 
-      root.appendChild(quad);
+      root.addChild(quad);
     }
-
-    ƒ.RenderManager.initialize(true, true);
-    ƒ.RenderManager.update();
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();

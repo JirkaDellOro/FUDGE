@@ -1,5 +1,5 @@
-///<reference path="../Event/Event.ts"/>
-///<reference path="../Time/Time.ts"/>
+// /<reference path="../Event/Event.ts"/>
+// /<reference path="../Time/Time.ts"/>
 namespace FudgeCore {
   /**
    * Determines the mode a loop runs in
@@ -63,7 +63,7 @@ namespace FudgeCore {
       let log: string = `Loop starting in mode ${Loop.mode}`;
       if (Loop.mode != LOOP_MODE.FRAME_REQUEST)
         log += ` with attempted ${_fps} fps`;
-      Debug.log(log);
+      Debug.fudge(log);
 
       switch (_mode) {
         case LOOP_MODE.FRAME_REQUEST:
@@ -108,7 +108,7 @@ namespace FudgeCore {
       }
 
       Loop.running = false;
-      Debug.log("Loop stopped!");
+      Debug.fudge("Loop stopped!");
     }
 
     public static getFpsGameAverage(): number {
@@ -131,6 +131,7 @@ namespace FudgeCore {
       Loop.timeLastFrameGameAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameGameAvg + Loop.timeFrameGame) / Loop.framesToAverage;
       Loop.timeLastFrameRealAvg = ((Loop.framesToAverage - 1) * Loop.timeLastFrameRealAvg + Loop.timeFrameReal) / Loop.framesToAverage;
 
+      // TODO: consider LoopEvent which conveys information such as timeElapsed etc...
       let event: Event = new Event(EVENT.LOOP_FRAME);
       Loop.targetStatic.dispatchEvent(event);
     }

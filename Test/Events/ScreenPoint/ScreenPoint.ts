@@ -1,5 +1,7 @@
 namespace ScreenPoint {
     import ƒ = FudgeCore;
+    
+    
     let canvas: HTMLCanvasElement;
     let camera: ƒ.Node;
     export let viewPort: ƒ.Viewport;
@@ -8,10 +10,6 @@ namespace ScreenPoint {
 
     function init(): void {
         let branch: ƒ.Node = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         let posCamera: ƒ.Vector3 = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");

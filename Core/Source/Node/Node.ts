@@ -6,10 +6,11 @@ namespace FudgeCore {
   /**
    * Represents a node in the scenetree.
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
    */
   export class Node extends EventTargetƒ implements Serializable {
     public name: string; // The name to call this node by.
-    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY;
+    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
 
     private parent: Node | null = null; // The parent of this node.
@@ -32,6 +33,7 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       this.active = _on;
+      // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
     public get isActive(): boolean {
@@ -63,16 +65,11 @@ namespace FudgeCore {
     }
     /**
      * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
-     * Returns null if no [[ComponentTransform]] is attached
+     * Fails if no [[ComponentTransform]] is attached
      */
-    // TODO: rejected for now, since there is some computational overhead, so node.mtxLocal should not be used carelessly
-    // public get mtxLocal(): Matrix4x4 {
-    //     let cmpTransform: ComponentTransform = this.cmpTransform;
-    //     if (cmpTransform)
-    //         return cmpTransform.local;
-    //     else
-    //         return null;
-    // }
+    public get mtxLocal(): Matrix4x4 {
+            return this.cmpTransform.local;
+    }
 
     // #region Scenetree
     /**
@@ -93,20 +90,28 @@ namespace FudgeCore {
     }
 
     /**
+     * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
+     * See and preferably use [[addChild]]
+     */
+    // tslint:disable-next-line: member-ordering
+    public readonly appendChild: (_node: Node) => void = this.addChild;
+
+    /**
      * Adds the given reference to a node to the list of children, if not already in
      * @param _node The node to be added as a child
      * @throws Error when trying to add an ancestor of this 
      */
-    public appendChild(_node: Node): void {
+    public addChild(_node: Node): void {
       if (this.children.includes(_node))
         // _node is already a child of this
         return;
 
       let inAudioBranch: boolean = false;
+      let branchListened: Node = AudioManager.default.getBranchListeningTo();
       let ancestor: Node = this;
       while (ancestor) {
         ancestor.timestampUpdate = 0;
-        inAudioBranch = inAudioBranch || (ancestor == AudioManager.default.getBranchListeningTo());
+        inAudioBranch = inAudioBranch || (ancestor == branchListened);
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else

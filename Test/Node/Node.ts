@@ -9,15 +9,15 @@ namespace NodeTest {
     let child1: ƒ.Node = new ƒ.Node("child1");
     let child2: ƒ.Node = new ƒ.Node("child2");
 
-    branch.appendChild(node1);
-    branch.appendChild(node2);
-    node1.appendChild(child1);
-    node2.appendChild(child2);
+    branch.addChild(node1);
+    branch.addChild(node2);
+    node1.addChild(child1);
+    node2.addChild(child2);
 
     for (let node of branch.branch)
       ƒ.Debug.log(node.name);
 
-    node1.appendChild(child2);
+    node1.addChild(child2);
 
     for (let node of branch.branch)
       ƒ.Debug.log(node.name);

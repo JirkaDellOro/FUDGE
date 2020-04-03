@@ -1,28 +1,68 @@
 /// <reference path="../../core/build/fudgecore.d.ts" />
 /// <reference types="../../core/build/fudgecore" />
 declare namespace FudgeAid {
-    class ArithIntervalSolver<Interval, Epsilon> {
-        left: Interval;
-        right: Interval;
+    /**
+     * Abstract class supporting versious arithmetical helper functions
+     */
+    abstract class Arith {
+        /**
+         * Returns one of the values passed in, either _value if within _min and _max or the boundary being exceeded by _value
+         */
+        static clamp<T>(_value: T, _min: T, _max: T, _isSmaller?: (_value1: T, _value2: T) => boolean): T;
+    }
+}
+declare namespace FudgeAid {
+    /**
+     * Within a given precision, an object of this class finds the parameter value at which a given function
+     * switches its boolean return value using interval splitting (bisection).
+     * Pass the type of the parameter and the type the precision is measured in.
+     */
+    class ArithBisection<Parameter, Epsilon> {
+        /** The left border of the interval found */
+        left: Parameter;
+        /** The right border of the interval found */
+        right: Parameter;
+        /** The function value at the left border of the interval found */
         leftValue: boolean;
+        /** The function value at the right border of the interval found */
         rightValue: boolean;
         private function;
         private divide;
         private isSmaller;
-        constructor(_function: (_t: Interval) => boolean, _divide: (_left: Interval, _right: Interval) => Interval, _isSmaller: (_left: Interval, _right: Interval, _epsilon: Epsilon) => boolean);
-        solve(_left: Interval, _right: Interval, _epsilon: Epsilon, _leftValue?: boolean, _rightValue?: boolean): void;
+        /**
+         * Creates a new Solver
+         * @param _function A function that takes an argument of the generic type <Parameter> and returns a boolean value.
+         * @param _divide A function splitting the interval to find a parameter for the next iteration, may simply be the arithmetic mean
+         * @param _isSmaller A function that determines a difference between the borders of the current interval and compares this to the given precision
+         */
+        constructor(_function: (_t: Parameter) => boolean, _divide: (_left: Parameter, _right: Parameter) => Parameter, _isSmaller: (_left: Parameter, _right: Parameter, _epsilon: Epsilon) => boolean);
+        /**
+         * Finds a solution with the given precision in the given interval using the functions this Solver was constructed with.
+         * After the method returns, find the data in this objects properties.
+         * @param _left The parameter on one side of the interval.
+         * @param _right The parameter on the other side, may be "smaller" than [[_left]].
+         * @param _epsilon The desired precision of the solution.
+         * @param _leftValue The value on the left side of the interval, omit if yet unknown or pass in if known for better performance.
+         * @param _rightValue The value on the right side of the interval, omit if yet unknown or pass in if known for better performance.
+         * @throws Error if both sides of the interval return the same value.
+         */
+        solve(_left: Parameter, _right: Parameter, _epsilon: Epsilon, _leftValue?: boolean, _rightValue?: boolean): void;
         toString(): string;
     }
 }
 declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class CameraOrbit extends ƒ.Node {
+        readonly axisRotateX: ƒ.Axis;
+        readonly axisRotateY: ƒ.Axis;
+        readonly axisDistance: ƒ.Axis;
         private maxRotX;
         private minDistance;
         private maxDistance;
         private rotatorX;
         private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
+        hndAxisOutput: EventListener;
         get component(): ƒ.ComponentCamera;
         get node(): ƒ.Node;
         set distance(_distance: number);
@@ -36,6 +76,21 @@ declare namespace FudgeAid {
     }
 }
 declare namespace FudgeAid {
+    enum IMAGE_RENDERING {
+        AUTO = "auto",
+        SMOOTH = "smooth",
+        HIGH_QUALITY = "high-quality",
+        CRISP_EDGES = "crisp-edges",
+        PIXELATED = "pixelated"
+    }
+    /**
+     * Adds comfort methods to create a render canvas
+     */
+    class Canvas {
+        static create(_fillParent?: boolean, _imageRendering?: IMAGE_RENDERING, _width?: number, _height?: number): HTMLCanvasElement;
+    }
+}
+declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class Node extends ƒ.Node {
         private static count;
@@ -43,6 +98,7 @@ declare namespace FudgeAid {
         private static getNextName;
         get local(): ƒ.Matrix4x4;
         get pivot(): ƒ.Matrix4x4;
+        deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
     }
 }
 declare namespace FudgeAid {
@@ -63,7 +119,7 @@ declare namespace FudgeAid {
         constructor(_name: string, _rotationY: number);
     }
 }
-declare namespace StateMachine {
+declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {
         stateCurrent: State;
@@ -77,7 +133,7 @@ declare namespace StateMachine {
  * State machine offers a structure and fundamental functionality for state machines
  * <State> should be an enum defining the various states of the machine
  */
-declare namespace StateMachine {
+declare namespace FudgeAid {
     /** Format of methods to be used as transitions or actions */
     type StateMachineMethod<State> = (_machine: StateMachine<State>) => void;
     /** Type for maps associating a state to a method */

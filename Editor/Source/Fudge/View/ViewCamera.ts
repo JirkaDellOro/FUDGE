@@ -13,14 +13,14 @@ namespace Fudge {
 
         constructor(_panel: Panel) {
             super(_panel);
-            this.parentPanel.addEventListener(ƒui.UIEVENT.ACTIVEVIEWPORT, this.setCamera);
+            this.parentPanel.addEventListener(EVENT_EDITOR.ACTIVEVIEWPORT, this.setCamera);
             let div: HTMLDivElement = document.createElement("div");
             this.content.appendChild(div);
         }
 
         fillContent(): void {
             let div: HTMLDivElement = document.createElement("div");
-            let inspector: ƒui.UINodeData = new ƒui.UINodeData(this.camera, div);
+            let inspector: NodeData = new NodeData(this.camera, div);
             this.content.replaceChild(div, this.content.firstChild);
         }        
         

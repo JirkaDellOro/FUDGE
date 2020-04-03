@@ -11,16 +11,16 @@ var ScriptSerialization;
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
         let coSys = Scenes.createCoordinateSystem();
-        root.appendChild(coSys);
-        // root.appendChild(branch);
+        root.addChild(coSys);
+        // root.addChild(branch);
         let test = createTest();
-        branch.appendChild(test);
+        branch.addChild(test);
         test.name = "Original";
         let resource = ƒ.ResourceManager.registerNodeAsResource(test, false);
         resource.name = "Resource";
         let instance = new ƒ.NodeResourceInstance(resource);
         instance.name = "Instance";
-        branch.appendChild(instance);
+        branch.addChild(instance);
         let cmpScript = instance.getComponent(ScriptSerialization.Test);
         let mutator = cmpScript.getMutator();
         mutator.startPosition["x"] = 1;
@@ -44,8 +44,7 @@ var ScriptSerialization;
         let reconstruct = ƒ.Serializer.deserialize(parsed);
         ƒ.Debug.log("Reconstructed branch", reconstruct);
         console.groupEnd();
-        root.appendChild(reconstruct);
-        ƒ.RenderManager.initialize();
+        root.addChild(reconstruct);
         let viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", branch, cmpCamera, canvas);
         // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -53,7 +52,6 @@ var ScriptSerialization;
         Compare.compare(branch, reconstruct);
         update(null);
         function update(_event) {
-            ƒ.RenderManager.update();
             viewport.draw();
         }
     }
@@ -69,7 +67,7 @@ var ScriptSerialization;
         let node = Scenes.createCompleteMeshNode("Test", mtrOrange, pyramid);
         // (<ƒ.ComponentMesh>center.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(0.5));
         // let satellite: ƒ.Node = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);
-        // center.appendChild(satellite);
+        // center.addChild(satellite);
         node.addComponent(new ScriptSerialization.Test());
         return node;
     }

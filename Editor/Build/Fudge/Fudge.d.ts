@@ -1,6 +1,64 @@
-/// <reference types="golden-layout" />
 /// <reference types="../../../core/build/fudgecore" />
 /// <reference types="../../../userinterface/build/fudgeui" />
+/// <reference types="golden-layout" />
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    enum EVENT_EDITOR {
+        REMOVE = "nodeRemoveEvent",
+        HIDE = "nodeHideEvent",
+        ACTIVEVIEWPORT = "activeViewport"
+    }
+    enum NODEMENU {
+        EMPTY = "Empty Node",
+        BOX = "Box Mesh Node",
+        PYRAMID = "Pyramid Mesh Node",
+        PLANE = "Plane Mesh Node"
+    }
+    enum COMPONENTMENU {
+        MESHBOX = "Mesh Component.Box Mesh Component",
+        MESHPLANE = "Mesh Component.Plane Mesh Component",
+        MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
+        AUDIOLISTENER = "Audio Listener Component",
+        AUDIO = "Audio Component",
+        ANIMATION = "Animation Component",
+        CAMERA = "Camera Component",
+        LIGHT = "Light Component",
+        SCRIPT = "Script Component",
+        TRANSFORM = "Transform Component"
+    }
+    class UINodeList {
+        listRoot: HTMLElement;
+        selectedEntry: HTMLElement;
+        private nodeRoot;
+        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
+        getNodeRoot(): ƒ.Node;
+        setSelection(_node: ƒ.Node): void;
+        getSelection(): ƒ.Node;
+        updateList: (_event: Event) => void;
+        setNodeRoot(_node: ƒ.Node): void;
+        toggleCollapse: (_event: Event) => void;
+        private BuildListFromNode;
+    }
+    class UIAnimationList {
+        listRoot: HTMLElement;
+        private mutator;
+        private index;
+        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
+        getMutator(): ƒ.Mutator;
+        setMutator(_mutator: ƒ.Mutator): void;
+        collectMutator: () => ƒ.Mutator;
+        getElementIndex(): ƒ.Mutator;
+        updateMutator(_update: ƒ.Mutator): void;
+        private updateEntry;
+        private updateMutatorEntry;
+        private buildFromMutator;
+        private toggleCollapse;
+    }
+    class NodeData extends ƒui.Mutable {
+        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
+    }
+}
 declare namespace Fudge {
 }
 declare namespace Fudge {
@@ -159,7 +217,7 @@ declare namespace Fudge {
         animation: FudgeCore.Animation;
         cmpAnimator: FudgeCore.ComponentAnimator;
         playbackTime: number;
-        controller: FudgeUserInterface.UIAnimationList;
+        controller: UIAnimationList;
         private canvas;
         private attributeList;
         private crc;
@@ -268,7 +326,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
@@ -276,7 +333,7 @@ declare namespace Fudge {
     class ViewNode extends View {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
-        listController: ƒui.UINodeList;
+        listController: UINodeList;
         constructor(_parent: NodePanel);
         deconstruct(): void;
         fillContent(): void;

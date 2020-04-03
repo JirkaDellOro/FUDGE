@@ -33,7 +33,6 @@ var MutateMatrixTest;
         };
         i++;
         cmpTransform.mutate(newMutator);
-        ƒ.RenderManager.update();
         Scenes.viewport.draw();
     }
 })(MutateMatrixTest || (MutateMatrixTest = {}));

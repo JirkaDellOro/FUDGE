@@ -8,12 +8,12 @@ namespace FudgeAid {
       let arrowGreen: ƒ.Node = new NodeArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
       let arrowBlue: ƒ.Node = new NodeArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
 
-      arrowRed.cmpTransform.local.rotateZ(-90);
-      arrowBlue.cmpTransform.local.rotateX(90);
+      arrowRed.mtxLocal.rotateZ(-90);
+      arrowBlue.mtxLocal.rotateX(90);
 
-      this.appendChild(arrowRed);
-      this.appendChild(arrowGreen);
-      this.appendChild(arrowBlue);
+      this.addChild(arrowRed);
+      this.addChild(arrowGreen);
+      this.addChild(arrowBlue);
     }
   }
 }

@@ -1,66 +1,64 @@
 namespace MeshTest {
-    import ƒ = FudgeCore;
-    import ƒAid = FudgeAid;
+  import ƒ = FudgeCore;
+  import ƒAid = FudgeAid;
+  
 
-    window.addEventListener("load", init);
-    
-    let branch: ƒ.Node = new ƒ.Node("Branch");
-    let gridFlat: ƒ.Node = new ƒ.Node("sphereTex");
-    let gridTex: ƒ.Node = new ƒ.Node("sphereTex");
+  window.addEventListener("load", init);
 
-    function init(_event: Event): void {
+  let branch: ƒ.Node = new ƒ.Node("Branch");
+  let gridFlat: ƒ.Node = new ƒ.Node("sphereTex");
+  let gridTex: ƒ.Node = new ƒ.Node("sphereTex");
 
-        let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
-        
-        let img: HTMLImageElement = document.querySelector("img");
-        let txtImage: ƒ.TextureImage = new ƒ.TextureImage();
-        txtImage.image = img;
-        let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
-        coatTextured.texture = txtImage;
+  function init(_event: Event): void {
 
-        let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+    let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
 
-        const myHeightMapFunction: ƒ.heightMapFunction = function(x, y): number {
-             return Math.sin(x * y * Math.PI * 2) * 0.2; 
-            };
+    let img: HTMLImageElement = document.querySelector("img");
+    let txtImage: ƒ.TextureImage = new ƒ.TextureImage();
+    txtImage.image = img;
+    let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+    coatTextured.texture = txtImage;
 
-        let gridMeshFlat: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
-        let gridMeshTex: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
+    let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
-        gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
-        gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
+    const myHeightMapFunction: ƒ.heightMapFunction = function (x: number, y: number): number {
+      return Math.sin(x * y * Math.PI * 2) * 0.2;
+    };
 
-        branch.appendChild(gridFlat);
-        branch.appendChild(gridTex);
+    let gridMeshFlat: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
+    let gridMeshTex: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
 
-        gridFlat.cmpTransform.local.translateX(-0.6);
-        gridTex.cmpTransform.local.translateX(0.6);
+    gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
+    gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
 
-        let body: ƒ.Node = new ƒ.Node("k");
+    branch.addChild(gridFlat);
+    branch.addChild(gridTex);
 
-        let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 110);
-        branch.appendChild(lights);
+    gridFlat.mtxLocal.translateX(-0.6);
+    gridTex.mtxLocal.translateX(0.6);
 
-        branch.appendChild(body);
+    let body: ƒ.Node = new ƒ.Node("k");
 
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+    let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 110);
+    branch.addChild(lights);
 
-        let viewport: ƒ.Viewport = new ƒ.Viewport();
-        let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    branch.addChild(body);
 
-        Scenes.dollyViewportCamera(viewport);
-        viewport.setFocus(true);
-        viewport.draw();
 
-        
-        window.setInterval(function (): void {
-            gridFlat.cmpTransform.local.rotateY(0.5);
-            ƒ.RenderManager.update();
-            viewport.draw();
-        },                 20);
-        
-    }
+    let viewport: ƒ.Viewport = new ƒ.Viewport();
+    let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
+    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+
+    Scenes.dollyViewportCamera(viewport);
+    viewport.setFocus(true);
+    viewport.draw();
+
+
+    window.setInterval(function (): void {
+      gridFlat.mtxLocal.rotateY(0.5);
+      viewport.draw();
+    },
+                       20);
+
+  }
 }

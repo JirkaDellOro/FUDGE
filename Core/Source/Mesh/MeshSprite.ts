@@ -9,17 +9,13 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class MeshSprite extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshSprite);
+
     public constructor() {
       super();
       this.create();
     }
 
-    public create(): void {
-      this.vertices = this.createVertices();
-      this.indices = this.createIndices();
-      this.textureUVs = this.createTextureUVs();
-      this.normalsFace = this.createFaceNormals();
-    }
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array([
@@ -48,13 +44,13 @@ namespace FudgeCore {
 
     protected createFaceNormals(): Float32Array {
       return new Float32Array([
-        /*0: normal of front face*/ 
-        0, 0, 1, 
-        /*1: normal of back face*/ 
-        0, 0, -1, 
-        /*2*/ 
-        0, 0, 0, 
-        /*3*/ 
+        /*0: normal of front face*/
+        0, 0, 1,
+        /*1: normal of back face*/
+        0, 0, -1,
+        /*2*/
+        0, 0, 0,
+        /*3*/
         0, 0, 0
       ]);
     }

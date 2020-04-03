@@ -69,15 +69,11 @@ namespace UITest {
         myLayout.init();
     }
     function initViewport(): void {
+        
         counter = 0;
         // create asset
         branch = new ƒ.Node("Root");
         branch.addComponent(new ƒ.ComponentTransform());
-
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
 
         // initialize viewports
         canvas = document.createElement("canvas");
@@ -90,12 +86,11 @@ namespace UITest {
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start();
-        document.body.addEventListener(ƒui.UIEVENT.SELECTION, function (_event: CustomEvent): void {
-            myLayout.emit(ƒui.UIEVENT.SELECTION, _event);
+        document.body.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, function (_event: CustomEvent): void {
+            myLayout.emit(ƒui.EVENT_USERINTERFACE.SELECT, _event);
         });
         function animate(_event: Event): void {
-            branch.cmpTransform.local.rotateY(1);
-            ƒ.RenderManager.update();
+            branch.mtxLocal.rotateY(1);
             // prepare and draw viewport
             viewPort.draw();
         }
@@ -111,9 +106,9 @@ namespace UITest {
     function createTestComponent(container: GoldenLayout.Container, state: Object): void {
         let content: HTMLElement = document.createElement("div");
         let components: ƒ.Component[] = branch.getAllComponents();
-        for (let component of components) {
-            let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(component, content);
-        }
+        // for (let component of components) {
+        //     let uiComponents: ƒui.NodeData = new ƒui.NodeData(component, content);
+        // }
         container.getElement().append(content);
         let mutator: ƒ.Mutator = {
             Primitives: {
@@ -130,7 +125,7 @@ namespace UITest {
         };
 
         let dropdown: ƒui.DropMenu = new ƒui.DropMenu("AddNodeMenu", mutator, { _text: "Add Node" });
-        dropdown.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, function (_event: CustomEvent): void {
+        dropdown.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, function (_event: CustomEvent): void {
             switch (_event.detail) {
                 case "AddNodeMenu.Primitives.Box":
                     let node: ƒ.Node = new ƒ.Node("Box");
@@ -149,7 +144,7 @@ namespace UITest {
                     node.mtxWorld.translate(randPos);
                     node.addComponent(cmpMesh);
                     node.addComponent(cmpMaterial);
-                    branch.appendChild(node);
+                    branch.addChild(node);
                     console.log(node);
                     break;
             }
@@ -158,11 +153,11 @@ namespace UITest {
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
-        let treeController: ƒui.UINodeList = new ƒui.UINodeList(branch, listContainer);
+        // let treeController: ƒui.NodeList = new ƒui.NodeList(branch, listContainer);
 
-        myLayout.on(ƒui.UIEVENT.SELECTION, function (_event: Event): void {
-            treeController.setNodeRoot(branch);
-        });
+        // myLayout.on(ƒui.EVENT_USERINTERFACE.SELECT, function (_event: Event): void {
+        //     treeController.setNodeRoot(branch);
+        // });
         container.getElement().html(listContainer);
     }
     function createAnimTreeComponent(container: GoldenLayout.Container, state: Object): void {
@@ -184,7 +179,7 @@ namespace UITest {
             }
 
         };
-        let treeController: ƒui.UIAnimationList = new ƒui.UIAnimationList(testMutator, listContainer);
+        // let treeController: ƒui.AnimationList = new ƒui.AnimationList(testMutator, listContainer);
         container.getElement().html(listContainer);
     }
 }

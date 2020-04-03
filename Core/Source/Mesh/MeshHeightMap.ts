@@ -10,6 +10,8 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
    */
   export class MeshHeightMap extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
+
     private resolutionX: number;
     private resolutionZ: number;
     private heightMapFunction: heightMapFunction;
@@ -29,13 +31,6 @@ namespace FudgeCore {
       else this.heightMapFunction = function (_x: number, _y: number): number { return 0; };
 
       this.create();
-    }
-
-    public create(): void {
-      this.vertices = this.createVertices();
-      this.indices = this.createIndices();
-      this.textureUVs = this.createTextureUVs();
-      this.normalsFace = this.createFaceNormals();
     }
 
     protected createVertices(): Float32Array {
@@ -92,6 +87,10 @@ namespace FudgeCore {
         }
       }
       return textureUVs;
+    }
+
+    protected createFaceNormals(): Float32Array {
+      return this.calculateFaceNormals();
     }
   }
 }

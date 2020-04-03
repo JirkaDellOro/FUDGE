@@ -2,10 +2,10 @@ namespace FudgeCore {
   /**
    * A [[Coat]] providing a texture and additional data for texturing
    */
-  @RenderInjector.decorateCoat
+  @RenderInjectorCoat.decorate
   export class CoatTextured extends Coat {
     public texture: TextureImage = null;
-    public pivot: Matrix3x3 = Matrix3x3.IDENTITY;
+    public pivot: Matrix3x3 = Matrix3x3.IDENTITY();
     // just ideas so far
     public tilingX: number;
     public tilingY: number;

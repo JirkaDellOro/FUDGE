@@ -4,12 +4,12 @@
 namespace UITest {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
-    export class CameraUI extends ƒui.UIMutable {
+    export class CameraUI extends ƒui.Mutable {
         protected root: HTMLFormElement;
         public constructor(container: GoldenLayout.Container, state: Object, _camera: ƒ.ComponentCamera) {
             super(_camera);
             this.root = document.createElement("form");
-            ƒui.UIGenerator.createFromMutable(<ƒ.Mutable>_camera, this.root);
+            ƒui.Generator.createFromMutable(<ƒ.Mutable>_camera, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             this.root.querySelector("#_r").textContent = "Red";
             

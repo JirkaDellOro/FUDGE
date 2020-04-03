@@ -1,6 +1,5 @@
 var Mutable;
 (function (Mutable) {
-    var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     let mutator;
     let angle = 0;
@@ -31,7 +30,6 @@ var Mutable;
         mutator.translation["x"] = 5 * Math.sin(angle);
         mutator.scaling["y"] = Math.cos(1.7 * angle);
         cmpTransform.local.mutate(mutator);
-        ƒ.RenderManager.update();
         Scenes.viewport.draw();
     }
 })(Mutable || (Mutable = {}));

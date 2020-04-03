@@ -3,8 +3,10 @@
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
       "../Source/References.ts",
-      "../Source/Arithmetic/ArithIntervalSolver.ts",
+      "../Source/Arithmetic/Arith.ts",
+      "../Source/Arithmetic/ArithBisection.ts",
       "../Source/Camera/CameraOrbit.ts",
+      "../Source/Canvas/Canvas.ts",
       "../Source/Geometry/Node.ts",
       "../Source/Geometry/NodeArrow.ts",
       "../Source/Geometry/NodeCoordinateSystem.ts",
@@ -22,7 +24,7 @@
         },
         {
           "pos": 15,
-          "end": 12031,
+          "end": 17082,
           "kind": "text"
         }
       ],
@@ -62,11 +64,11 @@
         },
         {
           "pos": 112,
-          "end": 5776,
+          "end": 8739,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.7.5"
+  "version": "3.9.0-dev.20200327"
 }

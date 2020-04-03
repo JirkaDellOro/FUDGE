@@ -53,7 +53,7 @@ var AudioBranch;
                 let parent = parseInt(prompt("Enter the number of the node that will become the parent", "0"));
                 if (parent < 0 || parent > 9)
                     throw (new Error("Index out of bounds"));
-                nodes[parent].appendChild(nodeControlled);
+                nodes[parent].addChild(nodeControlled);
                 break;
             case ƒ.KEYBOARD_CODE.C:
                 if (!cmpAudio)

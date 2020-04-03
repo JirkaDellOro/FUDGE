@@ -2,11 +2,16 @@ namespace FudgeAid {
   import ƒ = FudgeCore;
 
   export class CameraOrbit extends ƒ.Node {
+    public readonly axisRotateX: ƒ.Axis = new ƒ.Axis("RotateX", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
+    public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
+    public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
+
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
     private rotatorX: ƒ.Node;
     private translator: ƒ.Node;
+
 
 
     public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 2, _maxRotX: number = 75, _minDistance: number = 1, _maxDistance: number = 10) {
@@ -21,14 +26,32 @@ namespace FudgeAid {
 
       this.rotatorX = new ƒ.Node("CameraRotationX");
       this.rotatorX.addComponent(new ƒ.ComponentTransform());
-      this.appendChild(this.rotatorX);
+      this.addChild(this.rotatorX);
       this.translator = new ƒ.Node("CameraTranslate");
       this.translator.addComponent(new ƒ.ComponentTransform());
-      this.translator.cmpTransform.local.rotateY(180);
-      this.rotatorX.appendChild(this.translator);
+      this.translator.mtxLocal.rotateY(180);
+      this.rotatorX.addChild(this.translator);
 
       this.translator.addComponent(_cmpCamera);
       this.distance = _distanceStart;
+
+      this.axisRotateX.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
+      this.axisRotateY.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
+      this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
+    }
+
+    public hndAxisOutput: EventListener = (_event: Event): void => {
+      let output: number = (<CustomEvent>_event).detail.output;
+      switch ((<ƒ.Axis>_event.target).name) {
+        case "RotateX":
+          this.rotateX(output);
+          break;
+        case "RotateY":
+          this.rotateY(output);
+          break;
+        case "Distance":
+          this.distance += output;
+      }
     }
 
     public get component(): ƒ.ComponentCamera {
@@ -41,36 +64,36 @@ namespace FudgeAid {
 
     public set distance(_distance: number) {
       let newDistance: number = Math.min(this.maxDistance, Math.max(this.minDistance, _distance));
-      this.translator.cmpTransform.local.translation = ƒ.Vector3.Z(newDistance);
+      this.translator.mtxLocal.translation = ƒ.Vector3.Z(newDistance);
     }
 
     public get distance(): number {
-      return this.translator.cmpTransform.local.translation.z;
+      return this.translator.mtxLocal.translation.z;
     }
 
     public set rotationY(_angle: number) {
-      this.cmpTransform.local.rotation = ƒ.Vector3.Y(_angle);
+      this.mtxLocal.rotation = ƒ.Vector3.Y(_angle);
     }
 
     public get rotationY(): number {
-      return this.cmpTransform.local.rotation.y;
+      return this.mtxLocal.rotation.y;
     }
 
     public set rotationX(_angle: number) {
       _angle = Math.min(Math.max(-this.maxRotX, _angle), this.maxRotX);
-      this.rotatorX.cmpTransform.local.rotation = ƒ.Vector3.X(_angle);
+      this.rotatorX.mtxLocal.rotation = ƒ.Vector3.X(_angle);
     }
 
     public get rotationX(): number {
-      return this.rotatorX.cmpTransform.local.rotation.x;
+      return this.rotatorX.mtxLocal.rotation.x;
     }
 
     public rotateY(_delta: number): void {
-      this.cmpTransform.local.rotateY(_delta);
+      this.mtxLocal.rotateY(_delta);
     }
 
     public rotateX(_delta: number): void {
-      this.rotationX = this.rotatorX.cmpTransform.local.rotation.x + _delta;
+      this.rotationX = this.rotatorX.mtxLocal.rotation.x + _delta;
     }
   }
 }

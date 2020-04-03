@@ -1,5 +1,5 @@
+// / <reference path="DebugTarget.ts"/>
 /// <reference path="DebugInterfaces.ts"/>
-/// <reference path="DebugAlert.ts"/>
 /// <reference path="DebugConsole.ts"/>
 namespace FudgeCore {
   /**
@@ -11,17 +11,9 @@ namespace FudgeCore {
     /**
      * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
      */
-    // TODO: implement anonymous function setting up all filters
-    private static delegates: { [filter: number]: MapDebugTargetToDelegate } = {
-      [DEBUG_FILTER.INFO]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.INFO]]]),
-      [DEBUG_FILTER.LOG]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.LOG]]]),
-      [DEBUG_FILTER.WARN]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.WARN]]]),
-      [DEBUG_FILTER.ERROR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.ERROR]]]),
-      [DEBUG_FILTER.CLEAR]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.CLEAR]]]),
-      [DEBUG_FILTER.GROUP]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.GROUP]]]),
-      [DEBUG_FILTER.GROUPCOLLAPSED]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.GROUPCOLLAPSED]]]),
-      [DEBUG_FILTER.GROUPEND]: new Map([[DebugConsole, DebugConsole.delegates[DEBUG_FILTER.GROUPEND]]])
-    };
+    private static delegates: { [filter: number]: MapDebugTargetToDelegate } = Debug.setupConsole();
+
+    // TODO: create filter DEBUG_FILTER.FUDGE solely for messages from FUDGE
 
     /**
      * De- / Activate a filter for the given DebugTarget. 
@@ -67,6 +59,12 @@ namespace FudgeCore {
       Debug.delegate(DEBUG_FILTER.ERROR, _message, _args);
     }
     /**
+     * Displays messages from FUDGE
+     */
+    public static fudge(_message: Object, ..._args: Object[]): void {
+      Debug.delegate(DEBUG_FILTER.FUDGE, _message, _args);
+    }
+    /**
      * Clears the output and removes previous messages if possible
      */
     public static clear(): void {
@@ -96,10 +94,27 @@ namespace FudgeCore {
     private static delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void {
       let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
       for (let delegate of delegates.values())
-        if (_args && _args.length > 0)
-          delegate(_message, ..._args);
-        else
-          delegate(_message);
+        if (delegate)
+          if (_args && _args.length > 0)
+            delegate(_message, ..._args);
+          else
+            delegate(_message);
+
+    }
+    /**
+     * setup routing to standard console
+     */
+    private static setupConsole(): {} {
+      let result: { [filter: number]: MapDebugTargetToDelegate } = {};
+      let filters: DEBUG_FILTER[] = [
+        DEBUG_FILTER.INFO, DEBUG_FILTER.LOG, DEBUG_FILTER.WARN, DEBUG_FILTER.ERROR, DEBUG_FILTER.FUDGE,
+        DEBUG_FILTER.CLEAR, DEBUG_FILTER.GROUP, DEBUG_FILTER.GROUPCOLLAPSED, DEBUG_FILTER.GROUPEND
+      ];
+
+      for (let filter of filters)
+        result[filter] = new Map([[DebugConsole, DebugConsole.delegates[filter]]]);
+
+      return result;
     }
   }
 }

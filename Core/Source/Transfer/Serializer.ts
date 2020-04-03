@@ -101,7 +101,7 @@ namespace FudgeCore {
                 for (let path in _serialization) {
                     // reconstruct = new (<General>Fudge)[typeName];
                     reconstruct = Serializer.reconstruct(path);
-                    reconstruct.deserialize(_serialization[path]);
+                    reconstruct = reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             } catch (_error) {

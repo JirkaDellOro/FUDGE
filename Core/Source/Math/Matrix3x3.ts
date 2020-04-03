@@ -87,7 +87,7 @@ namespace FudgeCore {
       return matrix;
     }
 
-    public static get IDENTITY(): Matrix3x3 {
+    public static IDENTITY(): Matrix3x3 {
       const result: Matrix3x3 = Recycler.get(Matrix3x3);
       result.data.set([
         1, 0, 0,
@@ -221,13 +221,17 @@ namespace FudgeCore {
      * Add a scaling along the x-Axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      this.scale(new Vector2(_by, 1));
+      let vector: Vector2 = Recycler.borrow(Vector2);
+      vector.set(_by, 1);
+      this.scale(vector);
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      this.scale(new Vector2(1, _by));
+      let vector: Vector2 = Recycler.borrow(Vector2);
+      vector.set(1, _by);
+      this.scale(vector);
     }
     //#endregion
 
@@ -354,7 +358,7 @@ namespace FudgeCore {
       }
 
       // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
-      let matrix: Matrix3x3 = Matrix3x3.IDENTITY;
+      let matrix: Matrix3x3 = Matrix3x3.IDENTITY();
       if (vectors.translation)
         matrix.translate(vectors.translation);
       if (vectors.rotation) {

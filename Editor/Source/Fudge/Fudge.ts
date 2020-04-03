@@ -58,11 +58,9 @@ namespace Fudge {
   }
 
   function openViewNode(): void {
-    // node = Scenes.createAxisCross();
-    // node = new ƒ.Node("Scene");
     node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-    let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY);
-    node.appendChild(node2);
+    let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
+    node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
     let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
     PanelManager.instance.addPanel(nodePanel);

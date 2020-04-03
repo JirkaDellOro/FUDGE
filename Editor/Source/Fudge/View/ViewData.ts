@@ -13,7 +13,7 @@ namespace Fudge {
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent: Panel) {
             super(_parent);
-            this.parentPanel.addEventListener(ƒui.UIEVENT.SELECTION, this.setNode);
+            this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
             this.fillContent();
         }
         deconstruct(): void {
@@ -34,15 +34,15 @@ namespace Fudge {
                     cntHeader.append(txtNodeName);
                     let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents: ƒui.UINodeData = new ƒui.UINodeData(nodeComponent, cntComponents);
+                        let uiComponents: NodeData = new NodeData(nodeComponent, cntComponents);
                     }
                     this.content.append(cntComponents);
                     let mutator: ƒ.Mutator = {};
-                    for (let member in ƒui.COMPONENTMENU) {
-                        ƒui.MultiLevelMenuManager.buildFromSignature(ƒui.COMPONENTMENU[member], mutator);
+                    for (let member in COMPONENTMENU) {
+                        ƒui.MultiLevelMenuManager.buildFromSignature(COMPONENTMENU[member], mutator);
                     }
                     let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
-                    menu.addEventListener(ƒui.UIEVENT.DROPMENUCLICK, this.addComponent);
+                    menu.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, this.addComponent);
                     this.content.append(menu);
                 }
 

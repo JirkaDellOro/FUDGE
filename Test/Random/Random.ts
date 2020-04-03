@@ -16,7 +16,7 @@ namespace Random {
   let s2: symbol = Symbol("ƒudge2");
   let object: {} = { x: 10, b: true, s: "ƒudge" };
   object[s1] = "ƒudge1";
-  object[s2] = "ƒudge2"
+  object[s2] = "ƒudge2";
   let property: PropertyKey = random.getPropertyName(object);
   ƒ.Debug.log("Property", property, object[property]);
 

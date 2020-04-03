@@ -12,7 +12,7 @@ namespace Marix3x3 {
     crc2.scale(100, 100);
     crc2.lineWidth = 1 / 100;
 
-    let m0: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY;
+    let m0: ƒ.Matrix3x3 = ƒ.Matrix3x3.IDENTITY();
     let m1: ƒ.Matrix3x3 = new ƒ.Matrix3x3();
     printComparison("Start", m0, m1);
     draw(m0);

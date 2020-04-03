@@ -6,10 +6,6 @@ var ScreenPoint;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         let posCamera = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
         let cmpCamera = Scenes.createCamera(posCamera);

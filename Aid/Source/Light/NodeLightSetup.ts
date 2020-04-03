@@ -20,7 +20,7 @@ namespace FudgeAid {
             this.addComponent(keylight);
 
             this.addComponent(new ƒ.ComponentTransform);
-            this.cmpTransform.local.rotateY(_rotationY);
+            this.mtxLocal.rotateY(_rotationY);
 
             return this;
         }

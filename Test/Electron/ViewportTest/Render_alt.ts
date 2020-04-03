@@ -3,130 +3,125 @@
 /// <reference types="../../@types/golden-layout"/>
 
 namespace ElectronViewport {
-    import ƒ = FudgeCore;
-    // window.addEventListener("DOMContentLoaded", init);
+  import ƒ = FudgeCore;
+  // window.addEventListener("DOMContentLoaded", init);
 
-    let myLayout: GoldenLayout;
-    let savedState: string;
+  let myLayout: GoldenLayout;
+  let savedState: string;
 
-    let branch: ƒ.Node;
-    let canvas: HTMLCanvasElement;
+  let branch: ƒ.Node;
+  let canvas: HTMLCanvasElement;
+  let viewPort: ƒ.Viewport = new ƒ.Viewport();
+  let cmpCamera: ƒ.ComponentCamera;
+  window.addEventListener("load", init);
+
+  function init(): void {
+    let config: GoldenLayout.Config = {
+      content: [{
+        type: "row",
+        content: [{
+          type: "component",
+          componentName: "Inspector",
+          title: "Inspector"
+        },
+        {
+          type: "component",
+          componentName: "Viewport",
+          title: "Viewport"
+        }
+        ]
+      }]
+    };
+
+    initViewport();
+    myLayout = new GoldenLayout(config);
+
+    myLayout.registerComponent("Viewport", createViewportComponent);
+    myLayout.registerComponent("Inspector", createInspectorComponent);
+
+    myLayout.init();
+  }
+
+  function initViewport(): void {
+    
+    // create asset
+    branch = Scenes.createAxisCross();
+
+    // initialize viewport
+    cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
+    cmpCamera.projectCentral(1, 45);
+    canvas = Scenes.createCanvas();
+    document.body.appendChild(canvas);
+
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    let cmpCamera: ƒ.ComponentCamera;
-    window.addEventListener("load", init);
+    viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
+    viewPort.draw();
+  }
 
-    function init(): void {
-        let config: GoldenLayout.Config = {
-            content: [{
-                type: "row",
-                content: [{
-                    type: "component",
-                    componentName: "Inspector",
-                    title: "Inspector"
-                },
-                {
-                    type: "component",
-                    componentName: "Viewport",
-                    title: "Viewport"
-                }
-                ]
-            }]
-        };
+  function createViewportComponent(container: GoldenLayout.Container, state: Object): void {
+    container.getElement().append(canvas);
+  }
 
-        initViewport();
-        myLayout = new GoldenLayout(config);
+  function createInspectorComponent(container: GoldenLayout.Container, state: Object): void {
+    console.log(branch.getChildren()[0].name);
+    let lblName: HTMLElement = document.createElement("label");
+    lblName.innerHTML = "Node Name";
+    let txtName: HTMLInputElement = document.createElement("input");
+    txtName.value = <string>branch.getChildren()[0].name;
+    container.getElement().append(lblName);
+    container.getElement().append(txtName);
+  }
 
-        myLayout.registerComponent("Viewport", createViewportComponent);
-        myLayout.registerComponent("Inspector", createInspectorComponent);
+  function animate(_event: Event): void {
+    branch.mtxLocal.rotateY(1);
+    // prepare and draw viewport
+    viewPort.draw();
+  }
 
-        myLayout.init();
-    }
+  function addCubeNode(): void {
+    let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
 
-    function initViewport(): void {
-        // create asset
-        branch = Scenes.createAxisCross();
+    let clrCoffee: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
+    let coatCoffee: ƒ.CoatColored = new ƒ.CoatColored(clrCoffee);
+    let mtrCoffee: ƒ.Material = new ƒ.Material("Coffee", ƒ.ShaderUniColor, coatCoffee);
 
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+    // let clrCaramel: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
+    // let coatCaramel: ƒ.CoatColored = new ƒ.CoatColored(clrCaramel);
+    // let mtrCaramel: ƒ.Material = new ƒ.Material("Caramel", ƒ.ShaderUniColor, coatCaramel);
 
-        // initialize viewport
-        cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
-        cmpCamera.projectCentral(1, 45);
-        canvas = Scenes.createCanvas();
-        document.body.appendChild(canvas);
+    // let clrCream: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
+    // let coatCream: ƒ.CoatColored = new ƒ.CoatColored(clrCream);
+    // let mtrCream: ƒ.Material = new ƒ.Material("Caramel", ƒ.ShaderUniColor, coatCream);
 
-        let viewPort: ƒ.Viewport = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
-        viewPort.draw();
-    }
+    let nodeCubeCoffee: ƒ.Node = new ƒ.Node("Cube");
+    // let nodeCubeCaramel: ƒ.Node = new ƒ.Node("Cube");
+    // let nodeCubeCream: ƒ.Node = new ƒ.Node("Cube");
 
-    function createViewportComponent(container: GoldenLayout.Container, state: Object): void {
-        container.getElement().append(canvas);
-    }
+    let cmpMeshCoffee: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
+    let cmpMaterialCoffee: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCoffee);
+    let cmpTransformCoffee: ƒ.ComponentTransform = new ƒ.ComponentTransform();
 
-    function createInspectorComponent(container: GoldenLayout.Container, state: Object): void {
-        console.log(branch.getChildren()[0].name);
-        let lblName: HTMLElement = document.createElement("label");
-        lblName.innerHTML = "Node Name";
-        let txtName: HTMLInputElement = document.createElement("input");
-        txtName.value = <string>branch.getChildren()[0].name;
-        container.getElement().append(lblName);
-        container.getElement().append(txtName);
-    }
+    // let cmpMeshCaramel: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
+    // let cmpMaterialCaramel: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCaramel);
+    // let cmpTransformCaramel: ƒ.ComponentTransform = new ƒ.ComponentTransform();
 
-    function animate(_event: Event): void {
-        branch.cmpTransform.local.rotateY(1);
-        ƒ.RenderManager.update();
-        // prepare and draw viewport
-        viewPort.draw();
-    }
+    // let cmpMeshCream: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
+    // let cmpMaterialCream: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCream);
+    // let cmpTransformCream: ƒ.ComponentTransform = new ƒ.ComponentTransform();
+    // cmpMeshCream.pivot.scaleZ(2);
 
-    function addCubeNode(): void {
-        let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
+    nodeCubeCoffee.addComponent(cmpMeshCoffee);
+    nodeCubeCoffee.addComponent(cmpMaterialCoffee);
+    nodeCubeCoffee.addComponent(cmpTransformCoffee);
 
-        let clrCoffee: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
-        let coatCoffee: ƒ.CoatColored = new ƒ.CoatColored(clrCoffee);
-        let mtrCoffee: ƒ.Material = new ƒ.Material("Coffee", ƒ.ShaderUniColor, coatCoffee);
+    // nodeCubeCaramel.addComponent(cmpMeshCaramel);
+    // nodeCubeCaramel.addComponent(cmpMaterialCaramel);
+    // nodeCubeCaramel.addComponent(cmpTransformCaramel);
 
-        // let clrCaramel: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
-        // let coatCaramel: ƒ.CoatColored = new ƒ.CoatColored(clrCaramel);
-        // let mtrCaramel: ƒ.Material = new ƒ.Material("Caramel", ƒ.ShaderUniColor, coatCaramel);
+    // nodeCubeCaramel.addComponent(cmpMeshCream);
+    // nodeCubeCaramel.addComponent(cmpMaterialCream);
+    // nodeCubeCaramel.addComponent(cmpTransformCream);
 
-        // let clrCream: ƒ.Color = new ƒ.Color(0.35, 0.17, 0.03, 1);
-        // let coatCream: ƒ.CoatColored = new ƒ.CoatColored(clrCream);
-        // let mtrCream: ƒ.Material = new ƒ.Material("Caramel", ƒ.ShaderUniColor, coatCream);
-
-        let nodeCubeCoffee: ƒ.Node = new ƒ.Node("Cube");
-        // let nodeCubeCaramel: ƒ.Node = new ƒ.Node("Cube");
-        // let nodeCubeCream: ƒ.Node = new ƒ.Node("Cube");
-
-        let cmpMeshCoffee: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
-        let cmpMaterialCoffee: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCoffee);
-        let cmpTransformCoffee: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-
-        // let cmpMeshCaramel: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
-        // let cmpMaterialCaramel: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCaramel);
-        // let cmpTransformCaramel: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-
-        // let cmpMeshCream: ƒ.ComponentMesh = new ƒ.ComponentMesh(meshCube);
-        // let cmpMaterialCream: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtrCream);
-        // let cmpTransformCream: ƒ.ComponentTransform = new ƒ.ComponentTransform();
-        // cmpMeshCream.pivot.scaleZ(2);
-
-        nodeCubeCoffee.addComponent(cmpMeshCoffee);
-        nodeCubeCoffee.addComponent(cmpMaterialCoffee);
-        nodeCubeCoffee.addComponent(cmpTransformCoffee);
-
-        // nodeCubeCaramel.addComponent(cmpMeshCaramel);
-        // nodeCubeCaramel.addComponent(cmpMaterialCaramel);
-        // nodeCubeCaramel.addComponent(cmpTransformCaramel);
-
-        // nodeCubeCaramel.addComponent(cmpMeshCream);
-        // nodeCubeCaramel.addComponent(cmpMaterialCream);
-        // nodeCubeCaramel.addComponent(cmpTransformCream);
-
-        branch.appendChild(nodeCubeCoffee);
-    }
+    branch.addChild(nodeCubeCoffee);
+  }
 }

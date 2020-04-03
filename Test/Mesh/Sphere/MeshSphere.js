@@ -1,6 +1,7 @@
 var MeshTest;
 (function (MeshTest) {
     var ƒ = FudgeCore;
+    ƒ.RenderManager.initialize(true, true);
     var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let branch = new ƒ.Node("Branch");
@@ -17,17 +18,14 @@ var MeshTest;
         let sphereMesh = new ƒ.MeshSphere(16, 8);
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
-        sphereFlat.cmpTransform.local.translateX(0.6);
-        sphereTex.cmpTransform.local.translateX(-0.6);
-        branch.appendChild(sphereFlat);
-        branch.appendChild(sphereTex);
+        sphereFlat.mtxLocal.translateX(0.6);
+        sphereTex.mtxLocal.translateX(-0.6);
+        branch.addChild(sphereFlat);
+        branch.addChild(sphereTex);
         let body = new ƒ.Node("k");
         let lights = new ƒAid.NodeThreePointLights("lights", 0);
-        branch.appendChild(lights);
-        branch.appendChild(body);
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
+        branch.addChild(lights);
+        branch.addChild(body);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 0, 2.3), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
@@ -35,8 +33,7 @@ var MeshTest;
         viewport.setFocus(true);
         viewport.draw();
         window.setInterval(function () {
-            sphereTex.cmpTransform.local.rotateY(0.5);
-            ƒ.RenderManager.update();
+            sphereTex.mtxLocal.rotateY(0.5);
             viewport.draw();
         }, 20);
     }

@@ -1,4 +1,4 @@
-///<reference path="../Light/Light.ts"/>
+// /<reference path="../Light/Light.ts"/>
 namespace FudgeCore {
     /**
      * Attaches a [[Light]] to the node
@@ -16,8 +16,9 @@ namespace FudgeCore {
     // }
 
     export class ComponentLight extends Component {
+      public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);
         // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
-        public pivot: Matrix4x4 = Matrix4x4.IDENTITY;
+        public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
         public light: Light = null;
 
         constructor(_light: Light = new LightAmbient()) {

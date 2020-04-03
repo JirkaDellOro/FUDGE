@@ -1,15 +1,17 @@
 namespace FudgeCore {
-    /**
-     * Textured shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class ShaderTexture extends Shader {
-        public static getCoat(): typeof Coat {
-            return CoatTextured;
-        }
+  /**
+   * Textured shading
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export abstract class ShaderTexture extends Shader {
+    public static readonly iSubclass: number = Shader.registerSubclass(ShaderTexture);
 
-        public static getVertexShaderSource(): string {
-            return `#version 300 es
+    public static getCoat(): typeof Coat {
+      return CoatTextured;
+    }
+
+    public static getVertexShaderSource(): string {
+      return `#version 300 es
 
                 in vec3 a_position;
                 in vec2 a_textureUVs;
@@ -23,9 +25,9 @@ namespace FudgeCore {
                     // v_textureUVs = a_textureUVs;
                     v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
                 }`;
-        }
-        public static getFragmentShaderSource(): string {
-            return `#version 300 es
+    }
+    public static getFragmentShaderSource(): string {
+      return `#version 300 es
                 precision mediump float;
                 
                 in vec2 v_textureUVs;
@@ -37,6 +39,6 @@ namespace FudgeCore {
                     if (frag.a < 0.01)
                       discard;
             }`;
-        }
     }
+  }
 }

@@ -1,6 +1,3 @@
-/// <reference path="../Transfer/Mutable.ts"/>
-/// <reference path="../Render/RenderInjector.ts"/>
-/// <reference path="../Render/RenderOperator.ts"/>
 namespace FudgeCore {
     /**
      * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].  
@@ -15,7 +12,7 @@ namespace FudgeCore {
             super.mutate(_mutator);
         }
 
-        public useRenderData(_renderShader: RenderShader): void {/* injected by RenderInjector*/ }
+        public useRenderData(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
         
         //#region Transfer
         public serialize(): Serialization {
@@ -34,7 +31,7 @@ namespace FudgeCore {
     /**
      * The simplest [[Coat]] providing just a color
      */
-    @RenderInjector.decorateCoat
+    @RenderInjectorCoat.decorate
     export class CoatColored extends Coat {
         public color: Color;
 
@@ -48,7 +45,7 @@ namespace FudgeCore {
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
      * and a flatMix number for mixing between smooth and flat shading.
      */
-    @RenderInjector.decorateCoat
+    @RenderInjectorCoat.decorate
     export class CoatMatCap extends Coat {
         public texture: TextureImage = null;
         public tintColor: Color = new Color(0.5, 0.5, 0.5, 1);

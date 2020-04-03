@@ -43,10 +43,6 @@ var UI;
         // create branch
         branch = new ƒ.Node("Scene");
         branch.addComponent(new ƒ.ComponentTransform());
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.createElement("canvas");
         canvas.height = 800;
@@ -73,16 +69,15 @@ var UI;
     }
     function createInspectorComponent(container, state) {
         console.log(branch.getChildren()[0].name);
-        let lbl_name = document.createElement("label");
-        lbl_name.innerHTML = "Node Name";
-        let txt_name = document.createElement("input");
-        txt_name.value = branch.getChildren()[0].name;
-        container.getElement().append(lbl_name);
-        container.getElement().append(txt_name);
+        let lblName = document.createElement("label");
+        lblName.innerHTML = "Node Name";
+        let txtName = document.createElement("input");
+        txtName.value = branch.getChildren()[0].name;
+        container.getElement().append(lblName);
+        container.getElement().append(txtName);
     }
     function animate(_event) {
-        branch.cmpTransform.local.rotateY(1);
-        ƒ.RenderManager.update();
+        branch.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }
@@ -119,7 +114,7 @@ var UI;
         // nodeCubeCaramel.addComponent(cmpMeshCream);
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
-        branch.appendChild(nodeCubeCoffee);
+        branch.addChild(nodeCubeCoffee);
     }
 })(UI || (UI = {}));
 //# sourceMappingURL=app.js.map

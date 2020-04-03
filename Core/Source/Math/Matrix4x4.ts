@@ -42,8 +42,10 @@ namespace FudgeCore {
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector3 {
-      if (!this.vectors.translation)
-        this.vectors.translation = new Vector3(this.data[12], this.data[13], this.data[14]);
+      if (!this.vectors.translation) {
+        this.vectors.translation = Recycler.get(Vector3);
+        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+      }
       return this.vectors.translation.copy;
     }
     public set translation(_translation: Vector3) {
@@ -72,12 +74,14 @@ namespace FudgeCore {
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
-      if (!this.vectors.scaling)
-        this.vectors.scaling = new Vector3(
+      if (!this.vectors.scaling) {
+        this.vectors.scaling = Recycler.get(Vector3);
+        this.vectors.scaling.set(
           Math.hypot(this.data[0], this.data[1], this.data[2]),
           Math.hypot(this.data[4], this.data[5], this.data[6]),
           Math.hypot(this.data[8], this.data[9], this.data[10])
         );
+      }
       return this.vectors.scaling.copy;
     }
     public set scaling(_scaling: Vector3) {
@@ -89,7 +93,7 @@ namespace FudgeCore {
     /**
      * Retrieve a new identity matrix
      */
-    public static get IDENTITY(): Matrix4x4 {
+    public static IDENTITY(): Matrix4x4 {
       // const result: Matrix4x4 = new Matrix4x4();
       const result: Matrix4x4 = Recycler.get(Matrix4x4);
       result.data.set([
@@ -476,36 +480,50 @@ namespace FudgeCore {
     /**
      * Add a translation by the given vector to this matrix 
      */
-    public translate(_by: Vector3): void {
-      const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
-      // TODO: possible optimization, translation may alter mutator instead of deleting it.
-      this.set(matrix);
-      Recycler.store(matrix);
+    public translate(_by: Vector3, _local: boolean = true): void {
+      if (_local) {
+        let translation: Matrix4x4 = Matrix4x4.TRANSLATION(_by);
+        this.multiply(translation);
+        Recycler.store(translation);
+      } else {
+        this.data[12] += _by.x;
+        this.data[13] += _by.y;
+        this.data[14] += _by.z;
+        this.mutator = null;
+        if (this.vectors.translation)
+          Recycler.store(this.vectors.translation);
+        this.vectors.translation = null;
+      }
+
+      // const matrix: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.TRANSLATION(_by));
+      // // TODO: possible optimization, translation may alter mutator instead of deleting it.
+      // this.set(matrix);
+      // Recycler.store(matrix);
     }
 
     /**
      * Add a translation along the x-Axis by the given amount to this matrix 
      */
-    public translateX(_x: number): void {
-      this.data[12] += _x;
-      this.mutator = null;
-      this.vectors.translation = null;
+    public translateX(_x: number, _local: boolean = true): void {
+      let translation: Vector3 = Vector3.X(_x);
+      this.translate(translation, _local);
+      Recycler.store(translation);
     }
     /**
      * Add a translation along the y-Axis by the given amount to this matrix 
      */
-    public translateY(_y: number): void {
-      this.data[13] += _y;
-      this.mutator = null;
-      this.vectors.translation = null;
+    public translateY(_y: number, _local: boolean = true): void {
+      let translation: Vector3 = Vector3.Y(_y);
+      this.translate(translation, _local);
+      Recycler.store(translation);
     }
     /**
-     * Add a translation along the y-Axis by the given amount to this matrix 
+     * Add a translation along the z-Axis by the given amount to this matrix 
      */
-    public translateZ(_z: number): void {
-      this.data[14] += _z;
-      this.mutator = null;
-      this.vectors.translation = null;
+    public translateZ(_z: number, _local: boolean = true): void {
+      let translation: Vector3 = Vector3.Z(_z);
+      this.translate(translation, _local);
+      Recycler.store(translation);
     }
     //#endregion
 
@@ -518,23 +536,30 @@ namespace FudgeCore {
       this.set(matrix);
       Recycler.store(matrix);
     }
+
     /**
      * Add a scaling along the x-Axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      this.scale(new Vector3(_by, 1, 1));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(_by, 1, 1);
+      this.scale(vector);
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      this.scale(new Vector3(1, _by, 1));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(1, _by, 1);
+      this.scale(vector);
     }
     /**
      * Add a scaling along the z-Axis by the given amount to this matrix 
      */
     public scaleZ(_by: number): void {
-      this.scale(new Vector3(1, 1, _by));
+      let vector: Vector3 = Recycler.borrow(Vector3);
+      vector.set(1, 1, _by);
+      this.scale(vector);
     }
     //#endregion
 
@@ -590,7 +615,8 @@ namespace FudgeCore {
         z1 = 0;
       }
 
-      let rotation: Vector3 = new Vector3(x1, y1, z1);
+      let rotation: Vector3 = Recycler.get(Vector3);
+      rotation.set(x1, y1, z1);
       rotation.scale(180 / Math.PI);
 
       return rotation;
@@ -650,21 +676,24 @@ namespace FudgeCore {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        vectors.translation = new Vector3(
+        vectors.translation = Recycler.get(Vector3);
+        vectors.translation.set(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
           newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
           newTranslation.z != undefined ? newTranslation.z : oldTranslation.z
         );
       }
       if (newRotation) {
-        vectors.rotation = new Vector3(
+        vectors.rotation = Recycler.get(Vector3);
+        vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,
           newRotation.y != undefined ? newRotation.y : oldRotation.y,
           newRotation.z != undefined ? newRotation.z : oldRotation.z
         );
       }
       if (newScaling) {
-        vectors.scaling = new Vector3(
+        vectors.scaling = Recycler.get(Vector3);
+        vectors.scaling.set(
           newScaling.x != undefined ? newScaling.x : oldScaling.x,
           newScaling.y != undefined ? newScaling.y : oldScaling.y,
           newScaling.z != undefined ? newScaling.z : oldScaling.z
@@ -672,7 +701,7 @@ namespace FudgeCore {
       }
 
       // TODO: possible performance optimization when only one or two components change, then use old matrix instead of IDENTITY and transform by differences/quotients
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY;
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
       if (vectors.translation)
         matrix.translate(vectors.translation);
       if (vectors.rotation) {
@@ -682,9 +711,11 @@ namespace FudgeCore {
       }
       if (vectors.scaling)
         matrix.scale(vectors.scaling);
-      this.set(matrix);
 
+      this.set(matrix);
       this.vectors = vectors;
+
+      Recycler.store(matrix);
     }
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {

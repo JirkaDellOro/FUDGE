@@ -31,7 +31,6 @@ var ElectronFileIo;
     function displayNode(_node) {
         if (!_node)
             return;
-        ƒ.RenderManager.removeBranch(branch);
         branch = _node;
         viewport.setBranch(branch);
         viewport.draw();
@@ -60,10 +59,9 @@ var ElectronFileIo;
     }
     ElectronFileIo.open = open;
     function createScene() {
+        // initialize RenderManager and transmit content
         // create asset
         branch = Scenes.createAxisCross();
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
         // initialize viewport
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);

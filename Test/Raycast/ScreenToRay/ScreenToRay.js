@@ -17,10 +17,6 @@ var ScreenToRay;
         // create asset
         let branch = Scenes.createAxisCross();
         branch.addComponent(new ƒ.ComponentTransform());
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
-        ƒ.RenderManager.addBranch(branch);
-        ƒ.RenderManager.update();
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
@@ -62,7 +58,6 @@ var ScreenToRay;
         // animate(null);
         function animate(_event) {
             update();
-            ƒ.RenderManager.update();
             viewport.draw();
             adjustRayCamera();
             pickNodeAt(mouse);
@@ -226,6 +221,7 @@ var ScreenToRay;
         let clientRect = canvas.getBoundingClientRect();
         uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
+        viewport.createPickBuffers();
     }
 })(ScreenToRay || (ScreenToRay = {}));
 //# sourceMappingURL=ScreenToRay.js.map

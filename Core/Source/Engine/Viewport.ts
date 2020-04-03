@@ -1,9 +1,4 @@
-/// <reference path="../Light/Light.ts"/>
-/// <reference path="../Event/Event.ts"/>
-/// <reference path="../Component/ComponentLight.ts"/>
-/// <reference path="../Math/Rectangle.ts"/>
 namespace FudgeCore {
-  export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
   /**
    * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
@@ -31,12 +26,11 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
 
-    public lights: MapLightTypeToLightList = null;
 
     private branch: Node = null; // The first node in the tree(branch) that will be rendered.
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
-    private  pickBuffers: PickBuffer[] = [];
+    private pickBuffers: PickBuffer[] = [];
 
     /**
      * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
@@ -87,7 +81,6 @@ namespace FudgeCore {
       }
       this.branch = _branch;
       if (this.branch) {
-        this.collectLights();
         this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
         this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
@@ -117,10 +110,9 @@ namespace FudgeCore {
         this.adjustCamera();
 
       RenderManager.clear(this.camera.backgroundColor);
-      if (RenderManager.addBranch(this.branch))
-        // branch has not yet been processed fully by rendermanager -> update all registered nodes
-        RenderManager.update();
-      RenderManager.setLights(this.lights);
+      // if (RenderManager.addBranch(this.branch))
+      //   // branch has not yet been processed fully by rendermanager -> update all registered nodes
+      //   RenderManager.update();
       RenderManager.drawBranch(this.branch, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
@@ -140,12 +132,12 @@ namespace FudgeCore {
       if (this.adjustingCamera)
         this.adjustCamera();
 
-      if (RenderManager.addBranch(this.branch))
-        // branch has not yet been processed fully by rendermanager -> update all registered nodes
-        RenderManager.update();
+      // if (RenderManager.addBranch(this.branch))
+      //   // branch has not yet been processed fully by rendermanager -> update all registered nodes
+      //   RenderManager.update();
 
       this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
-      Debug.log(this.pickBuffers[0].frameBuffer);
+      // Debug.log(this.pickBuffers[0].frameBuffer);
     }
 
 
@@ -395,29 +387,11 @@ namespace FudgeCore {
     }
 
     private hndComponentEvent(_event: Event): void {
-      Debug.log(_event);
+      Debug.fudge(_event);
     }
     // #endregion
 
-    /**
-     * Collect all lights in the branch to pass to shaders
-     */
-    private collectLights(): void {
-      // TODO: make private
-      this.lights = new Map();
-      for (let node of this.branch.branch) {
-        let cmpLights: ComponentLight[] = node.getComponents(ComponentLight);
-        for (let cmpLight of cmpLights) {
-          let type: TypeOfLight = cmpLight.light.getType();
-          let lightsOfType: ComponentLight[] = this.lights.get(type);
-          if (!lightsOfType) {
-            lightsOfType = [];
-            this.lights.set(type, lightsOfType);
-          }
-          lightsOfType.push(cmpLight);
-        }
-      }
-    }
+  
     /**
      * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
      * @param _fudgeNode The node to create a scenegraphentry for.

@@ -1,11 +1,11 @@
 namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    export class ShaderRayCast extends Shader {
-        public static getVertexShaderSource(): string {
-            return `#version 300 es
+  /**
+   * Renders for Raycasting
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   */
+  export abstract class ShaderRayCast extends Shader {
+    public static getVertexShaderSource(): string {
+      return `#version 300 es
 
                     in vec3 a_position;
                     uniform mat4 u_projection;
@@ -13,9 +13,9 @@ namespace FudgeCore {
                     void main() {   
                         gl_Position = u_projection * vec4(a_position, 1.0);
                     }`;
-        }
-        public static getFragmentShaderSource(): string {
-            return `#version 300 es
+    }
+    public static getFragmentShaderSource(): string {
+      return `#version 300 es
                     precision mediump float;
                     precision highp int;
                     
@@ -28,6 +28,6 @@ namespace FudgeCore {
                        float lowerbyte = fract(gl_FragCoord.z * 256.0);
                        frag = vec4(gl_FragCoord.z, upperbyte, lowerbyte, 1.0);
                     }`;
-        }
     }
+  }
 }

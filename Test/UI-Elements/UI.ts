@@ -77,7 +77,7 @@ namespace UI {
         }
         public get(): ƒ.Rectangle {
             // tslint:disable no-any
-            let _rect: any = super.get();
+            let _rect: {[name: string]: number} = super.get();
             return new ƒ.Rectangle(_rect.x, _rect.y, _rect.width, _rect.height);
         }
 

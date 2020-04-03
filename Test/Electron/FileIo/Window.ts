@@ -29,7 +29,6 @@ namespace ElectronFileIo {
         if (!_node)
             return;
 
-        ƒ.RenderManager.removeBranch(branch);
         branch = _node;
         viewport.setBranch(branch);
         viewport.draw();
@@ -65,11 +64,11 @@ namespace ElectronFileIo {
     }
 
     function createScene(): ƒ.Viewport {
+        // initialize RenderManager and transmit content
+        
         // create asset
         branch = Scenes.createAxisCross();
 
-        // initialize RenderManager and transmit content
-        ƒ.RenderManager.initialize();
 
         // initialize viewport
         let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));

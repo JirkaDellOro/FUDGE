@@ -2,6 +2,7 @@
   "bundle": {
     "commonSourceDirectory": "../../Source/Fudge",
     "sourceFiles": [
+      "../../Source/Fudge/Editor.ts",
       "../../Source/Fudge/Fudge.ts",
       "../../Source/Fudge/Panel/Panel.ts",
       "../../Source/Fudge/Panel/PanelManager.ts",
@@ -21,7 +22,7 @@
       "sections": [
         {
           "pos": 0,
-          "end": 59457,
+          "end": 66956,
           "kind": "text"
         }
       ]
@@ -30,29 +31,29 @@
       "sections": [
         {
           "pos": 0,
-          "end": 39,
-          "kind": "type",
-          "data": "golden-layout"
-        },
-        {
-          "pos": 41,
-          "end": 96,
+          "end": 55,
           "kind": "type",
           "data": "../../../core/build/fudgecore"
         },
         {
-          "pos": 98,
-          "end": 160,
+          "pos": 57,
+          "end": 119,
           "kind": "type",
           "data": "../../../userinterface/build/fudgeui"
         },
         {
+          "pos": 121,
+          "end": 160,
+          "kind": "type",
+          "data": "golden-layout"
+        },
+        {
           "pos": 162,
-          "end": 11811,
+          "end": 13789,
           "kind": "text"
         }
       ]
     }
   },
-  "version": "3.7.5"
+  "version": "3.9.0-dev.20200327"
 }
