@@ -661,6 +661,32 @@ var FudgeUserInterface;
                         break;
                 }
             };
+            this.hndFocus = (_event) => {
+                _event.stopPropagation();
+                let items = Array.from(this.querySelectorAll("li"));
+                let target = _event.target;
+                let index = items.indexOf(target);
+                if (index < 0)
+                    return;
+                if (_event.shiftKey && this.broker.selection.length == 0)
+                    target.select(true);
+                switch (_event.type) {
+                    case EVENT_TREE.FOCUS_NEXT:
+                        if (++index < items.length)
+                            items[index].focus();
+                        break;
+                    case EVENT_TREE.FOCUS_PREVIOUS:
+                        if (--index >= 0)
+                            items[index].focus();
+                        break;
+                    default:
+                        break;
+                }
+                if (_event.shiftKey)
+                    document.activeElement.select(true);
+                else if (!_event.ctrlKey)
+                    this.clearSelection();
+            };
             this.broker = _broker;
             let root = new FudgeUserInterface.TreeItem(this.broker, _root);
             this.appendChild(root);
@@ -673,6 +699,10 @@ var FudgeUserInterface;
             this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
             this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
+            // @ts-ignore
+            this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+            // @ts-ignore
+            this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
         }
         /**
          * Clear the current selection
@@ -789,68 +819,30 @@ var FudgeUserInterface;
             this.classes = [];
             this.data = null;
             this.hndFocus = (_event) => {
-                let listening = _event.currentTarget;
-                switch (_event.type) {
-                    case FudgeUserInterface.EVENT_TREE.FOCUS_NEXT:
-                        let next = listening.nextElementSibling;
-                        if (!next)
-                            return;
-                        next.focus();
-                        _event.stopPropagation();
-                        break;
-                    case FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS:
-                        if (listening == _event.target)
-                            return;
-                        let items = listening.querySelectorAll("li");
-                        let prev = listening;
-                        for (let item of items) {
-                            if (item == _event.target)
-                                break;
-                            prev = item;
-                        }
-                        prev.focus();
-                        _event.stopPropagation();
-                        break;
-                    case FudgeUserInterface.EVENT_TREE.FOCUS_OUT:
-                        if (_event.target == this.label)
-                            this.label.disabled = true;
-                        break;
-                    default:
-                        break;
-                }
+                if (_event.target == this.label)
+                    this.label.disabled = true;
             };
             this.hndKey = (_event) => {
                 _event.stopPropagation();
                 let content = this.querySelector("ul");
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (content)
-                            content.firstChild.focus();
-                        else
+                        if (this.hasChildren && !content)
                             this.open(true);
-                        if (_event.shiftKey)
-                            document.activeElement.select(true);
+                        else
+                            this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                         if (content)
                             this.open(false);
                         else
-                            this.parentElement.focus();
-                        if (_event.shiftKey)
-                            document.activeElement.select(true);
+                            this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        if (content)
-                            content.firstChild.focus();
-                        else
-                            this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
-                        if (_event.shiftKey)
-                            document.activeElement.select(true);
+                        this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        this.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
-                        if (_event.shiftKey)
-                            document.activeElement.select(true);
+                        this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.F2:
                         this.startTypingLabel();
@@ -941,8 +933,8 @@ var FudgeUserInterface;
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_OUT, this.hndFocus);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.KEY_DOWN, this.hndKey);
-            this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, this.hndFocus);
-            this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+            // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+            // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
             this.draggable = true;
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DRAG_START, this.hndDragStart);
             this.addEventListener(FudgeUserInterface.EVENT_TREE.DRAG_OVER, this.hndDragOver);

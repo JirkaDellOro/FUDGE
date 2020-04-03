@@ -58,6 +58,10 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
       this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
       this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
+      // @ts-ignore
+      this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+      // @ts-ignore
+      this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
     }
 
     /**
@@ -156,14 +160,14 @@ namespace FudgeUserInterface {
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       _event.stopPropagation();
       let remove: T[] = this.broker.delete(target.data);
-      
+
       this.delete(remove);
     }
-    
+
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
     }
-    
+
     private hndCopyPaste = (_event: Event): void => {
       console.log(_event);
       _event.stopPropagation();
@@ -178,6 +182,36 @@ namespace FudgeUserInterface {
         case EVENT_TREE.CUT:
           break;
       }
+    }
+
+    private hndFocus = (_event: KeyboardEvent): void => {
+      _event.stopPropagation();
+      let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
+      let target: TreeItem<T> = <TreeItem<T>>_event.target;
+      let index: number = items.indexOf(target);
+      if (index < 0)
+        return;
+
+      if (_event.shiftKey && this.broker.selection.length == 0)
+        target.select(true);
+
+      switch (_event.type) {
+        case EVENT_TREE.FOCUS_NEXT:
+          if (++index < items.length)
+            items[index].focus();
+          break;
+        case EVENT_TREE.FOCUS_PREVIOUS:
+          if (--index >= 0)
+            items[index].focus();
+          break;
+        default:
+          break;
+      }
+
+      if (_event.shiftKey)
+        (<TreeItem<T>>document.activeElement).select(true);
+      else if (!_event.ctrlKey)
+        this.clearSelection();
     }
   }
 

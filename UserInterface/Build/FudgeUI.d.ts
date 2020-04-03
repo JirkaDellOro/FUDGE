@@ -167,6 +167,7 @@ declare namespace FudgeUserInterface {
         private hndDelete;
         private hndEscape;
         private hndCopyPaste;
+        private hndFocus;
     }
 }
 declare namespace FudgeUserInterface {

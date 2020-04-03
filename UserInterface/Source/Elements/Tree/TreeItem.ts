@@ -28,8 +28,8 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT_TREE.DOUBLE_CLICK, this.hndDblClick);
       this.addEventListener(EVENT_TREE.FOCUS_OUT, this.hndFocus);
       this.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
-      this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
-      this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+      // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+      // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
 
       this.draggable = true;
       this.addEventListener(EVENT_TREE.DRAG_START, this.hndDragStart);
@@ -160,36 +160,10 @@ namespace FudgeUserInterface {
       this.tabIndex = 0;
     }
 
+
     private hndFocus = (_event: Event): void => {
-      let listening: HTMLElement = <HTMLElement>_event.currentTarget;
-      switch (_event.type) {
-        case EVENT_TREE.FOCUS_NEXT:
-          let next: HTMLElement = <HTMLElement>listening.nextElementSibling;
-          if (!next)
-            return;
-          next.focus();
-          _event.stopPropagation();
-          break;
-        case EVENT_TREE.FOCUS_PREVIOUS:
-          if (listening == _event.target)
-            return;
-          let items: NodeListOf<HTMLLIElement> = listening.querySelectorAll("li");
-          let prev: HTMLElement = listening;
-          for (let item of items) {
-            if (item == _event.target)
-              break;
-            prev = item;
-          }
-          prev.focus();
-          _event.stopPropagation();
-          break;
-        case EVENT_TREE.FOCUS_OUT:
-          if (_event.target == this.label)
-            this.label.disabled = true;
-          break;
-        default:
-          break;
-      }
+      if (_event.target == this.label)
+        this.label.disabled = true;
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
@@ -198,37 +172,22 @@ namespace FudgeUserInterface {
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-          if (content)
-            (<HTMLElement>content.firstChild).focus();
-          else
+          if (this.hasChildren && !content)
             this.open(true);
-
-          if (_event.shiftKey)
-            (<TreeItem<T>>document.activeElement).select(true);
+          else
+            this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (content)
             this.open(false);
           else
-            this.parentElement.focus();
-
-          if (_event.shiftKey)
-            (<TreeItem<T>>document.activeElement).select(true);
+            this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-          if (content)
-            (<HTMLElement>content.firstChild).focus();
-          else
-            this.dispatchEvent(new Event(EVENT_TREE.FOCUS_NEXT, { bubbles: true }));
-
-          if (_event.shiftKey)
-            (<TreeItem<T>>document.activeElement).select(true);
+          this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
-          this.dispatchEvent(new Event(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true }));
-
-          if (_event.shiftKey)
-            (<TreeItem<T>>document.activeElement).select(true);
+          this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.F2:
           this.startTypingLabel();
