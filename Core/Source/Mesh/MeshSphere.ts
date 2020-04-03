@@ -35,25 +35,40 @@ namespace FudgeCore {
 
     public create(): void {
       let vertices: Array<number> = [];
+      let normals: number[] = [];
       let textureUVs: number[] = [];
+
+      let x: number;
+      let z: number;
+      let xz: number;
+      let y: number;
+
 
       let sectorStep: number = 2 * Math.PI / this.sectors;
       let stackStep: number = Math.PI / this.stacks;
+      let stackAngle: number;
+      let sectorAngle: number;
 
-      // add (sectorCount+1) vertices per stack. The first and last vertices have same position and normals, but different tex coords
+      /* add (sectorCount+1) vertices per stack.
+      the first and last vertices have same position and normal, 
+      but different tex coords */
       for (let i: number = 0; i <= this.stacks; ++i) {
-        let stackAngle: number = Math.PI / 2 - i * stackStep;
-        let xz: number = Math.cos(stackAngle);
-        let y: number = Math.sin(stackAngle);
+        stackAngle = Math.PI / 2 - i * stackStep;
+        xz = Math.cos(stackAngle);
+        y = Math.sin(stackAngle);
 
-        // add (sectorCount+1) vertices per stack. The first and last vertices have same position and normal, but different tex coords
+        // add (sectorCount+1) vertices per stack
+        // the first and last vertices have same position and normal, but different tex coords
         for (let j: number = 0; j <= this.sectors; ++j) {
-          let sectorAngle: number = j * sectorStep;
+          sectorAngle = j * sectorStep;
 
           //vertex position
-          let x: number = xz * Math.cos(sectorAngle);
-          let z: number = xz * Math.sin(sectorAngle);
+          x = xz * Math.cos(sectorAngle);
+          z = xz * Math.sin(sectorAngle);
           vertices.push(x, y, z);
+
+          //normals
+          normals.push(x, y, z);
 
           //UV Coords
           textureUVs.push(j / this.sectors * -1);
@@ -68,6 +83,7 @@ namespace FudgeCore {
       this.normals = new Float32Array(normals);
       this.vertices = new Float32Array(vertices);
       this.normalsFace = this.createFaceNormals();
+      this.indices = this.createIndices();
       this.createRenderBuffers();
     }
 
@@ -108,6 +124,11 @@ namespace FudgeCore {
 
     protected createTextureUVs(): Float32Array {
       return this.textureUVs;
+    }
+
+    //TODO: we also need REAL face normals
+    protected createFaceNormals(): Float32Array {
+      return this.normals;
     }
   }
 }

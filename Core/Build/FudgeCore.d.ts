@@ -2776,7 +2776,7 @@ declare namespace FudgeCore {
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
+        protected abstract createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -2817,16 +2817,10 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
-<<<<<<< .mine
-
-
-=======
-}
-declare namespace FudgeCore {
->>>>>>> .theirs
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
@@ -2843,6 +2837,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -2880,6 +2875,7 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {

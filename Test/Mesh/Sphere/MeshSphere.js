@@ -15,7 +15,7 @@ var MeshTest;
         coatTextured.texture = txtImage;
         let matTex = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
         let matFlat = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
-        let sphereMesh = new ƒ.MeshSphere(16, 8);
+        let sphereMesh = new ƒ.MeshSphere(32, 24);
         sphereFlat = Scenes.createCompleteMeshNode("SphereFlat", matFlat, sphereMesh);
         sphereTex = Scenes.createCompleteMeshNode("SphereTexture", matTex, sphereMesh);
         sphereFlat.mtxLocal.translateX(0.6);
