@@ -98,6 +98,7 @@ declare namespace FudgeAid {
         private static getNextName;
         get local(): ƒ.Matrix4x4;
         get pivot(): ƒ.Matrix4x4;
+        deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
     }
 }
 declare namespace FudgeAid {

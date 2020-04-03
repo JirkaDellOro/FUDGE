@@ -5,6 +5,8 @@ namespace UI_Tree {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
+
+  ƒ.Serializer.registerNamespace(ƒAid);
   let node: ƒ.Node;
   let viewport: ƒ.Viewport;
 

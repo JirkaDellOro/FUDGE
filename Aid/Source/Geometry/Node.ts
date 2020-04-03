@@ -26,5 +26,13 @@ namespace FudgeAid {
       let cmpMesh: ƒ.ComponentMesh = this.getComponent(ƒ.ComponentMesh);
       return cmpMesh ? cmpMesh.pivot : null;
     }
+
+    public deserialize(_serialization: ƒ.Serialization): ƒ.Serializable {
+      // console.log(_serialization);
+      let node: ƒ.Node = new ƒ.Node(_serialization.name);
+      node.deserialize(_serialization);
+      // console.log(node);
+      return node;
+    }
   }
 }

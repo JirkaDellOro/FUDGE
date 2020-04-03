@@ -9,6 +9,7 @@ var UI_Tree;
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     var ƒAid = FudgeAid;
+    ƒ.Serializer.registerNamespace(ƒAid);
     let node;
     let viewport;
     window.addEventListener("load", hndLoad);
