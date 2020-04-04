@@ -522,11 +522,11 @@ var Fudge;
                         componentName: Fudge.VIEW.PORT,
                         title: "Viewport"
                     },
-                    {
-                        type: "component",
-                        componentName: Fudge.VIEW.CAMERA,
-                        title: "Camera Controller"
-                    },
+                    // {
+                    //     type: "component",
+                    //     componentName: Fudge.VIEW.CAMERA,
+                    //     title: "Camera Controller"
+                    // },
                     {
                         type: "column",
                         content: [
@@ -1416,17 +1416,10 @@ var Fudge;
                 _event.cancelBubble = true;
                 this.parentPanel.dispatchEvent(eventToPass);
             };
-            if (_parent instanceof Fudge.NodePanel) {
-                if (_parent.getNode() != null) {
-                    this.branch = _parent.getNode();
-                }
-                else {
-                    this.branch = new ƒ.Node("Scene");
-                }
-            }
-            else {
-                this.branch = new ƒ.Node("Scene");
-            }
+            if (_parent instanceof Fudge.NodePanel && _parent.getNode() != null)
+                this.branch = _parent.getNode();
+            else
+                this.branch = new ƒ.Node("Node");
             this.selectedNode = null;
             this.parentPanel.addEventListener("select" /* SELECT */, this.setSelectedNode);
             this.listController = new Fudge.UINodeList(this.branch, this.content);

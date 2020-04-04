@@ -30,6 +30,20 @@
       margin-left: -30px;
     }
 
+    input[type=checkbox] {
+      height: 0px;
+      top:-1em;
+      display: inline-block;
+      position: relative;
+    }
+
+    input[type=checkbox]:checked::before {
+      content: "▼";
+    }
+    input[type=checkbox]::before {
+      content: "►";
+    }
+
     input[type="checkbox"]:checked~ul {
       display: block;
     }
