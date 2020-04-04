@@ -17,7 +17,7 @@ namespace Fudge {
    * @author Monika Galkewitsch, HFU, 2019
    * @author Lukas Scheuerle, HFU, 2019
    */
-  export abstract class View {
+  export abstract class View  {
 
     config: GoldenLayout.ComponentConfig;
     parentPanel: Panel;

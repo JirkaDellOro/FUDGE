@@ -19,10 +19,11 @@ namespace UI_Tree {
       return _node.getChildren();
     }
 
-    public delete(_object: ƒ.Node[]): ƒ.Node[] {
+    public delete(_focussed: ƒ.Node[]): ƒ.Node[] {
       // delete selection independend of focussed item
       let deleted: ƒ.Node[] = [];
-      for (let node of this.selection)
+      let expend: ƒ.Node[] = this.selection.length > 0 ? this.selection : _focussed;
+      for (let node of this.selection || expend)
         if (node.getParent()) {
           node.getParent().removeChild(node);
           deleted.push(node);

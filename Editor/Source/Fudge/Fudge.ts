@@ -7,10 +7,11 @@ namespace Fudge {
 
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  const { ipcRenderer, remote } = require("electron");
+  export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
+  export const remote: Electron.Remote = require("electron").remote;
   const fs: ƒ.General = require("fs");
 
-  ƒ.RenderManager.initialize();
+  // ƒ.RenderManager.initialize();
 
   // TODO: At this point of time, the project is just a single node. A project is much more complex...
   let node: ƒ.Node = null;

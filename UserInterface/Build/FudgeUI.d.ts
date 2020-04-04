@@ -158,6 +158,10 @@ declare namespace FudgeUserInterface {
          * Clear the current selection
          */
         clearSelection(): void;
+        /**
+         * Return the object in focus
+         */
+        getFocussed(): T;
         private hndOpen;
         private createBranch;
         private hndRename;
@@ -300,7 +304,8 @@ declare namespace FudgeUserInterface {
         COLLAPSE = "collapse",
         UPDATE = "update",
         DROPMENUCLICK = "dropMenuClick",
-        DROPMENUCOLLAPSE = "dropMenuCollapse"
+        DROPMENUCOLLAPSE = "dropMenuCollapse",
+        CONTEXTMENU = "contextmenu"
     }
 }
 declare namespace FudgeUserInterface {

@@ -72,6 +72,18 @@ namespace FudgeUserInterface {
       this.displaySelection(<T[]>this.controller.selection);
     }
 
+    /**
+     * Return the object in focus
+     */
+    public getFocussed(): T {
+      let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
+      let found: number = items.indexOf(<TreeItem<T>>document.activeElement);
+      if (found > -1)
+        return items[found].data;
+
+      return null;
+    }
+
     private hndOpen(_event: Event): void {
       let item: TreeItem<T> = <TreeItem<T>>_event.target;
       let children: T[] = this.controller.getChildren(item.data);

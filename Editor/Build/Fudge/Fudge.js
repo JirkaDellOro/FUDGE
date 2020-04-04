@@ -27,59 +27,61 @@ var Fudge;
         COMPONENTMENU["SCRIPT"] = "Script Component";
         COMPONENTMENU["TRANSFORM"] = "Transform Component";
     })(COMPONENTMENU = Fudge.COMPONENTMENU || (Fudge.COMPONENTMENU = {}));
-    class UINodeList {
-        constructor(_node, _listContainer) {
-            this.updateList = (_event) => {
-                this.setNodeRoot(this.nodeRoot);
-            };
-            this.toggleCollapse = (_event) => {
-                _event.preventDefault();
-                if (event.target instanceof ƒui.CollapsableNodeList) {
-                    let target = _event.target;
-                    if (target.content.children.length > 1)
-                        target.collapse(target);
-                    else {
-                        let nodeToExpand = target.node;
-                        let newList = this.BuildListFromNode(nodeToExpand);
-                        target.replaceWith(newList);
-                    }
-                }
-            };
-            this.nodeRoot = _node;
-            this.nodeRoot.addEventListener("childAppend" /* CHILD_APPEND */, this.updateList);
-            this.nodeRoot.addEventListener("childRemove" /* CHILD_REMOVE */, this.updateList);
-            this.listRoot = document.createElement("ul");
-            this.listRoot.classList.add("NodeList");
-            let list = this.BuildListFromNode(this.nodeRoot);
-            this.listRoot.appendChild(list);
-            _listContainer.appendChild(this.listRoot);
-            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
-        }
-        getNodeRoot() {
-            return this.nodeRoot;
-        }
-        setSelection(_node) {
-            //TODO: Select Appropriate Entry
-        }
-        getSelection() {
-            return this.selectedEntry.node;
-        }
-        setNodeRoot(_node) {
-            this.nodeRoot = _node;
-            this.listRoot = this.BuildListFromNode(this.nodeRoot);
-            this.listRoot.classList.add("NodeList");
-        }
-        BuildListFromNode(_node) {
-            let listRoot = new ƒui.CollapsableNodeList(_node, _node.name, true);
-            let nodeChildren = _node.getChildren();
-            for (let child of nodeChildren) {
-                let listItem = new ƒui.CollapsableNodeList(child, child.name);
-                listRoot.content.appendChild(listItem);
-            }
-            return listRoot;
-        }
-    }
-    Fudge.UINodeList = UINodeList;
+    // export class UINodeList {
+    //   listRoot: HTMLElement;
+    //   selectedEntry: HTMLElement;
+    //   private nodeRoot: ƒ.Node;
+    //   constructor(_node: ƒ.Node, _listContainer: HTMLElement) {
+    //     this.nodeRoot = _node;
+    //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_APPEND, this.updateList);
+    //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.updateList);
+    //     this.listRoot = document.createElement("ul");
+    //     this.listRoot.classList.add("NodeList");
+    //     let list: HTMLUListElement = this.BuildListFromNode(this.nodeRoot);
+    //     this.listRoot.appendChild(list);
+    //     _listContainer.appendChild(this.listRoot);
+    //     _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
+    //   }
+    //   public getNodeRoot(): ƒ.Node {
+    //     return this.nodeRoot;
+    //   }
+    //   public setSelection(_node: ƒ.Node): void {
+    //     //TODO: Select Appropriate Entry
+    //   }
+    //   public getSelection(): ƒ.Node {
+    //     return (<ƒui.CollapsableNodeList>this.selectedEntry).node;
+    //   }
+    //   public updateList = (_event: Event): void => {
+    //     this.setNodeRoot(this.nodeRoot);
+    //   }
+    //   public setNodeRoot(_node: ƒ.Node): void {
+    //     this.nodeRoot = _node;
+    //     this.listRoot = this.BuildListFromNode(this.nodeRoot);
+    //     this.listRoot.classList.add("NodeList");
+    //   }
+    //   public toggleCollapse = (_event: Event): void => {
+    //     _event.preventDefault();
+    //     if (event.target instanceof ƒui.CollapsableNodeList) {
+    //       let target: ƒui.CollapsableNodeList = <ƒui.CollapsableNodeList>_event.target;
+    //       if (target.content.children.length > 1)
+    //         target.collapse(target);
+    //       else {
+    //         let nodeToExpand: ƒ.Node = (<ƒui.CollapsableNodeList>target).node;
+    //         let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
+    //         target.replaceWith(newList);
+    //       }
+    //     }
+    //   }
+    //   private BuildListFromNode(_node: ƒ.Node): HTMLUListElement {
+    //     let listRoot: ƒui.CollapsableNodeList = new ƒui.CollapsableNodeList(_node, _node.name, true);
+    //     let nodeChildren: ƒ.Node[] = _node.getChildren();
+    //     for (let child of nodeChildren) {
+    //       let listItem: HTMLUListElement = new ƒui.CollapsableNodeList(child, child.name);
+    //       listRoot.content.appendChild(listItem);
+    //     }
+    //     return listRoot;
+    //   }
+    // }
     class UIAnimationList {
         constructor(_mutator, _listContainer) {
             this.collectMutator = () => {
@@ -184,9 +186,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    const { ipcRenderer, remote } = require("electron");
+    Fudge.ipcRenderer = require("electron").ipcRenderer;
+    Fudge.remote = require("electron").remote;
     const fs = require("fs");
-    ƒ.RenderManager.initialize();
+    // ƒ.RenderManager.initialize();
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels
@@ -197,7 +200,7 @@ var Fudge;
         Fudge.PanelManager.instance.init();
         console.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
-        ipcRenderer.on("save", (_event, _args) => {
+        Fudge.ipcRenderer.on("save", (_event, _args) => {
             ƒ.Debug.log("Save");
             panel = Fudge.PanelManager.instance.getActivePanel();
             if (panel instanceof Fudge.PanelNode) {
@@ -205,7 +208,7 @@ var Fudge;
             }
             save(node);
         });
-        ipcRenderer.on("open", (_event, _args) => {
+        Fudge.ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
             panel = Fudge.PanelManager.instance.getActivePanel();
@@ -213,16 +216,16 @@ var Fudge;
                 panel.setNode(node);
             }
         });
-        ipcRenderer.on("openViewNode", (_event, _args) => {
+        Fudge.ipcRenderer.on("openViewNode", (_event, _args) => {
             ƒ.Debug.log("OpenViewNode");
             openViewNode();
         });
-        ipcRenderer.on("openAnimationPanel", (_event, _args) => {
+        Fudge.ipcRenderer.on("openAnimationPanel", (_event, _args) => {
             ƒ.Debug.log("Open Animation Panel");
             // openAnimationPanel();
         });
         // HACK!
-        ipcRenderer.on("updateNode", (_event, _args) => {
+        Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("UpdateViewNode");
         });
     }
@@ -242,11 +245,11 @@ var Fudge;
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename = remote.dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
+        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
     function open() {
-        let filenames = remote.dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         console.groupCollapsed("File content");
         ƒ.Debug.log(content);
@@ -258,6 +261,27 @@ var Fudge;
         console.groupEnd();
         return node;
     }
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let MENU;
+    (function (MENU) {
+        MENU[MENU["NEW_NODE"] = 0] = "NEW_NODE";
+    })(MENU = Fudge.MENU || (Fudge.MENU = {}));
+    class ContextMenu {
+        static build(_for, _callback) {
+            let template = ContextMenu.getTemplate(_for, _callback);
+            let menu = Fudge.remote.Menu.buildFromTemplate(template);
+            return menu;
+        }
+        static getTemplate(_for, _callback) {
+            const menu = [
+                { label: "New Node", id: String(MENU.NEW_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" }
+            ];
+            return menu;
+        }
+    }
+    Fudge.ContextMenu = ContextMenu;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -277,10 +301,11 @@ var Fudge;
         getChildren(_node) {
             return _node.getChildren();
         }
-        delete(_object) {
+        delete(_focussed) {
             // delete selection independend of focussed item
             let deleted = [];
-            for (let node of this.selection)
+            let expend = this.selection.length > 0 ? this.selection : _focussed;
+            for (let node of expend)
                 if (node.getParent()) {
                     node.getParent().removeChild(node);
                     deleted.push(node);
@@ -552,7 +577,7 @@ var Fudge;
                     }
                 }
             }
-            console.log(config);
+            // console.log(config);
             return config;
         }
     }
@@ -1407,8 +1432,10 @@ var Fudge;
     Fudge.ViewComponents = ViewComponents;
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../Examples/Code/Scenes"/>
+// /<reference path="../Menus.ts"/>
 var Fudge;
 ///<reference types="../../../Examples/Code/Scenes"/>
+// /<reference path="../Menus.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
@@ -1472,6 +1499,20 @@ var Fudge;
                     eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
                 _event.cancelBubble = true;
                 this.parentPanel.dispatchEvent(eventToPass);
+                // this.dispatchEvent(eventToPass); <- if view was a subclass of HTMLElement or HTMLDivElement
+            };
+            this.openContextMenu = (_event) => {
+                this.contextMenu.popup();
+            };
+            this.contextMenuCallback = (_item, _window, _event) => {
+                console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+                switch (Number(_item.id)) {
+                    case Fudge.MENU.NEW_NODE:
+                        console.group("contextMenuCallback");
+                        console.log(this.tree.getFocussed());
+                        console.groupEnd();
+                        break;
+                }
             };
             if (_parent instanceof Fudge.PanelNode && _parent.getNode() != null)
                 this.branch = _parent.getNode();
@@ -1484,7 +1525,9 @@ var Fudge;
             // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
             this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.fillContent();
+            this.contextMenu = Fudge.ContextMenu.build(ViewNode, this.contextMenuCallback);
         }
         deconstruct() {
             //TODO: desconstruct

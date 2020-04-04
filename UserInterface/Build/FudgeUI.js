@@ -714,6 +714,16 @@ var FudgeUserInterface;
             this.controller.selection.splice(0);
             this.displaySelection(this.controller.selection);
         }
+        /**
+         * Return the object in focus
+         */
+        getFocussed() {
+            let items = Array.from(this.querySelectorAll("li"));
+            let found = items.indexOf(document.activeElement);
+            if (found > -1)
+                return items[found].data;
+            return null;
+        }
         hndOpen(_event) {
             let item = _event.target;
             let children = this.controller.getChildren(item.data);

@@ -16,10 +16,11 @@ var UI_Tree;
         getChildren(_node) {
             return _node.getChildren();
         }
-        delete(_object) {
+        delete(_focussed) {
             // delete selection independend of focussed item
             let deleted = [];
-            for (let node of this.selection)
+            let expend = this.selection.length > 0 ? this.selection : _focussed;
+            for (let node of this.selection || expend)
                 if (node.getParent()) {
                     node.getParent().removeChild(node);
                     deleted.push(node);

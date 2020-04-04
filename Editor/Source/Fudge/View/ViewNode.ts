@@ -1,4 +1,5 @@
 ///<reference types="../../../Examples/Code/Scenes"/>
+// /<reference path="../Menus.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -16,6 +17,7 @@ namespace Fudge {
     selectedNode: ƒ.Node;
     // listController: UINodeList;
     tree: ƒui.Tree<ƒ.Node>;
+    contextMenu: Electron.Menu;
 
     constructor(_parent: PanelNode) {
       super(_parent);
@@ -31,7 +33,10 @@ namespace Fudge {
       // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
       this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+      this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
       this.fillContent();
+
+      this.contextMenu = ContextMenu.build(ViewNode, this.contextMenuCallback);
     }
     deconstruct(): void {
       //TODO: desconstruct
@@ -112,6 +117,22 @@ namespace Fudge {
       _event.cancelBubble = true;
 
       this.parentPanel.dispatchEvent(eventToPass);
+      // this.dispatchEvent(eventToPass); <- if view was a subclass of HTMLElement or HTMLDivElement
+    }
+
+    private openContextMenu = (_event: Event): void => {
+      this.contextMenu.popup();
+    }
+
+    private contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
+      console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+      switch (Number(_item.id)) {
+        case MENU.NEW_NODE:
+          console.group("contextMenuCallback")
+          console.log(this.tree.getFocussed());
+          console.groupEnd();
+          break;
+      }
     }
   }
 }

@@ -27,19 +27,6 @@ declare namespace Fudge {
         SCRIPT = "Script Component",
         TRANSFORM = "Transform Component"
     }
-    class UINodeList {
-        listRoot: HTMLElement;
-        selectedEntry: HTMLElement;
-        private nodeRoot;
-        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
-        getNodeRoot(): ƒ.Node;
-        setSelection(_node: ƒ.Node): void;
-        getSelection(): ƒ.Node;
-        updateList: (_event: Event) => void;
-        setNodeRoot(_node: ƒ.Node): void;
-        toggleCollapse: (_event: Event) => void;
-        private BuildListFromNode;
-    }
     class UIAnimationList {
         listRoot: HTMLElement;
         private mutator;
@@ -60,6 +47,19 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    const ipcRenderer: Electron.IpcRenderer;
+    const remote: Electron.Remote;
+}
+declare namespace Fudge {
+    export enum MENU {
+        NEW_NODE = 0
+    }
+    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    export class ContextMenu {
+        static build(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu;
+        private static getTemplate;
+    }
+    export {};
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -69,7 +69,7 @@ declare namespace Fudge {
         rename(_node: ƒ.Node, _new: string): boolean;
         hasChildren(_node: ƒ.Node): boolean;
         getChildren(_node: ƒ.Node): ƒ.Node[];
-        delete(_object: ƒ.Node[]): ƒ.Node[];
+        delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
         copy(_originals: ƒ.Node[]): ƒ.Node[];
     }
@@ -347,6 +347,7 @@ declare namespace Fudge {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
         tree: ƒui.Tree<ƒ.Node>;
+        contextMenu: Electron.Menu;
         constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
@@ -367,6 +368,8 @@ declare namespace Fudge {
          * Pass Event to Panel
          */
         private passEventToPanel;
+        private openContextMenu;
+        private contextMenuCallback;
     }
 }
 declare namespace Fudge {
