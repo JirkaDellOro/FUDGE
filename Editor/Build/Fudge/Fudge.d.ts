@@ -63,6 +63,18 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒUi = FudgeUserInterface;
+    class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
+        getLabel(_node: ƒ.Node): string;
+        rename(_node: ƒ.Node, _new: string): boolean;
+        hasChildren(_node: ƒ.Node): boolean;
+        getChildren(_node: ƒ.Node): ƒ.Node[];
+        delete(_object: ƒ.Node[]): ƒ.Node[];
+        addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
+        copy(_originals: ƒ.Node[]): ƒ.Node[];
+    }
+}
+declare namespace Fudge {
     /**
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
@@ -91,23 +103,6 @@ declare namespace Fudge {
          * Used to identify panels
          */
         private generateID;
-    }
-    /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
-    * @author Monika Galkewitsch, 2019, HFU
-    */
-    class NodePanel extends Panel {
-        private node;
-        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
-        setNode(_node: ƒ.Node): void;
-        getNode(): ƒ.Node;
-        /**
- * Allows to construct the view from a template config.
- * @param template Panel Template to be used for the construction
- * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
- */
-        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType;
     }
 }
 declare namespace Fudge {
@@ -148,6 +143,26 @@ declare namespace Fudge {
          * During Initialization and addPanel function, this method is called already.
          */
         private setActivePanel;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    class PanelNode extends Panel {
+        private node;
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
+        setNode(_node: ƒ.Node): void;
+        getNode(): ƒ.Node;
+        /**
+         * Allows to construct the view from a template config.
+         * @param template Panel Template to be used for the construction
+         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+         */
+        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType;
     }
 }
 declare namespace Fudge {
@@ -305,7 +320,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class ViewData extends View {
+    class ViewComponents extends View {
         private data;
         constructor(_parent: Panel);
         deconstruct(): void;
@@ -326,6 +341,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
@@ -333,8 +349,8 @@ declare namespace Fudge {
     class ViewNode extends View {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
-        listController: UINodeList;
-        constructor(_parent: NodePanel);
+        tree: ƒui.Tree<ƒ.Node>;
+        constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
         /**
@@ -366,7 +382,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         branch: ƒ.Node;
-        constructor(_parent: NodePanel);
+        constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
         /**

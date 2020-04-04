@@ -4,8 +4,10 @@
     "sourceFiles": [
       "../../Source/Fudge/Editor.ts",
       "../../Source/Fudge/Fudge.ts",
+      "../../Source/Fudge/Controller/ControllerTreeNode.ts",
       "../../Source/Fudge/Panel/Panel.ts",
       "../../Source/Fudge/Panel/PanelManager.ts",
+      "../../Source/Fudge/Panel/PanelNode.ts",
       "../../Source/Fudge/Panel/PanelTemplate.ts",
       "../../Source/Fudge/View/View.ts",
       "../../Source/Fudge/View/ViewAnimation.ts",
@@ -14,7 +16,7 @@
       "../../Source/Fudge/View/ViewAnimationSheetDope.ts",
       "../../Source/Fudge/View/ViewAnimationTemplate.ts",
       "../../Source/Fudge/View/ViewCamera.ts",
-      "../../Source/Fudge/View/ViewData.ts",
+      "../../Source/Fudge/View/ViewComponents.ts",
       "../../Source/Fudge/View/ViewNode.ts",
       "../../Source/Fudge/View/ViewPort.ts"
     ],
@@ -22,7 +24,7 @@
       "sections": [
         {
           "pos": 0,
-          "end": 66793,
+          "end": 69292,
           "kind": "text"
         }
       ]
@@ -49,7 +51,7 @@
         },
         {
           "pos": 162,
-          "end": 13789,
+          "end": 14413,
           "kind": "text"
         }
       ]

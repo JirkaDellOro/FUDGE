@@ -12,9 +12,9 @@ namespace Fudge {
     canvas: HTMLCanvasElement;
     branch: ƒ.Node;
 
-    constructor(_parent: NodePanel) {
+    constructor(_parent: PanelNode) {
       super(_parent);
-      if (_parent instanceof NodePanel && _parent.getNode() != null)
+      if (_parent instanceof PanelNode && _parent.getNode() != null)
         this.branch = _parent.getNode();
       else {
         this.branch = new ƒ.Node("Scene");

@@ -8,7 +8,7 @@ namespace Fudge {
         COMPONENTMENU = "Add Components"
     }
 
-    export class ViewData extends View {
+    export class ViewComponents extends View {
         private data: ƒ.Node | ƒ.Mutable;
         // TODO: adept view to selected object, update when selection changes etc.
         constructor(_parent: Panel) {
@@ -16,9 +16,11 @@ namespace Fudge {
             this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
             this.fillContent();
         }
+
         deconstruct(): void {
             //TODO: Deconstruct;
         }
+
         fillContent(): void {
             if (this.data) {
                 let cntHeader: HTMLElement = document.createElement("span");
@@ -52,6 +54,7 @@ namespace Fudge {
                 this.content.append(cntEmpty);
             }
         }
+
         /**
          * Changes the name of the displayed node
          */
@@ -72,6 +75,7 @@ namespace Fudge {
             }
             this.fillContent();
         }
+        
         /**
          * Add Component to displayed node
          */
