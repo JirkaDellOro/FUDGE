@@ -52,7 +52,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     export enum MENU {
-        NEW_NODE = 0
+        ADD_NODE = 0,
+        ADD_COMPONENT = 1
     }
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     export class ContextMenu {

@@ -126,11 +126,18 @@ namespace Fudge {
 
     private contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
       console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+      let focus: ƒ.Node = this.tree.getFocussed();
+
       switch (Number(_item.id)) {
-        case MENU.NEW_NODE:
-          console.group("contextMenuCallback")
-          console.log(this.tree.getFocussed());
-          console.groupEnd();
+        case MENU.ADD_NODE:
+          let child: ƒ.Node = new ƒ.Node("New Node");
+          focus.addChild(child);
+          this.tree.findItem(focus).open(true);
+          this.tree.findOpen(child).focus();
+          break;
+        case MENU.ADD_COMPONENT:
+          let cmpTransform: ƒ.Component = new ƒ.ComponentTransform();
+          focus.addComponent(cmpTransform);
           break;
       }
     }

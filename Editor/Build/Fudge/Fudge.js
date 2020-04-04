@@ -266,7 +266,8 @@ var Fudge;
 (function (Fudge) {
     let MENU;
     (function (MENU) {
-        MENU[MENU["NEW_NODE"] = 0] = "NEW_NODE";
+        MENU[MENU["ADD_NODE"] = 0] = "ADD_NODE";
+        MENU[MENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     class ContextMenu {
         static build(_for, _callback) {
@@ -276,7 +277,8 @@ var Fudge;
         }
         static getTemplate(_for, _callback) {
             const menu = [
-                { label: "New Node", id: String(MENU.NEW_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" }
+                { label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" },
+                { label: "Add Component", id: String(MENU.ADD_COMPONENT), click: _callback, accelerator: process.platform == "darwin" ? "C" : "C" }
             ];
             return menu;
         }
@@ -1506,11 +1508,17 @@ var Fudge;
             };
             this.contextMenuCallback = (_item, _window, _event) => {
                 console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+                let focus = this.tree.getFocussed();
                 switch (Number(_item.id)) {
-                    case Fudge.MENU.NEW_NODE:
-                        console.group("contextMenuCallback");
-                        console.log(this.tree.getFocussed());
-                        console.groupEnd();
+                    case Fudge.MENU.ADD_NODE:
+                        let child = new ƒ.Node("New Node");
+                        focus.addChild(child);
+                        this.tree.findItem(focus).open(true);
+                        this.tree.findOpen(child).focus();
+                        break;
+                    case Fudge.MENU.ADD_COMPONENT:
+                        let cmpTransform = new ƒ.ComponentTransform();
+                        focus.addComponent(cmpTransform);
                         break;
                 }
             };

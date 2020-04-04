@@ -3,7 +3,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
 
   export enum MENU {
-    NEW_NODE
+    ADD_NODE, ADD_COMPONENT
   }
 
   type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
@@ -17,7 +17,8 @@ namespace Fudge {
 
     private static getTemplate(_for: typeof View, _callback: ContextMenuCallback): Electron.MenuItemConstructorOptions[] {
       const menu: Electron.MenuItemConstructorOptions[] = [
-        { label: "New Node", id: String(MENU.NEW_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" }
+        { label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" },
+        { label: "Add Component", id: String(MENU.ADD_COMPONENT), click: _callback, accelerator: process.platform == "darwin" ? "C" : "C" }
       ];
       return menu;
     }
