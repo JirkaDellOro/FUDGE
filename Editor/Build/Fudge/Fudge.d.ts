@@ -83,6 +83,7 @@ declare namespace Fudge {
      * @author Lukas Scheuerle, HFU, 2019
      */
     abstract class Panel extends EventTarget {
+        private static idCounter;
         views: View[];
         config: GoldenLayout.ItemConfig;
         /**
@@ -98,10 +99,6 @@ declare namespace Fudge {
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
         addView(_v: View, _pushToPanelManager?: boolean, _pushConfig?: boolean): void;
-        /**
-         * Returns a randomly generated ID.
-         * Used to identify panels
-         */
         private generateID;
     }
 }

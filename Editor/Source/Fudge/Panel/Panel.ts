@@ -10,6 +10,7 @@ namespace Fudge {
    */
 
   export abstract class Panel extends EventTarget {
+    private static idCounter: number = 0;
     views: View[] = [];
     config: GoldenLayout.ItemConfig;
 
@@ -20,12 +21,12 @@ namespace Fudge {
      */
     constructor(_name: string) {
       super();
-      let id: string = this.generateID();
+      let id: string;
       this.config = {
         type: "row",
         content: [],
         title: _name,
-        id: id
+        id: this.generateID(_name)
       };
 
     }
@@ -45,14 +46,8 @@ namespace Fudge {
       }
     }
 
-    /**
-     * Returns a randomly generated ID. 
-     * Used to identify panels
-     */
-    private generateID(): string {
-      let randLetter: string = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-      let uniqid: string = randLetter + Date.now();
-      return uniqid;
+    private generateID(_name: string): string {
+      return "Panel" + Panel.idCounter++ + "_" + _name;
     }
   }
 }
