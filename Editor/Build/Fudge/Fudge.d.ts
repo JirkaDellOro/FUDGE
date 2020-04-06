@@ -9,24 +9,6 @@ declare namespace Fudge {
         HIDE = "nodeHideEvent",
         ACTIVEVIEWPORT = "activeViewport"
     }
-    enum NODEMENU {
-        EMPTY = "Empty Node",
-        BOX = "Box Mesh Node",
-        PYRAMID = "Pyramid Mesh Node",
-        PLANE = "Plane Mesh Node"
-    }
-    enum COMPONENTMENU {
-        MESHBOX = "Mesh Component.Box Mesh Component",
-        MESHPLANE = "Mesh Component.Plane Mesh Component",
-        MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
-        AUDIOLISTENER = "Audio Listener Component",
-        AUDIO = "Audio Component",
-        ANIMATION = "Animation Component",
-        CAMERA = "Camera Component",
-        LIGHT = "Light Component",
-        SCRIPT = "Script Component",
-        TRANSFORM = "Transform Component"
-    }
     class UIAnimationList {
         listRoot: HTMLElement;
         private mutator;
@@ -358,10 +340,6 @@ declare namespace Fudge {
          * @param _node Node to be displayed
          */
         setRoot(_node: ƒ.Node): void;
-        /**
-         * Add new Node to Node Structure
-         */
-        private createNode;
         /**
          * Change the selected Node
          */

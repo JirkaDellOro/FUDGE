@@ -1,13 +1,7 @@
-///<reference types="../../../Examples/Code/Scenes"/>
-// /<reference path="../Menus.ts"/>
-
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  enum Menu {
-    NODE = "AddNode"
-  }
   /**
    * View displaying a Node and the hierarchical relation to its parents and children.  
    * Consists of a viewport, a tree-control and . 
@@ -15,7 +9,6 @@ namespace Fudge {
   export class ViewNode extends View {
     branch: ƒ.Node;
     selectedNode: ƒ.Node;
-    // listController: UINodeList;
     tree: ƒui.Tree<ƒ.Node>;
     contextMenu: Electron.Menu;
 
@@ -38,20 +31,13 @@ namespace Fudge {
 
       this.contextMenu = ContextMenu.getMenu(ViewNode, this.contextMenuCallback);
     }
+
     deconstruct(): void {
       //TODO: desconstruct
     }
 
     fillContent(): void {
-      let mutator: ƒ.Mutator = {};
-      for (let member in NODEMENU) {
-        ƒui.MultiLevelMenuManager.buildFromSignature(NODEMENU[member], mutator);
-      }
-      let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
-      menu.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, this.createNode);
-      // this.content.append(this.listController.listRoot);
       this.content.append(this.tree);
-      // this.content.append(menu);
     }
 
     /**
@@ -62,42 +48,8 @@ namespace Fudge {
       if (!_node)
         return;
       this.branch = _node;
-      // this.listController.listRoot.removeEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
-      // this.listController.setNodeRoot(_node);
-      // this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
-      // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
     }
-    /**
-     * Add new Node to Node Structure
-     */
-    private createNode = (_event: CustomEvent): void => {
-      let node: ƒ.Node = new ƒ.Node("");
-      let targetNode: ƒ.Node = this.selectedNode || this.branch;
-      let clrRed: ƒ.Color = new ƒ.Color(1, 0, 0, 1);
-      let coatRed: ƒ.CoatColored = new ƒ.CoatColored(clrRed);
-      let mtrRed: ƒ.Material = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-      switch (_event.detail) {
-        case Menu.NODE + "." + NODEMENU.BOX:
-          let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
-          node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
-          break;
-        case Menu.NODE + "." + NODEMENU.EMPTY:
-          node.name = "Empty Node";
-          break;
-        case Menu.NODE + "." + NODEMENU.PLANE:
-          let meshPlane: ƒ.MeshQuad = new ƒ.MeshQuad();
-          node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
-          break;
-        case Menu.NODE + "." + NODEMENU.PYRAMID:
-          let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
-          node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
-          break;
-      }
-      targetNode.addChild(node);
-      let event: Event = new Event(ƒ.EVENT.CHILD_APPEND);
-      targetNode.dispatchEvent(event);
-      this.setRoot(this.branch);
-    }
+
     /**
      * Change the selected Node
      */
@@ -105,6 +57,7 @@ namespace Fudge {
       // this.listController.setSelection(_event.detail);
       this.selectedNode = _event.detail;
     }
+    
     /**
      * Pass Event to Panel
      */
@@ -137,9 +90,9 @@ namespace Fudge {
           break;
         case MENU.ADD_COMPONENT:
           let iSubclass: number = _item["iSubclass"];
-          let s: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
           //@ts-ignore
-          let cmpNew: ƒ.Component = new s();
+          let cmpNew: ƒ.Component = new component();
           console.log(cmpNew.type, cmpNew);
 
           focus.addComponent(cmpNew);
