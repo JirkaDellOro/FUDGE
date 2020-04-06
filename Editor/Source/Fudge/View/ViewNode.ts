@@ -36,7 +36,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
       this.fillContent();
 
-      this.contextMenu = ContextMenu.build(ViewNode, this.contextMenuCallback);
+      this.contextMenu = ContextMenu.getMenu(ViewNode, this.contextMenuCallback);
     }
     deconstruct(): void {
       //TODO: desconstruct
@@ -136,8 +136,13 @@ namespace Fudge {
           this.tree.findOpen(child).focus();
           break;
         case MENU.ADD_COMPONENT:
-          let cmpTransform: ƒ.Component = new ƒ.ComponentTransform();
-          focus.addComponent(cmpTransform);
+          let iSubclass: number = _item["iSubclass"];
+          let s: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+          //@ts-ignore
+          let cmpNew: ƒ.Component = new s();
+          console.log(cmpNew.type, cmpNew);
+
+          focus.addComponent(cmpNew);
           break;
       }
     }
