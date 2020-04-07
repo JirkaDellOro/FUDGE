@@ -8,142 +8,49 @@
   --color-dragdrop-outline: hsl(0, 0%, 80%);
 }
 
-.lm_goldenlayout {
+.lm_goldenlayout, body {
   background-color: var(--color-background-main);
   color: var(--color-text);
 }
 
 .lm_content {
   background-color: var(--color-background-content);
-  position: relative;
-  /* overflow: auto; */
 }
 
-.lm_splitter {
-  transition: background-color 200ms ease
-}
-
-.lm_splitter:hover, .lm_splitter.lm_dragging {
+.lm_splitter:hover {
   background: var(--color-background-content);
-  transition: background-color 200ms ease
 }
-
-.lm_header {
-  height: 20px;
-  user-select: none;
-}
-
-.lm_header.lm_selectable {
-  cursor: pointer
-}
-
-.lm_header .lm_tab {
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  margin-right: 2px;
-  padding-bottom: 2px;
-  padding-top: 2px;
-  vertical-align: middle;
-}
-/* 
-.lm_header .lm_tab .lm_close_tab:hover {
-  opacity: .4;
-} */
-
-.lm_close_tab {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAADEUlfTAAAATElEQVR4nG3OwQ0DMQwDwZGRBtR/j1YJzMc5+IDoR+yCVO29g+pu981MFgqZmRdAfU7+CYWcbF11LwALjpBL0N0qybNx/RPU+gOeiS/+XCRwDlTgkQAAAABJRU5ErkJggg==);
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-
-.lm_header .lm_tab.lm_active {
-  border-bottom: 3px solid var(--color-background-content);
-  padding-bottom: 0px;
-  margin-bottom: 2px
+.lm_splitter.lm_dragging {
+  background: var(--color-background-main);
 }
 
 .lm_selected .lm_header {
   background-color: var(--color-background-content);
 }
 
-.lm_tab:hover, .lm_tab .lm_active {
+.lm_tab:hover, .lm_tab .lm_active, .lm_dragProxy .lm_tab {
   background-color: var(--color-background-content);
 }
 
 /* Controls */
-  .lm_header .lm_controls .lm_tabdropdown:before {
+
+.lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
 }
 
-.lm_controls>li {
-  position: relative;
-  background-position: center center;
-  background-repeat: no-repeat;
-  opacity: .4;
-  transition: opacity 300ms ease
-}
-
-.lm_controls>li:hover {
-  opacity: 1
-}
-
-.lm_controls .lm_popout {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAPklEQVR4nI2Q0QoAIAwCNfr/X7aXCpGN8snBdgejJOzckpkxs9jR6K6T5JpU0nWl5pSXTk7qwh8SnNT+CAAWCgkKFpuSWsUAAAAASUVORK5CYII=)
-}
-
-.lm_controls .lm_maximise {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAKElEQVR4nGP8////fwYCgImQAgYGBgYWKM2IR81/okwajIpgvsMbVgAwgQYRVakEKQAAAABJRU5ErkJggg==)
-}
-
-.lm_controls .lm_close {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAQUlEQVR4nHXOQQ4AMAgCQeT/f6aXpsGK3jSTuCVJAAr7iBdoAwCKd0nwfaAdHbYERw5b44+E8JoBjEYGMBq5gAYP3usUDu2IvoUAAAAASUVORK5CYII=)
-}
-/* 
-.lm_maximised .lm_header {
-  background-color: var(--color-background-main)
-} */
-
-.lm_maximised .lm_controls .lm_maximise {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAJ0lEQVR4nGP8//8/AzGAiShVI1YhCwMDA8OsWbPwBmZaWhoj0SYCAN1lBxMAX4n0AAAAAElFTkSuQmCC)
-}
-
-/* ???? */
-.lm_transition_indicator {
-  background-color: #ff0000;
-  border: 1px dashed #00ff00;
+.lm_header .lm_tab.lm_active {
+  border-bottom: 3px solid var(--color-background-content);
 }
 
 /* Drag & Drop */
-.lm_dragProxy .lm_content {
-  box-shadow: 2px 2px 4px var(--color-dragdrop-shadow);
-  background-color: var(--color-background-content);
-}
 
 .lm_dropTargetIndicator {
-  box-shadow: inset 0 0 30px var(--color-dragdrop-shadow);
   outline: 1px dashed var(--color-dragdrop-outline);
-  transition: all 200ms ease;
-  /* background-color: var(--color-background-content); */
+  background-color: var(--color-background-main);
 }
-
-.lm_dropTargetIndicator .lm_inner {
-  background-color: var(--color-background-content);
-  opacity: .2;
-}
-
-.lm_dragProxy.lm_bottom .lm_header .lm_tab, .lm_stack.lm_bottom .lm_header .lm_tab {
-  box-shadow: 2px 2px 2px var(--color-dragdrop-shadow);
-  background-color: var(--color-background-content);
-}
-
-
-.lm_dragProxy.lm_bottom .lm_header .lm_tab.lm_active, .lm_stack.lm_bottom .lm_header .lm_tab.lm_active {
-  box-shadow: 0 2px 2px #000000;
-  background-color: var(--color-background-content);
-}
-
 
 /* popin/popout (must be supported differently, if at all */
+
 /* 
 .lm_popin {
   cursor: pointer
