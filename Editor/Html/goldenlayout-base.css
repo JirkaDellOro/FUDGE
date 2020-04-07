@@ -1,9 +1,10 @@
+/* General */
 body {
   font-family: Arial, sans-serif;
   font-size: 12px;
 }
 
-.lm_root {
+.lm_goldenlayout {
   position: relative;
   /* font-family: Arial, sans-serif; */
   /* font-size: 12px; */
@@ -22,16 +23,12 @@ body {
   position: relative
 }
 
-.lm_dragging, .lm_dragging * {
-  cursor: move !important;
-  user-select: none
-}
-
+/* Partition */
 .lm_maximised {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 40
+  z-index: 40;
 }
 
 .lm_maximise_placeholder {
@@ -70,6 +67,7 @@ body {
   cursor: ew-resize
 }
 
+/* Header */
 .lm_header.lm_selectable {
   cursor: pointer
 }
@@ -183,7 +181,7 @@ body {
   height: 10px;
   visibility: hidden
 }
-
+/* 
 .lm_header .lm_controls .lm_tabdropdown:before {
   content: '';
   width: 0;
@@ -194,9 +192,7 @@ body {
   border-right: 5px solid transparent;
   border-left: 5px solid transparent;
   color: white
-}
-
-
+} */
 
 .lm_header .lm_tabdropdown_list {
   position: absolute;
@@ -220,11 +216,17 @@ body {
   display: none !important
 }
 
+/* Drag & Drop */
+.lm_dragging, .lm_dragging * {
+  cursor: move !important;
+  user-select: none
+}
+
 .lm_dragProxy {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 30
+  z-index: 100
 }
 /* 
 .lm_dragProxy .lm_header {
@@ -240,7 +242,7 @@ body {
 .lm_dropTargetIndicator {
   display: none;
   position: absolute;
-  z-index: 20;
+  z-index: 50;
   transition: all 200ms ease;
 }
 
@@ -252,6 +254,7 @@ body {
   left: 0
 }
 
+/* Popout/in */
 .lm_transition_indicator {
   display: none;
   width: 20px;
@@ -287,6 +290,7 @@ body {
   z-index: 20
 }
 
+/* Controls */
 .lm_controls .lm_popout {
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAPklEQVR4nI2Q0QoAIAwCNfr/X7aXCpGN8snBdgejJOzckpkxs9jR6K6T5JpU0nWl5pSXTk7qwh8SnNT+CAAWCgkKFpuSWsUAAAAASUVORK5CYII=)
 }

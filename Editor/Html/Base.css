@@ -32,8 +32,11 @@
   background-color: var(--color-background-content);
 }
 
-/* Controls */
+.lm_header {
+  background-color: var(--color-background-main);
+}
 
+/* Controls */
 .lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
 }
