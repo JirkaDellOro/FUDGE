@@ -1076,6 +1076,8 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     abstract class Component extends Mutable implements Serializable {
+        /** subclasses get a iSubclass number for identification */
+        static readonly iSubclass: number;
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Component;
         /** list of all the subclasses derived from this class, if they registered properly*/

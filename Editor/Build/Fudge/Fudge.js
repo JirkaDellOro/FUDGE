@@ -7,81 +7,6 @@ var Fudge;
         EVENT_EDITOR["HIDE"] = "nodeHideEvent";
         EVENT_EDITOR["ACTIVEVIEWPORT"] = "activeViewport";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
-    let NODEMENU;
-    (function (NODEMENU) {
-        NODEMENU["EMPTY"] = "Empty Node";
-        NODEMENU["BOX"] = "Box Mesh Node";
-        NODEMENU["PYRAMID"] = "Pyramid Mesh Node";
-        NODEMENU["PLANE"] = "Plane Mesh Node";
-    })(NODEMENU = Fudge.NODEMENU || (Fudge.NODEMENU = {}));
-    let COMPONENTMENU;
-    (function (COMPONENTMENU) {
-        COMPONENTMENU["MESHBOX"] = "Mesh Component.Box Mesh Component";
-        COMPONENTMENU["MESHPLANE"] = "Mesh Component.Plane Mesh Component";
-        COMPONENTMENU["MESHPYRAMID"] = "Mesh Component.Pyramid Mesh Component";
-        COMPONENTMENU["AUDIOLISTENER"] = "Audio Listener Component";
-        COMPONENTMENU["AUDIO"] = "Audio Component";
-        COMPONENTMENU["ANIMATION"] = "Animation Component";
-        COMPONENTMENU["CAMERA"] = "Camera Component";
-        COMPONENTMENU["LIGHT"] = "Light Component";
-        COMPONENTMENU["SCRIPT"] = "Script Component";
-        COMPONENTMENU["TRANSFORM"] = "Transform Component";
-    })(COMPONENTMENU = Fudge.COMPONENTMENU || (Fudge.COMPONENTMENU = {}));
-    // export class UINodeList {
-    //   listRoot: HTMLElement;
-    //   selectedEntry: HTMLElement;
-    //   private nodeRoot: ƒ.Node;
-    //   constructor(_node: ƒ.Node, _listContainer: HTMLElement) {
-    //     this.nodeRoot = _node;
-    //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_APPEND, this.updateList);
-    //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.updateList);
-    //     this.listRoot = document.createElement("ul");
-    //     this.listRoot.classList.add("NodeList");
-    //     let list: HTMLUListElement = this.BuildListFromNode(this.nodeRoot);
-    //     this.listRoot.appendChild(list);
-    //     _listContainer.appendChild(this.listRoot);
-    //     _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
-    //   }
-    //   public getNodeRoot(): ƒ.Node {
-    //     return this.nodeRoot;
-    //   }
-    //   public setSelection(_node: ƒ.Node): void {
-    //     //TODO: Select Appropriate Entry
-    //   }
-    //   public getSelection(): ƒ.Node {
-    //     return (<ƒui.CollapsableNodeList>this.selectedEntry).node;
-    //   }
-    //   public updateList = (_event: Event): void => {
-    //     this.setNodeRoot(this.nodeRoot);
-    //   }
-    //   public setNodeRoot(_node: ƒ.Node): void {
-    //     this.nodeRoot = _node;
-    //     this.listRoot = this.BuildListFromNode(this.nodeRoot);
-    //     this.listRoot.classList.add("NodeList");
-    //   }
-    //   public toggleCollapse = (_event: Event): void => {
-    //     _event.preventDefault();
-    //     if (event.target instanceof ƒui.CollapsableNodeList) {
-    //       let target: ƒui.CollapsableNodeList = <ƒui.CollapsableNodeList>_event.target;
-    //       if (target.content.children.length > 1)
-    //         target.collapse(target);
-    //       else {
-    //         let nodeToExpand: ƒ.Node = (<ƒui.CollapsableNodeList>target).node;
-    //         let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
-    //         target.replaceWith(newList);
-    //       }
-    //     }
-    //   }
-    //   private BuildListFromNode(_node: ƒ.Node): HTMLUListElement {
-    //     let listRoot: ƒui.CollapsableNodeList = new ƒui.CollapsableNodeList(_node, _node.name, true);
-    //     let nodeChildren: ƒ.Node[] = _node.getChildren();
-    //     for (let child of nodeChildren) {
-    //       let listItem: HTMLUListElement = new ƒui.CollapsableNodeList(child, child.name);
-    //       listRoot.content.appendChild(listItem);
-    //     }
-    //     return listRoot;
-    //   }
-    // }
     class UIAnimationList {
         constructor(_mutator, _listContainer) {
             this.collectMutator = () => {
@@ -264,23 +189,62 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     let MENU;
     (function (MENU) {
         MENU[MENU["ADD_NODE"] = 0] = "ADD_NODE";
         MENU[MENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
+    // TODO: figure out how to subclass MenuItem
+    // export class MenuItem extends remote.MenuItem {
+    //   public subclass: Function = null;
+    //   constructor(_options: Electron.MenuItemConstructorOptions) {
+    //     super(_options);
+    //   }
+    // }
     class ContextMenu {
-        static build(_for, _callback) {
-            let template = ContextMenu.getTemplate(_for, _callback);
-            let menu = Fudge.remote.Menu.buildFromTemplate(template);
+        // public static build(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu {
+        //   let template: Electron.MenuItemConstructorOptions[] = ContextMenu.getMenu(_for, _callback);
+        //   let menu: Electron.Menu = remote.Menu.buildFromTemplate(template);
+        //   return menu;
+        // }
+        static getMenu(_for, _callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
+            for (let subItem of ContextMenu.getComponents(_callback))
+                item.submenu.append(subItem);
+            menu.append(item);
+            this.appendCopyPaste(menu);
+            // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
             return menu;
         }
-        static getTemplate(_for, _callback) {
-            const menu = [
-                { label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" },
-                { label: "Add Component", id: String(MENU.ADD_COMPONENT), click: _callback, accelerator: process.platform == "darwin" ? "C" : "C" }
-            ];
-            return menu;
+        static appendCopyPaste(_menu) {
+            _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
+        }
+        static getComponents(_callback) {
+            const menuItems = [];
+            for (let subclass of ƒ.Component.subclasses) {
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(MENU.ADD_COMPONENT), click: _callback });
+                // @ts-ignore
+                item.overrideProperty("iSubclass", subclass.iSubclass);
+                item["iSubclass"] = subclass.iSubclass;
+                // // Object.defineProperty(item, "subclass", {value: subclass, writable: true});
+                // // item["subclass"] = subclass;
+                // // console.log(subclass);
+                //  function (): ƒ.Component {
+                //   console.log(this);
+                //   // @ts-ignore
+                //   this.Fudge.newComponent = new subclass();
+                //   // item.overrideProperty("component", new subclass());
+                // });
+                menuItems.push(item);
+            }
+            return menuItems;
         }
     }
     Fudge.ContextMenu = ContextMenu;
@@ -1354,7 +1318,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -1416,13 +1379,13 @@ var Fudge;
                         let uiComponents = new Fudge.NodeData(nodeComponent, cntComponents);
                     }
                     this.content.append(cntComponents);
-                    let mutator = {};
-                    for (let member in Fudge.COMPONENTMENU) {
-                        ƒui.MultiLevelMenuManager.buildFromSignature(Fudge.COMPONENTMENU[member], mutator);
-                    }
-                    let menu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
-                    menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.addComponent);
-                    this.content.append(menu);
+                    // let mutator: ƒ.Mutator = {};
+                    // for (let member in COMPONENTMENU) {
+                    //     ƒui.MultiLevelMenuManager.buildFromSignature(COMPONENTMENU[member], mutator);
+                    // }
+                    // let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
+                    // menu.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, this.addComponent);
+                    // this.content.append(menu);
                 }
             }
             else {
@@ -1433,18 +1396,10 @@ var Fudge;
     }
     Fudge.ViewComponents = ViewComponents;
 })(Fudge || (Fudge = {}));
-///<reference types="../../../Examples/Code/Scenes"/>
-// /<reference path="../Menus.ts"/>
 var Fudge;
-///<reference types="../../../Examples/Code/Scenes"/>
-// /<reference path="../Menus.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
-    let Menu;
-    (function (Menu) {
-        Menu["NODE"] = "AddNode";
-    })(Menu || (Menu = {}));
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
@@ -1452,37 +1407,6 @@ var Fudge;
     class ViewNode extends Fudge.View {
         constructor(_parent) {
             super(_parent);
-            /**
-             * Add new Node to Node Structure
-             */
-            this.createNode = (_event) => {
-                let node = new ƒ.Node("");
-                let targetNode = this.selectedNode || this.branch;
-                let clrRed = new ƒ.Color(1, 0, 0, 1);
-                let coatRed = new ƒ.CoatColored(clrRed);
-                let mtrRed = new ƒ.Material("Red", ƒ.ShaderUniColor, coatRed);
-                switch (_event.detail) {
-                    case Menu.NODE + "." + Fudge.NODEMENU.BOX:
-                        let meshCube = new ƒ.MeshCube();
-                        node = Scenes.createCompleteMeshNode("Box", mtrRed, meshCube);
-                        break;
-                    case Menu.NODE + "." + Fudge.NODEMENU.EMPTY:
-                        node.name = "Empty Node";
-                        break;
-                    case Menu.NODE + "." + Fudge.NODEMENU.PLANE:
-                        let meshPlane = new ƒ.MeshQuad();
-                        node = Scenes.createCompleteMeshNode("Plane", mtrRed, meshPlane);
-                        break;
-                    case Menu.NODE + "." + Fudge.NODEMENU.PYRAMID:
-                        let meshPyramid = new ƒ.MeshPyramid();
-                        node = Scenes.createCompleteMeshNode("Pyramid", mtrRed, meshPyramid);
-                        break;
-                }
-                targetNode.addChild(node);
-                let event = new Event("childAppend" /* CHILD_APPEND */);
-                targetNode.dispatchEvent(event);
-                this.setRoot(this.branch);
-            };
             /**
              * Change the selected Node
              */
@@ -1517,8 +1441,12 @@ var Fudge;
                         this.tree.findOpen(child).focus();
                         break;
                     case Fudge.MENU.ADD_COMPONENT:
-                        let cmpTransform = new ƒ.ComponentTransform();
-                        focus.addComponent(cmpTransform);
+                        let iSubclass = _item["iSubclass"];
+                        let component = ƒ.Component.subclasses[iSubclass];
+                        //@ts-ignore
+                        let cmpNew = new component();
+                        console.log(cmpNew.type, cmpNew);
+                        focus.addComponent(cmpNew);
                         break;
                 }
             };
@@ -1535,21 +1463,13 @@ var Fudge;
             this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.fillContent();
-            this.contextMenu = Fudge.ContextMenu.build(ViewNode, this.contextMenuCallback);
+            this.contextMenu = Fudge.ContextMenu.getMenu(ViewNode, this.contextMenuCallback);
         }
         deconstruct() {
             //TODO: desconstruct
         }
         fillContent() {
-            let mutator = {};
-            for (let member in Fudge.NODEMENU) {
-                ƒui.MultiLevelMenuManager.buildFromSignature(Fudge.NODEMENU[member], mutator);
-            }
-            let menu = new ƒui.DropMenu(Menu.NODE, mutator, { _text: "Add Node" });
-            menu.addEventListener("dropMenuClick" /* DROPMENUCLICK */, this.createNode);
-            // this.content.append(this.listController.listRoot);
             this.content.append(this.tree);
-            // this.content.append(menu);
         }
         /**
          * Display structure of node
@@ -1559,10 +1479,6 @@ var Fudge;
             if (!_node)
                 return;
             this.branch = _node;
-            // this.listController.listRoot.removeEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
-            // this.listController.setNodeRoot(_node);
-            // this.content.replaceChild(this.listController.listRoot, this.content.firstChild);
-            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
         }
     }
     Fudge.ViewNode = ViewNode;

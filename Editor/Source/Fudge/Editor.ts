@@ -8,86 +8,6 @@ namespace Fudge {
     HIDE = "nodeHideEvent",
     ACTIVEVIEWPORT = "activeViewport"
   }
-  export enum NODEMENU {
-    EMPTY = "Empty Node",
-    BOX = "Box Mesh Node",
-    PYRAMID = "Pyramid Mesh Node",
-    PLANE = "Plane Mesh Node"
-  }
-  export enum COMPONENTMENU {
-    MESHBOX = "Mesh Component.Box Mesh Component",
-    MESHPLANE = "Mesh Component.Plane Mesh Component",
-    MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
-    AUDIOLISTENER = "Audio Listener Component",
-    AUDIO = "Audio Component",
-    ANIMATION = "Animation Component",
-    CAMERA = "Camera Component",
-    LIGHT = "Light Component",
-    SCRIPT = "Script Component",
-    TRANSFORM = "Transform Component"
-  }
-
-  // export class UINodeList {
-  //   listRoot: HTMLElement;
-  //   selectedEntry: HTMLElement;
-  //   private nodeRoot: ƒ.Node;
-
-  //   constructor(_node: ƒ.Node, _listContainer: HTMLElement) {
-  //     this.nodeRoot = _node;
-  //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_APPEND, this.updateList);
-  //     this.nodeRoot.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.updateList);
-  //     this.listRoot = document.createElement("ul");
-  //     this.listRoot.classList.add("NodeList");
-  //     let list: HTMLUListElement = this.BuildListFromNode(this.nodeRoot);
-  //     this.listRoot.appendChild(list);
-  //     _listContainer.appendChild(this.listRoot);
-  //     _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
-
-  //   }
-  //   public getNodeRoot(): ƒ.Node {
-  //     return this.nodeRoot;
-  //   }
-  //   public setSelection(_node: ƒ.Node): void {
-  //     //TODO: Select Appropriate Entry
-  //   }
-
-  //   public getSelection(): ƒ.Node {
-  //     return (<ƒui.CollapsableNodeList>this.selectedEntry).node;
-  //   }
-
-  //   public updateList = (_event: Event): void => {
-  //     this.setNodeRoot(this.nodeRoot);
-  //   }
-  //   public setNodeRoot(_node: ƒ.Node): void {
-  //     this.nodeRoot = _node;
-  //     this.listRoot = this.BuildListFromNode(this.nodeRoot);
-  //     this.listRoot.classList.add("NodeList");
-  //   }
-  //   public toggleCollapse = (_event: Event): void => {
-  //     _event.preventDefault();
-
-  //     if (event.target instanceof ƒui.CollapsableNodeList) {
-  //       let target: ƒui.CollapsableNodeList = <ƒui.CollapsableNodeList>_event.target;
-  //       if (target.content.children.length > 1)
-  //         target.collapse(target);
-  //       else {
-  //         let nodeToExpand: ƒ.Node = (<ƒui.CollapsableNodeList>target).node;
-  //         let newList: HTMLUListElement = this.BuildListFromNode(nodeToExpand);
-  //         target.replaceWith(newList);
-  //       }
-  //     }
-  //   }
-
-  //   private BuildListFromNode(_node: ƒ.Node): HTMLUListElement {
-  //     let listRoot: ƒui.CollapsableNodeList = new ƒui.CollapsableNodeList(_node, _node.name, true);
-  //     let nodeChildren: ƒ.Node[] = _node.getChildren();
-  //     for (let child of nodeChildren) {
-  //       let listItem: HTMLUListElement = new ƒui.CollapsableNodeList(child, child.name);
-  //       listRoot.content.appendChild(listItem);
-  //     }
-  //     return listRoot;
-  //   }
-  // }
 
   export class UIAnimationList {
     listRoot: HTMLElement;
@@ -188,7 +108,5 @@ namespace Fudge {
       this.root.addEventListener("input", this.mutateOnInput);
       _container.append(this.root);
     }
-
   }
-
 }

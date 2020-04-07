@@ -1,0 +1,78 @@
+/* 🗖 🗕 🗗︎ 🗙︎ */
+
+:root {
+  --color-background-main: hsl(0, 0%, 30%);
+  --color-background-content: hsl(0, 0%, 50%);
+  --color-text: hsl(0, 0%, 80%);
+  --color-dragdrop-shadow: hsla(0, 0%, 0%, 0.8);
+  --color-dragdrop-outline: hsl(0, 0%, 80%);
+}
+
+.lm_goldenlayout, body {
+  background-color: var(--color-background-main);
+  color: var(--color-text);
+}
+
+.lm_content {
+  background-color: var(--color-background-content);
+}
+
+.lm_splitter:hover {
+  background: var(--color-background-content);
+}
+.lm_splitter.lm_dragging {
+  background: var(--color-background-main);
+}
+
+.lm_selected .lm_header {
+  background-color: var(--color-background-content);
+}
+
+.lm_tab:hover, .lm_tab .lm_active, .lm_dragProxy .lm_tab {
+  background-color: var(--color-background-content);
+}
+
+.lm_header {
+  background-color: var(--color-background-main);
+}
+
+/* Controls */
+.lm_header .lm_controls .lm_tabdropdown:before {
+  color: var(--color-text);
+}
+
+.lm_header .lm_tab.lm_active {
+  border-bottom: 3px solid var(--color-background-content);
+}
+
+/* Drag & Drop */
+
+.lm_dropTargetIndicator {
+  outline: 1px dashed var(--color-dragdrop-outline);
+  background-color: var(--color-background-main);
+}
+
+/* popin/popout (must be supported differently, if at all */
+
+/* 
+.lm_popin {
+  cursor: pointer
+}
+
+.lm_popin .lm_bg {
+  background: #ffffff;
+  opacity: .3
+}
+
+.lm_popin .lm_icon {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAWklEQVR4nJWOyw3AIAxDHcQC7L8jbwT3AlJBfNp3SiI7dtRaLSlKKeoA1oEsKSQZCEluexw8Tm3ohk+E7bnOUHUGcNh+HwbBygw4AZ7FN/Lt84p0l+yTflV8AKQyLdcCRJi/AAAAAElFTkSuQmCC);
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-left: 1px solid #eeeeee;
+  border-top: 1px solid #eeeeee;
+  opacity: .7
+}
+
+.lm_popin:hover .lm_icon {
+  opacity: 1
+} */
