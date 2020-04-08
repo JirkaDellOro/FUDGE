@@ -1,0 +1,14 @@
+
+/* https://colorpalettes.net/color-palette-3961/ */
+:root {
+  --color-darkest: #00353f;
+  --color-dark: #430c05;
+  --color-medium: #d46f4d;
+  --color-bright: #08c5d1;
+  --color-brightest:  #ffbf66;
+  
+  --color-background-main: var(--color-darkest);
+  --color-background-content: var(--color-dark);
+  --color-text: var(--color-bright);
+  --color-dragdrop-outline: var(--color-brightest);
+}

@@ -1,13 +1,5 @@
 /* 🗖 🗕 🗗︎ 🗙︎ */
 
-:root {
-  --color-background-main: hsl(0, 0%, 30%);
-  --color-background-content: hsl(0, 0%, 50%);
-  --color-text: hsl(0, 0%, 80%);
-  --color-dragdrop-shadow: hsla(0, 0%, 0%, 0.8);
-  --color-dragdrop-outline: hsl(0, 0%, 80%);
-}
-
 .lm_goldenlayout, body {
   background-color: var(--color-background-main);
   color: var(--color-text);
