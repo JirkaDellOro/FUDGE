@@ -33,8 +33,9 @@
   color: var(--color-text);
 }
 
-.lm_header .lm_tab.lm_active {
-  border-bottom: 3px solid var(--color-background-content);
+.lm_header .lm_tab.lm_active .lm_title{
+  /* border-bottom: 3px solid var(--color-background-content); */
+  text-decoration: underline;
 }
 
 /* Drag & Drop */
@@ -103,7 +104,33 @@ ul.tree input[type="checkbox"]~ul {
   display: none;
 }
 
-ul.tree .selected>input {
+/* Text input */
+
+/* ul.tree .selected>input {
   background-color: lightblue;
   font-weight: bold;
+} */
+
+input {
+  background-color: var(--color-background-content);
+  color: var(--color-text);
+  border: none;
+}
+input:focus, li:focus, li:focus>input[type="text"] {
+  border: none;
+  /* outline: 1px solid var(--color-dragdrop-outline); */
+  outline: none;
+  text-decoration: underline;
+}
+input[type="number"] {
+  background-color: var(--color-background-content);
+  color: var(--color-text);
+  /* border-bottom: 1px solid var(--color-text); */
+  text-align: center;
+  width: 6em;
+}
+
+/* Fieldset */
+fieldset {
+  border: none;
 }
