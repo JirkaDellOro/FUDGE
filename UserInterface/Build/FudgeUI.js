@@ -479,6 +479,7 @@ var FudgeUserInterface;
         constructor(_items = []) {
             super();
             this.addItems(_items);
+            this.className = "tree";
         }
         /**
          * Opens the tree along the given path to show the objects the path includes

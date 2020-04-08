@@ -68,3 +68,42 @@
 .lm_popin:hover .lm_icon {
   opacity: 1
 } */
+
+/* Tree Control */
+
+ul.tree {
+  list-style: none;
+}
+
+ul.tree li {
+  white-space: nowrap;
+  margin-left: -30px;
+}
+
+ul.tree input[type=checkbox] {
+  height: 0px;
+  top:-1em;
+  display: inline-block;
+  position: relative;
+  color: var(--color-text);
+}
+
+ul.tree input[type=checkbox]:checked::before {
+  content: "▼";
+}
+ul.tree input[type=checkbox]::before {
+  content: "►";
+}
+
+ul.tree input[type="checkbox"]:checked~ul {
+  display: block;
+}
+
+ul.tree input[type="checkbox"]~ul {
+  display: none;
+}
+
+ul.tree .selected>input {
+  background-color: lightblue;
+  font-weight: bold;
+}
