@@ -91,7 +91,7 @@ var Fudge;
     class NodeData extends ƒui.Mutable {
         constructor(_mutable, _container) {
             super(_mutable);
-            this.root = document.createElement("form");
+            this.root = document.createElement("div");
             ƒui.Generator.createFromMutable(_mutable, this.root);
             this.root.addEventListener("input", this.mutateOnInput);
             _container.append(this.root);

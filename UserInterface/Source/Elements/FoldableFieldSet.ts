@@ -2,17 +2,22 @@ namespace FudgeUserInterface {
   //import ƒ = FudgeCore;
 
   export class FoldableFieldSet extends HTMLFieldSetElement {
+    private cntFold: HTMLInputElement;
+
     public constructor(_legend: string) {
       super();
       let cntLegend: HTMLLegendElement = document.createElement("legend");
-      cntLegend.classList.add("unfoldable");
-      let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
-      btnFoldButton.addEventListener("click", this.toggleFoldElement);
+      // cntLegend.classList.add("unfoldable");
+      // let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
+      // btnFoldButton.addEventListener("click", this.toggleFoldElement);
       // btnfoldButton.classList.add("unfoldable");
+      
+      this.cntFold = document.createElement("input");
+      this.cntFold.type = "checkbox";
       let lblTitle: HTMLSpanElement = document.createElement("span");
       lblTitle.textContent = _legend;
       // lblTitle.classList.add("unfoldable");
-      cntLegend.appendChild(btnFoldButton);
+      cntLegend.appendChild(this.cntFold);
       cntLegend.appendChild(lblTitle);
 
       this.appendChild(cntLegend);

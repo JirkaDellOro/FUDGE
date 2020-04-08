@@ -184,14 +184,16 @@ var FudgeUserInterface;
                 }
             };
             let cntLegend = document.createElement("legend");
-            cntLegend.classList.add("unfoldable");
-            let btnFoldButton = new FudgeUserInterface.ToggleButton("FoldButton");
-            btnFoldButton.addEventListener("click", this.toggleFoldElement);
+            // cntLegend.classList.add("unfoldable");
+            // let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
+            // btnFoldButton.addEventListener("click", this.toggleFoldElement);
             // btnfoldButton.classList.add("unfoldable");
+            this.cntFold = document.createElement("input");
+            this.cntFold.type = "checkbox";
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
             // lblTitle.classList.add("unfoldable");
-            cntLegend.appendChild(btnFoldButton);
+            cntLegend.appendChild(this.cntFold);
             cntLegend.appendChild(lblTitle);
             this.appendChild(cntLegend);
         }

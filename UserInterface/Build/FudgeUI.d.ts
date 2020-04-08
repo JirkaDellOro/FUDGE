@@ -1,6 +1,7 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
+        private cntFold;
         constructor(_legend: string);
         private toggleFoldElement;
     }
