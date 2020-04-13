@@ -1,7 +1,7 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
-        private cntFold;
+        content: HTMLDivElement;
         constructor(_legend: string);
     }
 }
@@ -311,7 +311,11 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class Generator {
-        static createFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
+        /**
+         * Creates a userinterface for a [[FudgeCore.Mutable]]
+         */
+        static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable;
+        static createFieldsetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
         static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
         static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
@@ -324,7 +328,7 @@ declare namespace FudgeUserInterface {
             _value?: string;
             _cssClass?: string;
         }): HTMLInputElement;
-        static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement;
+        static createCheckboxElement(_id: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement;
         static createStepperElement(_id: string, _parent: HTMLElement, params?: {
             _value?: number;
             _min?: number;
@@ -335,7 +339,7 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    abstract class Mutable {
+    class Mutable {
         ui: HTMLElement;
         protected timeUpdate: number;
         /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */

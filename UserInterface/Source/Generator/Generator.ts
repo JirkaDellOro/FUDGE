@@ -4,13 +4,21 @@ namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
   export class Generator {
-    public static createFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
+    /**
+     * Creates a userinterface for a [[FudgeCore.Mutable]]
+     */
+    public static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable {
+      let mutable: Mutable = new Mutable(_mutable, this.createFieldsetFromMutable(_mutable, _name));
+      return mutable;
+    }
+
+    public static createFieldsetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name);
 
-      Generator.addMutator(mutator, mutatorTypes, fieldset, _mutable);
+      Generator.addMutator(mutator, mutatorTypes, fieldset.content, _mutable);
 
       return fieldset;
     }
@@ -23,6 +31,7 @@ namespace FudgeUserInterface {
           let value: string = _mutator[key].toString();
           if (type instanceof Object) {
             //Type is Enum
+            //
             Generator.createLabelElement(key, _parent);
             Generator.createDropdown(key, type, value, _parent);
           }
@@ -36,8 +45,7 @@ namespace FudgeUserInterface {
                 break;
               case "Boolean":
                 Generator.createLabelElement(key, _parent, { _value: key });
-                let enabled: boolean = value == "true" ? true : false;
-                Generator.createCheckboxElement(key, enabled, _parent);
+                Generator.createCheckboxElement(key, (value == "true"), _parent);
                 break;
               case "String":
                 Generator.createLabelElement(key, _parent, { _value: key });
@@ -46,8 +54,10 @@ namespace FudgeUserInterface {
               // Some other complex subclass of Mutable
               default:
                 let subMutable: ƒ.Mutable;
-                subMutable = (<ƒ.General>_mutable)[key];
-                let fieldset: FoldableFieldSet = Generator.createFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
+                // subMutable = (<ƒ.General>_mutable)[key];
+                // subMutable = Object.getOwnPropertyDescriptor(_mutable, key).value;
+                subMutable = Reflect.get(_mutable, key);
+                let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                 _parent.appendChild(fieldset);
                 break;
             }
@@ -118,10 +128,10 @@ namespace FudgeUserInterface {
       return valueInput;
     }
 
-    public static createCheckboxElement(_id: string, _value: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
+    public static createCheckboxElement(_id: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
       let valueInput: HTMLInputElement = document.createElement("input");
       valueInput.type = "checkbox";
-      valueInput.checked = _value;
+      valueInput.checked = _checked;
       valueInput.classList.add(_cssClass);
       valueInput.name = _id;
       valueInput.id = _id;

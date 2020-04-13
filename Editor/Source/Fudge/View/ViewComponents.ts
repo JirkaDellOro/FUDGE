@@ -28,7 +28,7 @@ namespace Fudge {
         lblNodeName.textContent = "Name";
         cntHeader.append(lblNodeName);
         this.content.append(cntHeader);
-        // let cntComponents: HTMLDivElement = document.createElement("div");
+        
         if (this.data instanceof ƒ.Node) {
           let txtNodeName: HTMLInputElement = document.createElement("input");
           txtNodeName.addEventListener("input", this.changeNodeName);
@@ -36,17 +36,10 @@ namespace Fudge {
           cntHeader.append(txtNodeName);
           let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFromMutable(nodeComponent);
+            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldsetFromMutable(nodeComponent);
             let uiComponent: ComponentUI = new ComponentUI(nodeComponent, fieldset);
             this.content.append(uiComponent.ui);
           }
-          // let mutator: ƒ.Mutator = {};
-          // for (let member in COMPONENTMENU) {
-          //     ƒui.MultiLevelMenuManager.buildFromSignature(COMPONENTMENU[member], mutator);
-          // }
-          // let menu: ƒui.DropMenu = new ƒui.DropMenu(Menu.COMPONENTMENU, mutator, { _text: "Add Components" });
-          // menu.addEventListener(ƒui.EVENT_USERINTERFACE.DROPMENUCLICK, this.addComponent);
-          // this.content.append(menu);
         }
 
       }

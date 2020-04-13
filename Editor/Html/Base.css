@@ -15,6 +15,7 @@
 *[view] {
   padding: 0.5em;
 }
+
 *[view="ViewRender"] {
   padding: 0em;
 }
@@ -22,6 +23,7 @@
 .lm_splitter:hover {
   background: var(--color-background-content);
 }
+
 .lm_splitter.lm_dragging {
   background: var(--color-background-main);
 }
@@ -39,6 +41,7 @@
 }
 
 /* Controls */
+
 .lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
 }
@@ -76,6 +79,7 @@
 } */
 
 /* Tree Control */
+
 ul.tree {
   list-style: none;
 }
@@ -84,13 +88,13 @@ ul.tree li {
   white-space: nowrap;
 }
 
-ul.tree ul{
+ul.tree ul {
   padding-left: 1em;
 }
 
 ul.tree input[type=checkbox] {
   height: 0px;
-  top:-1em;
+  top: -1em;
   display: inline-block;
   position: relative;
   color: var(--color-text);
@@ -99,6 +103,7 @@ ul.tree input[type=checkbox] {
 ul.tree input[type=checkbox]:checked::before {
   content: "▼";
 }
+
 ul.tree input[type=checkbox]::before {
   content: "►";
 }
@@ -119,17 +124,20 @@ ul.tree .selected>input {
 }
 
 /* Components */
+
 input {
   background-color: var(--color-background-content);
   color: var(--color-text);
   border: none;
 }
+
 input:focus, li:focus, li:focus>input[type="text"] {
   border: none;
   /* outline: 1px solid var(--color-dragdrop-outline); */
   outline: none;
   text-decoration: underline;
 }
+
 input[type="number"] {
   background-color: var(--color-background-content);
   color: var(--color-text);
@@ -139,35 +147,43 @@ input[type="number"] {
 }
 
 /* Fieldset */
+
 fieldset {
   border: none;
   padding-left: 1em;
 }
 
 fieldset>legend {
-  left: -1em;
+  /* left: -1em; */
   position: relative;
 }
 
-fieldset legend>input[type=checkbox] {
+fieldset>input[type=checkbox] {
   height: 0px;
-  top:-1em;
-  display: inline-block;
+  top: -1.1em;
+  left: -1em;
+  float: left;
   position: relative;
   color: var(--color-text);
 }
 
-fieldset legend>input[type=checkbox]:checked::before {
+fieldset>input[type=checkbox]:checked::before {
   content: "▼";
 }
-fieldset legend>input[type=checkbox]::before {
+
+fieldset>input[type=checkbox]::before {
   content: "►";
 }
+
 /* 
-ul.tree input[type="checkbox"]:checked~ul {
+fieldset>legend<input[type="checkbox"]:checked {
+  content: "XXXXXXXXXX";
+} */
+
+fieldset>input[type="checkbox"]:checked ~ div {
   display: block;
 }
 
-ul.tree input[type="checkbox"]~ul {
+fieldset>div {
   display: none;
-} */
+}

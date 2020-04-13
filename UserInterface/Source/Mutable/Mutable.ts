@@ -2,7 +2,7 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
-  export abstract class Mutable {
+  export class Mutable {
     public ui: HTMLElement;
     protected timeUpdate: number = 190;
     /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
@@ -22,13 +22,15 @@ namespace FudgeUserInterface {
     protected mutateOnInput = (_event: Event) => {
       this.mutator = this.updateMutator(this.mutable, this.ui);
       this.mutable.mutate(this.mutator);
-
+      _event.stopPropagation();
     }
 
     protected refresh = (_event: Event) => {
       this.mutable.updateMutator(this.mutator);
       this.update(this.mutable, this.ui);
     }
+
+    // TODO: optimize updates with cascade of delegates instead of switches
 
     protected updateMutator(_mutable: ƒ.Mutable, _ui: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
@@ -52,9 +54,11 @@ namespace FudgeUserInterface {
                 mutator[key] = input.value;
                 break;
               default:
-                let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
+                // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
+                let subMutator: ƒ.Mutator =  Reflect.get(mutator, key);
                 let subMutable: ƒ.Mutable;
-                subMutable = (<ƒ.General>_mutable)[key];
+                // subMutable = (<ƒ.General>_mutable)[key];
+                subMutable =  Reflect.get(_mutable, key);
                 let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
                 mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                 break;

@@ -171,18 +171,16 @@ var FudgeUserInterface;
         constructor(_legend) {
             super();
             let cntLegend = document.createElement("legend");
-            // cntLegend.classList.add("unfoldable");
-            // let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
-            // btnFoldButton.addEventListener("click", this.toggleFoldElement);
-            // btnfoldButton.classList.add("unfoldable");
-            this.cntFold = document.createElement("input");
-            this.cntFold.type = "checkbox";
+            let cntFold = document.createElement("input");
+            cntFold.type = "checkbox";
+            cntFold.checked = true;
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
-            // lblTitle.classList.add("unfoldable");
-            cntLegend.appendChild(this.cntFold);
+            this.appendChild(cntFold);
             cntLegend.appendChild(lblTitle);
+            this.content = document.createElement("div");
             this.appendChild(cntLegend);
+            this.appendChild(this.content);
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
@@ -1061,12 +1059,19 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class Generator {
-        static createFromMutable(_mutable, _name, _mutator) {
+        /**
+         * Creates a userinterface for a [[FudgeCore.Mutable]]
+         */
+        static createMutable(_mutable, _name) {
+            let mutable = new FudgeUserInterface.Mutable(_mutable, this.createFieldsetFromMutable(_mutable, _name));
+            return mutable;
+        }
+        static createFieldsetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let fieldset = Generator.createFoldableFieldset(name);
-            Generator.addMutator(mutator, mutatorTypes, fieldset, _mutable);
+            Generator.addMutator(mutator, mutatorTypes, fieldset.content, _mutable);
             return fieldset;
         }
         static addMutator(_mutator, _mutatorTypes, _parent, _mutable) {
@@ -1076,6 +1081,7 @@ var FudgeUserInterface;
                     let value = _mutator[key].toString();
                     if (type instanceof Object) {
                         //Type is Enum
+                        //
                         Generator.createLabelElement(key, _parent);
                         Generator.createDropdown(key, type, value, _parent);
                     }
@@ -1089,8 +1095,7 @@ var FudgeUserInterface;
                                 break;
                             case "Boolean":
                                 Generator.createLabelElement(key, _parent, { _value: key });
-                                let enabled = value == "true" ? true : false;
-                                Generator.createCheckboxElement(key, enabled, _parent);
+                                Generator.createCheckboxElement(key, (value == "true"), _parent);
                                 break;
                             case "String":
                                 Generator.createLabelElement(key, _parent, { _value: key });
@@ -1099,8 +1104,10 @@ var FudgeUserInterface;
                             // Some other complex subclass of Mutable
                             default:
                                 let subMutable;
-                                subMutable = _mutable[key];
-                                let fieldset = Generator.createFromMutable(subMutable, key, _mutator[key]);
+                                // subMutable = (<ƒ.General>_mutable)[key];
+                                // subMutable = Object.getOwnPropertyDescriptor(_mutable, key).value;
+                                subMutable = Reflect.get(_mutable, key);
+                                let fieldset = Generator.createFieldsetFromMutable(subMutable, key, _mutator[key]);
                                 _parent.appendChild(fieldset);
                                 break;
                         }
@@ -1164,10 +1171,10 @@ var FudgeUserInterface;
             _parent.appendChild(valueInput);
             return valueInput;
         }
-        static createCheckboxElement(_id, _value, _parent, _cssClass) {
+        static createCheckboxElement(_id, _checked, _parent, _cssClass) {
             let valueInput = document.createElement("input");
             valueInput.type = "checkbox";
-            valueInput.checked = _value;
+            valueInput.checked = _checked;
             valueInput.classList.add(_cssClass);
             valueInput.name = _id;
             valueInput.id = _id;
@@ -1194,6 +1201,7 @@ var FudgeUserInterface;
             this.mutateOnInput = (_event) => {
                 this.mutator = this.updateMutator(this.mutable, this.ui);
                 this.mutable.mutate(this.mutator);
+                _event.stopPropagation();
             };
             this.refresh = (_event) => {
                 this.mutable.updateMutator(this.mutator);
@@ -1206,6 +1214,7 @@ var FudgeUserInterface;
             window.setInterval(this.refresh, this.timeUpdate);
             this.ui.addEventListener("input", this.mutateOnInput);
         }
+        // TODO: optimize updates with cascade of delegates instead of switches
         updateMutator(_mutable, _ui, _mutator, _types) {
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
@@ -1228,9 +1237,11 @@ var FudgeUserInterface;
                                 mutator[key] = input.value;
                                 break;
                             default:
-                                let subMutator = mutator[key];
+                                // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
+                                let subMutator = Reflect.get(mutator, key);
                                 let subMutable;
-                                subMutable = _mutable[key];
+                                // subMutable = (<ƒ.General>_mutable)[key];
+                                subMutable = Reflect.get(_mutable, key);
                                 let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
                                 mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
