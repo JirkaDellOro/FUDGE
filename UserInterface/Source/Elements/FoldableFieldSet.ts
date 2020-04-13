@@ -5,7 +5,7 @@ namespace FudgeUserInterface {
     public content: HTMLDivElement;
     private checkbox: HTMLInputElement;
 
-    public constructor(_legend: string) {
+    public constructor(_legend: string = "") {
       super();
       let cntLegend: HTMLLegendElement = document.createElement("legend");
 
@@ -101,7 +101,7 @@ namespace FudgeUserInterface {
           let previous: HTMLElement = this;
           do {
             previous = <HTMLElement>previous.previousElementSibling;
-          } while (previous && !(previous instanceof FoldableFieldSet))
+          } while (previous && !(previous instanceof FoldableFieldSet));
 
           if (previous)
             if (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP)

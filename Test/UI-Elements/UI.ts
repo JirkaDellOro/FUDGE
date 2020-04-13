@@ -4,7 +4,7 @@ namespace UI {
     export interface ParamsCamera { aspect?: number; fieldOfView?: number; }
     export interface Size { width: number; height: number; }
 
-    export class FieldSet<T> extends HTMLFieldSetElement {
+    export class FieldSet extends HTMLFieldSetElement {
         protected values: {};
         constructor(_name: string = "FieldSet") {
             super();
@@ -38,7 +38,7 @@ namespace UI {
     }
 
     export class Stepper extends HTMLSpanElement {
-        public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
+        constructor(_label: string = "Stepper", params: { min?: number, max?: number, step?: number, value?: number } = {}) {
             super();
             this.textContent = _label + " ";
             let stepper: HTMLInputElement = document.createElement("input");
@@ -50,7 +50,7 @@ namespace UI {
         }
     }
 
-    export class Border extends FieldSet<ƒ.Border> {
+    export class Border extends FieldSet {
         constructor(_name: string = "Border", _step: number = 1) {
             super(_name);
             this.values = { left: 0, right: 0, top: 0, bottom: 0 };
@@ -61,7 +61,7 @@ namespace UI {
         }
     }
 
-    export class Rectangle extends FieldSet<ƒ.Rectangle> {
+    export class Rectangle extends FieldSet {
         constructor(_name: string = "Rectangle") {
             super(_name);
             this.values = { x: 0, y: 0, width: 0, height: 0 };
@@ -104,7 +104,7 @@ namespace UI {
         }
     }
 
-    export class Camera extends FieldSet<{ aspect: number, fieldOfView: number }> {
+    export class Camera extends FieldSet {
         constructor(_name: string = "Camera") {
             super(_name);
             this.values = { aspect: 0, fieldOfView: 0 };
@@ -113,7 +113,7 @@ namespace UI {
         }
     }
 
-    export class Point extends FieldSet<{ x: number, y: number }> {
+    export class Point extends FieldSet {
         constructor(_name: string = "Point") {
             super(_name);
             this.values = { x: 0, y: 0 };
@@ -123,7 +123,7 @@ namespace UI {
         }
     }
 
-    export class FramingScaled extends FieldSet<Size> {
+    export class FramingScaled extends FieldSet {
         result: UI.Rectangle;
 
         constructor(_name: string = "FramingScaled") {
@@ -144,7 +144,7 @@ namespace UI {
         }
     }
 
-    export class FramingComplex extends FieldSet<ƒ.Framing> {
+    export class FramingComplex extends FieldSet {
         constructor(_name: string = "FramingComplex") {
             super(_name);
             this.values = { Result: {}, Padding: {}, Margin: {} };
@@ -157,7 +157,7 @@ namespace UI {
 
         public get(): {} {
             for (let child of this.children) {
-                let fieldSet: FieldSet<ƒ.Border> = <FieldSet<ƒ.Border>>child;
+                let fieldSet: FieldSet = <FieldSet>child;
                 let name: string = fieldSet.name;
                 if (!this.values[name])
                     continue;
@@ -168,7 +168,7 @@ namespace UI {
 
         public set(_values: {}): void {
             for (let child of this.children) {
-                let fieldSet: FieldSet<ƒ.Border> = <FieldSet<ƒ.Border>>child;
+                let fieldSet: FieldSet = <FieldSet>child;
                 let name: string = fieldSet.name;
                 if (!_values[name])
                     continue;
@@ -184,4 +184,5 @@ namespace UI {
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
     customElements.define("ui-point", Point, { extends: "fieldset" });
+    customElements.define("ui-fieldset", FieldSet, { extends: "fieldset" });
 }

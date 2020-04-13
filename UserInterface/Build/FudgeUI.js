@@ -168,7 +168,7 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class FoldableFieldSet extends HTMLFieldSetElement {
-        constructor(_legend) {
+        constructor(_legend = "") {
             super();
             this.hndFocus = (_event) => {
                 switch (_event.type) {

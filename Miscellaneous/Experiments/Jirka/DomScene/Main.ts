@@ -7,6 +7,17 @@
 namespace DomScene {
     window.addEventListener("load", init);
 
+    class FudgeNode extends HTMLElement {
+        name: string;
+        count: number;
+
+        constructor(_name: string = "") {
+            super();
+            this.name = _name;
+            this.count = 0;
+        }
+    }
+
     function init(_event: Event): void {
         // register a custom element
         window.customElements.define("fudge-node", FudgeNode);
@@ -41,16 +52,5 @@ namespace DomScene {
     function printEventInfo(_event: Event): void {
         //console.log(_event);
         (<FudgeNode>_event.target).count++;
-    }
-
-    class FudgeNode extends HTMLElement {
-        name: string;
-        count: number;
-
-        constructor(_name: string) {
-            super();
-            this.name = _name;
-            this.count = 0;
-        }
     }
 }

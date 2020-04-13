@@ -3,7 +3,7 @@ declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
         content: HTMLDivElement;
         private checkbox;
-        constructor(_legend: string);
+        constructor(_legend?: string);
         private open;
         private get isOpen();
         private hndFocus;
