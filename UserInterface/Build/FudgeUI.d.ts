@@ -12,34 +12,6 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    abstract class CollapsableList extends HTMLUListElement {
-        header: HTMLLIElement;
-        content: HTMLElement;
-        constructor();
-        collapse(element: HTMLElement): void;
-    }
-    export class CollapsableNodeList extends CollapsableList {
-        node: ƒ.Node;
-        constructor(_node: ƒ.Node, _name: string, _unfolded?: boolean);
-        selectNode: (_event: MouseEvent) => void;
-        collapseEvent: (_event: MouseEvent) => void;
-    }
-    export class CollapsableAnimationList extends CollapsableList {
-        mutator: ƒ.Mutator;
-        name: string;
-        index: ƒ.Mutator;
-        constructor(_mutator: ƒ.Mutator, _name: string, _unfolded?: boolean);
-        collapseEvent: (_event: MouseEvent) => void;
-        buildContent(_mutator: ƒ.Mutator): void;
-        getMutator(): ƒ.Mutator;
-        setMutator(_mutator: ƒ.Mutator): void;
-        getElementIndex(): ƒ.Mutator;
-        private updateMutator;
-    }
-    export {};
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
     class DropMenu extends HTMLDivElement {
         name: string;
         private content;
@@ -63,22 +35,12 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     class Stepper extends HTMLInputElement {
-        constructor(_label: string, params?: {
+        constructor(_label?: string, params?: {
             min?: number;
             max?: number;
             step?: number;
             value?: number;
         });
-    }
-}
-declare namespace FudgeUserInterface {
-    class ToggleButton extends HTMLButtonElement {
-        private toggleState;
-        constructor(style: string);
-        setToggleState(toggleState: boolean): void;
-        getToggleState(): boolean;
-        toggle(): void;
-        private switchToggleState;
     }
 }
 declare namespace FudgeUserInterface {
@@ -323,24 +285,23 @@ declare namespace FudgeUserInterface {
         static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable;
         static createFieldsetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
         static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
-        static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
+        static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFoldableFieldset(_legend: string): FoldableFieldSet;
-        static createLabelElement(_id: string, _parent: HTMLElement, params?: {
-            _value?: string;
-            _cssClass?: string;
+        static createLabelElement(_name: string, _parent: HTMLElement, params?: {
+            value?: string;
+            cssClass?: string;
         }): HTMLElement;
-        static createTextElement(_id: string, _parent: HTMLElement, params?: {
-            _value?: string;
-            _cssClass?: string;
+        static createTextElement(_name: string, _parent: HTMLElement, params?: {
+            value?: string;
+            cssClass?: string;
         }): HTMLInputElement;
-        static createCheckboxElement(_id: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement;
-        static createStepperElement(_id: string, _parent: HTMLElement, params?: {
-            _value?: number;
-            _min?: number;
-            _max?: number;
-            _cssClass?: string;
-        }): HTMLSpanElement;
+        static createCheckboxElement(_name: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement;
+        static createStepperElement(_name: string, _parent: HTMLElement, params?: {
+            value?: number;
+            min?: number;
+            max?: number;
+            cssClass?: string;
+        }): Stepper;
     }
 }
 declare namespace FudgeUserInterface {

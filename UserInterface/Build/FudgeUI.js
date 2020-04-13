@@ -270,111 +270,115 @@ var FudgeUserInterface;
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    // export abstract class ListController {
-    //     abstract listRoot: HTMLElement;
-    //     protected abstract toggleCollapse(_event: MouseEvent): void;
-    // }
-    class CollapsableList extends HTMLUListElement {
-        constructor() {
-            super();
-            this.header = document.createElement("li");
-            this.content = document.createElement("ul");
-            this.appendChild(this.header);
-            this.appendChild(this.content);
-        }
-        collapse(element) {
-            element.content.classList.toggle("folded");
-        }
-    }
-    class CollapsableNodeList extends CollapsableList {
-        constructor(_node, _name, _unfolded = false) {
-            super();
-            this.selectNode = (_event) => {
-                let event = new CustomEvent("select" /* SELECT */, { bubbles: true, detail: this.node });
-                this.dispatchEvent(event);
-            };
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.node = _node;
-            let buttonState;
-            if (this.node.getChildren().length != 0)
-                buttonState = "FoldButton";
-            else
-                buttonState = "invisible";
-            let btnToggle = new FudgeUserInterface.ToggleButton(buttonState);
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            lblName.addEventListener("click", this.selectNode);
-            this.header.appendChild(lblName);
-        }
-    }
-    FudgeUserInterface.CollapsableNodeList = CollapsableNodeList;
-    class CollapsableAnimationList extends CollapsableList {
-        constructor(_mutator, _name, _unfolded = false) {
-            super();
-            this.collapseEvent = (_event) => {
-                let event = new CustomEvent("collapse" /* COLLAPSE */, { bubbles: true, detail: this });
-                this.dispatchEvent(event);
-            };
-            this.updateMutator = (_event) => {
-                let target = _event.target;
-                this.mutator[target.id] = parseFloat(target.value);
-                _event.cancelBubble = true;
-                let event = new CustomEvent("update" /* UPDATE */, { bubbles: true, detail: this.mutator });
-                this.dispatchEvent(event);
-            };
-            this.mutator = _mutator;
-            this.name = _name;
-            this.index = {};
-            let btnToggle = new FudgeUserInterface.ToggleButton("FoldButton");
-            btnToggle.setToggleState(_unfolded);
-            btnToggle.addEventListener("click", this.collapseEvent);
-            this.header.appendChild(btnToggle);
-            let lblName = document.createElement("span");
-            lblName.textContent = _name;
-            this.header.appendChild(lblName);
-            this.buildContent(_mutator);
-            this.content.addEventListener("input", this.updateMutator);
-        }
-        buildContent(_mutator) {
-            for (let key in _mutator) {
-                if (typeof _mutator[key] == "object") {
-                    let newList = new CollapsableAnimationList(_mutator[key], key);
-                    this.content.append(newList);
-                    this.index[key] = newList.getElementIndex();
-                }
-                else {
-                    let listEntry = document.createElement("li");
-                    FudgeUserInterface.Generator.createLabelElement(key, listEntry);
-                    let inputEntry = FudgeUserInterface.Generator.createStepperElement(key, listEntry, { _value: _mutator[key] });
-                    this.content.append(listEntry);
-                    this.index[key] = inputEntry;
-                }
-            }
-        }
-        getMutator() {
-            return this.mutator;
-        }
-        setMutator(_mutator) {
-            this.collapse(this.content);
-            this.mutator = _mutator;
-            this.buildContent(_mutator);
-        }
-        getElementIndex() {
-            return this.index;
-        }
-    }
-    FudgeUserInterface.CollapsableAnimationList = CollapsableAnimationList;
-    customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
-    customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
+// namespace FudgeUserInterface {
+//     import ƒ = FudgeCore;
+//     // export abstract class ListController {
+//     //     abstract listRoot: HTMLElement;
+//     //     protected abstract toggleCollapse(_event: MouseEvent): void;
+//     // }
+//     abstract class CollapsableList extends HTMLUListElement {
+//         header: HTMLLIElement;
+//         content: HTMLElement;
+//         constructor() {
+//             super();
+//             this.header = document.createElement("li");
+//             this.content = document.createElement("ul");
+//             this.appendChild(this.header);
+//             this.appendChild(this.content);
+//         }
+//         public collapse(element: HTMLElement): void {
+//             (<CollapsableList>element).content.classList.toggle("folded");
+//         }
+//     }
+//     export class CollapsableNodeList extends CollapsableList {
+//         node: ƒ.Node;
+//         constructor(_node: ƒ.Node, _name: string, _unfolded: boolean = false) {
+//             super();
+//             this.node = _node;
+//             let buttonState: string;
+//             if (this.node.getChildren().length != 0)
+//                 buttonState = "FoldButton";
+//             else
+//                 buttonState = "invisible";
+//             let btnToggle: HTMLButtonElement = new ToggleButton(buttonState);
+//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
+//             btnToggle.addEventListener("click", this.collapseEvent);
+//             this.header.appendChild(btnToggle);
+//             let lblName: HTMLSpanElement = document.createElement("span");
+//             lblName.textContent = _name;
+//             lblName.addEventListener("click", this.selectNode);
+//             this.header.appendChild(lblName);
+//         }
+//         public selectNode = (_event: MouseEvent): void => {
+//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: this.node });
+//             this.dispatchEvent(event);
+//         }
+//         public collapseEvent = (_event: MouseEvent): void => {
+//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
+//             this.dispatchEvent(event);
+//         }
+//     }
+//     export class CollapsableAnimationList extends CollapsableList {
+//         mutator: ƒ.Mutator;
+//         name: string;
+//         index: ƒ.Mutator;
+//         constructor(_mutator: ƒ.Mutator, _name: string, _unfolded: boolean = false) {
+//             super();
+//             this.mutator = _mutator;
+//             this.name = _name;
+//             this.index = {};
+//             let btnToggle: HTMLButtonElement = new ToggleButton("FoldButton");
+//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
+//             btnToggle.addEventListener("click", this.collapseEvent);
+//             this.header.appendChild(btnToggle);
+//             let lblName: HTMLSpanElement = document.createElement("span");
+//             lblName.textContent = _name;
+//             this.header.appendChild(lblName);
+//             this.buildContent(_mutator);
+//             this.content.addEventListener("input", this.updateMutator);
+//         }
+//         public collapseEvent = (_event: MouseEvent): void => {
+//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
+//             this.dispatchEvent(event);
+//         }
+//         public buildContent(_mutator: ƒ.Mutator): void {
+//             for (let key in _mutator) {
+//                 if (typeof _mutator[key] == "object") {
+//                     let newList: CollapsableAnimationList = new CollapsableAnimationList(<ƒ.Mutator>_mutator[key], key);
+//                     this.content.append(newList);
+//                     this.index[key] = newList.getElementIndex();
+//                 }
+//                 else {
+//                     let listEntry: HTMLLIElement = document.createElement("li");
+//                     Generator.createLabelElement(key, listEntry);
+//                     let inputEntry: HTMLSpanElement = Generator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
+//                     this.content.append(listEntry);
+//                     this.index[key] = inputEntry;
+//                 }
+//             }
+//         }
+//         public getMutator(): ƒ.Mutator {
+//             return this.mutator;
+//         }
+//         public setMutator(_mutator: ƒ.Mutator): void {
+//             this.collapse(this.content);
+//             this.mutator = _mutator;
+//             this.buildContent(_mutator);
+//         }
+//         public getElementIndex(): ƒ.Mutator {
+//             return this.index;
+//         }
+//         private updateMutator = (_event: Event): void => {
+//             let target: HTMLInputElement = <HTMLInputElement>_event.target;
+//             this.mutator[target.id] = parseFloat(target.value);
+//             _event.cancelBubble = true;
+//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.UPDATE, { bubbles: true, detail: this.mutator });
+//             this.dispatchEvent(event);
+//         }
+//     }
+//     customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
+//     customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
+// }
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     class MenuButton extends HTMLDivElement {
@@ -491,53 +495,17 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     // import ƒ = FudgeCore;
     class Stepper extends HTMLInputElement {
-        constructor(_label, params = {}) {
+        constructor(_label = "", params = {}) {
             super();
             this.name = _label;
             this.type = "number";
             this.value = params.value.toString();
-            this.id = _label;
+            // this.id = _label;
             this.step = String(params.step) || "1";
         }
     }
     FudgeUserInterface.Stepper = Stepper;
     customElements.define("ui-stepper", Stepper, { extends: "input" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    // import ƒ = FudgeCore;
-    class ToggleButton extends HTMLButtonElement {
-        constructor(style) {
-            super();
-            this.switchToggleState = (_event) => {
-                this.setToggleState(!this.toggleState);
-            };
-            this.type = "button";
-            this.toggleState = true;
-            this.classList.add(style);
-            this.classList.add("ToggleOn");
-            this.addEventListener("click", this.switchToggleState);
-        }
-        setToggleState(toggleState) {
-            this.toggleState = toggleState;
-            if (this.toggleState == true) {
-                this.classList.add("ToggleOn");
-                this.classList.remove("ToggleOff");
-            }
-            else {
-                this.classList.remove("ToggleOn");
-                this.classList.add("ToggleOff");
-            }
-        }
-        getToggleState() {
-            return this.toggleState;
-        }
-        toggle() {
-            this.setToggleState(!this.toggleState);
-        }
-    }
-    FudgeUserInterface.ToggleButton = ToggleButton;
-    customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
@@ -1173,18 +1141,18 @@ var FudgeUserInterface;
                     else {
                         switch (type) {
                             case "Number":
-                                Generator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createLabelElement(key, _parent, { value: key });
                                 // Generator.createTextElement(key, _parent, { _value: value })
                                 let numValue = parseInt(value);
-                                Generator.createStepperElement(key, _parent, { _value: numValue });
+                                Generator.createStepperElement(key, _parent, { value: numValue });
                                 break;
                             case "Boolean":
-                                Generator.createLabelElement(key, _parent, { _value: key });
+                                Generator.createLabelElement(key, _parent, { value: key });
                                 Generator.createCheckboxElement(key, (value == "true"), _parent);
                                 break;
                             case "String":
-                                Generator.createLabelElement(key, _parent, { _value: key });
-                                Generator.createTextElement(key, _parent, { _value: value });
+                                Generator.createLabelElement(key, _parent, { value: key });
+                                Generator.createTextElement(key, _parent, { value: value });
                                 break;
                             // Some other complex subclass of Mutable
                             default:
@@ -1203,10 +1171,11 @@ var FudgeUserInterface;
                 ƒ.Debug.fudge(_error);
             }
         }
-        static createDropdown(_id, _content, _value, _parent, _cssClass) {
+        static createDropdown(_name, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
-            dropdown.id = _id;
-            dropdown.name = _id;
+            // TODO: unique ids
+            dropdown.id = _name;
+            dropdown.name = _name;
             for (let value in _content) {
                 let entry = document.createElement("option");
                 entry.text = value;
@@ -1219,57 +1188,61 @@ var FudgeUserInterface;
             _parent.appendChild(dropdown);
             return dropdown;
         }
-        static createFieldset(_legend, _parent, _cssClass) {
-            let cntfieldset = document.createElement("fieldset");
-            cntfieldset.id = _legend;
-            let legend = document.createElement("legend");
-            legend.innerHTML = _legend;
-            cntfieldset.appendChild(legend);
-            _parent.appendChild(cntfieldset);
-            return cntfieldset;
-        }
+        // public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
+        //   let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
+        //   cntfieldset.id = _legend;
+        //   let legend: HTMLLegendElement = document.createElement("legend");
+        //   legend.innerHTML = _legend;
+        //   cntfieldset.appendChild(legend);
+        //   _parent.appendChild(cntfieldset);
+        //   return cntfieldset;
+        // }
         static createFoldableFieldset(_legend) {
             let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_legend);
+            //TODO: unique ids
             cntFoldFieldset.id = _legend;
+            cntFoldFieldset.name = _legend;
             return cntFoldFieldset;
         }
-        static createLabelElement(_id, _parent, params = {}) {
+        static createLabelElement(_name, _parent, params = {}) {
             let label = document.createElement("label");
-            if (params._value == undefined)
-                params._value = _id;
-            label.innerText = params._value;
-            if (!params._cssClass == undefined)
-                label.classList.add(params._cssClass);
-            label.id = "_" + _id;
+            if (params.value == undefined)
+                params.value = _name;
+            label.innerText = params.value;
+            if (params.cssClass != undefined)
+                label.classList.add(params.cssClass);
+            label.name = "_" + _name;
             _parent.appendChild(label);
             return label;
         }
-        static createTextElement(_id, _parent, params = {}) {
-            let valueInput = document.createElement("input");
-            if (params._value == undefined)
-                params._value = "";
-            if (!params._cssClass == undefined)
-                valueInput.classList.add(params._cssClass);
-            valueInput.id = _id;
-            valueInput.name = _id;
-            valueInput.value = params._value;
-            _parent.appendChild(valueInput);
-            return valueInput;
+        static createTextElement(_name, _parent, params = {}) {
+            let text = document.createElement("input");
+            if (params.value == undefined)
+                params.value = "";
+            if (!params.cssClass == undefined)
+                text.classList.add(params.cssClass);
+            //TODO: ids must be unique
+            text.id = _name;
+            text.name = _name;
+            text.value = params.value;
+            _parent.appendChild(text);
+            return text;
         }
-        static createCheckboxElement(_id, _checked, _parent, _cssClass) {
-            let valueInput = document.createElement("input");
-            valueInput.type = "checkbox";
-            valueInput.checked = _checked;
-            valueInput.classList.add(_cssClass);
-            valueInput.name = _id;
-            valueInput.id = _id;
-            _parent.appendChild(valueInput);
-            return valueInput;
+        static createCheckboxElement(_name, _checked, _parent, _cssClass) {
+            let checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = _checked;
+            checkbox.classList.add(_cssClass);
+            checkbox.name = _name;
+            // TODO: try to stick to conventions and make ids unique...
+            checkbox.id = _name;
+            _parent.appendChild(checkbox);
+            return checkbox;
         }
-        static createStepperElement(_id, _parent, params = {}) {
-            if (params._value == undefined)
-                params._value = 0;
-            let stepper = new FudgeUserInterface.Stepper(_id, { value: params._value });
+        static createStepperElement(_name, _parent, params = {}) {
+            if (params.value == undefined)
+                params.value = 0;
+            let stepper = new FudgeUserInterface.Stepper(_name, { value: params.value });
             _parent.appendChild(stepper);
             return stepper;
         }
@@ -1304,14 +1277,14 @@ var FudgeUserInterface;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.ui.querySelector("#" + key) != null) {
+                if (this.ui.querySelector(`[name=${key}]`) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _ui.querySelector("#" + key);
+                        let selectElement = _ui.querySelector(`[name=${key}]`);
                         selectElement.value = mutator[key];
                     }
                     else {
-                        let element = _ui.querySelector("#" + key);
+                        let element = _ui.querySelector(`[name=${key}]`);
                         let input = element;
                         switch (type) {
                             case "Boolean":
@@ -1340,30 +1313,30 @@ var FudgeUserInterface;
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.ui.querySelector("#" + key) != null) {
+                if (this.ui.querySelector(`[name=${key}]`) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _ui.querySelector("#" + key);
+                        let selectElement = _ui.querySelector(`[name=${key}]`);
                         selectElement.value = mutator[key];
                     }
                     else {
                         switch (type) {
                             case "Boolean":
-                                let checkbox = _ui.querySelector("#" + key);
+                                let checkbox = _ui.querySelector(`[name=${key}]`);
                                 checkbox.checked = mutator[key];
                                 break;
                             case "String":
-                                let textfield = _ui.querySelector("#" + key);
+                                let textfield = _ui.querySelector(`[name=${key}]`);
                                 textfield.value = mutator[key];
                                 break;
                             case "Number":
-                                let stepper = _ui.querySelector("#" + key);
+                                let stepper = _ui.querySelector(`[name=${key}]`);
                                 if (document.activeElement != stepper) {
                                     stepper.value = mutator[key];
                                 }
                                 break;
                             default:
-                                let fieldset = _ui.querySelector("#" + key);
+                                let fieldset = _ui.querySelector(`[name=${key}]`);
                                 // tslint:disable no-any
                                 let subMutable = _mutable[key];
                                 this.update(subMutable, fieldset);

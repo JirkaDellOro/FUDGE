@@ -8,7 +8,6 @@
       "../Source/Elements/Menu.ts",
       "../Source/Elements/MultiLevelMenu.ts",
       "../Source/Elements/Stepper.ts",
-      "../Source/Elements/Toggle.ts",
       "../Source/Elements/Tree/TreeList.ts",
       "../Source/Elements/Tree/Tree.ts",
       "../Source/Elements/Tree/TreeController.ts",
@@ -27,7 +26,7 @@
         },
         {
           "pos": 15,
-          "end": 62158,
+          "end": 61890,
           "kind": "text"
         }
       ],
@@ -61,7 +60,7 @@
         },
         {
           "pos": 58,
-          "end": 14209,
+          "end": 12720,
           "kind": "text"
         }
       ]
