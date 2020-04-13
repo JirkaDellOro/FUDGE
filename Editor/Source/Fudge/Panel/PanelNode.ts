@@ -25,11 +25,11 @@ namespace Fudge {
     public setNode(_node: ƒ.Node): void {
       this.node = _node;
       for (let view of this.views) {
-        if (view instanceof ViewNode) {
-          (<ViewNode>view).setRoot(this.node);
+        if (view instanceof ViewGraph) {
+          (<ViewGraph>view).setRoot(this.node);
         }
-        else if (view instanceof ViewViewport) {
-          (<ViewViewport>view).setRoot(this.node);
+        else if (view instanceof ViewRender) {
+          (<ViewRender>view).setRoot(this.node);
         }
       }
     }
@@ -60,14 +60,14 @@ namespace Fudge {
             let view: View;
             switch (item.componentName) {
               case VIEW.NODE:
-                view = new ViewNode(this);
+                view = new ViewGraph(this);
                 // view.content.addEventListener(ƒui.EVENT_USERINTERFACE.SELECTION, this.passEvent);
                 break;
-              case VIEW.DATA:
+              case VIEW.COMPONENTS:
                 view = new ViewComponents(this);
                 break;
-              case VIEW.PORT:
-                view = new ViewViewport(this);
+              case VIEW.RENDER:
+                view = new ViewRender(this);
                 break;
               case VIEW.CAMERA:
                 view = new ViewCamera(this);

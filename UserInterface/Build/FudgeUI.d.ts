@@ -3,7 +3,6 @@ declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
         private cntFold;
         constructor(_legend: string);
-        private toggleFoldElement;
     }
 }
 declare namespace FudgeUserInterface {
@@ -312,11 +311,11 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class Generator {
-        static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void;
-        static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
+        static createFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
+        static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
         static createDropdown(_id: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement;
-        static createFoldableFieldset(_legend: string, _parent: HTMLElement): HTMLFieldSetElement;
+        static createFoldableFieldset(_legend: string): FoldableFieldSet;
         static createLabelElement(_id: string, _parent: HTMLElement, params?: {
             _value?: string;
             _cssClass?: string;
@@ -337,14 +336,16 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     abstract class Mutable {
+        ui: HTMLElement;
         protected timeUpdate: number;
-        protected root: HTMLElement;
+        /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
         protected mutable: ƒ.Mutable;
+        /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
-        constructor(mutable: ƒ.Mutable);
-        protected mutateOnInput: (_e: Event) => void;
-        protected refresh: (_e: Event) => void;
-        protected updateMutator(_mutable: ƒ.Mutable, _root: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        protected update(_mutable: ƒ.Mutable, _root: HTMLElement): void;
+        constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
+        protected mutateOnInput: (_event: Event) => void;
+        protected refresh: (_event: Event) => void;
+        protected updateMutator(_mutable: ƒ.Mutable, _ui: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        protected update(_mutable: ƒ.Mutable, _ui: HTMLElement): void;
     }
 }

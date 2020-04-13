@@ -6,7 +6,7 @@ namespace Fudge {
    * View displaying a Node and the hierarchical relation to its parents and children.  
    * Consists of a viewport, a tree-control and . 
    */
-  export class ViewNode extends View {
+  export class ViewGraph extends View {
     branch: ƒ.Node;
     selectedNode: ƒ.Node;
     tree: ƒui.Tree<ƒ.Node>;
@@ -29,7 +29,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
       this.fillContent();
 
-      this.contextMenu = ContextMenu.getMenu(ViewNode, this.contextMenuCallback);
+      this.contextMenu = ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
     }
 
     deconstruct(): void {

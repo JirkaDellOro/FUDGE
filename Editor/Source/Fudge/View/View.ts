@@ -7,8 +7,8 @@ namespace Fudge {
     ANIMATION = "ViewAnimation",
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
-    PORT = "ViewPort",
-    DATA = "ViewData",
+    RENDER = "ViewRender",
+    COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera"
   }
 

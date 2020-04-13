@@ -24,8 +24,8 @@ declare namespace Fudge {
         private buildFromMutator;
         private toggleCollapse;
     }
-    class NodeData extends ƒui.Mutable {
-        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
+    class ComponentUI extends ƒui.Mutable {
+        constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
     }
 }
 declare namespace Fudge {
@@ -158,8 +158,8 @@ declare namespace Fudge {
     enum VIEW {
         NODE = "ViewNode",
         ANIMATION = "ViewAnimation",
-        PORT = "ViewPort",
-        DATA = "ViewData",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera"
     }
     /**
@@ -327,7 +327,7 @@ declare namespace Fudge {
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
      */
-    class ViewNode extends View {
+    class ViewGraph extends View {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
         tree: ƒui.Tree<ƒ.Node>;
@@ -358,7 +358,7 @@ declare namespace Fudge {
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewViewport extends View {
+    class ViewRender extends View {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         branch: ƒ.Node;

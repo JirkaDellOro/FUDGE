@@ -23,18 +23,18 @@ namespace FudgeUserInterface {
       this.appendChild(cntLegend);
     }
 
-    private toggleFoldElement = (_event: MouseEvent): void => {
-      _event.preventDefault();
-      if (_event.target != _event.currentTarget) return;
-      //Get the fieldset the button belongs to
-      let children: HTMLCollection = this.children;
-      //fold or unfold all children that aren't unfoldable
-      for (let child of children) {
-        if (!child.classList.contains("unfoldable")) {
-          child.classList.toggle("folded");
-        }
-      }
-    }
+    // private toggleFoldElement = (_event: MouseEvent): void => {
+    //   _event.preventDefault();
+    //   if (_event.target != _event.currentTarget) return;
+    //   //Get the fieldset the button belongs to
+    //   let children: HTMLCollection = this.children;
+    //   //fold or unfold all children that aren't unfoldable
+    //   for (let child of children) {
+    //     if (!child.classList.contains("unfoldable")) {
+    //       child.classList.toggle("folded");
+    //     }
+    //   }
+    // }
   }
 
   customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });

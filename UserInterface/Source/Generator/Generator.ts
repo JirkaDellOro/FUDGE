@@ -4,16 +4,18 @@ namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
   export class Generator {
-    public static createFromMutable(_mutable: ƒ.Mutable, _element: HTMLElement, _name?: string, _mutator?: ƒ.Mutator): void {
+    public static createFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-      let parent: HTMLElement = Generator.createFoldableFieldset(name, _element);
+      let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name);
 
-      Generator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
+      Generator.addMutator(mutator, mutatorTypes, fieldset, _mutable);
+
+      return fieldset;
     }
 
-    public static createFromMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
+    public static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
       try {
 
         for (let key in _mutatorTypes) {
@@ -45,7 +47,8 @@ namespace FudgeUserInterface {
               default:
                 let subMutable: ƒ.Mutable;
                 subMutable = (<ƒ.General>_mutable)[key];
-                Generator.createFromMutable(subMutable, _parent, key, <ƒ.Mutator>_mutator[key]);
+                let fieldset: FoldableFieldSet = Generator.createFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
+                _parent.appendChild(fieldset);
                 break;
             }
           }
@@ -82,10 +85,9 @@ namespace FudgeUserInterface {
       return cntfieldset;
     }
 
-    public static createFoldableFieldset(_legend: string, _parent: HTMLElement): HTMLFieldSetElement {
-      let cntFoldFieldset: HTMLFieldSetElement = new FoldableFieldSet(_legend);
+    public static createFoldableFieldset(_legend: string): FoldableFieldSet {
+      let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_legend);
       cntFoldFieldset.id = _legend;
-      _parent.appendChild(cntFoldFieldset);
       return cntFoldFieldset;
     }
 

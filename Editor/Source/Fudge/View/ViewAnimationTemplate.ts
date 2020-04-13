@@ -10,12 +10,12 @@ namespace Fudge {
             content: [
               {
                 type: "component",
-                componentName: Fudge.VIEW.PORT,
+                componentName: Fudge.VIEW.RENDER,
                 title: "Viewport"
               },
               {
                 type: "component",
-                componentName: Fudge.VIEW.DATA,
+                componentName: Fudge.VIEW.COMPONENTS,
                 title: "Inspector"
               }
             ]

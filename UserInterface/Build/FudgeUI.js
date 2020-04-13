@@ -170,19 +170,6 @@ var FudgeUserInterface;
     class FoldableFieldSet extends HTMLFieldSetElement {
         constructor(_legend) {
             super();
-            this.toggleFoldElement = (_event) => {
-                _event.preventDefault();
-                if (_event.target != _event.currentTarget)
-                    return;
-                //Get the fieldset the button belongs to
-                let children = this.children;
-                //fold or unfold all children that aren't unfoldable
-                for (let child of children) {
-                    if (!child.classList.contains("unfoldable")) {
-                        child.classList.toggle("folded");
-                    }
-                }
-            };
             let cntLegend = document.createElement("legend");
             // cntLegend.classList.add("unfoldable");
             // let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
@@ -1074,14 +1061,15 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class Generator {
-        static createFromMutable(_mutable, _element, _name, _mutator) {
+        static createFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let parent = Generator.createFoldableFieldset(name, _element);
-            Generator.createFromMutator(mutator, mutatorTypes, parent, _mutable);
+            let fieldset = Generator.createFoldableFieldset(name);
+            Generator.addMutator(mutator, mutatorTypes, fieldset, _mutable);
+            return fieldset;
         }
-        static createFromMutator(_mutator, _mutatorTypes, _parent, _mutable) {
+        static addMutator(_mutator, _mutatorTypes, _parent, _mutable) {
             try {
                 for (let key in _mutatorTypes) {
                     let type = _mutatorTypes[key];
@@ -1112,7 +1100,8 @@ var FudgeUserInterface;
                             default:
                                 let subMutable;
                                 subMutable = _mutable[key];
-                                Generator.createFromMutable(subMutable, _parent, key, _mutator[key]);
+                                let fieldset = Generator.createFromMutable(subMutable, key, _mutator[key]);
+                                _parent.appendChild(fieldset);
                                 break;
                         }
                     }
@@ -1147,10 +1136,9 @@ var FudgeUserInterface;
             _parent.appendChild(cntfieldset);
             return cntfieldset;
         }
-        static createFoldableFieldset(_legend, _parent) {
+        static createFoldableFieldset(_legend) {
             let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_legend);
             cntFoldFieldset.id = _legend;
-            _parent.appendChild(cntFoldFieldset);
             return cntFoldFieldset;
         }
         static createLabelElement(_id, _parent, params = {}) {
@@ -1201,34 +1189,35 @@ var FudgeUserInterface;
 // / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     class Mutable {
-        constructor(mutable) {
+        constructor(_mutable, _ui) {
             this.timeUpdate = 190;
-            this.mutateOnInput = (_e) => {
-                this.mutator = this.updateMutator(this.mutable, this.root);
+            this.mutateOnInput = (_event) => {
+                this.mutator = this.updateMutator(this.mutable, this.ui);
                 this.mutable.mutate(this.mutator);
             };
-            this.refresh = (_e) => {
+            this.refresh = (_event) => {
                 this.mutable.updateMutator(this.mutator);
-                this.update(this.mutable, this.root);
+                this.update(this.mutable, this.ui);
             };
-            this.root = document.createElement("div");
-            this.mutable = mutable;
-            this.mutator = mutable.getMutator();
+            this.ui = _ui;
+            this.mutable = _mutable;
+            this.mutator = _mutable.getMutator();
+            // TODO: examine, if ui-Mutables should register to one common interval, instead of each installing its own.
             window.setInterval(this.refresh, this.timeUpdate);
-            this.root.addEventListener("input", this.mutateOnInput);
+            this.ui.addEventListener("input", this.mutateOnInput);
         }
-        updateMutator(_mutable, _root, _mutator, _types) {
+        updateMutator(_mutable, _ui, _mutator, _types) {
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.root.querySelector("#" + key) != null) {
+                if (this.ui.querySelector("#" + key) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _root.querySelector("#" + key);
+                        let selectElement = _ui.querySelector("#" + key);
                         selectElement.value = mutator[key];
                     }
                     else {
-                        let element = _root.querySelector("#" + key);
+                        let element = _ui.querySelector("#" + key);
                         let input = element;
                         switch (type) {
                             case "Boolean":
@@ -1251,34 +1240,34 @@ var FudgeUserInterface;
             }
             return mutator;
         }
-        update(_mutable, _root) {
+        update(_mutable, _ui) {
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.root.querySelector("#" + key) != null) {
+                if (this.ui.querySelector("#" + key) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _root.querySelector("#" + key);
+                        let selectElement = _ui.querySelector("#" + key);
                         selectElement.value = mutator[key];
                     }
                     else {
                         switch (type) {
                             case "Boolean":
-                                let checkbox = _root.querySelector("#" + key);
+                                let checkbox = _ui.querySelector("#" + key);
                                 checkbox.checked = mutator[key];
                                 break;
                             case "String":
-                                let textfield = _root.querySelector("#" + key);
+                                let textfield = _ui.querySelector("#" + key);
                                 textfield.value = mutator[key];
                                 break;
                             case "Number":
-                                let stepper = _root.querySelector("#" + key);
+                                let stepper = _ui.querySelector("#" + key);
                                 if (document.activeElement != stepper) {
                                     stepper.value = mutator[key];
                                 }
                                 break;
                             default:
-                                let fieldset = _root.querySelector("#" + key);
+                                let fieldset = _ui.querySelector("#" + key);
                                 // tslint:disable no-any
                                 let subMutable = _mutable[key];
                                 this.update(subMutable, fieldset);

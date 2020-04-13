@@ -88,16 +88,13 @@ var Fudge;
         }
     }
     Fudge.UIAnimationList = UIAnimationList;
-    class NodeData extends ƒui.Mutable {
-        constructor(_mutable, _container) {
-            super(_mutable);
-            this.root = document.createElement("div");
-            ƒui.Generator.createFromMutable(_mutable, this.root);
-            this.root.addEventListener("input", this.mutateOnInput);
-            _container.append(this.root);
+    class ComponentUI extends ƒui.Mutable {
+        constructor(_mutable, _ui) {
+            super(_mutable, _ui);
+            this.ui.addEventListener("input", this.mutateOnInput);
         }
     }
-    Fudge.NodeData = NodeData;
+    Fudge.ComponentUI = ComponentUI;
 })(Fudge || (Fudge = {}));
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
@@ -474,10 +471,10 @@ var Fudge;
         setNode(_node) {
             this.node = _node;
             for (let view of this.views) {
-                if (view instanceof Fudge.ViewNode) {
+                if (view instanceof Fudge.ViewGraph) {
                     view.setRoot(this.node);
                 }
-                else if (view instanceof Fudge.ViewViewport) {
+                else if (view instanceof Fudge.ViewRender) {
                     view.setRoot(this.node);
                 }
             }
@@ -508,14 +505,14 @@ var Fudge;
                         let view;
                         switch (item.componentName) {
                             case Fudge.VIEW.NODE:
-                                view = new Fudge.ViewNode(this);
+                                view = new Fudge.ViewGraph(this);
                                 // view.content.addEventListener(ƒui.EVENT_USERINTERFACE.SELECTION, this.passEvent);
                                 break;
-                            case Fudge.VIEW.DATA:
+                            case Fudge.VIEW.COMPONENTS:
                                 view = new Fudge.ViewComponents(this);
                                 break;
-                            case Fudge.VIEW.PORT:
-                                view = new Fudge.ViewViewport(this);
+                            case Fudge.VIEW.RENDER:
+                                view = new Fudge.ViewRender(this);
                                 break;
                             case Fudge.VIEW.CAMERA:
                                 view = new Fudge.ViewCamera(this);
@@ -563,7 +560,7 @@ var Fudge;
                 content: [
                     {
                         type: "component",
-                        componentName: Fudge.VIEW.PORT,
+                        componentName: Fudge.VIEW.RENDER,
                         title: "Viewport"
                     },
                     // {
@@ -577,12 +574,12 @@ var Fudge;
                             {
                                 type: "component",
                                 componentName: Fudge.VIEW.NODE,
-                                title: "Node Explorer"
+                                title: "Graph "
                             },
                             {
                                 type: "component",
-                                componentName: Fudge.VIEW.DATA,
-                                title: "Inspector"
+                                componentName: Fudge.VIEW.COMPONENTS,
+                                title: "Components"
                             }
                         ]
                     }
@@ -602,8 +599,8 @@ var Fudge;
         VIEW["ANIMATION"] = "ViewAnimation";
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
-        VIEW["PORT"] = "ViewPort";
-        VIEW["DATA"] = "ViewData";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
     /**
@@ -1263,12 +1260,12 @@ var Fudge;
                         content: [
                             {
                                 type: "component",
-                                componentName: Fudge.VIEW.PORT,
+                                componentName: Fudge.VIEW.RENDER,
                                 title: "Viewport"
                             },
                             {
                                 type: "component",
-                                componentName: Fudge.VIEW.DATA,
+                                componentName: Fudge.VIEW.COMPONENTS,
                                 title: "Inspector"
                             }
                         ]
@@ -1306,7 +1303,7 @@ var Fudge;
         }
         fillContent() {
             let div = document.createElement("div");
-            let inspector = new Fudge.NodeData(this.camera, div);
+            let inspector = new Fudge.ComponentUI(this.camera, div);
             this.content.replaceChild(div, this.content.firstChild);
         }
         deconstruct() {
@@ -1318,6 +1315,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -1368,7 +1366,7 @@ var Fudge;
                 lblNodeName.textContent = "Name";
                 cntHeader.append(lblNodeName);
                 this.content.append(cntHeader);
-                let cntComponents = document.createElement("div");
+                // let cntComponents: HTMLDivElement = document.createElement("div");
                 if (this.data instanceof ƒ.Node) {
                     let txtNodeName = document.createElement("input");
                     txtNodeName.addEventListener("input", this.changeNodeName);
@@ -1376,9 +1374,10 @@ var Fudge;
                     cntHeader.append(txtNodeName);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let uiComponents = new Fudge.NodeData(nodeComponent, cntComponents);
+                        let fieldset = ƒui.Generator.createFromMutable(nodeComponent);
+                        let uiComponent = new Fudge.ComponentUI(nodeComponent, fieldset);
+                        this.content.append(uiComponent.ui);
                     }
-                    this.content.append(cntComponents);
                     // let mutator: ƒ.Mutator = {};
                     // for (let member in COMPONENTMENU) {
                     //     ƒui.MultiLevelMenuManager.buildFromSignature(COMPONENTMENU[member], mutator);
@@ -1404,7 +1403,7 @@ var Fudge;
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
      */
-    class ViewNode extends Fudge.View {
+    class ViewGraph extends Fudge.View {
         constructor(_parent) {
             super(_parent);
             /**
@@ -1463,7 +1462,7 @@ var Fudge;
             this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.fillContent();
-            this.contextMenu = Fudge.ContextMenu.getMenu(ViewNode, this.contextMenuCallback);
+            this.contextMenu = Fudge.ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
         }
         deconstruct() {
             //TODO: desconstruct
@@ -1481,7 +1480,7 @@ var Fudge;
             this.branch = _node;
         }
     }
-    Fudge.ViewNode = ViewNode;
+    Fudge.ViewGraph = ViewGraph;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1491,7 +1490,7 @@ var Fudge;
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewViewport extends Fudge.View {
+    class ViewRender extends Fudge.View {
         constructor(_parent) {
             super(_parent);
             /**
@@ -1548,6 +1547,6 @@ var Fudge;
             this.viewport.setBranch(this.branch);
         }
     }
-    Fudge.ViewViewport = ViewViewport;
+    Fudge.ViewRender = ViewRender;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

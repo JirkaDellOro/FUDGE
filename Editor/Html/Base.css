@@ -15,7 +15,7 @@
 *[view] {
   padding: 0.5em;
 }
-*[view="ViewViewport"] {
+*[view="ViewRender"] {
   padding: 0em;
 }
 

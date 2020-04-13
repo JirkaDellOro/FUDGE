@@ -7,7 +7,7 @@ namespace Fudge {
    * View displaying a Node and the hierarchical relation to its parents and children.  
    * Consists of a viewport and a tree-control. 
    */
-  export class ViewViewport extends View {
+  export class ViewRender extends View {
     viewport: ƒ.Viewport;
     canvas: HTMLCanvasElement;
     branch: ƒ.Node;
