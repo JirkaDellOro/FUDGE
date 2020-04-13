@@ -174,16 +174,3 @@ fieldset>input[type=checkbox]:checked::before {
 fieldset>input[type=checkbox]::before {
   content: "►";
 }
-
-/* 
-fieldset>legend<input[type="checkbox"]:checked {
-  content: "XXXXXXXXXX";
-} */
-
-fieldset>input[type="checkbox"]:checked ~ div {
-  display: block;
-}
-
-fieldset>div {
-  display: none;
-}

@@ -166,21 +166,105 @@
 // }
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    //import ƒ = FudgeCore;
+    var ƒ = FudgeCore;
     class FoldableFieldSet extends HTMLFieldSetElement {
         constructor(_legend) {
             super();
+            this.hndFocus = (_event) => {
+                switch (_event.type) {
+                    case FudgeUserInterface.EVENT_TREE.FOCUS_NEXT:
+                        let next = this.nextElementSibling;
+                        if (next && next.tabIndex > -1) {
+                            next.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS:
+                        let previous = this.previousElementSibling;
+                        if (previous && previous.tabIndex > -1) {
+                            let fieldsets = previous.querySelectorAll("fieldset");
+                            if (fieldsets.length == 0)
+                                previous.focus();
+                            else
+                                fieldsets[fieldsets.length - 1].focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case FudgeUserInterface.EVENT_TREE.FOCUS_SET:
+                        if (_event.target != this) {
+                            this.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                }
+            };
+            this.hndKey = (_event) => {
+                _event.stopPropagation();
+                // let target: HTMLElement = <HTMLElement>_event.target;
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                        if (!this.isOpen) {
+                            this.open(true);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        let next = this;
+                        if (this.isOpen)
+                            next = this.querySelector("fieldset");
+                        else
+                            do {
+                                next = next.nextElementSibling;
+                            } while (next && next.tabIndex > -1);
+                        if (next)
+                            next.focus();
+                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        else
+                            this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                        if (this.isOpen) {
+                            this.open(false);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        let previous = this;
+                        do {
+                            previous = previous.previousElementSibling;
+                        } while (previous && !(previous instanceof FoldableFieldSet));
+                        if (previous)
+                            if (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP)
+                                this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                            else
+                                previous.focus();
+                        else
+                            this.parentElement.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_SET, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                }
+            };
             let cntLegend = document.createElement("legend");
-            let cntFold = document.createElement("input");
-            cntFold.type = "checkbox";
-            cntFold.checked = true;
+            this.checkbox = document.createElement("input");
+            this.checkbox.type = "checkbox";
+            this.checkbox.checked = true;
+            this.checkbox.tabIndex = -1;
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
-            this.appendChild(cntFold);
+            this.appendChild(this.checkbox);
             cntLegend.appendChild(lblTitle);
             this.content = document.createElement("div");
             this.appendChild(cntLegend);
             this.appendChild(this.content);
+            this.tabIndex = 0;
+            this.addEventListener(FudgeUserInterface.EVENT_TREE.KEY_DOWN, this.hndKey);
+            this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+            this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+            this.addEventListener(FudgeUserInterface.EVENT_TREE.FOCUS_SET, this.hndFocus);
+            // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
+        }
+        open(_open) {
+            this.checkbox.checked = _open;
+        }
+        get isOpen() {
+            return this.checkbox.checked;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
@@ -609,6 +693,7 @@ var FudgeUserInterface;
         EVENT_TREE["COPY"] = "copy";
         EVENT_TREE["CUT"] = "cut";
         EVENT_TREE["PASTE"] = "paste";
+        EVENT_TREE["FOCUS_SET"] = "focusSet";
     })(EVENT_TREE = FudgeUserInterface.EVENT_TREE || (FudgeUserInterface.EVENT_TREE = {}));
     /**
      * Extension of [[TreeList]] that represents the root of a tree control

@@ -25,7 +25,8 @@ namespace FudgeUserInterface {
     ESCAPE = "escape",
     COPY = "copy",
     CUT = "cut",
-    PASTE = "paste"
+    PASTE = "paste",
+    FOCUS_SET = "focusSet"
   }
 
   /**

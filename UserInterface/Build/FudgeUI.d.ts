@@ -2,7 +2,12 @@
 declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
         content: HTMLDivElement;
+        private checkbox;
         constructor(_legend: string);
+        private open;
+        private get isOpen();
+        private hndFocus;
+        private hndKey;
     }
 }
 declare namespace FudgeUserInterface {
@@ -137,7 +142,8 @@ declare namespace FudgeUserInterface {
         ESCAPE = "escape",
         COPY = "copy",
         CUT = "cut",
-        PASTE = "paste"
+        PASTE = "paste",
+        FOCUS_SET = "focusSet"
     }
     /**
      * Extension of [[TreeList]] that represents the root of a tree control

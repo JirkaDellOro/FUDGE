@@ -335,4 +335,14 @@ body {
   /* background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAJ0lEQVR4nGP8//8/AzGAiShVI1YhCwMDA8OsWbPwBmZaWhoj0SYCAN1lBxMAX4n0AAAAAElFTkSuQmCC) */
 }
 
+/* Fieldsets */
+
+fieldset>input[type="checkbox"]:checked ~ div {
+  display: block;
+}
+
+fieldset>div {
+  display: none;
+}
+
 /*# sourceMappingURL=goldenlayout-base.css.map */
