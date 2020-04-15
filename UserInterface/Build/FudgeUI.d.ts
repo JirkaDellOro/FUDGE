@@ -290,7 +290,7 @@ declare namespace FudgeUserInterface {
         static createLabelElement(_name: string, _parent: HTMLElement, params?: {
             value?: string;
             cssClass?: string;
-        }): HTMLElement;
+        }): HTMLLabelElement;
         static createTextElement(_name: string, _parent: HTMLElement, params?: {
             value?: string;
             cssClass?: string;

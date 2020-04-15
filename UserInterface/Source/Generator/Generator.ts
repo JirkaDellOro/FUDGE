@@ -71,7 +71,7 @@ namespace FudgeUserInterface {
     public static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
       let dropdown: HTMLSelectElement = document.createElement("select");
       // TODO: unique ids
-      dropdown.id = _name;
+      // dropdown.id = _name;
       dropdown.name = _name;
       for (let value in _content) {
         let entry: HTMLOptionElement = document.createElement("option");
@@ -99,19 +99,19 @@ namespace FudgeUserInterface {
     public static createFoldableFieldset(_legend: string): FoldableFieldSet {
       let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_legend);
       //TODO: unique ids
-      cntFoldFieldset.id = _legend;
+      // cntFoldFieldset.id = _legend;
       cntFoldFieldset.name = _legend;
       return cntFoldFieldset;
     }
 
-    public static createLabelElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLElement {
-      let label: HTMLElement = document.createElement("label");
+    public static createLabelElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLLabelElement {
+      let label: HTMLLabelElement = document.createElement("label");
       if (params.value == undefined)
         params.value = _name;
       label.innerText = params.value;
       if (params.cssClass != undefined)
         label.classList.add(params.cssClass);
-      label.name = "_" + _name;
+      label.setAttribute("name", _name);
       _parent.appendChild(label);
 
       return label;
@@ -124,7 +124,7 @@ namespace FudgeUserInterface {
       if (!params.cssClass == undefined)
         text.classList.add(params.cssClass);
       //TODO: ids must be unique
-      text.id = _name;
+      // text.id = _name;
       text.name = _name;
       text.value = params.value;
       _parent.appendChild(text);
@@ -139,7 +139,7 @@ namespace FudgeUserInterface {
       checkbox.classList.add(_cssClass);
       checkbox.name = _name;
       // TODO: try to stick to conventions and make ids unique...
-      checkbox.id = _name;
+      // checkbox.id = _name;
       _parent.appendChild(checkbox);
       return checkbox;
     }

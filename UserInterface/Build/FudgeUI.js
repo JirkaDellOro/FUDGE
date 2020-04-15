@@ -1174,7 +1174,7 @@ var FudgeUserInterface;
         static createDropdown(_name, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
             // TODO: unique ids
-            dropdown.id = _name;
+            // dropdown.id = _name;
             dropdown.name = _name;
             for (let value in _content) {
                 let entry = document.createElement("option");
@@ -1200,7 +1200,7 @@ var FudgeUserInterface;
         static createFoldableFieldset(_legend) {
             let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_legend);
             //TODO: unique ids
-            cntFoldFieldset.id = _legend;
+            // cntFoldFieldset.id = _legend;
             cntFoldFieldset.name = _legend;
             return cntFoldFieldset;
         }
@@ -1211,7 +1211,7 @@ var FudgeUserInterface;
             label.innerText = params.value;
             if (params.cssClass != undefined)
                 label.classList.add(params.cssClass);
-            label.name = "_" + _name;
+            label.setAttribute("name", _name);
             _parent.appendChild(label);
             return label;
         }
@@ -1222,7 +1222,7 @@ var FudgeUserInterface;
             if (!params.cssClass == undefined)
                 text.classList.add(params.cssClass);
             //TODO: ids must be unique
-            text.id = _name;
+            // text.id = _name;
             text.name = _name;
             text.value = params.value;
             _parent.appendChild(text);
@@ -1235,7 +1235,7 @@ var FudgeUserInterface;
             checkbox.classList.add(_cssClass);
             checkbox.name = _name;
             // TODO: try to stick to conventions and make ids unique...
-            checkbox.id = _name;
+            // checkbox.id = _name;
             _parent.appendChild(checkbox);
             return checkbox;
         }
@@ -1313,32 +1313,32 @@ var FudgeUserInterface;
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
+                let element = _ui.querySelector(`[name=${key}]`);
                 if (this.ui.querySelector(`[name=${key}]`) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _ui.querySelector(`[name=${key}]`);
-                        selectElement.value = mutator[key];
+                        element.value = mutator[key];
                     }
                     else {
                         switch (type) {
                             case "Boolean":
-                                let checkbox = _ui.querySelector(`[name=${key}]`);
-                                checkbox.checked = mutator[key];
+                                // let checkbox: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
+                                element.checked = mutator[key];
                                 break;
                             case "String":
-                                let textfield = _ui.querySelector(`[name=${key}]`);
-                                textfield.value = mutator[key];
+                                // let textfield: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
+                                element.value = mutator[key];
                                 break;
                             case "Number":
-                                let stepper = _ui.querySelector(`[name=${key}]`);
-                                if (document.activeElement != stepper) {
-                                    stepper.value = mutator[key];
+                                if (document.activeElement != element) {
+                                    element.value = mutator[key];
                                 }
                                 break;
                             default:
-                                let fieldset = _ui.querySelector(`[name=${key}]`);
-                                // tslint:disable no-any
-                                let subMutable = _mutable[key];
+                                let fieldset = element;
+                                // t/slint:disable no-any
+                                // let subMutable: ƒ.Mutable = (<any>_mutable)[key];
+                                let subMutable = Reflect.get(_mutable, key);
                                 this.update(subMutable, fieldset);
                                 break;
                         }

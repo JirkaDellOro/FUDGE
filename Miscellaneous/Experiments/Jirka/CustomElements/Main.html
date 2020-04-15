@@ -9,36 +9,55 @@
 </head>
 
 <body>
-  <p is="test-stepper" label="Label">Inner</p>
+  <!-- <p is="test-stepper" label="Label">Inner</p> -->
+  <fieldset>
+    <legend>CustomBoolean</legend>
+    <!-- <test-stepper>Test-Stepper</test-stepper> -->
+    <custom-boolean key="x" label="x"></custom-boolean>
+    <br />
+  </fieldset>
+
+  <fieldset>
+    <legend>CustomMatrix4x4</legend>
+    <custom-matrix4x4>Test</custom-matrix4x4>
+  </fieldset>
+
 
   <template>
-    <vector3>
-      <span style="white-space: nowrap;">x <input type="number" /></span>
-      <span style="white-space: nowrap;">y <input type="number" /></span>
-      <span style="white-space: nowrap;">z <input type="number" /></span>
-    </vector3>
-    <matrix4x4 style="text-align: center; display: grid; 
+    <custom-vector3>
+      <div>
+        <custom-boolean key="active" label="active"></custom-boolean>
+        <span style="white-space: nowrap;">x <input type="number" /></span>
+        <span style="white-space: nowrap;">y <input type="number" /></span>
+        <span style="white-space: nowrap;">z <input type="number" /></span>
+      </div>
+    </custom-vector3>
+    <custom-matrix4x4>
+      <div style="text-align: center; display: grid; 
         grid-template-columns: min-content min-content min-content min-content; 
         grid-template-rows: min-content min-content min-content min-content;">
-      <span></span>
-      <span>x</span>
-      <span>y</span>
-      <span>z</span>
-      translation
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
-      rotation
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
-      scale
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
-    </matrix4x4>
+        <span></span>
+        <span>x</span>
+        <span>y</span>
+        <span>z</span>
+        translation
+        <input type="number" />
+        <input type="number" />
+        <input type="number" />
+        rotation
+        <input type="number" />
+        <input type="number" />
+        <input type="number" />
+        scale
+        <input type="number" />
+        <input type="number" />
+        <input type="number" />
+      </div>
+    </custom-matrix4x4>
   </template>
-
+  <script>
+    Custom.add([class CustomMatrix4x4 extends Custom.Custom { }]);
+  </script>
 </body>
 
 </html>

@@ -55,10 +55,10 @@ namespace FudgeUserInterface {
                 break;
               default:
                 // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
-                let subMutator: ƒ.Mutator =  Reflect.get(mutator, key);
+                let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
                 let subMutable: ƒ.Mutable;
                 // subMutable = (<ƒ.General>_mutable)[key];
-                subMutable =  Reflect.get(_mutable, key);
+                subMutable = Reflect.get(_mutable, key);
                 let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
                 mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                 break;
@@ -73,32 +73,32 @@ namespace FudgeUserInterface {
       let mutator: ƒ.Mutator = _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
+        let element: HTMLElement = <HTMLElement>_ui.querySelector(`[name=${key}]`);
         if (this.ui.querySelector(`[name=${key}]`) != null) {
           let type: Object = mutatorTypes[key];
           if (type instanceof Object) {
-            let selectElement: HTMLSelectElement = <HTMLSelectElement>_ui.querySelector(`[name=${key}]`);
-            selectElement.value = <string>mutator[key];
+            (<HTMLSelectElement>element).value = <string>mutator[key];
           }
           else {
             switch (type) {
               case "Boolean":
-                let checkbox: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                checkbox.checked = <boolean>mutator[key];
+                // let checkbox: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
+                (<HTMLInputElement>element).checked = <boolean>mutator[key];
                 break;
               case "String":
-                let textfield: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                textfield.value = <string>mutator[key];
+                // let textfield: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
+                (<HTMLInputElement>element).value = <string>mutator[key];
                 break;
               case "Number":
-                let stepper: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                if (document.activeElement != stepper) {
-                  stepper.value = <string>mutator[key];
+                if (document.activeElement != element) {
+                  (<HTMLInputElement>element).value = <string>mutator[key];
                 }
                 break;
               default:
-                let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>_ui.querySelector(`[name=${key}]`);
-                // tslint:disable no-any
-                let subMutable: ƒ.Mutable = (<any>_mutable)[key];
+                let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement>element;
+                // t/slint:disable no-any
+                // let subMutable: ƒ.Mutable = (<any>_mutable)[key];
+                let subMutable: ƒ.Mutable = Reflect.get(_mutable, key);
                 this.update(subMutable, fieldset);
                 break;
             }
