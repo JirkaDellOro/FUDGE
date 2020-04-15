@@ -41,20 +41,30 @@ namespace Custom {
       console.log(this.constructor["tag"]);
       this.node = <HTMLElement>templates.get(this.constructor["tag"]).children[0].cloneNode(true);
       this.initialized = true;
+      // this.parentElement.replaceChild(this.node, this);
       this.appendChild(this.node);
     }
   }
 
-  class CustomMatrix4x4 extends Custom {
-    public static tag: string = "CUSTOM-MATRIX4X4";
+  // class CustomMatrix4x4 extends Custom {
+  //   public static tag: string = "CUSTOM-MATRIX4X4";
+  // }
+
+  // class CustomVector3 extends Custom {
+  //   public static tag: string = "custom-vector3";
+  // }
+
+  export function registerTemplate(_template: HTMLTemplateElement): void {
+    console.log("Register", _template);
+    for (let custom of _template.content.children) {
+      templates.set(custom.tagName.toLowerCase(), <HTMLElement>custom);
+    }
   }
 
-  class CustomVector3 extends Custom {
-    public static tag: string = "CUSTOM-VECTOR3";
-  }
-
-  export function add(_classes: typeof Custom[]): void {
-    console.log(_classes);
+  export function registerClass(_tag: string, _class: typeof Custom): void {
+    console.log(_tag, _class);
+    _class.tag = _tag;
+    customElements.define(_tag, _class);
   }
 
   class Stepper extends HTMLParagraphElement {
@@ -103,26 +113,21 @@ namespace Custom {
     // document.body.appendChild(stepper2);
 
     // let templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template");
-    let template: HTMLTemplateElement = document.querySelector("template");
-    console.log(template);
-    for (let custom of template.content.children) {
-      templates.set(custom.tagName, <HTMLElement>custom);
-    }
 
     for (let entry of templates) {
       let custom: HTMLElement = entry[1];
-      console.log(custom.tagName);
+      let name: string = custom.tagName.toLowerCase();
       let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
       let legend: HTMLLegendElement = document.createElement("legend");
-      legend.textContent = custom.tagName;
+      legend.textContent = name;
       fieldset.appendChild(legend);
       // fieldset.appendChild(custom.cloneNode(true));
-      fieldset.appendChild(document.createElement(custom.tagName));
+      fieldset.appendChild(document.createElement(name));
       document.body.appendChild(fieldset);
     }
 
     // debugger;
     customElements.define("custom-boolean", CustomBoolean);
-    customElements.define("custom-vector3", CustomVector3);
+    // customElements.define("custom-vector3", CustomVector3);
   }
 }

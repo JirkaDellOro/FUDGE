@@ -56,7 +56,9 @@
     </custom-matrix4x4>
   </template>
   <script>
-    Custom.add([class CustomMatrix4x4 extends Custom.Custom { }]);
+    Custom.registerTemplate(document.currentScript.previousElementSibling);
+    Custom.registerClass("custom-matrix4x4", class CustomMatrix4x4 extends Custom.Custom { });
+    Custom.registerClass("custom-vector3", class CustomVector3 extends Custom.Custom { });
   </script>
 </body>
 
