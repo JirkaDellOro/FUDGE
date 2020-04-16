@@ -6,53 +6,32 @@ FUDGE is a lightweight open-source game engine and editor created for educating 
 # Wiki
 To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so, will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
-# Modules
+# Directory Overview
 ## Core
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
-# UserInterface
+## UserInterface
 Comtains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
-# Network
+## Network
 Contains components for gaming over networks. This module is not fully evaluated yet.
-# Aid
+## Aid
 Contains collections of classes for convenience, bundling and simplifying commonn procedures.
-
-the creation of
-Falcos Abschluss hochgeladen	2 months ago
-
-Aid	Old tree functionality with new tree	12 days ago
-Core	Contextmenu creates any component	10 days ago
-Documentation	Test enhanced & docu	15 days ago
-Editor	Collapsing componnents	3 days ago
-Miscellaneous	register template by localName of first child	9 hours ago
-Network	Falcos Abschluss hochgeladen	2 months ago
-Test	Experimenting with CustomElements	3 days ago
-
-The main modules that comprise the inner mechanics of FUDGE
-- [Core](Core)
-- [UserInterface](UserInterface)
-- [Network](Network)
- 
 ## Editor
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
-- [Editor](Editor)
+## Documentation
+Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References
+## Test
+Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up.
+## Miscellaneous	
+A collection of various other helpful documents and resources
 
-## Design
-The documentation of planning FUDGE and the decisions made
-- [Design](Documentation/Design)
-- [Logs](Documentation/Logs)
-
-## Reference
-The generated API-References, the Guidelines on how to work with FUDGE and how to extend and further develop it.
+# Reference
 - [Core-API](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core)
 - [UserInterface-API](https:///JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface)
 - [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
 
-## Test
-Tests to verify functionality
-- [Test](Test)
 
 
-# Themen für Abschluss- und Studienarbeiten
+# Call for papers
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
 - Light and Shadpw
