@@ -6,6 +6,9 @@ For compilation, compile
 - Source
 separately
 
+To start type
+electron Electron
+
 
 Localisation tutorial
 https://www.christianengvall.se/electron-localization/
