@@ -25,11 +25,10 @@ Contains programs to test the functionality of various components of FUDGE separ
 A collection of various other helpful documents and resources
 
 # Reference
+- [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
+- [Class-Diagramm Core](https://raw.githubusercontent.com/JirkaDellOro/FUDGE/development/Documentation/Design/Core.svg)  
 - [Core-API](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core)
 - [UserInterface-API](https:///JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface)
-- [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
-
-
 
 # Call for papers
 - Modeller
@@ -46,7 +45,6 @@ A collection of various other helpful documents and resources
 - :pencil: Physikengine (Marko Fehrenbach)
 - :pencil: Partikelsysteme (Jonas Plotzky)
 - ~~Spritesheet~~
-
 
 # Contributors  
 
