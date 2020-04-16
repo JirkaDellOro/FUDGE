@@ -6,9 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CustomElements</title>
   <script src="Main.js"></script>
+  <link rel="import" href="test.json">
 </head>
 
 <body>
+  ...
+  <script>
+    var link = document.querySelector('link[rel="import"]');
+    var content = link.import;
+    console.log(content);
+  </script>
   <!-- <p is="test-stepper" label="Label">Inner</p> -->
   <fieldset>
     <legend>CustomBoolean</legend>
