@@ -1,5 +1,19 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
+# Welcome to FUDGE
+FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
+
+
+Type	Name	Latest commit message	Commit time
+Aid	Old tree functionality with new tree	12 days ago
+Core	Contextmenu creates any component	10 days ago
+Documentation	Test enhanced & docu	15 days ago
+Editor	Collapsing componnents	3 days ago
+Miscellaneous	register template by localName of first child	9 hours ago
+Network	Falcos Abschluss hochgeladen	2 months ago
+Test	Experimenting with CustomElements	3 days ago
+UserInterface	Experimenting with templates and custom elements	yesterday
+
 ## Modules
 The main modules that comprise the inner mechanics of FUDGE
 - [Core](Core)
