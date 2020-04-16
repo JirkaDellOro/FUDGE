@@ -32,6 +32,8 @@ A collection of various other helpful documents and resources
 
 
 # Call for papers
+- Modeller
+- Cameratransformation, Axonometry and VR
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
 - Light and Shadpw
@@ -41,11 +43,8 @@ A collection of various other helpful documents and resources
 - Input-Manager
 - Selection-Sets to store temporary Groups
 - Advanced texturing
-- :pencil: Audiokomponenten 
-- :pencil: Physikengine 
-- :pencil: Modeller
-- :pencil: Cameratransformation, Axonometrien und VR
-- :pencil: Partikelsysteme
+- :pencil: Physikengine (Marko Fehrenbach)
+- :pencil: Partikelsysteme (Jonas Plotzky)
 - ~~Spritesheet~~
 
 
