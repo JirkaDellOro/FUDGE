@@ -6,8 +6,8 @@ For compilation, compile
 - Source
 separately
 
-To start type
-electron Electron
+To start type  
+"electron Electron"
 
 
 Localisation tutorial
