@@ -1,10 +1,24 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
-# Welcome to FUDGE
+# Welcome!
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
 
+# Wiki
+To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so, will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
-Type	Name	Latest commit message	Commit time
+# Modules
+## Core
+Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
+# UserInterface
+Comtains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
+# Network
+Contains components for gaming over networks. This module is not fully evaluated yet.
+# Aid
+Contains collections of classes for convenience, bundling and simplifying commonn procedures.
+
+the creation of
+Falcos Abschluss hochgeladen	2 months ago
+
 Aid	Old tree functionality with new tree	12 days ago
 Core	Contextmenu creates any component	10 days ago
 Documentation	Test enhanced & docu	15 days ago
@@ -12,9 +26,7 @@ Editor	Collapsing componnents	3 days ago
 Miscellaneous	register template by localName of first child	9 hours ago
 Network	Falcos Abschluss hochgeladen	2 months ago
 Test	Experimenting with CustomElements	3 days ago
-UserInterface	Experimenting with templates and custom elements	yesterday
 
-## Modules
 The main modules that comprise the inner mechanics of FUDGE
 - [Core](Core)
 - [UserInterface](UserInterface)
