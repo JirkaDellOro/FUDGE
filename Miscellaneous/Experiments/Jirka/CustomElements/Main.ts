@@ -1,6 +1,6 @@
 namespace Custom {
   window.addEventListener("load", init);
-  let templates: Map<string, HTMLElement> = new Map();
+  let templates: Map<string, DocumentFragment> = new Map();
 
   class CustomBoolean extends HTMLElement {
     // private static customElement: void = customElements.define("custom-boolean", CustomBoolean);
@@ -34,31 +34,23 @@ namespace Custom {
     }
 
     connectedCallback(): void {
-      // debugger;
       if (this.initialized)
         return;
-      // this.parentElement.replaceChild(node, this);
-      console.log(this.constructor["tag"]);
-      this.node = <HTMLElement>templates.get(this.constructor["tag"]).children[0].cloneNode(true);
+      let content: HTMLElement = <HTMLElement>templates.get(this.constructor["tag"]).firstElementChild;
+      let style: CSSStyleDeclaration = this.style;
+      for (let entry of content.style) {
+        style.setProperty(entry, content.style[entry]);
+      }
+      for (let child of content.childNodes) {
+        this.appendChild(child.cloneNode(true));
+      }
       this.initialized = true;
-      // this.parentElement.replaceChild(this.node, this);
-      this.appendChild(this.node);
     }
   }
 
-  // class CustomMatrix4x4 extends Custom {
-  //   public static tag: string = "CUSTOM-MATRIX4X4";
-  // }
-
-  // class CustomVector3 extends Custom {
-  //   public static tag: string = "custom-vector3";
-  // }
-
   export function registerTemplate(_template: HTMLTemplateElement): void {
     console.log("Register", _template);
-    for (let custom of _template.content.children) {
-      templates.set(custom.tagName.toLowerCase(), <HTMLElement>custom);
-    }
+    templates.set(_template.content.firstElementChild.tagName.toLowerCase(), _template.content);
   }
 
   export function registerClass(_tag: string, _class: typeof Custom): void {
@@ -115,18 +107,15 @@ namespace Custom {
     // let templates: NodeListOf<HTMLTemplateElement> = document.querySelectorAll("template");
 
     for (let entry of templates) {
-      let custom: HTMLElement = entry[1];
-      let name: string = custom.tagName.toLowerCase();
+      let name: string = entry[0];
       let fieldset: HTMLFieldSetElement = document.createElement("fieldset");
       let legend: HTMLLegendElement = document.createElement("legend");
       legend.textContent = name;
       fieldset.appendChild(legend);
-      // fieldset.appendChild(custom.cloneNode(true));
       fieldset.appendChild(document.createElement(name));
       document.body.appendChild(fieldset);
     }
 
-    // debugger;
     customElements.define("custom-boolean", CustomBoolean);
     // customElements.define("custom-vector3", CustomVector3);
   }
