@@ -16,26 +16,29 @@
   </fieldset>
 
   <fieldset>
-    <legend>CustomMatrix4x4</legend>
-    <custom-matrix4x4></custom-matrix4x4>
+    <legend>CustomMatrix4x4
+      <custom-boolean key="active" label="active"></custom-boolean>
+    </legend>
+    <custom-matrix4x4 style="background-color: azure;"></custom-matrix4x4>
   </fieldset>
 
   <fieldset>
-    <legend>CustomVector3</legend>
-    <custom-vector3></custom-vector3>
+    <legend>CustomVector3
+      <custom-boolean key="active" label="active"></custom-boolean>
+    </legend>
+    <custom-vector3 style="font-family: monospace"></custom-vector3>
   </fieldset>
 
 
   <template>
     <custom-vector3 style="background-color: antiquewhite;">
-        <custom-boolean key="active" label="active"></custom-boolean>
-        <span style="white-space: nowrap;">x <input type="number" /></span>
-        <span style="white-space: nowrap;">y <input type="number" /></span>
-        <span style="white-space: nowrap;">z <input type="number" /></span>
+      <span style="white-space: nowrap;">x <input type="number" /></span>
+      <span style="white-space: nowrap;">y <input type="number" /></span>
+      <span style="white-space: nowrap;">z <input type="number" /></span>
     </custom-vector3>
   </template>
   <script>
-    Custom.registerTemplate(document.currentScript.previousElementSibling);
+    Custom.registerTemplate("custom-vector3");
     Custom.registerClass("custom-vector3", class CustomVector3 extends Custom.Custom { });
   </script>
 
@@ -44,26 +47,26 @@
     <custom-matrix4x4 style="text-align: center; display: grid; 
         grid-template-columns: min-content min-content min-content min-content; 
         grid-template-rows: min-content min-content min-content min-content;">
-        <span></span>
-        <span>x</span>
-        <span>y</span>
-        <span>z</span>
-        translation
-        <input type="number" />
-        <input type="number" />
-        <input type="number" />
-        rotation
-        <input type="number" />
-        <input type="number" />
-        <input type="number" />
-        scale
-        <input type="number" />
-        <input type="number" />
-        <input type="number" />
+      <span></span>
+      <span>x</span>
+      <span>y</span>
+      <span>z</span>
+      translation
+      <input type="number" />
+      <input type="number" />
+      <input type="number" />
+      rotation
+      <input type="number" />
+      <input type="number" />
+      <input type="number" />
+      scale
+      <input type="number" />
+      <input type="number" />
+      <input type="number" />
     </custom-matrix4x4>
   </template>
   <script>
-    Custom.registerTemplate(document.currentScript.previousElementSibling);
+    Custom.registerTemplate("custom-matrix4x4");
     Custom.registerClass("custom-matrix4x4", class CustomMatrix4x4 extends Custom.Custom { });
   </script>
 </body>

@@ -48,9 +48,14 @@ namespace Custom {
     }
   }
 
-  export function registerTemplate(_template: HTMLTemplateElement): void {
-    console.log("Register", _template);
-    templates.set(_template.content.firstElementChild.tagName.toLowerCase(), _template.content);
+  // export function registerTemplate(_template: HTMLTemplateElement): void {
+  export function registerTemplate(_tagName: string): void {
+    for (let template of document.querySelectorAll("template")) {
+      if (template.content.firstElementChild.localName == _tagName) {
+        console.log("Register", template);
+        templates.set(_tagName, template.content);
+      }
+    }
   }
 
   export function registerClass(_tag: string, _class: typeof Custom): void {

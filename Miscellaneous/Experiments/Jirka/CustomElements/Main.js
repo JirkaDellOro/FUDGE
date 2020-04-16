@@ -40,9 +40,14 @@ var Custom;
         }
     }
     Custom_1.Custom = Custom;
-    function registerTemplate(_template) {
-        console.log("Register", _template);
-        templates.set(_template.content.firstElementChild.tagName.toLowerCase(), _template.content);
+    // export function registerTemplate(_template: HTMLTemplateElement): void {
+    function registerTemplate(_tagName) {
+        for (let template of document.querySelectorAll("template")) {
+            if (template.content.firstElementChild.localName == _tagName) {
+                console.log("Register", template);
+                templates.set(_tagName, template.content);
+            }
+        }
     }
     Custom_1.registerTemplate = registerTemplate;
     function registerClass(_tag, _class) {
