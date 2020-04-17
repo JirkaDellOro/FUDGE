@@ -2,8 +2,13 @@ namespace FudgeUserInterface {
   export class CustomElementBoolean extends CustomElement {
     // @ts-ignore
     private static customElement: void = customElements.define("fudge-boolean", CustomElementBoolean);
-    constructor(_key: string, _value: boolean = false) {
+
+    constructor(_key: string, _label?: string) {
       super(_key);
+      if (_label == undefined)
+        _label = _key;
+      if (_label)
+        this.setAttribute("label", _label);
     }
 
     connectedCallback(): void {
@@ -16,8 +21,6 @@ namespace FudgeUserInterface {
       label.textContent = this.getAttribute("label");
       label.htmlFor = input.id;
       this.appendChild(label);
-
-      console.log(this.getAttribute("key"));
     }
   }
 }

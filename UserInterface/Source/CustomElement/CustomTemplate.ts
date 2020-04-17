@@ -5,7 +5,7 @@ namespace FudgeUserInterface {
     private static fragment: Map<string, DocumentFragment> = new Map();
 
     constructor() {
-      super();
+      super(undefined);
     }
 
     connectedCallback(): void {

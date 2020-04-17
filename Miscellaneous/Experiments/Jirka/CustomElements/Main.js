@@ -23,7 +23,7 @@ var Custom;
     Custom_1.CustomElement = CustomElement;
     let CustomElementBoolean = /** @class */ (() => {
         class CustomElementBoolean extends CustomElement {
-            constructor(_key, _label, _value = false) {
+            constructor(_key, _label) {
                 super(_key);
                 if (_label == undefined)
                     _label = _key;
@@ -47,6 +47,37 @@ var Custom;
         return CustomElementBoolean;
     })();
     Custom_1.CustomElementBoolean = CustomElementBoolean;
+    let CustomElementStepper = /** @class */ (() => {
+        class CustomElementStepper extends CustomElement {
+            constructor(_key, _label, _params) {
+                super(_key);
+                if (_label == undefined)
+                    _label = _key;
+                if (_label)
+                    this.setAttribute("label", _label);
+                if (_params)
+                    for (let key in _params)
+                        this.setAttribute(key, _params[key]);
+            }
+            connectedCallback() {
+                let label = document.createElement("label");
+                label.textContent = this.getAttribute("label");
+                // label.htmlFor = input.id;
+                this.appendChild(label);
+                let input = document.createElement("input");
+                input.type = "number";
+                // input.id = CustomElement.nextId;
+                for (let attribute of this.getAttributeNames())
+                    if (attribute != "key" && attribute != "label")
+                        input.setAttribute(attribute, this.getAttribute(attribute));
+                this.appendChild(input);
+            }
+        }
+        // @ts-ignore
+        CustomElementStepper.customElement = customElements.define("fudge-stepper", CustomElementStepper);
+        return CustomElementStepper;
+    })();
+    Custom_1.CustomElementStepper = CustomElementStepper;
     class Custom extends HTMLElement {
         constructor() {
             super();
@@ -131,9 +162,23 @@ var Custom;
             fieldset.appendChild(document.createElement(name));
             document.body.appendChild(fieldset);
         }
-        let fudgeBoolean = new CustomElementBoolean("test", "testlabel", true);
+        let fudgeBoolean = new CustomElementBoolean("boolean", "new Boolean");
         document.body.appendChild(fudgeBoolean);
-        document.createElement("fudge-boolean");
+        document.body.appendChild(document.createElement("br"));
+        let fudgeStepper = new CustomElementStepper("stepper", "new Stepper", { min: -10, max: 10, step: 2, value: 5 });
+        document.body.appendChild(fudgeStepper);
+        document.body.appendChild(document.createElement("br"));
+        fudgeBoolean = document.createElement("fudge-boolean");
+        fudgeBoolean.setAttribute("label", "createBoolean");
+        fudgeBoolean.setAttribute("key", "boolean");
+        document.body.appendChild(fudgeBoolean);
+        document.body.appendChild(document.createElement("br"));
+        fudgeStepper = document.createElement("fudge-stepper");
+        fudgeStepper.setAttribute("label", "createStepper");
+        fudgeStepper.setAttribute("key", "stepper");
+        fudgeStepper.setAttribute("step", "0.1");
+        document.body.appendChild(fudgeStepper);
+        document.body.appendChild(document.createElement("br"));
         // customElements.define("custom-boolean", CustomElementBoolean);
         // customElements.define("custom-vector3", CustomVector3);
     }

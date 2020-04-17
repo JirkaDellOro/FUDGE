@@ -24,7 +24,7 @@ namespace Custom {
   export class CustomElementBoolean extends CustomElement {
     // @ts-ignore
     private static customElement: void = customElements.define("fudge-boolean", CustomElementBoolean);
-    constructor(_key: string, _label?: string, _value: boolean = false) {
+    constructor(_key: string, _label?: string) {
       super(_key);
       if (_label == undefined)
         _label = _key;
@@ -46,6 +46,40 @@ namespace Custom {
       console.log(this.getAttribute("key"));
     }
   }
+
+  export class CustomElementStepper extends CustomElement {
+    // @ts-ignore
+    private static customElement: void = customElements.define("fudge-stepper", CustomElementStepper);
+    public params: string;
+
+    constructor(_key: string, _label?: string, _params?: Object) {
+      super(_key);
+      if (_label == undefined)
+        _label = _key;
+      if (_label)
+        this.setAttribute("label", _label);
+      if (_params)
+        for (let key in _params)
+          this.setAttribute(key, _params[key]);
+    }
+
+    connectedCallback(): void {
+      let label: HTMLLabelElement = document.createElement("label");
+      label.textContent = this.getAttribute("label");
+      // label.htmlFor = input.id;
+      this.appendChild(label);
+
+      let input: HTMLInputElement = document.createElement("input");
+      input.type = "number";
+      // input.id = CustomElement.nextId;
+      for (let attribute of this.getAttributeNames())
+        if (attribute != "key" && attribute != "label")
+          input.setAttribute(attribute, this.getAttribute(attribute));
+
+      this.appendChild(input);
+    }
+  }
+
 
   export class Custom extends HTMLElement {
     public static tag: string;
@@ -145,10 +179,26 @@ namespace Custom {
       document.body.appendChild(fieldset);
     }
 
-    let fudgeBoolean: CustomElementBoolean = new CustomElementBoolean("test", "testlabel", true);
+    let fudgeBoolean: CustomElementBoolean = new CustomElementBoolean("boolean", "new Boolean");
     document.body.appendChild(fudgeBoolean);
+    document.body.appendChild(document.createElement("br"));
 
-    document.createElement("fudge-boolean");
+    let fudgeStepper: CustomElementBoolean = new CustomElementStepper("stepper", "new Stepper", { min: -10, max: 10, step: 2, value: 5 });
+    document.body.appendChild(fudgeStepper);
+    document.body.appendChild(document.createElement("br"));
+
+    fudgeBoolean = <CustomElementBoolean>document.createElement("fudge-boolean");
+    fudgeBoolean.setAttribute("label", "createBoolean");
+    fudgeBoolean.setAttribute("key", "boolean");
+    document.body.appendChild(fudgeBoolean);
+    document.body.appendChild(document.createElement("br"));
+
+    fudgeStepper = <CustomElementStepper>document.createElement("fudge-stepper");
+    fudgeStepper.setAttribute("label", "createStepper");
+    fudgeStepper.setAttribute("key", "stepper");
+    fudgeStepper.setAttribute("step", "0.1");
+    document.body.appendChild(fudgeStepper);
+    document.body.appendChild(document.createElement("br"));
 
     // customElements.define("custom-boolean", CustomElementBoolean);
     // customElements.define("custom-vector3", CustomVector3);
