@@ -2,17 +2,40 @@ namespace Custom {
   window.addEventListener("load", init);
   let templates: Map<string, DocumentFragment> = new Map();
 
-  class CustomBoolean extends HTMLElement {
-    // private static customElement: void = customElements.define("custom-boolean", CustomBoolean);
-    constructor() {
+  export abstract class CustomElement extends HTMLElement {
+    private static idCounter: number = 0;
+    protected initialized: boolean = false;
+
+    public constructor(_key: string) {
       super();
+      if (_key)
+        this.setAttribute("key", _key);
+    }
+
+    public get key(): string {
+      return this.getAttribute("key");
+    }
+
+    public static get nextId(): string {
+      return "ƒ" + CustomElement.idCounter++;
+    }
+  }
+
+  export class CustomElementBoolean extends CustomElement {
+    // @ts-ignore
+    private static customElement: void = customElements.define("fudge-boolean", CustomElementBoolean);
+    constructor(_key: string, _label?: string, _value: boolean = false) {
+      super(_key);
+      if (_label == undefined)
+        _label = _key;
+      if (_label)
+        this.setAttribute("label", _label);
     }
 
     connectedCallback(): void {
-      console.log("Test-Simple");
       let input: HTMLInputElement = document.createElement("input");
       input.type = "checkbox";
-      input.id = "test";
+      input.id = CustomElement.nextId;
       this.appendChild(input);
 
       let label: HTMLLabelElement = document.createElement("label");
@@ -26,7 +49,6 @@ namespace Custom {
 
   export class Custom extends HTMLElement {
     public static tag: string;
-    public node: HTMLElement;
     private initialized: boolean = false;
 
     constructor() {
@@ -36,10 +58,12 @@ namespace Custom {
     connectedCallback(): void {
       if (this.initialized)
         return;
-      let content: HTMLElement = <HTMLElement>templates.get(this.constructor["tag"]).firstElementChild;
+      let fragment: DocumentFragment = templates.get(Reflect.get(this.constructor, "tag"));
+      let content: HTMLElement = <HTMLElement>fragment.firstElementChild;
+
       let style: CSSStyleDeclaration = this.style;
       for (let entry of content.style) {
-        style.setProperty(entry, content.style[entry]);
+        style.setProperty(entry, Reflect.get(content.style, entry));
       }
       for (let child of content.childNodes) {
         this.appendChild(child.cloneNode(true));
@@ -121,7 +145,12 @@ namespace Custom {
       document.body.appendChild(fieldset);
     }
 
-    customElements.define("custom-boolean", CustomBoolean);
+    let fudgeBoolean: CustomElementBoolean = new CustomElementBoolean("test", "testlabel", true);
+    document.body.appendChild(fudgeBoolean);
+
+    document.createElement("fudge-boolean");
+
+    // customElements.define("custom-boolean", CustomElementBoolean);
     // customElements.define("custom-vector3", CustomVector3);
   }
 }

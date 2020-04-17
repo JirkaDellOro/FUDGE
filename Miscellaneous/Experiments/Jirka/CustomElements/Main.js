@@ -2,24 +2,51 @@ var Custom;
 (function (Custom_1) {
     window.addEventListener("load", init);
     let templates = new Map();
-    class CustomBoolean extends HTMLElement {
-        // private static customElement: void = customElements.define("custom-boolean", CustomBoolean);
-        constructor() {
-            super();
+    let CustomElement = /** @class */ (() => {
+        class CustomElement extends HTMLElement {
+            constructor(_key) {
+                super();
+                this.initialized = false;
+                if (_key)
+                    this.setAttribute("key", _key);
+            }
+            get key() {
+                return this.getAttribute("key");
+            }
+            static get nextId() {
+                return "ƒ" + CustomElement.idCounter++;
+            }
         }
-        connectedCallback() {
-            console.log("Test-Simple");
-            let input = document.createElement("input");
-            input.type = "checkbox";
-            input.id = "test";
-            this.appendChild(input);
-            let label = document.createElement("label");
-            label.textContent = this.getAttribute("label");
-            label.htmlFor = input.id;
-            this.appendChild(label);
-            console.log(this.getAttribute("key"));
+        CustomElement.idCounter = 0;
+        return CustomElement;
+    })();
+    Custom_1.CustomElement = CustomElement;
+    let CustomElementBoolean = /** @class */ (() => {
+        class CustomElementBoolean extends CustomElement {
+            constructor(_key, _label, _value = false) {
+                super(_key);
+                if (_label == undefined)
+                    _label = _key;
+                if (_label)
+                    this.setAttribute("label", _label);
+            }
+            connectedCallback() {
+                let input = document.createElement("input");
+                input.type = "checkbox";
+                input.id = CustomElement.nextId;
+                this.appendChild(input);
+                let label = document.createElement("label");
+                label.textContent = this.getAttribute("label");
+                label.htmlFor = input.id;
+                this.appendChild(label);
+                console.log(this.getAttribute("key"));
+            }
         }
-    }
+        // @ts-ignore
+        CustomElementBoolean.customElement = customElements.define("fudge-boolean", CustomElementBoolean);
+        return CustomElementBoolean;
+    })();
+    Custom_1.CustomElementBoolean = CustomElementBoolean;
     class Custom extends HTMLElement {
         constructor() {
             super();
@@ -28,10 +55,11 @@ var Custom;
         connectedCallback() {
             if (this.initialized)
                 return;
-            let content = templates.get(this.constructor["tag"]).firstElementChild;
+            let fragment = templates.get(Reflect.get(this.constructor, "tag"));
+            let content = fragment.firstElementChild;
             let style = this.style;
             for (let entry of content.style) {
-                style.setProperty(entry, content.style[entry]);
+                style.setProperty(entry, Reflect.get(content.style, entry));
             }
             for (let child of content.childNodes) {
                 this.appendChild(child.cloneNode(true));
@@ -103,7 +131,10 @@ var Custom;
             fieldset.appendChild(document.createElement(name));
             document.body.appendChild(fieldset);
         }
-        customElements.define("custom-boolean", CustomBoolean);
+        let fudgeBoolean = new CustomElementBoolean("test", "testlabel", true);
+        document.body.appendChild(fudgeBoolean);
+        document.createElement("fudge-boolean");
+        // customElements.define("custom-boolean", CustomElementBoolean);
         // customElements.define("custom-vector3", CustomVector3);
     }
 })(Custom || (Custom = {}));

@@ -6,25 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CustomElements</title>
   <script src="Main.js"></script>
-  <link rel="import" href="test.json">
 </head>
 
 <body>
-  ...
-  <script>
-    var link = document.querySelector('link[rel="import"]');
-    var content = link.import;
-    console.log(content);
-  </script>
-  <!-- <p is="test-stepper" label="Label">Inner</p> -->
   <fieldset>
     <legend>CustomBoolean</legend>
-    <custom-boolean key="x" label="x"></custom-boolean>
+    <fudge-boolean key="x" label="x"></fudge-boolean>
   </fieldset>
 
   <fieldset>
     <legend>CustomMatrix4x4
-      <custom-boolean key="active" label="active"></custom-boolean>
+      <fudge-boolean key="active" label="active"></fudge-boolean>
     </legend>
     <custom-matrix4x4 style="background-color: azure;"></custom-matrix4x4>
   </fieldset>
