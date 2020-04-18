@@ -5,10 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CustomElements</title>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="Stepper.js"></script>
   <script src="Main.js"></script>
 </head>
 
 <body>
+  <fieldset>
+    <legend>CustomDigit</legend>
+    <fudge-digit></fudge-digit>
+    <fudge-digit></fudge-digit>
+    <fudge-digit></fudge-digit>
+    <span style="float:left" tabindex="0">.</span>
+    <fudge-digit></fudge-digit>
+    <fudge-digit></fudge-digit>
+    <fudge-digit></fudge-digit>
+  </fieldset>
+
   <fieldset>
     <legend>CustomBoolean</legend>
     <fudge-boolean key="boolean" label="HTML-Boolean"></fudge-boolean>
@@ -16,7 +29,7 @@
 
   <fieldset>
     <legend>CustomStepper</legend>
-    <fudge-stepper key="stepper" label="HTML-Stepper" min=-1 max=1 step=0.01 value=0.1></fudge-stepper>
+    <fudge-stepper key="stepper" label="HTML-Stepper" min=-10000 max=10000 step=0.0001 value=1234.5678></fudge-stepper>
   </fieldset>
 
   <fieldset>

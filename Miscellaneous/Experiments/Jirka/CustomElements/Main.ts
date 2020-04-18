@@ -2,25 +2,6 @@ namespace Custom {
   window.addEventListener("load", init);
   let templates: Map<string, DocumentFragment> = new Map();
 
-  export abstract class CustomElement extends HTMLElement {
-    private static idCounter: number = 0;
-    protected initialized: boolean = false;
-
-    public constructor(_key: string) {
-      super();
-      if (_key)
-        this.setAttribute("key", _key);
-    }
-
-    public get key(): string {
-      return this.getAttribute("key");
-    }
-
-    public static get nextId(): string {
-      return "ƒ" + CustomElement.idCounter++;
-    }
-  }
-
   export class CustomElementBoolean extends CustomElement {
     // @ts-ignore
     private static customElement: void = customElements.define("fudge-boolean", CustomElementBoolean);
@@ -44,39 +25,6 @@ namespace Custom {
       this.appendChild(label);
 
       console.log(this.getAttribute("key"));
-    }
-  }
-
-  export class CustomElementStepper extends CustomElement {
-    // @ts-ignore
-    private static customElement: void = customElements.define("fudge-stepper", CustomElementStepper);
-    public params: string;
-
-    constructor(_key: string, _label?: string, _params?: Object) {
-      super(_key);
-      if (_label == undefined)
-        _label = _key;
-      if (_label)
-        this.setAttribute("label", _label);
-      if (_params)
-        for (let key in _params)
-          this.setAttribute(key, _params[key]);
-    }
-
-    connectedCallback(): void {
-      let label: HTMLLabelElement = document.createElement("label");
-      label.textContent = this.getAttribute("label");
-      // label.htmlFor = input.id;
-      this.appendChild(label);
-
-      let input: HTMLInputElement = document.createElement("input");
-      input.type = "number";
-      // input.id = CustomElement.nextId;
-      for (let attribute of this.getAttributeNames())
-        if (attribute != "key" && attribute != "label")
-          input.setAttribute(attribute, this.getAttribute(attribute));
-
-      this.appendChild(input);
     }
   }
 
