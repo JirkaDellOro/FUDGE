@@ -76,7 +76,7 @@ var Custom;
     Custom.CustomElementDigit = CustomElementDigit;
     let CustomElementStepper = /** @class */ (() => {
         class CustomElementStepper extends CustomElement {
-            constructor(_key, _label, _params) {
+            constructor(_key, _params) {
                 super(_key);
                 this.value = 0;
                 this.prevDisplay = 0;
@@ -102,13 +102,9 @@ var Custom;
                     }
                 };
                 this.hndWheel = (_event) => {
-                    let change = _event.deltaY < 0 ? -1 : +1;
+                    let change = _event.deltaY < 0 ? +1 : -1;
                     this.changeDigitFocussed(change);
                 };
-                if (_label == undefined)
-                    _label = _key;
-                if (_label)
-                    this.setAttribute("label", _label);
                 if (_params)
                     for (let key in _params)
                         this.setAttribute(key, _params[key]);
@@ -116,27 +112,23 @@ var Custom;
                     this.value = parseFloat(_params["value"]);
             }
             connectedCallback() {
-                let label = document.createElement("label");
-                label.textContent = this.getAttribute("label") + " ";
-                // label.htmlFor = input.id;
-                this.appendChild(label);
-                let numbers = document.createElement("span");
-                numbers.style.fontFamily = "monospace";
-                this.appendChild(numbers);
+                this.style.fontFamily = "monospace";
                 let sign = document.createElement("span");
                 sign.textContent = "+";
-                numbers.appendChild(sign);
+                this.appendChild(sign);
                 for (let exp = 2; exp > -4; exp--) {
                     let digit = new CustomElementDigit();
                     digit.setAttribute("exp", exp.toString());
-                    numbers.appendChild(digit);
+                    this.appendChild(digit);
                     if (exp == 0)
-                        numbers.innerHTML += ".";
+                        this.innerHTML += ".";
                 }
-                numbers.innerHTML += "e";
+                this.innerHTML += "e";
                 let exp = document.createElement("span");
                 exp.textContent = "+0";
-                numbers.appendChild(exp);
+                exp.tabIndex = 0;
+                exp.setAttribute("name", "exp");
+                this.appendChild(exp);
                 this.addEventListener("keydown", this.hndKey);
                 this.addEventListener("wheel", this.hndWheel);
             }
@@ -161,7 +153,7 @@ var Custom;
             }
             display() {
                 let [mantissa, exp] = this.toString().split("e");
-                let spans = this.children[1].querySelectorAll("span");
+                let spans = this.querySelectorAll("span");
                 spans[0].textContent = this.value < 0 ? "-" : "+";
                 spans[1].textContent = exp;
                 let digits = this.querySelectorAll("fudge-digit");
@@ -176,6 +168,7 @@ var Custom;
                     else
                         digit.innerHTML = "&nbsp;";
                 }
+                console.log(this.value);
             }
             changeDigitFocussed(_amount) {
                 let digit = document.activeElement;
@@ -184,6 +177,11 @@ var Custom;
                 _amount = Math.round(_amount);
                 if (_amount == 0)
                     return;
+                if (digit == this.querySelector("[name=exp]")) {
+                    this.value *= Math.pow(10, _amount);
+                    this.display();
+                    return;
+                }
                 let expDigit = parseInt(digit.getAttribute("exp"));
                 let [mantissa, expValue] = this.getMantissaAndExponent();
                 this.value += _amount * Math.pow(10, expDigit + expValue);

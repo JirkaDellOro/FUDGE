@@ -131,7 +131,7 @@ namespace Custom {
     document.body.appendChild(fudgeBoolean);
     document.body.appendChild(document.createElement("br"));
 
-    let fudgeStepper: CustomElementBoolean = new CustomElementStepper("stepper", "new Stepper", { min: -10, max: 10, step: 2, value: 5 });
+    let fudgeStepper: CustomElementBoolean = new CustomElementStepper("stepper", { min: -10, max: 10, step: 2, value: 5 });
     document.body.appendChild(fudgeStepper);
     document.body.appendChild(document.createElement("br"));
 

@@ -86,12 +86,8 @@ namespace Custom {
     public params: string;
     private prevDisplay: number = 0;
 
-    constructor(_key: string, _label?: string, _params?: Object) {
+    constructor(_key: string, _params?: Object) {
       super(_key);
-      if (_label == undefined)
-        _label = _key;
-      if (_label)
-        this.setAttribute("label", _label);
       if (_params)
         for (let key in _params)
           this.setAttribute(key, _params[key]);
@@ -100,30 +96,25 @@ namespace Custom {
     }
 
     connectedCallback(): void {
-      let label: HTMLLabelElement = document.createElement("label");
-      label.textContent = this.getAttribute("label") + " ";
-      // label.htmlFor = input.id;
-      this.appendChild(label);
-
-      let numbers: HTMLSpanElement = document.createElement("span");
-      numbers.style.fontFamily = "monospace";
-      this.appendChild(numbers);
+      this.style.fontFamily = "monospace";
 
       let sign: HTMLSpanElement = document.createElement("span");
       sign.textContent = "+";
-      numbers.appendChild(sign);
+      this.appendChild(sign);
       for (let exp: number = 2; exp > -4; exp--) {
         let digit: CustomElementDigit = new CustomElementDigit();
         digit.setAttribute("exp", exp.toString());
-        numbers.appendChild(digit);
+        this.appendChild(digit);
         if (exp == 0)
-          numbers.innerHTML += ".";
+          this.innerHTML += ".";
       }
-      numbers.innerHTML += "e";
+      this.innerHTML += "e";
 
       let exp: HTMLSpanElement = document.createElement("span");
       exp.textContent = "+0";
-      numbers.appendChild(exp);
+      exp.tabIndex = 0;
+      exp.setAttribute("name", "exp");
+      this.appendChild(exp);
 
       this.addEventListener("keydown", this.hndKey);
       this.addEventListener("wheel", this.hndWheel);
@@ -153,7 +144,7 @@ namespace Custom {
 
     private display(): void {
       let [mantissa, exp]: string[] = this.toString().split("e");
-      let spans: NodeListOf<HTMLSpanElement> = this.children[1].querySelectorAll("span");
+      let spans: NodeListOf<HTMLSpanElement> = this.querySelectorAll("span");
       spans[0].textContent = this.value < 0 ? "-" : "+";
       spans[1].textContent = exp;
 
@@ -169,6 +160,8 @@ namespace Custom {
         else
           digit.innerHTML = "&nbsp;";
       }
+
+      console.log(this.value);
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
@@ -195,7 +188,7 @@ namespace Custom {
     }
 
     private hndWheel = (_event: WheelEvent): void => {
-      let change: number = _event.deltaY < 0 ? -1 : +1;
+      let change: number = _event.deltaY < 0 ? +1 : -1;
       this.changeDigitFocussed(change);
     }
 
@@ -203,11 +196,17 @@ namespace Custom {
       let digit: Element = document.activeElement;
       if (!this.contains(digit))
         return;
-          
+
+
       _amount = Math.round(_amount);
       if (_amount == 0)
         return;
 
+      if (digit == this.querySelector("[name=exp]")) {
+        this.value *= Math.pow(10, _amount);
+        this.display();
+        return;
+      }
 
       let expDigit: number = parseInt(digit.getAttribute("exp"));
       let [mantissa, expValue]: number[] = this.getMantissaAndExponent();
