@@ -4,7 +4,7 @@
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
 
 # Wiki
-To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so, will grant you an intuitive understanding extremely helpful for further working with FUDGE.
+To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
 # Directory Overview
 ## Core
@@ -14,7 +14,7 @@ Comtains the classes for easy and even automatic creation of graphical interface
 ## Network
 Contains components for gaming over networks. This module is not fully evaluated yet.
 ## Aid
-Contains collections of classes for convenience, bundling and simplifying commonn procedures.
+Contains collections of classes for convenience, bundling and simplifying common procedures.
 ## Editor
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 ## Documentation
