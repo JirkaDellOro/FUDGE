@@ -106,6 +106,9 @@ namespace Custom {
       this.appendChild(label);
 
       let numbers: HTMLSpanElement = document.createElement("span");
+      numbers.style.fontFamily = "monospace";
+      this.appendChild(numbers);
+
       let sign: HTMLSpanElement = document.createElement("span");
       sign.textContent = "+";
       numbers.appendChild(sign);
@@ -122,8 +125,8 @@ namespace Custom {
       exp.textContent = "+0";
       numbers.appendChild(exp);
 
-      this.appendChild(numbers);
       this.addEventListener("keydown", this.hndKey);
+      this.addEventListener("wheel", this.hndWheel);
     }
 
     public setValue(_value: number): void {
@@ -133,22 +136,24 @@ namespace Custom {
       return this.value;
     }
 
-    private toString(): string {
+    public getMantissaAndExponent(): number[] {
       let prec: string = this.value.toExponential(6);
       let exp: number = parseInt(prec.split("e")[1]);
       let exp3: number = Math.trunc(exp / 3);
-      // console.log(prec, exp, exp3);
-      let mantissa: string = (this.value / Math.pow(10, exp3 * 3)).toFixed(3);
-      let prefix: string = (this.value < 0) ? "" : "+";
-      return prefix + mantissa + "e" + exp3 * 3;
+      let mantissa: number = this.value / Math.pow(10, exp3 * 3);
+      return [mantissa, exp3 * 3];
+    }
+
+    public toString(): string {
+      let [mantissa, exp]: number[] = this.getMantissaAndExponent();
+      let prefixMantissa: string = (mantissa < 0) ? "" : "+";
+      let prefixExp: string = (exp < 0) ? "" : "+";
+      return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
     }
 
     private display(): void {
-      // let mantissa: string;
-      // let exp: string;
       let [mantissa, exp]: string[] = this.toString().split("e");
       let spans: NodeListOf<HTMLSpanElement> = this.children[1].querySelectorAll("span");
-      console.log(spans);
       spans[0].textContent = this.value < 0 ? "-" : "+";
       spans[1].textContent = exp;
 
@@ -160,25 +165,21 @@ namespace Custom {
         if (pos < mantissa.length) {
           let char: string = mantissa.charAt(mantissa.length - 1 - pos);
           digit.textContent = char;
-          // digit.style.visibility = "visible";
         }
         else
           digit.innerHTML = "&nbsp;";
-          // digit.style.visibility = "hidden";
       }
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
-      let digit: CustomElementDigit = <CustomElementDigit>_event.target;
-      let expDigit: number = parseInt(digit.getAttribute("exp"));
-      let expValue: number = parseInt(this.toString().split("e")[1]);
+      let digit: Element = document.activeElement;
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-          this.value -= Math.pow(10, expDigit + expValue);
+          this.changeDigitFocussed(-1);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
-          this.value += Math.pow(10, expDigit + expValue);
+          this.changeDigitFocussed(+1);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           (<HTMLElement>digit.previousElementSibling).focus();
@@ -191,9 +192,45 @@ namespace Custom {
         default:
           break;
       }
-      console.log(this.value);
-      console.log(this.toString());
+    }
+
+    private hndWheel = (_event: WheelEvent): void => {
+      let change: number = _event.deltaY < 0 ? -1 : +1;
+      this.changeDigitFocussed(change);
+    }
+
+    private changeDigitFocussed(_amount: number): void {
+      let digit: Element = document.activeElement;
+      if (!this.contains(digit))
+        return;
+          
+      _amount = Math.round(_amount);
+      if (_amount == 0)
+        return;
+
+
+      let expDigit: number = parseInt(digit.getAttribute("exp"));
+      let [mantissa, expValue]: number[] = this.getMantissaAndExponent();
+
+      this.value += _amount * Math.pow(10, expDigit + expValue);
+
+      let expNew: number;
+      [mantissa, expNew] = this.getMantissaAndExponent();
+      this.shiftFocus(expNew - expValue);
       this.display();
+    }
+
+    private shiftFocus(_nDigits: number): void {
+      let shiftFocus: Element = document.activeElement;
+      if (_nDigits) {
+        for (let i: number = 0; i < 3; i++)
+          if (_nDigits > 0)
+            shiftFocus = shiftFocus.nextElementSibling;
+          else
+            shiftFocus = shiftFocus.previousElementSibling;
+
+        (<HTMLElement>shiftFocus).focus();
+      }
     }
   }
 }

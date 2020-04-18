@@ -81,15 +81,13 @@ var Custom;
                 this.value = 0;
                 this.prevDisplay = 0;
                 this.hndKey = (_event) => {
-                    let digit = _event.target;
-                    let expDigit = parseInt(digit.getAttribute("exp"));
-                    let expValue = parseInt(this.toString().split("e")[1]);
+                    let digit = document.activeElement;
                     switch (_event.code) {
                         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                            this.value -= Math.pow(10, expDigit + expValue);
+                            this.changeDigitFocussed(-1);
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_UP:
-                            this.value += Math.pow(10, expDigit + expValue);
+                            this.changeDigitFocussed(+1);
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                             digit.previousElementSibling.focus();
@@ -102,9 +100,10 @@ var Custom;
                         default:
                             break;
                     }
-                    console.log(this.value);
-                    console.log(this.toString());
-                    this.display();
+                };
+                this.hndWheel = (_event) => {
+                    let change = _event.deltaY < 0 ? -1 : +1;
+                    this.changeDigitFocussed(change);
                 };
                 if (_label == undefined)
                     _label = _key;
@@ -122,6 +121,8 @@ var Custom;
                 // label.htmlFor = input.id;
                 this.appendChild(label);
                 let numbers = document.createElement("span");
+                numbers.style.fontFamily = "monospace";
+                this.appendChild(numbers);
                 let sign = document.createElement("span");
                 sign.textContent = "+";
                 numbers.appendChild(sign);
@@ -136,8 +137,8 @@ var Custom;
                 let exp = document.createElement("span");
                 exp.textContent = "+0";
                 numbers.appendChild(exp);
-                this.appendChild(numbers);
                 this.addEventListener("keydown", this.hndKey);
+                this.addEventListener("wheel", this.hndWheel);
             }
             setValue(_value) {
                 this.value = _value;
@@ -145,21 +146,22 @@ var Custom;
             getValue() {
                 return this.value;
             }
-            toString() {
+            getMantissaAndExponent() {
                 let prec = this.value.toExponential(6);
                 let exp = parseInt(prec.split("e")[1]);
                 let exp3 = Math.trunc(exp / 3);
-                // console.log(prec, exp, exp3);
-                let mantissa = (this.value / Math.pow(10, exp3 * 3)).toFixed(3);
-                let prefix = (this.value < 0) ? "" : "+";
-                return prefix + mantissa + "e" + exp3 * 3;
+                let mantissa = this.value / Math.pow(10, exp3 * 3);
+                return [mantissa, exp3 * 3];
+            }
+            toString() {
+                let [mantissa, exp] = this.getMantissaAndExponent();
+                let prefixMantissa = (mantissa < 0) ? "" : "+";
+                let prefixExp = (exp < 0) ? "" : "+";
+                return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
             }
             display() {
-                // let mantissa: string;
-                // let exp: string;
                 let [mantissa, exp] = this.toString().split("e");
                 let spans = this.children[1].querySelectorAll("span");
-                console.log(spans);
                 spans[0].textContent = this.value < 0 ? "-" : "+";
                 spans[1].textContent = exp;
                 let digits = this.querySelectorAll("fudge-digit");
@@ -170,11 +172,35 @@ var Custom;
                     if (pos < mantissa.length) {
                         let char = mantissa.charAt(mantissa.length - 1 - pos);
                         digit.textContent = char;
-                        // digit.style.visibility = "visible";
                     }
                     else
                         digit.innerHTML = "&nbsp;";
-                    // digit.style.visibility = "hidden";
+                }
+            }
+            changeDigitFocussed(_amount) {
+                let digit = document.activeElement;
+                if (!this.contains(digit))
+                    return;
+                _amount = Math.round(_amount);
+                if (_amount == 0)
+                    return;
+                let expDigit = parseInt(digit.getAttribute("exp"));
+                let [mantissa, expValue] = this.getMantissaAndExponent();
+                this.value += _amount * Math.pow(10, expDigit + expValue);
+                let expNew;
+                [mantissa, expNew] = this.getMantissaAndExponent();
+                this.shiftFocus(expNew - expValue);
+                this.display();
+            }
+            shiftFocus(_nDigits) {
+                let shiftFocus = document.activeElement;
+                if (_nDigits) {
+                    for (let i = 0; i < 3; i++)
+                        if (_nDigits > 0)
+                            shiftFocus = shiftFocus.nextElementSibling;
+                        else
+                            shiftFocus = shiftFocus.previousElementSibling;
+                    shiftFocus.focus();
                 }
             }
         }
