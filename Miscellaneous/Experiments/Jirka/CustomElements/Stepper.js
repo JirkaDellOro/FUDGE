@@ -28,7 +28,7 @@ var Custom;
             }
             connectedCallback() {
                 this.value = 0;
-                // this.tabIndex = 0;
+                this.tabIndex = -1;
                 // this.style.float = "left";
                 // this.addEventListener("keydown", this.hndKey);
             }
@@ -86,10 +86,11 @@ var Custom;
                         switch (_event.code) {
                             case ƒ.KEYBOARD_CODE.ENTER:
                             case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                            case ƒ.KEYBOARD_CODE.SPACE:
                             case ƒ.KEYBOARD_CODE.ARROW_UP:
                             case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                                 this.activateInnerTabs(true);
-                                this.querySelector("fudge-digit").focus();
+                                this.querySelectorAll("fudge-digit")[2].focus();
                                 break;
                             case ƒ.KEYBOARD_CODE.F2:
                                 this.openInput(true);
@@ -183,7 +184,7 @@ var Custom;
                 this.innerHTML += "e";
                 let exp = document.createElement("span");
                 exp.textContent = "+0";
-                // exp.tabIndex = 0;
+                exp.tabIndex = -1;
                 exp.setAttribute("name", "exp");
                 this.appendChild(exp);
                 let input = document.createElement("input");
