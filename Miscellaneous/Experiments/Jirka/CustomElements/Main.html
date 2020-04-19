@@ -18,7 +18,7 @@
 
   <fieldset>
     <legend>CustomStepper</legend>
-    <fudge-stepper key="stepper" label="HTML-Stepper" min=-10000 max=10000 step=0.0001 value=1234.5678></fudge-stepper>
+    <fudge-stepper key="stepper"></fudge-stepper>
   </fieldset>
 
   <fieldset>
@@ -50,7 +50,7 @@
 
 
   <template>
-    <custom-matrix4x4 style="text-align: center; display: grid; 
+    <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
         grid-template-columns: min-content min-content min-content min-content; 
         grid-template-rows: min-content min-content min-content min-content;">
       <span></span>
@@ -58,17 +58,17 @@
       <span>y</span>
       <span>z</span>
       translation
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
+      <fudge-stepper key="tx"></fudge-stepper>
+      <fudge-stepper key="ty"></fudge-stepper>
+      <fudge-stepper key="tz"></fudge-stepper>
       rotation
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
+      <fudge-stepper key="rx"></fudge-stepper>
+      <fudge-stepper key="ry"></fudge-stepper>
+      <fudge-stepper key="rz"></fudge-stepper>
       scale
-      <input type="number" />
-      <input type="number" />
-      <input type="number" />
+      <fudge-stepper key="sx"></fudge-stepper>
+      <fudge-stepper key="sy"></fudge-stepper>
+      <fudge-stepper key="sz"></fudge-stepper>
     </custom-matrix4x4>
   </template>
   <script>

@@ -82,6 +82,7 @@ var Custom;
                 this.prevDisplay = 0;
                 this.hndKey = (_event) => {
                     let active = document.activeElement;
+                    let numEntered = _event.key.charCodeAt(0) - 48;
                     if (active == this) {
                         switch (_event.code) {
                             case ƒ.KEYBOARD_CODE.ENTER:
@@ -96,6 +97,11 @@ var Custom;
                                 this.openInput(true);
                                 break;
                         }
+                        if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+                            this.openInput(true);
+                            this.querySelector("input").value = "";
+                            // _event.stopImmediatePropagation();
+                        }
                         return;
                     }
                     // input field overlay is active
@@ -108,7 +114,6 @@ var Custom;
                         }
                         return;
                     }
-                    let numEntered = _event.key.charCodeAt(0) - 48;
                     if (numEntered >= 0 && numEntered <= 9) {
                         let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
                         this.changeDigitFocussed(difference);

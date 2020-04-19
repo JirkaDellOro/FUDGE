@@ -200,6 +200,7 @@ namespace Custom {
 
     private hndKey = (_event: KeyboardEvent): void => {
       let active: Element = document.activeElement;
+      let numEntered: number = _event.key.charCodeAt(0) - 48;
 
       if (active == this) {
         switch (_event.code) {
@@ -215,6 +216,11 @@ namespace Custom {
             this.openInput(true);
             break;
         }
+        if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+          this.openInput(true);
+          this.querySelector("input").value = "";
+          // _event.stopImmediatePropagation();
+        }
         return;
       }
 
@@ -229,7 +235,6 @@ namespace Custom {
         return;
       }
 
-      let numEntered: number = _event.key.charCodeAt(0) - 48;
       if (numEntered >= 0 && numEntered <= 9) {
         let difference: number = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
         this.changeDigitFocussed(difference);
