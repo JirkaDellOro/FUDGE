@@ -28,7 +28,7 @@ var Custom;
             }
             connectedCallback() {
                 this.value = 0;
-                this.tabIndex = 0;
+                // this.tabIndex = 0;
                 // this.style.float = "left";
                 // this.addEventListener("keydown", this.hndKey);
             }
@@ -81,7 +81,46 @@ var Custom;
                 this.value = 0;
                 this.prevDisplay = 0;
                 this.hndKey = (_event) => {
-                    let digit = document.activeElement;
+                    let active = document.activeElement;
+                    if (active == this) {
+                        switch (_event.code) {
+                            case ƒ.KEYBOARD_CODE.ENTER:
+                            case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                            case ƒ.KEYBOARD_CODE.ARROW_UP:
+                            case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                                this.activateInnerTabs(true);
+                                this.querySelector("fudge-digit").focus();
+                                break;
+                            case ƒ.KEYBOARD_CODE.F2:
+                                this.openInput(true);
+                                break;
+                        }
+                        return;
+                    }
+                    // input field overlay is active
+                    if (active.getAttribute("type") == "number") {
+                        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
+                            this.value = Number(active.value);
+                            this.display();
+                            this.openInput(false);
+                            this.focus();
+                        }
+                        return;
+                    }
+                    let numEntered = _event.key.charCodeAt(0) - 48;
+                    if (numEntered >= 0 && numEntered <= 9) {
+                        let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
+                        this.changeDigitFocussed(difference);
+                        let next = active.nextElementSibling;
+                        if (next)
+                            next.focus();
+                        return;
+                    }
+                    if (_event.key == "-" || _event.key == "+") {
+                        this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
+                        this.display();
+                        return;
+                    }
                     switch (_event.code) {
                         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                             this.changeDigitFocussed(-1);
@@ -90,12 +129,21 @@ var Custom;
                             this.changeDigitFocussed(+1);
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                            digit.previousElementSibling.focus();
+                            active.previousElementSibling.focus();
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                            let next = digit.nextElementSibling;
+                            let next = active.nextElementSibling;
                             if (next)
                                 next.focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.ENTER:
+                        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                            this.activateInnerTabs(false);
+                            this.focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.F2:
+                            this.activateInnerTabs(false);
+                            this.openInput(true);
                             break;
                         default:
                             break;
@@ -105,6 +153,14 @@ var Custom;
                     let change = _event.deltaY < 0 ? +1 : -1;
                     this.changeDigitFocussed(change);
                 };
+                this.hndInput = (_event) => {
+                    this.openInput(false);
+                };
+                this.hndFocus = (_event) => {
+                    if (this.contains(document.activeElement))
+                        return;
+                    this.activateInnerTabs(false);
+                };
                 if (_params)
                     for (let key in _params)
                         this.setAttribute(key, _params[key]);
@@ -113,6 +169,7 @@ var Custom;
             }
             connectedCallback() {
                 this.style.fontFamily = "monospace";
+                this.tabIndex = 0;
                 let sign = document.createElement("span");
                 sign.textContent = "+";
                 this.appendChild(sign);
@@ -126,11 +183,39 @@ var Custom;
                 this.innerHTML += "e";
                 let exp = document.createElement("span");
                 exp.textContent = "+0";
-                exp.tabIndex = 0;
+                // exp.tabIndex = 0;
                 exp.setAttribute("name", "exp");
                 this.appendChild(exp);
+                let input = document.createElement("input");
+                input.type = "number";
+                input.style.position = "absolute";
+                input.style.left = "0px";
+                input.style.display = "none";
+                this.appendChild(input);
+                // input.addEventListener("change", this.hndInput);
+                input.addEventListener("blur", this.hndInput);
+                this.addEventListener("blur", this.hndFocus);
                 this.addEventListener("keydown", this.hndKey);
                 this.addEventListener("wheel", this.hndWheel);
+            }
+            activateInnerTabs(_on) {
+                let index = _on ? 0 : -1;
+                let spans = this.querySelectorAll("span");
+                spans[1].tabIndex = index;
+                let digits = this.querySelectorAll("fudge-digit");
+                for (let digit of digits)
+                    digit.tabIndex = index;
+            }
+            openInput(_open) {
+                let input = this.querySelector("input");
+                if (_open) {
+                    input.style.display = "inline-block";
+                    input.value = this.value.toString();
+                    input.focus();
+                }
+                else {
+                    input.style.display = "none";
+                }
             }
             setValue(_value) {
                 this.value = _value;
@@ -143,6 +228,7 @@ var Custom;
                 let exp = parseInt(prec.split("e")[1]);
                 let exp3 = Math.trunc(exp / 3);
                 let mantissa = this.value / Math.pow(10, exp3 * 3);
+                mantissa = Math.round(mantissa * 1000) / 1000;
                 return [mantissa, exp3 * 3];
             }
             toString() {

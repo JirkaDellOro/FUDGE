@@ -33,7 +33,7 @@ namespace Custom {
 
     connectedCallback(): void {
       this.value = 0;
-      this.tabIndex = 0;
+      // this.tabIndex = 0;
       // this.style.float = "left";
       // this.addEventListener("keydown", this.hndKey);
     }
@@ -97,6 +97,7 @@ namespace Custom {
 
     connectedCallback(): void {
       this.style.fontFamily = "monospace";
+      this.tabIndex = 0;
 
       let sign: HTMLSpanElement = document.createElement("span");
       sign.textContent = "+";
@@ -112,12 +113,44 @@ namespace Custom {
 
       let exp: HTMLSpanElement = document.createElement("span");
       exp.textContent = "+0";
-      exp.tabIndex = 0;
+      // exp.tabIndex = 0;
       exp.setAttribute("name", "exp");
       this.appendChild(exp);
 
+      let input: HTMLInputElement = document.createElement("input");
+      input.type = "number";
+      input.style.position = "absolute";
+      input.style.left = "0px";
+      input.style.display = "none";
+      this.appendChild(input);
+
+      // input.addEventListener("change", this.hndInput);
+      input.addEventListener("blur", this.hndInput);
+      this.addEventListener("blur", this.hndFocus);
       this.addEventListener("keydown", this.hndKey);
       this.addEventListener("wheel", this.hndWheel);
+    }
+
+    public activateInnerTabs(_on: boolean): void {
+      let index: number = _on ? 0 : -1;
+
+      let spans: NodeListOf<HTMLSpanElement> = this.querySelectorAll("span");
+      spans[1].tabIndex = index;
+
+      let digits: NodeListOf<CustomElementDigit> = this.querySelectorAll("fudge-digit");
+      for (let digit of digits)
+        digit.tabIndex = index;
+    }
+
+    public openInput(_open: boolean): void {
+      let input: HTMLInputElement = <HTMLInputElement>this.querySelector("input");
+      if (_open) {
+        input.style.display = "inline-block";
+        input.value = this.value.toString();
+        input.focus();
+      } else {
+        input.style.display = "none";
+      }
     }
 
     public setValue(_value: number): void {
@@ -132,6 +165,7 @@ namespace Custom {
       let exp: number = parseInt(prec.split("e")[1]);
       let exp3: number = Math.trunc(exp / 3);
       let mantissa: number = this.value / Math.pow(10, exp3 * 3);
+      mantissa = Math.round(mantissa * 1000) / 1000;
       return [mantissa, exp3 * 3];
     }
 
@@ -165,7 +199,51 @@ namespace Custom {
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
-      let digit: Element = document.activeElement;
+      let active: Element = document.activeElement;
+
+      if (active == this) {
+        switch (_event.code) {
+          case ƒ.KEYBOARD_CODE.ENTER:
+          case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+          case ƒ.KEYBOARD_CODE.ARROW_UP:
+          case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+            this.activateInnerTabs(true);
+            (<HTMLElement>this.querySelector("fudge-digit")).focus();
+            break;
+          case ƒ.KEYBOARD_CODE.F2:
+            this.openInput(true);
+            break;
+        }
+        return;
+      }
+
+      // input field overlay is active
+      if (active.getAttribute("type") == "number") {
+        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
+          this.value = Number((<HTMLInputElement>active).value);
+          this.display();
+          this.openInput(false);
+          this.focus();
+        }
+        return;
+      }
+
+      let numEntered: number = _event.key.charCodeAt(0) - 48;
+      if (numEntered >= 0 && numEntered <= 9) {
+        let difference: number = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
+        this.changeDigitFocussed(difference);
+
+        let next: HTMLElement = <HTMLElement>active.nextElementSibling;
+        if (next)
+          next.focus();
+        return;
+      }
+
+      if (_event.key == "-" || _event.key == "+") {
+        this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
+        this.display();
+        return;
+      }
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
@@ -175,12 +253,21 @@ namespace Custom {
           this.changeDigitFocussed(+1);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-          (<HTMLElement>digit.previousElementSibling).focus();
+          (<HTMLElement>active.previousElementSibling).focus();
           break;
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-          let next: HTMLElement = <HTMLElement>digit.nextElementSibling;
+          let next: HTMLElement = <HTMLElement>active.nextElementSibling;
           if (next)
             next.focus();
+          break;
+        case ƒ.KEYBOARD_CODE.ENTER:
+        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+          this.activateInnerTabs(false);
+          this.focus();
+          break;
+        case ƒ.KEYBOARD_CODE.F2:
+          this.activateInnerTabs(false);
+          this.openInput(true);
           break;
         default:
           break;
@@ -192,11 +279,21 @@ namespace Custom {
       this.changeDigitFocussed(change);
     }
 
+    private hndInput = (_event: Event): void => {
+      this.openInput(false);
+    }
+
+    private hndFocus = (_event: Event): void => {
+      if (this.contains(document.activeElement))
+        return;
+
+      this.activateInnerTabs(false);
+    }
+
     private changeDigitFocussed(_amount: number): void {
       let digit: Element = document.activeElement;
       if (!this.contains(digit))
         return;
-
 
       _amount = Math.round(_amount);
       if (_amount == 0)
