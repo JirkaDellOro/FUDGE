@@ -36,6 +36,7 @@ namespace FudgeUserInterface {
             Generator.createDropdown(key, type, value, _parent);
           }
           else {
+            console.log(type);
             switch (type) {
               case "Number":
                 Generator.createLabelElement(key, _parent, { value: key });

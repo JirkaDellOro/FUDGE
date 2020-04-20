@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>FUDGE</title>
   <!-- Stylesheets -->
-  <link type="text/css" rel="stylesheet" href="goldenlayout-base.css"/>
+  <link type="text/css" rel="stylesheet" href="goldenlayout-base.css" />
   <link type="text/css" rel="stylesheet" href="Base.css" />
   <!-- <link type="text/css" rel="stylesheet" href="../Themes/LightGray/Colors.css" /> -->
   <!-- <link type="text/css" rel="stylesheet" href="../Themes/DarkGray/Colors.css" /> -->
@@ -23,7 +23,46 @@
 </head>
 
 <body>
+  <template>
+    <custom-vector3 style="background-color: antiquewhite;">
+      <fudge-stepper key="x" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="x"></fudge-stepper>
+      <fudge-stepper key="z" label="x"></fudge-stepper>
+    </custom-vector3>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-vector3");
+    FudgeUserInterface.CustomElement.register("custom-vector3", class CustomVector3 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map(FudgeCore.Vector3, "custom-vector3");
+  </script>
 
+  <template>
+    <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
+        grid-template-columns: min-content min-content min-content min-content; 
+        grid-template-rows: min-content min-content min-content min-content;">
+      <span></span>
+      <span>x</span>
+      <span>y</span>
+      <span>z</span>
+      translation
+      <fudge-stepper key="tx"></fudge-stepper>
+      <fudge-stepper key="ty"></fudge-stepper>
+      <fudge-stepper key="tz"></fudge-stepper>
+      rotation
+      <fudge-stepper key="rx"></fudge-stepper>
+      <fudge-stepper key="ry"></fudge-stepper>
+      <fudge-stepper key="rz"></fudge-stepper>
+      scale
+      <fudge-stepper key="sx"></fudge-stepper>
+      <fudge-stepper key="sy"></fudge-stepper>
+      <fudge-stepper key="sz"></fudge-stepper>
+    </custom-matrix4x4>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-matrix4x4");
+    FudgeUserInterface.CustomElement.register("custom-matrix4x4", class CustomMatrix4x4 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map(FudgeCore.Matrix4x4, "custom-matrix4x4");
+  </script>
 </body>
 
 </html>

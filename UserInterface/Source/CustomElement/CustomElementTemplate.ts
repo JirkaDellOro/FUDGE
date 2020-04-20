@@ -1,16 +1,25 @@
 ///<reference path="CustomElement.ts"/>
 namespace FudgeUserInterface {
   export class CustomElementTemplate extends CustomElement {
-    public static tag: string;
     private static fragment: Map<string, DocumentFragment> = new Map();
 
     constructor() {
       super(undefined);
     }
 
+    public static register(_tagName: string): void {
+      for (let template of document.querySelectorAll("template")) {
+        if (template.content.firstElementChild.localName == _tagName) {
+          console.log("Register", template);
+          CustomElementTemplate.fragment.set(_tagName, template.content);
+        }
+      }
+    }
+
     connectedCallback(): void {
       if (this.initialized)
         return;
+      this.initialized = true;
 
       let fragment: DocumentFragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
       let content: HTMLElement = <HTMLElement>fragment.firstElementChild;
@@ -22,7 +31,6 @@ namespace FudgeUserInterface {
       for (let child of content.childNodes) {
         this.appendChild(child.cloneNode(true));
       }
-      this.initialized = true;
     }
   }
 }

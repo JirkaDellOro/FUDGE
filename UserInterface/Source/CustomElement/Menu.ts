@@ -96,7 +96,7 @@ namespace FudgeUserInterface {
     }
   }
 
-  customElements.define("ui-dropdown", DropMenu, { extends: "div" });
-  customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
+  // customElements.define("ui-dropdown", DropMenu, { extends: "div" });
+  // customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
   customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
 }

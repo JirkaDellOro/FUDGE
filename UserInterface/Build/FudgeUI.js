@@ -1,4 +1,422 @@
 "use strict";
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    let CustomElement = /** @class */ (() => {
+        class CustomElement extends HTMLElement {
+            constructor(_attributes) {
+                super();
+                this.initialized = false;
+                if (_attributes)
+                    for (let name in _attributes)
+                        this.setAttribute(name, _attributes[name]);
+            }
+            get key() {
+                return this.getAttribute("key");
+            }
+            static get nextId() {
+                return "ƒ" + CustomElement.idCounter++;
+            }
+            static register(_tag, _typeCustomElement, _typeObject) {
+                // console.log(_tag, _class);
+                _typeCustomElement.tag = _tag;
+                customElements.define(_tag, _typeCustomElement);
+                if (_typeObject)
+                    CustomElement.map(_typeObject, _typeCustomElement);
+            }
+            static map(_type, _typeCustomElement) {
+                CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
+            }
+            appendLabel() {
+                let label = document.createElement("label");
+                label.textContent = this.getAttribute("label");
+                this.appendChild(label);
+                return label;
+            }
+        }
+        CustomElement.mapObjectToCustomElement = new Map();
+        CustomElement.idCounter = 0;
+        return CustomElement;
+    })();
+    FudgeUserInterface.CustomElement = CustomElement;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    let CustomElementBoolean = /** @class */ (() => {
+        class CustomElementBoolean extends FudgeUserInterface.CustomElement {
+            constructor(_attributes) {
+                super(_attributes);
+                if (!_attributes.label)
+                    this.setAttribute("label", _attributes.key);
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                let input = document.createElement("input");
+                input.type = "checkbox";
+                input.id = FudgeUserInterface.CustomElement.nextId;
+                this.appendChild(input);
+                this.appendLabel().htmlFor = input.id;
+            }
+        }
+        // @ts-ignore
+        CustomElementBoolean.customElement = FudgeUserInterface.CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
+        return CustomElementBoolean;
+    })();
+    FudgeUserInterface.CustomElementBoolean = CustomElementBoolean;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    /**
+     * Represents a single digit number to be used in groups to represent a multidigit value.
+     * Is tabbable and in-/decreases previous sibling when flowing over/under.
+     */
+    let CustomElementDigit = /** @class */ (() => {
+        class CustomElementDigit extends HTMLElement {
+            constructor() {
+                super();
+                this.initialized = false;
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                this.value = 0;
+                this.tabIndex = -1;
+            }
+            set value(_value) {
+                _value = Math.trunc(_value);
+                if (_value > 9 || _value < 0)
+                    return;
+                this.textContent = _value.toString();
+            }
+            get value() {
+                return parseInt(this.textContent);
+            }
+            add(_addend) {
+                _addend = Math.trunc(_addend);
+                if (_addend == 0)
+                    return;
+                if (_addend > 0) {
+                    if (this.value < 9)
+                        this.value++;
+                    else {
+                        let prev = this.previousElementSibling;
+                        if (!(prev && prev instanceof CustomElementDigit))
+                            return;
+                        prev.add(1);
+                        this.value = 0;
+                    }
+                }
+                else {
+                    if (this.value > 0)
+                        this.value--;
+                    else {
+                        let prev = this.previousElementSibling;
+                        if (!(prev && prev instanceof CustomElementDigit))
+                            return;
+                        prev.add(-1);
+                        this.value = 9;
+                    }
+                }
+            }
+        }
+        // @ts-ignore
+        CustomElementDigit.customElement = FudgeUserInterface.CustomElement.register("fudge-digit", CustomElementDigit);
+        return CustomElementDigit;
+    })();
+    FudgeUserInterface.CustomElementDigit = CustomElementDigit;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
+    let CustomElementStepper = /** @class */ (() => {
+        class CustomElementStepper extends FudgeUserInterface.CustomElement {
+            constructor(_attributes) {
+                super(_attributes);
+                this.value = 0;
+                this.hndKey = (_event) => {
+                    let active = document.activeElement;
+                    let numEntered = _event.key.charCodeAt(0) - 48;
+                    if (active == this) {
+                        switch (_event.code) {
+                            case ƒ.KEYBOARD_CODE.ENTER:
+                            case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                            case ƒ.KEYBOARD_CODE.SPACE:
+                            case ƒ.KEYBOARD_CODE.ARROW_UP:
+                            case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                                this.activateInnerTabs(true);
+                                this.querySelectorAll("fudge-digit")[2].focus();
+                                break;
+                            case ƒ.KEYBOARD_CODE.F2:
+                                this.openInput(true);
+                                break;
+                        }
+                        if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+                            this.openInput(true);
+                            this.querySelector("input").value = "";
+                            // _event.stopImmediatePropagation();
+                        }
+                        return;
+                    }
+                    // input field overlay is active
+                    if (active.getAttribute("type") == "number") {
+                        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
+                            this.value = Number(active.value);
+                            this.display();
+                            this.openInput(false);
+                            this.focus();
+                        }
+                        return;
+                    }
+                    if (numEntered >= 0 && numEntered <= 9) {
+                        let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
+                        this.changeDigitFocussed(difference);
+                        let next = active.nextElementSibling;
+                        if (next)
+                            next.focus();
+                        return;
+                    }
+                    if (_event.key == "-" || _event.key == "+") {
+                        this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
+                        this.display();
+                        return;
+                    }
+                    switch (_event.code) {
+                        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                            this.changeDigitFocussed(-1);
+                            break;
+                        case ƒ.KEYBOARD_CODE.ARROW_UP:
+                            this.changeDigitFocussed(+1);
+                            break;
+                        case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                            active.previousElementSibling.focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                            let next = active.nextElementSibling;
+                            if (next)
+                                next.focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.ENTER:
+                        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                            this.activateInnerTabs(false);
+                            this.focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.F2:
+                            this.activateInnerTabs(false);
+                            this.openInput(true);
+                            break;
+                        default:
+                            break;
+                    }
+                };
+                this.hndWheel = (_event) => {
+                    let change = _event.deltaY < 0 ? +1 : -1;
+                    this.changeDigitFocussed(change);
+                };
+                this.hndInput = (_event) => {
+                    this.openInput(false);
+                };
+                this.hndFocus = (_event) => {
+                    if (this.contains(document.activeElement))
+                        return;
+                    this.activateInnerTabs(false);
+                };
+                if (_attributes && _attributes["value"])
+                    this.value = parseFloat(_attributes["value"]);
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                this.style.fontFamily = "monospace";
+                this.tabIndex = 0;
+                this.appendLabel();
+                let sign = document.createElement("span");
+                sign.textContent = "+";
+                this.appendChild(sign);
+                for (let exp = 2; exp > -4; exp--) {
+                    let digit = new FudgeUserInterface.CustomElementDigit();
+                    digit.setAttribute("exp", exp.toString());
+                    this.appendChild(digit);
+                    if (exp == 0)
+                        this.innerHTML += ".";
+                }
+                this.innerHTML += "e";
+                let exp = document.createElement("span");
+                exp.textContent = "+0";
+                exp.tabIndex = -1;
+                exp.setAttribute("name", "exp");
+                this.appendChild(exp);
+                let input = document.createElement("input");
+                input.type = "number";
+                input.style.position = "absolute";
+                input.style.left = "0px";
+                input.style.display = "none";
+                this.appendChild(input);
+                // input.addEventListener("change", this.hndInput);
+                input.addEventListener("blur", this.hndInput);
+                this.addEventListener("blur", this.hndFocus);
+                this.addEventListener("keydown", this.hndKey);
+                this.addEventListener("wheel", this.hndWheel);
+            }
+            activateInnerTabs(_on) {
+                let index = _on ? 0 : -1;
+                let spans = this.querySelectorAll("span");
+                spans[1].tabIndex = index;
+                let digits = this.querySelectorAll("fudge-digit");
+                for (let digit of digits)
+                    digit.tabIndex = index;
+            }
+            openInput(_open) {
+                let input = this.querySelector("input");
+                if (_open) {
+                    input.style.display = "inline-block";
+                    input.value = this.value.toString();
+                    input.focus();
+                }
+                else {
+                    input.style.display = "none";
+                }
+            }
+            setValue(_value) {
+                this.value = _value;
+            }
+            getValue() {
+                return this.value;
+            }
+            getMantissaAndExponent() {
+                let prec = this.value.toExponential(6);
+                let exp = parseInt(prec.split("e")[1]);
+                let exp3 = Math.trunc(exp / 3);
+                let mantissa = this.value / Math.pow(10, exp3 * 3);
+                mantissa = Math.round(mantissa * 1000) / 1000;
+                return [mantissa, exp3 * 3];
+            }
+            toString() {
+                let [mantissa, exp] = this.getMantissaAndExponent();
+                let prefixMantissa = (mantissa < 0) ? "" : "+";
+                let prefixExp = (exp < 0) ? "" : "+";
+                return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
+            }
+            display() {
+                let [mantissa, exp] = this.toString().split("e");
+                let spans = this.querySelectorAll("span");
+                spans[0].textContent = this.value < 0 ? "-" : "+";
+                spans[1].textContent = exp;
+                let digits = this.querySelectorAll("fudge-digit");
+                mantissa = mantissa.substring(1);
+                mantissa = mantissa.replace(".", "");
+                for (let pos = 0; pos < digits.length; pos++) {
+                    let digit = digits[5 - pos];
+                    if (pos < mantissa.length) {
+                        let char = mantissa.charAt(mantissa.length - 1 - pos);
+                        digit.textContent = char;
+                    }
+                    else
+                        digit.innerHTML = "&nbsp;";
+                }
+                console.log(this.value);
+            }
+            changeDigitFocussed(_amount) {
+                let digit = document.activeElement;
+                if (!this.contains(digit))
+                    return;
+                _amount = Math.round(_amount);
+                if (_amount == 0)
+                    return;
+                if (digit == this.querySelector("[name=exp]")) {
+                    this.value *= Math.pow(10, _amount);
+                    this.display();
+                    return;
+                }
+                let expDigit = parseInt(digit.getAttribute("exp"));
+                // @ts-ignore (mantissa not used)
+                let [mantissa, expValue] = this.getMantissaAndExponent();
+                this.value += _amount * Math.pow(10, expDigit + expValue);
+                let expNew;
+                [mantissa, expNew] = this.getMantissaAndExponent();
+                this.shiftFocus(expNew - expValue);
+                this.display();
+            }
+            shiftFocus(_nDigits) {
+                let shiftFocus = document.activeElement;
+                if (_nDigits) {
+                    for (let i = 0; i < 3; i++)
+                        if (_nDigits > 0)
+                            shiftFocus = shiftFocus.nextElementSibling;
+                        else
+                            shiftFocus = shiftFocus.previousElementSibling;
+                    shiftFocus.focus();
+                }
+            }
+        }
+        // @ts-ignore
+        CustomElementStepper.customElement = FudgeUserInterface.CustomElement.register("fudge-stepper", CustomElementStepper, Number);
+        return CustomElementStepper;
+    })();
+    FudgeUserInterface.CustomElementStepper = CustomElementStepper;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+///<reference path="CustomElement.ts"/>
+var FudgeUserInterface;
+///<reference path="CustomElement.ts"/>
+(function (FudgeUserInterface) {
+    let CustomElementTemplate = /** @class */ (() => {
+        class CustomElementTemplate extends FudgeUserInterface.CustomElement {
+            constructor() {
+                super(undefined);
+            }
+            static register(_tagName) {
+                for (let template of document.querySelectorAll("template")) {
+                    if (template.content.firstElementChild.localName == _tagName) {
+                        console.log("Register", template);
+                        CustomElementTemplate.fragment.set(_tagName, template.content);
+                    }
+                }
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                let fragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
+                let content = fragment.firstElementChild;
+                let style = this.style;
+                for (let entry of content.style) {
+                    style.setProperty(entry, Reflect.get(content.style, entry));
+                }
+                for (let child of content.childNodes) {
+                    this.appendChild(child.cloneNode(true));
+                }
+            }
+        }
+        CustomElementTemplate.fragment = new Map();
+        return CustomElementTemplate;
+    })();
+    FudgeUserInterface.CustomElementTemplate = CustomElementTemplate;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    let CustomElementTextInput = /** @class */ (() => {
+        class CustomElementTextInput extends FudgeUserInterface.CustomElement {
+            constructor(_attributes) {
+                super(_attributes);
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                let input = document.createElement("input");
+                input.id = FudgeUserInterface.CustomElement.nextId;
+                this.appendChild(input);
+                this.appendLabel();
+            }
+        }
+        // @ts-ignore
+        CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
+        return CustomElementTextInput;
+    })();
+    FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     /**
 //      * <select><option>Hallo</option></select>
@@ -461,8 +879,8 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.DropMenu = DropMenu;
-    customElements.define("ui-dropdown", DropMenu, { extends: "div" });
-    customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
+    // customElements.define("ui-dropdown", DropMenu, { extends: "div" });
+    // customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -1139,6 +1557,7 @@ var FudgeUserInterface;
                         Generator.createDropdown(key, type, value, _parent);
                     }
                     else {
+                        console.log(type);
                         switch (type) {
                             case "Number":
                                 Generator.createLabelElement(key, _parent, { value: key });

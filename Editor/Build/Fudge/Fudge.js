@@ -11,19 +11,19 @@ var Fudge;
         constructor(_mutator, _listContainer) {
             this.collectMutator = () => {
                 let children = this.listRoot.children;
-                for (let child of children) {
-                    this.mutator[child.name] = child.mutator;
-                }
+                // for (let child of children) {
+                //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
+                // }
                 console.log(this.mutator);
                 return this.mutator;
             };
             this.toggleCollapse = (_event) => {
                 _event.preventDefault();
-                console.log(_event.target instanceof ƒui.CollapsableAnimationList);
-                if (_event.target instanceof ƒui.CollapsableAnimationList) {
-                    let target = _event.target;
-                    target.collapse(target);
-                }
+                // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
+                // if (_event.target instanceof ƒui.CollapsableAnimationList) {
+                //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
+                //   target.collapse(target);
+                // }
             };
             this.mutator = _mutator;
             this.listRoot = document.createElement("ul");
@@ -78,12 +78,12 @@ var Fudge;
         }
         buildFromMutator(_mutator) {
             let listRoot = document.createElement("ul");
-            for (let key in _mutator) {
-                let listElement = new ƒui.CollapsableAnimationList(this.mutator[key], key);
-                listRoot.append(listElement);
-                this.index[key] = listElement.getElementIndex();
-                console.log(this.index);
-            }
+            // for (let key in _mutator) {
+            //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+            //   listRoot.append(listElement);
+            //   this.index[key] = listElement.getElementIndex();
+            //   console.log(this.index);
+            // }
             return listRoot;
         }
     }

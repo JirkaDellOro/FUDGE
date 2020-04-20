@@ -1,12 +1,10 @@
 namespace FudgeUserInterface {
-  export class CustomElementBoolean extends CustomElement {
+  export class CustomElementTextInput extends CustomElement {
     // @ts-ignore
-    private static customElement: void = CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
+    private static customElement: void = CustomElement.register("fudge-textinput", CustomElementTextInput, String);
 
     constructor(_attributes: CustomElementAttributes) {
       super(_attributes);
-      if (!_attributes.label)
-        this.setAttribute("label", _attributes.key);
     }
 
     connectedCallback(): void {
@@ -15,11 +13,10 @@ namespace FudgeUserInterface {
       this.initialized = true;
 
       let input: HTMLInputElement = document.createElement("input");
-      input.type = "checkbox";
       input.id = CustomElement.nextId;
       this.appendChild(input);
 
-      this.appendLabel().htmlFor = input.id;
+      this.appendLabel();
     }
   }
 }

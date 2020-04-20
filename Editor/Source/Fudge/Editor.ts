@@ -36,9 +36,9 @@ namespace Fudge {
 
     public collectMutator = (): ƒ.Mutator => {
       let children: HTMLCollection = this.listRoot.children;
-      for (let child of children) {
-        this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
-      }
+      // for (let child of children) {
+      //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
+      // }
       console.log(this.mutator);
       return this.mutator;
     }
@@ -81,22 +81,22 @@ namespace Fudge {
     }
     private buildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
       let listRoot: HTMLUListElement = document.createElement("ul");
-      for (let key in _mutator) {
-        let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-        listRoot.append(listElement);
-        this.index[key] = listElement.getElementIndex();
-        console.log(this.index);
-      }
+      // for (let key in _mutator) {
+      //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+      //   listRoot.append(listElement);
+      //   this.index[key] = listElement.getElementIndex();
+      //   console.log(this.index);
+      // }
       return listRoot;
     }
 
     private toggleCollapse = (_event: Event): void => {
       _event.preventDefault();
-      console.log(_event.target instanceof ƒui.CollapsableAnimationList);
-      if (_event.target instanceof ƒui.CollapsableAnimationList) {
-        let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
-        target.collapse(target);
-      }
+      // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
+      // if (_event.target instanceof ƒui.CollapsableAnimationList) {
+      //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
+      //   target.collapse(target);
+      // }
     }
   }
 

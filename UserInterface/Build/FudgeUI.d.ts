@@ -1,5 +1,83 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
+    interface CustomElementAttributes {
+        key: string;
+        label?: string;
+        [name: string]: string;
+    }
+    class CustomElement extends HTMLElement {
+        static tag: string;
+        private static mapObjectToCustomElement;
+        private static idCounter;
+        protected initialized: boolean;
+        constructor(_attributes?: CustomElementAttributes);
+        get key(): string;
+        static get nextId(): string;
+        static register(_tag: string, _typeCustomElement: typeof CustomElement, _typeObject?: typeof Object): void;
+        static map(_type: typeof Object, _typeCustomElement: typeof CustomElement): void;
+        appendLabel(): HTMLLabelElement;
+    }
+}
+declare namespace FudgeUserInterface {
+    class CustomElementBoolean extends CustomElement {
+        private static customElement;
+        constructor(_attributes: CustomElementAttributes);
+        connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * Represents a single digit number to be used in groups to represent a multidigit value.
+     * Is tabbable and in-/decreases previous sibling when flowing over/under.
+     */
+    class CustomElementDigit extends HTMLElement {
+        private static customElement;
+        protected initialized: boolean;
+        constructor();
+        connectedCallback(): void;
+        set value(_value: number);
+        get value(): number;
+        add(_addend: number): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    class CustomElementStepper extends CustomElement {
+        private static customElement;
+        value: number;
+        params: string;
+        constructor(_attributes?: CustomElementAttributes);
+        connectedCallback(): void;
+        activateInnerTabs(_on: boolean): void;
+        openInput(_open: boolean): void;
+        setValue(_value: number): void;
+        getValue(): number;
+        getMantissaAndExponent(): number[];
+        toString(): string;
+        private display;
+        private hndKey;
+        private hndWheel;
+        private hndInput;
+        private hndFocus;
+        private changeDigitFocussed;
+        private shiftFocus;
+    }
+}
+declare namespace FudgeUserInterface {
+    class CustomElementTemplate extends CustomElement {
+        private static fragment;
+        constructor();
+        static register(_tagName: string): void;
+        connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    class CustomElementTextInput extends CustomElement {
+        private static customElement;
+        constructor(_attributes: CustomElementAttributes);
+        connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
     class FoldableFieldSet extends HTMLFieldSetElement {
         content: HTMLDivElement;
         private checkbox;
