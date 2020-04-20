@@ -139,6 +139,7 @@ var FudgeUserInterface;
                 this.hndKey = (_event) => {
                     let active = document.activeElement;
                     let numEntered = _event.key.charCodeAt(0) - 48;
+                    _event.stopPropagation();
                     if (active == this) {
                         switch (_event.code) {
                             case ƒ.KEYBOARD_CODE.ENTER:
@@ -603,10 +604,13 @@ var FudgeUserInterface;
                         let previous = this.previousElementSibling;
                         if (previous && previous.tabIndex > -1) {
                             let fieldsets = previous.querySelectorAll("fieldset");
-                            if (fieldsets.length == 0)
-                                previous.focus();
+                            let i = fieldsets.length;
+                            if (i)
+                                do { // focus the last visible fieldset
+                                    fieldsets[--i].focus();
+                                } while (!fieldsets[i].offsetParent);
                             else
-                                fieldsets[fieldsets.length - 1].focus();
+                                previous.focus();
                             _event.stopPropagation();
                         }
                         break;
@@ -652,7 +656,7 @@ var FudgeUserInterface;
                             previous = previous.previousElementSibling;
                         } while (previous && !(previous instanceof FoldableFieldSet));
                         if (previous)
-                            if (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP)
+                            if (previous.isOpen)
                                 this.dispatchEvent(new KeyboardEvent(FudgeUserInterface.EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                             else
                                 previous.focus();
@@ -1551,11 +1555,14 @@ var FudgeUserInterface;
                 if (!element) {
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
+                    if (subMutable instanceof ƒ.Mutable)
+                        element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
+                    else //HACK
+                        element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type.toString() });
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
                 }
-                fieldset.appendChild(element);
+                fieldset.content.appendChild(element);
             }
             return fieldset;
         }

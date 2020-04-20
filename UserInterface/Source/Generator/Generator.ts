@@ -25,11 +25,14 @@ namespace FudgeUserInterface {
         if (!element) {
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
-          element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
+          if (subMutable instanceof ƒ.Mutable)
+            element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
+          else //HACK
+            element = new CustomElementTextInput({key: key, label: key, value: type.toString()});
           // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
           // _parent.appendChild(fieldset);
         }
-        fieldset.appendChild(element);
+        fieldset.content.appendChild(element);
       }
       return fieldset;
     }

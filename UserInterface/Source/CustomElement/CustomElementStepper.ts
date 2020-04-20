@@ -126,6 +126,8 @@ namespace FudgeUserInterface {
       let active: Element = document.activeElement;
       let numEntered: number = _event.key.charCodeAt(0) - 48;
 
+      _event.stopPropagation();
+
       if (active == this) {
         switch (_event.code) {
           case ƒ.KEYBOARD_CODE.ENTER:

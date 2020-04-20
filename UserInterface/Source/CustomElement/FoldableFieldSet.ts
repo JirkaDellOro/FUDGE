@@ -51,10 +51,15 @@ namespace FudgeUserInterface {
           let previous: HTMLElement = <HTMLElement>this.previousElementSibling;
           if (previous && previous.tabIndex > -1) {
             let fieldsets: NodeListOf<HTMLFieldSetElement> = previous.querySelectorAll("fieldset");
-            if (fieldsets.length == 0)
-              previous.focus();
+            let i: number = fieldsets.length;
+            if (i)
+              do { // focus the last visible fieldset
+                fieldsets[--i].focus();
+              } while (!fieldsets[i].offsetParent);
             else
-              fieldsets[fieldsets.length - 1].focus();
+              previous.focus();
+
+
             _event.stopPropagation();
           }
           break;
@@ -104,7 +109,7 @@ namespace FudgeUserInterface {
           } while (previous && !(previous instanceof FoldableFieldSet));
 
           if (previous)
-            if (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP)
+            if ((<FoldableFieldSet>previous).isOpen)
               this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
             else
               previous.focus();
