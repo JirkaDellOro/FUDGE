@@ -12,11 +12,13 @@ namespace FudgeUserInterface {
         return;
       this.initialized = true;
 
+      this.appendLabel();
+      
       let input: HTMLInputElement = document.createElement("input");
       input.id = CustomElement.nextId;
+      input.value = this.getAttribute("value");
       this.appendChild(input);
 
-      this.appendLabel();
     }
   }
 }

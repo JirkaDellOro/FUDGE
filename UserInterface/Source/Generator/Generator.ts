@@ -8,66 +8,69 @@ namespace FudgeUserInterface {
      * Creates a userinterface for a [[FudgeCore.Mutable]]
      */
     public static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable {
-      let mutable: Mutable = new Mutable(_mutable, this.createFieldsetFromMutable(_mutable, _name));
+      let mutable: Mutable = new Mutable(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
       return mutable;
     }
 
-    public static createFieldsetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
+    public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name);
 
-      Generator.addMutator(mutator, mutatorTypes, fieldset.content, _mutable);
-
+      for (let key in mutatorTypes) {
+        let type: Object = mutatorTypes[key];
+        let value: string = mutator[key].toString();
+        let element: HTMLElement = Generator.createMutatorElement(key, type, value);
+        if (!element) {
+          let subMutable: ƒ.Mutable;
+          subMutable = Reflect.get(_mutable, key);
+          element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
+          // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
+          // _parent.appendChild(fieldset);
+        }
+        fieldset.appendChild(element);
+      }
       return fieldset;
     }
 
-    public static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void {
+    public static createMutatorElement(_key: string, _type: Object, _value: string): HTMLElement {
+      let element: HTMLElement;
       try {
-
-        for (let key in _mutatorTypes) {
-          let type: Object = _mutatorTypes[key];
-          let value: string = _mutator[key].toString();
-          if (type instanceof Object) {
-            //Type is Enum
-            //
-            Generator.createLabelElement(key, _parent);
-            Generator.createDropdown(key, type, value, _parent);
-          }
-          else {
-            console.log(type);
-            switch (type) {
-              case "Number":
-                Generator.createLabelElement(key, _parent, { value: key });
-                // Generator.createTextElement(key, _parent, { _value: value })
-                let numValue: number = parseInt(value);
-                Generator.createStepperElement(key, _parent, { value: numValue });
-                break;
-              case "Boolean":
-                Generator.createLabelElement(key, _parent, { value: key });
-                Generator.createCheckboxElement(key, (value == "true"), _parent);
-                break;
-              case "String":
-                Generator.createLabelElement(key, _parent, { value: key });
-                Generator.createTextElement(key, _parent, { value: value });
-                break;
-              // Some other complex subclass of Mutable
-              default:
-                let subMutable: ƒ.Mutable;
-                // subMutable = (<ƒ.General>_mutable)[key];
-                // subMutable = Object.getOwnPropertyDescriptor(_mutable, key).value;
-                subMutable = Reflect.get(_mutable, key);
-                let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
-                _parent.appendChild(fieldset);
-                break;
-            }
+        if (_type instanceof Object) {
+          //Type is Enum
+          //
+          element = document.createElement("span");
+          Generator.createLabelElement(_key, element);
+          Generator.createDropdown(_key, _type, _value, element);
+        }
+        else {
+          console.log(_type);
+          switch (_type) {
+            case "Number":
+              // let numValue: number = parseInt(value);
+              // Generator.createLabelElement(key, _parent, { value: key });
+              // Generator.createStepperElement(key, _parent, { value: numValue });
+              element = new CustomElementStepper({ key: _key, label: _key, value: _value });
+              break;
+            case "Boolean":
+              // Generator.createLabelElement(key, _parent, { value: key });
+              // Generator.createCheckboxElement(key, (value == "true"), _parent);
+              element = new CustomElementBoolean({ key: _key, label: _key, value: _value });
+              break;
+            case "String":
+              // Generator.createLabelElement(key, _parent, { value: key });
+              // Generator.createTextElement(key, _parent, { value: value });
+              element = new CustomElementTextInput({ key: _key, label: _key, value: _value });
+              break;
           }
         }
       } catch (_error) {
         ƒ.Debug.fudge(_error);
       }
+      return element;
     }
+
 
     public static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
       let dropdown: HTMLSelectElement = document.createElement("select");

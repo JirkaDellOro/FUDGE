@@ -36,7 +36,7 @@ namespace Fudge {
           cntHeader.append(txtNodeName);
           let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldsetFromMutable(nodeComponent);
+            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ComponentUI = new ComponentUI(nodeComponent, fieldset);
             this.content.append(uiComponent.ui);
           }

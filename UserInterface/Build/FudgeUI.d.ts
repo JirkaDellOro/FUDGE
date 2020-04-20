@@ -361,8 +361,8 @@ declare namespace FudgeUserInterface {
          * Creates a userinterface for a [[FudgeCore.Mutable]]
          */
         static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable;
-        static createFieldsetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
-        static addMutator(_mutator: ƒ.Mutator, _mutatorTypes: ƒ.MutatorAttributeTypes, _parent: HTMLElement, _mutable: ƒ.Mutable): void;
+        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
+        static createMutatorElement(_key: string, _type: Object, _value: string): HTMLElement;
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFoldableFieldset(_legend: string): FoldableFieldSet;
         static createLabelElement(_name: string, _parent: HTMLElement, params?: {

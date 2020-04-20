@@ -1373,7 +1373,7 @@ var Fudge;
                     cntHeader.append(txtNodeName);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let fieldset = ƒui.Generator.createFieldsetFromMutable(nodeComponent);
+                        let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ComponentUI(nodeComponent, fieldset);
                         this.content.append(uiComponent.ui);
                     }

@@ -17,6 +17,7 @@ namespace FudgeUserInterface {
       let input: HTMLInputElement = document.createElement("input");
       input.type = "checkbox";
       input.id = CustomElement.nextId;
+      input.checked = this.getAttribute("value") == "true";
       this.appendChild(input);
 
       this.appendLabel().htmlFor = input.id;

@@ -55,6 +55,7 @@ var FudgeUserInterface;
                 let input = document.createElement("input");
                 input.type = "checkbox";
                 input.id = FudgeUserInterface.CustomElement.nextId;
+                input.checked = this.getAttribute("value") == "true";
                 this.appendChild(input);
                 this.appendLabel().htmlFor = input.id;
             }
@@ -405,10 +406,11 @@ var FudgeUserInterface;
                 if (this.initialized)
                     return;
                 this.initialized = true;
+                this.appendLabel();
                 let input = document.createElement("input");
                 input.id = FudgeUserInterface.CustomElement.nextId;
+                input.value = this.getAttribute("value");
                 this.appendChild(input);
-                this.appendLabel();
             }
         }
         // @ts-ignore
@@ -1534,61 +1536,65 @@ var FudgeUserInterface;
          * Creates a userinterface for a [[FudgeCore.Mutable]]
          */
         static createMutable(_mutable, _name) {
-            let mutable = new FudgeUserInterface.Mutable(_mutable, this.createFieldsetFromMutable(_mutable, _name));
+            let mutable = new FudgeUserInterface.Mutable(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
             return mutable;
         }
-        static createFieldsetFromMutable(_mutable, _name, _mutator) {
+        static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let fieldset = Generator.createFoldableFieldset(name);
-            Generator.addMutator(mutator, mutatorTypes, fieldset.content, _mutable);
+            for (let key in mutatorTypes) {
+                let type = mutatorTypes[key];
+                let value = mutator[key].toString();
+                let element = Generator.createMutatorElement(key, type, value);
+                if (!element) {
+                    let subMutable;
+                    subMutable = Reflect.get(_mutable, key);
+                    element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
+                    // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
+                    // _parent.appendChild(fieldset);
+                }
+                fieldset.appendChild(element);
+            }
             return fieldset;
         }
-        static addMutator(_mutator, _mutatorTypes, _parent, _mutable) {
+        static createMutatorElement(_key, _type, _value) {
+            let element;
             try {
-                for (let key in _mutatorTypes) {
-                    let type = _mutatorTypes[key];
-                    let value = _mutator[key].toString();
-                    if (type instanceof Object) {
-                        //Type is Enum
-                        //
-                        Generator.createLabelElement(key, _parent);
-                        Generator.createDropdown(key, type, value, _parent);
-                    }
-                    else {
-                        console.log(type);
-                        switch (type) {
-                            case "Number":
-                                Generator.createLabelElement(key, _parent, { value: key });
-                                // Generator.createTextElement(key, _parent, { _value: value })
-                                let numValue = parseInt(value);
-                                Generator.createStepperElement(key, _parent, { value: numValue });
-                                break;
-                            case "Boolean":
-                                Generator.createLabelElement(key, _parent, { value: key });
-                                Generator.createCheckboxElement(key, (value == "true"), _parent);
-                                break;
-                            case "String":
-                                Generator.createLabelElement(key, _parent, { value: key });
-                                Generator.createTextElement(key, _parent, { value: value });
-                                break;
-                            // Some other complex subclass of Mutable
-                            default:
-                                let subMutable;
-                                // subMutable = (<ƒ.General>_mutable)[key];
-                                // subMutable = Object.getOwnPropertyDescriptor(_mutable, key).value;
-                                subMutable = Reflect.get(_mutable, key);
-                                let fieldset = Generator.createFieldsetFromMutable(subMutable, key, _mutator[key]);
-                                _parent.appendChild(fieldset);
-                                break;
-                        }
+                if (_type instanceof Object) {
+                    //Type is Enum
+                    //
+                    element = document.createElement("span");
+                    Generator.createLabelElement(_key, element);
+                    Generator.createDropdown(_key, _type, _value, element);
+                }
+                else {
+                    console.log(_type);
+                    switch (_type) {
+                        case "Number":
+                            // let numValue: number = parseInt(value);
+                            // Generator.createLabelElement(key, _parent, { value: key });
+                            // Generator.createStepperElement(key, _parent, { value: numValue });
+                            element = new FudgeUserInterface.CustomElementStepper({ key: _key, label: _key, value: _value });
+                            break;
+                        case "Boolean":
+                            // Generator.createLabelElement(key, _parent, { value: key });
+                            // Generator.createCheckboxElement(key, (value == "true"), _parent);
+                            element = new FudgeUserInterface.CustomElementBoolean({ key: _key, label: _key, value: _value });
+                            break;
+                        case "String":
+                            // Generator.createLabelElement(key, _parent, { value: key });
+                            // Generator.createTextElement(key, _parent, { value: value });
+                            element = new FudgeUserInterface.CustomElementTextInput({ key: _key, label: _key, value: _value });
+                            break;
                     }
                 }
             }
             catch (_error) {
                 ƒ.Debug.fudge(_error);
             }
+            return element;
         }
         static createDropdown(_name, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");

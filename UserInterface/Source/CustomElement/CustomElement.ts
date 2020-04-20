@@ -31,7 +31,7 @@ namespace FudgeUserInterface {
       // console.log(_tag, _class);
       _typeCustomElement.tag = _tag;
       customElements.define(_tag, _typeCustomElement);
-      
+
       if (_typeObject)
         CustomElement.map(_typeObject, _typeCustomElement);
     }
