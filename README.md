@@ -35,6 +35,7 @@ A collection of various other helpful documents and resources
 - Cameratransformation, Axonometry and VR
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
+- Importer for standard file formats
 - Light and Shadpw
 - Diegetic User-Interface
 - Runtime-Recording for Replay
