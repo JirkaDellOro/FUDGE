@@ -1,4 +1,4 @@
-namespace Flame {
+namespace Firework {
   import f = FudgeCore;
   import fAid = FudgeAid;
 
@@ -35,24 +35,30 @@ namespace Flame {
       for (let i: number = 0; i < 1000; i++) {
         this.randomNumbers.push(Math.random());
       }
+
+      console.log(this.randomNumbers.toString());
     }
 
     public update(_time: number): void {
       let inNormTime: number = _time * this.speed % 1;
       for (let index: number = 0, length: number = this.particles.length; index < length; ++index) {
-        let inParticle: number = index * this.normNumberOfParticles - this.normNumberOfParticles / 2;
-        let inNormParticleTime: number = (inParticle + inNormTime) % 1;
-        let x: number = (this.polynom4(inNormParticleTime - 0.7, this.a, this.b, this.c, this.d) + this.randomNumberFrom(index, -0.2, 0.2) * (1 + inNormParticleTime * 1.5)); //* (1 + inNormParticleTime * 1.5);
-        let y: number = inNormParticleTime;
+        // let inParticle: number = index * this.normNumberOfParticles; // - this.normNumberOfParticles / 2;
+        // let inNormParticleTime: number = (inParticle + inNormTime) % 1;
+        let x: number = 0; //Math.sqrt(inNormTime); //this.scale(this.polynom4(inNormParticleTime, this.a, this.b, this.c, this.d), this.randomNumberFrom(index, this.scaleXMin, this.scaleXMax));
+        let y: number = Math.sqrt(inNormTime) * this.randomNumbers[index + 1]; //inNormParticleTime;
         let z: number = 0;
         let translation: f.Vector3 = new f.Vector3(x, y, z);
+        translation.transform(f.Matrix4x4.ROTATION_Z(this.randomNumbers[index] * 360));
+        translation.add(f.Vector3.Y(- 1 / 2 * 10 * inNormTime * inNormTime));
+        // translation.y = translation.y + translation.y * inNormTime - 1 / 2 * 10 * inNormTime * inNormTime;
         this.particles[index].mtxLocal.translation = translation;
       }
     }
 
-    private polynom4(_x: number, _a: number, _b: number, _c: number, _d: number): number {
-      return _a * Math.pow(_x, 3) + _b * Math.pow(_x, 2) + _c * _x + _d;
-    }
+    public polynom4: (_x: number, _a: number, _b: number, _c: number, _d: number) => number
+      = function (_x: number, _a: number, _b: number, _c: number, _d: number): number {
+        return _a * Math.pow(_x, 3) + _b * Math.pow(_x, 2) + _c * _x + _d;
+      };
 
     private scale(_value: number, _by: number): number {
       return _value * _by;
@@ -65,7 +71,7 @@ namespace Flame {
     }
 
     private randomNumberFrom(_index: number, _min: number, _max: number): number {
-      return this.randomNumbers[_index] * (_max - _min) + _min; 
+      return this.randomNumbers[_index] * (_max - _min) + _min;
     }
   }
 }

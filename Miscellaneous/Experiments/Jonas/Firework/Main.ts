@@ -1,7 +1,7 @@
 ///<reference types="../../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../../Aid/Build/FudgeAid"/>
 
-namespace Flame {
+namespace Firework {
   import f = FudgeCore;
   import fAid = FudgeAid;
 
@@ -53,7 +53,8 @@ namespace Flame {
 
     // setup input
     input.addEventListener("input", (_event: Event) => {
-      let newParticleSystem: ParticleSystem = new ParticleSystem(mesh, material, f.Matrix4x4.TRANSLATION(f.Vector3.Y(-.5)), input.valueAsNumber, 0.5, -2, -1, 0.5, 0.5, 0, 1);
+      // let newParticleSystem: ParticleSystem = new ParticleSystem(mesh, material, f.Matrix4x4.TRANSLATION(f.Vector3.Y(-.5)), input.valueAsNumber, 0.5, -2, 2, 0, 0, -1, 1);
+      let newParticleSystem: ParticleSystem = new ParticleSystem(mesh, material, f.Matrix4x4.TRANSLATION(f.Vector3.Y(-.5)), input.valueAsNumber, 0.5, 0, 0, 5, 0, -1, 1);
       root.replaceChild(getParticleSystem(), newParticleSystem);
       particleSystem = getParticleSystem();
     });

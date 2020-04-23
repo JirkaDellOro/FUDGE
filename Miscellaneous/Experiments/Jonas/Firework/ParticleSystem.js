@@ -7,6 +7,9 @@ var Flame;
         constructor(_mesh, _material, _transform, _numberOfParticles, _speed, _a, _b, _c, _d, _scaleXMin, _scaleXMax) {
             super("Particles");
             this.randomNumbers = [];
+            this.polynom4 = function (_x, _a, _b, _c, _d) {
+                return _a * Math.pow(_x, 3) + _b * Math.pow(_x, 2) + _c * _x + _d;
+            };
             this.addComponent(new f.ComponentTransform());
             this.cmpTransform.local = _transform;
             this.speed = _speed;
@@ -24,21 +27,22 @@ var Flame;
             for (let i = 0; i < 1000; i++) {
                 this.randomNumbers.push(Math.random());
             }
+            console.log(this.randomNumbers.toString());
         }
         update(_time) {
             let inNormTime = _time * this.speed % 1;
             for (let index = 0, length = this.particles.length; index < length; ++index) {
-                let inParticle = index * this.normNumberOfParticles - this.normNumberOfParticles / 2;
-                let inNormParticleTime = (inParticle + inNormTime) % 1;
-                let x = (this.polynom4(inNormParticleTime - 0.7, this.a, this.b, this.c, this.d) + this.randomNumberFrom(index, -0.2, 0.2) * (1 + inNormParticleTime * 1.5)); //* (1 + inNormParticleTime * 1.5);
-                let y = inNormParticleTime;
+                // let inParticle: number = index * this.normNumberOfParticles; // - this.normNumberOfParticles / 2;
+                // let inNormParticleTime: number = (inParticle + inNormTime) % 1;
+                let x = 0; //Math.sqrt(inNormTime); //this.scale(this.polynom4(inNormParticleTime, this.a, this.b, this.c, this.d), this.randomNumberFrom(index, this.scaleXMin, this.scaleXMax));
+                let y = Math.sqrt(inNormTime) * this.randomNumbers[index + 1]; //inNormParticleTime;
                 let z = 0;
                 let translation = new f.Vector3(x, y, z);
+                translation.transform(f.Matrix4x4.ROTATION_Z(this.randomNumbers[index] * 360));
+                translation.add(f.Vector3.Y(-1 / 2 * 10 * inNormTime * inNormTime));
+                // translation.y = translation.y + translation.y * inNormTime - 1 / 2 * 10 * inNormTime * inNormTime;
                 this.particles[index].mtxLocal.translation = translation;
             }
-        }
-        polynom4(_x, _a, _b, _c, _d) {
-            return _a * Math.pow(_x, 3) + _b * Math.pow(_x, 2) + _c * _x + _d;
         }
         scale(_value, _by) {
             return _value * _by;
