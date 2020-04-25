@@ -20,5 +20,12 @@ namespace FudgeUserInterface {
       this.appendChild(input);
 
     }
+
+    public getMutatorValue(): string {
+      return this.querySelector("input").value;
+    }
+    public setMutatorValue(_value: string): void {
+      this.querySelector("input").value = _value;
+    }
   }
 }

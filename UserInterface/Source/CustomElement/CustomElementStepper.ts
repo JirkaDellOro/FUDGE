@@ -46,6 +46,7 @@ namespace FudgeUserInterface {
       input.style.position = "absolute";
       input.style.left = "0px";
       input.style.display = "none";
+      input.addEventListener("input", (_event: Event): void => { event.stopPropagation(); });
       this.appendChild(input);
 
       // input.addEventListener("change", this.hndInput);
@@ -77,11 +78,11 @@ namespace FudgeUserInterface {
       }
     }
 
-    public setValue(_value: number): void {
-      this.value = _value;
-    }
-    public getValue(): number {
+    public getMutatorValue(): number {
       return this.value;
+    }
+    public setMutatorValue(_value: number): void {
+      this.value = _value;
     }
 
     public getMantissaAndExponent(): number[] {
@@ -128,6 +129,7 @@ namespace FudgeUserInterface {
 
       _event.stopPropagation();
 
+      // if focus is on stepper, enter it and focus digit
       if (active == this) {
         switch (_event.code) {
           case ƒ.KEYBOARD_CODE.ENTER:
@@ -157,6 +159,7 @@ namespace FudgeUserInterface {
           this.display();
           this.openInput(false);
           this.focus();
+          this.dispatchEvent(new Event("input", { bubbles: true }));
         }
         return;
       }
@@ -168,21 +171,26 @@ namespace FudgeUserInterface {
         let next: HTMLElement = <HTMLElement>active.nextElementSibling;
         if (next)
           next.focus();
+
+        this.dispatchEvent(new Event("input", { bubbles: true }));
         return;
       }
 
       if (_event.key == "-" || _event.key == "+") {
         this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
         this.display();
+        this.dispatchEvent(new Event("input", { bubbles: true }));
         return;
       }
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           this.changeDigitFocussed(-1);
+          this.dispatchEvent(new Event("input", { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           this.changeDigitFocussed(+1);
+          this.dispatchEvent(new Event("input", { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           (<HTMLElement>active.previousElementSibling).focus();
@@ -209,6 +217,7 @@ namespace FudgeUserInterface {
     private hndWheel = (_event: WheelEvent): void => {
       let change: number = _event.deltaY < 0 ? +1 : -1;
       this.changeDigitFocussed(change);
+      this.dispatchEvent(new Event("input", { bubbles: true }));
     }
 
     private hndInput = (_event: Event): void => {

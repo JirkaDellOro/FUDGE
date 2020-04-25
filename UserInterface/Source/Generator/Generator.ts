@@ -27,8 +27,8 @@ namespace FudgeUserInterface {
           subMutable = Reflect.get(_mutable, key);
           if (subMutable instanceof ƒ.Mutable)
             element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
-          else //HACK
-            element = new CustomElementTextInput({key: key, label: key, value: type.toString()});
+          else //HACK! Display an enumerated select here
+            element = new CustomElementTextInput({ key: key, label: key, value: type.toString() });
           // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
           // _parent.appendChild(fieldset);
         }
@@ -42,13 +42,13 @@ namespace FudgeUserInterface {
       try {
         if (_type instanceof Object) {
           //Type is Enum
-          //
           element = document.createElement("span");
           Generator.createLabelElement(_key, element);
           Generator.createDropdown(_key, _type, _value, element);
         }
         else {
           console.log(_type);
+          // TODO: remove switch and use registered custom elements instead
           switch (_type) {
             case "Number":
               // let numValue: number = parseInt(value);
@@ -103,11 +103,11 @@ namespace FudgeUserInterface {
     //   return cntfieldset;
     // }
 
-    public static createFoldableFieldset(_legend: string): FoldableFieldSet {
-      let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_legend);
+    public static createFoldableFieldset(_key: string): FoldableFieldSet {
+      let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
-      cntFoldFieldset.name = _legend;
+      cntFoldFieldset.setAttribute("key", _key);
       return cntFoldFieldset;
     }
 
@@ -124,40 +124,40 @@ namespace FudgeUserInterface {
       return label;
     }
 
-    public static createTextElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLInputElement {
-      let text: HTMLInputElement = document.createElement("input");
-      if (params.value == undefined)
-        params.value = "";
-      if (!params.cssClass == undefined)
-        text.classList.add(params.cssClass);
-      //TODO: ids must be unique
-      // text.id = _name;
-      text.name = _name;
-      text.value = params.value;
-      _parent.appendChild(text);
+    //   public static createTextElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLInputElement {
+    //     let text: HTMLInputElement = document.createElement("input");
+    //     if (params.value == undefined)
+    //       params.value = "";
+    //     if (!params.cssClass == undefined)
+    //       text.classList.add(params.cssClass);
+    //     //TODO: ids must be unique
+    //     // text.id = _name;
+    //     text.name = _name;
+    //     text.value = params.value;
+    //     _parent.appendChild(text);
 
-      return text;
-    }
+    //     return text;
+    //   }
 
-    public static createCheckboxElement(_name: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
-      let checkbox: HTMLInputElement = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = _checked;
-      checkbox.classList.add(_cssClass);
-      checkbox.name = _name;
-      // TODO: try to stick to conventions and make ids unique...
-      // checkbox.id = _name;
-      _parent.appendChild(checkbox);
-      return checkbox;
-    }
+    //   public static createCheckboxElement(_name: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement {
+    //     let checkbox: HTMLInputElement = document.createElement("input");
+    //     checkbox.type = "checkbox";
+    //     checkbox.checked = _checked;
+    //     checkbox.classList.add(_cssClass);
+    //     checkbox.name = _name;
+    //     // TODO: try to stick to conventions and make ids unique...
+    //     // checkbox.id = _name;
+    //     _parent.appendChild(checkbox);
+    //     return checkbox;
+    //   }
 
-    public static createStepperElement(_name: string, _parent: HTMLElement, params: { value?: number, min?: number, max?: number, cssClass?: string } = {}): Stepper {
-      if (params.value == undefined)
-        params.value = 0;
-      let stepper: Stepper = new Stepper(_name, { value: params.value });
-      _parent.appendChild(stepper);
-      return stepper;
-    }
+    //   public static createStepperElement(_name: string, _parent: HTMLElement, params: { value?: number, min?: number, max?: number, cssClass?: string } = {}): Stepper {
+    //     if (params.value == undefined)
+    //       params.value = 0;
+    //     let stepper: Stepper = new Stepper(_name, { value: params.value });
+    //     _parent.appendChild(stepper);
+    //     return stepper;
+    //   }
   }
 }
 

@@ -5,7 +5,7 @@ declare namespace FudgeUserInterface {
         label?: string;
         [name: string]: string;
     }
-    class CustomElement extends HTMLElement {
+    abstract class CustomElement extends HTMLElement {
         static tag: string;
         private static mapObjectToCustomElement;
         private static idCounter;
@@ -16,6 +16,8 @@ declare namespace FudgeUserInterface {
         static register(_tag: string, _typeCustomElement: typeof CustomElement, _typeObject?: typeof Object): void;
         static map(_type: typeof Object, _typeCustomElement: typeof CustomElement): void;
         appendLabel(): HTMLLabelElement;
+        abstract getMutatorValue(): Object;
+        abstract setMutatorValue(_value: Object): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -23,6 +25,8 @@ declare namespace FudgeUserInterface {
         private static customElement;
         constructor(_attributes: CustomElementAttributes);
         connectedCallback(): void;
+        getMutatorValue(): boolean;
+        setMutatorValue(_value: boolean): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -49,8 +53,8 @@ declare namespace FudgeUserInterface {
         connectedCallback(): void;
         activateInnerTabs(_on: boolean): void;
         openInput(_open: boolean): void;
-        setValue(_value: number): void;
-        getValue(): number;
+        getMutatorValue(): number;
+        setMutatorValue(_value: number): void;
         getMantissaAndExponent(): number[];
         toString(): string;
         private display;
@@ -63,7 +67,7 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    class CustomElementTemplate extends CustomElement {
+    abstract class CustomElementTemplate extends CustomElement {
         private static fragment;
         constructor();
         static register(_tagName: string): void;
@@ -75,6 +79,8 @@ declare namespace FudgeUserInterface {
         private static customElement;
         constructor(_attributes: CustomElementAttributes);
         connectedCallback(): void;
+        getMutatorValue(): string;
+        setMutatorValue(_value: string): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -112,14 +118,6 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    class Stepper extends HTMLInputElement {
-        constructor(_label?: string, params?: {
-            min?: number;
-            max?: number;
-            step?: number;
-            value?: number;
-        });
-    }
 }
 declare namespace FudgeUserInterface {
     /**
@@ -364,22 +362,11 @@ declare namespace FudgeUserInterface {
         static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
         static createMutatorElement(_key: string, _type: Object, _value: string): HTMLElement;
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFoldableFieldset(_legend: string): FoldableFieldSet;
+        static createFoldableFieldset(_key: string): FoldableFieldSet;
         static createLabelElement(_name: string, _parent: HTMLElement, params?: {
             value?: string;
             cssClass?: string;
         }): HTMLLabelElement;
-        static createTextElement(_name: string, _parent: HTMLElement, params?: {
-            value?: string;
-            cssClass?: string;
-        }): HTMLInputElement;
-        static createCheckboxElement(_name: string, _checked: boolean, _parent: HTMLElement, _cssClass?: string): HTMLInputElement;
-        static createStepperElement(_name: string, _parent: HTMLElement, params?: {
-            value?: number;
-            min?: number;
-            max?: number;
-            cssClass?: string;
-        }): Stepper;
     }
 }
 declare namespace FudgeUserInterface {
@@ -395,6 +382,6 @@ declare namespace FudgeUserInterface {
         protected mutateOnInput: (_event: Event) => void;
         protected refresh: (_event: Event) => void;
         protected updateMutator(_mutable: ƒ.Mutable, _ui: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        protected update(_mutable: ƒ.Mutable, _ui: HTMLElement): void;
+        protected updateUserInterface(_mutable: ƒ.Mutable, _ui: HTMLElement): void;
     }
 }

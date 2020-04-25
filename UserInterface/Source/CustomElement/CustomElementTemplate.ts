@@ -1,6 +1,6 @@
 ///<reference path="CustomElement.ts"/>
 namespace FudgeUserInterface {
-  export class CustomElementTemplate extends CustomElement {
+  export abstract class CustomElementTemplate extends CustomElement {
     private static fragment: Map<string, DocumentFragment> = new Map();
 
     constructor() {

@@ -6,7 +6,7 @@ namespace FudgeUserInterface {
     [name: string]: string;
   }
 
-  export class CustomElement extends HTMLElement {
+  export abstract class CustomElement extends HTMLElement {
     public static tag: string;
     private static mapObjectToCustomElement: Map<typeof Object, typeof CustomElement> = new Map();
     private static idCounter: number = 0;
@@ -30,6 +30,7 @@ namespace FudgeUserInterface {
     public static register(_tag: string, _typeCustomElement: typeof CustomElement, _typeObject?: typeof Object): void {
       // console.log(_tag, _class);
       _typeCustomElement.tag = _tag;
+      // @ts-ignore
       customElements.define(_tag, _typeCustomElement);
 
       if (_typeObject)
@@ -46,5 +47,8 @@ namespace FudgeUserInterface {
       this.appendChild(label);
       return label;
     }
+ 
+    public abstract getMutatorValue(): Object;
+    public abstract setMutatorValue(_value: Object): void;
   }
 }

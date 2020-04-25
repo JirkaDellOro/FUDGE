@@ -19,6 +19,7 @@ var FudgeUserInterface;
             static register(_tag, _typeCustomElement, _typeObject) {
                 // console.log(_tag, _class);
                 _typeCustomElement.tag = _tag;
+                // @ts-ignore
                 customElements.define(_tag, _typeCustomElement);
                 if (_typeObject)
                     CustomElement.map(_typeObject, _typeCustomElement);
@@ -58,6 +59,12 @@ var FudgeUserInterface;
                 input.checked = this.getAttribute("value") == "true";
                 this.appendChild(input);
                 this.appendLabel().htmlFor = input.id;
+            }
+            getMutatorValue() {
+                return this.querySelector("input").checked;
+            }
+            setMutatorValue(_value) {
+                this.querySelector("input").checked = _value;
             }
         }
         // @ts-ignore
@@ -140,6 +147,7 @@ var FudgeUserInterface;
                     let active = document.activeElement;
                     let numEntered = _event.key.charCodeAt(0) - 48;
                     _event.stopPropagation();
+                    // if focus is on stepper, enter it and focus digit
                     if (active == this) {
                         switch (_event.code) {
                             case ƒ.KEYBOARD_CODE.ENTER:
@@ -168,6 +176,7 @@ var FudgeUserInterface;
                             this.display();
                             this.openInput(false);
                             this.focus();
+                            this.dispatchEvent(new Event("input", { bubbles: true }));
                         }
                         return;
                     }
@@ -177,19 +186,23 @@ var FudgeUserInterface;
                         let next = active.nextElementSibling;
                         if (next)
                             next.focus();
+                        this.dispatchEvent(new Event("input", { bubbles: true }));
                         return;
                     }
                     if (_event.key == "-" || _event.key == "+") {
                         this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
                         this.display();
+                        this.dispatchEvent(new Event("input", { bubbles: true }));
                         return;
                     }
                     switch (_event.code) {
                         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                             this.changeDigitFocussed(-1);
+                            this.dispatchEvent(new Event("input", { bubbles: true }));
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_UP:
                             this.changeDigitFocussed(+1);
+                            this.dispatchEvent(new Event("input", { bubbles: true }));
                             break;
                         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                             active.previousElementSibling.focus();
@@ -215,6 +228,7 @@ var FudgeUserInterface;
                 this.hndWheel = (_event) => {
                     let change = _event.deltaY < 0 ? +1 : -1;
                     this.changeDigitFocussed(change);
+                    this.dispatchEvent(new Event("input", { bubbles: true }));
                 };
                 this.hndInput = (_event) => {
                     this.openInput(false);
@@ -255,6 +269,7 @@ var FudgeUserInterface;
                 input.style.position = "absolute";
                 input.style.left = "0px";
                 input.style.display = "none";
+                input.addEventListener("input", (_event) => { event.stopPropagation(); });
                 this.appendChild(input);
                 // input.addEventListener("change", this.hndInput);
                 input.addEventListener("blur", this.hndInput);
@@ -281,11 +296,11 @@ var FudgeUserInterface;
                     input.style.display = "none";
                 }
             }
-            setValue(_value) {
-                this.value = _value;
-            }
-            getValue() {
+            getMutatorValue() {
                 return this.value;
+            }
+            setMutatorValue(_value) {
+                this.value = _value;
             }
             getMantissaAndExponent() {
                 let prec = this.value.toExponential(6);
@@ -412,6 +427,12 @@ var FudgeUserInterface;
                 input.id = FudgeUserInterface.CustomElement.nextId;
                 input.value = this.getAttribute("value");
                 this.appendChild(input);
+            }
+            getMutatorValue() {
+                return this.querySelector("input").value;
+            }
+            setMutatorValue(_value) {
+                this.querySelector("input").value = _value;
             }
         }
         // @ts-ignore
@@ -914,22 +935,6 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    // import ƒ = FudgeCore;
-    class Stepper extends HTMLInputElement {
-        constructor(_label = "", params = {}) {
-            super();
-            this.name = _label;
-            this.type = "number";
-            this.value = params.value.toString();
-            // this.id = _label;
-            this.step = String(params.step) || "1";
-        }
-    }
-    FudgeUserInterface.Stepper = Stepper;
-    customElements.define("ui-stepper", Stepper, { extends: "input" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
@@ -1557,7 +1562,7 @@ var FudgeUserInterface;
                     subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
                         element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
-                    else //HACK
+                    else //HACK! Display an enumerated select here
                         element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type.toString() });
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
@@ -1571,13 +1576,13 @@ var FudgeUserInterface;
             try {
                 if (_type instanceof Object) {
                     //Type is Enum
-                    //
                     element = document.createElement("span");
                     Generator.createLabelElement(_key, element);
                     Generator.createDropdown(_key, _type, _value, element);
                 }
                 else {
                     console.log(_type);
+                    // TODO: remove switch and use registered custom elements instead
                     switch (_type) {
                         case "Number":
                             // let numValue: number = parseInt(value);
@@ -1629,11 +1634,11 @@ var FudgeUserInterface;
         //   _parent.appendChild(cntfieldset);
         //   return cntfieldset;
         // }
-        static createFoldableFieldset(_legend) {
-            let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_legend);
+        static createFoldableFieldset(_key) {
+            let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
-            cntFoldFieldset.name = _legend;
+            cntFoldFieldset.setAttribute("key", _key);
             return cntFoldFieldset;
         }
         static createLabelElement(_name, _parent, params = {}) {
@@ -1647,37 +1652,6 @@ var FudgeUserInterface;
             _parent.appendChild(label);
             return label;
         }
-        static createTextElement(_name, _parent, params = {}) {
-            let text = document.createElement("input");
-            if (params.value == undefined)
-                params.value = "";
-            if (!params.cssClass == undefined)
-                text.classList.add(params.cssClass);
-            //TODO: ids must be unique
-            // text.id = _name;
-            text.name = _name;
-            text.value = params.value;
-            _parent.appendChild(text);
-            return text;
-        }
-        static createCheckboxElement(_name, _checked, _parent, _cssClass) {
-            let checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.checked = _checked;
-            checkbox.classList.add(_cssClass);
-            checkbox.name = _name;
-            // TODO: try to stick to conventions and make ids unique...
-            // checkbox.id = _name;
-            _parent.appendChild(checkbox);
-            return checkbox;
-        }
-        static createStepperElement(_name, _parent, params = {}) {
-            if (params.value == undefined)
-                params.value = 0;
-            let stepper = new FudgeUserInterface.Stepper(_name, { value: params.value });
-            _parent.appendChild(stepper);
-            return stepper;
-        }
     }
     FudgeUserInterface.Generator = Generator;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -1685,6 +1659,7 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 // / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     class Mutable {
         constructor(_mutable, _ui) {
             this.timeUpdate = 190;
@@ -1695,7 +1670,7 @@ var FudgeUserInterface;
             };
             this.refresh = (_event) => {
                 this.mutable.updateMutator(this.mutator);
-                this.update(this.mutable, this.ui);
+                this.updateUserInterface(this.mutable, this.ui);
             };
             this.ui = _ui;
             this.mutable = _mutable;
@@ -1709,22 +1684,24 @@ var FudgeUserInterface;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.ui.querySelector(`[name=${key}]`) != null) {
+                if (this.ui.querySelector(`[key=${key}]`) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        let selectElement = _ui.querySelector(`[name=${key}]`);
+                        let selectElement = _ui.querySelector(`[key=${key}]`);
                         selectElement.value = mutator[key];
                     }
                     else {
-                        let element = _ui.querySelector(`[name=${key}]`);
-                        let input = element;
+                        let element = _ui.querySelector(`[key=${key}]`);
+                        // let input: HTMLInputElement = <HTMLInputElement>element;
                         switch (type) {
                             case "Boolean":
-                                mutator[key] = input.checked;
+                                mutator[key] = element.getMutatorValue(); // .checked;
                                 break;
                             case "String":
+                                mutator[key] = element.getMutatorValue(); // .checked;
                             case "Number":
-                                mutator[key] = input.value;
+                                mutator[key] = element.getMutatorValue(); // .checked;
+                                // mutator[key] = input.value;
                                 break;
                             default:
                                 // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
@@ -1733,7 +1710,8 @@ var FudgeUserInterface;
                                 // subMutable = (<ƒ.General>_mutable)[key];
                                 subMutable = Reflect.get(_mutable, key);
                                 let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
-                                mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
+                                if (subMutable instanceof ƒ.Mutable)
+                                    mutator[key] = this.updateMutator(subMutable, element, subMutator, subTypes);
                                 break;
                         }
                     }
@@ -1741,29 +1719,33 @@ var FudgeUserInterface;
             }
             return mutator;
         }
-        update(_mutable, _ui) {
+        updateUserInterface(_mutable, _ui) {
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _ui.querySelector(`[name=${key}]`);
-                if (this.ui.querySelector(`[name=${key}]`) != null) {
+                let element = _ui.querySelector(`[key=${key}]`);
+                // TODO: examine if there is a reason for testing this.ui here instead of element...!
+                if (this.ui.querySelector(`[key=${key}]`) != null) {
                     let type = mutatorTypes[key];
                     if (type instanceof Object) {
-                        element.value = mutator[key];
+                        element.setMutatorValue(mutator[key]);
                     }
                     else {
                         switch (type) {
                             case "Boolean":
                                 // let checkbox: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                                element.checked = mutator[key];
+                                // (<HTMLInputElement>element).checked = <boolean>mutator[key];
+                                element.setMutatorValue(mutator[key]);
                                 break;
                             case "String":
                                 // let textfield: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                                element.value = mutator[key];
+                                // (<HTMLInputElement>element).value = <string>mutator[key];
+                                element.setMutatorValue(mutator[key]);
                                 break;
                             case "Number":
                                 if (document.activeElement != element) {
-                                    element.value = mutator[key];
+                                    // (<HTMLInputElement>element).value = <string>mutator[key];
+                                    element.setMutatorValue(mutator[key]);
                                 }
                                 break;
                             default:
@@ -1771,7 +1753,8 @@ var FudgeUserInterface;
                                 // t/slint:disable no-any
                                 // let subMutable: ƒ.Mutable = (<any>_mutable)[key];
                                 let subMutable = Reflect.get(_mutable, key);
-                                this.update(subMutable, fieldset);
+                                if (subMutable instanceof ƒ.Mutable)
+                                    this.updateUserInterface(subMutable, fieldset);
                                 break;
                         }
                     }

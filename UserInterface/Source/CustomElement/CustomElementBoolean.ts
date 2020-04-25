@@ -22,5 +22,12 @@ namespace FudgeUserInterface {
 
       this.appendLabel().htmlFor = input.id;
     }
+
+    public getMutatorValue(): boolean {
+      return this.querySelector("input").checked;
+    }
+    public setMutatorValue(_value: boolean): void {
+      this.querySelector("input").checked = _value;
+    }
   }
 }
