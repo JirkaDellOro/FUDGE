@@ -2,7 +2,12 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
+  /**
+   * Connects a [[FudgeCode.Mutable]] to a Userinterfaced and synchronizes that mutable with the mutator stored within.
+   * Updates the mutable on interaction with the user interface and the user interface in time intervals.
+   */
   export class Mutable {
+    // TODO: examine the use of the attribute key vs name. Key signals the use by FUDGE while name is standard and supported by forms
     public ui: HTMLElement;
     protected timeUpdate: number = 190;
     /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
@@ -19,20 +24,9 @@ namespace FudgeUserInterface {
       this.ui.addEventListener("input", this.mutateOnInput);
     }
 
-    protected mutateOnInput = (_event: Event) => {
-      this.mutator = this.updateMutator(this.mutable, this.ui);
-      this.mutable.mutate(this.mutator);
-      _event.stopPropagation();
-    }
-
-    protected refresh = (_event: Event) => {
-      this.mutable.updateMutator(this.mutator);
-      this.updateUserInterface(this.mutable, this.ui);
-    }
-
     // TODO: optimize updates with cascade of delegates instead of switches
 
-    protected updateMutator(_mutable: ƒ.Mutable, _ui: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+    public updateMutator(_mutable: ƒ.Mutable = this.mutable, _ui: HTMLElement = this.ui, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
@@ -72,7 +66,7 @@ namespace FudgeUserInterface {
       return mutator;
     }
 
-    protected updateUserInterface(_mutable: ƒ.Mutable, _ui: HTMLElement): void {
+    public updateUserInterface(_mutable: ƒ.Mutable = this.mutable, _ui: HTMLElement = this.ui): void {
       let mutator: ƒ.Mutator = _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
@@ -113,6 +107,17 @@ namespace FudgeUserInterface {
           }
         }
       }
+    }
+
+    protected mutateOnInput = (_event: Event) => {
+      this.mutator = this.updateMutator();
+      this.mutable.mutate(this.mutator);
+      _event.stopPropagation();
+    }
+
+    protected refresh = (_event: Event) => {
+      this.mutable.updateMutator(this.mutator);
+      this.updateUserInterface();
     }
   }
 }

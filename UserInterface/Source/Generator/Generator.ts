@@ -9,6 +9,7 @@ namespace FudgeUserInterface {
      */
     public static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable {
       let mutable: Mutable = new Mutable(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+      mutable.updateUserInterface();
       return mutable;
     }
 

@@ -371,6 +371,10 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+    /**
+     * Connects a [[FudgeCode.Mutable]] to a Userinterfaced and synchronizes that mutable with the mutator stored within.
+     * Updates the mutable on interaction with the user interface and the user interface in time intervals.
+     */
     class Mutable {
         ui: HTMLElement;
         protected timeUpdate: number;
@@ -379,9 +383,9 @@ declare namespace FudgeUserInterface {
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
         constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
+        updateMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        updateUserInterface(_mutable?: ƒ.Mutable, _ui?: HTMLElement): void;
         protected mutateOnInput: (_event: Event) => void;
         protected refresh: (_event: Event) => void;
-        protected updateMutator(_mutable: ƒ.Mutable, _ui: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        protected updateUserInterface(_mutable: ƒ.Mutable, _ui: HTMLElement): void;
     }
 }

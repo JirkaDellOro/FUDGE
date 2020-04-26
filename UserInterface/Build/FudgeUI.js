@@ -301,6 +301,7 @@ var FudgeUserInterface;
             }
             setMutatorValue(_value) {
                 this.value = _value;
+                this.display();
             }
             getMantissaAndExponent() {
                 let prec = this.value.toExponential(6);
@@ -1546,6 +1547,7 @@ var FudgeUserInterface;
          */
         static createMutable(_mutable, _name) {
             let mutable = new FudgeUserInterface.Mutable(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+            mutable.updateUserInterface();
             return mutable;
         }
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
@@ -1660,17 +1662,21 @@ var FudgeUserInterface;
 // / <reference types="../../../Core/Build/FudgeCore"/>
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
+    /**
+     * Connects a [[FudgeCode.Mutable]] to a Userinterfaced and synchronizes that mutable with the mutator stored within.
+     * Updates the mutable on interaction with the user interface and the user interface in time intervals.
+     */
     class Mutable {
         constructor(_mutable, _ui) {
             this.timeUpdate = 190;
             this.mutateOnInput = (_event) => {
-                this.mutator = this.updateMutator(this.mutable, this.ui);
+                this.mutator = this.updateMutator();
                 this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
             };
             this.refresh = (_event) => {
                 this.mutable.updateMutator(this.mutator);
-                this.updateUserInterface(this.mutable, this.ui);
+                this.updateUserInterface();
             };
             this.ui = _ui;
             this.mutable = _mutable;
@@ -1680,7 +1686,7 @@ var FudgeUserInterface;
             this.ui.addEventListener("input", this.mutateOnInput);
         }
         // TODO: optimize updates with cascade of delegates instead of switches
-        updateMutator(_mutable, _ui, _mutator, _types) {
+        updateMutator(_mutable = this.mutable, _ui = this.ui, _mutator, _types) {
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
@@ -1719,7 +1725,7 @@ var FudgeUserInterface;
             }
             return mutator;
         }
-        updateUserInterface(_mutable, _ui) {
+        updateUserInterface(_mutable = this.mutable, _ui = this.ui) {
             let mutator = _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {

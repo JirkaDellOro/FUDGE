@@ -83,6 +83,7 @@ namespace FudgeUserInterface {
     }
     public setMutatorValue(_value: number): void {
       this.value = _value;
+      this.display();
     }
 
     public getMantissaAndExponent(): number[] {
