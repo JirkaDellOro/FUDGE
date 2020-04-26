@@ -19,8 +19,8 @@
       "../Source/CustomElement/Tree/TreeController.ts",
       "../Source/CustomElement/Tree/TreeItem.ts",
       "../Source/Event/Event.ts",
-      "../Source/Generator/Generator.ts",
-      "../Source/Mutable/Mutable.ts"
+      "../Source/UserInterface/Generator.ts",
+      "../Source/UserInterface/UserInterface.ts"
     ],
     "js": {
       "sections": [
@@ -32,7 +32,7 @@
         },
         {
           "pos": 15,
-          "end": 81833,
+          "end": 82233,
           "kind": "text"
         }
       ],
@@ -66,7 +66,7 @@
         },
         {
           "pos": 58,
-          "end": 15228,
+          "end": 15293,
           "kind": "text"
         }
       ]

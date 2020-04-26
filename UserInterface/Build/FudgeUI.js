@@ -27,6 +27,9 @@ var FudgeUserInterface;
             static map(_type, _typeCustomElement) {
                 CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
             }
+            static get(_type) {
+                return CustomElement.mapObjectToCustomElement.get(_type);
+            }
             appendLabel() {
                 let label = document.createElement("label");
                 label.textContent = this.getAttribute("label");
@@ -1555,7 +1558,7 @@ var FudgeUserInterface;
             let fieldset = Generator.createFoldableFieldset(name);
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
-                let value = mutator[key].toString();
+                let value = mutator[key];
                 let element = Generator.createMutatorElement(key, type, value);
                 if (!element) {
                     let subMutable;
@@ -1578,27 +1581,31 @@ var FudgeUserInterface;
                     //Type is Enum
                     element = document.createElement("span");
                     Generator.createLabelElement(_key, element);
-                    Generator.createDropdown(_key, _type, _value, element);
+                    Generator.createDropdown(_key, _type, _value.toString(), element);
                 }
                 else {
                     console.log(_type);
                     // TODO: remove switch and use registered custom elements instead
+                    // @ts-ignore 
+                    console.log("Element", FudgeUserInterface.CustomElement.get(_value.constructor));
+                    // @ts-ignore 
+                    console.log("Constructor", _value.constructor);
                     switch (_type) {
                         case "Number":
                             // let numValue: number = parseInt(value);
                             // Generator.createLabelElement(key, _parent, { value: key });
                             // Generator.createStepperElement(key, _parent, { value: numValue });
-                            element = new FudgeUserInterface.CustomElementStepper({ key: _key, label: _key, value: _value });
+                            element = new FudgeUserInterface.CustomElementStepper({ key: _key, label: _key, value: _value.toString() });
                             break;
                         case "Boolean":
                             // Generator.createLabelElement(key, _parent, { value: key });
                             // Generator.createCheckboxElement(key, (value == "true"), _parent);
-                            element = new FudgeUserInterface.CustomElementBoolean({ key: _key, label: _key, value: _value });
+                            element = new FudgeUserInterface.CustomElementBoolean({ key: _key, label: _key, value: _value.toString() });
                             break;
                         case "String":
                             // Generator.createLabelElement(key, _parent, { value: key });
                             // Generator.createTextElement(key, _parent, { value: value });
-                            element = new FudgeUserInterface.CustomElementTextInput({ key: _key, label: _key, value: _value });
+                            element = new FudgeUserInterface.CustomElementTextInput({ key: _key, label: _key, value: _value.toString() });
                             break;
                     }
                 }

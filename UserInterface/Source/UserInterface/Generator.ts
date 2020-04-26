@@ -21,7 +21,7 @@ namespace FudgeUserInterface {
 
       for (let key in mutatorTypes) {
         let type: Object = mutatorTypes[key];
-        let value: string = mutator[key].toString();
+        let value: Object = mutator[key];
         let element: HTMLElement = Generator.createMutatorElement(key, type, value);
         if (!element) {
           let subMutable: ƒ.Mutable;
@@ -38,34 +38,39 @@ namespace FudgeUserInterface {
       return fieldset;
     }
 
-    public static createMutatorElement(_key: string, _type: Object, _value: string): HTMLElement {
+    public static createMutatorElement(_key: string, _type: Object, _value: Object): HTMLElement {
       let element: HTMLElement;
       try {
         if (_type instanceof Object) {
           //Type is Enum
           element = document.createElement("span");
           Generator.createLabelElement(_key, element);
-          Generator.createDropdown(_key, _type, _value, element);
+          Generator.createDropdown(_key, _type, _value.toString(), element);
         }
         else {
           console.log(_type);
           // TODO: remove switch and use registered custom elements instead
+          // @ts-ignore 
+          console.log("Element", CustomElement.get(_value.constructor));
+          // @ts-ignore 
+          console.log("Constructor", _value.constructor);
+          
           switch (_type) {
             case "Number":
               // let numValue: number = parseInt(value);
               // Generator.createLabelElement(key, _parent, { value: key });
               // Generator.createStepperElement(key, _parent, { value: numValue });
-              element = new CustomElementStepper({ key: _key, label: _key, value: _value });
+              element = new CustomElementStepper({ key: _key, label: _key, value: _value.toString() });
               break;
             case "Boolean":
               // Generator.createLabelElement(key, _parent, { value: key });
               // Generator.createCheckboxElement(key, (value == "true"), _parent);
-              element = new CustomElementBoolean({ key: _key, label: _key, value: _value });
+              element = new CustomElementBoolean({ key: _key, label: _key, value: _value.toString() });
               break;
             case "String":
               // Generator.createLabelElement(key, _parent, { value: key });
               // Generator.createTextElement(key, _parent, { value: value });
-              element = new CustomElementTextInput({ key: _key, label: _key, value: _value });
+              element = new CustomElementTextInput({ key: _key, label: _key, value: _value.toString() });
               break;
           }
         }

@@ -40,6 +40,9 @@ namespace FudgeUserInterface {
     public static map(_type: typeof Object, _typeCustomElement: typeof CustomElement): void {
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
+    public static get(_type: typeof Object): typeof CustomElement {
+      return CustomElement.mapObjectToCustomElement.get(_type);
+    }
 
     public appendLabel(): HTMLLabelElement {
       let label: HTMLLabelElement = document.createElement("label");
