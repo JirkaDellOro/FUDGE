@@ -48,31 +48,13 @@ namespace FudgeUserInterface {
           Generator.createDropdown(_key, _type, _value.toString(), element);
         }
         else {
-          console.log(_type);
           // TODO: remove switch and use registered custom elements instead
-          // @ts-ignore 
-          console.log("Element", CustomElement.get(_value.constructor));
-          // @ts-ignore 
-          console.log("Constructor", _value.constructor);
-          
-          switch (_type) {
-            case "Number":
-              // let numValue: number = parseInt(value);
-              // Generator.createLabelElement(key, _parent, { value: key });
-              // Generator.createStepperElement(key, _parent, { value: numValue });
-              element = new CustomElementStepper({ key: _key, label: _key, value: _value.toString() });
-              break;
-            case "Boolean":
-              // Generator.createLabelElement(key, _parent, { value: key });
-              // Generator.createCheckboxElement(key, (value == "true"), _parent);
-              element = new CustomElementBoolean({ key: _key, label: _key, value: _value.toString() });
-              break;
-            case "String":
-              // Generator.createLabelElement(key, _parent, { value: key });
-              // Generator.createTextElement(key, _parent, { value: value });
-              element = new CustomElementTextInput({ key: _key, label: _key, value: _value.toString() });
-              break;
-          }
+          let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
+          console.log("CustomElement", _type, elementType);
+          if (!elementType)
+            return element;
+          // @ts-ignore: instantiate abstract class
+          element = new elementType({ key: _key, label: _key, value: _value.toString() });
         }
       } catch (_error) {
         ƒ.Debug.fudge(_error);
