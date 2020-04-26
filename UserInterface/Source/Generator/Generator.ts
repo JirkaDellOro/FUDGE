@@ -7,8 +7,8 @@ namespace FudgeUserInterface {
     /**
      * Creates a userinterface for a [[FudgeCore.Mutable]]
      */
-    public static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable {
-      let mutable: Mutable = new Mutable(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+    public static createMutable(_mutable: ƒ.Mutable, _name?: string): UserInterface {
+      let mutable: UserInterface = new UserInterface(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
       mutable.updateUserInterface();
       return mutable;
     }

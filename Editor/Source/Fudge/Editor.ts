@@ -100,10 +100,10 @@ namespace Fudge {
     }
   }
 
-  export class ComponentUI extends ƒui.Mutable {
-    public constructor(_mutable: ƒ.Mutable, _ui: HTMLElement) {
-      super(_mutable, _ui);
-      this.ui.addEventListener("input", this.mutateOnInput);
+  export class ComponentUI extends ƒui.UserInterface {
+    public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
+      super(_mutable, _domElement);
+      this.domElement.addEventListener("input", this.mutateOnInput);
     }
   }
 }

@@ -23,6 +23,14 @@ namespace FudgeUserInterface {
 
       this.appendLabel();
 
+      let input: HTMLInputElement = document.createElement("input");
+      input.type = "number";
+      input.style.position = "absolute";
+      input.style.display = "none";
+      input.addEventListener("input", (_event: Event): void => { event.stopPropagation(); });
+      this.appendChild(input);
+
+
       let sign: HTMLSpanElement = document.createElement("span");
       sign.textContent = "+";
       this.appendChild(sign);
@@ -41,13 +49,6 @@ namespace FudgeUserInterface {
       exp.setAttribute("name", "exp");
       this.appendChild(exp);
 
-      let input: HTMLInputElement = document.createElement("input");
-      input.type = "number";
-      input.style.position = "absolute";
-      input.style.left = "0px";
-      input.style.display = "none";
-      input.addEventListener("input", (_event: Event): void => { event.stopPropagation(); });
-      this.appendChild(input);
 
       // input.addEventListener("change", this.hndInput);
       input.addEventListener("blur", this.hndInput);
@@ -70,7 +71,7 @@ namespace FudgeUserInterface {
     public openInput(_open: boolean): void {
       let input: HTMLInputElement = <HTMLInputElement>this.querySelector("input");
       if (_open) {
-        input.style.display = "inline-block";
+        input.style.display = "inline";
         input.value = this.value.toString();
         input.focus();
       } else {
@@ -120,8 +121,6 @@ namespace FudgeUserInterface {
         else
           digit.innerHTML = "&nbsp;";
       }
-
-      console.log(this.value);
     }
 
     private hndKey = (_event: KeyboardEvent): void => {
@@ -155,7 +154,7 @@ namespace FudgeUserInterface {
 
       // input field overlay is active
       if (active.getAttribute("type") == "number") {
-        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER) {
+        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER || _event.key == ƒ.KEYBOARD_CODE.TABULATOR) {
           this.value = Number((<HTMLInputElement>active).value);
           this.display();
           this.openInput(false);

@@ -358,7 +358,7 @@ declare namespace FudgeUserInterface {
         /**
          * Creates a userinterface for a [[FudgeCore.Mutable]]
          */
-        static createMutable(_mutable: ƒ.Mutable, _name?: string): Mutable;
+        static createMutable(_mutable: ƒ.Mutable, _name?: string): UserInterface;
         static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
         static createMutatorElement(_key: string, _type: Object, _value: string): HTMLElement;
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
@@ -372,19 +372,19 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     /**
-     * Connects a [[FudgeCode.Mutable]] to a Userinterfaced and synchronizes that mutable with the mutator stored within.
-     * Updates the mutable on interaction with the user interface and the user interface in time intervals.
+     * Connects a [[Mutable]] to a DOM-Element and synchronizes that mutable with the mutator stored within.
+     * Updates the mutable on interaction with the element and the element in time intervals.
      */
-    class Mutable {
-        ui: HTMLElement;
+    class UserInterface {
+        domElement: HTMLElement;
         protected timeUpdate: number;
         /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
         protected mutable: ƒ.Mutable;
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
         constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
-        updateMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        updateUserInterface(_mutable?: ƒ.Mutable, _ui?: HTMLElement): void;
+        getMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
         protected mutateOnInput: (_event: Event) => void;
         protected refresh: (_event: Event) => void;
     }

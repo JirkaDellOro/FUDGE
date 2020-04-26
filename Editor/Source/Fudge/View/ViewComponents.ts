@@ -38,12 +38,12 @@ namespace Fudge {
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ComponentUI = new ComponentUI(nodeComponent, fieldset);
-            this.content.append(uiComponent.ui);
+            this.content.append(uiComponent.domElement);
           }
         }
 
       }
-      else {
+      else {  
         let cntEmpty: HTMLDivElement = document.createElement("div");
         this.content.append(cntEmpty);
       }

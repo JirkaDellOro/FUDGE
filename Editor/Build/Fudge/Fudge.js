@@ -88,10 +88,10 @@ var Fudge;
         }
     }
     Fudge.UIAnimationList = UIAnimationList;
-    class ComponentUI extends ƒui.Mutable {
-        constructor(_mutable, _ui) {
-            super(_mutable, _ui);
-            this.ui.addEventListener("input", this.mutateOnInput);
+    class ComponentUI extends ƒui.UserInterface {
+        constructor(_mutable, _domElement) {
+            super(_mutable, _domElement);
+            this.domElement.addEventListener("input", this.mutateOnInput);
         }
     }
     Fudge.ComponentUI = ComponentUI;
@@ -1375,7 +1375,7 @@ var Fudge;
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ComponentUI(nodeComponent, fieldset);
-                        this.content.append(uiComponent.ui);
+                        this.content.append(uiComponent.domElement);
                     }
                 }
             }

@@ -24,8 +24,8 @@ declare namespace Fudge {
         private buildFromMutator;
         private toggleCollapse;
     }
-    class ComponentUI extends ƒui.Mutable {
-        constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
+    class ComponentUI extends ƒui.UserInterface {
+        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
     }
 }
 declare namespace Fudge {
