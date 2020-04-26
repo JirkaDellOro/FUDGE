@@ -25,41 +25,26 @@ namespace FudgeUserInterface {
     }
 
     // TODO: optimize updates with cascade of delegates instead of switches
-    public getMutator(_mutable: ƒ.Mutable = this.mutable, _ui: HTMLElement = this.domElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+    public getMutator(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
+      
       for (let key in mutator) {
-        if (this.domElement.querySelector(`[key=${key}]`) != null) {
-          let type: Object = mutatorTypes[key];
-          if (type instanceof Object) {
-            let selectElement: HTMLSelectElement = <HTMLSelectElement>_ui.querySelector(`[key=${key}]`);
-            selectElement.value = <string>mutator[key];
-          }
-          else {
-            let element: CustomElement = <CustomElement>_ui.querySelector(`[key=${key}]`);
-            // let input: HTMLInputElement = <HTMLInputElement>element;
-            switch (type) {
-              case "Boolean":
-                mutator[key] = element.getMutatorValue(); // .checked;
-                break;
-              case "String":
-                mutator[key] = element.getMutatorValue(); // .checked;
-              case "Number":
-                mutator[key] = element.getMutatorValue(); // .checked;
-                // mutator[key] = input.value;
-                break;
-              default:
-                // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
-                let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
-                let subMutable: ƒ.Mutable;
-                // subMutable = (<ƒ.General>_mutable)[key];
-                subMutable = Reflect.get(_mutable, key);
-                let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
-                if (subMutable instanceof ƒ.Mutable)
-                  mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
-                break;
-            }
-          }
+        let element: HTMLElement = _domElement.querySelector(`[key=${key}]`);
+        if (element == null)
+          return mutator;
+
+        if (element instanceof CustomElement)
+          mutator[key] = (<CustomElement>element).getMutatorValue();
+        else if ( mutatorTypes[key] instanceof Object)
+          (<HTMLSelectElement>element).value = <string>mutator[key];
+        else {
+          let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
+          let subMutable: ƒ.Mutable;
+          subMutable = Reflect.get(_mutable, key);
+          let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
+          if (subMutable instanceof ƒ.Mutable)
+            mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
         }
       }
       return mutator;

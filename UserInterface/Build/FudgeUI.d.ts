@@ -13,7 +13,7 @@ declare namespace FudgeUserInterface {
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
         constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
-        getMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        getMutator(_mutable?: ƒ.Mutable, _domElement?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
         protected mutateOnInput: (_event: Event) => void;
         protected refresh: (_event: Event) => void;

@@ -28,41 +28,24 @@ var FudgeUserInterface;
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
         // TODO: optimize updates with cascade of delegates instead of switches
-        getMutator(_mutable = this.mutable, _ui = this.domElement, _mutator, _types) {
+        getMutator(_mutable = this.mutable, _domElement = this.domElement, _mutator, _types) {
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                if (this.domElement.querySelector(`[key=${key}]`) != null) {
-                    let type = mutatorTypes[key];
-                    if (type instanceof Object) {
-                        let selectElement = _ui.querySelector(`[key=${key}]`);
-                        selectElement.value = mutator[key];
-                    }
-                    else {
-                        let element = _ui.querySelector(`[key=${key}]`);
-                        // let input: HTMLInputElement = <HTMLInputElement>element;
-                        switch (type) {
-                            case "Boolean":
-                                mutator[key] = element.getMutatorValue(); // .checked;
-                                break;
-                            case "String":
-                                mutator[key] = element.getMutatorValue(); // .checked;
-                            case "Number":
-                                mutator[key] = element.getMutatorValue(); // .checked;
-                                // mutator[key] = input.value;
-                                break;
-                            default:
-                                // let subMutator: ƒ.Mutator = (<ƒ.General>mutator)[key];
-                                let subMutator = Reflect.get(mutator, key);
-                                let subMutable;
-                                // subMutable = (<ƒ.General>_mutable)[key];
-                                subMutable = Reflect.get(_mutable, key);
-                                let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
-                                if (subMutable instanceof ƒ.Mutable)
-                                    mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
-                                break;
-                        }
-                    }
+                let element = _domElement.querySelector(`[key=${key}]`);
+                if (element == null)
+                    return mutator;
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    mutator[key] = element.getMutatorValue();
+                else if (mutatorTypes[key] instanceof Object)
+                    element.value = mutator[key];
+                else {
+                    let subMutator = Reflect.get(mutator, key);
+                    let subMutable;
+                    subMutable = Reflect.get(_mutable, key);
+                    let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
+                    if (subMutable instanceof ƒ.Mutable)
+                        mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
                 }
             }
             return mutator;
@@ -162,7 +145,7 @@ var FudgeUserInterface;
                 else {
                     // TODO: remove switch and use registered custom elements instead
                     let elementType = FudgeUserInterface.CustomElement.get(_value.constructor);
-                    console.log("CustomElement", _type, elementType);
+                    // console.log("CustomElement", _type, elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
