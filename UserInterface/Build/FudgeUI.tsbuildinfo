@@ -2,6 +2,8 @@
   "bundle": {
     "commonSourceDirectory": "../Source",
     "sourceFiles": [
+      "../Source/Controller/Controller.ts",
+      "../Source/Controller/Generator.ts",
       "../Source/CustomElement/CustomElement.ts",
       "../Source/CustomElement/CustomElementBoolean.ts",
       "../Source/CustomElement/CustomElementDigit.ts",
@@ -18,9 +20,7 @@
       "../Source/CustomElement/Tree/Tree.ts",
       "../Source/CustomElement/Tree/TreeController.ts",
       "../Source/CustomElement/Tree/TreeItem.ts",
-      "../Source/Event/Event.ts",
-      "../Source/UserInterface/Generator.ts",
-      "../Source/UserInterface/UserInterface.ts"
+      "../Source/Event/Event.ts"
     ],
     "js": {
       "sections": [
@@ -32,7 +32,7 @@
         },
         {
           "pos": 15,
-          "end": 82233,
+          "end": 82221,
           "kind": "text"
         }
       ],
@@ -66,7 +66,7 @@
         },
         {
           "pos": 58,
-          "end": 15293,
+          "end": 15287,
           "kind": "text"
         }
       ]

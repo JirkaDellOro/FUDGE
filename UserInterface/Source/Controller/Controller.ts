@@ -6,7 +6,7 @@ namespace FudgeUserInterface {
    * Connects a [[Mutable]] to a DOM-Element and synchronizes that mutable with the mutator stored within.
    * Updates the mutable on interaction with the element and the element in time intervals.
    */
-  export class UserInterface {
+  export class Controller {
     // TODO: examine the use of the attribute key vs name. Key signals the use by FUDGE while name is standard and supported by forms
     public domElement: HTMLElement;
     protected timeUpdate: number = 190;

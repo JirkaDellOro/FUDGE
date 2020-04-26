@@ -1,5 +1,42 @@
 /// <reference path="../../Core/Build/FudgeCore.d.ts" />
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    /**
+     * Connects a [[Mutable]] to a DOM-Element and synchronizes that mutable with the mutator stored within.
+     * Updates the mutable on interaction with the element and the element in time intervals.
+     */
+    class Controller {
+        domElement: HTMLElement;
+        protected timeUpdate: number;
+        /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
+        protected mutable: ƒ.Mutable;
+        /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
+        protected mutator: ƒ.Mutator;
+        constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
+        getMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
+        protected mutateOnInput: (_event: Event) => void;
+        protected refresh: (_event: Event) => void;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class Generator {
+        /**
+         * Creates a userinterface for a [[FudgeCore.Mutable]]
+         */
+        static createMutable(_mutable: ƒ.Mutable, _name?: string): Controller;
+        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
+        static createMutatorElement(_key: string, _type: Object, _value: Object): HTMLElement;
+        static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
+        static createFoldableFieldset(_key: string): FoldableFieldSet;
+        static createLabelElement(_name: string, _parent: HTMLElement, params?: {
+            value?: string;
+            cssClass?: string;
+        }): HTMLLabelElement;
+    }
+}
+declare namespace FudgeUserInterface {
     interface CustomElementAttributes {
         key: string;
         label?: string;
@@ -351,42 +388,5 @@ declare namespace FudgeUserInterface {
         DROPMENUCLICK = "dropMenuClick",
         DROPMENUCOLLAPSE = "dropMenuCollapse",
         CONTEXTMENU = "contextmenu"
-    }
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    class Generator {
-        /**
-         * Creates a userinterface for a [[FudgeCore.Mutable]]
-         */
-        static createMutable(_mutable: ƒ.Mutable, _name?: string): UserInterface;
-        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
-        static createMutatorElement(_key: string, _type: Object, _value: Object): HTMLElement;
-        static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFoldableFieldset(_key: string): FoldableFieldSet;
-        static createLabelElement(_name: string, _parent: HTMLElement, params?: {
-            value?: string;
-            cssClass?: string;
-        }): HTMLLabelElement;
-    }
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    /**
-     * Connects a [[Mutable]] to a DOM-Element and synchronizes that mutable with the mutator stored within.
-     * Updates the mutable on interaction with the element and the element in time intervals.
-     */
-    class UserInterface {
-        domElement: HTMLElement;
-        protected timeUpdate: number;
-        /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
-        protected mutable: ƒ.Mutable;
-        /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
-        protected mutator: ƒ.Mutator;
-        constructor(_mutable: ƒ.Mutable, _ui: HTMLElement);
-        getMutator(_mutable?: ƒ.Mutable, _ui?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
-        protected mutateOnInput: (_event: Event) => void;
-        protected refresh: (_event: Event) => void;
     }
 }

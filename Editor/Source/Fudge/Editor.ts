@@ -100,7 +100,7 @@ namespace Fudge {
     }
   }
 
-  export class ComponentUI extends ƒui.UserInterface {
+  export class ComponentController extends ƒui.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
       this.domElement.addEventListener("input", this.mutateOnInput);
