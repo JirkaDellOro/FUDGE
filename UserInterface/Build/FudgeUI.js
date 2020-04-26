@@ -17,6 +17,7 @@ var FudgeUserInterface;
                 _event.stopPropagation();
             };
             this.refresh = (_event) => {
+                //TODO: this.mutator is updated but then not used in updateUserInterface. Instead, the mutator is created again there...
                 this.mutable.updateMutator(this.mutator);
                 this.updateUserInterface();
             };
@@ -55,41 +56,17 @@ var FudgeUserInterface;
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
                 let element = _domElement.querySelector(`[key=${key}]`);
-                // TODO: examine if there is a reason for testing this.ui here instead of element...!
-                // if (this.domElement.querySelector(`[key=${key}]`) != null) {
                 if (!element)
                     continue;
-                let type = mutatorTypes[key];
-                if (type instanceof Object) {
+                if (element instanceof FudgeUserInterface.CustomElement && element != document.activeElement)
                     element.setMutatorValue(mutator[key]);
-                }
+                else if (mutatorTypes[key] instanceof Object)
+                    element.setMutatorValue(mutator[key]);
                 else {
-                    switch (type) {
-                        case "Boolean":
-                            // let checkbox: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                            // (<HTMLInputElement>element).checked = <boolean>mutator[key];
-                            element.setMutatorValue(mutator[key]);
-                            break;
-                        case "String":
-                            // let textfield: HTMLInputElement = <HTMLInputElement>_ui.querySelector(`[name=${key}]`);
-                            // (<HTMLInputElement>element).value = <string>mutator[key];
-                            element.setMutatorValue(mutator[key]);
-                            break;
-                        case "Number":
-                            if (document.activeElement != element) {
-                                // (<HTMLInputElement>element).value = <string>mutator[key];
-                                element.setMutatorValue(mutator[key]);
-                            }
-                            break;
-                        default:
-                            let fieldset = element;
-                            // t/slint:disable no-any
-                            // let subMutable: ƒ.Mutable = (<any>_mutable)[key];
-                            let subMutable = Reflect.get(_mutable, key);
-                            if (subMutable instanceof ƒ.Mutable)
-                                this.updateUserInterface(subMutable, fieldset);
-                            break;
-                    }
+                    let fieldset = element;
+                    let subMutable = Reflect.get(_mutable, key);
+                    if (subMutable instanceof ƒ.Mutable)
+                        this.updateUserInterface(subMutable, fieldset);
                 }
             }
         }
@@ -174,15 +151,6 @@ var FudgeUserInterface;
             _parent.appendChild(dropdown);
             return dropdown;
         }
-        // public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
-        //   let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
-        //   cntfieldset.id = _legend;
-        //   let legend: HTMLLegendElement = document.createElement("legend");
-        //   legend.innerHTML = _legend;
-        //   cntfieldset.appendChild(legend);
-        //   _parent.appendChild(cntfieldset);
-        //   return cntfieldset;
-        // }
         static createFoldableFieldset(_key) {
             let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_key);
             //TODO: unique ids

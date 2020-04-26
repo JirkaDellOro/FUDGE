@@ -81,16 +81,6 @@ namespace FudgeUserInterface {
       return dropdown;
     }
 
-    // public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
-    //   let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
-    //   cntfieldset.id = _legend;
-    //   let legend: HTMLLegendElement = document.createElement("legend");
-    //   legend.innerHTML = _legend;
-    //   cntfieldset.appendChild(legend);
-    //   _parent.appendChild(cntfieldset);
-    //   return cntfieldset;
-    // }
-
     public static createFoldableFieldset(_key: string): FoldableFieldSet {
       let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
       //TODO: unique ids
@@ -112,6 +102,17 @@ namespace FudgeUserInterface {
       return label;
     }
 
+
+    // public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {
+    //   let cntfieldset: HTMLFieldSetElement = document.createElement("fieldset");
+    //   cntfieldset.id = _legend;
+    //   let legend: HTMLLegendElement = document.createElement("legend");
+    //   legend.innerHTML = _legend;
+    //   cntfieldset.appendChild(legend);
+    //   _parent.appendChild(cntfieldset);
+    //   return cntfieldset;
+    // }
+    
     //   public static createTextElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLInputElement {
     //     let text: HTMLInputElement = document.createElement("input");
     //     if (params.value == undefined)
