@@ -363,10 +363,11 @@ var FudgeUserInterface;
     class CustomElementMatrix4x4 extends FudgeUserInterface.CustomElementTemplate {
         getMutatorValue() {
             let steppers = this.querySelectorAll("fudge-stepper");
-            let mutator = {};
-            mutator.translation = { x: steppers[0].value, y: steppers[1].value, z: steppers[2].value };
-            mutator.rotation = { x: steppers[3].value, y: steppers[4].value, z: steppers[5].value };
-            mutator.scaling = { x: steppers[6].value, y: steppers[7].value, z: steppers[8].value };
+            let mutator = { translation: {}, rotation: {}, scaling: {} };
+            let count = 0;
+            for (let vector of ["translation", "rotation", "scaling"])
+                for (let dimension of ["x", "y", "z"])
+                    mutator[vector][dimension] = steppers[count++].getMutatorValue();
             return mutator;
         }
         setMutatorValue(_mutator) {

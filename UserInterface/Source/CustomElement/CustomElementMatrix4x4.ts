@@ -6,13 +6,14 @@ namespace FudgeUserInterface {
 
     public getMutatorValue(): Object {
       let steppers: NodeListOf<CustomElementStepper> = this.querySelectorAll("fudge-stepper");
-      let mutator: ƒ.Mutator = {};
-      mutator.translation = { x: steppers[0].value, y: steppers[1].value, z: steppers[2].value };
-      mutator.rotation = { x: steppers[3].value, y: steppers[4].value, z: steppers[5].value };
-      mutator.scaling = { x: steppers[6].value, y: steppers[7].value, z: steppers[8].value };
+      let mutator: ƒ.Mutator = { translation: {}, rotation: {}, scaling: {} };
+      let count: number = 0;
+      for (let vector of ["translation", "rotation", "scaling"])
+        for (let dimension of ["x", "y", "z"])
+          (<ƒ.Mutator>mutator[vector])[dimension] = steppers[count++].getMutatorValue();
       return mutator;
-
     }
+
     public setMutatorValue(_mutator: ƒ.Mutator): void {
       let steppers: NodeListOf<CustomElementStepper> = this.querySelectorAll("fudge-stepper");
       let count: number = 0;
