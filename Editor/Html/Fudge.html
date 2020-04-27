@@ -60,7 +60,7 @@
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-matrix4x4");
-    FudgeUserInterface.CustomElement.register("custom-matrix4x4", class CustomMatrix4x4 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.register("custom-matrix4x4", FudgeUserInterface.CustomElementMatrix4x4);
     FudgeUserInterface.CustomElement.map("Matrix4x4", "custom-matrix4x4");
   </script>
 </body>

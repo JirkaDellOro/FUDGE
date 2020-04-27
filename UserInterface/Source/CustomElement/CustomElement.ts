@@ -43,7 +43,10 @@ namespace FudgeUserInterface {
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
     public static get(_type: string): typeof CustomElement {
-      return CustomElement.mapObjectToCustomElement.get(_type);
+      let element: string | typeof CustomElement = CustomElement.mapObjectToCustomElement.get(_type);
+      if (typeof (element) == "string")
+        element = customElements.get(element);
+      return <typeof CustomElement>element;
     }
 
     public appendLabel(): HTMLLabelElement {

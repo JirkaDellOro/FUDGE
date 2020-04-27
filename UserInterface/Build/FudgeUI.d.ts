@@ -83,6 +83,20 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    abstract class CustomElementTemplate extends CustomElement {
+        private static fragment;
+        constructor(_attributes?: CustomElementAttributes);
+        static register(_tagName: string): void;
+        connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    class CustomElementMatrix4x4 extends CustomElementTemplate {
+        getMutatorValue(): Object;
+        setMutatorValue(_value: Object): void;
+    }
+}
+declare namespace FudgeUserInterface {
     class CustomElementStepper extends CustomElement {
         private static customElement;
         value: number;
@@ -102,14 +116,6 @@ declare namespace FudgeUserInterface {
         private hndFocus;
         private changeDigitFocussed;
         private shiftFocus;
-    }
-}
-declare namespace FudgeUserInterface {
-    abstract class CustomElementTemplate extends CustomElement {
-        private static fragment;
-        constructor();
-        static register(_tagName: string): void;
-        connectedCallback(): void;
     }
 }
 declare namespace FudgeUserInterface {

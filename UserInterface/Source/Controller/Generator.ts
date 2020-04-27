@@ -52,8 +52,6 @@ namespace FudgeUserInterface {
           // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
           let elementType: typeof CustomElement = CustomElement.get(_type);
           console.log("CustomElement", _type, elementType);
-          if (typeof(elementType ) == "string")
-            elementType = customElements.get(<string><unknown>elementType);
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class
@@ -115,7 +113,7 @@ namespace FudgeUserInterface {
     //   _parent.appendChild(cntfieldset);
     //   return cntfieldset;
     // }
-    
+
     //   public static createTextElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLInputElement {
     //     let text: HTMLInputElement = document.createElement("input");
     //     if (params.value == undefined)

@@ -7,8 +7,9 @@
       "../Source/CustomElement/CustomElement.ts",
       "../Source/CustomElement/CustomElementBoolean.ts",
       "../Source/CustomElement/CustomElementDigit.ts",
-      "../Source/CustomElement/CustomElementStepper.ts",
       "../Source/CustomElement/CustomElementTemplate.ts",
+      "../Source/CustomElement/CustomElementMatrix4x4.ts",
+      "../Source/CustomElement/CustomElementStepper.ts",
       "../Source/CustomElement/CustomElementTextInput.ts",
       "../Source/CustomElement/Elements.ts",
       "../Source/CustomElement/FoldableFieldSet.ts",
@@ -32,7 +33,7 @@
         },
         {
           "pos": 15,
-          "end": 78611,
+          "end": 79253,
           "kind": "text"
         }
       ],
@@ -66,7 +67,7 @@
         },
         {
           "pos": 58,
-          "end": 15290,
+          "end": 15527,
           "kind": "text"
         }
       ]

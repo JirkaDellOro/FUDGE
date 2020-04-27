@@ -3,8 +3,8 @@ namespace FudgeUserInterface {
   export abstract class CustomElementTemplate extends CustomElement {
     private static fragment: Map<string, DocumentFragment> = new Map();
 
-    constructor() {
-      super(undefined);
+    constructor(_attributes?: CustomElementAttributes) {
+      super(_attributes);
     }
 
     public static register(_tagName: string): void {

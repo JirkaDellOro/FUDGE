@@ -124,8 +124,6 @@ var FudgeUserInterface;
                     // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
                     let elementType = FudgeUserInterface.CustomElement.get(_type);
                     console.log("CustomElement", _type, elementType);
-                    if (typeof (elementType) == "string")
-                        elementType = customElements.get(elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
@@ -205,7 +203,10 @@ var FudgeUserInterface;
                 CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
             }
             static get(_type) {
-                return CustomElement.mapObjectToCustomElement.get(_type);
+                let element = CustomElement.mapObjectToCustomElement.get(_type);
+                if (typeof (element) == "string")
+                    element = customElements.get(element);
+                return element;
             }
             appendLabel() {
                 let label = document.createElement("label");
@@ -315,6 +316,59 @@ var FudgeUserInterface;
         return CustomElementDigit;
     })();
     FudgeUserInterface.CustomElementDigit = CustomElementDigit;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+///<reference path="CustomElement.ts"/>
+var FudgeUserInterface;
+///<reference path="CustomElement.ts"/>
+(function (FudgeUserInterface) {
+    let CustomElementTemplate = /** @class */ (() => {
+        class CustomElementTemplate extends FudgeUserInterface.CustomElement {
+            constructor(_attributes) {
+                super(_attributes);
+            }
+            static register(_tagName) {
+                for (let template of document.querySelectorAll("template")) {
+                    if (template.content.firstElementChild.localName == _tagName) {
+                        console.log("Register", template);
+                        CustomElementTemplate.fragment.set(_tagName, template.content);
+                    }
+                }
+            }
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                let fragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
+                let content = fragment.firstElementChild;
+                let style = this.style;
+                for (let entry of content.style) {
+                    style.setProperty(entry, Reflect.get(content.style, entry));
+                }
+                for (let child of content.childNodes) {
+                    this.appendChild(child.cloneNode(true));
+                }
+            }
+        }
+        CustomElementTemplate.fragment = new Map();
+        return CustomElementTemplate;
+    })();
+    FudgeUserInterface.CustomElementTemplate = CustomElementTemplate;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+///<reference path="CustomElementTemplate.ts"/>
+var FudgeUserInterface;
+///<reference path="CustomElementTemplate.ts"/>
+(function (FudgeUserInterface) {
+    class CustomElementMatrix4x4 extends FudgeUserInterface.CustomElementTemplate {
+        getMutatorValue() {
+            console.log("GetMatrixMutatorValue");
+            return null;
+        }
+        setMutatorValue(_value) {
+            console.log("SetMatrixMutatorValue");
+            /* */
+        }
+    }
+    FudgeUserInterface.CustomElementMatrix4x4 = CustomElementMatrix4x4;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
@@ -553,43 +607,6 @@ var FudgeUserInterface;
         return CustomElementStepper;
     })();
     FudgeUserInterface.CustomElementStepper = CustomElementStepper;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-///<reference path="CustomElement.ts"/>
-var FudgeUserInterface;
-///<reference path="CustomElement.ts"/>
-(function (FudgeUserInterface) {
-    let CustomElementTemplate = /** @class */ (() => {
-        class CustomElementTemplate extends FudgeUserInterface.CustomElement {
-            constructor() {
-                super(undefined);
-            }
-            static register(_tagName) {
-                for (let template of document.querySelectorAll("template")) {
-                    if (template.content.firstElementChild.localName == _tagName) {
-                        console.log("Register", template);
-                        CustomElementTemplate.fragment.set(_tagName, template.content);
-                    }
-                }
-            }
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                let fragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
-                let content = fragment.firstElementChild;
-                let style = this.style;
-                for (let entry of content.style) {
-                    style.setProperty(entry, Reflect.get(content.style, entry));
-                }
-                for (let child of content.childNodes) {
-                    this.appendChild(child.cloneNode(true));
-                }
-            }
-        }
-        CustomElementTemplate.fragment = new Map();
-        return CustomElementTemplate;
-    })();
-    FudgeUserInterface.CustomElementTemplate = CustomElementTemplate;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
