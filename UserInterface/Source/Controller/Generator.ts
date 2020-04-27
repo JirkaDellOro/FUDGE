@@ -38,7 +38,7 @@ namespace FudgeUserInterface {
       return fieldset;
     }
 
-    public static createMutatorElement(_key: string, _type: Object, _value: Object): HTMLElement {
+    public static createMutatorElement(_key: string, _type: Object | string, _value: Object): HTMLElement {
       let element: HTMLElement;
       try {
         if (_type instanceof Object) {
@@ -49,8 +49,11 @@ namespace FudgeUserInterface {
         }
         else {
           // TODO: remove switch and use registered custom elements instead
-          let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
-          // console.log("CustomElement", _type, elementType);
+          // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
+          let elementType: typeof CustomElement = CustomElement.get(_type);
+          console.log("CustomElement", _type, elementType);
+          if (typeof(elementType ) == "string")
+            elementType = customElements.get(<string><unknown>elementType);
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class

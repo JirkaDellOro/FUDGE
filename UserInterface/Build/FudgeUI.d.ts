@@ -27,7 +27,7 @@ declare namespace FudgeUserInterface {
          */
         static createMutable(_mutable: ƒ.Mutable, _name?: string): Controller;
         static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
-        static createMutatorElement(_key: string, _type: Object, _value: Object): HTMLElement;
+        static createMutatorElement(_key: string, _type: Object | string, _value: Object): HTMLElement;
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFoldableFieldset(_key: string): FoldableFieldSet;
         static createLabelElement(_name: string, _parent: HTMLElement, params?: {
@@ -51,8 +51,8 @@ declare namespace FudgeUserInterface {
         get key(): string;
         static get nextId(): string;
         static register(_tag: string, _typeCustomElement: typeof CustomElement, _typeObject?: typeof Object): void;
-        static map(_type: typeof Object, _typeCustomElement: typeof CustomElement): void;
-        static get(_type: typeof Object): typeof CustomElement;
+        static map(_type: string, _typeCustomElement: typeof CustomElement): void;
+        static get(_type: string): typeof CustomElement;
         appendLabel(): HTMLLabelElement;
         abstract getMutatorValue(): Object;
         abstract setMutatorValue(_value: Object): void;

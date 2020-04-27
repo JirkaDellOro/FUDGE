@@ -121,8 +121,11 @@ var FudgeUserInterface;
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
-                    let elementType = FudgeUserInterface.CustomElement.get(_value.constructor);
-                    // console.log("CustomElement", _type, elementType);
+                    // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
+                    let elementType = FudgeUserInterface.CustomElement.get(_type);
+                    console.log("CustomElement", _type, elementType);
+                    if (typeof (elementType) == "string")
+                        elementType = customElements.get(elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
@@ -195,9 +198,10 @@ var FudgeUserInterface;
                 // @ts-ignore
                 customElements.define(_tag, _typeCustomElement);
                 if (_typeObject)
-                    CustomElement.map(_typeObject, _typeCustomElement);
+                    CustomElement.map(_typeObject.name, _typeCustomElement);
             }
             static map(_type, _typeCustomElement) {
+                console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
                 CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
             }
             static get(_type) {
@@ -210,6 +214,7 @@ var FudgeUserInterface;
                 return label;
             }
         }
+        // private static mapObjectToCustomElement: Map<typeof Object, typeof CustomElement> = new Map();
         CustomElement.mapObjectToCustomElement = new Map();
         CustomElement.idCounter = 0;
         return CustomElement;

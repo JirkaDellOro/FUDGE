@@ -8,7 +8,8 @@ namespace FudgeUserInterface {
 
   export abstract class CustomElement extends HTMLElement {
     public static tag: string;
-    private static mapObjectToCustomElement: Map<typeof Object, typeof CustomElement> = new Map();
+    // private static mapObjectToCustomElement: Map<typeof Object, typeof CustomElement> = new Map();
+    private static mapObjectToCustomElement: Map<string, typeof CustomElement> = new Map();
     private static idCounter: number = 0;
     protected initialized: boolean = false;
 
@@ -34,13 +35,14 @@ namespace FudgeUserInterface {
       customElements.define(_tag, _typeCustomElement);
 
       if (_typeObject)
-        CustomElement.map(_typeObject, _typeCustomElement);
+        CustomElement.map(_typeObject.name, _typeCustomElement);
     }
 
-    public static map(_type: typeof Object, _typeCustomElement: typeof CustomElement): void {
+    public static map(_type: string, _typeCustomElement: typeof CustomElement): void {
+      console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
-    public static get(_type: typeof Object): typeof CustomElement {
+    public static get(_type: string): typeof CustomElement {
       return CustomElement.mapObjectToCustomElement.get(_type);
     }
 
@@ -50,7 +52,7 @@ namespace FudgeUserInterface {
       this.appendChild(label);
       return label;
     }
- 
+
     public abstract getMutatorValue(): Object;
     public abstract setMutatorValue(_value: Object): void;
   }
