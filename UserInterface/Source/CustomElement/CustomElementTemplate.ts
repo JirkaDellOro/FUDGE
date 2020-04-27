@@ -16,7 +16,7 @@ namespace FudgeUserInterface {
       }
     }
 
-    connectedCallback(): void {
+    protected connectedCallback(): void {
       if (this.initialized)
         return;
       this.initialized = true;

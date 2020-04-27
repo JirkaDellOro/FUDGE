@@ -40,19 +40,22 @@
     <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
         grid-template-columns: min-content min-content min-content min-content; 
         grid-template-rows: min-content min-content min-content min-content;">
-      <span></span>
+      <span style="text-align: left">
+        <!-- <input type="checkbox" checked="true" /> -->
+        <label>label</label>
+      </span>
       <span>x</span>
       <span>y</span>
       <span>z</span>
-      translation
+      <span style="text-align: right;">translation</span>
       <fudge-stepper key="tx"></fudge-stepper>
       <fudge-stepper key="ty"></fudge-stepper>
       <fudge-stepper key="tz"></fudge-stepper>
-      rotation
+      <span style="text-align: right;">rotation</span>
       <fudge-stepper key="rx"></fudge-stepper>
       <fudge-stepper key="ry"></fudge-stepper>
       <fudge-stepper key="rz"></fudge-stepper>
-      scale
+      <span style="text-align: right;">scaling</span>
       <fudge-stepper key="sx"></fudge-stepper>
       <fudge-stepper key="sy"></fudge-stepper>
       <fudge-stepper key="sz"></fudge-stepper>

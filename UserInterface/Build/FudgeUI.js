@@ -235,6 +235,8 @@ var FudgeUserInterface;
                 if (this.initialized)
                     return;
                 this.initialized = true;
+                // TODO: delete tabindex from checkbox and get space-key on this
+                // this.tabIndex = 0;
                 let input = document.createElement("input");
                 input.type = "checkbox";
                 input.id = FudgeUserInterface.CustomElement.nextId;
@@ -360,12 +362,25 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     class CustomElementMatrix4x4 extends FudgeUserInterface.CustomElementTemplate {
         getMutatorValue() {
-            console.log("GetMatrixMutatorValue");
-            return null;
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let mutator = {};
+            mutator.translation = { x: steppers[0].value, y: steppers[1].value, z: steppers[2].value };
+            mutator.rotation = { x: steppers[3].value, y: steppers[4].value, z: steppers[5].value };
+            mutator.scaling = { x: steppers[6].value, y: steppers[7].value, z: steppers[8].value };
+            return mutator;
         }
-        setMutatorValue(_value) {
-            console.log("SetMatrixMutatorValue");
-            /* */
+        setMutatorValue(_mutator) {
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let count = 0;
+            for (let vector of ["translation", "rotation", "scaling"])
+                for (let dimension of ["x", "y", "z"])
+                    steppers[count++].setMutatorValue(Number(_mutator[vector][dimension]));
+        }
+        connectedCallback() {
+            super.connectedCallback();
+            console.log("Matrix Callback");
+            let label = this.querySelector("label");
+            label.textContent = this.getAttribute("label");
         }
     }
     FudgeUserInterface.CustomElementMatrix4x4 = CustomElementMatrix4x4;

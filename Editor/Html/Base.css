@@ -174,3 +174,18 @@ fieldset>input[type=checkbox]:checked::before {
 fieldset>input[type=checkbox]::before {
   content: "►";
 }
+/* 
+custom-matrix4x4 input[type=checkbox]  {
+  height: 0px;
+  top: -0.9em;
+  position: relative;
+  color: var(--color-text);
+}
+
+custom-matrix4x4 input[type=checkbox]:checked::before {
+  content: "▼";
+}
+
+custom-matrix4x4 input[type=checkbox]::before {
+  content: "►";
+} */

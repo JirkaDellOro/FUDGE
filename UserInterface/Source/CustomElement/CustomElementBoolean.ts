@@ -14,6 +14,9 @@ namespace FudgeUserInterface {
         return;
       this.initialized = true;
 
+      // TODO: delete tabindex from checkbox and get space-key on this
+      // this.tabIndex = 0;
+
       let input: HTMLInputElement = document.createElement("input");
       input.type = "checkbox";
       input.id = CustomElement.nextId;

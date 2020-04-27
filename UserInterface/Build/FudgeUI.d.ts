@@ -87,13 +87,15 @@ declare namespace FudgeUserInterface {
         private static fragment;
         constructor(_attributes?: CustomElementAttributes);
         static register(_tagName: string): void;
-        connectedCallback(): void;
+        protected connectedCallback(): void;
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     class CustomElementMatrix4x4 extends CustomElementTemplate {
         getMutatorValue(): Object;
-        setMutatorValue(_value: Object): void;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        protected connectedCallback(): void;
     }
 }
 declare namespace FudgeUserInterface {
