@@ -3,16 +3,22 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
+  /**
+   * Static class generating UI-domElements from the information found in [[ƒ.Mutable]]s and [[ƒ.Mutator]]s
+   */
   export class Generator {
     /**
-     * Creates a userinterface for a [[FudgeCore.Mutable]]
+     * Creates a [[Controller]] from a [[FudgeCore.Mutable]] using a CustomFieldSet
      */
-    public static createMutable(_mutable: ƒ.Mutable, _name?: string): Controller {
-      let mutable: Controller = new Controller(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
-      mutable.updateUserInterface();
-      return mutable;
+    public static createController(_mutable: ƒ.Mutable, _name?: string): Controller {
+      let controller: Controller = new Controller(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+      controller.updateUserInterface();
+      return controller;
     }
 
+    /**
+     * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     */
     public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
@@ -38,11 +44,14 @@ namespace FudgeUserInterface {
       return fieldset;
     }
 
+    /**
+     * Create a specific CustomElement for the given data, using _key as identification
+     */
     public static createMutatorElement(_key: string, _type: Object | string, _value: Object): HTMLElement {
       let element: HTMLElement;
       try {
         if (_type instanceof Object) {
-          //Type is Enum
+          //TODO: refactor for enums and get rid of the two old generator functions
           element = document.createElement("span");
           Generator.createLabelElement(_key, element);
           Generator.createDropdown(_key, _type, _value.toString(), element);
@@ -63,7 +72,9 @@ namespace FudgeUserInterface {
       return element;
     }
 
-
+    /**
+     * TODO: refactor for enums 
+     */
     public static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
       let dropdown: HTMLSelectElement = document.createElement("select");
       // TODO: unique ids
@@ -82,6 +93,7 @@ namespace FudgeUserInterface {
       return dropdown;
     }
 
+    // TODO: implement CustomFieldSet and replace this
     public static createFoldableFieldset(_key: string): FoldableFieldSet {
       let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
       //TODO: unique ids

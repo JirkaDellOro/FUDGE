@@ -15,8 +15,8 @@ namespace FudgeUserInterface {
     /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
     protected mutator: ƒ.Mutator;
 
-    constructor(_mutable: ƒ.Mutable, _ui: HTMLElement) {
-      this.domElement = _ui;
+    constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
+      this.domElement = _domElement;
       this.mutable = _mutable;
       this.mutator = _mutable.getMutator();
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -24,9 +24,14 @@ namespace FudgeUserInterface {
       this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
-    // TODO: optimize updates with cascade of delegates instead of switches
+    /**
+     * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]] 
+     * as a template and updating its values with those found in the given UI-domElement. 
+     */
     public getMutator(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+      // TODO: examine if this.mutator should also be addressed in some way...
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+      // TODO: Mutator type now only used for enums. Examine if there is another way
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
       for (let key in mutator) {
@@ -50,7 +55,11 @@ namespace FudgeUserInterface {
       return mutator;
     }
 
+    /**
+     * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
+     */
     public updateUserInterface(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement): void {
+      // TODO: should get Mutator for UI or work with this.mutator (examine)
       let mutator: ƒ.Mutator = _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
