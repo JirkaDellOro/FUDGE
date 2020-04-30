@@ -102,6 +102,7 @@ namespace FudgeUserInterface {
       return cntFoldFieldset;
     }
 
+    //TODO: delete
     public static createLabelElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLLabelElement {
       let label: HTMLLabelElement = document.createElement("label");
       if (params.value == undefined)

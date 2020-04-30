@@ -1,14 +1,23 @@
 namespace FudgeUserInterface {
   // import ƒ = FudgeCore;
+
+  /**
+   * Structure for the attributes to set in a CustomElement.
+   * key (maybe rename to `name`) is mandatory and must match the key of a mutator if used in conjunction
+   * label is recommended for labelled elements, key is used if not given.
+   */
   export interface CustomElementAttributes {
     key: string;
     label?: string;
     [name: string]: string;
   }
 
+  /**
+   * Handles the mapping of CustomElements to their HTML-Tags via customElement.define
+   * and to the data types and [[FudgeCore.Mutable]]s they render an interface for. 
+   */
   export abstract class CustomElement extends HTMLElement {
     public static tag: string;
-    // private static mapObjectToCustomElement: Map<typeof Object, typeof CustomElement> = new Map();
     private static mapObjectToCustomElement: Map<string, typeof CustomElement> = new Map();
     private static idCounter: number = 0;
     protected initialized: boolean = false;
@@ -20,14 +29,23 @@ namespace FudgeUserInterface {
           this.setAttribute(name, _attributes[name]);
     }
 
+    /**
+     * Return the key (name) of the attribute this element represents
+     */
     public get key(): string {
       return this.getAttribute("key");
     }
 
-    public static get nextId(): string {
+    /**
+     * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
+     */
+    protected static get nextId(): string {
       return "ƒ" + CustomElement.idCounter++;
     }
 
+    /**
+     * Register map the given element type to the given tag and the given type of data
+     */
     public static register(_tag: string, _typeCustomElement: typeof CustomElement, _typeObject?: typeof Object): void {
       // console.log(_tag, _class);
       _typeCustomElement.tag = _tag;
@@ -38,10 +56,9 @@ namespace FudgeUserInterface {
         CustomElement.map(_typeObject.name, _typeCustomElement);
     }
 
-    public static map(_type: string, _typeCustomElement: typeof CustomElement): void {
-      console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
-      CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
-    }
+    /**
+     * Retrieve the element representing the given data type (if registered)
+     */
     public static get(_type: string): typeof CustomElement {
       let element: string | typeof CustomElement = CustomElement.mapObjectToCustomElement.get(_type);
       if (typeof (element) == "string")
@@ -49,6 +66,14 @@ namespace FudgeUserInterface {
       return <typeof CustomElement>element;
     }
 
+    private static map(_type: string, _typeCustomElement: typeof CustomElement): void {
+      console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+      CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
+    }
+    
+    /**
+     * Add a label-element as child to this element
+     */
     public appendLabel(): HTMLLabelElement {
       let label: HTMLLabelElement = document.createElement("label");
       label.textContent = this.getAttribute("label");
@@ -56,7 +81,14 @@ namespace FudgeUserInterface {
       return label;
     }
 
+    /**
+     * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+     */
     public abstract getMutatorValue(): Object;
+
+    /**
+     * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
+     */
     public abstract setMutatorValue(_value: Object): void;
   }
 }
