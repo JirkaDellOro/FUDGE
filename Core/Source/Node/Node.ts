@@ -267,13 +267,14 @@ namespace FudgeCore {
     public addComponent(_component: Component): void {
       if (_component.getContainer() == this)
         return;
-      if (this.components[_component.type] === undefined)
+      let cmpList: Component[] = this.components[_component.type];
+      if (cmpList === undefined)
         this.components[_component.type] = [_component];
       else
-        if (_component.isSingleton)
+        if (cmpList.length && _component.isSingleton)
           throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
         else
-          this.components[_component.type].push(_component);
+          cmpList.push(_component);
 
       _component.setContainer(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
