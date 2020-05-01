@@ -645,7 +645,7 @@ namespace FudgeCore {
     /**
      * Return a copy of this
      */
-    public copy(): Matrix4x4 {
+    public get copy(): Matrix4x4 {
       let copy: Matrix4x4 = new Matrix4x4();
       copy.set(this);
       return copy;

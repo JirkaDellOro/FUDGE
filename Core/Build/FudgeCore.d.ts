@@ -2553,7 +2553,7 @@ declare namespace FudgeCore {
         /**
          * Return a copy of this
          */
-        copy(): Matrix4x4;
+        get copy(): Matrix4x4;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
