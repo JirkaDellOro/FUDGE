@@ -1,6 +1,9 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
+  /**
+   * An interactive number stepper with exponential display and complex handling using keyboard and mouse
+   */
   export class CustomElementStepper extends CustomElement {
     // @ts-ignore
     private static customElement: void = CustomElement.register("fudge-stepper", CustomElementStepper, Number);
@@ -13,6 +16,9 @@ namespace FudgeUserInterface {
         this.value = parseFloat(_attributes["value"]);
     }
 
+    /**
+     * Creates the content of the element when connected the first time
+     */
     connectedCallback(): void {
       if (this.initialized)
         return;
@@ -57,6 +63,9 @@ namespace FudgeUserInterface {
       this.addEventListener("wheel", this.hndWheel);
     }
 
+    /**
+     * De-/Activates tabbing for the inner digits
+     */
     public activateInnerTabs(_on: boolean): void {
       let index: number = _on ? 0 : -1;
 
@@ -68,6 +77,9 @@ namespace FudgeUserInterface {
         digit.tabIndex = index;
     }
 
+    /**
+     * Opens/Closes a standard number input for typing the value at once
+     */
     public openInput(_open: boolean): void {
       let input: HTMLInputElement = <HTMLInputElement>this.querySelector("input");
       if (_open) {
@@ -79,14 +91,23 @@ namespace FudgeUserInterface {
       }
     }
 
+    /**
+     * Retrieve the value of this
+     */
     public getMutatorValue(): number {
       return this.value;
     }
+    /**
+     * Sets its value and displays it
+     */
     public setMutatorValue(_value: number): void {
       this.value = _value;
       this.display();
     }
 
+    /**
+     * Retrieve mantissa and exponent separately as an array of two members
+     */
     public getMantissaAndExponent(): number[] {
       let prec: string = this.value.toExponential(6);
       let exp: number = parseInt(prec.split("e")[1]);
@@ -96,6 +117,9 @@ namespace FudgeUserInterface {
       return [mantissa, exp3 * 3];
     }
 
+    /**
+     * Retrieves this value as a string
+     */
     public toString(): string {
       let [mantissa, exp]: number[] = this.getMantissaAndExponent();
       let prefixMantissa: string = (mantissa < 0) ? "" : "+";
@@ -103,6 +127,9 @@ namespace FudgeUserInterface {
       return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
     }
 
+    /**
+     * Displays this value by setting the contents of the digits and the exponent
+     */
     private display(): void {
       let [mantissa, exp]: string[] = this.toString().split("e");
       let spans: NodeListOf<HTMLSpanElement> = this.querySelectorAll("span");
@@ -123,6 +150,9 @@ namespace FudgeUserInterface {
       }
     }
 
+    /**
+     * Handle keyboard input on this element and its digits
+     */
     private hndKey = (_event: KeyboardEvent): void => {
       let active: Element = document.activeElement;
       let numEntered: number = _event.key.charCodeAt(0) - 48;

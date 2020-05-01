@@ -1,5 +1,8 @@
 ///<reference path="CustomElement.ts"/>
 namespace FudgeUserInterface {
+  /**
+   * Creates a CustomElement from an HTML-Template-Tag
+   */
   export abstract class CustomElementTemplate extends CustomElement {
     private static fragment: Map<string, DocumentFragment> = new Map();
 
@@ -7,6 +10,10 @@ namespace FudgeUserInterface {
       super(_attributes);
     }
 
+    /**
+     * Browses through the templates in the current document and registers the one defining the given tagname.
+     * To be called from a script tag implemented with the template in HTML.
+     */
     public static register(_tagName: string): void {
       for (let template of document.querySelectorAll("template")) {
         if (template.content.firstElementChild.localName == _tagName) {
@@ -16,6 +23,9 @@ namespace FudgeUserInterface {
       }
     }
 
+    /**
+     * When connected the first time, the element gets constructed as a deep clone of the template.
+     */
     protected connectedCallback(): void {
       if (this.initialized)
         return;

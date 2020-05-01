@@ -1,4 +1,7 @@
 namespace FudgeUserInterface {
+  /**
+   * A standard checkbox with a label to it
+   */
   export class CustomElementBoolean extends CustomElement {
     // @ts-ignore
     private static customElement: void = CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
@@ -9,6 +12,9 @@ namespace FudgeUserInterface {
         this.setAttribute("label", _attributes.key);
     }
 
+    /**
+     * Creates the content of the element when connected the first time
+     */
     connectedCallback(): void {
       if (this.initialized)
         return;
@@ -26,9 +32,15 @@ namespace FudgeUserInterface {
       this.appendLabel().htmlFor = input.id;
     }
 
+    /**
+     * Retrieves the status of the checkbox as boolean value
+     */
     public getMutatorValue(): boolean {
       return this.querySelector("input").checked;
     }
+    /**
+     * Sets the status of the checkbox
+     */
     public setMutatorValue(_value: boolean): void {
       this.querySelector("input").checked = _value;
     }

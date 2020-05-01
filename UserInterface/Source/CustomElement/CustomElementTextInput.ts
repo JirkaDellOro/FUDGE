@@ -1,4 +1,7 @@
 namespace FudgeUserInterface {
+  /**
+   * A standard text input field with a label to it.
+   */
   export class CustomElementTextInput extends CustomElement {
     // @ts-ignore
     private static customElement: void = CustomElement.register("fudge-textinput", CustomElementTextInput, String);
@@ -7,6 +10,9 @@ namespace FudgeUserInterface {
       super(_attributes);
     }
 
+    /**
+     * Creates the content of the element when connected the first time
+     */
     connectedCallback(): void {
       if (this.initialized)
         return;
@@ -21,9 +27,15 @@ namespace FudgeUserInterface {
 
     }
 
+    /**
+     * Retrieves the content of the input element
+     */
     public getMutatorValue(): string {
       return this.querySelector("input").value;
     }
+    /**
+     * Sets the content of the input element
+     */
     public setMutatorValue(_value: string): void {
       this.querySelector("input").value = _value;
     }
