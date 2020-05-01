@@ -25,7 +25,7 @@
       "sections": [
         {
           "pos": 0,
-          "end": 67541,
+          "end": 67525,
           "kind": "text"
         }
       ]
@@ -40,19 +40,19 @@
         },
         {
           "pos": 57,
-          "end": 119,
+          "end": 130,
           "kind": "type",
-          "data": "../../../userinterface/build/fudgeui"
+          "data": "../../../userinterface/build/fudgeuserinterface"
         },
         {
-          "pos": 121,
-          "end": 160,
+          "pos": 132,
+          "end": 171,
           "kind": "type",
           "data": "golden-layout"
         },
         {
-          "pos": 162,
-          "end": 13800,
+          "pos": 173,
+          "end": 13811,
           "kind": "text"
         }
       ]

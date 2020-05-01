@@ -99,19 +99,18 @@ var Fudge;
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var Fudge;
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     const fs = require("fs");
-    // ƒ.RenderManager.initialize();
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node = null;
     // TODO: At this point of time, there is just a single panel. Support multiple panels

@@ -1,5 +1,5 @@
 /// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../userinterface/build/fudgeui" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
     import ƒ = FudgeCore;

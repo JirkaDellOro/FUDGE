@@ -1,7 +1,7 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 
 namespace Fudge {
 
@@ -10,8 +10,6 @@ namespace Fudge {
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
   const fs: ƒ.General = require("fs");
-
-  // ƒ.RenderManager.initialize();
 
   // TODO: At this point of time, the project is just a single node. A project is much more complex...
   let node: ƒ.Node = null;
