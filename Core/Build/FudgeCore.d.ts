@@ -2550,6 +2550,10 @@ declare namespace FudgeCore {
          * Return the elements of this matrix as a Float32Array
          */
         get(): Float32Array;
+        /**
+         * Return a copy of this
+         */
+        copy(): Matrix4x4;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;

@@ -642,6 +642,15 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Return a copy of this
+     */
+    public copy(): Matrix4x4 {
+      let copy: Matrix4x4 = new Matrix4x4();
+      copy.set(this);
+      return copy;
+    }
+
     public serialize(): Serialization {
       // TODO: save translation, rotation and scale as vectors for readability and manipulation
       let serialization: Serialization = this.getMutator();
