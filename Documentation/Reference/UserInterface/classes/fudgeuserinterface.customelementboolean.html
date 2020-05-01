@@ -69,6 +69,13 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A standard checkbox with a label to it</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
@@ -275,7 +282,6 @@
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgeuserinterface.customelementboolean.html#key" class="tsd-kind-icon">key</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgeuserinterface.customelementboolean.html#nextid" class="tsd-kind-icon">next<wbr>Id</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -355,7 +361,6 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeuserinterface.customelementboolean.html#toggleattribute" class="tsd-kind-icon">toggle<wbr>Attribute</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgeuserinterface.customelementboolean.html#webkitmatchesselector" class="tsd-kind-icon">webkit<wbr>Matches<wbr>Selector</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgeuserinterface.customelementboolean.html#get" class="tsd-kind-icon">get</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgeuserinterface.customelementboolean.html#map" class="tsd-kind-icon">map</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgeuserinterface.customelementboolean.html#register" class="tsd-kind-icon">register</a></li>
 							</ul>
 						</section>
@@ -375,7 +380,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L4">CustomElement/CustomElementBoolean.ts:4</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L7">CustomElement/CustomElementBoolean.ts:7</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2948,7 +2953,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#tag">tag</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L10">CustomElement/CustomElement.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElement.ts#L20">CustomElement/CustomElement.ts:20</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -2966,27 +2971,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#key">key</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L23">CustomElement/CustomElement.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElement.ts#L35">CustomElement/CustomElement.ts:35</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="nextid" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> next<wbr>Id</h3>
-					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> nextId<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#nextid">nextId</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L27">CustomElement/CustomElement.ts:27</a></li>
-								</ul>
-							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return the key (name) of the attribute this element represents</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
@@ -3203,9 +3195,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#appendlabel">appendLabel</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L52">CustomElement/CustomElement.ts:52</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElement.ts#L77">CustomElement/CustomElement.ts:77</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Add a label-element as child to this element</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">HTMLLabelElement</span></h4>
 						</li>
 					</ul>
@@ -3461,9 +3458,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L12">CustomElement/CustomElementBoolean.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L18">CustomElement/CustomElementBoolean.ts:18</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates the content of the element when connected the first time</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -3924,9 +3926,14 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#getmutatorvalue">getMutatorValue</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L29">CustomElement/CustomElementBoolean.ts:29</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L38">CustomElement/CustomElementBoolean.ts:38</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieves the status of the checkbox as boolean value</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 						</li>
 					</ul>
@@ -5245,9 +5252,14 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#setmutatorvalue">setMutatorValue</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L32">CustomElement/CustomElementBoolean.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElementBoolean.ts#L44">CustomElement/CustomElementBoolean.ts:44</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Sets the status of the checkbox</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -5350,9 +5362,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#get">get</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L45">CustomElement/CustomElement.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElement.ts#L62">CustomElement/CustomElement.ts:62</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieve the element representing the given data type (if registered)</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -5360,33 +5377,6 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.customelement.html" class="tsd-signature-type">CustomElement</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="map" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> map</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">map<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _typeCustomElement<span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.customelement.html" class="tsd-signature-type">CustomElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#map">map</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L41">CustomElement/CustomElement.ts:41</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_type: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>_typeCustomElement: <a href="fudgeuserinterface.customelement.html" class="tsd-signature-type">CustomElement</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -5401,9 +5391,14 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgeuserinterface.customelement.html">CustomElement</a>.<a href="fudgeuserinterface.customelement.html#register">register</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a293efd3/UserInterface/Source/CustomElement/CustomElement.ts#L31">CustomElement/CustomElement.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8299d334/UserInterface/Source/CustomElement/CustomElement.ts#L49">CustomElement/CustomElement.ts:49</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Register map the given element type to the given tag and the given type of data</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -5983,9 +5978,6 @@
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgeuserinterface.customelementboolean.html#key" class="tsd-kind-icon">key</a>
 							</li>
-							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgeuserinterface.customelementboolean.html#nextid" class="tsd-kind-icon">next<wbr>Id</a>
-							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgeuserinterface.customelementboolean.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
@@ -6207,9 +6199,6 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgeuserinterface.customelementboolean.html#get" class="tsd-kind-icon">get</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgeuserinterface.customelementboolean.html#map" class="tsd-kind-icon">map</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgeuserinterface.customelementboolean.html#register" class="tsd-kind-icon">register</a>
