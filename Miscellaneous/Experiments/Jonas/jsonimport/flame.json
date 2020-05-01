@@ -49,32 +49,45 @@
     ]
   },
   "y-coordinate": {
-    "operation": "modulo",
+    "operation": "addition",
     "arguments": [
       {
-        "operation": "addition",
+        "operation": "modulo",
         "arguments": [
           {
-            "operation": "multiplication",
+            "operation": "addition",
             "arguments": [
-              "index",
               {
-                "operation": "division",
+                "operation": "multiplication",
                 "arguments": [
-                  1,
-                  "size"
+                  "index",
+                  {
+                    "operation": "division",
+                    "arguments": [
+                      1,
+                      "size"
+                    ]
+                  }
+                ]
+              },
+              {
+                "operation": "modulo",
+                "arguments": [
+                  "time",
+                  1
                 ]
               }
             ]
-          },
-          {
-            "operation": "modulo",
-            "arguments": [
-              "time",
-              1
-            ]
           }
         ]
+      },
+      {
+        "operation": "parabola",
+        "arguments": [
+          9.81,
+          "time"
+        ],
+        "global": true
       }
     ]
   }

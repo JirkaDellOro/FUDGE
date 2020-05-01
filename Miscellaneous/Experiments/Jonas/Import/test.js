@@ -1,0 +1,99 @@
+"use strict";
+var Import;
+(function (Import) {
+    Import.data = {
+        "x-coordinate": {
+            "operation": "multiplication",
+            "arguments": [
+                {
+                    "operation": "polynom3",
+                    "arguments": [
+                        {
+                            "operation": "modulo",
+                            "arguments": [
+                                {
+                                    "operation": "addition",
+                                    "arguments": [
+                                        {
+                                            "operation": "multiplication",
+                                            "arguments": [
+                                                "index",
+                                                {
+                                                    "operation": "division",
+                                                    "arguments": [
+                                                        1,
+                                                        "size"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "operation": "modulo",
+                                            "arguments": [
+                                                "time",
+                                                1
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        1,
+                        1,
+                        1
+                    ]
+                },
+                {
+                    "operation": "random",
+                    "arguments": [
+                        "index"
+                    ]
+                }
+            ]
+        },
+        "y-coordinate": {
+            "operation": "addition",
+            "arguments": [
+                {
+                    "operation": "modulo",
+                    "arguments": [
+                        {
+                            "operation": "addition",
+                            "arguments": [
+                                {
+                                    "operation": "multiplication",
+                                    "arguments": [
+                                        "index",
+                                        {
+                                            "operation": "division",
+                                            "arguments": [
+                                                1,
+                                                "size"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "operation": "modulo",
+                                    "arguments": [
+                                        "time",
+                                        1
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "operation": "parabola",
+                    "arguments": [
+                        9.81,
+                        "time"
+                    ],
+                    "global": true
+                }
+            ]
+        }
+    };
+})(Import || (Import = {}));
+//# sourceMappingURL=test.js.map
