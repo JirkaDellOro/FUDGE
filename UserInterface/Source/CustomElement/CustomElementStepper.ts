@@ -8,7 +8,6 @@ namespace FudgeUserInterface {
     // @ts-ignore
     private static customElement: void = CustomElement.register("fudge-stepper", CustomElementStepper, Number);
     public value: number = 0;
-    public params: string;
 
     constructor(_attributes?: CustomElementAttributes) {
       super(_attributes);
@@ -24,7 +23,6 @@ namespace FudgeUserInterface {
         return;
       this.initialized = true;
 
-      this.style.fontFamily = "monospace";
       this.tabIndex = 0;
 
       this.appendLabel();

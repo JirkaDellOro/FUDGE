@@ -40,6 +40,7 @@ namespace FudgeUserInterface {
           // _parent.appendChild(fieldset);
         }
         fieldset.content.appendChild(element);
+        fieldset.content.appendChild(document.createElement("br"));
       }
       return fieldset;
     }
@@ -52,9 +53,13 @@ namespace FudgeUserInterface {
       try {
         if (_type instanceof Object) {
           //TODO: refactor for enums and get rid of the two old generator functions
-          element = document.createElement("span");
-          Generator.createLabelElement(_key, element);
-          Generator.createDropdown(_key, _type, _value.toString(), element);
+          // element = document.createElement("span");
+          // Generator.createLabelElement(_key, element);
+          // Generator.createDropdown(_key, _type, _value.toString(), element);
+
+          let elementType: typeof CustomElement = CustomElement.get("Object");
+          // @ts-ignore: instantiate abstract class
+          element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
         }
         else {
           // TODO: remove switch and use registered custom elements instead

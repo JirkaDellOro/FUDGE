@@ -171,12 +171,33 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
+     * A standard checkbox with a label to it
+     */
+    class CustomElementSelect extends CustomElement {
+        private static customElement;
+        content: Object;
+        constructor(_attributes: CustomElementAttributes, _content?: Object);
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback(): void;
+        /**
+         * Retrieves the status of the checkbox as boolean value
+         */
+        getMutatorValue(): string;
+        /**
+         * Sets the status of the checkbox
+         */
+        setMutatorValue(_value: string): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
      * An interactive number stepper with exponential display and complex handling using keyboard and mouse
      */
     class CustomElementStepper extends CustomElement {
         private static customElement;
         value: number;
-        params: string;
         constructor(_attributes?: CustomElementAttributes);
         /**
          * Creates the content of the element when connected the first time

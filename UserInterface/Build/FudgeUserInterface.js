@@ -122,6 +122,7 @@ var FudgeUserInterface;
                     // _parent.appendChild(fieldset);
                 }
                 fieldset.content.appendChild(element);
+                fieldset.content.appendChild(document.createElement("br"));
             }
             return fieldset;
         }
@@ -133,9 +134,12 @@ var FudgeUserInterface;
             try {
                 if (_type instanceof Object) {
                     //TODO: refactor for enums and get rid of the two old generator functions
-                    element = document.createElement("span");
-                    Generator.createLabelElement(_key, element);
-                    Generator.createDropdown(_key, _type, _value.toString(), element);
+                    // element = document.createElement("span");
+                    // Generator.createLabelElement(_key, element);
+                    // Generator.createDropdown(_key, _type, _value.toString(), element);
+                    let elementType = FudgeUserInterface.CustomElement.get("Object");
+                    // @ts-ignore: instantiate abstract class
+                    element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
@@ -452,6 +456,59 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    /**
+     * A standard checkbox with a label to it
+     */
+    let CustomElementSelect = /** @class */ (() => {
+        class CustomElementSelect extends FudgeUserInterface.CustomElement {
+            constructor(_attributes, _content = {}) {
+                super(_attributes);
+                if (!_attributes.label)
+                    this.setAttribute("label", _attributes.key);
+                this.content = _content;
+            }
+            /**
+             * Creates the content of the element when connected the first time
+             */
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                this.appendLabel();
+                let select = document.createElement("select");
+                for (let key in this.content) {
+                    let entry = document.createElement("option");
+                    entry.text = key;
+                    entry.value = this.content[key];
+                    if (key == this.getAttribute("value")) {
+                        entry.selected = true;
+                    }
+                    select.add(entry);
+                }
+                select.tabIndex = 0;
+                this.appendChild(select);
+            }
+            /**
+             * Retrieves the status of the checkbox as boolean value
+             */
+            getMutatorValue() {
+                return this.querySelector("select").value;
+            }
+            /**
+             * Sets the status of the checkbox
+             */
+            setMutatorValue(_value) {
+                this.querySelector("select").value = _value;
+            }
+        }
+        // @ts-ignore
+        CustomElementSelect.customElement = FudgeUserInterface.CustomElement.register("fudge-select", CustomElementSelect, Object);
+        return CustomElementSelect;
+    })();
+    FudgeUserInterface.CustomElementSelect = CustomElementSelect;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     /**
      * An interactive number stepper with exponential display and complex handling using keyboard and mouse
@@ -569,7 +626,6 @@ var FudgeUserInterface;
                 if (this.initialized)
                     return;
                 this.initialized = true;
-                this.style.fontFamily = "monospace";
                 this.tabIndex = 0;
                 this.appendLabel();
                 let input = document.createElement("input");
