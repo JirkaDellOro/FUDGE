@@ -142,7 +142,7 @@ declare namespace FudgeUserInterface {
          */
         connectedCallback(): void;
         /**
-         * Retrieves the values of picker and slider as ƒ.Color
+         * Retrieves the values of picker and slider as ƒ.Mutator
          */
         getMutatorValue(): ƒ.Mutator;
         /**

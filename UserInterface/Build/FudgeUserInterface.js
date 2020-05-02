@@ -341,13 +341,21 @@ var FudgeUserInterface;
                 picker.type = "color";
                 picker.tabIndex = 0;
                 this.appendChild(picker);
+                let slider = document.createElement("input");
+                slider.type = "range";
+                slider.min = "0";
+                slider.max = "1";
+                slider.step = "0.01";
+                this.appendChild(slider);
             }
             /**
-             * Retrieves the values of picker and slider as ƒ.Color
+             * Retrieves the values of picker and slider as ƒ.Mutator
              */
             getMutatorValue() {
                 let hex = this.querySelector("input[type=color").value;
+                let alpha = this.querySelector("input[type=range").value;
                 this.color.setHex(hex.substr(1, 6) + "ff");
+                this.color.a = parseFloat(alpha);
                 return this.color.getMutator();
             }
             /**
@@ -357,6 +365,7 @@ var FudgeUserInterface;
                 this.color.mutate(_value);
                 let hex = this.color.getHex();
                 this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
+                this.querySelector("input[type=range").value = this.color.a.toString();
             }
         }
         // @ts-ignore
