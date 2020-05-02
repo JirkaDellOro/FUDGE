@@ -26,6 +26,8 @@ namespace FudgeUserInterface {
 
       let select: HTMLSelectElement = document.createElement("select");
       for (let key in this.content) {
+        if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
+          continue;
         let entry: HTMLOptionElement = document.createElement("option");
         entry.text = key;
         entry.value = (<{ [key: string]: string }>this.content)[key];
