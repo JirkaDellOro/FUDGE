@@ -317,6 +317,56 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
+    /**
+     * A color picker with a label to it and a slider for opacity
+     */
+    let CustomElementColor = /** @class */ (() => {
+        class CustomElementColor extends FudgeUserInterface.CustomElement {
+            constructor(_attributes) {
+                super(_attributes);
+                this.color = new ƒ.Color();
+                if (!_attributes.label)
+                    this.setAttribute("label", _attributes.key);
+            }
+            /**
+             * Creates the content of the element when connected the first time
+             */
+            connectedCallback() {
+                if (this.initialized)
+                    return;
+                this.initialized = true;
+                this.appendLabel();
+                let picker = document.createElement("input");
+                picker.type = "color";
+                picker.tabIndex = 0;
+                this.appendChild(picker);
+            }
+            /**
+             * Retrieves the values of picker and slider as ƒ.Color
+             */
+            getMutatorValue() {
+                let hex = this.querySelector("input[type=color").value;
+                this.color.setHex(hex.substr(1, 6) + "ff");
+                return this.color.getMutator();
+            }
+            /**
+             * Sets the values of color picker and slider
+             */
+            setMutatorValue(_value) {
+                this.color.mutate(_value);
+                let hex = this.color.getHex();
+                this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
+            }
+        }
+        // @ts-ignore
+        CustomElementColor.customElement = FudgeUserInterface.CustomElement.register("fudge-color", CustomElementColor, ƒ.Color);
+        return CustomElementColor;
+    })();
+    FudgeUserInterface.CustomElementColor = CustomElementColor;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
     /**
      * Represents a single digit number to be used in groups to represent a multidigit value.
      * Is tabbable and in-/decreases previous sibling when flowing over/under.
@@ -457,7 +507,7 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
-     * A standard checkbox with a label to it
+     * A dropdown menu to display enums
      */
     let CustomElementSelect = /** @class */ (() => {
         class CustomElementSelect extends FudgeUserInterface.CustomElement {

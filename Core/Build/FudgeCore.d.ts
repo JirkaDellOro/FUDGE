@@ -1644,6 +1644,8 @@ declare namespace FudgeCore {
         getArrayBytesRGBA(): Uint8ClampedArray;
         add(_color: Color): void;
         getCSS(): string;
+        getHex(): string;
+        setHex(_hex: string): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

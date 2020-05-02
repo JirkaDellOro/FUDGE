@@ -75,6 +75,22 @@ namespace FudgeCore {
       return `RGBA(${bytes[0]}, ${bytes[1]}, ${bytes[2]}, ${bytes[3]})`;
     }
 
+    public getHex(): string {
+      let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
+      let hex: string = "";
+      for (let byte of bytes)
+        hex += byte.toString(16).padStart(2, "0");
+      return hex;
+    }
+
+    public setHex(_hex: string): void {
+      let bytes: Uint8ClampedArray = this.getArrayBytesRGBA();
+      let channel: number = 0;
+      for (let byte in bytes)
+        bytes[byte] = parseInt(_hex.substr(channel++ * 2, 2), 16);
+      this.setArrayBytesRGBA(bytes);
+    }
+
     protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 }

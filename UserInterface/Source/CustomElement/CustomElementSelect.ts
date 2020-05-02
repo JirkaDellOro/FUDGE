@@ -1,6 +1,6 @@
 namespace FudgeUserInterface {
   /**
-   * A standard checkbox with a label to it
+   * A dropdown menu to display enums
    */
   export class CustomElementSelect extends CustomElement {
     // @ts-ignore

@@ -129,6 +129,29 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    /**
+     * A color picker with a label to it and a slider for opacity
+     */
+    class CustomElementColor extends CustomElement {
+        private static customElement;
+        color: ƒ.Color;
+        constructor(_attributes: CustomElementAttributes);
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback(): void;
+        /**
+         * Retrieves the values of picker and slider as ƒ.Color
+         */
+        getMutatorValue(): ƒ.Mutator;
+        /**
+         * Sets the values of color picker and slider
+         */
+        setMutatorValue(_value: ƒ.Mutator): void;
+    }
+}
+declare namespace FudgeUserInterface {
     /**
      * Represents a single digit number to be used in groups to represent a multidigit value.
      * Is tabbable and in-/decreases previous sibling when flowing over/under.
@@ -171,7 +194,7 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
-     * A standard checkbox with a label to it
+     * A dropdown menu to display enums
      */
     class CustomElementSelect extends CustomElement {
         private static customElement;
