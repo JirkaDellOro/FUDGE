@@ -1,12 +1,35 @@
 "use strict";
 var Import;
 (function (Import) {
+    // export let data: ParticleData = {
+    //   "x-coordinate": {
+    //     "operation": "addition",
+    //     "arguments": [
+    //       {
+    //         "operation": "linear",
+    //         "arguments": [
+    //           "time",
+    //           0,
+    //           2,
+    //           2,
+    //           4
+    //         ]
+    //       },
+    //       {
+    //         "operation": "random",
+    //         "arguments": [
+    //           "index"
+    //         ]
+    //       }
+    //     ]
+    //   }
+    // }
     Import.data = {
         "x-coordinate": {
             "operation": "multiplication",
             "arguments": [
                 {
-                    "operation": "polynom3",
+                    "operation": "polynomial3",
                     "arguments": [
                         {
                             "operation": "modulo",
@@ -35,12 +58,14 @@ var Import;
                                             ]
                                         }
                                     ]
-                                }
+                                },
+                                1
                             ]
                         },
                         1,
                         1,
-                        1
+                        1,
+                        0
                     ]
                 },
                 {
@@ -52,48 +77,39 @@ var Import;
             ]
         },
         "y-coordinate": {
-            "operation": "addition",
+            // "operation": "addition",
+            // "arguments": [
+            //   {
+            "operation": "modulo",
             "arguments": [
                 {
-                    "operation": "modulo",
+                    "operation": "addition",
                     "arguments": [
                         {
-                            "operation": "addition",
+                            "operation": "multiplication",
                             "arguments": [
+                                "index",
                                 {
-                                    "operation": "multiplication",
+                                    "operation": "division",
                                     "arguments": [
-                                        "index",
-                                        {
-                                            "operation": "division",
-                                            "arguments": [
-                                                1,
-                                                "size"
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "operation": "modulo",
-                                    "arguments": [
-                                        "time",
-                                        1
+                                        1,
+                                        "size"
                                     ]
                                 }
+                            ]
+                        },
+                        {
+                            "operation": "modulo",
+                            "arguments": [
+                                "time",
+                                1
                             ]
                         }
                     ]
                 },
-                {
-                    "operation": "parabola",
-                    "arguments": [
-                        9.81,
-                        "time"
-                    ],
-                    "global": true
-                }
+                1
             ]
-        }
+        },
     };
 })(Import || (Import = {}));
 //# sourceMappingURL=test.js.map

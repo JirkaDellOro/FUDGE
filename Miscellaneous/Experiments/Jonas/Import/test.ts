@@ -4,12 +4,36 @@ namespace Import {
     [key: string]: any;
   }
 
+  // export let data: ParticleData = {
+  //   "x-coordinate": {
+  //     "operation": "addition",
+  //     "arguments": [
+  //       {
+  //         "operation": "linear",
+  //         "arguments": [
+  //           "time",
+  //           0,
+  //           2,
+  //           2,
+  //           4
+  //         ]
+  //       },
+  //       {
+  //         "operation": "random",
+  //         "arguments": [
+  //           "index"
+  //         ]
+  //       }
+  //     ]
+  //   }
+  // }
+
   export let data: ParticleData = {
     "x-coordinate": {
       "operation": "multiplication",
       "arguments": [
         {
-          "operation": "polynom3",
+          "operation": "polynomial3",
           "arguments": [
             {
               "operation": "modulo",
@@ -38,12 +62,14 @@ namespace Import {
                       ]
                     }
                   ]
-                }
+                },
+                1
               ]
             },
             1,
             1,
-            1
+            1,
+            0
           ]
         },
         {
@@ -55,47 +81,48 @@ namespace Import {
       ]
     },
     "y-coordinate": {
-      "operation": "addition",
+      // "operation": "addition",
+      // "arguments": [
+      //   {
+      "operation": "modulo",
       "arguments": [
         {
-          "operation": "modulo",
+          "operation": "addition",
           "arguments": [
             {
-              "operation": "addition",
+              "operation": "multiplication",
               "arguments": [
+                "index",
                 {
-                  "operation": "multiplication",
+                  "operation": "division",
                   "arguments": [
-                    "index",
-                    {
-                      "operation": "division",
-                      "arguments": [
-                        1,
-                        "size"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "operation": "modulo",
-                  "arguments": [
-                    "time",
-                    1
+                    1,
+                    "size"
                   ]
                 }
+              ]
+            },
+            {
+              "operation": "modulo",
+              "arguments": [
+                "time",
+                1
               ]
             }
           ]
         },
-        {
-          "operation": "parabola",
-          "arguments": [
-            9.81,
-            "time"
-          ],
-          "global": true
-        }
+        1
       ]
-    }
+    },
+    // // {
+    // //   "operation": "parabola",
+    // //   "arguments": [
+    // //     9.81,
+    // //     "time"
+    // //   ],
+    // //   "global": true
+    // // }
+    // // ]
+    // // }
   };
 }

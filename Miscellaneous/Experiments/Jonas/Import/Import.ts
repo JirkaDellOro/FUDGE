@@ -10,7 +10,7 @@ namespace Import {
   }
 
   function parseOperation(_data: ParticleData): Function {
-    let op: ParticleData = _data["operation"];
+    let op: string = _data["operation"];
     let args: (ParticleData | string | number)[] = _data["arguments"];
     if (!op) {
       console.log("Error, no operation defined");
