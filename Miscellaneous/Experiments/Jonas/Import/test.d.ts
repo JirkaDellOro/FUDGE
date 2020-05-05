@@ -1,6 +1,17 @@
 declare namespace Import {
-    interface ParticleData {
-        [key: string]: any;
+    interface SystemData {
+        particle: Particle;
     }
-    let data: ParticleData;
+    interface Particle {
+        store: ParticleData;
+        translation: ParticleData;
+    }
+    interface ParticleData {
+        [key: string]: ParticleClosure;
+    }
+    interface ParticleClosure {
+        operation: string;
+        arguments: (ParticleClosure | string | number)[];
+    }
+    let data: SystemData;
 }

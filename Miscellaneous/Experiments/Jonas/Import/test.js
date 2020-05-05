@@ -1,115 +1,120 @@
 "use strict";
 var Import;
 (function (Import) {
-    // export let data: ParticleData = {
-    //   "x-coordinate": {
-    //     "operation": "addition",
-    //     "arguments": [
-    //       {
-    //         "operation": "linear",
-    //         "arguments": [
-    //           "time",
-    //           0,
-    //           2,
-    //           2,
-    //           4
-    //         ]
-    //       },
-    //       {
-    //         "operation": "random",
-    //         "arguments": [
-    //           "index"
-    //         ]
-    //       }
-    //     ]
-    //   }
-    // }
     Import.data = {
-        "x-coordinate": {
-            "operation": "multiplication",
-            "arguments": [
-                {
-                    "operation": "polynomial3",
+        "particle": {
+            "store": {
+                "inNormTime": {
+                    "operation": "modulo",
                     "arguments": [
-                        {
-                            "operation": "modulo",
-                            "arguments": [
-                                {
-                                    "operation": "addition",
-                                    "arguments": [
-                                        {
-                                            "operation": "multiplication",
-                                            "arguments": [
-                                                "index",
-                                                {
-                                                    "operation": "division",
-                                                    "arguments": [
-                                                        1,
-                                                        "size"
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "operation": "modulo",
-                                            "arguments": [
-                                                "time",
-                                                1
-                                            ]
-                                        }
-                                    ]
-                                },
-                                1
-                            ]
-                        },
-                        1,
-                        1,
-                        1,
-                        0
-                    ]
-                },
-                {
-                    "operation": "random",
-                    "arguments": [
-                        "index"
+                        "time",
+                        1
                     ]
                 }
-            ]
-        },
-        "y-coordinate": {
-            // "operation": "addition",
-            // "arguments": [
-            //   {
-            "operation": "modulo",
-            "arguments": [
-                {
-                    "operation": "addition",
+            },
+            "translation": {
+                "x": {
+                    "operation": "multiplication",
                     "arguments": [
-                        {
-                            "operation": "multiplication",
-                            "arguments": [
-                                "index",
-                                {
-                                    "operation": "division",
-                                    "arguments": [
-                                        1,
-                                        "size"
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "operation": "modulo",
-                            "arguments": [
-                                "time",
-                                1
-                            ]
-                        }
+                        "inNormTime",
+                        1
                     ]
                 },
-                1
-            ]
-        },
+                "y": {
+                    "operation": "multiplication",
+                    "arguments": [
+                        "inNormTime",
+                        2
+                    ]
+                }
+            }
+        }
     };
+    // export let data: ParticleData = {
+    //   "translation": {
+    //     "x-coordinate": {
+    //       "operation": "multiplication",
+    //       "arguments": [
+    //         {
+    //           "operation": "polynomial3",
+    //           "arguments": [
+    //             {
+    //               "operation": "modulo",
+    //               "arguments": [
+    //                 {
+    //                   "operation": "addition",
+    //                   "arguments": [
+    //                     {
+    //                       "operation": "multiplication",
+    //                       "arguments": [
+    //                         "index",
+    //                         {
+    //                           "operation": "division",
+    //                           "arguments": [
+    //                             1,
+    //                             "size"
+    //                           ]
+    //                         }
+    //                       ]
+    //                     },
+    //                     {
+    //                       "operation": "modulo",
+    //                       "arguments": [
+    //                         "time",
+    //                         1
+    //                       ]
+    //                     }
+    //                   ]
+    //                 },
+    //                 1
+    //               ]
+    //             },
+    //             1,
+    //             1,
+    //             1,
+    //             0
+    //           ]
+    //         },
+    //         {
+    //           "operation": "random",
+    //           "arguments": [
+    //             "index"
+    //           ]
+    //         }
+    //       ]
+    //     },
+    //     "y-coordinate": {
+    //       "operation": "modulo",
+    //       "arguments": [
+    //         {
+    //           "operation": "addition",
+    //           "arguments": [
+    //             {
+    //               "operation": "multiplication",
+    //               "arguments": [
+    //                 "index",
+    //                 {
+    //                   "operation": "division",
+    //                   "arguments": [
+    //                     1,
+    //                     "size"
+    //                   ]
+    //                 }
+    //               ]
+    //             },
+    //             {
+    //               "operation": "modulo",
+    //               "arguments": [
+    //                 "time",
+    //                 1
+    //               ]
+    //             }
+    //           ]
+    //         },
+    //         1
+    //       ]
+    //     }
+    //   }
+    // };
 })(Import || (Import = {}));
 //# sourceMappingURL=test.js.map

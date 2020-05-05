@@ -1,58 +1,95 @@
 "use strict";
 var Import;
 (function (Import) {
-    console.log(Import.data);
-    for (let dim in Import.data) {
-        console.groupCollapsed(dim);
-        let closure = parseOperation(Import.data[dim]);
+    // console.log(data);
+    let storage = {};
+    let storageEvaluated = {};
+    test();
+    function test() {
+        console.log(Import.data);
+        parseFile(Import.data);
+    }
+    // for (let dim in data) {
+    //   console.groupCollapsed(dim);
+    //   let closure: Closure = parseOperation(data[dim]);
+    //   console.groupEnd();
+    //   console.log("Created", closure);
+    //   console.log(closure(1.5, 0, 1, [0.1, 1, 0.5]));
+    // }
+    function parseFile(_data) {
+        let time = 0.5;
+        let index = 0;
+        let size = 1;
+        let randomNumbers = [1];
+        for (const key in _data.particle.store) {
+            storage[key] = parseOperation(_data.particle.store[key]);
+        }
+        let closureX = parseOperation(_data.particle.translation["x"]);
+        let closureY = parseOperation(_data.particle.translation["y"]);
+        for (const key in storage) {
+            console.groupCollapsed(`Evaluate storage "${key}"`);
+            storageEvaluated[key] = storage[key](time, index, size, randomNumbers);
+            console.log(`Stored "${key}"`, storageEvaluated[key]);
+            console.groupEnd();
+        }
+        console.groupCollapsed("Evaluate x");
+        console.log("x =", closureX(time, index, size, randomNumbers));
         console.groupEnd();
-        console.log("Created", closure);
-        console.log(closure(1.5, 0, 1, [0.1, 1, 0.5]));
+        console.groupCollapsed("Evaluate y");
+        console.log("y =", closureY(time, index, size, randomNumbers));
+        console.groupEnd();
     }
     function parseOperation(_data) {
-        let op = _data["operation"];
-        let args = _data["arguments"];
-        if (!op) {
+        if (!_data.operation) {
             console.log("Error, no operation defined");
             return null;
         }
-        // console.log(op);
-        // console.log(args);
         let parameters = [];
-        for (let arg of args) {
+        for (let arg of _data.arguments) {
             switch (typeof (arg)) {
                 case "object":
-                    console.log("Operation", arg);
+                    // console.log("Operation", arg);
                     let result = parseOperation(arg);
                     parameters.push(result);
                     break;
                 case "string":
-                    console.log("String", arg);
+                    // console.log("String", arg);
                     let varFunction;
                     switch (arg) {
                         case "time":
                             varFunction = function (_time, _index, _size, _randomNumbers) {
-                                console.log("Variable", arg);
+                                console.log("Variable", `"${arg}"`, _time);
                                 return _time;
                             };
                             break;
                         case "index":
                             varFunction = function (_time, _index, _size, _randomNumbers) {
-                                console.log("Variable", arg);
+                                console.log("Variable", `"${arg}"`, _index);
                                 return _index;
                             };
                             break;
                         case "size":
                             varFunction = function (_time, _index, _size, _randomNumbers) {
-                                console.log("Variable", arg);
+                                console.log("Variable", `"${arg}"`, _size);
                                 return _size;
                             };
                             break;
+                        default:
+                            if (storage[arg]) {
+                                varFunction = function (_time, _index, _size, _randomNumbers) {
+                                    console.log("Storage", `"${arg}"`, storageEvaluated[arg]);
+                                    return storageEvaluated[arg];
+                                };
+                            }
+                            else {
+                                console.error(`"${arg}" is not defined`);
+                                return null;
+                            }
                     }
                     parameters.push(varFunction);
                     break;
                 case "number":
-                    console.log("Number", arg);
+                    // console.log("Number", arg);
                     parameters.push(function () {
                         console.log("Constant", arg);
                         return arg;
@@ -60,7 +97,7 @@ var Import;
                     break;
             }
         }
-        let closure = createClosureFromOperation(op, parameters);
+        let closure = createClosureFromOperation(_data.operation, parameters);
         return closure;
     }
     // function createClosure(() => {}): Closure {
@@ -93,14 +130,14 @@ var Import;
                 closure = createClosureRandom(_parameters);
                 break;
             default:
-                console.log(`"${_operation}" is not an operation`);
+                console.error(`"${_operation}" is not an operation`);
                 return null;
         }
         return closure;
     }
     function createClosureAddition(_parameters) {
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureAddition", _parameters);
+            console.group("ClosureAddition");
             let result = 0;
             for (const param of _parameters) {
                 result += param(_time, _index, _size, _randomNumbers);
@@ -111,7 +148,7 @@ var Import;
     }
     function createClosureMultiplication(_parameters) {
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureMultiplication", _parameters);
+            console.group("ClosureMultiplication");
             let result = 1;
             for (const param of _parameters) {
                 result *= param(_time, _index, _size, _randomNumbers);
@@ -122,7 +159,7 @@ var Import;
     }
     function createClosureDivision(_parameters) {
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureDivision", _parameters);
+            console.group("ClosureDivision");
             let result = _parameters[0](_time, _index, _size, _randomNumbers) / _parameters[1](_time, _index, _size, _randomNumbers);
             console.groupEnd();
             return result;
@@ -130,7 +167,7 @@ var Import;
     }
     function createClosureModulo(_parameters) {
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureModulo", _parameters);
+            console.group("ClosureModulo");
             let result = _parameters[0](_time, _index, _size, _randomNumbers) % _parameters[1](_time, _index, _size, _randomNumbers);
             console.groupEnd();
             return result;
@@ -142,7 +179,7 @@ var Import;
         let yStart = _parameters[3]();
         let yEnd = _parameters[4]();
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureLinear", _parameters);
+            console.group("ClosureLinear");
             let x = _parameters[0](_time, _index, _size, _randomNumbers);
             let y = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
             console.groupEnd();
@@ -155,7 +192,7 @@ var Import;
         let c = _parameters[3]();
         let d = _parameters[4]();
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosurePolynomial3", _parameters);
+            console.group("ClosurePolynomial3");
             let x = _parameters[0](_time, _index, _size, _randomNumbers);
             let y = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
             console.groupEnd();
@@ -164,7 +201,7 @@ var Import;
     }
     function createClosureRandom(_parameters) {
         return function (/* input parameters */ _time, _index, _size, _randomNumbers) {
-            console.group("ClosureRandom", _parameters);
+            console.group("ClosureRandom");
             let result = _randomNumbers[_parameters[0](_time, _index, _size, _randomNumbers)];
             console.groupEnd();
             return result;
