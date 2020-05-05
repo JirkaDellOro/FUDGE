@@ -1047,14 +1047,13 @@ declare namespace FudgeCore {
         constructor(_color?: Color);
     }
     /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
-     * and a flatMix number for mixing between smooth and flat shading.
+     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
      */
     class CoatMatCap extends Coat {
         texture: TextureImage;
         tintColor: Color;
-        flatMix: number;
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number);
+        shadeSmooth: number;
+        constructor(_texture?: TextureImage, _tintcolor?: Color, _shadeSmooth?: number);
     }
 }
 declare namespace FudgeCore {
