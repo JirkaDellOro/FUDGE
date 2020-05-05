@@ -53,9 +53,9 @@ namespace FudgeCore {
       let tintColorArray: Float32Array = new Float32Array([r, g, b, a]);
       crc3.uniform4fv(colorUniformLocation, tintColorArray);
 
-      let floatUniformLocation: WebGLUniformLocation = _shader.uniforms["u_flatmix"];
-      let flatMix: number = (<CoatMatCap>this).flatMix;
-      crc3.uniform1f(floatUniformLocation, flatMix);
+      let floatUniformLocation: WebGLUniformLocation = _shader.uniforms["shade_smooth"];
+      let shadeSmooth: number = (<CoatMatCap>this).shadeSmooth;
+      crc3.uniform1i(floatUniformLocation, shadeSmooth);
 
       if (this.renderData) {
         // buffers exist
