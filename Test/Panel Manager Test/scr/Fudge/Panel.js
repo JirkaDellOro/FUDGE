@@ -71,8 +71,7 @@ var FudgeTest;
                                 view = new FudgeTest.ViewData(this);
                                 break;
                             case FudgeTest.VIEW.PORT:
-                                view = new FudgeTest.ViewRender;
-                                #(this);
+                                view = new FudgeTest.ViewRender(this);
                                 break;
                         }
                         let viewConfig = {

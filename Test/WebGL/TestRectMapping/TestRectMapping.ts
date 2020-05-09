@@ -3,7 +3,7 @@ namespace TestRectMapping {
   
 
   window.addEventListener("load", init);
-  let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
+  let uiMaps: { [name: string]: { ui: UI.FieldSet, framing: ƒ.Framing } } = {};
   let uiClient: UI.Rectangle;
   let canvas: HTMLCanvasElement;
   let viewPort: ƒ.Viewport = new ƒ.Viewport();
@@ -137,13 +137,13 @@ namespace TestRectMapping {
 
       switch (name) {
         case "ClientToCanvas": {
-          let uiMap: { ui: UI.FieldSet<UI.FramingScaled>, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
           uiMap.ui.set(uiMap.framing);
           uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
           break;
         }
         case "CanvasToDestination": {
-          let uiMap: { ui: UI.FieldSet<null>, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet<null>, framing: ƒ.FramingComplex }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet, framing: ƒ.FramingComplex }>uiMaps[name];
           uiMap.ui.set({ Margin: uiMap.framing.margin, Padding: uiMap.framing.padding });
           uiMap.ui.set({ Result: viewPort.rectDestination });
           break;
