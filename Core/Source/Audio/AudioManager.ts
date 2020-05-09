@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Extends the standard AudioContext for integration with [[Node]]-branches.
+   * Extends the standard AudioContext for integration with FUDGE-graphs.
    * Creates a default object at startup to be addressed as AudioManager default.
    * Other objects of this class may be create for special purposes.
    */
@@ -9,7 +9,7 @@ namespace FudgeCore {
     public static readonly default: AudioManager = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
     /** The master volume all AudioNodes in the context should attach to */
     public readonly gain: GainNode;
-    private branch: Node = null;
+    private graph: Node = null;
     private cmpListener: ComponentAudioListener = null;
 
     constructor(contextOptions?: AudioContextOptions) {
@@ -33,22 +33,22 @@ namespace FudgeCore {
     }
 
     /**
-     * Determines branch to listen to. Each [[ComponentAudio]] in the branch will connect to this contexts master gain, all others disconnect.
+     * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
      */
-    public listenTo = (_branch: Node | null): void => {
-      if (this.branch)
-        this.branch.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
-      if (!_branch)
+    public listenTo = (_graph: Node | null): void => {
+      if (this.graph)
+        this.graph.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
+      if (!_graph)
         return;
-      this.branch = _branch;
-      this.branch.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
+      this.graph = _graph;
+      this.graph.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
     /**
-     * Retrieve the branch currently listening to
+     * Retrieve the FUDGE-graph currently listening to
      */
-    public getBranchListeningTo = (): Node => {
-      return this.branch;
+    public getGraphListeningTo = (): Node => {
+      return this.graph;
     }
 
     /**
@@ -59,10 +59,10 @@ namespace FudgeCore {
     }
 
     /**
-     * Updates the spatial settings of the AudioNodes effected in the current branch
+     * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
      */
     public update = (): void => {
-      this.branch.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
+      this.graph.broadcastEvent(new Event(EVENT_AUDIO.UPDATE));
       if (this.cmpListener)
         this.cmpListener.update(this.listener);
     }

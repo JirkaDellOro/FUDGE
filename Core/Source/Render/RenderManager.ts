@@ -35,13 +35,13 @@ namespace FudgeCore {
 
     //#region RayCast & Picking
     /**
-     * Draws the branch for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
+     * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
      */
-    public static drawBranchForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       RenderManager.pickBuffers = [];
       //TODO: examine, why switching blendFunction is necessary 
       RenderOperator.crc3.blendFunc(1, 0);
-      RenderManager.drawBranch(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
+      RenderManager.drawGraph(_node, _cmpCamera, RenderManager.drawNodeForRayCast);
       RenderOperator.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
 
       RenderManager.resetFrameBuffer();
@@ -49,7 +49,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Browses through the buffers (previously created with [[drawBranchForRayCast]]) of the size given
+     * Browses through the buffers (previously created with [[drawGraphForRayCast]]) of the size given
      * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
      */
     public static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[] {
@@ -76,22 +76,22 @@ namespace FudgeCore {
     //#region Drawing
     /**
      * The main rendering function to be called from [[Viewport]].
-     * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+     * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].
      */
-    public static drawBranch(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+    public static drawGraph(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
       RenderManager.setupTransformAndLights(_node, matrix);
 
-      RenderManager.drawBranchRecursive(_node, _cmpCamera, _drawNode);
+      RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
     }
 
     /**
-     * Recursivly iterates over the branch and renders each node and all successors with the given render function
+     * Recursivly iterates over the graph and renders each node and all successors with the given render function
      */
-    private static drawBranchRecursive(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+    private static drawGraphRecursive(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
       // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       if (!_node.isActive)
         return;
@@ -111,7 +111,7 @@ namespace FudgeCore {
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
-        RenderManager.drawBranchRecursive(childNode, _cmpCamera, _drawNode); //, world);
+        RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
       }
 
       Recycler.store(projection);
@@ -195,8 +195,8 @@ namespace FudgeCore {
 
     //#region Transformation & Lights
     /**
-     * Recursively iterates over the branch starting with the node given, recalculates all world transforms, 
-     * collects all lights and feeds all shaders used in the branch with these lights
+     * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
+     * collects all lights and feeds all shaders used in the graph with these lights
      */
     private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);

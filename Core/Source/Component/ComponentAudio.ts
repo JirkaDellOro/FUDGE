@@ -199,14 +199,14 @@ namespace FudgeCore {
     private handleAttach = (_event: Event): void => {
       // Debug.log(_event);
       if (_event.type == EVENT.COMPONENT_ADD) {
-        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
-        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
+        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
         this.getContainer().addEventListener(EVENT_AUDIO.UPDATE, this.update, true);
-        this.listened = this.getContainer().isDescendantOf(AudioManager.default.getBranchListeningTo());
+        this.listened = this.getContainer().isDescendantOf(AudioManager.default.getGraphListeningTo());
       }
       else {
-        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleBranch, true);
-        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleBranch, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
+        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
         this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = false;
       }
@@ -214,9 +214,9 @@ namespace FudgeCore {
     }
 
     /** 
-     * Automatically connects/disconnects AudioNodes when appending/removing the branch the component is in. 
+     * Automatically connects/disconnects AudioNodes when appending/removing the FUDGE-graph the component is in. 
      */
-    private handleBranch = (_event: Event): void => {
+    private handleGraph = (_event: Event): void => {
       // Debug.log(_event);
       this.listened = (_event.type == EVENT_AUDIO.CHILD_APPEND);
       this.updateConnection();

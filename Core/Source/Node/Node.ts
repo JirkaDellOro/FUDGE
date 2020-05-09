@@ -106,12 +106,12 @@ namespace FudgeCore {
         // _node is already a child of this
         return;
 
-      let inAudioBranch: boolean = false;
-      let branchListened: Node = AudioManager.default.getBranchListeningTo();
+      let inAudioGraph: boolean = false;
+      let graphListened: Node = AudioManager.default.getGraphListeningTo();
       let ancestor: Node = this;
       while (ancestor) {
         ancestor.timestampUpdate = 0;
-        inAudioBranch = inAudioBranch || (ancestor == branchListened);
+        inAudioGraph = inAudioGraph || (ancestor == graphListened);
         if (ancestor == _node)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else
@@ -124,7 +124,7 @@ namespace FudgeCore {
       this.children.push(_node);
       _node.parent = this;
       _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
-      if (inAudioBranch)
+      if (inAudioGraph)
         _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
@@ -138,7 +138,7 @@ namespace FudgeCore {
         return;
 
       _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
-      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+      if (this.isDescendantOf(AudioManager.default.getGraphListeningTo()))
         _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       this.children.splice(found, 1);
       _node.parent = null;
@@ -171,17 +171,17 @@ namespace FudgeCore {
       _with.parent = this;
 
       _with.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
-      if (this.isDescendantOf(AudioManager.default.getBranchListeningTo()))
+      if (this.isDescendantOf(AudioManager.default.getGraphListeningTo()))
         _with.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
 
       return true;
     }
 
     /**
-     * Generator yielding the node and all successors in the branch below for iteration
+     * Generator yielding the node and all decendants in the graph below for iteration
      */
-    public get branch(): IterableIterator<Node> {
-      return this.getBranchGenerator();
+    public get graph(): IterableIterator<Node> {
+      return this.getGraphGenerator();
     }
 
     public isUpdated(_timestampUpdate: number): boolean {
@@ -450,10 +450,10 @@ namespace FudgeCore {
     }
     // #endregion
 
-    private * getBranchGenerator(): IterableIterator<Node> {
+    private * getGraphGenerator(): IterableIterator<Node> {
       yield this;
       for (let child of this.children)
-        yield* child.branch;
+        yield* child.graph;
     }
   }
 }
