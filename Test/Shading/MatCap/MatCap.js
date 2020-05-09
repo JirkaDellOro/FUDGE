@@ -1,7 +1,7 @@
 var MatCapTest;
 (function (MatCapTest) {
     var ƒ = FudgeCore;
-    let branch = new ƒ.Node("Branch");
+    let graph = new ƒ.Node("Graph");
     window.addEventListener("load", init);
     function init() {
         /* textures can only be loaded by https - not with file:// address (cross origin block)
@@ -20,11 +20,11 @@ var MatCapTest;
         let sphere = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere(32, 32));
         sphere.mtxLocal.translateX(1);
         pyramid.mtxLocal.translateX(-1);
-        branch.addChild(pyramid);
-        branch.addChild(sphere);
+        graph.addChild(pyramid);
+        graph.addChild(sphere);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
         ƒ.Loop.start(ƒ.LOOP_MODE["TIME_GAME"], 30, true);

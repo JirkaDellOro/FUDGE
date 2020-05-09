@@ -2,7 +2,7 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 ///<reference path="../../Scenes/Scenes.ts"/>
 
 
@@ -14,7 +14,7 @@ namespace UITest {
     let myLayout: GoldenLayout;
     let savedState: string;
 
-    let branch: ƒ.Node;
+    let graph: ƒ.Node;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera;
@@ -72,8 +72,8 @@ namespace UITest {
         
         counter = 0;
         // create asset
-        branch = new ƒ.Node("Root");
-        branch.addComponent(new ƒ.ComponentTransform());
+        graph = new ƒ.Node("Root");
+        graph.addComponent(new ƒ.ComponentTransform());
 
         // initialize viewports
         canvas = document.createElement("canvas");
@@ -81,7 +81,7 @@ namespace UITest {
         canvas.width = 1200;
         document.body.append(canvas);
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
@@ -90,7 +90,7 @@ namespace UITest {
             myLayout.emit(ƒui.EVENT_USERINTERFACE.SELECT, _event);
         });
         function animate(_event: Event): void {
-            branch.mtxLocal.rotateY(1);
+            graph.mtxLocal.rotateY(1);
             // prepare and draw viewport
             viewPort.draw();
         }
@@ -105,7 +105,7 @@ namespace UITest {
 
     function createTestComponent(container: GoldenLayout.Container, state: Object): void {
         let content: HTMLElement = document.createElement("div");
-        let components: ƒ.Component[] = branch.getAllComponents();
+        let components: ƒ.Component[] = graph.getAllComponents();
         // for (let component of components) {
         //     let uiComponents: ƒui.NodeData = new ƒui.NodeData(component, content);
         // }
@@ -144,7 +144,7 @@ namespace UITest {
                     node.mtxWorld.translate(randPos);
                     node.addComponent(cmpMesh);
                     node.addComponent(cmpMaterial);
-                    branch.addChild(node);
+                    graph.addChild(node);
                     console.log(node);
                     break;
             }
@@ -153,11 +153,6 @@ namespace UITest {
     }
     function createTreeComponent(container: GoldenLayout.Container, state: Object): void {
         let listContainer: HTMLElement = document.createElement("div");
-        // let treeController: ƒui.NodeList = new ƒui.NodeList(branch, listContainer);
-
-        // myLayout.on(ƒui.EVENT_USERINTERFACE.SELECT, function (_event: Event): void {
-        //     treeController.setNodeRoot(branch);
-        // });
         container.getElement().html(listContainer);
     }
     function createAnimTreeComponent(container: GoldenLayout.Container, state: Object): void {

@@ -23,14 +23,14 @@ namespace TextureTest {
 
     pyramid.mtxLocal.translateX(-0.7);
 
-    let branch: ƒ.Node = new ƒ.Node("Branch");
-    branch.addChild(quad);
-    branch.addChild(cube);
-    branch.addChild(pyramid);
+    let graph: ƒ.Node = new ƒ.Node("Graph");
+    graph.addChild(quad);
+    graph.addChild(cube);
+    graph.addChild(pyramid);
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     viewport.draw();
 

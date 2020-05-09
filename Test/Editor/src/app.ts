@@ -10,7 +10,7 @@ namespace UI {
     let myLayout: GoldenLayout;
     let savedState: string;
 
-    let branch: ƒ.Node;
+    let graph: ƒ.Node;
     let canvas: HTMLCanvasElement;
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
     let camera: ƒ.Node;
@@ -44,9 +44,9 @@ namespace UI {
     }
 
     function initViewport(): void {
-        // create branch
-        branch = new ƒ.Node("Scene");
-        branch.addComponent(new ƒ.ComponentTransform());
+        // create Scene-Graph
+        graph = new ƒ.Node("Scene");
+        graph.addComponent(new ƒ.ComponentTransform());
 
         // initialize viewports
         canvas = document.createElement("canvas");
@@ -63,7 +63,7 @@ namespace UI {
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
         camera.addComponent(cmpCamera);
         addCubeNode();
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
@@ -76,17 +76,17 @@ namespace UI {
     }
 
     function createInspectorComponent(container: any, state: any): void {
-        console.log(branch.getChildren()[0].name);
+        console.log(graph.getChildren()[0].name);
         let lblName: HTMLElement = document.createElement("label");
         lblName.innerHTML = "Node Name";
         let txtName: HTMLInputElement = document.createElement("input");
-        txtName.value = <string>branch.getChildren()[0].name;
+        txtName.value = <string>graph.getChildren()[0].name;
         container.getElement().append(lblName);
         container.getElement().append(txtName);
     }
  
     function animate(_event: Event): void {
-        branch.mtxLocal.rotateY(1);
+        graph.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }
@@ -135,7 +135,7 @@ namespace UI {
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
 
-        branch.addChild(nodeCubeCoffee);
+        graph.addChild(nodeCubeCoffee);
     }
 
 

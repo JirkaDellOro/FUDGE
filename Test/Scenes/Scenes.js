@@ -22,12 +22,12 @@ var Scenes;
         let cmpMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
         cmpMesh.pivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
-        // create branch
-        let branch = new ƒ.Node("AxisCross");
-        branch.addChild(cubeRed);
-        branch.addChild(cubeGreen);
-        branch.addChild(cubeBlue);
-        return branch;
+        // create graph
+        let graph = new ƒ.Node("AxisCross");
+        graph.addChild(cubeRed);
+        graph.addChild(cubeGreen);
+        graph.addChild(cubeBlue);
+        return graph;
     }
     Scenes.createAxisCross = createAxisCross;
     function createArrow(_name, _color) {

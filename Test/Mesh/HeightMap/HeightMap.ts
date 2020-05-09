@@ -5,7 +5,7 @@ namespace MeshTest {
 
   window.addEventListener("load", init);
 
-  let branch: ƒ.Node = new ƒ.Node("Branch");
+  let graph: ƒ.Node = new ƒ.Node("Graph");
   let gridFlat: ƒ.Node = new ƒ.Node("sphereTex");
   let gridTex: ƒ.Node = new ƒ.Node("sphereTex");
 
@@ -31,8 +31,8 @@ namespace MeshTest {
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
     gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
 
-    branch.addChild(gridFlat);
-    branch.addChild(gridTex);
+    graph.addChild(gridFlat);
+    graph.addChild(gridTex);
 
     gridFlat.mtxLocal.translateX(-0.6);
     gridTex.mtxLocal.translateX(0.6);
@@ -40,14 +40,14 @@ namespace MeshTest {
     let body: ƒ.Node = new ƒ.Node("k");
 
     let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 110);
-    branch.addChild(lights);
+    graph.addChild(lights);
 
-    branch.addChild(body);
+    graph.addChild(body);
 
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 2), new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     Scenes.dollyViewportCamera(viewport);
     viewport.setFocus(true);

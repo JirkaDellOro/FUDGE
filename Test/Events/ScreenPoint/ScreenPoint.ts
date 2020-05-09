@@ -9,14 +9,14 @@ namespace ScreenPoint {
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
-        let branch: ƒ.Node = Scenes.createAxisCross();
+        let graph: ƒ.Node = Scenes.createAxisCross();
 
         let posCamera: ƒ.Vector3 = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
         let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(posCamera);
         cmpCamera.projectCentral(1, 45);
         viewPort = new ƒ.Viewport();
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
 
         viewPort.frameClientToCanvas.setScale(0.5, 0.5);
         viewPort.frameCanvasToDestination.margin = { left: 0, top: 0.5, right: 0, bottom: 0 };

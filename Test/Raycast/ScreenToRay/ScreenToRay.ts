@@ -19,20 +19,20 @@ namespace ScreenToRay {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
-    branch.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = Scenes.createAxisCross();
+    graph.addComponent(new ƒ.ComponentTransform());
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    viewport.initialize(canvas.id, branch, cmpCamera, canvas);
+    viewport.initialize(canvas.id, graph, cmpCamera, canvas);
     canvas.addEventListener("mousemove", setCursorPosition);
 
     canvasRay = document.querySelector("canvas#ray");
     cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
     let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
     cmpCameraRay.projectCentral(1, 45);
-    viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
+    viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];

@@ -3,7 +3,7 @@ namespace MatCapTest {
   import ƒ = FudgeCore;
   
 
-  let branch: ƒ.Node = new ƒ.Node("Branch");
+  let graph: ƒ.Node = new ƒ.Node("Graph");
 
   window.addEventListener("load", init);
   function init(): void {
@@ -29,13 +29,13 @@ namespace MatCapTest {
     let sphere: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere(32,32));
     sphere.mtxLocal.translateX(1);
     pyramid.mtxLocal.translateX(-1);
-    branch.addChild(pyramid);
-    branch.addChild(sphere);
+    graph.addChild(pyramid);
+    graph.addChild(sphere);
 
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     viewport.draw();
 

@@ -7,11 +7,11 @@ var TextureTest;
         let material = new ƒ.Material("Red", ƒ.ShaderFlat, coatRed);
         let cube = Scenes.createCompleteMeshNode("Cube", material, new ƒ.MeshCube());
         cube.mtxLocal.translate(ƒ.Vector3.ZERO());
-        let branch = new ƒ.Node("Branch");
-        branch.addChild(cube);
+        let graph = new ƒ.Node("Graph");
+        graph.addChild(cube);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 3, 3), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         window.setInterval(function () {
             cube.mtxLocal.rotateY(-1);

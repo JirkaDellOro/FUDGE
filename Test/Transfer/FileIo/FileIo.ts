@@ -24,13 +24,13 @@ namespace FileIo {
         testFileIo(node);
     }
 
-    async function testFileIo(_branch: ƒ.Node): Promise<void> {
+    async function testFileIo(_graph: ƒ.Node): Promise<void> {
         console.group("Original");
-        console.log(_branch);
+        console.log(_graph);
         console.groupEnd();
 
         console.group("Serialized");
-        let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_branch);
+        let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_graph);
         console.log(serialization);
         console.groupEnd();
 
@@ -69,7 +69,7 @@ namespace FileIo {
                 console.groupEnd();
 
                 console.group("Comparison");
-                Compare.compare(_branch, reconstruction);
+                Compare.compare(_graph, reconstruction);
                 console.groupEnd();
             }
         }

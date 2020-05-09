@@ -1,7 +1,8 @@
 var UI;
 (function (UI) {
     class TreeComponent {
-        constructor(container, state, _branch) {
+        constructor(container, state, _graph) {
+            //
         }
     }
     UI.TreeComponent = TreeComponent;

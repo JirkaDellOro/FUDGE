@@ -10,12 +10,12 @@ var TestRectMapping;
     let uiCamera;
     function init() {
         // create asset
-        let branch = Scenes.createAxisCross();
-        branch.addComponent(new ƒ.ComponentTransform());
+        let graph = Scenes.createAxisCross();
+        graph.addComponent(new ƒ.ComponentTransform());
         // initialize viewports
         canvas = document.getElementsByTagName("canvas")[0];
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         let menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
@@ -38,7 +38,7 @@ var TestRectMapping;
         ƒ.Loop.start();
         function animate(_event) {
             update();
-            branch.mtxLocal.rotateY(1);
+            graph.mtxLocal.rotateY(1);
             viewPort.draw();
         }
     }

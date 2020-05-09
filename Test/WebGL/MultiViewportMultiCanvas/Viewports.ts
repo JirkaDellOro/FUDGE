@@ -6,8 +6,8 @@ namespace RenderManagerRendering {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
-    branch.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = Scenes.createAxisCross();
+    graph.addComponent(new ƒ.ComponentTransform());
 
 
     // initialize viewports
@@ -18,7 +18,7 @@ namespace RenderManagerRendering {
       let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(posCameras[i]);
       cmpCamera.projectCentral(1, 45);
       let viewPort: ƒ.Viewport = new ƒ.Viewport();
-      viewPort.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
+      viewPort.initialize(canvasList[i].id, graph, cmpCamera, canvasList[i]);
       viewPorts.push(viewPort);
     }
 
@@ -26,7 +26,7 @@ namespace RenderManagerRendering {
     ƒ.Loop.start();
 
     function animate(_event: Event): void {
-      branch.mtxLocal.rotateY(1);
+      graph.mtxLocal.rotateY(1);
       // prepare and draw viewport
       for (let viewPort of viewPorts) {
         //viewPort.prepare();

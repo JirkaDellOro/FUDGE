@@ -6,7 +6,7 @@ namespace RenderManagerRendering {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
+    let graph: ƒ.Node = Scenes.createAxisCross();
 
     // initialize viewport
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
@@ -14,7 +14,7 @@ namespace RenderManagerRendering {
     let canvas: HTMLCanvasElement = Scenes.createCanvas();
     document.body.appendChild(canvas);
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
+    viewPort.initialize("TestViewport", graph, cmpCamera, canvas);
 
     // prepare and draw viewport
     //viewPort.prepare();

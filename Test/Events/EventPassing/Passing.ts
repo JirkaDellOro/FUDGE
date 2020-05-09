@@ -9,7 +9,7 @@ namespace EventPassing {
     window.addEventListener("DOMContentLoaded", init);
 
     function init(): void {
-        let branch: ƒ.Node = Scenes.createAxisCross();
+        let graph: ƒ.Node = Scenes.createAxisCross();
 
         let posCameras: ƒ.Vector3[] = [new ƒ.Vector3(-1, 2, 3), new ƒ.Vector3(1, 2, 3)];
         let canvasList: HTMLCollectionOf<HTMLCanvasElement> = document.getElementsByTagName("canvas");
@@ -17,7 +17,7 @@ namespace EventPassing {
             let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(posCameras[i]);
             cmpCamera.projectCentral(1, 45);
             let viewport: ƒ.Viewport = new ƒ.Viewport();
-            viewport.initialize(canvasList[i].id, branch, cmpCamera, canvasList[i]);
+            viewport.initialize(canvasList[i].id, graph, cmpCamera, canvasList[i]);
             viewPorts.push(viewport);
             viewport.draw();
 

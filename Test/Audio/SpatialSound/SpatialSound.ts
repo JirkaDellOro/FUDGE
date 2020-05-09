@@ -76,15 +76,15 @@ namespace AudioSpace {
     camera.axisRotateY.addControl(cntMouseX);
 
     // scene setup
-    const branch: ƒ.Node = new ƒ.Node("Branch");
-    branch.addChild(new ƒAid.NodeCoordinateSystem());
-    branch.addChild(translator);
-    branch.addChild(camera);
+    const graph: ƒ.Node = new ƒ.Node("Graph");
+    graph.addChild(new ƒAid.NodeCoordinateSystem());
+    graph.addChild(translator);
+    graph.addChild(camera);
 
     const viewport: ƒ.Viewport = new ƒ.Viewport();
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
-    viewport.initialize("Viewport", branch, cmpCamera, canvas);
-    ƒ.AudioManager.default.listenTo(branch);
+    viewport.initialize("Viewport", graph, cmpCamera, canvas);
+    ƒ.AudioManager.default.listenTo(graph);
     ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
 
     // setup event handling

@@ -19,12 +19,12 @@ var FileIo;
         // let result: ƒ.Resources = testFileIo(node);
         testFileIo(node);
     }
-    async function testFileIo(_branch) {
+    async function testFileIo(_graph) {
         console.group("Original");
-        console.log(_branch);
+        console.log(_graph);
         console.groupEnd();
         console.group("Serialized");
-        let serialization = ƒ.Serializer.serialize(_branch);
+        let serialization = ƒ.Serializer.serialize(_graph);
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Stringified");
@@ -55,7 +55,7 @@ var FileIo;
                 console.log(reconstruction);
                 console.groupEnd();
                 console.group("Comparison");
-                Compare.compare(_branch, reconstruction);
+                Compare.compare(_graph, reconstruction);
                 console.groupEnd();
             }
         }

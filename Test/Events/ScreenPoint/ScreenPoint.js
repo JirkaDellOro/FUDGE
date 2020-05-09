@@ -5,13 +5,13 @@ var ScreenPoint;
     let camera;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
-        let branch = Scenes.createAxisCross();
+        let graph = Scenes.createAxisCross();
         let posCamera = new ƒ.Vector3(-1, 2, 3);
         canvas = document.querySelector("canvas");
         let cmpCamera = Scenes.createCamera(posCamera);
         cmpCamera.projectCentral(1, 45);
         ScreenPoint.viewPort = new ƒ.Viewport();
-        ScreenPoint.viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        ScreenPoint.viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         ScreenPoint.viewPort.frameClientToCanvas.setScale(0.5, 0.5);
         ScreenPoint.viewPort.frameCanvasToDestination.margin = { left: 0, top: 0.5, right: 0, bottom: 0 };
         ScreenPoint.viewPort.frameCanvasToDestination.padding = { left: 5, top: 0, right: 5, bottom: 5 };

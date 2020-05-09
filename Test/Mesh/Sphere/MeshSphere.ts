@@ -5,7 +5,7 @@ namespace MeshTest {
 
   window.addEventListener("load", init);
 
-  let branch: ƒ.Node = new ƒ.Node("Branch");
+  let graph: ƒ.Node = new ƒ.Node("Graph");
   let sphereTex: ƒ.Node = new ƒ.Node("sphereTex");
   let sphereFlat: ƒ.Node = new ƒ.Node("sphereFlat");
 
@@ -27,19 +27,19 @@ namespace MeshTest {
     sphereFlat.mtxLocal.translateX(0.6);
     sphereTex.mtxLocal.translateX(-0.6);
 
-    branch.addChild(sphereFlat);
-    branch.addChild(sphereTex);
+    graph.addChild(sphereFlat);
+    graph.addChild(sphereTex);
 
     let body: ƒ.Node = new ƒ.Node("k");
 
     let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 0);
-    branch.addChild(lights);
+    graph.addChild(lights);
 
-    branch.addChild(body);
+    graph.addChild(body);
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 0, 2.3), new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     Scenes.dollyViewportCamera(viewport);
     viewport.setFocus(true);
