@@ -104,8 +104,8 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#assert" class="tsd-kind-icon">assert</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#clear" class="tsd-kind-icon">clear</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawbranch" class="tsd-kind-icon">draw<wbr>Branch</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawbranchforraycast" class="tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Ray<wbr>Cast</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
@@ -129,7 +129,7 @@
 					<div class="tsd-signature tsd-kind-icon">rect<wbr>Clip<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol"> =&nbsp;new Rectangle(-1, 1, 2, -2)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L17">Render/RenderManager.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L17">Render/RenderManager.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -147,7 +147,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#assert">assert</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L41">Render/RenderOperator.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L41">Render/RenderOperator.ts:41</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -190,7 +190,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L24">Render/RenderManager.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L24">Render/RenderManager.ts:24</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -209,22 +209,22 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="drawbranch" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Branch</h3>
+					<a name="drawgraph" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Graph</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">draw<wbr>Branch<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _drawNode<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">draw<wbr>Graph<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _drawNode<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L81">Render/RenderManager.ts:81</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L81">Render/RenderManager.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>The main rendering function to be called from <a href="fudgecore.viewport.html">Viewport</a>.
-									Draws the branch starting with the given <a href="fudgecore.node.html">Node</a> using the camera given <a href="fudgecore.componentcamera.html">ComponentCamera</a>.</p>
+									Draws the graph starting with the given <a href="fudgecore.node.html">Node</a> using the camera given <a href="fudgecore.componentcamera.html">ComponentCamera</a>.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -244,21 +244,21 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="drawbranchforraycast" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Branch<wbr>For<wbr>Ray<wbr>Cast</h3>
+					<a name="drawgraphforraycast" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Ray<wbr>Cast<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.pickbuffer.html" class="tsd-signature-type">PickBuffer</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.pickbuffer.html" class="tsd-signature-type">PickBuffer</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L40">Render/RenderManager.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L40">Render/RenderManager.ts:40</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Draws the branch for RayCasting starting with the given <a href="fudgecore.node.html">Node</a> using the camera given <a href="fudgecore.componentcamera.html">ComponentCamera</a>.</p>
+									<p>Draws the graph for RayCasting starting with the given <a href="fudgecore.node.html">Node</a> using the camera given <a href="fudgecore.componentcamera.html">ComponentCamera</a>.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -285,7 +285,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#getcanvas">getCanvas</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L80">Render/RenderOperator.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L80">Render/RenderOperator.ts:80</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -308,7 +308,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#getcanvasrect">getCanvasRect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L94">Render/RenderOperator.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L94">Render/RenderOperator.ts:94</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +331,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#getrenderingcontext">getRenderingContext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L87">Render/RenderOperator.ts:87</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L87">Render/RenderOperator.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -354,7 +354,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#getviewportrectangle">getViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L119">Render/RenderOperator.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L119">Render/RenderOperator.ts:119</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -377,7 +377,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#initialize">initialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L50">Render/RenderOperator.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L50">Render/RenderOperator.ts:50</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -408,12 +408,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L55">Render/RenderManager.ts:55</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L55">Render/RenderManager.ts:55</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Browses through the buffers (previously created with <a href="fudgecore.rendermanager.html#drawbranchforraycast">drawBranchForRayCast</a>) of the size given
+									<p>Browses through the buffers (previously created with <a href="fudgecore.rendermanager.html#drawgraphforraycast">drawGraphForRayCast</a>) of the size given
 									and returns an unsorted list of the values at the given position, representing node-ids and depth information as <a href="fudgecore.rayhit.html">RayHit</a>s</p>
 								</div>
 							</div>
@@ -443,7 +443,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderManager.ts#L32">Render/RenderManager.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderManager.ts#L32">Render/RenderManager.ts:32</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -472,7 +472,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#setattributestructure">setAttributeStructure</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L32">Render/RenderOperator.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L32">Render/RenderOperator.ts:32</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -510,7 +510,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#setcanvassize">setCanvasSize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L102">Render/RenderOperator.ts:102</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L102">Render/RenderOperator.ts:102</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -542,7 +542,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.renderoperator.html">RenderOperator</a>.<a href="fudgecore.renderoperator.html#setviewportrectangle">setViewportRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Render/RenderOperator.ts#L111">Render/RenderOperator.ts:111</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/782fec7f/Core/Source/Render/RenderOperator.ts#L111">Render/RenderOperator.ts:111</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -592,10 +592,10 @@
 								<a href="fudgecore.rendermanager.html#clear" class="tsd-kind-icon">clear</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#drawbranch" class="tsd-kind-icon">draw<wbr>Branch</a>
+								<a href="fudgecore.rendermanager.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#drawbranchforraycast" class="tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Ray<wbr>Cast</a>
+								<a href="fudgecore.rendermanager.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgecore.rendermanager.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a>
