@@ -75,13 +75,13 @@ namespace Fudge {
     let content: string = ƒ.Serializer.stringify(serialization);
 
     // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
+    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
 
     fs.writeFileSync(filename, content);
   }
 
   function open(): ƒ.Node {
-    let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+    let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
     console.groupCollapsed("File content");

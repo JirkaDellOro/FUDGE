@@ -10,14 +10,14 @@ namespace Fudge {
   export class ViewRender extends View {
     viewport: ƒ.Viewport;
     canvas: HTMLCanvasElement;
-    branch: ƒ.Node;
+    graph: ƒ.Node;
 
     constructor(_parent: PanelNode) {
       super(_parent);
       if (_parent instanceof PanelNode && _parent.getNode() != null)
-        this.branch = _parent.getNode();
+        this.graph = _parent.getNode();
       else {
-        this.branch = new ƒ.Node("Scene");
+        this.graph = new ƒ.Node("Scene");
       }
       this.fillContent();
     }
@@ -36,7 +36,7 @@ namespace Fudge {
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
+      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
 
       this.content.append(this.canvas);
@@ -58,15 +58,15 @@ namespace Fudge {
     public setRoot(_node: ƒ.Node): void {
       if (!_node)
         return;
-      this.branch = _node;
-      this.viewport.setBranch(this.branch);
+      this.graph = _node;
+      this.viewport.setGraph(this.graph);
 
     }
     /** 
      * Update Viewport every frame
      */
     private animate = (_e: Event) => {
-      this.viewport.setBranch(this.branch);
+      this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }

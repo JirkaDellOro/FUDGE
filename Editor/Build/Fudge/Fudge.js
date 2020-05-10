@@ -166,11 +166,11 @@ var Fudge;
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
+        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
     function open() {
-        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         console.groupCollapsed("File content");
         ƒ.Debug.log(content);
@@ -1441,13 +1441,12 @@ var Fudge;
                 }
             };
             if (_parent instanceof Fudge.PanelNode && _parent.getNode() != null)
-                this.branch = _parent.getNode();
+                this.graph = _parent.getNode();
             else
-                this.branch = new ƒ.Node("Node");
+                this.graph = new ƒ.Node("Node");
             this.selectedNode = null;
             this.parentPanel.addEventListener("select" /* SELECT */, this.setSelectedNode);
-            // this.listController = new UINodeList(this.branch, this.content);
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.branch);
+            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
             this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
@@ -1468,7 +1467,7 @@ var Fudge;
         setRoot(_node) {
             if (!_node)
                 return;
-            this.branch = _node;
+            this.graph = _node;
         }
     }
     Fudge.ViewGraph = ViewGraph;
@@ -1488,7 +1487,7 @@ var Fudge;
              * Update Viewport every frame
              */
             this.animate = (_e) => {
-                this.viewport.setBranch(this.branch);
+                this.viewport.setGraph(this.graph);
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();
             };
@@ -1498,9 +1497,9 @@ var Fudge;
                 _event.cancelBubble = true;
             };
             if (_parent instanceof Fudge.PanelNode && _parent.getNode() != null)
-                this.branch = _parent.getNode();
+                this.graph = _parent.getNode();
             else {
-                this.branch = new ƒ.Node("Scene");
+                this.graph = new ƒ.Node("Scene");
             }
             this.fillContent();
         }
@@ -1517,7 +1516,7 @@ var Fudge;
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, this.canvas);
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
             this.content.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
@@ -1534,8 +1533,8 @@ var Fudge;
         setRoot(_node) {
             if (!_node)
                 return;
-            this.branch = _node;
-            this.viewport.setBranch(this.branch);
+            this.graph = _node;
+            this.viewport.setGraph(this.graph);
         }
     }
     Fudge.ViewRender = ViewRender;
