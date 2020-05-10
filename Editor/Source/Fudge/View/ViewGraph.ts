@@ -7,7 +7,7 @@ namespace Fudge {
    * Consists of a viewport, a tree-control and . 
    */
   export class ViewGraph extends View {
-    branch: ƒ.Node;
+    graph: ƒ.Node;
     selectedNode: ƒ.Node;
     tree: ƒui.Tree<ƒ.Node>;
     contextMenu: Electron.Menu;
@@ -15,14 +15,13 @@ namespace Fudge {
     constructor(_parent: PanelNode) {
       super(_parent);
       if (_parent instanceof PanelNode && (<PanelNode>_parent).getNode() != null)
-        this.branch = (<PanelNode>_parent).getNode();
+        this.graph = (<PanelNode>_parent).getNode();
       else
-        this.branch = new ƒ.Node("Node");
+        this.graph = new ƒ.Node("Node");
 
       this.selectedNode = null;
       this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
-      // this.listController = new UINodeList(this.branch, this.content);
-      this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.branch);
+      this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
       this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
@@ -47,7 +46,7 @@ namespace Fudge {
     public setRoot(_node: ƒ.Node): void {
       if (!_node)
         return;
-      this.branch = _node;
+      this.graph = _node;
     }
 
     /**

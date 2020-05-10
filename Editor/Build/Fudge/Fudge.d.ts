@@ -328,7 +328,7 @@ declare namespace Fudge {
      * Consists of a viewport, a tree-control and .
      */
     class ViewGraph extends View {
-        branch: ƒ.Node;
+        graph: ƒ.Node;
         selectedNode: ƒ.Node;
         tree: ƒui.Tree<ƒ.Node>;
         contextMenu: Electron.Menu;
@@ -361,7 +361,7 @@ declare namespace Fudge {
     class ViewRender extends View {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
-        branch: ƒ.Node;
+        graph: ƒ.Node;
         constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
