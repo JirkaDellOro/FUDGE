@@ -1,16 +1,15 @@
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 
 namespace Fudge {
 
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  const { ipcRenderer, remote } = require("electron");
+  export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
+  export const remote: Electron.Remote = require("electron").remote;
   const fs: ƒ.General = require("fs");
-
-  ƒ.RenderManager.initialize();
 
   // TODO: At this point of time, the project is just a single node. A project is much more complex...
   let node: ƒ.Node = null;
@@ -29,7 +28,7 @@ namespace Fudge {
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Save");
       panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof NodePanel) {
+      if (panel instanceof PanelNode) {
         node = panel.getNode();
       }
       save(node);
@@ -38,7 +37,7 @@ namespace Fudge {
       ƒ.Debug.log("Open");
       node = open();
       panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof NodePanel) {
+      if (panel instanceof PanelNode) {
         panel.setNode(node);
       }
     });
@@ -62,7 +61,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    let nodePanel: NodePanel = new NodePanel("Node Panel", new NodePanelTemplate, node);
+    let nodePanel: PanelNode = new PanelNode("Node Panel", new NodePanelTemplate, node);
     PanelManager.instance.addPanel(nodePanel);
   }
 

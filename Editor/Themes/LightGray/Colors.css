@@ -1,0 +1,15 @@
+
+:root {
+  --color-darkest: hsl(0, 0%, 0%);
+  --color-dark: hsl(0, 0%, 30%);
+  --color-medium: hsl(0, 0%, 50%);
+  --color-bright: hsl(0, 0%, 95%);
+  --color-brightest: hsl(0, 0%, 100%);
+  
+  --color-background-main: var(--color-bright);
+  --color-background-content: var(--color-brightest);
+  --color-text: var(--color-dark);
+  --color-dragdrop-outline: var(--color-bright);
+  --color-highlight: var(--color-darkest);
+  --color-signal: var(--color-darkest)
+}

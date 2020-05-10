@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Controls the rendering of a branch of a scenetree, using the given [[ComponentCamera]],
+   * Controls the rendering of a graph, using the given [[ComponentCamera]],
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of [[Framing]] objects. The stages involved are in order of rendering
    * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
@@ -10,7 +10,7 @@ namespace FudgeCore {
     private static focus: Viewport;
 
     public name: string = "Viewport"; // The name to call this viewport by.
-    public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
+    public camera: ComponentCamera = null; // The camera representing the view parameters to render the graph.
 
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
@@ -27,19 +27,15 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
 
 
-    private branch: Node = null; // The first node in the tree(branch) that will be rendered.
+    private graph: Node = null; // The first node in the graph that will be rendered.
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
     private pickBuffers: PickBuffer[] = [];
 
     /**
-     * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
-     * @param _name 
-     * @param _branch 
-     * @param _camera 
-     * @param _canvas 
+     * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
      */
-    public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
+    public initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
       this.name = _name;
       this.camera = _camera;
       this.canvas = _canvas;
@@ -48,7 +44,7 @@ namespace FudgeCore {
       this.rectSource = RenderManager.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      this.setBranch(_branch);
+      this.setGraph(_graph);
     }
     /**
      * Retrieve the 2D-context attached to the destination canvas
@@ -72,17 +68,17 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the branch to be drawn in the viewport.
+     * Set the graph to be drawn in the viewport.
      */
-    public setBranch(_branch: Node): void {
-      if (this.branch) {
-        this.branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+    public setGraph(_graph: Node): void {
+      if (this.graph) {
+        this.graph.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.graph.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
-      this.branch = _branch;
-      if (this.branch) {
-        this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      this.graph = _graph;
+      if (this.graph) {
+        this.graph.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.graph.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
     }
     /**
@@ -92,8 +88,8 @@ namespace FudgeCore {
       // TODO: move to debug-class
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
-      output += this.branch.name;
-      Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.branch));
+      output += this.graph.name;
+      Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.graph));
     }
 
     // #region Drawing
@@ -110,10 +106,7 @@ namespace FudgeCore {
         this.adjustCamera();
 
       RenderManager.clear(this.camera.backgroundColor);
-      // if (RenderManager.addBranch(this.branch))
-      //   // branch has not yet been processed fully by rendermanager -> update all registered nodes
-      //   RenderManager.update();
-      RenderManager.drawBranch(this.branch, this.camera);
+      RenderManager.drawGraph(this.graph, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
       this.crc2.drawImage(
@@ -131,13 +124,7 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-
-      // if (RenderManager.addBranch(this.branch))
-      //   // branch has not yet been processed fully by rendermanager -> update all registered nodes
-      //   RenderManager.update();
-
-      this.pickBuffers = RenderManager.drawBranchForRayCast(this.branch, this.camera);
-      // Debug.log(this.pickBuffers[0].frameBuffer);
+      this.pickBuffers = RenderManager.drawGraphForRayCast(this.graph, this.camera);
     }
 
 
@@ -259,7 +246,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    // #region Events (passing from canvas to viewport and from there into branch)
+    // #region Events (passing from canvas to viewport and from there into graph)
     /**
      * Returns true if this viewport currently has focus and thus receives keyboard events
      */

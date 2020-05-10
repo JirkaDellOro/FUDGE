@@ -14,9 +14,7 @@ var Flame;
     let speedCameraRotation = 0.2;
     let speedCameraTranslation = 0.02;
     let input;
-    let particleNum;
-    let particleOffset;
-    let randomNumbers = [];
+    let particleSystem;
     function hndLoad(_event) {
         input = document.getElementById("particleNum");
         const canvas = document.querySelector("canvas");
@@ -40,65 +38,26 @@ var Flame;
         viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
         viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
         viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
-        // setup random 100 random numbers
-        for (let i = 0; i < 100; i++) {
-            randomNumbers.push(Math.random());
-        }
         // setup particles
         let mesh = new f.MeshCube();
         let material = new f.Material("Alpha", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("YELLOW")));
-        particleNum = input.valueAsNumber;
-        particleOffset = 1 / particleNum;
-        root.addChild(createParticles(mesh, material));
+        root.addChild(new f.Node("Particles"));
         // setup input
         input.addEventListener("input", (_event) => {
-            particleNum = input.valueAsNumber;
-            particleOffset = 1 / particleNum;
-            let newParticles = createParticles(mesh, material);
-            root.replaceChild(getParticles(), newParticles);
+            let newParticleSystem = new Flame.ParticleSystem(mesh, material, f.Matrix4x4.TRANSLATION(f.Vector3.Y(-.5)), input.valueAsNumber, 0.5, -2, -1, 0.5, 0.5, 0, 1);
+            root.replaceChild(getParticleSystem(), newParticleSystem);
+            particleSystem = getParticleSystem();
         });
-        viewport.draw();
+        input.dispatchEvent(new Event("input"));
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         f.Loop.start(f.LOOP_MODE.TIME_GAME, 60);
         function update(_event) {
             let time = f.Time.game.get() / 1000;
-            updateParticles(time);
+            particleSystem.update(time);
             viewport.draw();
         }
     }
-    function updateParticles(_time) {
-        let effectFactor = _time * .7 % 1;
-        let particleIndex = 1;
-        for (const child of getParticles().getChildren()) {
-            // console.log("Child: " + particleIndex + "-------");
-            let currentOffset = particleIndex * particleOffset - particleOffset / 2;
-            // console.log("Offset: " + currentOffset);
-            let y = (effectFactor + currentOffset + randomNumbers[(particleIndex - 1) % 100]) % 1;
-            let x = ((-2 + currentOffset * 4) * Math.pow(1 - y, 3) + (2 - currentOffset * 4) * Math.pow(1 - y, 2));
-            let z = 0;
-            // y = slowDown(y);
-            let translation = new f.Vector3(x, y, z);
-            // console.log(translation.toString());
-            child.cmpTransform.local.translation = translation;
-            particleIndex++;
-        }
-        // function slowDown(_value: number): number {
-        //     return _value * _value;
-        // }
-    }
-    function createParticle(_mesh, _material) {
-        let node = new fAid.Node("Alpha", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0, 0)), _material, _mesh);
-        node.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.05, 0.05, 0.05));
-        return node;
-    }
-    function createParticles(_mesh, _material) {
-        let newParticles = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, -.5, 0)));
-        for (let i = 0; i < particleNum; i++) {
-            newParticles.addChild(createParticle(_mesh, _material));
-        }
-        return newParticles;
-    }
-    function getParticles() {
+    function getParticleSystem() {
         return root.getChildrenByName("Particles")[0];
     }
     function hndPointerMove(_event) {

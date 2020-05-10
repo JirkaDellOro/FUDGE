@@ -69,7 +69,7 @@ namespace FudgeCore {
         }
 
         /**
-         * Creates and registers a resource from a [[Node]], copying the complete branch starting with it
+         * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from
          * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
          */

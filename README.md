@@ -1,34 +1,41 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
-## Modules
-The main modules that comprise the inner mechanics of FUDGE
-- [Core](Core)
-- [UserInterface](UserInterface)
-- [Network](Network)
- 
+# Welcome!
+FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
+
+# Wiki
+To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
+
+# Directory Overview
+## Core
+Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
+## UserInterface
+Comtains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
+## Network
+Contains components for gaming over networks. This module is not fully evaluated yet.
+## Aid
+Contains collections of classes for convenience, bundling and simplifying common procedures.
 ## Editor
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
-- [Editor](Editor)
+## Documentation
+Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References
+## Test
+Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up.
+## Miscellaneous	
+A collection of various other helpful documents and resources
 
-## Design
-The documentation of planning FUDGE and the decisions made
-- [Design](Documentation/Design)
-- [Logs](Documentation/Logs)
-
-## Reference
-The generated API-References, the Guidelines on how to work with FUDGE and how to extend and further develop it.
+# Reference
+- [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
+- [Class-Diagramm Core](https://raw.githubusercontent.com/JirkaDellOro/FUDGE/development/Documentation/Design/Core.svg)  
 - [Core-API](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core)
 - [UserInterface-API](https:///JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface)
-- [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
 
-## Test
-Tests to verify functionality
-- [Test](Test)
-
-
-# Themen für Abschluss- und Studienarbeiten
+# Call for papers
+- Modeller
+- Cameratransformation, Axonometry and VR
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
+- Importer for standard file formats
 - Light and Shadpw
 - Diegetic User-Interface
 - Runtime-Recording for Replay
@@ -36,13 +43,9 @@ Tests to verify functionality
 - Input-Manager
 - Selection-Sets to store temporary Groups
 - Advanced texturing
-- :pencil: Audiokomponenten 
-- :pencil: Physikengine 
-- :pencil: Modeller
-- :pencil: Cameratransformation, Axonometrien und VR
-- :pencil: Partikelsysteme
+- :pencil: Physikengine (Marko Fehrenbach)
+- :pencil: Partikelsysteme (Jonas Plotzky)
 - ~~Spritesheet~~
-
 
 # Contributors  
 

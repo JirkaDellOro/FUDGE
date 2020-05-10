@@ -42,20 +42,19 @@ namespace FudgeCore {
     }
 
     /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral)
-     * and a flatMix number for mixing between smooth and flat shading.
+     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
      */
     @RenderInjectorCoat.decorate
     export class CoatMatCap extends Coat {
         public texture: TextureImage = null;
         public tintColor: Color = new Color(0.5, 0.5, 0.5, 1);
-        public flatMix: number = 0.5;
+        public shadeSmooth: number;
 
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _flatmix?: number) {
+        constructor(_texture?: TextureImage, _tintcolor?: Color, _shadeSmooth?: number) {
             super();
             this.texture = _texture || new TextureImage();
             this.tintColor = _tintcolor || new Color(0.5, 0.5, 0.5, 1);
-            this.flatMix = _flatmix > 1.0 ? this.flatMix = 1.0 : this.flatMix = _flatmix || 0.5;
+            this.shadeSmooth = _shadeSmooth || 0;
         }
     }
 }

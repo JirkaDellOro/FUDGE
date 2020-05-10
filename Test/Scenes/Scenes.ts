@@ -32,13 +32,13 @@ namespace Scenes {
         cmpMesh.pivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 
-        // create branch
-        let branch: ƒ.Node = new ƒ.Node("AxisCross");
-        branch.addChild(cubeRed);
-        branch.addChild(cubeGreen);
-        branch.addChild(cubeBlue);
+        // create graph
+        let graph: ƒ.Node = new ƒ.Node("AxisCross");
+        graph.addChild(cubeRed);
+        graph.addChild(cubeGreen);
+        graph.addChild(cubeBlue);
 
-        return branch;
+        return graph;
     }
 
     function createArrow(_name: string, _color: ƒ.Color): ƒ.Node {

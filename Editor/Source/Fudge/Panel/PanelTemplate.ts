@@ -12,26 +12,26 @@ namespace Fudge {
                     content: [
                         {
                             type: "component",
-                            componentName: Fudge.VIEW.PORT,
+                            componentName: Fudge.VIEW.RENDER,
                             title: "Viewport"
                         },
-                        {
-                            type: "component",
-                            componentName: Fudge.VIEW.CAMERA,
-                            title: "Camera Controller"
-                        },
+                        // {
+                        //     type: "component",
+                        //     componentName: Fudge.VIEW.CAMERA,
+                        //     title: "Camera Controller"
+                        // },
                         {
                             type: "column",
                             content: [
                                 {
                                     type: "component",
                                     componentName: Fudge.VIEW.NODE,
-                                    title: "Node Explorer"
+                                    title: "Graph "
                                 },
                                 {
                                     type: "component",
-                                    componentName: Fudge.VIEW.DATA,
-                                    title: "Inspector"
+                                    componentName: Fudge.VIEW.COMPONENTS,
+                                    title: "Components"
                                 }
                             ]
                         }

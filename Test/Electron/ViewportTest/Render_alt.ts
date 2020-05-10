@@ -9,7 +9,7 @@ namespace ElectronViewport {
   let myLayout: GoldenLayout;
   let savedState: string;
 
-  let branch: ƒ.Node;
+  let graph: ƒ.Node;
   let canvas: HTMLCanvasElement;
   let viewPort: ƒ.Viewport = new ƒ.Viewport();
   let cmpCamera: ƒ.ComponentCamera;
@@ -45,7 +45,7 @@ namespace ElectronViewport {
   function initViewport(): void {
     
     // create asset
-    branch = Scenes.createAxisCross();
+    graph = Scenes.createAxisCross();
 
     // initialize viewport
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
@@ -54,7 +54,7 @@ namespace ElectronViewport {
     document.body.appendChild(canvas);
 
     let viewPort: ƒ.Viewport = new ƒ.Viewport();
-    viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
+    viewPort.initialize("TestViewport", graph, cmpCamera, canvas);
     viewPort.draw();
   }
 
@@ -63,17 +63,17 @@ namespace ElectronViewport {
   }
 
   function createInspectorComponent(container: GoldenLayout.Container, state: Object): void {
-    console.log(branch.getChildren()[0].name);
+    console.log(graph.getChildren()[0].name);
     let lblName: HTMLElement = document.createElement("label");
     lblName.innerHTML = "Node Name";
     let txtName: HTMLInputElement = document.createElement("input");
-    txtName.value = <string>branch.getChildren()[0].name;
+    txtName.value = <string>graph.getChildren()[0].name;
     container.getElement().append(lblName);
     container.getElement().append(txtName);
   }
 
   function animate(_event: Event): void {
-    branch.mtxLocal.rotateY(1);
+    graph.mtxLocal.rotateY(1);
     // prepare and draw viewport
     viewPort.draw();
   }
@@ -122,6 +122,6 @@ namespace ElectronViewport {
     // nodeCubeCaramel.addComponent(cmpMaterialCream);
     // nodeCubeCaramel.addComponent(cmpTransformCream);
 
-    branch.addChild(nodeCubeCoffee);
+    graph.addChild(nodeCubeCoffee);
   }
 }

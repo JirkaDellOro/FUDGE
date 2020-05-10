@@ -7,18 +7,15 @@ namespace NodeResource {
   function init(): void {
     ƒ.Debug.log("Start");
 
-    let branch: ƒ.Node = new ƒ.Node("Root");
+    let graph: ƒ.Node = new ƒ.Node("Root");
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
     let canvas: HTMLCanvasElement = Scenes.createCanvas();
     document.body.appendChild(canvas);
-    // let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-    // branch.addChild(coSys);
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
-    viewport.initialize("Viewport", branch, cmpCamera, canvas);
+    viewport.initialize("Viewport", graph, cmpCamera, canvas);
 
     let center: ƒ.Node = createCenterAndSatellite();
-    // branch.addChild(center);
 
     // Fudge["AnimateSatellite"] = AnimateSatellite;
     // console.log(AnimateSatellite["namespaceX"]);
@@ -30,7 +27,7 @@ namespace NodeResource {
       for (let y: number = -dim.y; y < dim.y + 1; y++)
         for (let x: number = -dim.x; x < dim.x + 1; x++) {
           let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
-          branch.addChild(instance);
+          graph.addChild(instance);
           instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
           (<ƒ.ComponentMesh>instance.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(1));
           instance.broadcastEvent(new Event("startSatellite"));

@@ -3,7 +3,7 @@ namespace ScreenToRay {
   
   window.addEventListener("load", init);
 
-  let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
+  let uiMaps: { [name: string]: { ui: UI.FieldSet, framing: ƒ.Framing } } = {};
   let uiClient: UI.Rectangle;
   let menu: HTMLDivElement;
 
@@ -19,20 +19,20 @@ namespace ScreenToRay {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
-    branch.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = Scenes.createAxisCross();
+    graph.addComponent(new ƒ.ComponentTransform());
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    viewport.initialize(canvas.id, branch, cmpCamera, canvas);
+    viewport.initialize(canvas.id, graph, cmpCamera, canvas);
     canvas.addEventListener("mousemove", setCursorPosition);
 
     canvasRay = document.querySelector("canvas#ray");
     cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
     let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
     cmpCameraRay.projectCentral(1, 45);
-    viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
+    viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];
@@ -241,13 +241,13 @@ namespace ScreenToRay {
 
       switch (name) {
         case "ClientToCanvas": {
-          let uiMap: { ui: UI.FieldSet<UI.FramingScaled>, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
           uiMap.ui.set(uiMap.framing);
           uiMap.ui.set({ Result: viewport.getCanvasRectangle() });
           break;
         }
         case "CanvasToDestination": {
-          let uiMap: { ui: UI.FieldSet<null>, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet<null>, framing: ƒ.FramingComplex }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet, framing: ƒ.FramingComplex }>uiMaps[name];
           uiMap.ui.set({ Margin: uiMap.framing.margin, Padding: uiMap.framing.padding });
           uiMap.ui.set({ Result: viewport.rectDestination });
           break;

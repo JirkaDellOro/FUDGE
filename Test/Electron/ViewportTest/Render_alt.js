@@ -10,7 +10,7 @@ var ElectronViewport;
     // window.addEventListener("DOMContentLoaded", init);
     let myLayout;
     let savedState;
-    let branch;
+    let graph;
     let canvas;
     let viewPort = new ƒ.Viewport();
     let cmpCamera;
@@ -40,30 +40,30 @@ var ElectronViewport;
     }
     function initViewport() {
         // create asset
-        branch = Scenes.createAxisCross();
+        graph = Scenes.createAxisCross();
         // initialize viewport
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(3, 3, 5));
         cmpCamera.projectCentral(1, 45);
         canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
         let viewPort = new ƒ.Viewport();
-        viewPort.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewPort.initialize("TestViewport", graph, cmpCamera, canvas);
         viewPort.draw();
     }
     function createViewportComponent(container, state) {
         container.getElement().append(canvas);
     }
     function createInspectorComponent(container, state) {
-        console.log(branch.getChildren()[0].name);
+        console.log(graph.getChildren()[0].name);
         let lblName = document.createElement("label");
         lblName.innerHTML = "Node Name";
         let txtName = document.createElement("input");
-        txtName.value = branch.getChildren()[0].name;
+        txtName.value = graph.getChildren()[0].name;
         container.getElement().append(lblName);
         container.getElement().append(txtName);
     }
     function animate(_event) {
-        branch.mtxLocal.rotateY(1);
+        graph.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }
@@ -100,7 +100,7 @@ var ElectronViewport;
         // nodeCubeCaramel.addComponent(cmpMeshCream);
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
-        branch.addChild(nodeCubeCoffee);
+        graph.addChild(nodeCubeCoffee);
     }
 })(ElectronViewport || (ElectronViewport = {}));
 //# sourceMappingURL=Render_alt.js.map

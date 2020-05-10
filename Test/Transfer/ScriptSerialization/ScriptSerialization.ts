@@ -9,16 +9,15 @@ namespace ScriptSerialization {
     ƒ.Debug.log("Start");
 
     let root: ƒ.Node = new ƒ.Node("Root");
-    let branch: ƒ.Node = new ƒ.Node("Branch");
+    let graph: ƒ.Node = new ƒ.Node("Graph");
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 10));
     let canvas: HTMLCanvasElement = Scenes.createCanvas();
     document.body.appendChild(canvas);
     let coSys: ƒ.Node = Scenes.createCoordinateSystem();
     root.addChild(coSys);
-    // root.addChild(branch);
 
     let test: ƒ.Node = createTest();
-    branch.addChild(test);
+    graph.addChild(test);
     test.name = "Original";
 
     let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(test, false);
@@ -26,7 +25,7 @@ namespace ScriptSerialization {
 
     let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
     instance.name = "Instance";
-    branch.addChild(instance);
+    graph.addChild(instance);
 
     let cmpScript: Test = instance.getComponent(Test);
     let mutator: ƒ.Mutator = cmpScript.getMutator();
@@ -35,34 +34,34 @@ namespace ScriptSerialization {
 
 
     let srlResources: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
-    let srlBranch: ƒ.Serialization = ƒ.Serializer.serialize(branch);
+    let srlGraph: ƒ.Serialization = ƒ.Serializer.serialize(graph);
 
     console.groupCollapsed("Resources");
     console.log(srlResources);
     console.groupEnd();
     console.groupCollapsed("Scene");
-    console.log(srlBranch);
+    console.log(srlGraph);
     console.groupEnd();
 
     console.group("Serialization/Deserialization");
-    ƒ.Debug.log("Original branch", branch);
-    let json: string = ƒ.Serializer.stringify(srlBranch);
+    ƒ.Debug.log("Original graph", graph);
+    let json: string = ƒ.Serializer.stringify(srlGraph);
     console.groupCollapsed("Json");
     ƒ.Debug.log("JSON", json);
     console.groupEnd();
     let parsed: ƒ.Serialization = ƒ.Serializer.parse(json);
     ƒ.Debug.log("Parsed", parsed);
     let reconstruct: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(parsed);
-    ƒ.Debug.log("Reconstructed branch", reconstruct);
+    ƒ.Debug.log("Reconstructed graph", reconstruct);
     console.groupEnd();
 
     root.addChild(reconstruct);
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
-    viewport.initialize("Viewport", branch, cmpCamera, canvas);
+    viewport.initialize("Viewport", graph, cmpCamera, canvas);
     // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     // ƒ.Loop.start();
-    Compare.compare(branch, reconstruct);
+    Compare.compare(graph, reconstruct);
 
     update(null);
     function update(_event: Event): void {

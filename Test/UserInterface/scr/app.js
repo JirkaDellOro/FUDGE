@@ -2,21 +2,21 @@
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 ///<reference path="../../Scenes/Scenes.ts"/>
 var UITest;
 // <reference path="../../../Core/src/Transfer/Serializer.ts"/>
 // <reference path="../../../Core/Build/Fudge.d.ts"/>
 /// <reference types="../../@types/golden-layout"/>
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 ///<reference path="../../Scenes/Scenes.ts"/>
 (function (UITest) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     let myLayout;
     let savedState;
-    let branch;
+    let graph;
     let canvas;
     let viewPort = new ƒ.Viewport();
     let cmpCamera;
@@ -69,15 +69,15 @@ var UITest;
     function initViewport() {
         counter = 0;
         // create asset
-        branch = new ƒ.Node("Root");
-        branch.addComponent(new ƒ.ComponentTransform());
+        graph = new ƒ.Node("Root");
+        graph.addComponent(new ƒ.ComponentTransform());
         // initialize viewports
         canvas = document.createElement("canvas");
         canvas.height = 800;
         canvas.width = 1200;
         document.body.append(canvas);
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
@@ -86,7 +86,7 @@ var UITest;
             myLayout.emit("select" /* SELECT */, _event);
         });
         function animate(_event) {
-            branch.mtxLocal.rotateY(1);
+            graph.mtxLocal.rotateY(1);
             // prepare and draw viewport
             viewPort.draw();
         }
@@ -99,7 +99,7 @@ var UITest;
     }
     function createTestComponent(container, state) {
         let content = document.createElement("div");
-        let components = branch.getAllComponents();
+        let components = graph.getAllComponents();
         // for (let component of components) {
         //     let uiComponents: ƒui.NodeData = new ƒui.NodeData(component, content);
         // }
@@ -135,7 +135,7 @@ var UITest;
                     node.mtxWorld.translate(randPos);
                     node.addComponent(cmpMesh);
                     node.addComponent(cmpMaterial);
-                    branch.addChild(node);
+                    graph.addChild(node);
                     console.log(node);
                     break;
             }
@@ -144,10 +144,6 @@ var UITest;
     }
     function createTreeComponent(container, state) {
         let listContainer = document.createElement("div");
-        // let treeController: ƒui.NodeList = new ƒui.NodeList(branch, listContainer);
-        // myLayout.on(ƒui.EVENT_USERINTERFACE.SELECT, function (_event: Event): void {
-        //     treeController.setNodeRoot(branch);
-        // });
         container.getElement().html(listContainer);
     }
     function createAnimTreeComponent(container, state) {

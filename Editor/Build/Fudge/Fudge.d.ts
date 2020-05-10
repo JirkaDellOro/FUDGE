@@ -1,5 +1,5 @@
 /// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../userinterface/build/fudgeui" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -8,37 +8,6 @@ declare namespace Fudge {
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
         ACTIVEVIEWPORT = "activeViewport"
-    }
-    enum NODEMENU {
-        EMPTY = "Empty Node",
-        BOX = "Box Mesh Node",
-        PYRAMID = "Pyramid Mesh Node",
-        PLANE = "Plane Mesh Node"
-    }
-    enum COMPONENTMENU {
-        MESHBOX = "Mesh Component.Box Mesh Component",
-        MESHPLANE = "Mesh Component.Plane Mesh Component",
-        MESHPYRAMID = "Mesh Component.Pyramid Mesh Component",
-        AUDIOLISTENER = "Audio Listener Component",
-        AUDIO = "Audio Component",
-        ANIMATION = "Animation Component",
-        CAMERA = "Camera Component",
-        LIGHT = "Light Component",
-        SCRIPT = "Script Component",
-        TRANSFORM = "Transform Component"
-    }
-    class UINodeList {
-        listRoot: HTMLElement;
-        selectedEntry: HTMLElement;
-        private nodeRoot;
-        constructor(_node: ƒ.Node, _listContainer: HTMLElement);
-        getNodeRoot(): ƒ.Node;
-        setSelection(_node: ƒ.Node): void;
-        getSelection(): ƒ.Node;
-        updateList: (_event: Event) => void;
-        setNodeRoot(_node: ƒ.Node): void;
-        toggleCollapse: (_event: Event) => void;
-        private BuildListFromNode;
     }
     class UIAnimationList {
         listRoot: HTMLElement;
@@ -55,14 +24,41 @@ declare namespace Fudge {
         private buildFromMutator;
         private toggleCollapse;
     }
-    class NodeData extends ƒui.Mutable {
-        constructor(_mutable: ƒ.Mutable, _container: HTMLElement);
+    class ComponentController extends ƒui.Controller {
+        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
     }
 }
 declare namespace Fudge {
+    const ipcRenderer: Electron.IpcRenderer;
+    const remote: Electron.Remote;
+}
+declare namespace Fudge {
+    export enum MENU {
+        ADD_NODE = 0,
+        ADD_COMPONENT = 1
+    }
+    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    export class ContextMenu {
+        static getMenu(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu;
+        private static appendCopyPaste;
+        private static getComponents;
+    }
+    export {};
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒUi = FudgeUserInterface;
+    class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
+        getLabel(_node: ƒ.Node): string;
+        rename(_node: ƒ.Node, _new: string): boolean;
+        hasChildren(_node: ƒ.Node): boolean;
+        getChildren(_node: ƒ.Node): ƒ.Node[];
+        delete(_focussed: ƒ.Node[]): ƒ.Node[];
+        addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
+        copy(_originals: ƒ.Node[]): ƒ.Node[];
+    }
+}
+declare namespace Fudge {
     /**
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
@@ -71,6 +67,7 @@ declare namespace Fudge {
      * @author Lukas Scheuerle, HFU, 2019
      */
     abstract class Panel extends EventTarget {
+        private static idCounter;
         views: View[];
         config: GoldenLayout.ItemConfig;
         /**
@@ -86,28 +83,7 @@ declare namespace Fudge {
          * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
          */
         addView(_v: View, _pushToPanelManager?: boolean, _pushConfig?: boolean): void;
-        /**
-         * Returns a randomly generated ID.
-         * Used to identify panels
-         */
         private generateID;
-    }
-    /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
-    * @author Monika Galkewitsch, 2019, HFU
-    */
-    class NodePanel extends Panel {
-        private node;
-        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
-        setNode(_node: ƒ.Node): void;
-        getNode(): ƒ.Node;
-        /**
- * Allows to construct the view from a template config.
- * @param template Panel Template to be used for the construction
- * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
- */
-        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType;
     }
 }
 declare namespace Fudge {
@@ -151,6 +127,26 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    class PanelNode extends Panel {
+        private node;
+        constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node);
+        setNode(_node: ƒ.Node): void;
+        getNode(): ƒ.Node;
+        /**
+         * Allows to construct the view from a template config.
+         * @param template Panel Template to be used for the construction
+         * @param _type Type of the top layer container element used in the goldenLayout Config. This can be "row", "column" or "stack"
+         */
+        constructFromTemplate(template: GoldenLayout.ItemConfig, _type: string, _id?: string): GoldenLayout.ItemConfigType;
+    }
+}
+declare namespace Fudge {
     abstract class PanelTemplate {
         config: GoldenLayout.ItemConfig;
     }
@@ -162,8 +158,8 @@ declare namespace Fudge {
     enum VIEW {
         NODE = "ViewNode",
         ANIMATION = "ViewAnimation",
-        PORT = "ViewPort",
-        DATA = "ViewData",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera"
     }
     /**
@@ -305,7 +301,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class ViewData extends View {
+    class ViewComponents extends View {
         private data;
         constructor(_parent: Panel);
         deconstruct(): void;
@@ -326,15 +322,17 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
     /**
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
      */
-    class ViewNode extends View {
+    class ViewGraph extends View {
         branch: ƒ.Node;
         selectedNode: ƒ.Node;
-        listController: UINodeList;
-        constructor(_parent: NodePanel);
+        tree: ƒui.Tree<ƒ.Node>;
+        contextMenu: Electron.Menu;
+        constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
         /**
@@ -343,10 +341,6 @@ declare namespace Fudge {
          */
         setRoot(_node: ƒ.Node): void;
         /**
-         * Add new Node to Node Structure
-         */
-        private createNode;
-        /**
          * Change the selected Node
          */
         private setSelectedNode;
@@ -354,6 +348,8 @@ declare namespace Fudge {
          * Pass Event to Panel
          */
         private passEventToPanel;
+        private openContextMenu;
+        private contextMenuCallback;
     }
 }
 declare namespace Fudge {
@@ -362,11 +358,11 @@ declare namespace Fudge {
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport and a tree-control.
      */
-    class ViewViewport extends View {
+    class ViewRender extends View {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         branch: ƒ.Node;
-        constructor(_parent: NodePanel);
+        constructor(_parent: PanelNode);
         deconstruct(): void;
         fillContent(): void;
         /**

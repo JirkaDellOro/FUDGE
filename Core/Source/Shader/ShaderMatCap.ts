@@ -17,28 +17,15 @@ namespace FudgeCore {
 
                     in vec3 a_position;
                     in vec3 a_normal;
+
                     uniform mat4 u_projection;
 
-                    out vec2 tex_coords_smooth;
-                    flat out vec2 tex_coords_flat;
+                    out vec2 texcoords_smooth;
+                    flat out vec2 texcoords_flat;
 
                     void main() {
-                        mat4 normalMatrix = transpose(inverse(u_projection));
-                        vec4 p = vec4(a_position, 1.0);
-                        vec4 normal4 = vec4(a_normal, 1.0);
-                        vec3 e = normalize( vec3( u_projection * p ) );
-                        vec3 n = normalize( vec3(normalMatrix * normal4) );
-
-                        vec3 r = reflect( e, n );
-                        float m = 2. * sqrt(
-                            pow( r.x, 2. ) +
-                            pow( r.y, 2. ) +
-                            pow( r.z + 1., 2. )
-                        );
-
-                        tex_coords_smooth = r.xy / m + .5;
-                        tex_coords_flat = r.xy / m + .5;
-
+                        texcoords_smooth = normalize(mat3(u_projection) * a_normal).xy * 0.5 - 0.5;
+                        texcoords_flat = texcoords_smooth;
                         gl_Position = u_projection * vec4(a_position, 1.0);
                     }`;
     }
@@ -47,17 +34,21 @@ namespace FudgeCore {
                     precision mediump float;
                     
                     uniform vec4 u_tint_color;
-                    uniform float u_flatmix;
+                    uniform int shade_smooth;
                     uniform sampler2D u_texture;
                     
-                    in vec2 tex_coords_smooth;
-                    flat in vec2 tex_coords_flat;
+                    in vec2 texcoords_smooth;
+                    flat in vec2 texcoords_flat;
 
                     out vec4 frag;
 
                     void main() {
-                        vec2 tc = mix(tex_coords_smooth, tex_coords_flat, u_flatmix);
-                        frag = u_tint_color * texture(u_texture, tc) * 2.0;
+
+                        if (shade_smooth > 0) {
+                          frag = u_tint_color * texture(u_texture, texcoords_smooth) * 2.0;
+                        } else {
+                          frag = u_tint_color * texture(u_texture, texcoords_flat) * 2.0;
+                        }
                     }`;
     }
   }

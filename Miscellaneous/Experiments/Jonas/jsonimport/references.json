@@ -1,0 +1,64 @@
+{
+  "system": {
+    "modTime": {
+      "operation": "modulo",
+      "arguments": [
+        "time",
+        1
+      ]
+    }
+  },
+  "particle": {
+    "store": {
+      "y-coordinate": {
+        "operation": "modulo",
+        "arguments": [
+          {
+            "operation": "addition",
+            "arguments": [
+              {
+                "operation": "multiplication",
+                "arguments": [
+                  "index",
+                  {
+                    "operation": "division",
+                    "arguments": [
+                      1,
+                      "size"
+                    ]
+                  }
+                ]
+              },
+              {
+                "operation": "modulo",
+                "arguments": [
+                  "time",
+                  1
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "translation": {
+      "x": {
+        "operation": "addition",
+        "arguments": [
+          "modTime",
+          "y-coordinate"
+        ]
+      },
+      "y": {
+        "operation": "parabola",
+        "arguments": [
+          9.81,
+          "time"
+        ],
+        "global": true
+      }
+    },
+    "rotation": {},
+    "color": {}
+  }
+}

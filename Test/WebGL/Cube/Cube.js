@@ -4,9 +4,9 @@ var Cube;
     window.addEventListener("load", init);
     function init(_event) {
         ƒ.Debug.log("Refactored Cube");
-        let branch = new ƒ.Node("Branch");
+        let graph = new ƒ.Node("Graph");
         let coSys = Scenes.createCoordinateSystem();
-        branch.addChild(coSys);
+        graph.addChild(coSys);
         let material = new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
         let body = Scenes.createCompleteMeshNode("Body", material, new ƒ.MeshCube());
         body.mtxLocal.rotateX(-30);
@@ -15,11 +15,10 @@ var Cube;
         let child = Scenes.createCompleteMeshNode("Child", material, new ƒ.MeshPyramid());
         child.mtxLocal.translateX(1.5);
         body.appendChild(child);
-        branch.addChild(body);
-        // ƒ.RenderManager.addBranch(branch);
+        graph.addChild(body);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 4), body.mtxWorld.translation);
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
     }
 })(Cube || (Cube = {}));

@@ -1,0 +1,191 @@
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+.lm_goldenlayout, body {
+  background-color: var(--color-background-main);
+  color: var(--color-text);
+}
+
+.lm_content {
+  background-color: var(--color-background-content);
+}
+
+*[view] {
+  padding: 0.5em;
+}
+
+*[view="ViewRender"] {
+  padding: 0em;
+}
+
+.lm_splitter:hover {
+  background: var(--color-background-content);
+}
+
+.lm_splitter.lm_dragging {
+  background: var(--color-background-main);
+}
+
+.lm_selected .lm_header {
+  background-color: var(--color-background-content);
+}
+
+.lm_tab:hover, .lm_tab .lm_active, .lm_dragProxy .lm_tab {
+  background-color: var(--color-background-content);
+}
+
+.lm_header {
+  background-color: var(--color-background-main);
+}
+
+/* Controls */
+
+.lm_header .lm_controls .lm_tabdropdown:before {
+  color: var(--color-text);
+}
+
+/* Drag & Drop */
+
+.lm_dropTargetIndicator {
+  outline: 1px dashed var(--color-dragdrop-outline);
+  background-color: var(--color-background-main);
+}
+
+/* popin/popout (must be supported differently, if at all */
+
+/* 
+.lm_popin {
+  cursor: pointer
+}
+
+.lm_popin .lm_bg {
+  background: #ffffff;
+  opacity: .3
+}
+
+.lm_popin .lm_icon {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAWklEQVR4nJWOyw3AIAxDHcQC7L8jbwT3AlJBfNp3SiI7dtRaLSlKKeoA1oEsKSQZCEluexw8Tm3ohk+E7bnOUHUGcNh+HwbBygw4AZ7FN/Lt84p0l+yTflV8AKQyLdcCRJi/AAAAAElFTkSuQmCC);
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-left: 1px solid #eeeeee;
+  border-top: 1px solid #eeeeee;
+  opacity: .7
+}
+
+.lm_popin:hover .lm_icon {
+  opacity: 1
+} */
+
+/* Tree Control */
+
+ul.tree {
+  list-style: none;
+}
+
+ul.tree li {
+  white-space: nowrap;
+}
+
+ul.tree ul {
+  padding-left: 1em;
+}
+
+ul.tree input[type=checkbox] {
+  height: 0px;
+  top: -1em;
+  display: inline-block;
+  position: relative;
+  color: var(--color-text);
+}
+
+ul.tree input[type=checkbox]:checked::before {
+  content: "▼";
+}
+
+ul.tree input[type=checkbox]::before {
+  content: "►";
+}
+
+ul.tree input[type="checkbox"]:checked~ul {
+  display: block;
+}
+
+ul.tree input[type="checkbox"]~ul {
+  display: none;
+}
+
+/* Text input */
+
+ul.tree .selected>input {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
+/* Components */
+
+input {
+  background-color: var(--color-background-content);
+  color: var(--color-text);
+  border: none;
+}
+
+input:focus, li:focus, li:focus>input[type="text"] {
+  border: none;
+  /* outline: 1px solid var(--color-dragdrop-outline); */
+  outline: none;
+  text-decoration: underline;
+}
+
+input[type="number"] {
+  background-color: var(--color-background-content);
+  color: var(--color-text);
+  /* border-bottom: 1px solid var(--color-text); */
+  text-align: center;
+  width: 6em;
+}
+
+/* Fieldset */
+
+fieldset {
+  border: none;
+  padding-left: 1em;
+}
+
+fieldset>legend {
+  /* left: -1em; */
+  position: relative;
+}
+
+fieldset>input[type=checkbox] {
+  height: 0px;
+  top: -1.1em;
+  left: -1em;
+  float: left;
+  position: relative;
+  color: var(--color-text);
+}
+
+fieldset>input[type=checkbox]:checked::before {
+  content: "▼";
+}
+
+fieldset>input[type=checkbox]::before {
+  content: "►";
+}
+/* 
+custom-matrix4x4 input[type=checkbox]  {
+  height: 0px;
+  top: -0.9em;
+  position: relative;
+  color: var(--color-text);
+}
+
+custom-matrix4x4 input[type=checkbox]:checked::before {
+  content: "▼";
+}
+
+custom-matrix4x4 input[type=checkbox]::before {
+  content: "►";
+} */

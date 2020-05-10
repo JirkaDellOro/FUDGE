@@ -30,14 +30,14 @@ namespace TextureTest {
         cmpLightDirectionalBlue.pivot.lookAt(new ƒ.Vector3(0.5, -1, 0.5));
         lights.addComponent(cmpLightDirectionalBlue);
 
-        let branch: ƒ.Node = new ƒ.Node("Branch");
-        branch.addChild(body);
-        branch.addChild(Scenes.createCoordinateSystem());
-        branch.addChild(lights);
+        let graph: ƒ.Node = new ƒ.Node("Graph");
+        graph.addChild(body);
+        graph.addChild(Scenes.createCoordinateSystem());
+        graph.addChild(lights);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
         let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 2), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
         Scenes.dollyViewportCamera(viewport);
         viewport.setFocus(true);

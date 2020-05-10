@@ -5,16 +5,13 @@ var NodeResource;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         ƒ.Debug.log("Start");
-        let branch = new ƒ.Node("Root");
+        let graph = new ƒ.Node("Root");
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
         let canvas = Scenes.createCanvas();
         document.body.appendChild(canvas);
-        // let coSys: ƒ.Node = Scenes.createCoordinateSystem();
-        // branch.addChild(coSys);
         let viewport = new ƒ.Viewport();
-        viewport.initialize("Viewport", branch, cmpCamera, canvas);
+        viewport.initialize("Viewport", graph, cmpCamera, canvas);
         let center = createCenterAndSatellite();
-        // branch.addChild(center);
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
         let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
@@ -23,7 +20,7 @@ var NodeResource;
             for (let y = -dim.y; y < dim.y + 1; y++)
                 for (let x = -dim.x; x < dim.x + 1; x++) {
                     let instance = new ƒ.NodeResourceInstance(resource);
-                    branch.addChild(instance);
+                    graph.addChild(instance);
                     instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));

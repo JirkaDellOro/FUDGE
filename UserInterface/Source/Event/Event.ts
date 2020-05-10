@@ -4,6 +4,7 @@ namespace FudgeUserInterface {
       COLLAPSE = "collapse",
       UPDATE = "update",
       DROPMENUCLICK = "dropMenuClick",
-      DROPMENUCOLLAPSE = "dropMenuCollapse"
+      DROPMENUCOLLAPSE = "dropMenuCollapse",
+      CONTEXTMENU = "contextmenu"
     }
 }

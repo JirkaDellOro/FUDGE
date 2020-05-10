@@ -32,7 +32,7 @@ var UI;
     }
     UI.FieldSet = FieldSet;
     class Stepper extends HTMLSpanElement {
-        constructor(_label, params = {}) {
+        constructor(_label = "Stepper", params = {}) {
             super();
             this.textContent = _label + " ";
             let stepper = document.createElement("input");
@@ -168,5 +168,6 @@ var UI;
     customElements.define("ui-border", Border, { extends: "fieldset" });
     customElements.define("ui-camera", Camera, { extends: "fieldset" });
     customElements.define("ui-point", Point, { extends: "fieldset" });
+    customElements.define("ui-fieldset", FieldSet, { extends: "fieldset" });
 })(UI || (UI = {}));
 //# sourceMappingURL=UI.js.map

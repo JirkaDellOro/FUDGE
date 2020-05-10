@@ -1,7 +1,7 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
-var AudioBranch;
+var AudioGraph;
 /// <reference types="../../../Core/Build/FudgeCore"/>
-(function (AudioBranch) {
+(function (AudioGraph) {
     var ƒ = FudgeCore;
     window.addEventListener("click", start);
     let nodes = [];
@@ -28,7 +28,7 @@ var AudioBranch;
         log();
     }
     function log() {
-        ƒ.Debug.group(`Listening to ${ƒ.AudioManager.default.getBranchListeningTo().name}, controlling ${nodeControlled.name}`);
+        ƒ.Debug.group(`Listening to ${ƒ.AudioManager.default.getGraphListeningTo().name}, controlling ${nodeControlled.name}`);
         for (let node of nodes) {
             let out = `node: ${node.name}`;
             if (node.getParent())
@@ -72,5 +72,5 @@ var AudioBranch;
         }
         log();
     }
-})(AudioBranch || (AudioBranch = {}));
+})(AudioGraph || (AudioGraph = {}));
 //# sourceMappingURL=BranchMix.js.map

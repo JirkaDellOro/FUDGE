@@ -15,18 +15,18 @@ var ScreenToRay;
     let canvasRay;
     function init() {
         // create asset
-        let branch = Scenes.createAxisCross();
-        branch.addComponent(new ƒ.ComponentTransform());
+        let graph = Scenes.createAxisCross();
+        graph.addComponent(new ƒ.ComponentTransform());
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        viewport.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewport.initialize(canvas.id, graph, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
         canvasRay = document.querySelector("canvas#ray");
         cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCameraRay = cameraRay;
         cmpCameraRay.projectCentral(1, 45);
-        viewportRay.initialize("ray", branch, cmpCameraRay, canvasRay);
+        viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
         menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";

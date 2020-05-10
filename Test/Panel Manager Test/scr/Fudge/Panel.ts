@@ -72,7 +72,7 @@ namespace FudgeTest {
                                 view = new ViewData(this);
                                 break;
                             case VIEW.PORT:
-                                view = new ViewPort(this);
+                                view = new ViewRender(this);
                                 break;
                         }
                         let viewConfig: GoldenLayout.ComponentConfig = {

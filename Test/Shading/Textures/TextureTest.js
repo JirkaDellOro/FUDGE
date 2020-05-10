@@ -18,13 +18,13 @@ var TextureTest;
         // cube.cmpTransform.rotateX(-45);
         cube.mtxLocal.rotateY(-45);
         pyramid.mtxLocal.translateX(-0.7);
-        let branch = new ƒ.Node("Branch");
-        branch.addChild(quad);
-        branch.addChild(cube);
-        branch.addChild(pyramid);
+        let graph = new ƒ.Node("Graph");
+        graph.addChild(quad);
+        graph.addChild(cube);
+        graph.addChild(pyramid);
         let viewport = new ƒ.Viewport();
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
-        viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+        viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         window.setInterval(function () {
             pyramid.mtxLocal.rotateX(1);

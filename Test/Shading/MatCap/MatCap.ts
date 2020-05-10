@@ -1,9 +1,9 @@
 namespace MatCapTest {
 
   import ƒ = FudgeCore;
-  
 
-  let branch: ƒ.Node = new ƒ.Node("Branch");
+
+  let graph: ƒ.Node = new ƒ.Node("Graph");
 
   window.addEventListener("load", init);
   function init(): void {
@@ -19,23 +19,23 @@ namespace MatCapTest {
     let txtImage2: ƒ.TextureImage = new ƒ.TextureImage();
     txtImage2.image = img2;
 
-    let ctMatcap: ƒ.CoatMatCap = new ƒ.CoatMatCap(txtImage1, new ƒ.Color(0.5, 0.5, 0.5, 1), 0.8);
-    let ctMatcapGreen: ƒ.CoatMatCap = new ƒ.CoatMatCap(txtImage2, new ƒ.Color(0.5, 0.5, 0.5, 1), 0.2);
+    let ctMatcap1: ƒ.CoatMatCap = new ƒ.CoatMatCap(txtImage1, new ƒ.Color(0.3, 0.55, 0.6, 1));
+    let ctMatcap2: ƒ.CoatMatCap = new ƒ.CoatMatCap(txtImage2, new ƒ.Color(0.5, 0.5, 0.5, 1), 1);
 
-    let mtlRed: ƒ.Material = new ƒ.Material("Material_Red", ƒ.ShaderMatCap, ctMatcap);
-    let mtlGreen: ƒ.Material = new ƒ.Material("Material_Green", ƒ.ShaderMatCap, ctMatcapGreen);
+    let mtl1: ƒ.Material = new ƒ.Material("Material_Matcap1", ƒ.ShaderMatCap, ctMatcap1);
+    let mtl2: ƒ.Material = new ƒ.Material("Material_Matcap2", ƒ.ShaderMatCap, ctMatcap2);
 
-    let pyramidRed: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtlRed, new ƒ.MeshPyramid());
-    let pyramidGreen: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtlGreen, new ƒ.MeshPyramid());
-    pyramidGreen.mtxLocal.translateX(1);
-    pyramidRed.mtxLocal.translateX(-1);
-    branch.addChild(pyramidRed);
-    branch.addChild(pyramidGreen);
+    let pyramid: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl1, new ƒ.MeshCube());
+    let sphere: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere(32, 32));
+    sphere.mtxLocal.translateX(1);
+    pyramid.mtxLocal.translateX(-1);
+    graph.addChild(pyramid);
+    graph.addChild(sphere);
 
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", branch, cmpCamera, document.querySelector("canvas"));
+    viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     viewport.draw();
 
@@ -43,10 +43,10 @@ namespace MatCapTest {
     ƒ.Loop.start(ƒ.LOOP_MODE["TIME_GAME"], 30, true);
 
     function handleFrame(_event: Event): void {
-      pyramidGreen.mtxLocal.rotateX(1);
-      pyramidGreen.mtxLocal.rotateY(0.5);
-      pyramidRed.mtxLocal.rotateX(0.6);
-      pyramidRed.mtxLocal.rotateY(0.8);
+      sphere.mtxLocal.rotateX(1);
+      sphere.mtxLocal.rotateY(0.5);
+      pyramid.mtxLocal.rotateX(0.6);
+      pyramid.mtxLocal.rotateY(0.8);
       viewport.draw();
     }
 

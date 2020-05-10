@@ -7,12 +7,11 @@ namespace FudgeTest {
     
 
     /**
-     * View displaying a Node and the hierarchical relation to its parents and children.  
-     * Consists of a viewport and a tree-control. 
+     * View displaying a rendered graph 
      */
-    export class ViewPort extends View {
+    export class ViewRender extends View {
         viewport: ƒ.Viewport;
-        branch: ƒ.Node;
+        graph: ƒ.Node;
 
         constructor(_parent: Panel) {
             super(_parent);
@@ -23,12 +22,12 @@ namespace FudgeTest {
         }
         
         fillContent(): void { 
-            this.branch = new ƒ.Node("Dummy Node");
+            this.graph = new ƒ.Node("Dummy Node");
             let canvas: HTMLCanvasElement;
             let cmpCamera: ƒ.ComponentCamera;
 
             // TODO: delete example scene
-            this.branch = Scenes.createAxisCross();
+            this.graph = Scenes.createAxisCross();
 
             // initialize viewport
             // TODO: create camera/canvas here without "Scenes"
@@ -38,7 +37,7 @@ namespace FudgeTest {
             document.body.appendChild(canvas);
 
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.branch, cmpCamera, canvas);
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, canvas);
             this.viewport.draw();
 
             this.content.append(canvas);
@@ -61,9 +60,6 @@ namespace FudgeTest {
             if (!_node)
                 return;
             ƒ.Debug.log("Trying to display node: ", _node);
-            // ƒ.RenderManager.removeBranch(this.viewport. this.viewport.getBranch());
-            // this.viewport.setBranch(_node);
-            // this.viewport.draw();
         }
 
     }

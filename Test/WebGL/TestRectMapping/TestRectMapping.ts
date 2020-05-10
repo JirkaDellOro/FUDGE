@@ -3,7 +3,7 @@ namespace TestRectMapping {
   
 
   window.addEventListener("load", init);
-  let uiMaps: { [name: string]: { ui: UI.FieldSet<null>, framing: ƒ.Framing } } = {};
+  let uiMaps: { [name: string]: { ui: UI.FieldSet, framing: ƒ.Framing } } = {};
   let uiClient: UI.Rectangle;
   let canvas: HTMLCanvasElement;
   let viewPort: ƒ.Viewport = new ƒ.Viewport();
@@ -12,13 +12,13 @@ namespace TestRectMapping {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
-    branch.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = Scenes.createAxisCross();
+    graph.addComponent(new ƒ.ComponentTransform());
 
     // initialize viewports
     canvas = document.getElementsByTagName("canvas")[0];
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+    viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
 
     let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
@@ -47,7 +47,7 @@ namespace TestRectMapping {
     ƒ.Loop.start();
     function animate(_event: Event): void {
       update();
-      branch.mtxLocal.rotateY(1);
+      graph.mtxLocal.rotateY(1);
       viewPort.draw();
     }
 
@@ -137,13 +137,13 @@ namespace TestRectMapping {
 
       switch (name) {
         case "ClientToCanvas": {
-          let uiMap: { ui: UI.FieldSet<UI.FramingScaled>, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingScaled } = <{ ui: UI.FramingScaled, framing: ƒ.FramingScaled }>uiMaps[name];
           uiMap.ui.set(uiMap.framing);
           uiMap.ui.set({ Result: viewPort.getCanvasRectangle() });
           break;
         }
         case "CanvasToDestination": {
-          let uiMap: { ui: UI.FieldSet<null>, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet<null>, framing: ƒ.FramingComplex }>uiMaps[name];
+          let uiMap: { ui: UI.FieldSet, framing: ƒ.FramingComplex } = <{ ui: UI.FieldSet, framing: ƒ.FramingComplex }>uiMaps[name];
           uiMap.ui.set({ Margin: uiMap.framing.margin, Padding: uiMap.framing.padding });
           uiMap.ui.set({ Result: viewPort.rectDestination });
           break;

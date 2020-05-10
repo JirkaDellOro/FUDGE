@@ -11,13 +11,13 @@ namespace RenderManagerRendering {
 
   function init(): void {
     // create asset
-    let branch: ƒ.Node = Scenes.createAxisCross();
-    branch.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = Scenes.createAxisCross();
+    graph.addComponent(new ƒ.ComponentTransform());
 
     // initialize viewports
     canvas = document.getElementsByTagName("canvas")[0];
     cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+    viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
 
 
     let menu: HTMLDivElement = document.getElementsByTagName("div")[0];
@@ -42,7 +42,7 @@ namespace RenderManagerRendering {
     ƒ.Loop.start();
     function animate(_event: Event): void {
       update();
-      branch.mtxLocal.rotateY(1);
+      graph.mtxLocal.rotateY(1);
       viewPort.draw();
     }
 

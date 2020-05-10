@@ -19,8 +19,8 @@ namespace Iterator {
         Scenes.createViewport();
         Scenes.viewport.draw();
 
-        console.group("Nodes in branch");
-        for (let iter of node.branch)
+        console.group("Nodes in graph");
+        for (let iter of node.graph)
             console.log(iter.name);
         console.groupEnd();
 

@@ -11,7 +11,7 @@ var UI;
     var ƒ = FudgeCore;
     let myLayout;
     let savedState;
-    let branch;
+    let graph;
     let canvas;
     let viewPort = new ƒ.Viewport();
     let camera;
@@ -40,9 +40,9 @@ var UI;
         myLayout.init();
     }
     function initViewport() {
-        // create branch
-        branch = new ƒ.Node("Scene");
-        branch.addComponent(new ƒ.ComponentTransform());
+        // create Scene-Graph
+        graph = new ƒ.Node("Scene");
+        graph.addComponent(new ƒ.ComponentTransform());
         // initialize viewports
         canvas = document.createElement("canvas");
         canvas.height = 800;
@@ -58,7 +58,7 @@ var UI;
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
         camera.addComponent(cmpCamera);
         addCubeNode();
-        viewPort.initialize(canvas.id, branch, cmpCamera, canvas);
+        viewPort.initialize(canvas.id, graph, cmpCamera, canvas);
         viewPort.adjustingFrames = false;
         viewPort.adjustingCamera = false;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
@@ -68,16 +68,16 @@ var UI;
         container.getElement().append(canvas);
     }
     function createInspectorComponent(container, state) {
-        console.log(branch.getChildren()[0].name);
+        console.log(graph.getChildren()[0].name);
         let lblName = document.createElement("label");
         lblName.innerHTML = "Node Name";
         let txtName = document.createElement("input");
-        txtName.value = branch.getChildren()[0].name;
+        txtName.value = graph.getChildren()[0].name;
         container.getElement().append(lblName);
         container.getElement().append(txtName);
     }
     function animate(_event) {
-        branch.mtxLocal.rotateY(1);
+        graph.mtxLocal.rotateY(1);
         // prepare and draw viewport
         viewPort.draw();
     }
@@ -114,7 +114,7 @@ var UI;
         // nodeCubeCaramel.addComponent(cmpMeshCream);
         // nodeCubeCaramel.addComponent(cmpMaterialCream);
         // nodeCubeCaramel.addComponent(cmpTransformCream);
-        branch.addChild(nodeCubeCoffee);
+        graph.addChild(nodeCubeCoffee);
     }
 })(UI || (UI = {}));
 //# sourceMappingURL=app.js.map

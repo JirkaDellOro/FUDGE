@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CustomElements</title>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="Stepper.js"></script>
+  <script src="Main.js"></script>
+</head>
+
+<body>
+  <fieldset>
+    <legend>CustomBoolean</legend>
+    <fudge-boolean key="boolean" label="HTML-Boolean"></fudge-boolean>
+  </fieldset>
+
+  <fieldset>
+    <legend>CustomStepper</legend>
+    <fudge-stepper key="stepper"></fudge-stepper>
+  </fieldset>
+
+  <fieldset>
+    <legend>CustomMatrix4x4
+      <fudge-boolean key="active" label="active"></fudge-boolean>
+    </legend>
+    <custom-matrix4x4 style="background-color: azure;"></custom-matrix4x4>
+  </fieldset>
+
+  <fieldset>
+    <legend>CustomVector3
+      <custom-boolean key="active" label="active"></custom-boolean>
+    </legend>
+    <custom-vector3 style="font-family: monospace"></custom-vector3>
+  </fieldset>
+
+
+  <template>
+    <custom-vector3 style="background-color: antiquewhite;">
+      <span style="white-space: nowrap;">x <input type="number" /></span>
+      <span style="white-space: nowrap;">y <input type="number" /></span>
+      <span style="white-space: nowrap;">z <input type="number" /></span>
+    </custom-vector3>
+  </template>
+  <script>
+    Custom.registerTemplate("custom-vector3");
+    Custom.registerClass("custom-vector3", class CustomVector3 extends Custom.Custom { });
+  </script>
+
+
+  <template>
+    <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
+        grid-template-columns: min-content min-content min-content min-content; 
+        grid-template-rows: min-content min-content min-content min-content;">
+      <span></span>
+      <span>x</span>
+      <span>y</span>
+      <span>z</span>
+      translation
+      <fudge-stepper key="tx"></fudge-stepper>
+      <fudge-stepper key="ty"></fudge-stepper>
+      <fudge-stepper key="tz"></fudge-stepper>
+      rotation
+      <fudge-stepper key="rx"></fudge-stepper>
+      <fudge-stepper key="ry"></fudge-stepper>
+      <fudge-stepper key="rz"></fudge-stepper>
+      scale
+      <fudge-stepper key="sx"></fudge-stepper>
+      <fudge-stepper key="sy"></fudge-stepper>
+      <fudge-stepper key="sz"></fudge-stepper>
+    </custom-matrix4x4>
+  </template>
+  <script>
+    Custom.registerTemplate("custom-matrix4x4");
+    Custom.registerClass("custom-matrix4x4", class CustomMatrix4x4 extends Custom.Custom { });
+  </script>
+</body>
+
+</html>

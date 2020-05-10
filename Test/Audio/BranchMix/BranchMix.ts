@@ -1,5 +1,5 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
-namespace AudioBranch {
+namespace AudioGraph {
   import ƒ = FudgeCore;
   window.addEventListener("click", start);
   let nodes: ƒ.Node[] = [];
@@ -36,7 +36,7 @@ namespace AudioBranch {
   }
 
   function log(): void {
-    ƒ.Debug.group(`Listening to ${ƒ.AudioManager.default.getBranchListeningTo().name}, controlling ${nodeControlled.name}`);
+    ƒ.Debug.group(`Listening to ${ƒ.AudioManager.default.getGraphListeningTo().name}, controlling ${nodeControlled.name}`);
     for (let node of nodes) {
       let out: string = `node: ${node.name}`;
       if (node.getParent())

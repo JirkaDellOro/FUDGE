@@ -308,6 +308,15 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Return a copy of this
+     */
+    public get copy(): Matrix3x3 {
+      let copy: Matrix3x3 = new Matrix3x3();
+      copy.set(this);
+      return copy;
+    }
+
     public serialize(): Serialization {
       // TODO: save translation, rotation and scale as vectors for readability and manipulation
       let serialization: Serialization = this.getMutator();

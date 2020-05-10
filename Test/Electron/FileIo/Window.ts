@@ -11,13 +11,13 @@ namespace ElectronFileIo {
     const { ipcRenderer } = require("electron");
     const fs: ƒ.General = require("fs");
     window.addEventListener("DOMContentLoaded", init);
-    let branch: ƒ.Node;
+    let graph: ƒ.Node;
     let viewport: ƒ.Viewport;
 
     function init(): void {
         viewport = createScene();
         ipcRenderer.on("save", (event, arg) => {
-            save(branch);
+            save(graph);
         });
         ipcRenderer.on("open", (event, arg) => {
             let node: ƒ.Node = open();
@@ -29,24 +29,24 @@ namespace ElectronFileIo {
         if (!_node)
             return;
 
-        branch = _node;
-        viewport.setBranch(branch);
+        graph = _node;
+        viewport.setGraph(graph);
         viewport.draw();
     }
 
-    export function save(_node: ƒ.Node = branch): void {
+    export function save(_node: ƒ.Node = graph): void {
         let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
         let content: string = ƒ.Serializer.stringify(serialization);
 
         // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename: string = dialog.showSaveDialogSync(null, { title: "Save Branch", buttonLabel: "Save Branch", message: "ƒ-Message" });
+        let filename: string = dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
 
         fs.writeFileSync(filename, content);
     }
 
     export function open(): ƒ.Node {
         // @ts-ignore
-        let filenames: string[] = dialog.showOpenDialogSync(null, { title: "Load Branch", buttonLabel: "Load Branch", properties: ["openFile"] });
+        let filenames: string[] = dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
         let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         console.groupCollapsed("File content");
@@ -67,7 +67,7 @@ namespace ElectronFileIo {
         // initialize RenderManager and transmit content
         
         // create asset
-        branch = Scenes.createAxisCross();
+        graph = Scenes.createAxisCross();
 
 
         // initialize viewport
@@ -77,7 +77,7 @@ namespace ElectronFileIo {
         document.body.appendChild(canvas);
 
         let viewport: ƒ.Viewport = new ƒ.Viewport();
-        viewport.initialize("TestViewport", branch, cmpCamera, canvas);
+        viewport.initialize("TestViewport", graph, cmpCamera, canvas);
         viewport.draw();
 
         return viewport;
