@@ -1360,16 +1360,13 @@ var Fudge;
         }
         fillContent() {
             if (this.data) {
-                let cntHeader = document.createElement("span");
-                let lblNodeName = document.createElement("label");
-                lblNodeName.textContent = "Name";
-                cntHeader.append(lblNodeName);
-                this.content.append(cntHeader);
                 if (this.data instanceof ƒ.Node) {
-                    let txtNodeName = document.createElement("input");
-                    txtNodeName.addEventListener("input", this.changeNodeName);
-                    txtNodeName.value = this.data.name;
-                    cntHeader.append(txtNodeName);
+                    // let txtNodeName: HTMLInputElement = document.createElement("input");
+                    // txtNodeName.addEventListener("input", this.changeNodeName);
+                    // cntHeader.append(txtNodeName);
+                    let cntHeader = document.createElement("span");
+                    cntHeader.textContent = this.data.name;
+                    this.content.appendChild(cntHeader);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);

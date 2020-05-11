@@ -65,7 +65,7 @@ namespace FudgeUserInterface {
           // TODO: remove switch and use registered custom elements instead
           // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
           let elementType: typeof CustomElement = CustomElement.get(_type);
-          console.log("CustomElement", _type, elementType);
+          // console.log("CustomElement", _type, elementType);
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class
