@@ -4,13 +4,13 @@ namespace FudgeCore {
       RenderInjector.inject(_constructor, RenderInjectorCoat);
     }
 
-    protected static injectCoatColored(this: Coat, _shader: typeof Shader): void {
+    protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
-      let color: Float32Array = (<CoatColored>this).color.getArray();
-      RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color);
+      let color: Color = Color.MULTIPLY((<CoatColored>this).color, _cmpMaterial.clrPrimary);
+      RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
     }
 
-    protected static injectCoatTextured(this: Coat, _shader: typeof Shader): void {
+    protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
       if (this.renderData) {
         // buffers exist
@@ -41,11 +41,11 @@ namespace FudgeCore {
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
 
-        this.useRenderData(_shader);
+        this.useRenderData(_shader, _cmpMaterial);
       }
     }
 
-    protected static injectCoatMatCap(this: Coat, _shader: typeof Shader): void {
+    protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_tint_color"];
@@ -84,7 +84,7 @@ namespace FudgeCore {
         this.renderData["texture0"] = texture;
 
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, null);
-        this.useRenderData(_shader);
+        this.useRenderData(_shader, _cmpMaterial);
       }
     }
   }

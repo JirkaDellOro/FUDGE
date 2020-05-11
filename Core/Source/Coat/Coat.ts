@@ -12,7 +12,7 @@ namespace FudgeCore {
             super.mutate(_mutator);
         }
 
-        public useRenderData(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
+        public useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
         
         //#region Transfer
         public serialize(): Serialization {

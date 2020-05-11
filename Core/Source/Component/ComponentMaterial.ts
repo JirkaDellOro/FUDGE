@@ -6,6 +6,8 @@ namespace FudgeCore {
   export class ComponentMaterial extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);
     public material: Material;
+    public clrPrimary: Color = Color.CSS("white");
+    public clrSecondary: Color = Color.CSS("white");
     // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {

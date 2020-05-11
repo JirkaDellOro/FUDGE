@@ -350,9 +350,9 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectCoatColored(this: Coat, _shader: typeof Shader): void;
-        protected static injectCoatTextured(this: Coat, _shader: typeof Shader): void;
-        protected static injectCoatMatCap(this: Coat, _shader: typeof Shader): void;
+        protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
 }
 declare namespace FudgeCore {
@@ -684,7 +684,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_shader: typeof Shader, _mesh: Mesh, _coat: Coat, _final: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
@@ -1034,7 +1034,7 @@ declare namespace FudgeCore {
             [key: string]: unknown;
         };
         mutate(_mutator: Mutator): void;
-        useRenderData(_shader: typeof Shader): void;
+        useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(): void;
@@ -1403,6 +1403,8 @@ declare namespace FudgeCore {
     class ComponentMaterial extends Component {
         static readonly iSubclass: number;
         material: Material;
+        clrPrimary: Color;
+        clrSecondary: Color;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
