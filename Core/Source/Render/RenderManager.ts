@@ -124,12 +124,10 @@ namespace FudgeCore {
      */
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
       try {
-        let material: Material = _node.getComponent(ComponentMaterial).material;
-        let coat: Coat = material.getCoat();
-        let shader: typeof Shader = material.getShader();
+        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
-        RenderManager.draw(shader, mesh, coat, _finalTransform, _projection); //, _lights);
+        RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
