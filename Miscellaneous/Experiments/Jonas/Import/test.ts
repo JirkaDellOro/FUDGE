@@ -26,6 +26,12 @@ namespace Import {
             "time",
             1
           ]
+        },
+        "zz": {
+          "operation": "random",
+          "arguments": [
+            "index"
+          ]
         }
       },
       "translation": {
