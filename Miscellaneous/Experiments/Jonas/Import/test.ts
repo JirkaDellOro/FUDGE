@@ -1,142 +1,37 @@
 namespace Import {
-  export interface SystemData {
-    particle: Particle;
+  export interface StoredValues {
+    [key: string]: number;
   }
+  
+  test();
 
-  export interface Particle {
-    store: ParticleData;
-    translation: ParticleData;
-  }
+  function test(): void {
+    console.log(data);
+    let storedValues: StoredValues = {
+      "time": 0.5,
+      "index": 0,
+      "size": 1
+    };
+    let randomNumbers: number[] = [42];
+    let effectImporter: ParticleEffectImporter = new ParticleEffectImporter();
+    effectImporter.randomNumbers = randomNumbers;
+    effectImporter.storedValues = storedValues;
+    let effect: ParticleEffectDefinition = effectImporter.parseFile(data);
 
-  export interface ParticleData {
-    [key: string]: ParticleClosure;
-  }
+    // evaluate storage
+    for (const key in effect.storage) {
+      console.groupCollapsed(`Evaluate storage "${key}"`);
+      storedValues[key] = effect.storage[key]();
+      console.log(`Stored "${key}"`, storedValues[key]);
+      console.groupEnd();
+    }
 
-  export interface ParticleClosure {
-    operation: string;
-    arguments: (ParticleClosure | string | number)[];
-  }
-
-  export let data: SystemData = {
-    "particle": {
-      "store": {
-        "inNormTime": {
-          "operation": "modulo",
-          "arguments": [
-            "time",
-            1
-          ]
-        },
-        "zz": {
-          "operation": "random",
-          "arguments": [
-            "index"
-          ]
-        }
-      },
-      "translation": {
-        "x": {
-          "operation": "multiplication",
-          "arguments": [
-            "inNormTime",
-            1
-          ]
-        },
-        "y": {
-          "operation": "multiplication",
-          "arguments": [
-            "inNormTime",
-            2
-          ]
-        }
-      }
+    //evaluate translation
+    for (const key in effect.translation) {
+      console.groupCollapsed(`Evaluate translation "${key}"`);
+      storedValues[key] = effect.translation[key]();
+      // console.log(`Stored "${key}"`, storedValues[key]);
+      console.groupEnd();
     }
   }
-
-  // export let data: ParticleData = {
-  //   "translation": {
-  //     "x-coordinate": {
-  //       "operation": "multiplication",
-  //       "arguments": [
-  //         {
-  //           "operation": "polynomial3",
-  //           "arguments": [
-  //             {
-  //               "operation": "modulo",
-  //               "arguments": [
-  //                 {
-  //                   "operation": "addition",
-  //                   "arguments": [
-  //                     {
-  //                       "operation": "multiplication",
-  //                       "arguments": [
-  //                         "index",
-  //                         {
-  //                           "operation": "division",
-  //                           "arguments": [
-  //                             1,
-  //                             "size"
-  //                           ]
-  //                         }
-  //                       ]
-  //                     },
-  //                     {
-  //                       "operation": "modulo",
-  //                       "arguments": [
-  //                         "time",
-  //                         1
-  //                       ]
-  //                     }
-  //                   ]
-  //                 },
-  //                 1
-  //               ]
-  //             },
-  //             1,
-  //             1,
-  //             1,
-  //             0
-  //           ]
-  //         },
-  //         {
-  //           "operation": "random",
-  //           "arguments": [
-  //             "index"
-  //           ]
-  //         }
-  //       ]
-  //     },
-  //     "y-coordinate": {
-  //       "operation": "modulo",
-  //       "arguments": [
-  //         {
-  //           "operation": "addition",
-  //           "arguments": [
-  //             {
-  //               "operation": "multiplication",
-  //               "arguments": [
-  //                 "index",
-  //                 {
-  //                   "operation": "division",
-  //                   "arguments": [
-  //                     1,
-  //                     "size"
-  //                   ]
-  //                 }
-  //               ]
-  //             },
-  //             {
-  //               "operation": "modulo",
-  //               "arguments": [
-  //                 "time",
-  //                 1
-  //               ]
-  //             }
-  //           ]
-  //         },
-  //         1
-  //       ]
-  //     }
-  //   }
-  // };
 }
