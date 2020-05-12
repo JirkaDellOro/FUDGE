@@ -10,13 +10,22 @@ var Import;
     //   POLYNOMIAL3 = "polynomial3",
     //   RANDOM = "random"
     // }
+    /**
+     * @class Factory class to create closures.
+     */
     class ClosureFactory {
-        static getClosure(_operation, _parameters /*, _inputFactors?: { [key: string]: number }, _randomNumbers?: number[]*/) {
-            let closure = this.closures[_operation];
-            if (_operation in this.closures)
+        /**
+         * Creates a closure for the given function type and the parameters.
+         * @param _function the function type of the closure you want to create.
+         * @param _parameters the parameters, which should be functions themselves, given to the created closure.
+         * @returns
+         */
+        static getClosure(_function, _parameters /*, _inputFactors?: { [key: string]: number }, _randomNumbers?: number[]*/) {
+            let closure = this.closures[_function];
+            if (_function in this.closures)
                 return closure(_parameters);
             else {
-                console.error(`"${_operation}" is not an operation`);
+                console.error(`"${_function}" is not an operation`);
                 return null;
             }
         }
@@ -31,6 +40,10 @@ var Import;
         //     [CLOSURE_TYPE.RANDOM, this.createClosureRandom],
         //   ]);
         // }
+        /**
+         * Calculates the sum of the given parameters.
+         *  i.e. parameter[0] + ... + parameter[n]
+         */
         static createClosureAddition(_parameters) {
             return function () {
                 console.group("ClosureAddition");
@@ -42,6 +55,10 @@ var Import;
                 return result;
             };
         }
+        /**
+          * Calculates the product of the given parameters.
+          *   i.e. parameter[0] * ... * parameter[n]
+          */
         static createClosureMultiplication(_parameters) {
             return function () {
                 console.group("ClosureMultiplication");
@@ -53,6 +70,10 @@ var Import;
                 return result;
             };
         }
+        /**
+         * Calculates the division of the given parameters.
+         *  i.e. parameter[0] / parameter[1]
+         */
         static createClosureDivision(_parameters) {
             return function () {
                 console.group("ClosureDivision");
@@ -61,6 +82,10 @@ var Import;
                 return result;
             };
         }
+        /**
+         * Calculates the modulo of the given parameters.
+         *  i.e. parameter[0] % parameter[1]
+         */
         static createClosureModulo(_parameters) {
             return function () {
                 console.group("ClosureModulo");
@@ -69,6 +94,11 @@ var Import;
                 return result;
             };
         }
+        /**
+         * Interpolates a linear function between two given points.
+         *  parameter[0] will be the input value for the function.
+         *  parameter[1] - parameter[4] describe the points between which will be interpoleted
+         */
         static createClosureLinear(_parameters) {
             let xStart = _parameters[1]();
             let xEnd = _parameters[2]();
@@ -78,10 +108,16 @@ var Import;
                 console.group("ClosureLinear");
                 let x = _parameters[0]();
                 let y = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
+                console.log(xEnd);
                 console.groupEnd();
                 return y;
             };
         }
+        /**
+         * Creates a polynomial of third degree.
+         *  parameter[0] will be the input value for the function.
+         *  parameter[1] - parameter[4] representing a,b,c,d
+         */
         static createClosurePolynomial3(_parameters) {
             let a = _parameters[1]();
             let b = _parameters[2]();
@@ -95,6 +131,11 @@ var Import;
                 return y;
             };
         }
+        /**
+         * Creates a closure which will return number chosen from the given array of numbers.
+         *  parameter[0] representing the index of the number which will be chosen.
+         *  parameter[1] representing the array of random numbers to choose from.
+         */
         static createClosureRandom(_parameters) {
             return function () {
                 console.group("ClosureRandom");

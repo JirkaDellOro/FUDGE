@@ -2,24 +2,35 @@
 var Import;
 (function (Import) {
     class ParticleEffectImporter {
-        constructor() {
+        constructor(_storedValues, _randomNumbers) {
             this.definition = {};
+            this.storedValues = _storedValues;
+            this.randomNumbers = _randomNumbers;
         }
         importFile(_filename) {
             //TODO: import file
         }
         parseFile(_data) {
             this.definition.storage = {};
-            for (const key in _data.particle.store) {
+            for (const key in _data.storage) {
                 if (key in this.storedValues)
                     console.error("Predfined varaiables can not be overwritten");
                 else
-                    this.definition.storage[key] = this.parseClosure(_data.particle.store[key]);
+                    this.definition.storage[key] = this.parseClosure(_data.storage[key]);
             }
             this.definition.translation = {};
-            for (const key in _data.particle.translation) {
+            for (const key in _data.translation) {
                 if (["x", "y", "z"].includes(key)) { //TODO: define only once
-                    this.definition.translation[key] = this.parseClosure(_data.particle.translation[key]);
+                    this.definition.translation[key] = this.parseClosure(_data.translation[key]);
+                }
+                else {
+                    console.error(`"${key}" is not part of a translation`);
+                }
+            }
+            this.definition.translationWorld = {};
+            for (const key in _data.translationWorld) {
+                if (["x", "y", "z"].includes(key)) { //TODO: define only once
+                    this.definition.translationWorld[key] = this.parseClosure(_data.translationWorld[key]);
                 }
                 else {
                     console.error(`"${key}" is not part of a translation`);
@@ -28,43 +39,52 @@ var Import;
             return this.definition;
         }
         parseClosure(_data) {
-            if (!_data.operation) {
+            if (!_data.function) {
                 console.error("Error, no operation defined");
                 return null;
             }
             let parameters = [];
-            for (let argument of _data.arguments) {
-                switch (typeof (argument)) {
+            for (let param of _data.parameters) {
+                switch (typeof (param)) {
                     case "object":
-                        let result = this.parseClosure(argument);
+                        let result = this.parseClosure(param);
                         parameters.push(result);
                         break;
                     case "string":
-                        if (argument in this.definition.storage || argument in this.storedValues) {
+                        if (param in this.definition.storage || param in this.storedValues) { // TODO: simplify this, Problem: this.storedValues only contains time, index, size while parsing
                             parameters.push(() => {
-                                console.log("Variable", `"${argument}"`, this.storedValues[argument]);
-                                return this.storedValues[argument];
+                                console.log("Variable", `"${param}"`, this.storedValues[param]);
+                                return this.storedValues[param];
                             });
                         }
                         else {
-                            console.error(`"${argument}" is not defined`);
+                            console.error(`"${param}" is not defined`);
                             return null;
                         }
                         break;
                     case "number":
                         parameters.push(function () {
-                            console.log("Constant", argument);
-                            return argument;
+                            console.log("Constant", param);
+                            return param;
                         });
                         break;
                 }
             }
-            if (_data.operation == "random") {
+            if (_data.function == "random") {
                 parameters.push(() => {
                     return this.randomNumbers;
                 });
             }
-            let closure = Import.ClosureFactory.getClosure(_data.operation, parameters);
+            let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
+            // pre evaluate closure so that only the result will be saved
+            if (_data.preEvaluate) {
+                console.log("PreEvaluate");
+                let result = closure();
+                closure = () => {
+                    console.log("preEvaluated", result);
+                    return result;
+                };
+            }
             return closure;
         }
     }

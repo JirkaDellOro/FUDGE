@@ -10,22 +10,47 @@ var Import;
             "size": 1
         };
         let randomNumbers = [42];
-        let effectImporter = new Import.ParticleEffectImporter();
-        effectImporter.randomNumbers = randomNumbers;
-        effectImporter.storedValues = storedValues;
-        let effect = effectImporter.parseFile(Import.data);
+        let effectImporter = new Import.ParticleEffectImporter(storedValues, randomNumbers);
+        let effectDefinition = effectImporter.parseFile(Import.data);
         // evaluate storage
-        for (const key in effect.storage) {
+        for (const key in effectDefinition.storage) {
             console.groupCollapsed(`Evaluate storage "${key}"`);
-            storedValues[key] = effect.storage[key]();
+            storedValues[key] = effectDefinition.storage[key]();
             console.log(`Stored "${key}"`, storedValues[key]);
             console.groupEnd();
         }
         //evaluate translation
-        for (const key in effect.translation) {
+        for (const key in effectDefinition.translation) {
             console.groupCollapsed(`Evaluate translation "${key}"`);
-            storedValues[key] = effect.translation[key]();
-            // console.log(`Stored "${key}"`, storedValues[key]);
+            console.log(`${key} =`, effectDefinition.translation[key]());
+            console.groupEnd();
+        }
+        //evaluate translation world
+        for (const key in effectDefinition.translationWorld) {
+            console.groupCollapsed(`Evaluate translation world "${key}"`);
+            console.log(`${key} =`, effectDefinition.translationWorld[key]());
+            console.groupEnd();
+        }
+        // iterration 2
+        storedValues["time"] = 2.3;
+        storedValues["size"] = 3;
+        // evaluate storage
+        for (const key in effectDefinition.storage) {
+            console.groupCollapsed(`Evaluate storage "${key}"`);
+            storedValues[key] = effectDefinition.storage[key]();
+            console.log(`Stored "${key}"`, storedValues[key]);
+            console.groupEnd();
+        }
+        //evaluate translation
+        for (const key in effectDefinition.translation) {
+            console.groupCollapsed(`Evaluate translation "${key}"`);
+            console.log(`${key} =`, effectDefinition.translation[key]());
+            console.groupEnd();
+        }
+        //evaluate translation world
+        for (const key in effectDefinition.translationWorld) {
+            console.groupCollapsed(`Evaluate translation world "${key}"`);
+            console.log(`${key} =`, effectDefinition.translationWorld[key]());
             console.groupEnd();
         }
     }

@@ -2,37 +2,48 @@
 var Import;
 (function (Import) {
     Import.data = {
-        "particle": {
-            "store": {
-                "inNormTime": {
-                    "operation": "modulo",
-                    "arguments": [
-                        "time",
-                        1
-                    ]
-                },
-                "zz": {
-                    "operation": "random",
-                    "arguments": [
-                        "index"
-                    ]
-                }
+        "storage": {
+            "inNormTime": {
+                "function": "modulo",
+                "parameters": [
+                    "time",
+                    1
+                ]
+            }
+        },
+        "translation": {
+            "x": {
+                "function": "multiplication",
+                "parameters": [
+                    "inNormTime",
+                    1
+                ]
             },
-            "translation": {
-                "x": {
-                    "operation": "multiplication",
-                    "arguments": [
-                        "inNormTime",
-                        1
-                    ]
-                },
-                "y": {
-                    "operation": "multiplication",
-                    "arguments": [
-                        "inNormTime",
-                        2
-                    ]
-                }
+            "y": {
+                "function": "multiplication",
+                "parameters": [
+                    {
+                        "function": "division",
+                        "parameters": [
+                            1,
+                            "size"
+                        ],
+                        "preEvaluate": true
+                    },
+                    2
+                ]
+            }
+        },
+        "translationWorld": {
+            "y": {
+                "function": "linear",
+                "parameters": [
+                    "time",
+                    0,
+                    1,
+                    0,
+                    -1
+                ]
             }
         }
     };

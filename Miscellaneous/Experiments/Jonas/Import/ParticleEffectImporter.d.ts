@@ -3,17 +3,18 @@ declare namespace Import {
         [key: string]: Function;
     }
     export interface ParticleEffectDefinition {
-        system?: ClosureStorage;
         storage?: ClosureStorage;
         translation?: ClosureStorage;
         rotation?: ClosureStorage;
+        translationWorld?: ClosureStorage;
     }
     export class ParticleEffectImporter {
-        storedValues: StoredValues;
-        randomNumbers: number[];
+        private storedValues;
+        private randomNumbers;
         private definition;
+        constructor(_storedValues: StoredValues, _randomNumbers: number[]);
         importFile(_filename: string): void;
-        parseFile(_data: ParticleSystemData): ParticleEffectDefinition;
+        parseFile(_data: ParticleEffectData): ParticleEffectDefinition;
         private parseClosure;
     }
     export {};
