@@ -72,7 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Extends the standard AudioContext for integration with <a href="fudgecore.node.html">Node</a>-branches.
+						<p>Extends the standard AudioContext for integration with FUDGE-graphs.
 							Creates a default object at startup to be addressed as AudioManager default.
 						Other objects of this class may be create for special purposes.</p>
 					</div>
@@ -153,7 +153,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.audiomanager.html#createwaveshaper" class="tsd-kind-icon">create<wbr>Wave<wbr>Shaper</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.audiomanager.html#decodeaudiodata" class="tsd-kind-icon">decode<wbr>Audio<wbr>Data</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.audiomanager.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiomanager.html#getbranchlisteningto" class="tsd-kind-icon">get<wbr>Branch<wbr>Listening<wbr>To</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiomanager.html#getgraphlisteningto" class="tsd-kind-icon">get<wbr>Graph<wbr>Listening<wbr>To</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.audiomanager.html#getoutputtimestamp" class="tsd-kind-icon">get<wbr>Output<wbr>Timestamp</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiomanager.html#listen" class="tsd-kind-icon">listen</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.audiomanager.html#listento" class="tsd-kind-icon">listen<wbr>To</a></li>
@@ -178,7 +178,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L13">Audio/AudioManager.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L13">Audio/AudioManager.ts:13</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -244,7 +244,7 @@
 					<div class="tsd-signature tsd-kind-icon">gain<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">GainNode</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L11">Audio/AudioManager.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L11">Audio/AudioManager.ts:11</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -353,7 +353,7 @@
 					<div class="tsd-signature tsd-kind-icon">default<span class="tsd-signature-symbol">:</span> <a href="fudgecore.audiomanager.html" class="tsd-signature-type">AudioManager</a><span class="tsd-signature-symbol"> =&nbsp;new AudioManager({ latencyHint: &quot;interactive&quot;, sampleRate: 44100 })</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L9">Audio/AudioManager.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L9">Audio/AudioManager.ts:9</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -376,7 +376,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L31">Audio/AudioManager.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L31">Audio/AudioManager.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -389,7 +389,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L24">Audio/AudioManager.ts:24</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L24">Audio/AudioManager.ts:24</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1048,21 +1048,21 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getbranchlisteningto" class="tsd-anchor"></a>
-					<h3>get<wbr>Branch<wbr>Listening<wbr>To</h3>
+					<a name="getgraphlisteningto" class="tsd-anchor"></a>
+					<h3>get<wbr>Graph<wbr>Listening<wbr>To</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Branch<wbr>Listening<wbr>To<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Graph<wbr>Listening<wbr>To<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L50">Audio/AudioManager.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L50">Audio/AudioManager.ts:50</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Retrieve the branch currently listening to</p>
+									<p>Retrieve the FUDGE-graph currently listening to</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h4>
@@ -1097,7 +1097,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L57">Audio/AudioManager.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L57">Audio/AudioManager.ts:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1119,24 +1119,24 @@
 					<a name="listento" class="tsd-anchor"></a>
 					<h3>listen<wbr>To</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">listen<wbr>To<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">listen<wbr>To<span class="tsd-signature-symbol">(</span>_graph<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L38">Audio/AudioManager.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L38">Audio/AudioManager.ts:38</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Determines branch to listen to. Each <a href="fudgecore.componentaudio.html">ComponentAudio</a> in the branch will connect to this contexts master gain, all others disconnect.</p>
+									<p>Determines FUDGE-graph to listen to. Each <a href="fudgecore.componentaudio.html">ComponentAudio</a> in the graph will connect to this contexts master gain, all others disconnect.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+									<h5>_graph: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1270,12 +1270,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/253acbed/Core/Source/Audio/AudioManager.ts#L64">Audio/AudioManager.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/280b15a4/Core/Source/Audio/AudioManager.ts#L64">Audio/AudioManager.ts:64</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Updates the spatial settings of the AudioNodes effected in the current branch</p>
+									<p>Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1423,7 +1423,7 @@
 								<a href="fudgecore.audiomanager.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.audiomanager.html#getbranchlisteningto" class="tsd-kind-icon">get<wbr>Branch<wbr>Listening<wbr>To</a>
+								<a href="fudgecore.audiomanager.html#getgraphlisteningto" class="tsd-kind-icon">get<wbr>Graph<wbr>Listening<wbr>To</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.audiomanager.html#getoutputtimestamp" class="tsd-kind-icon">get<wbr>Output<wbr>Timestamp</a>
