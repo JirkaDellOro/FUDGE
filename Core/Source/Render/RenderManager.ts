@@ -268,7 +268,7 @@ namespace FudgeCore {
             let cmpLight: ComponentLight = cmpLights[i];
             RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.pivot);
+            direction.transform(cmpLight.pivot, false);
             direction.transform(cmpLight.getContainer().mtxWorld);
             RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }
