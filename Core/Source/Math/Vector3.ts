@@ -120,8 +120,12 @@ namespace FudgeCore {
      * Creates and returns a vector which is a copy of the given vector scaled to the given length
      */
     public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
-      let vector: Vector3 = Vector3.ZERO();
+      let magnitude: number = _vector.magnitude;
+      let vector: Vector3;
       try {
+        if (magnitude == 0)
+          throw (new RangeError("Impossible normalization"));
+        vector = Vector3.ZERO();
         let factor: number = _length / _vector.magnitude;
         vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
       } catch (_error) {
@@ -131,9 +135,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Sums up multiple vectors.
-     * @param _vectors A series of vectors to sum up
-     * @returns A new vector representing the sum of the given vectors
+     * Returns the resulting vector attained by addition of all given vectors.
      */
     public static SUM(..._vectors: Vector3[]): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
@@ -141,17 +143,16 @@ namespace FudgeCore {
         result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
       return result;
     }
+
     /**
-     * Subtracts two vectors.
-     * @param _a The vector to subtract from.
-     * @param _b The vector to subtract.
-     * @returns A new vector representing the difference of the given vectors
+     * Returns the result of the subtraction of two vectors.
      */
-    public static DIFFERENCE(_a: Vector3, _b: Vector3): Vector3 {
+    public static DIFFERENCE(_minuend: Vector3, _subtrahend: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_a.x - _b.x, _a.y - _b.y, _a.z - _b.z]);
+      vector.data = new Float32Array([_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z]);
       return vector;
     }
+
     /**
      * Returns a new vector representing the given vector scaled by the given scaling factor
      */
@@ -160,11 +161,9 @@ namespace FudgeCore {
       scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
       return scaled;
     }
+
     /**
      * Computes the crossproduct of 2 vectors.
-     * @param _a The vector to multiply.
-     * @param _b The vector to multiply by.
-     * @returns A new vector representing the crossproduct of the given vectors
      */
     public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
@@ -176,9 +175,6 @@ namespace FudgeCore {
     }
     /**
      * Computes the dotproduct of 2 vectors.
-     * @param _a The vector to multiply.
-     * @param _b The vector to multiply by.
-     * @returns A new vector representing the dotproduct of the given vectors
      */
     public static DOT(_a: Vector3, _b: Vector3): number {
       let scalarProduct: number = _a.x * _b.x + _a.y * _b.y + _a.z * _b.z;
@@ -201,6 +197,15 @@ namespace FudgeCore {
     }
 
     /**
+     * Divides the dividend by the divisor component by component and returns the result
+     */
+    public static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
+      return vector;
+    }
+
+    /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
      * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
      */
@@ -211,34 +216,77 @@ namespace FudgeCore {
       return true;
     }
 
+    /**
+     * Returns true if the position described by this is within a cube with the opposite corners 1 and 2
+     */
+    public isInside(_corner1: Vector3, _corner2: Vector3): boolean {
+      let diagonal: Vector3 = Vector3.DIFFERENCE(_corner2, _corner1);
+      let relative: Vector3 = Vector3.DIFFERENCE(this, _corner1);
+      let ratio: Vector3 = Vector3.RATIO(relative, diagonal);
+      if (ratio.x > 1 || ratio.x < 0)
+        return false;
+      if (ratio.y > 1 || ratio.y < 0)
+        return false;
+      if (ratio.z > 1 || ratio.z < 0)
+        return false;
+      return true;
+    }
+
+    /**
+     * Adds the given vector to this
+     */
     public add(_addend: Vector3): void {
       this.data.set([_addend.x + this.x, _addend.y + this.y, _addend.z + this.z]);
     }
+
+    /**
+     * Subtracts the given vector from this
+     */
     public subtract(_subtrahend: Vector3): void {
       this.data.set([this.x - _subtrahend.x, this.y - _subtrahend.y, this.z - _subtrahend.z]);
     }
-    public scale(_scale: number): void {
-      this.data.set([_scale * this.x, _scale * this.y, _scale * this.z]);
+
+    /**
+     * Scales this vector by the given scalar
+     */
+    public scale(_scalar: number): void {
+      this.data.set([_scalar * this.x, _scalar * this.y, _scalar * this.z]);
     }
 
+    /**
+     * Normalizes this to the given length, 1 by default
+     */
     public normalize(_length: number = 1): void {
       this.data = Vector3.NORMALIZATION(this, _length).data;
     }
 
+    /**
+     * Defines the components of this vector with the given numbers
+     */
     public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
       this.data = new Float32Array([_x, _y, _z]);
     }
 
+    /**
+     * Returns this vector as a new Float32Array (copy)
+     */
     public get(): Float32Array {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Returns a copy of this vector
+     */
     public get copy(): Vector3 {
       let copy: Vector3 = Recycler.get(Vector3);
       copy.data.set(this.data);
       return copy;
     }
 
+    /**
+     * Transforms this vector by the given matrix, including or exluding the translation.
+     * Including is the default, excluding will only rotate and scale this vector.
+     */
     public transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void {
       this.data = Vector3.TRANSFORMATION(this, _matrix, _includeTranslation).data;
     }
@@ -250,17 +298,34 @@ namespace FudgeCore {
       return new Vector2(this.x, this.y);
     }
 
+    /**
+     * Reflects this vector at a given normal. See [[REFLECTION]]
+     */
     public reflect(_normal: Vector3): void {
       const reflected: Vector3 = Vector3.REFLECTION(this, _normal);
       this.set(reflected.x, reflected.y, reflected.z);
       Recycler.store(reflected);
     }
 
+    /**
+     * Shuffles the components of this vector
+     */
+    public shuffle(): void {
+      let a: number[] = Array.from(this.data);
+      this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
+    }
+
+    /**
+     * Returns a formatted string representation of this vector
+     */
     public toString(): string {
       let result: string = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)}, ${this.z.toPrecision(5)})`;
       return result;
     }
 
+    /**
+     * Uses the standard array.map functionality to perform the given function on all components of this vector
+     */
     public map(_function: (value: number, index: number, array: Float32Array) => number): Vector3 {
       let copy: Vector3 = Recycler.get(Vector3);
       copy.data = this.data.map(_function);

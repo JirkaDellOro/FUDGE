@@ -1,6 +1,6 @@
 namespace TextureTest {
   import ƒ = FudgeCore;
-  
+
 
   window.addEventListener("load", init);
 
@@ -17,7 +17,12 @@ namespace TextureTest {
     // graph.addComponent(cmpLightAmbient);
 
     let cmpLightDirectionalRed: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("RED")));
-    cmpLightDirectionalRed.pivot.rotateY(-90);
+    // cmpLightDirectionalRed.pivot.rotateY(-90, true);
+    // console.log(cmpLightDirectionalRed.pivot.toString());
+    cmpLightDirectionalRed.pivot.translateX(1);
+    console.log(cmpLightDirectionalRed.pivot.toString());
+    cmpLightDirectionalRed.pivot.lookAt(ƒ.Vector3.ZERO());
+    console.log(cmpLightDirectionalRed.pivot.toString());
     graph.addComponent(cmpLightDirectionalRed);
 
     let cmpLightDirectionalGreen: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("GREEN")));
@@ -32,7 +37,9 @@ namespace TextureTest {
     graph.addComponent(cmpLightDirectionalWhite);
 
     graph.addChild(body);
-    graph.addChild(Scenes.createCoordinateSystem());
+    let cosys: ƒ.Node = Scenes.createCoordinateSystem();
+    graph.addChild(cosys);
+    cosys.addComponent(new ƒ.ComponentTransform(cmpLightDirectionalRed.pivot));
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
     let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1.5, 1.5, 1.5), new ƒ.Vector3(0, 0, 0));
@@ -49,7 +56,7 @@ namespace TextureTest {
       // body.cmpTransform.rotateZ(-0.9);
       viewport.draw();
     },
-                       20);
+      20);
     //*/
   }
 }

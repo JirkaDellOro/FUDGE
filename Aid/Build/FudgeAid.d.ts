@@ -1,5 +1,7 @@
 /// <reference path="../../core/build/fudgecore.d.ts" />
 /// <reference types="../../core/build/fudgecore" />
+import ƒ = FudgeCore;
+import ƒAid = FudgeAid;
 declare namespace FudgeAid {
     /**
      * Abstract class supporting versious arithmetical helper functions
@@ -114,9 +116,11 @@ declare namespace FudgeAid {
     }
 }
 declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    function addStandardLightComponents(_node: ƒ.Node, _clrAmbient?: ƒ.Color, _clrKey?: ƒ.Color, _clrBack?: ƒ.Color, _posKey?: ƒ.Vector3, _posBack?: ƒ.Vector3): void;
     /** Three Point Light setup that by default illuminates the Scene from +Z */
     class NodeThreePointLights extends Node {
-        constructor(_name: string, _rotationY: number);
+        constructor(_name: string, _rotationY?: number);
     }
 }
 declare namespace FudgeAid {

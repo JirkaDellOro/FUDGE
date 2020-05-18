@@ -72,7 +72,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns removes a randomly selected element from the given array and returns it
+     * Removes a randomly selected element from the given array and returns it
      */
     public splice<T>(_array: Array<T>): T {
       return _array.splice(this.getIndex(_array), 1)[0];

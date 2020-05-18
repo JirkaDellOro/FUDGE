@@ -470,7 +470,7 @@ namespace FudgeCore {
      * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector 
      */
     public lookAt(_target: Vector3, _up: Vector3 = Vector3.Y()): void {
-      const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target); // TODO: Handle rotation around z-axis
+      const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up); // TODO: Handle rotation around z-axis
       this.set(matrix);
       Recycler.store(matrix);
     }
