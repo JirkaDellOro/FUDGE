@@ -1,10 +1,12 @@
 namespace Import {
+
   interface ClosureStorage {
     [key: string]: Function;
   }
 
   export interface ParticleEffectDefinition {
     storage?: ClosureStorage;
+    // TODO: refactor this because translation/rotation/transWolrd split causes lots of code duplication
     translation?: ClosureStorage;
     rotation?: ClosureStorage;
     translationWorld?: ClosureStorage;
@@ -19,33 +21,70 @@ namespace Import {
       this.storedValues = _storedValues;
       this.randomNumbers = _randomNumbers;
     }
-    
+
     public importFile(_filename: string): void {
       //TODO: import file
     }
 
+    /**
+     * Parse the data from json file and return a particle effect definition
+     * @param _data the data to parse
+     * @returns a definition of the particle effect containing the closure for translation, rotation etc.
+     */
     public parseFile(_data: ParticleEffectData): ParticleEffectDefinition {
 
-      this.definition.storage = {};
+      // pre parse storage and initialize stored values
       for (const key in _data.storage) {
-        if (key in this.storedValues)
+        if (key in this.storedValues) {
           console.error("Predfined varaiables can not be overwritten");
+          return null;
+        }
         else
-          this.definition.storage[key] = this.parseClosure(_data.storage[key]);
+          this.storedValues[key] = 0;
       }
 
+      // initialize effect definition
+      let vectorDefinition: Array<string> = ["x", "y", "z"];
+      this.definition.storage = {};
       this.definition.translation = {};
+      this.definition.rotation = {};
+      this.definition.translationWorld = {};
+      let nullFunction: Function = function(): number {
+        return 0;
+      };
+      for (const coordinate of vectorDefinition) {
+        this.definition.translation[coordinate] = nullFunction;
+        this.definition.rotation[coordinate] = nullFunction;
+        this.definition.translationWorld[coordinate] = nullFunction;
+      }
+
+
+      // parse storage
+      for (const key in _data.storage) {
+        this.definition.storage[key] = this.parseClosure(_data.storage[key]);
+      }
+
+      // parse translation locale
       for (const key in _data.translation) {
-        if (["x", "y", "z"].includes(key)) { //TODO: define only once
+        if (vectorDefinition.includes(key)) {
           this.definition.translation[key] = this.parseClosure(_data.translation[key]);
         } else {
           console.error(`"${key}" is not part of a translation`);
         }
       }
 
-      this.definition.translationWorld = {};
+      // parse rotation
+      for (const key in _data.rotation) {
+        if (vectorDefinition.includes(key)) {
+          this.definition.rotation[key] = this.parseClosure(_data.rotation[key]);
+        } else {
+          console.error(`"${key}" is not part of a rotation`);
+        }
+      }
+
+      // parse translation world
       for (const key in _data.translationWorld) {
-        if (["x", "y", "z"].includes(key)) { //TODO: define only once
+        if (vectorDefinition.includes(key)) {
           this.definition.translationWorld[key] = this.parseClosure(_data.translationWorld[key]);
         } else {
           console.error(`"${key}" is not part of a translation`);
@@ -55,6 +94,10 @@ namespace Import {
       return this.definition;
     }
 
+    /**
+     * 
+     * @param _data the closure data to parse recursively
+     */
     private parseClosure(_data: ClosureData): Function {
       if (!_data.function) {
         console.error("Error, no operation defined");
@@ -70,7 +113,7 @@ namespace Import {
             parameters.push(result);
             break;
           case "string":
-            if (param in this.definition.storage || param in this.storedValues) { // TODO: simplify this, Problem: this.storedValues only contains time, index, size while parsing
+            if (param in this.storedValues) {
               parameters.push(() => {
                 console.log("Variable", `"${param}"`, this.storedValues[<string>param]);
                 return this.storedValues[<string>param];

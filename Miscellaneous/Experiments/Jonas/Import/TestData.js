@@ -12,46 +12,190 @@ var Import;
             }
         },
         "translation": {
-            "x": {
-                "function": "multiplication",
-                "parameters": [
-                    "inNormTime",
-                    1
-                ]
-            },
             "y": {
                 "function": "multiplication",
                 "parameters": [
                     {
-                        "function": "division",
+                        "function": "random",
                         "parameters": [
-                            1,
-                            "size"
-                        ],
-                        "preEvaluate": true
+                            "index"
+                        ]
                     },
-                    2
+                    {
+                        "function": "linear",
+                        "parameters": [
+                            "inNormTime",
+                            0,
+                            1,
+                            0,
+                            1
+                        ]
+                    }
+                ]
+            }
+        },
+        "rotation": {
+            "z": {
+                "function": "multiplication",
+                "parameters": [
+                    {
+                        "function": "random",
+                        "parameters": [
+                            {
+                                "function": "addition",
+                                "parameters": [
+                                    "index",
+                                    1
+                                ]
+                            }
+                        ]
+                    },
+                    360
                 ]
             }
         },
         "translationWorld": {
             "y": {
-                "function": "linear",
+                "function": "polynomial",
                 "parameters": [
-                    "time",
+                    "inNormTime",
                     0,
-                    1,
+                    -2.5,
                     0,
-                    -1
+                    0
                 ]
             }
         }
     };
+    // export let data: ParticleEffectData = {
+    //   "storage": {
+    //     "inNormParticleTime": {
+    //       "function": "modulo",
+    //       "parameters": [
+    //         {
+    //           "function": "addition",
+    //           "parameters": [
+    //             {
+    //               "function": "multiplication",
+    //               "parameters": [
+    //                 "index",
+    //                 {
+    //                   "function": "division",
+    //                   "parameters": [
+    //                     1,
+    //                     "size"
+    //                   ],
+    //                   "preEvaluate": true
+    //                 }
+    //               ]
+    //             },
+    //             {
+    //               "function": "modulo",
+    //               "parameters": [
+    //                 "time",
+    //                 1
+    //               ]
+    //             }
+    //           ]
+    //         },
+    //         1
+    //       ]
+    //     }
+    //   },
+    //   "translation": {
+    //     "x": {
+    //       "function": "multiplication",
+    //       "parameters": [
+    //         {
+    //           "function": "polynomial",
+    //           "parameters": [
+    //             "inNormParticleTime",
+    //             -2,
+    //             -1,
+    //             0.5,
+    //             0.5
+    //           ]
+    //         },
+    //         {
+    //           "function": "random",
+    //           "parameters": [
+    //             "index"
+    //           ]
+    //         }
+    //       ]
+    //     },
+    //     "y": {
+    //       "function": "linear",
+    //       "parameters": [
+    //         "inNormParticleTime",
+    //         0,
+    //         1,
+    //         0,
+    //         1
+    //       ]
+    //     }
+    //   }
+    // };
+    // export let data: ParticleEffectData = {
+    //   "storage": {
+    //     "inNormTime": {
+    //       "function": "modulo",
+    //       "parameters": [
+    //         "time",
+    //         1
+    //       ]
+    //     }
+    //   },
+    //   "translation": {
+    //     "x": {
+    //       "function": "multiplication",
+    //       "parameters": [
+    //         "inNormTime",
+    //         1
+    //       ]
+    //     },
+    //     "y": {
+    //       "function": "multiplication",
+    //       "parameters": [
+    //         {
+    //           "function": "division",
+    //           "parameters": [
+    //             1,
+    //             "size"
+    //           ],
+    //           "preEvaluate": true
+    //         },
+    //         2
+    //       ]
+    //     }
+    //   },
+    //   "rotation": {
+    //     "x": {
+    //       "function": "addition",
+    //       "parameters": [
+    //         "time",
+    //         3
+    //       ]
+    //     }
+    //   },
+    //   "translationWorld": {
+    //     "y": {
+    //       "function": "linear",
+    //       "parameters": [
+    //         "time",
+    //         0,
+    //         1,
+    //         0,
+    //         -1
+    //       ]
+    //     }
+    //   }
+    // };
     // export let data: ParticleData = {
     //   "translation": {
-    //     "x-coordinate": {
-    //       "operation": "multiplication",
-    //       "arguments": [
+    //     "x": {
+    //       "function": "multiplication",
+    //       "parameters": [
     //         {
     //           "operation": "polynomial3",
     //           "arguments": [
@@ -100,7 +244,7 @@ var Import;
     //         }
     //       ]
     //     },
-    //     "y-coordinate": {
+    //     "y": {
     //       "operation": "modulo",
     //       "arguments": [
     //         {

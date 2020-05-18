@@ -132,6 +132,19 @@ var Import;
             };
         }
         /**
+         * Creates a closure which will return the square root of the given parameter
+         *  parameter[0] will be the input value for the function.
+         */
+        static createClosureSquareRoot(_parameters) {
+            return function () {
+                console.group("ClosureSquareRoot");
+                let x = _parameters[0]();
+                let y = Math.sqrt(x);
+                console.groupEnd();
+                return y;
+            };
+        }
+        /**
          * Creates a closure which will return number chosen from the given array of numbers.
          *  parameter[0] representing the index of the number which will be chosen.
          *  parameter[1] representing the array of random numbers to choose from.
@@ -158,6 +171,7 @@ var Import;
         "modulo": ClosureFactory.createClosureModulo,
         "linear": ClosureFactory.createClosureLinear,
         "polynomial": ClosureFactory.createClosurePolynomial3,
+        "squareRoot": ClosureFactory.createClosureSquareRoot,
         "random": ClosureFactory.createClosureRandom
     };
     Import.ClosureFactory = ClosureFactory;

@@ -25,6 +25,12 @@ var Import;
             console.log(`${key} =`, effectDefinition.translation[key]());
             console.groupEnd();
         }
+        //evaluate rotation
+        for (const key in effectDefinition.rotation) {
+            console.groupCollapsed(`Evaluate rotation "${key}"`);
+            console.log(`${key} =`, effectDefinition.rotation[key]());
+            console.groupEnd();
+        }
         //evaluate translation world
         for (const key in effectDefinition.translationWorld) {
             console.groupCollapsed(`Evaluate translation world "${key}"`);

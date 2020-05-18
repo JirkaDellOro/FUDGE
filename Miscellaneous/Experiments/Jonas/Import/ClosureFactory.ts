@@ -27,6 +27,7 @@ namespace Import {
       "modulo": ClosureFactory.createClosureModulo,
       "linear": ClosureFactory.createClosureLinear,
       "polynomial": ClosureFactory.createClosurePolynomial3,
+      "squareRoot": ClosureFactory.createClosureSquareRoot,
       "random": ClosureFactory.createClosureRandom
     };
 
@@ -150,6 +151,20 @@ namespace Import {
         console.group("ClosurePolynomial3");
         let x: number = _parameters[0]();
         let y: number = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
+        console.groupEnd();
+        return y;
+      };
+    }
+
+    /**
+     * Creates a closure which will return the square root of the given parameter
+     *  parameter[0] will be the input value for the function.
+     */
+    private static createClosureSquareRoot(_parameters: Function[]): Function {
+      return function (): number {
+        console.group("ClosureSquareRoot");
+        let x: number = _parameters[0]();
+        let y: number = Math.sqrt(x);
         console.groupEnd();
         return y;
       };
