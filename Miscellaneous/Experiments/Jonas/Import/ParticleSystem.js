@@ -45,25 +45,17 @@ var Import;
                 this.storedValues["index"] = index;
                 let transformation = f.Matrix4x4.IDENTITY();
                 // calculate local translation
-                let x = this.effectDefinition.translation["x"](); // TODO: define string only once
-                let y = this.effectDefinition.translation["y"]();
-                let z = this.effectDefinition.translation["z"]();
-                transformation.translate(new f.Vector3(x, y, z));
-                // this.particles[index].mtxLocal.translate(new f.Vector3(x, y, z));
+                transformation.translate(this.evaluateClosureVector(this.effectDefinition.translation));
                 // calculate rotation
-                x = this.effectDefinition.rotation["x"]();
-                y = this.effectDefinition.rotation["y"]();
-                z = this.effectDefinition.rotation["z"]();
-                transformation.rotate(new f.Vector3(x, y, z), true);
-                // this.particles[index].mtxLocal.rotate(new f.Vector3(x, y, z));
+                transformation.rotate(this.evaluateClosureVector(this.effectDefinition.rotation), true);
                 // calculate world translation
-                x = this.effectDefinition.translationWorld["x"]();
-                y = this.effectDefinition.translationWorld["y"]();
-                z = this.effectDefinition.translationWorld["z"]();
-                transformation.translate(new f.Vector3(x, y, z), false);
-                // this.particles[index].mtxLocal.translate(new f.Vector3(x, y, z), false);
+                transformation.translate(this.evaluateClosureVector(this.effectDefinition.translationWorld), false);
+                console.log("trans", transformation.toString());
                 this.particles[index].mtxLocal.set(transformation);
             }
+        }
+        evaluateClosureVector(_closureVector) {
+            return new f.Vector3(_closureVector.x(), _closureVector.y(), _closureVector.z());
         }
         createParticle(_mesh, _material) {
             let node = new fAid.Node("Particle", f.Matrix4x4.IDENTITY(), _material, _mesh);

@@ -1,12 +1,17 @@
 declare namespace Import {
     interface ParticleEffectData {
         storage?: ParticleData;
-        translation?: ParticleData;
-        rotation?: ParticleData;
-        translationWorld?: ParticleData;
+        translation?: ParticleVectorData;
+        rotation?: ParticleVectorData;
+        translationWorld?: ParticleVectorData;
     }
     interface ParticleData {
         [key: string]: ClosureData;
+    }
+    interface ParticleVectorData {
+        x?: ClosureData;
+        y?: ClosureData;
+        z?: ClosureData;
     }
     interface ClosureData {
         function: string;

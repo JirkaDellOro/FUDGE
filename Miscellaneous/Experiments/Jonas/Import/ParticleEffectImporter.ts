@@ -1,15 +1,20 @@
 namespace Import {
 
-  interface ClosureStorage {
+  export interface ClosureStorage {
     [key: string]: Function;
   }
 
   export interface ParticleEffectDefinition {
     storage?: ClosureStorage;
-    // TODO: refactor this because translation/rotation/transWolrd split causes lots of code duplication
-    translation?: ClosureStorage;
-    rotation?: ClosureStorage;
-    translationWorld?: ClosureStorage;
+    translation?: ClosureVector;
+    rotation?: ClosureVector;
+    translationWorld?: ClosureVector;
+  }
+
+  export interface ClosureVector {
+    x?: Function;
+    y?: Function;
+    z?: Function;
   }
 
   export class ParticleEffectImporter {
@@ -43,62 +48,50 @@ namespace Import {
           this.storedValues[key] = 0;
       }
 
-      // initialize effect definition
-      let vectorDefinition: Array<string> = ["x", "y", "z"];
-      this.definition.storage = {};
-      this.definition.translation = {};
-      this.definition.rotation = {};
-      this.definition.translationWorld = {};
-      let nullFunction: Function = function(): number {
-        return 0;
-      };
-      for (const coordinate of vectorDefinition) {
-        this.definition.translation[coordinate] = nullFunction;
-        this.definition.rotation[coordinate] = nullFunction;
-        this.definition.translationWorld[coordinate] = nullFunction;
-      }
-
-
       // parse storage
+      this.definition.storage = {};
       for (const key in _data.storage) {
         this.definition.storage[key] = this.parseClosure(_data.storage[key]);
       }
 
       // parse translation locale
-      for (const key in _data.translation) {
-        if (vectorDefinition.includes(key)) {
-          this.definition.translation[key] = this.parseClosure(_data.translation[key]);
-        } else {
-          console.error(`"${key}" is not part of a translation`);
-        }
-      }
+      this.definition.translation = this.parseVectorData(_data.translation);
 
       // parse rotation
-      for (const key in _data.rotation) {
-        if (vectorDefinition.includes(key)) {
-          this.definition.rotation[key] = this.parseClosure(_data.rotation[key]);
-        } else {
-          console.error(`"${key}" is not part of a rotation`);
-        }
-      }
+      this.definition.rotation = this.parseVectorData(_data.rotation);
 
       // parse translation world
-      for (const key in _data.translationWorld) {
-        if (vectorDefinition.includes(key)) {
-          this.definition.translationWorld[key] = this.parseClosure(_data.translationWorld[key]);
-        } else {
-          console.error(`"${key}" is not part of a translation`);
-        }
-      }
+      this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
 
       return this.definition;
     }
 
     /**
-     * 
+     * Parse the given paticle vector. If _data is undefined return a closure vector which functions return 0.
+     * @param _data the paticle vector data to parse
+     */
+    private parseVectorData(_data: ParticleVectorData): ClosureVector {
+      if (!_data) {
+        _data = {};
+      }
+      let closureVector: ClosureVector = {};
+      closureVector.x = this.parseClosure(_data.x);
+      closureVector.y = this.parseClosure(_data.y);
+      closureVector.z = this.parseClosure(_data.z);
+      return closureVector;
+    }
+
+    /**
+     * Parse the given closure data recursivley. If _data is undefined return a function which returns 0.
      * @param _data the closure data to parse recursively
      */
     private parseClosure(_data: ClosureData): Function {
+      if (!_data) {
+        return function (): number {
+          return 0;
+        };
+      }
+
       if (!_data.function) {
         console.error("Error, no operation defined");
         return null;

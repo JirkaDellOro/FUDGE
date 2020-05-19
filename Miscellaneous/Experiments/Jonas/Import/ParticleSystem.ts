@@ -56,28 +56,21 @@ namespace Import {
         let transformation: f.Matrix4x4 = f.Matrix4x4.IDENTITY();
 
         // calculate local translation
-        let x: number = this.effectDefinition.translation["x"](); // TODO: define string only once
-        let y: number = this.effectDefinition.translation["y"]();
-        let z: number = this.effectDefinition.translation["z"]();
-        transformation.translate(new f.Vector3(x, y, z));
-        // this.particles[index].mtxLocal.translate(new f.Vector3(x, y, z));
+        transformation.translate(this.evaluateClosureVector(this.effectDefinition.translation));
 
         // calculate rotation
-        x = this.effectDefinition.rotation["x"]();
-        y = this.effectDefinition.rotation["y"]();
-        z = this.effectDefinition.rotation["z"]();
-        transformation.rotate(new f.Vector3(x, y, z), true);
-        // this.particles[index].mtxLocal.rotate(new f.Vector3(x, y, z));
+        transformation.rotate(this.evaluateClosureVector(this.effectDefinition.rotation), true);
 
         // calculate world translation
-        x = this.effectDefinition.translationWorld["x"]();
-        y = this.effectDefinition.translationWorld["y"]();
-        z = this.effectDefinition.translationWorld["z"]();
-        transformation.translate(new f.Vector3(x, y, z), false);
-        // this.particles[index].mtxLocal.translate(new f.Vector3(x, y, z), false);
+        transformation.translate(this.evaluateClosureVector(this.effectDefinition.translationWorld), false);
 
+        console.log("trans", transformation.toString());
         this.particles[index].mtxLocal.set(transformation);
       }
+    }
+
+    private evaluateClosureVector(_closureVector: ClosureVector): f.Vector3 {
+      return new f.Vector3(_closureVector.x(), _closureVector.y(), _closureVector.z());
     }
 
     private createParticle(_mesh: f.Mesh, _material: f.Material): f.Node {

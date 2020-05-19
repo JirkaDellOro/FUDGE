@@ -53,19 +53,19 @@ var Import;
                     360
                 ]
             }
-        },
-        "translationWorld": {
-            "y": {
-                "function": "polynomial",
-                "parameters": [
-                    "inNormTime",
-                    0,
-                    -2.5,
-                    0,
-                    0
-                ]
-            }
-        }
+        } //,
+        // "translationWorld": {
+        //   "y": {
+        //     "function": "polynomial",
+        //     "parameters": [
+        //       "inNormTime",
+        //       0,
+        //       -2.5,
+        //       0,
+        //       0
+        //     ]
+        //   }
+        // }
     };
     // export let data: ParticleEffectData = {
     //   "storage": {

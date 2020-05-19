@@ -1,13 +1,19 @@
 namespace Import {
   export interface ParticleEffectData {
     storage?: ParticleData;
-    translation?: ParticleData;
-    rotation?: ParticleData;
-    translationWorld?: ParticleData;
+    translation?: ParticleVectorData;
+    rotation?: ParticleVectorData;
+    translationWorld?: ParticleVectorData;
   }
 
   export interface ParticleData {
     [key: string]: ClosureData;
+  }
+
+  export interface ParticleVectorData {
+    x?: ClosureData;
+    y?: ClosureData;
+    z?: ClosureData;
   }
 
   export interface ClosureData {
@@ -69,19 +75,19 @@ namespace Import {
           360
         ]
       }
-    },
-    "translationWorld": {
-      "y": {
-        "function": "polynomial",
-        "parameters": [
-          "inNormTime",
-          0,
-          -2.5,
-          0,
-          0
-        ]
-      }
-    }
+    }//,
+    // "translationWorld": {
+    //   "y": {
+    //     "function": "polynomial",
+    //     "parameters": [
+    //       "inNormTime",
+    //       0,
+    //       -2.5,
+    //       0,
+    //       0
+    //     ]
+    //   }
+    // }
   };
 
   // export let data: ParticleEffectData = {
