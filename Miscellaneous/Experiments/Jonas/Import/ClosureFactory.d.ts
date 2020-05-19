@@ -44,6 +44,11 @@ declare namespace Import {
          */
         private static createClosurePolynomial3;
         /**
+         * Creates a closure which will return the square root of the given parameter
+         *  parameter[0] will be the input value for the function.
+         */
+        private static createClosureSquareRoot;
+        /**
          * Creates a closure which will return number chosen from the given array of numbers.
          *  parameter[0] representing the index of the number which will be chosen.
          *  parameter[1] representing the array of random numbers to choose from.

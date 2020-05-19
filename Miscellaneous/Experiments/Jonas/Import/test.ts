@@ -27,14 +27,21 @@ namespace Import {
     //evaluate translation
     for (const key in effectDefinition.translation) {
       console.groupCollapsed(`Evaluate translation "${key}"`);
-      console.log(`${key} =`, effectDefinition.translation[key]());
+      console.log(`${key} =`, (<ClosureStorage>effectDefinition.translation)[key]());
+      console.groupEnd();
+    }
+
+    //evaluate rotation
+    for (const key in effectDefinition.rotation) {
+      console.groupCollapsed(`Evaluate rotation "${key}"`);
+      console.log(`${key} =`, (<ClosureStorage>effectDefinition.rotation)[key]());
       console.groupEnd();
     }
 
     //evaluate translation world
     for (const key in effectDefinition.translationWorld) {
       console.groupCollapsed(`Evaluate translation world "${key}"`);
-      console.log(`${key} =`, effectDefinition.translationWorld[key]());
+      console.log(`${key} =`, (<ClosureStorage>effectDefinition.translationWorld)[key]());
       console.groupEnd();
     }
 
@@ -53,14 +60,14 @@ namespace Import {
     //evaluate translation
     for (const key in effectDefinition.translation) {
       console.groupCollapsed(`Evaluate translation "${key}"`);
-      console.log(`${key} =`, effectDefinition.translation[key]());
+      console.log(`${key} =`, (<ClosureStorage>effectDefinition.translation)[key]());
       console.groupEnd();
     }
 
     //evaluate translation world
     for (const key in effectDefinition.translationWorld) {
       console.groupCollapsed(`Evaluate translation world "${key}"`);
-      console.log(`${key} =`, effectDefinition.translationWorld[key]());
+      console.log(`${key} =`, (<ClosureStorage>effectDefinition.translationWorld)[key]());
       console.groupEnd();
     }
   }
