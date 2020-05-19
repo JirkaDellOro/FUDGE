@@ -219,7 +219,7 @@ namespace FudgeCore {
     /**
      * Returns true if the position described by this is within a cube with the opposite corners 1 and 2
      */
-    public isInside(_corner1: Vector3, _corner2: Vector3): boolean {
+    public isInsideCube(_corner1: Vector3, _corner2: Vector3): boolean {
       let diagonal: Vector3 = Vector3.DIFFERENCE(_corner2, _corner1);
       let relative: Vector3 = Vector3.DIFFERENCE(this, _corner1);
       let ratio: Vector3 = Vector3.RATIO(relative, diagonal);
@@ -230,6 +230,14 @@ namespace FudgeCore {
       if (ratio.z > 1 || ratio.z < 0)
         return false;
       return true;
+    }
+
+    /**
+     * Returns true if the position described by this is within a sphere with the given center and radius
+     */
+    public isInsideSphere(_center: Vector3, _radius: number): boolean {
+      let difference: Vector3 = Vector3.DIFFERENCE(this, _center);
+      return difference.magnitudeSquared < (_radius * _radius);
     }
 
     /**

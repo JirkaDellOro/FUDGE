@@ -36,10 +36,27 @@ namespace FudgeCore {
       // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
+
     public get isActive(): boolean {
       return this.active;
     }
 
+    /**
+     * Shortcut to retrieve this nodes [[ComponentTransform]]
+     */
+    public get cmpTransform(): ComponentTransform {
+      return <ComponentTransform>this.getComponents(ComponentTransform)[0];
+    }
+
+    /**
+     * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
+     * Fails if no [[ComponentTransform]] is attached
+     */
+    public get mtxLocal(): Matrix4x4 {
+            return this.cmpTransform.local;
+    }
+
+    // #region Scenetree
     /**
      * Returns a reference to this nodes parent node
      */
@@ -58,30 +75,28 @@ namespace FudgeCore {
     }
 
     /**
-     * Shortcut to retrieve this nodes [[ComponentTransform]]
+     * Returns the number of children attached to this
      */
-    public get cmpTransform(): ComponentTransform {
-      return <ComponentTransform>this.getComponents(ComponentTransform)[0];
-    }
-    /**
-     * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
-     * Fails if no [[ComponentTransform]] is attached
-     */
-    public get mtxLocal(): Matrix4x4 {
-            return this.cmpTransform.local;
+    public get nChildren(): number {
+      return this.children.length;
     }
 
-    // #region Scenetree
+    /**
+     * Returns child at the given index in the list of children
+     */
+    public getChild(_index: number): Node {
+      return this.children[_index];
+    }
+
     /**
      * Returns a clone of the list of children
      */
     public getChildren(): Node[] {
       return this.children.slice(0);
     }
+
     /**
      * Returns an array of references to childnodes with the supplied name. 
-     * @param _name The name of the nodes to be found.
-     * @return An array with references to nodes
      */
     public getChildrenByName(_name: string): Node[] {
       let found: Node[] = [];
@@ -94,15 +109,14 @@ namespace FudgeCore {
      * See and preferably use [[addChild]]
      */
     // tslint:disable-next-line: member-ordering
-    public readonly appendChild: (_node: Node) => void = this.addChild;
+    public readonly appendChild: (_child: Node) => void = this.addChild;
 
     /**
      * Adds the given reference to a node to the list of children, if not already in
-     * @param _node The node to be added as a child
      * @throws Error when trying to add an ancestor of this 
      */
-    public addChild(_node: Node): void {
-      if (this.children.includes(_node))
+    public addChild(_child: Node): void {
+      if (this.children.includes(_child))
         // _node is already a child of this
         return;
 
@@ -112,44 +126,44 @@ namespace FudgeCore {
       while (ancestor) {
         ancestor.timestampUpdate = 0;
         inAudioGraph = inAudioGraph || (ancestor == graphListened);
-        if (ancestor == _node)
+        if (ancestor == _child)
           throw (new Error("Cyclic reference prohibited in node hierarchy, ancestors must not be added as children"));
         else
           ancestor = ancestor.parent;
       }
 
-      let previousParent: Node = _node.parent;
+      let previousParent: Node = _child.parent;
       if (previousParent)
-        previousParent.removeChild(_node);
-      this.children.push(_node);
-      _node.parent = this;
-      _node.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
+        previousParent.removeChild(_child);
+      this.children.push(_child);
+      _child.parent = this;
+      _child.dispatchEvent(new Event(EVENT.CHILD_APPEND, { bubbles: true }));
       if (inAudioGraph)
-        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
+        _child.broadcastEvent(new Event(EVENT_AUDIO.CHILD_APPEND));
     }
 
     /**
      * Removes the reference to the give node from the list of children
-     * @param _node The node to be removed.
+     * @param _child The node to be removed.
      */
-    public removeChild(_node: Node): void {
-      let found: number = this.findChild(_node);
+    public removeChild(_child: Node): void {
+      let found: number = this.findChild(_child);
       if (found < 0)
         return;
 
-      _node.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
+      _child.dispatchEvent(new Event(EVENT.CHILD_REMOVE, { bubbles: true }));
       if (this.isDescendantOf(AudioManager.default.getGraphListeningTo()))
-        _node.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
+        _child.broadcastEvent(new Event(EVENT_AUDIO.CHILD_REMOVE));
       this.children.splice(found, 1);
-      _node.parent = null;
+      _child.parent = null;
     }
 
     /**
      * Returns the position of the node in the list of children or -1 if not found
-     * @param _node The node to be found.
+     * @param _search The node to be found.
      */
-    public findChild(_node: Node): number {
-      return this.children.indexOf(_node);
+    public findChild(_search: Node): number {
+      return this.children.indexOf(_search);
     }
 
     /**

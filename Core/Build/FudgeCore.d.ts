@@ -2730,7 +2730,11 @@ declare namespace FudgeCore {
         /**
          * Returns true if the position described by this is within a cube with the opposite corners 1 and 2
          */
-        isInside(_corner1: Vector3, _corner2: Vector3): boolean;
+        isInsideCube(_corner1: Vector3, _corner2: Vector3): boolean;
+        /**
+         * Returns true if the position described by this is within a sphere with the given center and radius
+         */
+        isInsideSphere(_center: Vector3, _radius: number): boolean;
         /**
          * Adds the given vector to this
          */
@@ -2968,14 +2972,6 @@ declare namespace FudgeCore {
         activate(_on: boolean): void;
         get isActive(): boolean;
         /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent(): Node | null;
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor(): Node | null;
-        /**
          * Shortcut to retrieve this nodes [[ComponentTransform]]
          */
         get cmpTransform(): ComponentTransform;
@@ -2985,36 +2981,49 @@ declare namespace FudgeCore {
          */
         get mtxLocal(): Matrix4x4;
         /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor(): Node | null;
+        /**
+         * Returns the number of children attached to this
+         */
+        get nChildren(): number;
+        /**
+         * Returns child at the given index in the list of children
+         */
+        getChild(_index: number): Node;
+        /**
          * Returns a clone of the list of children
          */
         getChildren(): Node[];
         /**
          * Returns an array of references to childnodes with the supplied name.
-         * @param _name The name of the nodes to be found.
-         * @return An array with references to nodes
          */
         getChildrenByName(_name: string): Node[];
         /**
          * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
          * See and preferably use [[addChild]]
          */
-        readonly appendChild: (_node: Node) => void;
+        readonly appendChild: (_child: Node) => void;
         /**
          * Adds the given reference to a node to the list of children, if not already in
-         * @param _node The node to be added as a child
          * @throws Error when trying to add an ancestor of this
          */
-        addChild(_node: Node): void;
+        addChild(_child: Node): void;
         /**
          * Removes the reference to the give node from the list of children
-         * @param _node The node to be removed.
+         * @param _child The node to be removed.
          */
-        removeChild(_node: Node): void;
+        removeChild(_child: Node): void;
         /**
          * Returns the position of the node in the list of children or -1 if not found
-         * @param _node The node to be found.
+         * @param _search The node to be found.
          */
-        findChild(_node: Node): number;
+        findChild(_search: Node): number;
         /**
          * Replaces a child node with another, preserving the position in the list of children
          * @param _replace The node to be replaced
