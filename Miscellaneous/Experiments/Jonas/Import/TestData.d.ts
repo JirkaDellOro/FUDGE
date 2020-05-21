@@ -4,6 +4,7 @@ declare namespace Import {
         translation?: ParticleVectorData;
         rotation?: ParticleVectorData;
         translationWorld?: ParticleVectorData;
+        scaling?: ParticleVectorData;
     }
     interface ParticleData {
         [key: string]: ClosureData;

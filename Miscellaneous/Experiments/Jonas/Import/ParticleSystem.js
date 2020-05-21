@@ -41,8 +41,12 @@ var Import;
                 transformation.rotate(this.evaluateClosureVector(this.effectDefinition.rotation), true);
                 // calculate world translation
                 transformation.translate(this.evaluateClosureVector(this.effectDefinition.translationWorld), false);
+                // calculate scaling
+                // transformation.scale(this.evaluateClosureVector(this.effectDefinition.scaling));
                 // f.Debug.log("trans", transformation.toString());
                 this.particles[index].mtxLocal.set(transformation);
+                // TODO: change scaling so that if not set in json don't affect anything
+                this.particles[index].getComponent(Import.f.ComponentMesh).pivot.scaling = this.evaluateClosureVector(this.effectDefinition.scaling);
             }
         }
         evaluateClosureVector(_closureVector) {
@@ -50,7 +54,7 @@ var Import;
         }
         createParticle(_mesh, _material) {
             let node = new Import.fAid.Node("Particle", Import.f.Matrix4x4.IDENTITY(), _material, _mesh);
-            node.getComponent(Import.f.ComponentMesh).pivot.scale(new Import.f.Vector3(0.05, 0.05, 0.05));
+            // node.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.05, 0.05, 0.05));
             return node;
         }
     }

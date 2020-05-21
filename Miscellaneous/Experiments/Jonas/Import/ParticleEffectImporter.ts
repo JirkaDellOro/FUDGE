@@ -9,6 +9,7 @@ namespace Import {
     translation?: ClosureVector;
     rotation?: ClosureVector;
     translationWorld?: ClosureVector;
+    scaling?: ClosureVector;
   }
 
   export interface ClosureVector {
@@ -63,6 +64,9 @@ namespace Import {
       // parse translation world
       this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
 
+      // parse scaling
+      this.definition.scaling = this.parseVectorData(_data.scaling);
+
       return this.definition;
     }
 
@@ -88,7 +92,7 @@ namespace Import {
     private parseClosure(_data: ClosureData): Function {
       if (!_data) {
         return function (): number {
-          return 0;
+          return null;
         };
       }
 

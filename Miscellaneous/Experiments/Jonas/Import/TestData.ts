@@ -4,6 +4,7 @@ namespace Import {
     translation?: ParticleVectorData;
     rotation?: ParticleVectorData;
     translationWorld?: ParticleVectorData;
+    scaling?: ParticleVectorData;
   }
 
   export interface ParticleData {
@@ -29,6 +30,20 @@ namespace Import {
         "parameters": [
           "time",
           1
+        ]
+      },
+      "inNormTime-1": 
+      {
+        "function": "multiplication",
+        "parameters": [
+          {
+            "function": "addition",
+            "parameters": [
+              "inNormTime",
+              -1
+            ]
+          },
+          0.1
         ]
       }
     },
@@ -75,19 +90,39 @@ namespace Import {
           360
         ]
       }
-    }//,
-    // "translationWorld": {
-    //   "y": {
-    //     "function": "polynomial",
-    //     "parameters": [
-    //       "inNormTime",
-    //       0,
-    //       -2.5,
-    //       0,
-    //       0
-    //     ]
-    //   }
-    // }
+    },
+    "translationWorld": {
+      "y": {
+        "function": "polynomial",
+        "parameters": [
+          "inNormTime",
+          0,
+          -2.5,
+          0,
+          0
+        ]
+      }
+    },
+    "scaling": {
+      "x": {
+        "function": "identity",
+        "parameters": [
+          "inNormTime-1"
+        ]
+      },
+      "y": {
+        "function": "identity",
+        "parameters": [
+          "inNormTime-1"
+        ]
+      },
+      "z": {
+        "function": "identity",
+        "parameters": [
+          "inNormTime-1"
+        ]
+      }
+    }
   };
 
   // export let data: ParticleEffectData = {

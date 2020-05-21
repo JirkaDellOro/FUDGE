@@ -4,27 +4,11 @@
 namespace Import {
   export import f = FudgeCore;
   export import fAid = FudgeAid;
-  // export enum CLOSURE_TYPE {
-  //   ADDITION = "addition",
-  //   MULTIPLICATION = "multiplication",
-  //   DIVISION = "division",
-  //   MODULO = "modulo",
-  //   LINEAR = "linear",
-  //   POLYNOMIAL3 = "polynomial3",
-  //   RANDOM = "random"
-  // }
 
   /**
    * @class Factory class to create closures.
    */
   export class ClosureFactory {
-    // private inputFactors: { [key: string]: number };
-
-    // constructor(_inputFactors: { [key: string]: number }) {
-    //   this.inputFactors = _inputFactors;
-    // }
-    // public static inputFactors: { [key: string]: number };
-    // private static closures: Map<CLOSURE_TYPE, Function> = ClosureFactory.createClosures();
     private static closures: { [key: string]: Function } = {
       "addition": ClosureFactory.createClosureAddition,
       "multiplication": ClosureFactory.createClosureMultiplication,
@@ -33,7 +17,8 @@ namespace Import {
       "linear": ClosureFactory.createClosureLinear,
       "polynomial": ClosureFactory.createClosurePolynomial3,
       "squareRoot": ClosureFactory.createClosureSquareRoot,
-      "random": ClosureFactory.createClosureRandom
+      "random": ClosureFactory.createClosureRandom,
+      "identity": ClosureFactory.createClosureIdentity
     };
 
     /**
@@ -176,7 +161,7 @@ namespace Import {
     }
 
     /**
-     * Creates a closure which will return number chosen from the given array of numbers.
+     * Creates a closure which will return a number chosen from the given array of numbers.
      *  parameter[0] representing the index of the number which will be chosen.
      *  parameter[1] representing the array of random numbers to choose from.
      */
@@ -184,6 +169,18 @@ namespace Import {
       return function (): number {
         f.Debug.group("ClosureRandom");
         let result: number = _parameters[1]()[_parameters[0]()];
+        f.Debug.groupEnd();
+        return result;
+      };
+    }
+
+    /**
+     * Creates a closure which will return the input value
+     */
+    private static createClosureIdentity(_parameters: Function[]): Function {
+      return function (): number {
+        f.Debug.group("ClosureIdentity");
+        let result: number = _parameters[0]();
         f.Debug.groupEnd();
         return result;
       };

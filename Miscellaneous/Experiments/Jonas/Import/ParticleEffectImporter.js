@@ -36,6 +36,8 @@ var Import;
             this.definition.rotation = this.parseVectorData(_data.rotation);
             // parse translation world
             this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
+            // parse scaling
+            this.definition.scaling = this.parseVectorData(_data.scaling);
             return this.definition;
         }
         /**
@@ -59,7 +61,7 @@ var Import;
         parseClosure(_data) {
             if (!_data) {
                 return function () {
-                    return 0;
+                    return null;
                 };
             }
             if (!_data.function) {

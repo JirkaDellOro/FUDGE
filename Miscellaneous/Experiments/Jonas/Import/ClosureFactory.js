@@ -7,15 +7,6 @@ var Import;
 (function (Import) {
     Import.f = FudgeCore;
     Import.fAid = FudgeAid;
-    // export enum CLOSURE_TYPE {
-    //   ADDITION = "addition",
-    //   MULTIPLICATION = "multiplication",
-    //   DIVISION = "division",
-    //   MODULO = "modulo",
-    //   LINEAR = "linear",
-    //   POLYNOMIAL3 = "polynomial3",
-    //   RANDOM = "random"
-    // }
     /**
      * @class Factory class to create closures.
      */
@@ -151,7 +142,7 @@ var Import;
             };
         }
         /**
-         * Creates a closure which will return number chosen from the given array of numbers.
+         * Creates a closure which will return a number chosen from the given array of numbers.
          *  parameter[0] representing the index of the number which will be chosen.
          *  parameter[1] representing the array of random numbers to choose from.
          */
@@ -163,13 +154,18 @@ var Import;
                 return result;
             };
         }
+        /**
+         * Creates a closure which will return the input value
+         */
+        static createClosureIdentity(_parameters) {
+            return function () {
+                Import.f.Debug.group("ClosureIdentity");
+                let result = _parameters[0]();
+                Import.f.Debug.groupEnd();
+                return result;
+            };
+        }
     }
-    // private inputFactors: { [key: string]: number };
-    // constructor(_inputFactors: { [key: string]: number }) {
-    //   this.inputFactors = _inputFactors;
-    // }
-    // public static inputFactors: { [key: string]: number };
-    // private static closures: Map<CLOSURE_TYPE, Function> = ClosureFactory.createClosures();
     ClosureFactory.closures = {
         "addition": ClosureFactory.createClosureAddition,
         "multiplication": ClosureFactory.createClosureMultiplication,
@@ -178,7 +174,8 @@ var Import;
         "linear": ClosureFactory.createClosureLinear,
         "polynomial": ClosureFactory.createClosurePolynomial3,
         "squareRoot": ClosureFactory.createClosureSquareRoot,
-        "random": ClosureFactory.createClosureRandom
+        "random": ClosureFactory.createClosureRandom,
+        "identity": ClosureFactory.createClosureIdentity
     };
     Import.ClosureFactory = ClosureFactory;
 })(Import || (Import = {}));

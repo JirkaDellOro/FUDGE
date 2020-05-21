@@ -58,8 +58,14 @@ namespace Import {
         // calculate world translation
         transformation.translate(this.evaluateClosureVector(this.effectDefinition.translationWorld), false);
 
+        // calculate scaling
+        // transformation.scale(this.evaluateClosureVector(this.effectDefinition.scaling));
+
         // f.Debug.log("trans", transformation.toString());
         this.particles[index].mtxLocal.set(transformation);
+
+        // TODO: change scaling so that if not set in json don't affect anything
+        this.particles[index].getComponent(f.ComponentMesh).pivot.scaling = this.evaluateClosureVector(this.effectDefinition.scaling);
       }
     }
 
@@ -69,7 +75,7 @@ namespace Import {
 
     private createParticle(_mesh: f.Mesh, _material: f.Material): f.Node {
       let node: f.Node = new fAid.Node("Particle", f.Matrix4x4.IDENTITY(), _material, _mesh);
-      node.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.05, 0.05, 0.05));
+      // node.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.05, 0.05, 0.05));
       return node;
     }
   }
