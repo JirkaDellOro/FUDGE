@@ -7,23 +7,18 @@ declare namespace Import {
         scaling?: ParticleVectorData;
     }
     interface ParticleData {
-        [key: string]: ClosureDataa;
+        [key: string]: ClosureData;
     }
     interface ParticleVectorData {
-        x?: ClosureDataa;
-        y?: ClosureDataa;
-        z?: ClosureDataa;
-    }
-    interface ClosureData {
-        function: string;
-        parameters: (ClosureData | string | number)[];
-        preEvaluate?: boolean;
+        x?: ClosureData;
+        y?: ClosureData;
+        z?: ClosureData;
     }
     interface ClosureDataFunction {
         function: string;
-        parameters: ClosureDataa[];
+        parameters: ClosureData[];
         preEvaluate?: boolean;
     }
-    type ClosureDataa = ClosureDataFunction | string | number;
+    type ClosureData = ClosureDataFunction | string | number;
     let data: ParticleEffectData;
 }

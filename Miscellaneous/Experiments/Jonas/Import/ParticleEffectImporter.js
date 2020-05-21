@@ -59,6 +59,7 @@ var Import;
          * @param _data the closure data to parse recursively
          */
         parseClosure(_data) {
+            // TODO: Refactor handling of undefined vlaues
             if (!_data) {
                 return function () {
                     return null;

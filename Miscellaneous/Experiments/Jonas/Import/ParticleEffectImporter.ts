@@ -89,7 +89,8 @@ namespace Import {
      * Parse the given closure data recursivley. If _data is undefined return a function which returns 0.
      * @param _data the closure data to parse recursively
      */
-    private parseClosure(_data: ClosureDataa): Function {
+    private parseClosure(_data: ClosureData): Function {
+      // TODO: Refactor handling of undefined vlaues
       if (!_data) {
         return function (): number {
           return null;
@@ -134,7 +135,7 @@ namespace Import {
             f.Debug.error(`"${_data}" is not defined`);
             return null;
           }
-          
+
         case "number":
           return function (): number {
             f.Debug.log("Constant", _data);

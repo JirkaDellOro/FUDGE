@@ -8,28 +8,22 @@ namespace Import {
   }
 
   export interface ParticleData {
-    [key: string]: ClosureDataa;
+    [key: string]: ClosureData;
   }
 
   export interface ParticleVectorData {
-    x?: ClosureDataa;
-    y?: ClosureDataa;
-    z?: ClosureDataa;
-  }
-
-  export interface ClosureData {
-    function: string;
-    parameters: (ClosureData | string | number)[];
-    preEvaluate?: boolean;
+    x?: ClosureData;
+    y?: ClosureData;
+    z?: ClosureData;
   }
 
   export interface ClosureDataFunction {
     function: string;
-    parameters: ClosureDataa[];
+    parameters: ClosureData[];
     preEvaluate?: boolean;
   }
 
-  export type ClosureDataa = ClosureDataFunction | string | number;
+  export type ClosureData = ClosureDataFunction | string | number;
 
   // export let data: ParticleEffectData = {
   //   "translation": {
