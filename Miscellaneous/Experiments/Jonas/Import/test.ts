@@ -1,8 +1,4 @@
 namespace Import {
-  export interface StoredValues {
-    [key: string]: number;
-  }
-
   test();
 
   function test(): void {

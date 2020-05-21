@@ -41,7 +41,7 @@ namespace Import {
       // pre parse storage and initialize stored values
       for (const key in _data.storage) {
         if (key in this.storedValues) {
-          console.error("Predfined varaiables can not be overwritten");
+          f.Debug.error("Predefined variables can not be overwritten");
           return null;
         }
         else
@@ -93,7 +93,7 @@ namespace Import {
       }
 
       if (!_data.function) {
-        console.error("Error, no operation defined");
+        f.Debug.error("Error, no operation defined");
         return null;
       }
 
@@ -108,24 +108,25 @@ namespace Import {
           case "string":
             if (param in this.storedValues) {
               parameters.push(() => {
-                console.log("Variable", `"${param}"`, this.storedValues[<string>param]);
+                f.Debug.log("Variable", `"${param}"`, this.storedValues[<string>param]);
                 return this.storedValues[<string>param];
               });
             }
             else {
-              console.error(`"${param}" is not defined`);
+              f.Debug.error(`"${param}" is not defined`);
               return null;
             }
             break;
           case "number":
             parameters.push(function (): number {
-              console.log("Constant", param);
+              f.Debug.log("Constant", param);
               return <number>param;
             });
             break;
         }
       }
 
+      // random closure needs to have the random numbers array as a parameter
       if (_data.function == "random") {
         parameters.push(() => {
           return this.randomNumbers;
@@ -136,10 +137,10 @@ namespace Import {
 
       // pre evaluate closure so that only the result will be saved
       if (_data.preEvaluate) {
-        console.log("PreEvaluate");
+        f.Debug.log("PreEvaluate");
         let result: number = closure();
         closure = () => {
-          console.log("preEvaluated", result);
+          f.Debug.log("preEvaluated", result);
           return result;
         };
       }

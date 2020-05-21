@@ -1,13 +1,7 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
-///<reference types="../../../../Aid/Build/FudgeAid"/>
-
 namespace Import {
-  import f = FudgeCore;
-  import fAid = FudgeAid;
-
-  // export interface StoredValues {
-  //   [key: string]: number;
-  // }
+  export interface StoredValues {
+    [key: string]: number;
+  }
 
   export class ParticleSystem extends f.Node {
     private particles: f.Node[];
@@ -44,10 +38,10 @@ namespace Import {
 
       // evaluate storage
       for (const key in this.effectDefinition.storage) {
-        console.groupCollapsed(`Evaluate storage "${key}"`);
+        // f.Debug.groupCollapsed(`Evaluate storage "${key}"`);
         this.storedValues[key] = this.effectDefinition.storage[key]();
-        console.log(`Stored "${key}"`, this.storedValues[key]);
-        console.groupEnd();
+        // f.Debug.log(`Stored "${key}"`, this.storedValues[key]);
+        // f.Debug.groupEnd();
       }
 
       for (let index: number = 0, length: number = this.particles.length; index < length; ++index) {
@@ -64,7 +58,7 @@ namespace Import {
         // calculate world translation
         transformation.translate(this.evaluateClosureVector(this.effectDefinition.translationWorld), false);
 
-        console.log("trans", transformation.toString());
+        // f.Debug.log("trans", transformation.toString());
         this.particles[index].mtxLocal.set(transformation);
       }
     }

@@ -1,10 +1,8 @@
 "use strict";
 var Import;
 (function (Import) {
-    var f = FudgeCore;
-    var fAid = FudgeAid;
     window.addEventListener("load", hndLoad);
-    let root = new f.Node("Root");
+    let root = new Import.f.Node("Root");
     let viewport;
     let camera;
     let speedCameraRotation = 0.2;
@@ -14,41 +12,42 @@ var Import;
     function hndLoad(_event) {
         input = document.getElementById("particleNum");
         const canvas = document.querySelector("canvas");
-        f.RenderManager.initialize(false, true);
-        f.Debug.log("Canvas", canvas);
+        Import.f.RenderManager.initialize(false, true);
+        Import.f.Debug.log("Canvas", canvas);
+        Import.f.Debug.setFilter(Import.f.DebugConsole, Import.f.DEBUG_FILTER.NONE);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
         // setup orbiting camera
-        camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
+        camera = new Import.fAid.CameraOrbit(new Import.f.ComponentCamera(), 4);
         root.addChild(camera);
         // setup coordinate axes
-        let coordinateSystem = new fAid.NodeCoordinateSystem("Coordinates", f.Matrix4x4.SCALING(new f.Vector3(1, 1, 1)));
+        let coordinateSystem = new Import.fAid.NodeCoordinateSystem("Coordinates", Import.f.Matrix4x4.SCALING(new Import.f.Vector3(1, 1, 1)));
         root.addChild(coordinateSystem);
         // setup viewport
-        viewport = new f.Viewport();
+        viewport = new Import.f.Viewport();
         viewport.initialize("Viewport", root, camera.component, canvas);
-        f.Debug.log("Viewport", viewport);
+        Import.f.Debug.log("Viewport", viewport);
         // setup event handling
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
         viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
         viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
         viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
         // setup particles
-        let mesh = new f.MeshCube();
-        let material = new f.Material("Alpha", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("YELLOW")));
-        root.addChild(new f.Node("Particles"));
+        let mesh = new Import.f.MeshCube();
+        let material = new Import.f.Material("Alpha", Import.f.ShaderUniColor, new Import.f.CoatColored(Import.f.Color.CSS("YELLOW")));
+        root.addChild(new Import.f.Node("Particles"));
         // setup input
         input.addEventListener("input", (_event) => {
-            let newParticleSystem = new Import.ParticleSystem(mesh, material, f.Matrix4x4.IDENTITY(), input.valueAsNumber);
+            let newParticleSystem = new Import.ParticleSystem(mesh, material, Import.f.Matrix4x4.IDENTITY(), input.valueAsNumber);
             root.replaceChild(getParticleSystem(), newParticleSystem);
             particleSystem = getParticleSystem();
         });
         input.dispatchEvent(new Event("input"));
-        f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
+        Import.f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        Import.f.Loop.start(Import.f.LOOP_MODE.TIME_GAME, 30);
         function update(_event) {
-            let time = f.Time.game.get() / 1000;
+            let time = Import.f.Time.game.get() / 1000;
             particleSystem.update(time);
             viewport.draw();
         }

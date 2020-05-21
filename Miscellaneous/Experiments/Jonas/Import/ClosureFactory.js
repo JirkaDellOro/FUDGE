@@ -1,6 +1,12 @@
 "use strict";
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Aid/Build/FudgeAid"/>
 var Import;
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Aid/Build/FudgeAid"/>
 (function (Import) {
+    Import.f = FudgeCore;
+    Import.fAid = FudgeAid;
     // export enum CLOSURE_TYPE {
     //   ADDITION = "addition",
     //   MULTIPLICATION = "multiplication",
@@ -25,7 +31,7 @@ var Import;
             if (_function in this.closures)
                 return closure(_parameters);
             else {
-                console.error(`"${_function}" is not an operation`);
+                Import.f.Debug.error(`"${_function}" is not an operation`);
                 return null;
             }
         }
@@ -46,12 +52,12 @@ var Import;
          */
         static createClosureAddition(_parameters) {
             return function () {
-                console.group("ClosureAddition");
+                Import.f.Debug.group("ClosureAddition");
                 let result = 0;
                 for (const param of _parameters) {
                     result += param();
                 }
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -61,12 +67,12 @@ var Import;
           */
         static createClosureMultiplication(_parameters) {
             return function () {
-                console.group("ClosureMultiplication");
+                Import.f.Debug.log("ClosureMultiplication");
                 let result = 1;
                 for (const param of _parameters) {
                     result *= param();
                 }
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -76,9 +82,9 @@ var Import;
          */
         static createClosureDivision(_parameters) {
             return function () {
-                console.group("ClosureDivision");
+                Import.f.Debug.group("ClosureDivision");
                 let result = _parameters[0]() / _parameters[1]();
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -88,9 +94,9 @@ var Import;
          */
         static createClosureModulo(_parameters) {
             return function () {
-                console.group("ClosureModulo");
+                Import.f.Debug.group("ClosureModulo");
                 let result = _parameters[0]() % _parameters[1]();
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -105,11 +111,11 @@ var Import;
             let yStart = _parameters[3]();
             let yEnd = _parameters[4]();
             return function () {
-                console.group("ClosureLinear");
+                Import.f.Debug.group("ClosureLinear");
                 let x = _parameters[0]();
                 let y = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
-                console.log(xEnd);
-                console.groupEnd();
+                Import.f.Debug.log(xEnd);
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
@@ -124,10 +130,10 @@ var Import;
             let c = _parameters[3]();
             let d = _parameters[4]();
             return function () {
-                console.group("ClosurePolynomial3");
+                Import.f.Debug.group("ClosurePolynomial3");
                 let x = _parameters[0]();
                 let y = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
@@ -137,10 +143,10 @@ var Import;
          */
         static createClosureSquareRoot(_parameters) {
             return function () {
-                console.group("ClosureSquareRoot");
+                Import.f.Debug.group("ClosureSquareRoot");
                 let x = _parameters[0]();
                 let y = Math.sqrt(x);
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
@@ -151,9 +157,9 @@ var Import;
          */
         static createClosureRandom(_parameters) {
             return function () {
-                console.group("ClosureRandom");
+                Import.f.Debug.group("ClosureRandom");
                 let result = _parameters[1]()[_parameters[0]()];
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }

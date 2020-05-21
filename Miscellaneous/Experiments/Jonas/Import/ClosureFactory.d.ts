@@ -1,4 +1,8 @@
+/// <reference types="../../../../core/build/fudgecore" />
+/// <reference types="../../../../aid/build/fudgeaid" />
 declare namespace Import {
+    export import f = FudgeCore;
+    export import fAid = FudgeAid;
     /**
      * @class Factory class to create closures.
      */

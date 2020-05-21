@@ -1,7 +1,4 @@
 namespace Import {
-  import f = FudgeCore;
-  import fAid = FudgeAid;
-
   window.addEventListener("load", hndLoad);
 
   let root: f.Node = new f.Node("Root");
@@ -19,6 +16,7 @@ namespace Import {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     f.RenderManager.initialize(false, true);
     f.Debug.log("Canvas", canvas);
+    f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.NONE);
 
     // enable unlimited mouse-movement (user needs to click on canvas first)
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
