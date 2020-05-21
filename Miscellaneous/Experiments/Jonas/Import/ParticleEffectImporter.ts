@@ -89,67 +89,58 @@ namespace Import {
      * Parse the given closure data recursivley. If _data is undefined return a function which returns 0.
      * @param _data the closure data to parse recursively
      */
-    private parseClosure(_data: ClosureData): Function {
+    private parseClosure(_data: ClosureDataa): Function {
       if (!_data) {
         return function (): number {
           return null;
         };
       }
 
-      if (!_data.function) {
-        f.Debug.error("Error, no operation defined");
-        return null;
-      }
+      switch (typeof _data) {
+        case "object":
+          let parameters: Function[] = [];
+          for (let param of _data.parameters) {
+            parameters.push(this.parseClosure(param));
+          }
 
-      let parameters: Function[] = [];
-
-      for (let param of _data.parameters) {
-        switch (typeof (param)) {
-          case "object":
-            let result: Function = this.parseClosure(<ClosureData>param);
-            parameters.push(result);
-            break;
-          case "string":
-            if (param in this.storedValues) {
-              parameters.push(() => {
-                f.Debug.log("Variable", `"${param}"`, this.storedValues[<string>param]);
-                return this.storedValues[<string>param];
-              });
-            }
-            else {
-              f.Debug.error(`"${param}" is not defined`);
-              return null;
-            }
-            break;
-          case "number":
-            parameters.push(function (): number {
-              f.Debug.log("Constant", param);
-              return <number>param;
+          // random closure needs to have the random numbers array as a parameter
+          if (_data.function == "random") {
+            parameters.push(() => {
+              return this.randomNumbers;
             });
-            break;
-        }
+          }
+
+          let closure: Function = ClosureFactory.getClosure(_data.function, parameters);
+
+          // pre evaluate closure so that only the result will be saved
+          if (_data.preEvaluate) {
+            f.Debug.log("PreEvaluate");
+            let result: number = closure();
+            closure = () => {
+              f.Debug.log("preEvaluated", result);
+              return result;
+            };
+          }
+          return closure;
+
+        case "string":
+          if (_data in this.storedValues) {
+            return () => {
+              f.Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
+              return this.storedValues[<string>_data];
+            };
+          }
+          else {
+            f.Debug.error(`"${_data}" is not defined`);
+            return null;
+          }
+          
+        case "number":
+          return function (): number {
+            f.Debug.log("Constant", _data);
+            return <number>_data;
+          };
       }
-
-      // random closure needs to have the random numbers array as a parameter
-      if (_data.function == "random") {
-        parameters.push(() => {
-          return this.randomNumbers;
-        });
-      }
-
-      let closure: Function = ClosureFactory.getClosure(_data.function, parameters);
-
-      // pre evaluate closure so that only the result will be saved
-      if (_data.preEvaluate) {
-        f.Debug.log("PreEvaluate");
-        let result: number = closure();
-        closure = () => {
-          f.Debug.log("preEvaluated", result);
-          return result;
-        };
-      }
-
-      return closure;
     }
   }
 }

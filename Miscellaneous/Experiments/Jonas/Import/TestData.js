@@ -1,6 +1,19 @@
 "use strict";
 var Import;
 (function (Import) {
+    // export let data: ParticleEffectData = {
+    //   "translation": {
+    //     "x": 1,
+    //     "y": "index",
+    //     "z": {
+    //       "function": "modulo",
+    //       "parameters": [
+    //         "time",
+    //         1
+    //       ]
+    //     }
+    //   }
+    // };
     Import.data = {
         "storage": {
             "inNormTime": {
@@ -80,24 +93,9 @@ var Import;
             }
         },
         "scaling": {
-            "x": {
-                "function": "identity",
-                "parameters": [
-                    "inNormTime-1"
-                ]
-            },
-            "y": {
-                "function": "identity",
-                "parameters": [
-                    "inNormTime-1"
-                ]
-            },
-            "z": {
-                "function": "identity",
-                "parameters": [
-                    "inNormTime-1"
-                ]
-            }
+            "x": "inNormTime-1",
+            "y": "inNormTime-1",
+            "z": "inNormTime-1"
         }
     };
     // export let data: ParticleEffectData = {

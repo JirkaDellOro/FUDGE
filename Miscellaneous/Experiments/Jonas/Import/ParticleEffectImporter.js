@@ -64,54 +64,46 @@ var Import;
                     return null;
                 };
             }
-            if (!_data.function) {
-                Import.f.Debug.error("Error, no operation defined");
-                return null;
-            }
-            let parameters = [];
-            for (let param of _data.parameters) {
-                switch (typeof (param)) {
-                    case "object":
-                        let result = this.parseClosure(param);
-                        parameters.push(result);
-                        break;
-                    case "string":
-                        if (param in this.storedValues) {
-                            parameters.push(() => {
-                                Import.f.Debug.log("Variable", `"${param}"`, this.storedValues[param]);
-                                return this.storedValues[param];
-                            });
-                        }
-                        else {
-                            Import.f.Debug.error(`"${param}" is not defined`);
-                            return null;
-                        }
-                        break;
-                    case "number":
-                        parameters.push(function () {
-                            Import.f.Debug.log("Constant", param);
-                            return param;
+            switch (typeof _data) {
+                case "object":
+                    let parameters = [];
+                    for (let param of _data.parameters) {
+                        parameters.push(this.parseClosure(param));
+                    }
+                    // random closure needs to have the random numbers array as a parameter
+                    if (_data.function == "random") {
+                        parameters.push(() => {
+                            return this.randomNumbers;
                         });
-                        break;
-                }
+                    }
+                    let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
+                    // pre evaluate closure so that only the result will be saved
+                    if (_data.preEvaluate) {
+                        Import.f.Debug.log("PreEvaluate");
+                        let result = closure();
+                        closure = () => {
+                            Import.f.Debug.log("preEvaluated", result);
+                            return result;
+                        };
+                    }
+                    return closure;
+                case "string":
+                    if (_data in this.storedValues) {
+                        return () => {
+                            Import.f.Debug.log("Variable", `"${_data}"`, this.storedValues[_data]);
+                            return this.storedValues[_data];
+                        };
+                    }
+                    else {
+                        Import.f.Debug.error(`"${_data}" is not defined`);
+                        return null;
+                    }
+                case "number":
+                    return function () {
+                        Import.f.Debug.log("Constant", _data);
+                        return _data;
+                    };
             }
-            // random closure needs to have the random numbers array as a parameter
-            if (_data.function == "random") {
-                parameters.push(() => {
-                    return this.randomNumbers;
-                });
-            }
-            let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
-            // pre evaluate closure so that only the result will be saved
-            if (_data.preEvaluate) {
-                Import.f.Debug.log("PreEvaluate");
-                let result = closure();
-                closure = () => {
-                    Import.f.Debug.log("preEvaluated", result);
-                    return result;
-                };
-            }
-            return closure;
         }
     }
     Import.ParticleEffectImporter = ParticleEffectImporter;

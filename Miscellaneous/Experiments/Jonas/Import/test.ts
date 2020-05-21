@@ -43,6 +43,7 @@ namespace Import {
 
     // iterration 2
     storedValues["time"] = 2.3;
+    storedValues["index"] = 1;
     storedValues["size"] = 3;
 
     // evaluate storage

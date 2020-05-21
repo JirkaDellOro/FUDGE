@@ -8,13 +8,13 @@ namespace Import {
   }
 
   export interface ParticleData {
-    [key: string]: ClosureData;
+    [key: string]: ClosureDataa;
   }
 
   export interface ParticleVectorData {
-    x?: ClosureData;
-    y?: ClosureData;
-    z?: ClosureData;
+    x?: ClosureDataa;
+    y?: ClosureDataa;
+    z?: ClosureDataa;
   }
 
   export interface ClosureData {
@@ -22,6 +22,28 @@ namespace Import {
     parameters: (ClosureData | string | number)[];
     preEvaluate?: boolean;
   }
+
+  export interface ClosureDataFunction {
+    function: string;
+    parameters: ClosureDataa[];
+    preEvaluate?: boolean;
+  }
+
+  export type ClosureDataa = ClosureDataFunction | string | number;
+
+  // export let data: ParticleEffectData = {
+  //   "translation": {
+  //     "x": 1,
+  //     "y": "index",
+  //     "z": {
+  //       "function": "modulo",
+  //       "parameters": [
+  //         "time",
+  //         1
+  //       ]
+  //     }
+  //   }
+  // };
 
   export let data: ParticleEffectData = {
     "storage": {
@@ -104,24 +126,9 @@ namespace Import {
       }
     },
     "scaling": {
-      "x": {
-        "function": "identity",
-        "parameters": [
-          "inNormTime-1"
-        ]
-      },
-      "y": {
-        "function": "identity",
-        "parameters": [
-          "inNormTime-1"
-        ]
-      },
-      "z": {
-        "function": "identity",
-        "parameters": [
-          "inNormTime-1"
-        ]
-      }
+      "x": "inNormTime-1",
+      "y": "inNormTime-1",
+      "z": "inNormTime-1"
     }
   };
 
