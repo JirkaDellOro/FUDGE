@@ -470,10 +470,9 @@ namespace FudgeCore {
      * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector 
      */
     public lookAt(_target: Vector3, _up?: Vector3): void {
-      if (!_up) {
-        _up = Vector3.Y();
-        _up.transform(this, false);
-      }
+      if (!_up) 
+        _up = this.getY();
+        
       const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up); // TODO: Handle rotation around z-axis
       this.set(matrix);
       Recycler.store(matrix);
@@ -644,6 +643,22 @@ namespace FudgeCore {
      */
     public get(): Float32Array {
       return new Float32Array(this.data);
+    }
+
+    public getX(): Vector3 {
+      let result: Vector3 = Recycler.get(Vector3);
+      result.set(this.data[0], this.data[1], this.data[2]);
+      return result;
+    }
+    public getY(): Vector3 {
+      let result: Vector3 = Recycler.get(Vector3);
+      result.set(this.data[4], this.data[5], this.data[6]);
+      return result;
+    }
+    public getZ(): Vector3 {
+      let result: Vector3 = Recycler.get(Vector3);
+      result.set(this.data[8], this.data[9], this.data[10]);
+      return result;
     }
 
     /**

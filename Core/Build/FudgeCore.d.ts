@@ -2553,6 +2553,9 @@ declare namespace FudgeCore {
          * Return the elements of this matrix as a Float32Array
          */
         get(): Float32Array;
+        getX(): Vector3;
+        getY(): Vector3;
+        getZ(): Vector3;
         /**
          * Return a copy of this
          */
