@@ -1,25 +1,14 @@
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Aid/Build/FudgeAid"/>
+
 namespace Import {
-  // export enum CLOSURE_TYPE {
-  //   ADDITION = "addition",
-  //   MULTIPLICATION = "multiplication",
-  //   DIVISION = "division",
-  //   MODULO = "modulo",
-  //   LINEAR = "linear",
-  //   POLYNOMIAL3 = "polynomial3",
-  //   RANDOM = "random"
-  // }
+  export import f = FudgeCore;
+  export import fAid = FudgeAid;
 
   /**
    * @class Factory class to create closures.
    */
   export class ClosureFactory {
-    // private inputFactors: { [key: string]: number };
-
-    // constructor(_inputFactors: { [key: string]: number }) {
-    //   this.inputFactors = _inputFactors;
-    // }
-    // public static inputFactors: { [key: string]: number };
-    // private static closures: Map<CLOSURE_TYPE, Function> = ClosureFactory.createClosures();
     private static closures: { [key: string]: Function } = {
       "addition": ClosureFactory.createClosureAddition,
       "multiplication": ClosureFactory.createClosureMultiplication,
@@ -28,7 +17,8 @@ namespace Import {
       "linear": ClosureFactory.createClosureLinear,
       "polynomial": ClosureFactory.createClosurePolynomial3,
       "squareRoot": ClosureFactory.createClosureSquareRoot,
-      "random": ClosureFactory.createClosureRandom
+      "random": ClosureFactory.createClosureRandom,
+      "identity": ClosureFactory.createClosureIdentity
     };
 
     /**
@@ -42,7 +32,7 @@ namespace Import {
       if (_function in this.closures)
         return closure(_parameters);
       else {
-        console.error(`"${_function}" is not an operation`);
+        f.Debug.error(`"${_function}" is not an operation`);
         return null;
       }
     }
@@ -65,12 +55,12 @@ namespace Import {
      */
     private static createClosureAddition(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureAddition");
+        f.Debug.group("ClosureAddition");
         let result: number = 0;
         for (const param of _parameters) {
           result += param();
         }
-        console.groupEnd();
+        f.Debug.groupEnd();
         return result;
       };
     }
@@ -81,12 +71,12 @@ namespace Import {
       */
     private static createClosureMultiplication(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureMultiplication");
+        f.Debug.log("ClosureMultiplication");
         let result: number = 1;
         for (const param of _parameters) {
           result *= param();
         }
-        console.groupEnd();
+        f.Debug.groupEnd();
         return result;
       };
     }
@@ -97,9 +87,9 @@ namespace Import {
      */
     private static createClosureDivision(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureDivision");
+        f.Debug.group("ClosureDivision");
         let result: number = _parameters[0]() / _parameters[1]();
-        console.groupEnd();
+        f.Debug.groupEnd();
         return result;
       };
     }
@@ -110,9 +100,9 @@ namespace Import {
      */
     private static createClosureModulo(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureModulo");
+        f.Debug.group("ClosureModulo");
         let result: number = _parameters[0]() % _parameters[1]();
-        console.groupEnd();
+        f.Debug.groupEnd();
         return result;
       };
     }
@@ -128,11 +118,11 @@ namespace Import {
       let yStart: number = _parameters[3]();
       let yEnd: number = _parameters[4]();
       return function (): number {
-        console.group("ClosureLinear");
+        f.Debug.group("ClosureLinear");
         let x: number = _parameters[0]();
         let y: number = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
-        console.log(xEnd);
-        console.groupEnd();
+        f.Debug.log(xEnd);
+        f.Debug.groupEnd();
         return y;
       };
     }
@@ -148,10 +138,10 @@ namespace Import {
       let c: number = _parameters[3]();
       let d: number = _parameters[4]();
       return function (): number {
-        console.group("ClosurePolynomial3");
+        f.Debug.group("ClosurePolynomial3");
         let x: number = _parameters[0]();
         let y: number = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
-        console.groupEnd();
+        f.Debug.groupEnd();
         return y;
       };
     }
@@ -162,24 +152,36 @@ namespace Import {
      */
     private static createClosureSquareRoot(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureSquareRoot");
+        f.Debug.group("ClosureSquareRoot");
         let x: number = _parameters[0]();
         let y: number = Math.sqrt(x);
-        console.groupEnd();
+        f.Debug.groupEnd();
         return y;
       };
     }
 
     /**
-     * Creates a closure which will return number chosen from the given array of numbers.
+     * Creates a closure which will return a number chosen from the given array of numbers.
      *  parameter[0] representing the index of the number which will be chosen.
      *  parameter[1] representing the array of random numbers to choose from.
      */
     private static createClosureRandom(_parameters: Function[]): Function {
       return function (): number {
-        console.group("ClosureRandom");
+        f.Debug.group("ClosureRandom");
         let result: number = _parameters[1]()[_parameters[0]()];
-        console.groupEnd();
+        f.Debug.groupEnd();
+        return result;
+      };
+    }
+
+    /**
+     * Creates a closure which will return the input value
+     */
+    private static createClosureIdentity(_parameters: Function[]): Function {
+      return function (): number {
+        f.Debug.group("ClosureIdentity");
+        let result: number = _parameters[0]();
+        f.Debug.groupEnd();
         return result;
       };
     }

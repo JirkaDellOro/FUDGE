@@ -1,4 +1,8 @@
+/// <reference types="../../../../core/build/fudgecore" />
+/// <reference types="../../../../aid/build/fudgeaid" />
 declare namespace Import {
+    export import f = FudgeCore;
+    export import fAid = FudgeAid;
     /**
      * @class Factory class to create closures.
      */
@@ -49,10 +53,14 @@ declare namespace Import {
          */
         private static createClosureSquareRoot;
         /**
-         * Creates a closure which will return number chosen from the given array of numbers.
+         * Creates a closure which will return a number chosen from the given array of numbers.
          *  parameter[0] representing the index of the number which will be chosen.
          *  parameter[1] representing the array of random numbers to choose from.
          */
         private static createClosureRandom;
+        /**
+         * Creates a closure which will return the input value
+         */
+        private static createClosureIdentity;
     }
 }

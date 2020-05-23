@@ -19,7 +19,7 @@ var Import;
             // pre parse storage and initialize stored values
             for (const key in _data.storage) {
                 if (key in this.storedValues) {
-                    console.error("Predfined varaiables can not be overwritten");
+                    Import.f.Debug.error("Predefined variables can not be overwritten");
                     return null;
                 }
                 else
@@ -36,6 +36,8 @@ var Import;
             this.definition.rotation = this.parseVectorData(_data.rotation);
             // parse translation world
             this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
+            // parse scaling
+            this.definition.scaling = this.parseVectorData(_data.scaling);
             return this.definition;
         }
         /**
@@ -57,58 +59,52 @@ var Import;
          * @param _data the closure data to parse recursively
          */
         parseClosure(_data) {
+            // TODO: Refactor handling of undefined vlaues
             if (!_data) {
                 return function () {
-                    return 0;
+                    return null;
                 };
             }
-            if (!_data.function) {
-                console.error("Error, no operation defined");
-                return null;
-            }
-            let parameters = [];
-            for (let param of _data.parameters) {
-                switch (typeof (param)) {
-                    case "object":
-                        let result = this.parseClosure(param);
-                        parameters.push(result);
-                        break;
-                    case "string":
-                        if (param in this.storedValues) {
-                            parameters.push(() => {
-                                console.log("Variable", `"${param}"`, this.storedValues[param]);
-                                return this.storedValues[param];
-                            });
-                        }
-                        else {
-                            console.error(`"${param}" is not defined`);
-                            return null;
-                        }
-                        break;
-                    case "number":
-                        parameters.push(function () {
-                            console.log("Constant", param);
-                            return param;
+            switch (typeof _data) {
+                case "object":
+                    let parameters = [];
+                    for (let param of _data.parameters) {
+                        parameters.push(this.parseClosure(param));
+                    }
+                    // random closure needs to have the random numbers array as a parameter
+                    if (_data.function == "random") {
+                        parameters.push(() => {
+                            return this.randomNumbers;
                         });
-                        break;
-                }
+                    }
+                    let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
+                    // pre evaluate closure so that only the result will be saved
+                    if (_data.preEvaluate) {
+                        Import.f.Debug.log("PreEvaluate");
+                        let result = closure();
+                        closure = () => {
+                            Import.f.Debug.log("preEvaluated", result);
+                            return result;
+                        };
+                    }
+                    return closure;
+                case "string":
+                    if (_data in this.storedValues) {
+                        return () => {
+                            Import.f.Debug.log("Variable", `"${_data}"`, this.storedValues[_data]);
+                            return this.storedValues[_data];
+                        };
+                    }
+                    else {
+                        Import.f.Debug.error(`"${_data}" is not defined`);
+                        return null;
+                    }
+                case "number":
+                    return function () {
+                        Import.f.Debug.log("Constant", _data);
+                        return _data;
+                    };
             }
-            if (_data.function == "random") {
-                parameters.push(() => {
-                    return this.randomNumbers;
-                });
-            }
-            let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
-            // pre evaluate closure so that only the result will be saved
-            if (_data.preEvaluate) {
-                console.log("PreEvaluate");
-                let result = closure();
-                closure = () => {
-                    console.log("preEvaluated", result);
-                    return result;
-                };
-            }
-            return closure;
         }
     }
     Import.ParticleEffectImporter = ParticleEffectImporter;

@@ -4,6 +4,7 @@ declare namespace Import {
         translation?: ParticleVectorData;
         rotation?: ParticleVectorData;
         translationWorld?: ParticleVectorData;
+        scaling?: ParticleVectorData;
     }
     interface ParticleData {
         [key: string]: ClosureData;
@@ -13,10 +14,11 @@ declare namespace Import {
         y?: ClosureData;
         z?: ClosureData;
     }
-    interface ClosureData {
+    interface ClosureDataFunction {
         function: string;
-        parameters: (ClosureData | string | number)[];
+        parameters: ClosureData[];
         preEvaluate?: boolean;
     }
+    type ClosureData = ClosureDataFunction | string | number;
     let data: ParticleEffectData;
 }

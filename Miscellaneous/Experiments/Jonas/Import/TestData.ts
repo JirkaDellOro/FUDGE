@@ -4,6 +4,7 @@ namespace Import {
     translation?: ParticleVectorData;
     rotation?: ParticleVectorData;
     translationWorld?: ParticleVectorData;
+    scaling?: ParticleVectorData;
   }
 
   export interface ParticleData {
@@ -16,11 +17,27 @@ namespace Import {
     z?: ClosureData;
   }
 
-  export interface ClosureData {
+  export interface ClosureDataFunction {
     function: string;
-    parameters: (ClosureData | string | number)[];
+    parameters: ClosureData[];
     preEvaluate?: boolean;
   }
+
+  export type ClosureData = ClosureDataFunction | string | number;
+
+  // export let data: ParticleEffectData = {
+  //   "translation": {
+  //     "x": 1,
+  //     "y": "index",
+  //     "z": {
+  //       "function": "modulo",
+  //       "parameters": [
+  //         "time",
+  //         1
+  //       ]
+  //     }
+  //   }
+  // };
 
   export let data: ParticleEffectData = {
     "storage": {
@@ -29,6 +46,20 @@ namespace Import {
         "parameters": [
           "time",
           1
+        ]
+      },
+      "inNormTime-1": 
+      {
+        "function": "multiplication",
+        "parameters": [
+          {
+            "function": "addition",
+            "parameters": [
+              "inNormTime",
+              -1
+            ]
+          },
+          0.1
         ]
       }
     },
@@ -75,19 +106,24 @@ namespace Import {
           360
         ]
       }
-    }//,
-    // "translationWorld": {
-    //   "y": {
-    //     "function": "polynomial",
-    //     "parameters": [
-    //       "inNormTime",
-    //       0,
-    //       -2.5,
-    //       0,
-    //       0
-    //     ]
-    //   }
-    // }
+    },
+    "translationWorld": {
+      "y": {
+        "function": "polynomial",
+        "parameters": [
+          "inNormTime",
+          0,
+          -2.5,
+          0,
+          0
+        ]
+      }
+    },
+    "scaling": {
+      "x": "inNormTime-1",
+      "y": "inNormTime-1",
+      "z": "inNormTime-1"
+    }
   };
 
   // export let data: ParticleEffectData = {

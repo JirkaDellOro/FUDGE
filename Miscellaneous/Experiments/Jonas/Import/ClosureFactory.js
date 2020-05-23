@@ -1,15 +1,12 @@
 "use strict";
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Aid/Build/FudgeAid"/>
 var Import;
+///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Aid/Build/FudgeAid"/>
 (function (Import) {
-    // export enum CLOSURE_TYPE {
-    //   ADDITION = "addition",
-    //   MULTIPLICATION = "multiplication",
-    //   DIVISION = "division",
-    //   MODULO = "modulo",
-    //   LINEAR = "linear",
-    //   POLYNOMIAL3 = "polynomial3",
-    //   RANDOM = "random"
-    // }
+    Import.f = FudgeCore;
+    Import.fAid = FudgeAid;
     /**
      * @class Factory class to create closures.
      */
@@ -25,7 +22,7 @@ var Import;
             if (_function in this.closures)
                 return closure(_parameters);
             else {
-                console.error(`"${_function}" is not an operation`);
+                Import.f.Debug.error(`"${_function}" is not an operation`);
                 return null;
             }
         }
@@ -46,12 +43,12 @@ var Import;
          */
         static createClosureAddition(_parameters) {
             return function () {
-                console.group("ClosureAddition");
+                Import.f.Debug.group("ClosureAddition");
                 let result = 0;
                 for (const param of _parameters) {
                     result += param();
                 }
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -61,12 +58,12 @@ var Import;
           */
         static createClosureMultiplication(_parameters) {
             return function () {
-                console.group("ClosureMultiplication");
+                Import.f.Debug.log("ClosureMultiplication");
                 let result = 1;
                 for (const param of _parameters) {
                     result *= param();
                 }
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -76,9 +73,9 @@ var Import;
          */
         static createClosureDivision(_parameters) {
             return function () {
-                console.group("ClosureDivision");
+                Import.f.Debug.group("ClosureDivision");
                 let result = _parameters[0]() / _parameters[1]();
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -88,9 +85,9 @@ var Import;
          */
         static createClosureModulo(_parameters) {
             return function () {
-                console.group("ClosureModulo");
+                Import.f.Debug.group("ClosureModulo");
                 let result = _parameters[0]() % _parameters[1]();
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
@@ -105,11 +102,11 @@ var Import;
             let yStart = _parameters[3]();
             let yEnd = _parameters[4]();
             return function () {
-                console.group("ClosureLinear");
+                Import.f.Debug.group("ClosureLinear");
                 let x = _parameters[0]();
                 let y = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
-                console.log(xEnd);
-                console.groupEnd();
+                Import.f.Debug.log(xEnd);
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
@@ -124,10 +121,10 @@ var Import;
             let c = _parameters[3]();
             let d = _parameters[4]();
             return function () {
-                console.group("ClosurePolynomial3");
+                Import.f.Debug.group("ClosurePolynomial3");
                 let x = _parameters[0]();
                 let y = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
@@ -137,33 +134,38 @@ var Import;
          */
         static createClosureSquareRoot(_parameters) {
             return function () {
-                console.group("ClosureSquareRoot");
+                Import.f.Debug.group("ClosureSquareRoot");
                 let x = _parameters[0]();
                 let y = Math.sqrt(x);
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
                 return y;
             };
         }
         /**
-         * Creates a closure which will return number chosen from the given array of numbers.
+         * Creates a closure which will return a number chosen from the given array of numbers.
          *  parameter[0] representing the index of the number which will be chosen.
          *  parameter[1] representing the array of random numbers to choose from.
          */
         static createClosureRandom(_parameters) {
             return function () {
-                console.group("ClosureRandom");
+                Import.f.Debug.group("ClosureRandom");
                 let result = _parameters[1]()[_parameters[0]()];
-                console.groupEnd();
+                Import.f.Debug.groupEnd();
+                return result;
+            };
+        }
+        /**
+         * Creates a closure which will return the input value
+         */
+        static createClosureIdentity(_parameters) {
+            return function () {
+                Import.f.Debug.group("ClosureIdentity");
+                let result = _parameters[0]();
+                Import.f.Debug.groupEnd();
                 return result;
             };
         }
     }
-    // private inputFactors: { [key: string]: number };
-    // constructor(_inputFactors: { [key: string]: number }) {
-    //   this.inputFactors = _inputFactors;
-    // }
-    // public static inputFactors: { [key: string]: number };
-    // private static closures: Map<CLOSURE_TYPE, Function> = ClosureFactory.createClosures();
     ClosureFactory.closures = {
         "addition": ClosureFactory.createClosureAddition,
         "multiplication": ClosureFactory.createClosureMultiplication,
@@ -172,7 +174,8 @@ var Import;
         "linear": ClosureFactory.createClosureLinear,
         "polynomial": ClosureFactory.createClosurePolynomial3,
         "squareRoot": ClosureFactory.createClosureSquareRoot,
-        "random": ClosureFactory.createClosureRandom
+        "random": ClosureFactory.createClosureRandom,
+        "identity": ClosureFactory.createClosureIdentity
     };
     Import.ClosureFactory = ClosureFactory;
 })(Import || (Import = {}));

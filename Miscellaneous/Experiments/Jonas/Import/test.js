@@ -39,6 +39,7 @@ var Import;
         }
         // iterration 2
         storedValues["time"] = 2.3;
+        storedValues["index"] = 1;
         storedValues["size"] = 3;
         // evaluate storage
         for (const key in effectDefinition.storage) {
@@ -61,4 +62,4 @@ var Import;
         }
     }
 })(Import || (Import = {}));
-//# sourceMappingURL=Test.js.map
+//# sourceMappingURL=test.js.map

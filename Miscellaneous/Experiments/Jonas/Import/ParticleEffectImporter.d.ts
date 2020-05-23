@@ -7,6 +7,7 @@ declare namespace Import {
         translation?: ClosureVector;
         rotation?: ClosureVector;
         translationWorld?: ClosureVector;
+        scaling?: ClosureVector;
     }
     interface ClosureVector {
         x?: Function;

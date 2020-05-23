@@ -1,6 +1,8 @@
 /// <reference types="../../../../core/build/fudgecore" />
 declare namespace Import {
-    import f = FudgeCore;
+    interface StoredValues {
+        [key: string]: number;
+    }
     class ParticleSystem extends f.Node {
         private particles;
         private randomNumbers;
