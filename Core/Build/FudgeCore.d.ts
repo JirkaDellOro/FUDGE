@@ -2501,9 +2501,10 @@ declare namespace FudgeCore {
          */
         rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector
+         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector.
+         * If no up vector is given, the previous up-vector is used. When _preserveScaling is false, a rotated identity matrix is the result.
          */
-        lookAt(_target: Vector3, _up?: Vector3): void;
+        lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Add a translation by the given vector to this matrix
          */

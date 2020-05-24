@@ -467,13 +467,16 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector 
+     * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector.
+     * If no up vector is given, the previous up-vector is used. When _preserveScaling is false, a rotated identity matrix is the result. 
      */
-    public lookAt(_target: Vector3, _up?: Vector3): void {
+    public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
       if (!_up) 
         _up = this.getY();
-        
+
       const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up); // TODO: Handle rotation around z-axis
+      if (_preserveScaling)
+        matrix.scale(this.scaling);
       this.set(matrix);
       Recycler.store(matrix);
     }
