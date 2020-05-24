@@ -252,14 +252,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
-     * @param _transformPosition The x,y and z-coordinates of the object to rotate.
-     * @param _targetPosition The position to look at.
+     * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
+     * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
      */
-    public static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+    public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
       // const matrix: Matrix4x4 = new Matrix4x4;
       const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
-      let zAxis: Vector3 = Vector3.DIFFERENCE(_targetPosition, _transformPosition);
+      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
       zAxis.normalize();
       let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
       let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
@@ -268,9 +267,34 @@ namespace FudgeCore {
           xAxis.x, xAxis.y, xAxis.z, 0,
           yAxis.x, yAxis.y, yAxis.z, 0,
           zAxis.x, zAxis.y, zAxis.z, 0,
-          _transformPosition.x,
-          _transformPosition.y,
-          _transformPosition.z,
+          _translation.x,
+          _translation.y,
+          _translation.z,
+          1
+        ]);
+      return matrix;
+    }
+
+    /**
+     * Computes and returns a matrix with the given translation, its y-axis matching the given up-vector
+     * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
+     */
+    public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
+      // const matrix: Matrix4x4 = new Matrix4x4;
+      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
+      let zAxis: Vector3 = Vector3.DIFFERENCE(_target, _translation);
+      zAxis.normalize();
+      let xAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(_up, zAxis));
+      // let yAxis: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(zAxis, xAxis));
+      zAxis = Vector3.NORMALIZATION(Vector3.CROSS(xAxis, _up));
+      matrix.data.set(
+        [
+          xAxis.x, xAxis.y, xAxis.z, 0,
+          _up.x, _up.y, _up.z, 0,
+          zAxis.x, zAxis.y, zAxis.z, 0,
+          _translation.x,
+          _translation.y,
+          _translation.z,
           1
         ]);
       return matrix;
@@ -440,7 +464,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adds a rotation around the x-Axis to this matrix
+     * Adds a rotation around the x-axis to this matrix
      */
     public rotateX(_angleInDegrees: number, _fromLeft: boolean = false): void {
       let rotation: Matrix4x4 = Matrix4x4.ROTATION_X(_angleInDegrees);
@@ -449,7 +473,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adds a rotation around the y-Axis to this matrix
+     * Adds a rotation around the y-axis to this matrix
      */
     public rotateY(_angleInDegrees: number, _fromLeft: boolean = false): void {
       let rotation: Matrix4x4 = Matrix4x4.ROTATION_Y(_angleInDegrees);
@@ -458,7 +482,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adds a rotation around the z-Axis to this matrix
+     * Adds a rotation around the z-axis to this matrix
      */
     public rotateZ(_angleInDegrees: number, _fromLeft: boolean = false): void {
       let rotation: Matrix4x4 = Matrix4x4.ROTATION_Z(_angleInDegrees);
@@ -467,14 +491,31 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector.
-     * If no up vector is given, the previous up-vector is used. When _preserveScaling is false, a rotated identity matrix is the result. 
+     * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
+     * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
       if (!_up)
         _up = this.getY();
 
-      const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up); // TODO: Handle rotation around z-axis
+      const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up);
+      if (_preserveScaling)
+        matrix.scale(this.scaling);
+      this.set(matrix);
+      Recycler.store(matrix);
+    }
+
+    /**
+     * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
+     * When _preserveScaling is false, a rotated identity matrix is the result. 
+     */
+    public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+      if (!_up)
+        _up = this.getY();
+
+      const matrix: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up); 
       if (_preserveScaling)
         matrix.scale(this.scaling);
       this.set(matrix);
@@ -508,7 +549,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Add a translation along the x-Axis by the given amount to this matrix 
+     * Add a translation along the x-axis by the given amount to this matrix 
      */
     public translateX(_x: number, _local: boolean = true): void {
       let translation: Vector3 = Vector3.X(_x);
@@ -516,7 +557,7 @@ namespace FudgeCore {
       Recycler.store(translation);
     }
     /**
-     * Add a translation along the y-Axis by the given amount to this matrix 
+     * Add a translation along the y-axis by the given amount to this matrix 
      */
     public translateY(_y: number, _local: boolean = true): void {
       let translation: Vector3 = Vector3.Y(_y);
@@ -524,7 +565,7 @@ namespace FudgeCore {
       Recycler.store(translation);
     }
     /**
-     * Add a translation along the z-Axis by the given amount to this matrix 
+     * Add a translation along the z-axis by the given amount to this matrix 
      */
     public translateZ(_z: number, _local: boolean = true): void {
       let translation: Vector3 = Vector3.Z(_z);
@@ -544,7 +585,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Add a scaling along the x-Axis by the given amount to this matrix 
+     * Add a scaling along the x-axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
       let vector: Vector3 = Recycler.borrow(Vector3);
@@ -552,7 +593,7 @@ namespace FudgeCore {
       this.scale(vector);
     }
     /**
-     * Add a scaling along the y-Axis by the given amount to this matrix 
+     * Add a scaling along the y-axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
       let vector: Vector3 = Recycler.borrow(Vector3);
@@ -560,7 +601,7 @@ namespace FudgeCore {
       this.scale(vector);
     }
     /**
-     * Add a scaling along the z-Axis by the given amount to this matrix 
+     * Add a scaling along the z-axis by the given amount to this matrix 
      */
     public scaleZ(_by: number): void {
       let vector: Vector3 = Recycler.borrow(Vector3);
@@ -649,7 +690,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Return cardinal X-Axis
+     * Return cardinal x-axis
      */
     public getX(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
@@ -657,7 +698,7 @@ namespace FudgeCore {
       return result;
     }
     /**
-     * Return cardinal Y-Axis
+     * Return cardinal y-axis
      */
     public getY(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
@@ -665,7 +706,7 @@ namespace FudgeCore {
       return result;
     }
     /**
-     * Return cardinal Z-Axis
+     * Return cardinal z-axis
      */
     public getZ(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
@@ -677,28 +718,28 @@ namespace FudgeCore {
      * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
      */
     public swapXY(): void {
-      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store X-Axis
-      this.data.set([this.data[4], this.data[5], this.data[6]], 0); // overwrite X-Axis with Y-Axis
+      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store x-axis
+      this.data.set([this.data[4], this.data[5], this.data[6]], 0); // overwrite x-axis with y-axis
       this.data.set(temp, 4); // overwrite Y with temp
-      this.data.set([-this.data[8], -this.data[9], -this.data[10]], 8); // reverse Z
+      this.data.set([-this.data[8], -this.data[9], -this.data[10]], 8); // reverse z-axis
     }
     /**
      * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
      */
     public swapXZ(): void {
-      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store X-Axis
-      this.data.set([this.data[8], this.data[9], this.data[10]], 0); // overwrite X-Axis with Z-Axis
+      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store x-axis
+      this.data.set([this.data[8], this.data[9], this.data[10]], 0); // overwrite x-axis with z-axis
       this.data.set(temp, 8); // overwrite Z with temp
-      this.data.set([-this.data[4], -this.data[5], -this.data[6]], 4); // reverse Y
+      this.data.set([-this.data[4], -this.data[5], -this.data[6]], 4); // reverse y-axis
     }
     /**
      * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
      */
     public swapYZ(): void {
-      let temp: number[] = [this.data[4], this.data[5], this.data[6]]; // store Y-Axis
-      this.data.set([this.data[8], this.data[9], this.data[10]], 4); // overwrite y-Axis with Z-Axis
+      let temp: number[] = [this.data[4], this.data[5], this.data[6]]; // store y-axis
+      this.data.set([this.data[8], this.data[9], this.data[10]], 4); // overwrite y-axis with z-axis
       this.data.set(temp, 8); // overwrite Z with temp
-      this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse X
+      this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse x-axis
     }
 
     /**

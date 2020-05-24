@@ -2436,11 +2436,15 @@ declare namespace FudgeCore {
          */
         static INVERSION(_matrix: Matrix4x4): Matrix4x4;
         /**
-         * Computes and returns a rotationmatrix that aligns a transformations z-axis with the vector between it and its target.
-         * @param _transformPosition The x,y and z-coordinates of the object to rotate.
-         * @param _targetPosition The position to look at.
+         * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
+         * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
          */
-        static LOOK_AT(_transformPosition: Vector3, _targetPosition: Vector3, _up?: Vector3): Matrix4x4;
+        static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
+        /**
+         * Computes and returns a matrix with the given translation, its y-axis matching the given up-vector
+         * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
+         */
+        static SHOW_TO(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
         /**
          * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
          */
@@ -2489,36 +2493,43 @@ declare namespace FudgeCore {
          */
         rotate(_by: Vector3, _fromLeft?: boolean): void;
         /**
-         * Adds a rotation around the x-Axis to this matrix
+         * Adds a rotation around the x-axis to this matrix
          */
         rotateX(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adds a rotation around the y-Axis to this matrix
+         * Adds a rotation around the y-axis to this matrix
          */
         rotateY(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adds a rotation around the z-Axis to this matrix
+         * Adds a rotation around the z-axis to this matrix
          */
         rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to face the given target and tilts it to accord with the given up vector.
-         * If no up vector is given, the previous up-vector is used. When _preserveScaling is false, a rotated identity matrix is the result.
+         * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
+         * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        /**
+         * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
+         * When _preserveScaling is false, a rotated identity matrix is the result.
+         */
+        showTo(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Add a translation by the given vector to this matrix
          */
         translate(_by: Vector3, _local?: boolean): void;
         /**
-         * Add a translation along the x-Axis by the given amount to this matrix
+         * Add a translation along the x-axis by the given amount to this matrix
          */
         translateX(_x: number, _local?: boolean): void;
         /**
-         * Add a translation along the y-Axis by the given amount to this matrix
+         * Add a translation along the y-axis by the given amount to this matrix
          */
         translateY(_y: number, _local?: boolean): void;
         /**
-         * Add a translation along the z-Axis by the given amount to this matrix
+         * Add a translation along the z-axis by the given amount to this matrix
          */
         translateZ(_z: number, _local?: boolean): void;
         /**
@@ -2526,15 +2537,15 @@ declare namespace FudgeCore {
          */
         scale(_by: Vector3): void;
         /**
-         * Add a scaling along the x-Axis by the given amount to this matrix
+         * Add a scaling along the x-axis by the given amount to this matrix
          */
         scaleX(_by: number): void;
         /**
-         * Add a scaling along the y-Axis by the given amount to this matrix
+         * Add a scaling along the y-axis by the given amount to this matrix
          */
         scaleY(_by: number): void;
         /**
-         * Add a scaling along the z-Axis by the given amount to this matrix
+         * Add a scaling along the z-axis by the given amount to this matrix
          */
         scaleZ(_by: number): void;
         /**
@@ -2555,15 +2566,15 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * Return cardinal X-Axis
+         * Return cardinal x-axis
          */
         getX(): Vector3;
         /**
-         * Return cardinal Y-Axis
+         * Return cardinal y-axis
          */
         getY(): Vector3;
         /**
-         * Return cardinal Z-Axis
+         * Return cardinal z-axis
          */
         getZ(): Vector3;
         /**
