@@ -471,7 +471,7 @@ namespace FudgeCore {
      * If no up vector is given, the previous up-vector is used. When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
-      if (!_up) 
+      if (!_up)
         _up = this.getY();
 
       const matrix: Matrix4x4 = Matrix4x4.LOOK_AT(this.translation, _target, _up); // TODO: Handle rotation around z-axis
@@ -648,20 +648,57 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
+    /**
+     * Return cardinal X-Axis
+     */
     public getX(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
       result.set(this.data[0], this.data[1], this.data[2]);
       return result;
     }
+    /**
+     * Return cardinal Y-Axis
+     */
     public getY(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
       result.set(this.data[4], this.data[5], this.data[6]);
       return result;
     }
+    /**
+     * Return cardinal Z-Axis
+     */
     public getZ(): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
       result.set(this.data[8], this.data[9], this.data[10]);
       return result;
+    }
+
+    /**
+     * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+     */
+    public swapXY(): void {
+      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store X-Axis
+      this.data.set([this.data[4], this.data[5], this.data[6]], 0); // overwrite X-Axis with Y-Axis
+      this.data.set(temp, 4); // overwrite Y with temp
+      this.data.set([-this.data[8], -this.data[9], -this.data[10]], 8); // reverse Z
+    }
+    /**
+     * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+     */
+    public swapXZ(): void {
+      let temp: number[] = [this.data[0], this.data[1], this.data[2]]; // store X-Axis
+      this.data.set([this.data[8], this.data[9], this.data[10]], 0); // overwrite X-Axis with Z-Axis
+      this.data.set(temp, 8); // overwrite Z with temp
+      this.data.set([-this.data[4], -this.data[5], -this.data[6]], 4); // reverse Y
+    }
+    /**
+     * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+     */
+    public swapYZ(): void {
+      let temp: number[] = [this.data[4], this.data[5], this.data[6]]; // store Y-Axis
+      this.data.set([this.data[8], this.data[9], this.data[10]], 4); // overwrite y-Axis with Z-Axis
+      this.data.set(temp, 8); // overwrite Z with temp
+      this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse X
     }
 
     /**

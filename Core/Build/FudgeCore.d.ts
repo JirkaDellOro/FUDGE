@@ -2554,9 +2554,30 @@ declare namespace FudgeCore {
          * Return the elements of this matrix as a Float32Array
          */
         get(): Float32Array;
+        /**
+         * Return cardinal X-Axis
+         */
         getX(): Vector3;
+        /**
+         * Return cardinal Y-Axis
+         */
         getY(): Vector3;
+        /**
+         * Return cardinal Z-Axis
+         */
         getZ(): Vector3;
+        /**
+         * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+         */
+        swapXY(): void;
+        /**
+         * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+         */
+        swapXZ(): void;
+        /**
+         * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
+         */
+        swapYZ(): void;
         /**
          * Return a copy of this
          */
