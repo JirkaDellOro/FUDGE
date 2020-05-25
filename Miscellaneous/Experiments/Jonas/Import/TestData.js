@@ -93,9 +93,13 @@ var Import;
             }
         },
         "scaling": {
-            "x": "inNormTime-1",
-            "y": "inNormTime-1",
-            "z": "inNormTime-1"
+            "x": .05,
+            "y": .05,
+            "z": .05
+        },
+        "color": {
+            "r": "inNormTime",
+            "b": 1
         }
     };
     // export let data: ParticleEffectData = {

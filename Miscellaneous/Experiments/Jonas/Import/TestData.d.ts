@@ -5,6 +5,7 @@ declare namespace Import {
         rotation?: ParticleVectorData;
         translationWorld?: ParticleVectorData;
         scaling?: ParticleVectorData;
+        color?: ParticleColorData;
     }
     interface ParticleData {
         [key: string]: ClosureData;
@@ -13,6 +14,12 @@ declare namespace Import {
         x?: ClosureData;
         y?: ClosureData;
         z?: ClosureData;
+    }
+    interface ParticleColorData {
+        r?: ClosureData;
+        g?: ClosureData;
+        b?: ClosureData;
+        a?: ClosureData;
     }
     interface ClosureDataFunction {
         function: string;

@@ -42,8 +42,8 @@ namespace Import {
     viewport.addEventListener(f.EVENT_WHEEL.WHEEL, hndWheelMove);
 
     // setup particles
-    let mesh: f.Mesh = new f.MeshCube();
-    let material: f.Material = new f.Material("Alpha", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("YELLOW")));
+    let mesh: f.Mesh = new f.MeshQuad();
+    let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
     root.addChild(new f.Node("Particles"));
 
     // setup input

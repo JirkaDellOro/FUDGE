@@ -10,12 +10,20 @@ namespace Import {
     rotation?: ClosureVector;
     translationWorld?: ClosureVector;
     scaling?: ClosureVector;
+    color?: ClosureColor;
   }
 
   export interface ClosureVector {
     x?: Function;
     y?: Function;
     z?: Function;
+  }
+
+  export interface ClosureColor {
+    r?: Function;
+    g?: Function;
+    b?: Function;
+    a?: Function;
   }
 
   export class ParticleEffectImporter {
@@ -65,39 +73,51 @@ namespace Import {
       this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
 
       // parse scaling
-      this.definition.scaling = this.parseVectorData(_data.scaling);
+      this.definition.scaling = this.parseVectorData(_data.scaling, 1);
+
+      // parse color
+      //TODO: Refactor color and vector because code duplication
+      if (!_data.color)
+        _data.color = {};
+      this.definition.color = {
+        r: this.parseClosure(_data.color.r),
+        g: this.parseClosure(_data.color.g),
+        b: this.parseClosure(_data.color.b),
+        a: this.parseClosure(_data.color.a, 1)
+      };
 
       return this.definition;
     }
 
     /**
-     * Parse the given paticle vector. If _data is undefined return a closure vector which functions return 0.
+     * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _identityElement.
      * @param _data the paticle vector data to parse
+     * @param _identityElement the number which will be returned by each function if the respective closure data is undefined
      */
-    private parseVectorData(_data: ParticleVectorData): ClosureVector {
+    private parseVectorData(_data: ParticleVectorData, _identityElement: number = 0): ClosureVector {
       if (!_data) {
         _data = {};
       }
-      let closureVector: ClosureVector = {};
-      closureVector.x = this.parseClosure(_data.x);
-      closureVector.y = this.parseClosure(_data.y);
-      closureVector.z = this.parseClosure(_data.z);
-      return closureVector;
+      return {
+        x: this.parseClosure(_data.x, _identityElement),
+        y: this.parseClosure(_data.y, _identityElement),
+        z: this.parseClosure(_data.z, _identityElement)
+      };
     }
 
     /**
-     * Parse the given closure data recursivley. If _data is undefined return a function which returns 0.
+     * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _identityElement.
+     *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
      * @param _data the closure data to parse recursively
+     * @param _identityElement the number which will be returned by the function if _data is undefined
      */
-    private parseClosure(_data: ClosureData): Function {
-      // TODO: Refactor handling of undefined vlaues
-      if (!_data) {
-        return function (): number {
-          return null;
-        };
-      }
-
+    private parseClosure(_data: ClosureData, _identityElement: number = 0): Function {
       switch (typeof _data) {
+        case "undefined":
+          return () => {
+            return _identityElement;
+          };
+
         case "object":
           let parameters: Function[] = [];
           for (let param of _data.parameters) {

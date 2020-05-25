@@ -34,8 +34,8 @@ var Import;
         viewport.addEventListener("\u0192pointermove" /* MOVE */, hndPointerMove);
         viewport.addEventListener("\u0192wheel" /* WHEEL */, hndWheelMove);
         // setup particles
-        let mesh = new Import.f.MeshCube();
-        let material = new Import.f.Material("Alpha", Import.f.ShaderUniColor, new Import.f.CoatColored(Import.f.Color.CSS("YELLOW")));
+        let mesh = new Import.f.MeshQuad();
+        let material = new Import.f.Material("Material", Import.f.ShaderUniColor, new Import.f.CoatColored(Import.f.Color.CSS("WHITE")));
         root.addChild(new Import.f.Node("Particles"));
         // setup input
         input.addEventListener("input", (_event) => {

@@ -5,6 +5,7 @@ namespace Import {
     rotation?: ParticleVectorData;
     translationWorld?: ParticleVectorData;
     scaling?: ParticleVectorData;
+    color?: ParticleColorData;
   }
 
   export interface ParticleData {
@@ -17,6 +18,13 @@ namespace Import {
     z?: ClosureData;
   }
 
+  export interface ParticleColorData {
+    r?: ClosureData;
+    g?: ClosureData;
+    b?: ClosureData;
+    a?: ClosureData;
+  }
+
   export interface ClosureDataFunction {
     function: string;
     parameters: ClosureData[];
@@ -24,6 +32,7 @@ namespace Import {
   }
 
   export type ClosureData = ClosureDataFunction | string | number;
+
 
   // export let data: ParticleEffectData = {
   //   "translation": {
@@ -48,7 +57,7 @@ namespace Import {
           1
         ]
       },
-      "inNormTime-1": 
+      "inNormTime-1":
       {
         "function": "multiplication",
         "parameters": [
@@ -120,9 +129,13 @@ namespace Import {
       }
     },
     "scaling": {
-      "x": "inNormTime-1",
-      "y": "inNormTime-1",
-      "z": "inNormTime-1"
+      "x": .05,
+      "y": .05,
+      "z": .05
+    },
+    "color": {
+      "r": "inNormTime",
+      "b": 1
     }
   };
 
