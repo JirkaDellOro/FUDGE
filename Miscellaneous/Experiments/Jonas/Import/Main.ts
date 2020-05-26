@@ -22,8 +22,16 @@ namespace Import {
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
     canvas.addEventListener("mouseup", () => document.exitPointerLock());
 
+    // set lights
+    let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
+    cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, -1, -0.8));
+    // game.addComponent(cmpLight);
+    let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.25, 0.25, 0.25, 1)));
+    root.addComponent(cmpLightAmbient);
+
     // setup orbiting camera
     camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
+    camera.component.backgroundColor = ƒ.Color.CSS("black");
     root.addChild(camera);
 
     // setup coordinate axes
@@ -42,9 +50,22 @@ namespace Import {
     viewport.addEventListener(f.EVENT_WHEEL.WHEEL, hndWheelMove);
 
     // setup particles
+    let img: HTMLImageElement = document.querySelector("img");
+    let txtImage: f.TextureImage = new f.TextureImage();
+    txtImage.image = img;
+    let coat: f.CoatTextured = new f.CoatTextured();
+    coat.texture = txtImage;
+
+    let material: f.Material = new f.Material("Material", f.ShaderTexture, coat);
+    // let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
     let mesh: f.Mesh = new f.MeshQuad();
-    let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
+
     root.addChild(new f.Node("Particles"));
+
+    let backgroundMaterial: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("SKYBLUE")));
+    let background: f.Node = new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(-1)), backgroundMaterial, mesh);
+    root.addChild(background);
+    root.addChild(new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(1)), backgroundMaterial, mesh));
 
     // setup input
     input.addEventListener("input", (_event: Event) => {

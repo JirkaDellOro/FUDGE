@@ -93,13 +93,24 @@ var Import;
             }
         },
         "scaling": {
-            "x": .05,
-            "y": .05,
-            "z": .05
+            "x": 0.1,
+            "y": 0.1,
+            "z": 0.1
         },
         "color": {
-            "r": "inNormTime",
-            "b": 1
+            "r": 1,
+            "g": 0,
+            "b": 0,
+            "a": {
+                "function": "addition",
+                "parameters": [
+                    1,
+                    {
+                        "function": "multiplication",
+                        "parameters": [-1, "inNormTime"]
+                    }
+                ]
+            }
         }
     };
     // export let data: ParticleEffectData = {
