@@ -1,6 +1,9 @@
 namespace Import {
   export interface ParticleEffectData {
-    storage?: ParticleData;
+    // storage?: ParticleStorageData;
+    system?: ParticleStorageData;
+    update?: ParticleStorageData;
+    particle?: ParticleStorageData;
     translation?: ParticleVectorData;
     rotation?: ParticleVectorData;
     translationWorld?: ParticleVectorData;
@@ -8,7 +11,13 @@ namespace Import {
     color?: ParticleColorData;
   }
 
-  export interface ParticleData {
+  // export interface ParticleStorageData {
+  //   system?: ParticleData;
+  //   update?: ParticleData;
+  //   particle?: ParticleData;
+  // }
+
+  export interface ParticleStorageData {
     [key: string]: ClosureData;
   }
 
@@ -28,7 +37,7 @@ namespace Import {
   export interface ClosureDataFunction {
     function: string;
     parameters: ClosureData[];
-    preEvaluate?: boolean;
+    // preEvaluate?: boolean;
   }
 
   export type ClosureData = ClosureDataFunction | string | number;
@@ -49,7 +58,7 @@ namespace Import {
   // };
 
   export let data: ParticleEffectData = {
-    "storage": {
+    "update": {
       "inNormTime": {
         "function": "modulo",
         "parameters": [
@@ -140,7 +149,7 @@ namespace Import {
       "a": {
         "function": "addition",
         "parameters": [
-          1, 
+          1,
           {
             "function": "multiplication",
             "parameters": [-1, "inNormTime"]

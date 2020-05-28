@@ -31,21 +31,22 @@ namespace Import {
 
       let effectImporter: ParticleEffectImporter = new ParticleEffectImporter(this.storedValues, this.randomNumbers);
       this.effectDefinition = effectImporter.parseFile(data);
+
+      // evaluate system storage
+      this.evaluateClosureStorage(this.effectDefinition.system);
     }
 
     public update(_time: number): void {
       this.storedValues["time"] = _time;
 
-      // evaluate storage
-      for (const key in this.effectDefinition.storage) {
-        // f.Debug.groupCollapsed(`Evaluate storage "${key}"`);
-        this.storedValues[key] = this.effectDefinition.storage[key]();
-        // f.Debug.log(`Stored "${key}"`, this.storedValues[key]);
-        // f.Debug.groupEnd();
-      }
+      // evaluate update storage
+      this.evaluateClosureStorage(this.effectDefinition.update);
 
       for (let index: number = 0, length: number = this.particles.length; index < length; ++index) {
         this.storedValues["index"] = index;
+
+        // evaluate particle storage
+        this.evaluateClosureStorage(this.effectDefinition.particle);
 
         let transformation: f.Matrix4x4 = f.Matrix4x4.IDENTITY();
 
@@ -66,6 +67,12 @@ namespace Import {
 
         //calculate color
         this.particles[index].getComponent(f.ComponentMaterial).clrPrimary = new f.Color(this.effectDefinition.color.r(), this.effectDefinition.color.g(), this.effectDefinition.color.b(), this.effectDefinition.color.a());
+      }
+    }
+
+    private evaluateClosureStorage(_closureStorage: ClosureStorage): void {
+      for (const key in _closureStorage) {
+        this.storedValues[key] = _closureStorage[key]();
       }
     }
 

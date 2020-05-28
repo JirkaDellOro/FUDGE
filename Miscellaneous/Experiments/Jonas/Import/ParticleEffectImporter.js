@@ -17,19 +17,16 @@ var Import;
          */
         parseFile(_data) {
             // pre parse storage and initialize stored values
-            for (const key in _data.storage) {
-                if (key in this.storedValues) {
-                    Import.f.Debug.error("Predefined variables can not be overwritten");
-                    return null;
-                }
-                else
-                    this.storedValues[key] = 0;
-            }
+            this.preParseParticleData(_data.system);
+            this.preParseParticleData(_data.update);
+            this.preParseParticleData(_data.particle);
             // parse storage
-            this.definition.storage = {};
-            for (const key in _data.storage) {
-                this.definition.storage[key] = this.parseClosure(_data.storage[key]);
-            }
+            this.definition.system = {};
+            this.definition.update = {};
+            this.definition.particle = {};
+            this.parsePaticleData(_data.system, this.definition.system);
+            this.parsePaticleData(_data.update, this.definition.update);
+            this.parsePaticleData(_data.particle, this.definition.particle);
             // parse translation locale
             this.definition.translation = this.parseVectorData(_data.translation);
             // parse rotation
@@ -39,7 +36,7 @@ var Import;
             // parse scaling
             this.definition.scaling = this.parseVectorData(_data.scaling, 1);
             // parse color
-            //TODO: Refactor color and vector because code duplication
+            //TODO: Refactor color and vector because code duplication?
             if (!_data.color)
                 _data.color = {};
             this.definition.color = {
@@ -51,9 +48,33 @@ var Import;
             return this.definition;
         }
         /**
+         * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+         * @param _data The paticle data to parse
+         */
+        preParseParticleData(_data) {
+            for (const key in _data) {
+                if (key in this.storedValues) {
+                    // f.Debug.error(`"${key}" is already defined`);
+                    throw `"${key}" is already defined`;
+                }
+                else
+                    this.storedValues[key] = 0;
+            }
+        }
+        /**
+         * Parse the given particle storage data, create a closure for each entry and add it to the given closure storage
+         * @param _data The storage data to parse
+         * @param _closureStorage The closure storage to add to
+         */
+        parsePaticleData(_data, _closureStorage) {
+            for (const key in _data) {
+                _closureStorage[key] = this.parseClosure(_data[key]);
+            }
+        }
+        /**
          * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _identityElement.
-         * @param _data the paticle vector data to parse
-         * @param _identityElement the number which will be returned by each function if the respective closure data is undefined
+         * @param _data The paticle vector data to parse
+         * @param _identityElement The number which will be returned by each function if the respective closure data is undefined
          */
         parseVectorData(_data, _identityElement = 0) {
             if (!_data) {
@@ -68,8 +89,8 @@ var Import;
         /**
          * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _identityElement.
          *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
-         * @param _data the closure data to parse recursively
-         * @param _identityElement the number which will be returned by the function if _data is undefined
+         * @param _data The closure data to parse recursively
+         * @param _identityElement The number which will be returned by the function if _data is undefined
          */
         parseClosure(_data, _identityElement = 0) {
             switch (typeof _data) {
@@ -90,14 +111,14 @@ var Import;
                     }
                     let closure = Import.ClosureFactory.getClosure(_data.function, parameters);
                     // pre evaluate closure so that only the result will be saved
-                    if (_data.preEvaluate) {
-                        Import.f.Debug.log("PreEvaluate");
-                        let result = closure();
-                        closure = () => {
-                            Import.f.Debug.log("preEvaluated", result);
-                            return result;
-                        };
-                    }
+                    // if (_data.preEvaluate) {
+                    //   f.Debug.log("PreEvaluate");
+                    //   let result: number = closure();
+                    //   closure = () => {
+                    //     f.Debug.log("preEvaluated", result);
+                    //     return result;
+                    //   };
+                    // }
                     return closure;
                 case "string":
                     if (_data in this.storedValues) {

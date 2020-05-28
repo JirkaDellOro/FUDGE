@@ -1,13 +1,15 @@
 declare namespace Import {
     interface ParticleEffectData {
-        storage?: ParticleData;
+        system?: ParticleStorageData;
+        update?: ParticleStorageData;
+        particle?: ParticleStorageData;
         translation?: ParticleVectorData;
         rotation?: ParticleVectorData;
         translationWorld?: ParticleVectorData;
         scaling?: ParticleVectorData;
         color?: ParticleColorData;
     }
-    interface ParticleData {
+    interface ParticleStorageData {
         [key: string]: ClosureData;
     }
     interface ParticleVectorData {
@@ -24,7 +26,6 @@ declare namespace Import {
     interface ClosureDataFunction {
         function: string;
         parameters: ClosureData[];
-        preEvaluate?: boolean;
     }
     type ClosureData = ClosureDataFunction | string | number;
     let data: ParticleEffectData;

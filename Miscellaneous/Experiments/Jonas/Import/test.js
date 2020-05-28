@@ -13,9 +13,9 @@ var Import;
         let effectImporter = new Import.ParticleEffectImporter(storedValues, randomNumbers);
         let effectDefinition = effectImporter.parseFile(Import.data);
         // evaluate storage
-        for (const key in effectDefinition.storage) {
+        for (const key in effectDefinition.update) {
             console.groupCollapsed(`Evaluate storage "${key}"`);
-            storedValues[key] = effectDefinition.storage[key]();
+            storedValues[key] = effectDefinition.update[key]();
             console.log(`Stored "${key}"`, storedValues[key]);
             console.groupEnd();
         }
@@ -42,9 +42,9 @@ var Import;
         storedValues["index"] = 1;
         storedValues["size"] = 3;
         // evaluate storage
-        for (const key in effectDefinition.storage) {
+        for (const key in effectDefinition.update) {
             console.groupCollapsed(`Evaluate storage "${key}"`);
-            storedValues[key] = effectDefinition.storage[key]();
+            storedValues[key] = effectDefinition.update[key]();
             console.log(`Stored "${key}"`, storedValues[key]);
             console.groupEnd();
         }

@@ -13,9 +13,9 @@ namespace Import {
     let effectDefinition: ParticleEffectDefinition = effectImporter.parseFile(data);
 
     // evaluate storage
-    for (const key in effectDefinition.storage) {
+    for (const key in effectDefinition.update) {
       console.groupCollapsed(`Evaluate storage "${key}"`);
-      storedValues[key] = effectDefinition.storage[key]();
+      storedValues[key] = effectDefinition.update[key]();
       console.log(`Stored "${key}"`, storedValues[key]);
       console.groupEnd();
     }
@@ -47,9 +47,9 @@ namespace Import {
     storedValues["size"] = 3;
 
     // evaluate storage
-    for (const key in effectDefinition.storage) {
+    for (const key in effectDefinition.update) {
       console.groupCollapsed(`Evaluate storage "${key}"`);
-      storedValues[key] = effectDefinition.storage[key]();
+      storedValues[key] = effectDefinition.update[key]();
       console.log(`Stored "${key}"`, storedValues[key]);
       console.groupEnd();
     }

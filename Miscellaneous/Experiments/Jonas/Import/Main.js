@@ -14,7 +14,7 @@ var Import;
         const canvas = document.querySelector("canvas");
         Import.f.RenderManager.initialize(false, true);
         Import.f.Debug.log("Canvas", canvas);
-        Import.f.Debug.setFilter(Import.f.DebugConsole, Import.f.DEBUG_FILTER.NONE);
+        Import.f.Debug.setFilter(Import.f.DebugConsole, Import.f.DEBUG_FILTER.ERROR);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());

@@ -22,18 +22,17 @@ var Import;
             };
             let effectImporter = new Import.ParticleEffectImporter(this.storedValues, this.randomNumbers);
             this.effectDefinition = effectImporter.parseFile(Import.data);
+            // evaluate system storage
+            this.evaluateClosureStorage(this.effectDefinition.system);
         }
         update(_time) {
             this.storedValues["time"] = _time;
-            // evaluate storage
-            for (const key in this.effectDefinition.storage) {
-                // f.Debug.groupCollapsed(`Evaluate storage "${key}"`);
-                this.storedValues[key] = this.effectDefinition.storage[key]();
-                // f.Debug.log(`Stored "${key}"`, this.storedValues[key]);
-                // f.Debug.groupEnd();
-            }
+            // evaluate update storage
+            this.evaluateClosureStorage(this.effectDefinition.update);
             for (let index = 0, length = this.particles.length; index < length; ++index) {
                 this.storedValues["index"] = index;
+                // evaluate particle storage
+                this.evaluateClosureStorage(this.effectDefinition.particle);
                 let transformation = Import.f.Matrix4x4.IDENTITY();
                 // calculate local translation
                 transformation.translate(this.evaluateClosureVector(this.effectDefinition.translation));
@@ -47,6 +46,11 @@ var Import;
                 this.particles[index].getComponent(Import.f.ComponentMesh).pivot.scaling = this.evaluateClosureVector(this.effectDefinition.scaling);
                 //calculate color
                 this.particles[index].getComponent(Import.f.ComponentMaterial).clrPrimary = new Import.f.Color(this.effectDefinition.color.r(), this.effectDefinition.color.g(), this.effectDefinition.color.b(), this.effectDefinition.color.a());
+            }
+        }
+        evaluateClosureStorage(_closureStorage) {
+            for (const key in _closureStorage) {
+                this.storedValues[key] = _closureStorage[key]();
             }
         }
         evaluateClosureVector(_closureVector) {

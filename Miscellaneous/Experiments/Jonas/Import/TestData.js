@@ -15,7 +15,7 @@ var Import;
     //   }
     // };
     Import.data = {
-        "storage": {
+        "update": {
             "inNormTime": {
                 "function": "modulo",
                 "parameters": [

@@ -10,6 +10,7 @@ declare namespace Import {
         private effectDefinition;
         constructor(_mesh: f.Mesh, _material: f.Material, _transform: f.Matrix4x4, _numberOfParticles: number);
         update(_time: number): void;
+        private evaluateClosureStorage;
         private evaluateClosureVector;
         private createParticle;
     }

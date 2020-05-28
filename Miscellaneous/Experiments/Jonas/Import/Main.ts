@@ -16,7 +16,7 @@ namespace Import {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     f.RenderManager.initialize(false, true);
     f.Debug.log("Canvas", canvas);
-    f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.NONE);
+    f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.ERROR);
 
     // enable unlimited mouse-movement (user needs to click on canvas first)
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
