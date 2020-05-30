@@ -15,7 +15,7 @@ namespace Transparence {
 
   function hndLoad(_event: Event): void {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
-    f.RenderManager.initialize(false, true);
+    f.RenderManager.initialize(true, true);
     f.Debug.log("Canvas", canvas);
     f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.NONE);
 
@@ -61,20 +61,31 @@ namespace Transparence {
     let mesh: f.Mesh = new f.MeshQuad();
     let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
 
-    let back: f.Node = new fAid.Node("back", f.Matrix4x4.TRANSLATION(f.Vector3.Z(-1)), material, mesh);
-    back.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("blue");
+    let back: f.Node = new fAid.Node("back", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0.5, -1)), material, mesh);
+    back.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("blue", 0.5);
     let middle: f.Node = new fAid.Node("middle", f.Matrix4x4.TRANSLATION(f.Vector3.Z(0)), material, mesh);
-    middle.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("green", 0.5); // only middle is set to be transparent
-    let front: f.Node = new fAid.Node("front", f.Matrix4x4.TRANSLATION(f.Vector3.Z(1)), material, mesh);
-    front.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("red");
-    root.addChild(back);
-    root.addChild(middle);
-    root.addChild(front);
+    middle.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("lime", 0.5); // only middle is set to be transparent
+    let front: f.Node = new fAid.Node("front", f.Matrix4x4.TRANSLATION(new f.Vector3(0.5, 0, 1)), material, mesh);
+    front.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("red", 0.5);
+
+    let quads: f.Node = new f.Node("quads");
+    root.addChild(quads);
+    quads.addChild(back);
+    quads.addChild(middle);
+    quads.addChild(front);
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
 
     function update(_event: f.Eventƒ): void {
+      try {
+        let mtxCamera: f.Matrix4x4 = f.Matrix4x4.MULTIPLICATION(camera.component.getContainer().mtxWorld, camera.component.pivot);
+        for (let quad of root.getChildrenByName("quads")[0].getChildren()) {
+          quad.mtxLocal.showTo(mtxCamera.translation);//, f.Vector3.Y());
+        }
+      } catch (_error) {
+        ƒ.Debug.warn(_error);
+      }
       viewport.draw();
     }
 
@@ -85,6 +96,7 @@ namespace Transparence {
       return;
     camera.rotateY(_event.movementX * speedCameraRotation);
     camera.rotateX(_event.movementY * speedCameraRotation);
+
   }
 
   function hndWheelMove(_event: WheelEvent): void {

@@ -15,7 +15,7 @@ var Transparence;
     let speedCameraTranslation = 0.02;
     function hndLoad(_event) {
         const canvas = document.querySelector("canvas");
-        Transparence.f.RenderManager.initialize(false, true);
+        Transparence.f.RenderManager.initialize(true, true);
         Transparence.f.Debug.log("Canvas", canvas);
         Transparence.f.Debug.setFilter(Transparence.f.DebugConsole, Transparence.f.DEBUG_FILTER.NONE);
         // enable unlimited mouse-movement (user needs to click on canvas first)
@@ -52,18 +52,29 @@ var Transparence;
         // TODO: Relevant part is here
         let mesh = new Transparence.f.MeshQuad();
         let material = new Transparence.f.Material("Material", Transparence.f.ShaderUniColor, new Transparence.f.CoatColored(Transparence.f.Color.CSS("WHITE")));
-        let back = new Transparence.fAid.Node("back", Transparence.f.Matrix4x4.TRANSLATION(Transparence.f.Vector3.Z(-1)), material, mesh);
-        back.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("blue");
+        let back = new Transparence.fAid.Node("back", Transparence.f.Matrix4x4.TRANSLATION(new Transparence.f.Vector3(0, 0.5, -1)), material, mesh);
+        back.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("blue", 0.5);
         let middle = new Transparence.fAid.Node("middle", Transparence.f.Matrix4x4.TRANSLATION(Transparence.f.Vector3.Z(0)), material, mesh);
-        middle.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("green", 0.5); // only middle is set to be transparent
-        let front = new Transparence.fAid.Node("front", Transparence.f.Matrix4x4.TRANSLATION(Transparence.f.Vector3.Z(1)), material, mesh);
-        front.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("red");
-        root.addChild(back);
-        root.addChild(middle);
-        root.addChild(front);
+        middle.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("lime", 0.5); // only middle is set to be transparent
+        let front = new Transparence.fAid.Node("front", Transparence.f.Matrix4x4.TRANSLATION(new Transparence.f.Vector3(0.5, 0, 1)), material, mesh);
+        front.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("red", 0.5);
+        let quads = new Transparence.f.Node("quads");
+        root.addChild(quads);
+        quads.addChild(back);
+        quads.addChild(middle);
+        quads.addChild(front);
         Transparence.f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         Transparence.f.Loop.start(Transparence.f.LOOP_MODE.TIME_GAME, 30);
         function update(_event) {
+            try {
+                let mtxCamera = Transparence.f.Matrix4x4.MULTIPLICATION(camera.component.getContainer().mtxWorld, camera.component.pivot);
+                for (let quad of root.getChildrenByName("quads")[0].getChildren()) {
+                    quad.mtxLocal.showTo(mtxCamera.translation); //, f.Vector3.Y());
+                }
+            }
+            catch (_error) {
+                ƒ.Debug.warn(_error);
+            }
             viewport.draw();
         }
     }
