@@ -14,19 +14,16 @@ var Transparence;
     let speedCameraRotation = 0.2;
     let speedCameraTranslation = 0.02;
     function hndLoad(_event) {
+        Transparence.f.RenderManager.initialize(true, false);
+        Transparence.f.RenderManager.setDepthTest(false);
+        Transparence.f.RenderManager.setBlendMode(Transparence.f.BLEND.PARTICLE);
         const canvas = document.querySelector("canvas");
-        Transparence.f.RenderManager.initialize(true, true);
         Transparence.f.Debug.log("Canvas", canvas);
         Transparence.f.Debug.setFilter(Transparence.f.DebugConsole, Transparence.f.DEBUG_FILTER.NONE);
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
-        //   // set lights
-        //   let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-        //   cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, -1, -0.8));
-        //   // game.addComponent(cmpLight);
-        //   let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.25, 0.25, 0.25, 1)));
-        //   root.addComponent(cmpLightAmbient);
+        Transparence.fAid.addStandardLightComponents(root);
         // setup orbiting camera
         camera = new Transparence.fAid.CameraOrbit(new Transparence.f.ComponentCamera(), 4);
         camera.component.backgroundColor = ƒ.Color.CSS("black");
@@ -51,13 +48,15 @@ var Transparence;
         coat.texture = txtImage;
         // TODO: Relevant part is here
         let mesh = new Transparence.f.MeshQuad();
-        let material = new Transparence.f.Material("Material", Transparence.f.ShaderUniColor, new Transparence.f.CoatColored(Transparence.f.Color.CSS("WHITE")));
+        // let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
+        // let material: f.Material = new f.Material("Material", f.ShaderFlat, new f.CoatColored(f.Color.CSS("WHITE")));
+        let material = new Transparence.f.Material("Material", Transparence.f.ShaderTexture, coat);
         let back = new Transparence.fAid.Node("back", Transparence.f.Matrix4x4.TRANSLATION(new Transparence.f.Vector3(0, 0.5, -1)), material, mesh);
-        back.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("blue", 0.5);
+        back.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("orangered", 1);
         let middle = new Transparence.fAid.Node("middle", Transparence.f.Matrix4x4.TRANSLATION(Transparence.f.Vector3.Z(0)), material, mesh);
-        middle.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("lime", 0.5); // only middle is set to be transparent
+        middle.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("orangered", 1); // only middle is set to be transparent
         let front = new Transparence.fAid.Node("front", Transparence.f.Matrix4x4.TRANSLATION(new Transparence.f.Vector3(0.5, 0, 1)), material, mesh);
-        front.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("red", 0.5);
+        front.getComponent(Transparence.f.ComponentMaterial).clrPrimary = Transparence.f.Color.CSS("orangered", 1);
         let quads = new Transparence.f.Node("quads");
         root.addChild(quads);
         quads.addChild(back);
@@ -69,6 +68,7 @@ var Transparence;
             try {
                 let mtxCamera = Transparence.f.Matrix4x4.MULTIPLICATION(camera.component.getContainer().mtxWorld, camera.component.pivot);
                 for (let quad of root.getChildrenByName("quads")[0].getChildren()) {
+                    // quad.mtxLocal.lookAt(mtxCamera.translation); //, f.Vector3.Y());
                     quad.mtxLocal.showTo(mtxCamera.translation); //, f.Vector3.Y());
                 }
             }

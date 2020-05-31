@@ -14,8 +14,11 @@ namespace Transparence {
   let speedCameraTranslation: number = 0.02;
 
   function hndLoad(_event: Event): void {
+    f.RenderManager.initialize(true, false);
+    f.RenderManager.setDepthTest(false);
+    f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
+    
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
-    f.RenderManager.initialize(true, true);
     f.Debug.log("Canvas", canvas);
     f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.NONE);
 
@@ -23,12 +26,7 @@ namespace Transparence {
     canvas.addEventListener("mousedown", canvas.requestPointerLock);
     canvas.addEventListener("mouseup", () => document.exitPointerLock());
 
-    //   // set lights
-    //   let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-    //   cmpLight.pivot.lookAt(new ƒ.Vector3(0.5, -1, -0.8));
-    //   // game.addComponent(cmpLight);
-    //   let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.25, 0.25, 0.25, 1)));
-    //   root.addComponent(cmpLightAmbient);
+    fAid.addStandardLightComponents(root);
 
     // setup orbiting camera
     camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
@@ -59,14 +57,16 @@ namespace Transparence {
 
     // TODO: Relevant part is here
     let mesh: f.Mesh = new f.MeshQuad();
-    let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
+    // let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
+    // let material: f.Material = new f.Material("Material", f.ShaderFlat, new f.CoatColored(f.Color.CSS("WHITE")));
+    let material: f.Material = new f.Material("Material", f.ShaderTexture, coat);
 
     let back: f.Node = new fAid.Node("back", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0.5, -1)), material, mesh);
-    back.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("blue", 0.5);
+    back.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("orangered", 1);
     let middle: f.Node = new fAid.Node("middle", f.Matrix4x4.TRANSLATION(f.Vector3.Z(0)), material, mesh);
-    middle.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("lime", 0.5); // only middle is set to be transparent
+    middle.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("orangered", 1); // only middle is set to be transparent
     let front: f.Node = new fAid.Node("front", f.Matrix4x4.TRANSLATION(new f.Vector3(0.5, 0, 1)), material, mesh);
-    front.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("red", 0.5);
+    front.getComponent(f.ComponentMaterial).clrPrimary = f.Color.CSS("orangered", 1);
 
     let quads: f.Node = new f.Node("quads");
     root.addChild(quads);
@@ -81,7 +81,8 @@ namespace Transparence {
       try {
         let mtxCamera: f.Matrix4x4 = f.Matrix4x4.MULTIPLICATION(camera.component.getContainer().mtxWorld, camera.component.pivot);
         for (let quad of root.getChildrenByName("quads")[0].getChildren()) {
-          quad.mtxLocal.showTo(mtxCamera.translation);//, f.Vector3.Y());
+          // quad.mtxLocal.lookAt(mtxCamera.translation); //, f.Vector3.Y());
+          quad.mtxLocal.showTo(mtxCamera.translation); //, f.Vector3.Y());
         }
       } catch (_error) {
         ƒ.Debug.warn(_error);
