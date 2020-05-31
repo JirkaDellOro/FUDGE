@@ -14,6 +14,10 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
       if (this.renderData) {
         // buffers exist
+        let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
+        let color: Color = Color.MULTIPLY((<CoatTextured>this).color, _cmpMaterial.clrPrimary);
+        RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
+
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
         crc3.uniform1i(_shader.uniforms["u_texture"], 0);
@@ -49,7 +53,7 @@ namespace FudgeCore {
       let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
 
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_tint_color"];
-      let { r, g, b, a } = (<CoatMatCap>this).tintColor;
+      let { r, g, b, a } = (<CoatMatCap>this).color;
       let tintColorArray: Float32Array = new Float32Array([r, g, b, a]);
       crc3.uniform4fv(colorUniformLocation, tintColorArray);
 

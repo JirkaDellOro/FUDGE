@@ -626,6 +626,11 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     let fudgeConfig: General;
+    enum BLEND {
+        OPAQUE = 0,
+        TRANSPARENT = 1,
+        PARTICLE = 2
+    }
     interface BufferSpecification {
         size: number;
         dataType: number;
@@ -681,6 +686,8 @@ declare namespace FudgeCore {
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
         static getViewportRectangle(): Rectangle;
+        static setDepthTest(_test: boolean): void;
+        static setBlendMode(_mode: BLEND): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -1051,9 +1058,9 @@ declare namespace FudgeCore {
      */
     class CoatMatCap extends Coat {
         texture: TextureImage;
-        tintColor: Color;
+        color: Color;
         shadeSmooth: number;
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _shadeSmooth?: number);
+        constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number);
     }
 }
 declare namespace FudgeCore {
@@ -1061,6 +1068,7 @@ declare namespace FudgeCore {
      * A [[Coat]] providing a texture and additional data for texturing
      */
     class CoatTextured extends Coat {
+        color: Color;
         texture: TextureImage;
         pivot: Matrix3x3;
         tilingX: number;
