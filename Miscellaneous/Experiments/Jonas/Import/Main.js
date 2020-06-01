@@ -10,9 +10,11 @@ var Import;
     let input;
     let particleSystem;
     function hndLoad(_event) {
+        Import.f.RenderManager.initialize(true, false);
+        Import.f.RenderManager.setDepthTest(false);
+        Import.f.RenderManager.setBlendMode(Import.f.BLEND.PARTICLE);
         input = document.getElementById("particleNum");
         const canvas = document.querySelector("canvas");
-        Import.f.RenderManager.initialize(false, true);
         Import.f.Debug.log("Canvas", canvas);
         Import.f.Debug.setFilter(Import.f.DebugConsole, Import.f.DEBUG_FILTER.ERROR);
         // enable unlimited mouse-movement (user needs to click on canvas first)
@@ -50,10 +52,10 @@ var Import;
         // let material: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("WHITE")));
         let mesh = new Import.f.MeshQuad();
         root.addChild(new Import.f.Node("Particles"));
-        let backgroundMaterial = new Import.f.Material("Material", Import.f.ShaderUniColor, new Import.f.CoatColored(Import.f.Color.CSS("SKYBLUE")));
-        let background = new Import.fAid.Node("Backgound", Import.f.Matrix4x4.TRANSLATION(Import.f.Vector3.Z(-1)), backgroundMaterial, mesh);
-        root.addChild(background);
-        root.addChild(new Import.fAid.Node("Backgound", Import.f.Matrix4x4.TRANSLATION(Import.f.Vector3.Z(1)), backgroundMaterial, mesh));
+        // let backgroundMaterial: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("SKYBLUE")));
+        // let background: f.Node = new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(-1)), backgroundMaterial, mesh);
+        // root.addChild(background);
+        // root.addChild(new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(1)), backgroundMaterial, mesh));
         // setup input
         input.addEventListener("input", (_event) => {
             let newParticleSystem = new Import.ParticleSystem(mesh, material, Import.f.Matrix4x4.IDENTITY(), input.valueAsNumber);

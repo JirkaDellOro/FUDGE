@@ -12,9 +12,12 @@ namespace Import {
   let particleSystem: ParticleSystem;
 
   function hndLoad(_event: Event): void {
+    f.RenderManager.initialize(true, false);
+    f.RenderManager.setDepthTest(false);
+    f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
+
     input = <HTMLInputElement>document.getElementById("particleNum");
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
-    f.RenderManager.initialize(false, true);
     f.Debug.log("Canvas", canvas);
     f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.ERROR);
 
@@ -62,10 +65,10 @@ namespace Import {
 
     root.addChild(new f.Node("Particles"));
 
-    let backgroundMaterial: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("SKYBLUE")));
-    let background: f.Node = new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(-1)), backgroundMaterial, mesh);
-    root.addChild(background);
-    root.addChild(new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(1)), backgroundMaterial, mesh));
+    // let backgroundMaterial: f.Material = new f.Material("Material", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("SKYBLUE")));
+    // let background: f.Node = new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(-1)), backgroundMaterial, mesh);
+    // root.addChild(background);
+    // root.addChild(new fAid.Node("Backgound", f.Matrix4x4.TRANSLATION(f.Vector3.Z(1)), backgroundMaterial, mesh));
 
     // setup input
     input.addEventListener("input", (_event: Event) => {

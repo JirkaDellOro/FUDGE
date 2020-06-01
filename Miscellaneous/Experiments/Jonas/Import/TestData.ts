@@ -144,17 +144,17 @@ namespace Import {
     },
     "color": {
       "r": 1,
-      "g": 0,
-      "b": 0,
-      "a": {
-        "function": "addition",
-        "parameters": [
-          1,
-          {
-            "function": "multiplication",
-            "parameters": [-1, "inNormTime"]
-          }]
-      }
+      "g": 0.2,
+      "b": 0.1
+      // "a": {
+      //   "function": "addition",
+      //   "parameters": [
+      //     1,
+      //     {
+      //       "function": "multiplication",
+      //       "parameters": [-1, "inNormTime"]
+      //     }]
+      // }
     }
   };
 
