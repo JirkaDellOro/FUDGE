@@ -1434,6 +1434,24 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface StoredValues {
+        [key: string]: number;
+    }
+    class ComponentParticleSystem extends Component {
+        static readonly iSubclass: number;
+        private particles;
+        private randomNumbers;
+        private storedValues;
+        private effectDefinition;
+        constructor(_filename?: string, _numberOfParticles?: number);
+        updateParticleEffect(_time: number): void;
+        createParticles(_mesh: Mesh, _material: Material): void;
+        private evaluateClosureStorage;
+        private evaluateClosureVector;
+        private createParticle;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Base class for scripts the user writes
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -3177,6 +3195,160 @@ declare namespace FudgeCore {
          * @param _nodeResource
          */
         private set;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * @class Factory class to create closures.
+     */
+    class ClosureFactory {
+        private static closures;
+        /**
+         * Creates a closure for the given function type and the parameters.
+         * @param _function the function type of the closure you want to create.
+         * @param _parameters the parameters, which should be functions themselves, given to the created closure.
+         * @returns
+         */
+        static getClosure(_function: string, _parameters: Function[]): Function;
+        /**
+         * Calculates the sum of the given parameters.
+         *  i.e. parameter[0] + ... + parameter[n]
+         */
+        private static createClosureAddition;
+        /**
+          * Calculates the product of the given parameters.
+          *   i.e. parameter[0] * ... * parameter[n]
+          */
+        private static createClosureMultiplication;
+        /**
+         * Calculates the division of the given parameters.
+         *  i.e. parameter[0] / parameter[1]
+         */
+        private static createClosureDivision;
+        /**
+         * Calculates the modulo of the given parameters.
+         *  i.e. parameter[0] % parameter[1]
+         */
+        private static createClosureModulo;
+        /**
+         * Interpolates a linear function between two given points.
+         *  parameter[0] will be the input value for the function.
+         *  parameter[1] - parameter[4] describe the points between which will be interpoleted
+         */
+        private static createClosureLinear;
+        /**
+         * Creates a polynomial of third degree.
+         *  parameter[0] will be the input value for the function.
+         *  parameter[1] - parameter[4] representing a,b,c,d
+         */
+        private static createClosurePolynomial3;
+        /**
+         * Creates a closure which will return the square root of the given parameter
+         *  parameter[0] will be the input value for the function.
+         */
+        private static createClosureSquareRoot;
+        /**
+         * Creates a closure which will return a number chosen from the given array of numbers.
+         *  parameter[0] representing the index of the number which will be chosen.
+         *  parameter[1] representing the array of random numbers to choose from.
+         */
+        private static createClosureRandom;
+        /**
+         * Creates a closure which will return the input value
+         */
+        private static createClosureIdentity;
+    }
+}
+declare namespace FudgeCore {
+    interface ParticleEffectData {
+        system?: ParticleStorageData;
+        update?: ParticleStorageData;
+        particle?: ParticleStorageData;
+        translation?: ParticleVectorData;
+        rotation?: ParticleVectorData;
+        translationWorld?: ParticleVectorData;
+        scaling?: ParticleVectorData;
+        color?: ParticleColorData;
+    }
+    interface ParticleStorageData {
+        [key: string]: ClosureData;
+    }
+    interface ParticleVectorData {
+        x?: ClosureData;
+        y?: ClosureData;
+        z?: ClosureData;
+    }
+    interface ParticleColorData {
+        r?: ClosureData;
+        g?: ClosureData;
+        b?: ClosureData;
+        a?: ClosureData;
+    }
+    interface ClosureDataFunction {
+        function: string;
+        parameters: ClosureData[];
+    }
+    type ClosureData = ClosureDataFunction | string | number;
+    interface ParticleEffectDefinition {
+        system?: ClosureStorage;
+        update?: ClosureStorage;
+        particle?: ClosureStorage;
+        translation?: ClosureVector;
+        rotation?: ClosureVector;
+        translationWorld?: ClosureVector;
+        scaling?: ClosureVector;
+        color?: ClosureColor;
+    }
+    interface ClosureStorage {
+        [key: string]: Function;
+    }
+    interface ClosureVector {
+        x?: Function;
+        y?: Function;
+        z?: Function;
+    }
+    interface ClosureColor {
+        r?: Function;
+        g?: Function;
+        b?: Function;
+        a?: Function;
+    }
+    class ParticleEffectImporter {
+        private storedValues;
+        private randomNumbers;
+        private definition;
+        constructor(_storedValues: StoredValues, _randomNumbers: number[]);
+        importFile(_filename: string): ParticleEffectDefinition;
+        /**
+         * Parse the data from json file and return a particle effect definition
+         * @param _data the data to parse
+         * @returns a definition of the particle effect containing the closure for translation, rotation etc.
+         */
+        private parseFile;
+        /**
+         * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+         * @param _data The paticle data to parse
+         */
+        private preParseParticleData;
+        /**
+         * Parse the given particle storage data, create a closure storage and return it
+         * @param _data The storage data to parse
+         * @param _closureStorage The closure storage to add to
+         */
+        private parsePaticleData;
+        /**
+         * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _undefinedValue.
+         * @param _data The paticle vector data to parse
+         * @param _undefinedValue The number which will be returned by each function if the respective closure data is undefined
+         */
+        private parseVectorData;
+        /**
+         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue.
+         *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
+         * @param _data The closure data to parse recursively
+         * @param _undefinedValue The number which will be returned by the function if _data is undefined
+         */
+        private parseClosure;
     }
 }
 declare namespace FudgeCore {

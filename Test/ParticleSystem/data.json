@@ -1,0 +1,102 @@
+{
+  "update": {
+    "inNormTime": {
+      "function": "modulo",
+      "parameters": [
+        "time",
+        1
+      ]
+    },
+    "inNormTime-1": {
+      "function": "multiplication",
+      "parameters": [
+        {
+          "function": "addition",
+          "parameters": [
+            "inNormTime",
+            -1
+          ]
+        },
+        0.1
+      ]
+    }
+  },
+  "translation": {
+    "y": {
+      "function": "multiplication",
+      "parameters": [
+        {
+          "function": "random",
+          "parameters": [
+            "index"
+          ]
+        },
+        {
+          "function": "linear",
+          "parameters": [
+            "inNormTime",
+            0,
+            1,
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "rotation": {
+    "z": {
+      "function": "multiplication",
+      "parameters": [
+        {
+          "function": "random",
+          "parameters": [
+            {
+              "function": "addition",
+              "parameters": [
+                "index",
+                1
+              ]
+            }
+          ]
+        },
+        360
+      ]
+    }
+  },
+  "translationWorld": {
+    "y": {
+      "function": "polynomial",
+      "parameters": [
+        "inNormTime",
+        0,
+        -2.5,
+        0,
+        0
+      ]
+    }
+  },
+  "scaling": {
+    "x": 0.1,
+    "y": 0.1,
+    "z": 0.1
+  },
+  "color": {
+    "r": 1,
+    "g": 0.2,
+    "b": 0.1,
+    "a": {
+      "function": "addition",
+      "parameters": [
+        1,
+        {
+          "function": "multiplication",
+          "parameters": [
+            -1,
+            "inNormTime"
+          ]
+        }
+      ]
+    }
+  }
+}
