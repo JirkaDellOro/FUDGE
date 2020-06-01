@@ -99,7 +99,7 @@ namespace FudgeCore {
       let finalTransform: Matrix4x4;
 
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh)
+      if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
         finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
       else
         finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
@@ -107,7 +107,9 @@ namespace FudgeCore {
       // multiply camera matrix
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
+      // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       _drawNode(_node, finalTransform, projection);
+      // RenderParticles.drawParticles();
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
