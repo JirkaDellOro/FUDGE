@@ -21,12 +21,9 @@ var Import;
             this.preParseParticleData(_data.update);
             this.preParseParticleData(_data.particle);
             // parse storage
-            this.definition.system = {};
-            this.definition.update = {};
-            this.definition.particle = {};
-            this.parsePaticleData(_data.system, this.definition.system);
-            this.parsePaticleData(_data.update, this.definition.update);
-            this.parsePaticleData(_data.particle, this.definition.particle);
+            this.definition.system = this.parsePaticleData(_data.system);
+            this.definition.update = this.parsePaticleData(_data.update);
+            this.definition.particle = this.parsePaticleData(_data.particle);
             // parse translation locale
             this.definition.translation = this.parseVectorData(_data.translation);
             // parse rotation
@@ -62,41 +59,43 @@ var Import;
             }
         }
         /**
-         * Parse the given particle storage data, create a closure for each entry and add it to the given closure storage
+         * Parse the given particle storage data, create a closure storage and return it
          * @param _data The storage data to parse
          * @param _closureStorage The closure storage to add to
          */
-        parsePaticleData(_data, _closureStorage) {
+        parsePaticleData(_data) {
+            let closureStorage = {};
             for (const key in _data) {
-                _closureStorage[key] = this.parseClosure(_data[key]);
+                closureStorage[key] = this.parseClosure(_data[key]);
             }
+            return closureStorage;
         }
         /**
-         * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _identityElement.
+         * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _undefinedValue.
          * @param _data The paticle vector data to parse
-         * @param _identityElement The number which will be returned by each function if the respective closure data is undefined
+         * @param _undefinedValue The number which will be returned by each function if the respective closure data is undefined
          */
-        parseVectorData(_data, _identityElement = 0) {
+        parseVectorData(_data, _undefinedValue = 0) {
             if (!_data) {
                 _data = {};
             }
             return {
-                x: this.parseClosure(_data.x, _identityElement),
-                y: this.parseClosure(_data.y, _identityElement),
-                z: this.parseClosure(_data.z, _identityElement)
+                x: this.parseClosure(_data.x, _undefinedValue),
+                y: this.parseClosure(_data.y, _undefinedValue),
+                z: this.parseClosure(_data.z, _undefinedValue)
             };
         }
         /**
-         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _identityElement.
+         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue.
          *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
          * @param _data The closure data to parse recursively
-         * @param _identityElement The number which will be returned by the function if _data is undefined
+         * @param _undefinedValue The number which will be returned by the function if _data is undefined
          */
-        parseClosure(_data, _identityElement = 0) {
+        parseClosure(_data, _undefinedValue = 0) {
             switch (typeof _data) {
                 case "undefined":
                     return () => {
-                        return _identityElement;
+                        return _undefinedValue;
                     };
                 case "object":
                     let parameters = [];
