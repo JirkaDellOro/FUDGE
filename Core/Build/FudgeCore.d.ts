@@ -1439,16 +1439,13 @@ declare namespace FudgeCore {
     }
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
-        private particles;
+        storedValues: StoredValues;
+        effectDefinition: ParticleEffectDefinition;
         private randomNumbers;
-        private storedValues;
-        private effectDefinition;
         constructor(_filename?: string, _numberOfParticles?: number);
         updateParticleEffect(_time: number): void;
-        createParticles(_mesh: Mesh, _material: Material): void;
-        private evaluateClosureStorage;
-        private evaluateClosureVector;
-        private createParticle;
+        evaluateClosureStorage(_closureStorage: ClosureStorage): void;
+        evaluateClosureVector(_closureVector: ClosureVector): Vector3;
     }
 }
 declare namespace FudgeCore {
@@ -3352,6 +3349,21 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class ParticleSystem extends Component {
+        static readonly iSubclass: number;
+        private particles;
+        private randomNumbers;
+        private storedValues;
+        private effectDefinition;
+        constructor(_filename?: string, _numberOfParticles?: number);
+        updateParticleEffect(_time: number): void;
+        createParticles(_mesh: Mesh, _material: Material): void;
+        private evaluateClosureStorage;
+        private evaluateClosureVector;
+        private createParticle;
+    }
+}
+declare namespace FudgeCore {
     class Ray {
         origin: Vector3;
         direction: Vector3;
@@ -3413,7 +3425,7 @@ declare namespace FudgeCore {
         /**
          * The standard render function for drawing a single node
          */
-        private static drawNode;
+        protected static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void;
         /**
          * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
          */
@@ -3435,7 +3447,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class RenderParticles extends RenderManager {
-        static drawParticles(): void;
+        static drawParticles(_node: Node, _finalTransform: Matrix4x4, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
     }
 }
 declare namespace FudgeCore {

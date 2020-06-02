@@ -8,6 +8,7 @@ namespace ParticleSystemTest {
   window.addEventListener("load", hndLoad);
 
   let root: f.Node = new f.Node("Root");
+  let particles: f.Node;
   let viewport: f.Viewport;
   let camera: fAid.CameraOrbit;
   let speedCameraRotation: number = 0.2;
@@ -32,11 +33,11 @@ namespace ParticleSystemTest {
     canvas.addEventListener("mouseup", () => document.exitPointerLock());
 
     // set lights
-    let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
+    // let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
+    // cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     // game.addComponent(cmpLight);
-    let cmpLightAmbient: f.ComponentLight = new f.ComponentLight(new f.LightAmbient(new f.Color(0.25, 0.25, 0.25, 1)));
-    root.addComponent(cmpLightAmbient);
+    // let cmpLightAmbient: f.ComponentLight = new f.ComponentLight(new f.LightAmbient(new f.Color(0.25, 0.25, 0.25, 1)));
+    // root.addComponent(cmpLightAmbient);
 
     // setup orbiting camera
     camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
@@ -68,22 +69,16 @@ namespace ParticleSystemTest {
     let material: f.Material = new f.Material("Material", f.ShaderTexture, coat);
     // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
     let mesh: f.Mesh = new f.MeshQuad();
-
+    particles = new fAid.Node("Paritcles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 1, 0)), material, mesh);
     particleSystem = new f.ComponentParticleSystem("data.json", input.valueAsNumber);
-    root.addComponent(particleSystem);
-    particleSystem.createParticles(mesh, material);
-
-    // let backgroundMaterial: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("SKYBLUE")));
-    // let background: ƒ.Node = new ƒAid.Node("Backgound", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(-1)), backgroundMaterial, mesh);
-    // root.addChild(background);
-    // root.addChild(new ƒAid.Node("Backgound", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(1)), backgroundMaterial, mesh));
+    particles.addComponent(particleSystem);
+    root.addChild(particles);
 
     // setup input
     input.addEventListener("input", (_event: Event) => {
       let newParticleSystem: f.ComponentParticleSystem = new f.ComponentParticleSystem("data.json", input.valueAsNumber);
-      root.removeComponent(particleSystem);
-      root.addComponent(newParticleSystem);
-      newParticleSystem.createParticles(mesh, material);
+      particles.removeComponent(particleSystem);
+      particles.addComponent(newParticleSystem);
       particleSystem = newParticleSystem;
     });
 
@@ -95,6 +90,7 @@ namespace ParticleSystemTest {
     function update(_event: f.Eventƒ): void {
       let time: number = f.Time.game.get() / 1000;
       particleSystem.updateParticleEffect(time);
+      // console.log(particles.getComponent(f.ComponentTransform).local);
       viewport.draw();
     }
 

@@ -105,11 +105,16 @@ namespace FudgeCore {
         finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
 
       // multiply camera matrix
+      // TODO: this needs to be done extra for every single particle
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
       // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
-      _drawNode(_node, finalTransform, projection);
-      // RenderParticles.drawParticles();
+      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
+      if (cmpParticleSystem)
+        RenderParticles.drawParticles(_node, finalTransform, _cmpCamera, _drawNode);
+      else
+        _drawNode(_node, finalTransform, projection);
+
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
@@ -124,7 +129,7 @@ namespace FudgeCore {
     /**
      * The standard render function for drawing a single node
      */
-    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
+    protected static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
