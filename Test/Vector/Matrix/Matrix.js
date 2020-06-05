@@ -1,15 +1,16 @@
 var MatrixTest;
 (function (MatrixTest) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     let coSys;
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
-    let anim = [ƒ.Vector3.ZERO(), new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
     function init(_event) {
         createUI();
-        coSys = Scenes.createCoordinateSystem();
-        coSys.addComponent(new ƒ.ComponentTransform());
-        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
+        coSys = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY());
+        let cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
+        cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
         viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
         update();
         displayVectors(coSys.mtxLocal);
@@ -18,11 +19,11 @@ var MatrixTest;
     function animate() {
         window.setInterval(function () {
             let local = coSys.mtxLocal;
-            anim = [local.translation, local.rotation, local.scaling];
+            // anim = [local.translation, local.rotation, local.scaling];
             // anim[2].x += 1;
             // anim[2].y += 1;
             // anim[2].z += 1;
-            setTransform(anim);
+            // setTransform(anim);
             update();
         }, 20);
     }
@@ -35,11 +36,13 @@ var MatrixTest;
     function createUI() {
         let fieldset;
         fieldset = document.querySelector("#Matrix");
-        for (let element = 0; element < 16;) {
-            fieldset.innerHTML += `<span>${element} <input id='m${element}' type='number' disabled /></span>`;
-            if (++element % 4 == 0)
-                fieldset.innerHTML += "<br />";
-        }
+        let element = 0;
+        for (let prefix of ["X", "Y", "Z", "T"])
+            for (let postfix of ["x", "y", "z", "w"]) {
+                fieldset.innerHTML += `<span>${prefix}${postfix}&nbsp;<input id='m${element}' type='number' disabled /></span>`;
+                if (++element % 4 == 0)
+                    fieldset.innerHTML += "<br />";
+            }
         fieldset = document.querySelector("#Vectors");
         for (let transform of ["t", "r", "s"]) {
             for (let dimension of ["x", "y", "z"]) {

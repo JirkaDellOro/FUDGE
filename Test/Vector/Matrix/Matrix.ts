@@ -1,19 +1,19 @@
 namespace MatrixTest {
   import ƒ = FudgeCore;
-  
+  import ƒAid = FudgeAid;
+
 
   let coSys: ƒ.Node;
   let viewport: ƒ.Viewport = new ƒ.Viewport();
   window.addEventListener("load", init);
-  let anim: ƒ.Vector3[] = [ƒ.Vector3.ZERO(), new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
 
   function init(_event: Event): void {
     createUI();
-    coSys = Scenes.createCoordinateSystem();
-    coSys.addComponent(new ƒ.ComponentTransform());
+    coSys = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY());
 
-
-    let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
 
     update();
@@ -27,11 +27,11 @@ namespace MatrixTest {
       function (): void {
         let local: ƒ.Matrix4x4 = coSys.mtxLocal;
 
-        anim = [local.translation, local.rotation, local.scaling];
+        // anim = [local.translation, local.rotation, local.scaling];
         // anim[2].x += 1;
         // anim[2].y += 1;
         // anim[2].z += 1;
-        setTransform(anim);
+        // setTransform(anim);
 
         update();
       },
@@ -48,11 +48,13 @@ namespace MatrixTest {
   function createUI(): void {
     let fieldset: HTMLFieldSetElement;
     fieldset = document.querySelector("#Matrix");
-    for (let element: number = 0; element < 16;) {
-      fieldset.innerHTML += `<span>${element} <input id='m${element}' type='number' disabled /></span>`;
-      if (++element % 4 == 0)
-        fieldset.innerHTML += "<br />";
-    }
+    let element: number = 0;
+    for (let prefix of ["X", "Y", "Z", "T"])
+      for (let postfix of ["x", "y", "z", "w"]) {
+        fieldset.innerHTML += `<span>${prefix}${postfix}&nbsp;<input id='m${element}' type='number' disabled /></span>`;
+        if (++element % 4 == 0)
+          fieldset.innerHTML += "<br />";
+      }
 
     fieldset = document.querySelector("#Vectors");
     for (let transform of ["t", "r", "s"]) {
