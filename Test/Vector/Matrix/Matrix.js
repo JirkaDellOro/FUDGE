@@ -2,40 +2,47 @@ var MatrixTest;
 (function (MatrixTest) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    let coSys;
+    let coSys = [];
     let viewport = new ƒ.Viewport();
     window.addEventListener("load", init);
     function init(_event) {
-        createUI();
-        coSys = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY());
+        let root = new ƒ.Node("Root");
+        for (let i = 0; i < 2; i++) {
+            coSys.push(new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY()));
+            root.addChild(coSys[i]);
+            createUI(i);
+        }
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
         cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-        viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
-        update();
-        displayVectors(coSys.mtxLocal);
-        animate();
+        viewport.initialize("Viewport", root, cmpCamera, document.querySelector("canvas"));
+        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
+        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 5);
     }
     function animate() {
-        window.setInterval(function () {
-            let local = coSys.mtxLocal;
-            // anim = [local.translation, local.rotation, local.scaling];
-            // anim[2].x += 1;
-            // anim[2].y += 1;
-            // anim[2].z += 1;
-            // setTransform(anim);
-            update();
-        }, 20);
-    }
-    function update() {
+        for (let i = 0; i < 2; i++) {
+            displayMatrix(i, coSys[i].mtxLocal);
+            move(i);
+        }
         viewport.draw();
-        let local = coSys.mtxLocal;
-        displayMatrix(local);
-        displayVectors(local);
     }
-    function createUI() {
+    function move(_which) {
+        let fieldset = document.querySelector("fieldset#Interact" + _which);
+        let formData = new FormData(fieldset.querySelector("form"));
+        // console.log(formData.get("t").valueOf(), formData.get("tValue"), formData.get("tDirection"));
+        // console.log(formData.get("r"), formData.get("rValue"), formData.get("rDirection"));
+        // console.log(formData.get("s"), formData.get("sValue"), formData.get("sDirection"));
+        let translate = calcVector(String(formData.get("t")), Number(formData.get("tValue")), Number(formData.get("tDirection")));
+        let rotate = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
+        let scale = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
+        coSys[_which].mtxLocal.translate(translate);
+        coSys[_which].mtxLocal.rotate(rotate, true);
+        scale.add(ƒ.Vector3.ONE());
+        coSys[_which].mtxLocal.scale(scale);
+    }
+    function createUI(_which) {
         let fieldset;
-        fieldset = document.querySelector("#Matrix");
+        fieldset = document.querySelector("fieldset#Matrix" + _which);
         let element = 0;
         for (let prefix of ["X", "Y", "Z", "T"])
             for (let postfix of ["x", "y", "z", "w"]) {
@@ -43,112 +50,127 @@ var MatrixTest;
                 if (++element % 4 == 0)
                     fieldset.innerHTML += "<br />";
             }
-        fieldset = document.querySelector("#Vectors");
+        fieldset = document.querySelector("fieldset#Interact" + _which);
+        let table = "<form><table>";
         for (let transform of ["t", "r", "s"]) {
+            let step = transform == "r" ? 1 : 0.1;
+            let value = 0;
+            table += `<tr><th>${transform}</th>`;
             for (let dimension of ["x", "y", "z"]) {
                 let id = transform + dimension;
-                fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' lastValue='0' stepped='0'/></span>`;
+                // fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' step='0.1'/><button>+</button><button>-</button></span>`;
+                table += `<td><input type="radio" name="${transform}" value="${dimension}" id="${id}" ${dimension == "x" ? "checked" : ""}></input>`;
+                table += `<label for="${id}">${dimension}</label></td>`;
             }
-            fieldset.innerHTML += "<br />";
+            table += `<td><input type="number" name="${transform}Value" step="${step}" value="${value}"></input></td>`;
+            table += `<td><input type="range" name="${transform}Direction" step="1" value="0" min="-1" max="1"></input></td>`;
+            table += "</tr>";
         }
-        fieldset.addEventListener("input", hndInteraction);
+        table += "</table></form>";
+        console.log(table);
+        fieldset.innerHTML += table;
+        let sliders = fieldset.querySelectorAll("input[type=range]");
+        for (let slider of sliders) {
+            slider.addEventListener("keyUp", hndKey);
+            slider.addEventListener("keyPress", hndKey);
+        }
     }
-    function hndInteraction(_event) {
-        let input = _event.target;
-        if (input.name == "Interact") {
-            let local = coSys.mtxLocal;
-            displayVectors(local);
+    async function hndKey(_event) {
+        console.log(_event.type);
+        let slider = _event.target;
+        if (slider.type != "range")
             return;
-        }
-        let stepped = parseFloat(input.value) - parseFloat(input.getAttribute("lastValue"));
-        input.setAttribute("stepped", stepped.toString());
-        if (isAbsolute())
-            interactAbsolute(input);
-        else
-            interactRelative(input);
-        update();
-        input.setAttribute("lastValue", input.value);
-    }
-    function isAbsolute() {
-        return document.querySelector("#absolute").checked;
-    }
-    function interactAbsolute(_input) {
-        let vectors = [];
-        for (let transform of ["t", "r", "s"]) {
-            let vector = new ƒ.Vector3();
-            for (let dimension of ["x", "y", "z"]) {
-                let id = transform + dimension;
-                let input = document.querySelector("#" + id);
-                vector[dimension] = parseFloat(input.value);
-            }
-            vectors.push(vector);
-        }
-        setTransform(vectors);
-    }
-    function setTransform(_vectors) {
-        let matrix = ƒ.Matrix4x4.IDENTITY();
-        matrix.translate(_vectors[0]);
-        matrix.rotateZ(_vectors[1].z);
-        matrix.rotateY(_vectors[1].y);
-        matrix.rotateX(_vectors[1].x);
-        matrix.scale(_vectors[2]);
-        coSys.mtxLocal.set(matrix);
-    }
-    function interactRelative(_input) {
-        switch (_input.id[0]) {
-            case "t":
-                translate(_input);
-                break;
-            case "s":
-                scale(_input);
-                break;
-            case "r":
-                rotate(_input);
-                break;
+        if (_event.code != ƒ.KEYBOARD_CODE.ARROW_LEFT && _event.code != ƒ.KEYBOARD_CODE.ARROW_RIGHT)
+            return;
+        if (_event.type == "keyUp")
+            slider.value = "0";
+        else {
+            ƒ.Loop.stop();
+            animate();
+            // let timer: ƒ.Timer = new ƒ.Timer(ƒ.Time.game,)
+            await ƒ.Time.game.delay(100);
+            ƒ.Loop.continue();
         }
     }
-    function translate(_input) {
-        let vector = calcInputVector(_input);
-        vector.scale(0.1);
-        coSys.mtxLocal.translate(vector);
-    }
-    function scale(_input) {
-        let vector = calcInputVector(_input);
-        vector.scale(0.1);
-        vector.add(new ƒ.Vector3(1, 1, 1));
-        coSys.mtxLocal.scale(vector);
-    }
-    function rotate(_input) {
-        let vector = calcInputVector(_input);
-        vector.scale(5);
-        coSys.mtxLocal.rotateY(vector.y);
-        coSys.mtxLocal.rotateX(vector.x);
-        coSys.mtxLocal.rotateZ(vector.z);
-    }
-    function calcInputVector(_input) {
-        let dimension = _input.id[1];
+    // function isAbsolute(): boolean {
+    //   return (<HTMLInputElement>document.querySelector("#absolute")).checked;
+    // }
+    // function interactAbsolute(_input: HTMLInputElement): void {
+    //   let vectors: ƒ.Vector3[] = [];
+    //   for (let transform of ["t", "r", "s"]) {
+    //     let vector: ƒ.Vector3 = new ƒ.Vector3();
+    //     for (let dimension of ["x", "y", "z"]) {
+    //       let id: string = transform + dimension;
+    //       let input: HTMLInputElement = <HTMLInputElement>document.querySelector("#" + id);
+    //       vector[dimension] = parseFloat(input.value);
+    //     }
+    //     vectors.push(vector);
+    //   }
+    //   setTransform(vectors);
+    // }
+    // function setTransform(_vectors: ƒ.Vector3[]): void {
+    //   let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
+    //   matrix.translate(_vectors[0]);
+    //   matrix.rotateZ(_vectors[1].z);
+    //   matrix.rotateY(_vectors[1].y);
+    //   matrix.rotateX(_vectors[1].x);
+    //   matrix.scale(_vectors[2]);
+    //   coSys.mtxLocal.set(matrix);
+    // }
+    // function interactRelative(_input: HTMLInputElement, _factor: number): void {
+    //   switch (_input.id[0]) {
+    //     case "t":
+    //       translate(_input, _factor);
+    //       break;
+    //     case "s":
+    //       scale(_input, _factor);
+    //       break;
+    //     case "r":
+    //       rotate(_input, _factor);
+    //       break;
+    //   }
+    // }
+    // function translate(_input: HTMLInputElement, _factor: number): void {
+    //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
+    //   // vector.scale(0.1);
+    //   coSys.mtxLocal.translate(vector);
+    // }
+    // function scale(_input: HTMLInputElement, _factor: number): void {
+    //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
+    //   // vector.scale(0.1);
+    //   vector.add(new ƒ.Vector3(1, 1, 1));
+    //   coSys.mtxLocal.scale(vector);
+    // }
+    // function rotate(_input: HTMLInputElement, _factor: number): void {
+    //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
+    //   // vector.scale(5);
+    //   coSys.mtxLocal.rotateY(vector.y);
+    //   coSys.mtxLocal.rotateX(vector.x);
+    //   coSys.mtxLocal.rotateZ(vector.z);
+    // }
+    function calcVector(_dimension, _value, _factor) {
         let vector = new ƒ.Vector3();
-        let stepdown = 0 > parseFloat(_input.getAttribute("stepped"));
-        vector[dimension] = stepdown ? -1 : 1;
+        vector[_dimension] = _factor * _value;
         return vector;
     }
-    function displayMatrix(_matrix) {
+    function displayMatrix(_which, _matrix) {
+        let fieldset = document.querySelector("fieldset#Matrix" + _which);
         let data = _matrix.get();
         for (let index in data) {
-            let input = document.querySelector("#m" + index);
+            let input = fieldset.querySelector("#m" + index);
             input.value = data[index].toFixed(2);
         }
     }
-    function displayVectors(_matrix) {
-        let vectors = [_matrix.translation, _matrix.rotation, _matrix.scaling];
-        for (let transform of ["t", "r", "s"]) {
-            let vector = vectors.shift();
-            for (let dimension of ["x", "y", "z"]) {
-                let id = transform + dimension;
-                let input = document.querySelector("#" + id);
-                input.value = vector[dimension].toFixed(2);
-            }
-        }
-    }
+    // function displayVectors(_matrix: ƒ.Matrix4x4): void {
+    //   let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling];
+    //   for (let transform of ["t", "r", "s"]) {
+    //     let vector: ƒ.Vector3 = vectors.shift();
+    //     for (let dimension of ["x", "y", "z"]) {
+    //       let id: string = transform + dimension;
+    //       let input: HTMLInputElement = document.querySelector("#" + id);
+    //       input.value = vector[dimension].toFixed(2);
+    //     }
+    //   }
+    // }
 })(MatrixTest || (MatrixTest = {}));
 //# sourceMappingURL=Matrix.js.map

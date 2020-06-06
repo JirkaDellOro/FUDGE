@@ -1949,7 +1949,8 @@ declare namespace FudgeCore {
      */
     const enum EVENT_KEYBOARD {
         UP = "\u0192keyup",
-        DOWN = "\u0192keydown"
+        DOWN = "\u0192keydown",
+        PRESS = "\u0192keypress"
     }
     /**
      * The codes sent from a standard english keyboard layout
@@ -3431,6 +3432,7 @@ declare namespace FudgeCore {
          * Stops the loop
          */
         static stop(): void;
+        static continue(): void;
         static getFpsGameAverage(): number;
         static getFpsRealAverage(): number;
         private static loop;
