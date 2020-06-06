@@ -10,7 +10,8 @@ namespace FudgeCore {
      */
     export const enum EVENT_KEYBOARD {
         UP = "ƒkeyup",
-        DOWN = "ƒkeydown"
+        DOWN = "ƒkeydown",
+        PRESS = "ƒkeypress"
     }
 
     /**
