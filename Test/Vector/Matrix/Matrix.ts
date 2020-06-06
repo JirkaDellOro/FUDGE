@@ -5,15 +5,17 @@ namespace MatrixTest {
 
   let coSys: ƒ.Node[] = [];
   let viewport: ƒ.Viewport = new ƒ.Viewport();
+  let root: ƒ.Node = new ƒ.Node("Root");
+
   window.addEventListener("load", init);
 
   function init(_event: Event): void {
-    let root: ƒ.Node = new ƒ.Node("Root");
     for (let i: number = 0; i < 2; i++) {
       coSys.push(new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY()));
       root.addChild(coSys[i]);
       createUI(i);
     }
+    document.querySelector("fieldset#Hierarchy").addEventListener("change", hndHierarchy);
 
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
@@ -45,7 +47,7 @@ namespace MatrixTest {
     let scale: ƒ.Vector3 = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
 
     coSys[_which].mtxLocal.translate(translate);
-    coSys[_which].mtxLocal.rotate(rotate, true);
+    coSys[_which].mtxLocal.rotate(rotate, false);
     scale.add(ƒ.Vector3.ONE());
     coSys[_which].mtxLocal.scale(scale);
   }
@@ -106,6 +108,24 @@ namespace MatrixTest {
     animate();
     await ƒ.Time.game.delay(100);
     ƒ.Loop.continue();
+  }
+
+  function hndHierarchy(_event: Event): void {
+    let hierarchy: number = Number((<HTMLInputElement>_event.target).value);
+    switch (hierarchy) {
+      case 0:
+        root.appendChild(coSys[0]);
+        coSys[0].appendChild(coSys[1]);
+        break;
+      case 1:
+        root.appendChild(coSys[1]);
+        coSys[1].appendChild(coSys[0]);
+        break;
+      default:
+        root.appendChild(coSys[0]);
+        root.appendChild(coSys[1]);
+        break;
+    }
   }
 
   // function isAbsolute(): boolean {

@@ -27,12 +27,14 @@
 
     fieldset {
       display: inline;
-      float:left;
+      float: left;
     }
 
-    div {
-      display: flex;
+    fieldset#Hierarchy {
+      display: block;
+      float: none;
     }
+
 
     input:not([type=radio]) {
       width: 55px;
@@ -49,6 +51,15 @@
 <body>
   <canvas></canvas>
   <div>
+    <fieldset id="Hierarchy">
+      <legend>Hierarchy</legend>
+      <input type="radio" name="Hierarchy" value="-1" id="hNone"></input><label for="hNone">none </label>
+      <input type="radio" name="Hierarchy" value="0" id="h01"></input><label for="h01">0 parent of 1 </label>
+      <input type="radio" name="Hierarchy" value="1" id="h10"></input><label for="h10">1 parent of 0 </label>
+    </fieldset>
+  </div>
+
+  <div>
     <fieldset id="Matrix0">
       <legend>Matrix0</legend>
     </fieldset>
@@ -56,6 +67,7 @@
       <legend>Interact0</legend>
     </fieldset>
   </div>
+
   <div>
     <fieldset id="Matrix1">
       <legend>Matrix1</legend>
