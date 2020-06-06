@@ -455,7 +455,7 @@ namespace FudgeCore {
     //#region Rotation
     /**
      * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
-     * @param _by 
+     * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
      */
     public rotate(_by: Vector3, _fromLeft: boolean = false): void {
       this.rotateZ(_by.z, _fromLeft);
@@ -525,7 +525,9 @@ namespace FudgeCore {
 
     //#region Translation
     /**
-     * Add a translation by the given vector to this matrix 
+     * Add a translation by the given vector to this matrix.
+     * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
+     * according to the parent otherwise. 
      */
     public translate(_by: Vector3, _local: boolean = true): void {
       if (_local) {
