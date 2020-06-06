@@ -46,7 +46,7 @@ namespace MatrixTest {
     let rotate: ƒ.Vector3 = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
     let scale: ƒ.Vector3 = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
 
-    coSys[_which].mtxLocal.translate(translate);
+    coSys[_which].mtxLocal.translate(translate, false);
     coSys[_which].mtxLocal.rotate(rotate, false);
     scale.add(ƒ.Vector3.ONE());
     coSys[_which].mtxLocal.scale(scale);
@@ -68,7 +68,7 @@ namespace MatrixTest {
     let table: string = "<form><table>";
     for (let transform of ["t", "r", "s"]) {
       let step: number = transform == "r" ? 1 : 0.1;
-      let value: number = 0;
+      let value: number = transform == "r" ? 5 : 0.1;
       table += `<tr><th>${transform}</th>`;
       for (let dimension of ["x", "y", "z"]) {
         let id: string = transform + dimension;
