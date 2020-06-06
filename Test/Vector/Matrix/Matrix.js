@@ -69,28 +69,26 @@ var MatrixTest;
         table += "</table></form>";
         console.log(table);
         fieldset.innerHTML += table;
-        let sliders = fieldset.querySelectorAll("input[type=range]");
-        for (let slider of sliders) {
-            slider.addEventListener("keyUp", hndKey);
-            slider.addEventListener("keyPress", hndKey);
-        }
+        fieldset.addEventListener("keyup", hndKey);
+        fieldset.addEventListener("keydown", hndKey);
     }
     async function hndKey(_event) {
-        console.log(_event.type);
         let slider = _event.target;
         if (slider.type != "range")
             return;
         if (_event.code != ƒ.KEYBOARD_CODE.ARROW_LEFT && _event.code != ƒ.KEYBOARD_CODE.ARROW_RIGHT)
             return;
-        if (_event.type == "keyUp")
+        if (_event.type == "keyup")
             slider.value = "0";
         else {
             ƒ.Loop.stop();
-            animate();
-            // let timer: ƒ.Timer = new ƒ.Timer(ƒ.Time.game,)
-            await ƒ.Time.game.delay(100);
-            ƒ.Loop.continue();
+            window.setTimeout(tick, 10);
         }
+    }
+    async function tick() {
+        animate();
+        await ƒ.Time.game.delay(100);
+        ƒ.Loop.continue();
     }
     // function isAbsolute(): boolean {
     //   return (<HTMLInputElement>document.querySelector("#absolute")).checked;
