@@ -32,6 +32,9 @@ namespace MatrixTest {
       move(i);
     }
     viewport.draw();
+
+    let relative: ƒ.Matrix4x4 = calculateRelativeMatrix(coSys[1].mtxWorld, coSys[0].mtxWorld);
+    console.log(relative.toString());
   }
 
 
@@ -128,69 +131,6 @@ namespace MatrixTest {
     }
   }
 
-  // function isAbsolute(): boolean {
-  //   return (<HTMLInputElement>document.querySelector("#absolute")).checked;
-  // }
-
-  // function interactAbsolute(_input: HTMLInputElement): void {
-  //   let vectors: ƒ.Vector3[] = [];
-  //   for (let transform of ["t", "r", "s"]) {
-  //     let vector: ƒ.Vector3 = new ƒ.Vector3();
-  //     for (let dimension of ["x", "y", "z"]) {
-  //       let id: string = transform + dimension;
-  //       let input: HTMLInputElement = <HTMLInputElement>document.querySelector("#" + id);
-  //       vector[dimension] = parseFloat(input.value);
-  //     }
-  //     vectors.push(vector);
-  //   }
-  //   setTransform(vectors);
-  // }
-
-  // function setTransform(_vectors: ƒ.Vector3[]): void {
-  //   let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
-  //   matrix.translate(_vectors[0]);
-  //   matrix.rotateZ(_vectors[1].z);
-  //   matrix.rotateY(_vectors[1].y);
-  //   matrix.rotateX(_vectors[1].x);
-  //   matrix.scale(_vectors[2]);
-
-  //   coSys.mtxLocal.set(matrix);
-  // }
-
-  // function interactRelative(_input: HTMLInputElement, _factor: number): void {
-
-  //   switch (_input.id[0]) {
-  //     case "t":
-  //       translate(_input, _factor);
-  //       break;
-  //     case "s":
-  //       scale(_input, _factor);
-  //       break;
-  //     case "r":
-  //       rotate(_input, _factor);
-  //       break;
-  //   }
-  // }
-
-  // function translate(_input: HTMLInputElement, _factor: number): void {
-  //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
-  //   // vector.scale(0.1);
-  //   coSys.mtxLocal.translate(vector);
-  // }
-  // function scale(_input: HTMLInputElement, _factor: number): void {
-  //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
-  //   // vector.scale(0.1);
-  //   vector.add(new ƒ.Vector3(1, 1, 1));
-  //   coSys.mtxLocal.scale(vector);
-  // }
-  // function rotate(_input: HTMLInputElement, _factor: number): void {
-  //   let vector: ƒ.Vector3 = calcInputVector(_input, _factor);
-  //   // vector.scale(5);
-  //   coSys.mtxLocal.rotateY(vector.y);
-  //   coSys.mtxLocal.rotateX(vector.x);
-  //   coSys.mtxLocal.rotateZ(vector.z);
-  // }
-
   function calcVector(_dimension: string, _value: number, _factor: number): ƒ.Vector3 {
     let vector: ƒ.Vector3 = new ƒ.Vector3();
     vector[_dimension] = _factor * _value;
@@ -205,15 +145,11 @@ namespace MatrixTest {
       input.value = data[index].toFixed(2);
     }
   }
-  // function displayVectors(_matrix: ƒ.Matrix4x4): void {
-  //   let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling];
-  //   for (let transform of ["t", "r", "s"]) {
-  //     let vector: ƒ.Vector3 = vectors.shift();
-  //     for (let dimension of ["x", "y", "z"]) {
-  //       let id: string = transform + dimension;
-  //       let input: HTMLInputElement = document.querySelector("#" + id);
-  //       input.value = vector[dimension].toFixed(2);
-  //     }
-  //   }
-  // }
+
+  function calculateRelativeMatrix(_matrix: ƒ.Matrix4x4, _relativeTo: ƒ.Matrix4x4): ƒ.Matrix4x4 {
+    let result: ƒ.Matrix4x4;
+    result = ƒ.Matrix4x4.INVERSION(_relativeTo);
+    result = ƒ.Matrix4x4.MULTIPLICATION(result, _matrix);
+    return result;
+  }
 }
