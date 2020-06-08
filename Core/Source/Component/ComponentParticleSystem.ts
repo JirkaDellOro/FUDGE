@@ -6,9 +6,10 @@ namespace FudgeCore {
   
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public storedValues: StoredValues = {};
+    public storedValues: StoredValues = {}; // TODO: make privat
     public effectDefinition: ParticleEffectDefinition;
     private randomNumbers: number[] = [];
+    // color
 
     constructor(_filename: string = null, _numberOfParticles: number = null) {
       super();

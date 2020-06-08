@@ -111,7 +111,7 @@ namespace FudgeCore {
       // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       if (cmpParticleSystem)
-        RenderParticles.drawParticles(_node, _node.mtxWorld, _cmpCamera, _drawNode);
+        RenderParticles.drawParticles(_node, _node.mtxWorld, _cmpCamera);
       else
         _drawNode(_node, finalTransform, projection);
 
@@ -130,7 +130,7 @@ namespace FudgeCore {
     /**
      * The standard render function for drawing a single node
      */
-    protected static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
+    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;

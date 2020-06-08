@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export abstract class RenderParticles extends RenderManager {
-    public static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera, _drawNode: Function = RenderManager.drawNode): void {
+    public static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera): void {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
@@ -45,6 +45,7 @@ namespace FudgeCore {
         // apply system transformation
         finalTransform.multiply(_systemTransform, true);
 
+        // TODO: optimize
         // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
 
         // calculate scaling
@@ -58,7 +59,7 @@ namespace FudgeCore {
         cmpMaterial.clrPrimary.a = effectDefinition.color.a();
 
         let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-        // _drawNode(_node, finalTransform, projection);
+
         RenderManager.draw(mesh, cmpMaterial, finalTransform, projection);
         // this increases fps
         Recycler.store(projection);
