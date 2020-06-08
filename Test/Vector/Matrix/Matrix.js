@@ -26,8 +26,10 @@ var MatrixTest;
             move(i);
         }
         viewport.draw();
-        let relative = calculateRelativeMatrix(coSys[1].mtxWorld, coSys[0].mtxWorld);
-        console.log(relative.toString());
+        // let relative: ƒ.Matrix4x4 = calculateRelativeMatrix(coSys[1].mtxWorld, coSys[0].mtxWorld);
+        // console.log("Relative", relative.toString());
+        // console.log("Local", coSys[1].mtxLocal.toString());
+        // coSys[1].cmpTransform.local = relative;
     }
     function move(_which) {
         let fieldset = document.querySelector("fieldset#Interact" + _which);
@@ -38,10 +40,22 @@ var MatrixTest;
         let translate = calcVector(String(formData.get("t")), Number(formData.get("tValue")), Number(formData.get("tDirection")));
         let rotate = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
         let scale = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
-        coSys[_which].mtxLocal.translate(translate, false);
-        coSys[_which].mtxLocal.rotate(rotate, false);
+        // let transform: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
+        // coSys[_which].mtxLocal.translate(translate, false);
+        // coSys[_which].mtxLocal.rotate(rotate, false);
+        // scale.add(ƒ.Vector3.ONE());
+        // coSys[_which].mtxLocal.scale(scale);
+        let transform = coSys[_which].mtxLocal.copy;
+        if (_which == 1)
+            transform = calculateRelativeMatrix(transform, coSys[0].mtxWorld);
+        transform.translate(translate, false);
+        transform.rotate(rotate, false);
         scale.add(ƒ.Vector3.ONE());
-        coSys[_which].mtxLocal.scale(scale);
+        transform.scale(scale);
+        if (_which == 1)
+            transform.multiply(coSys[0].mtxLocal, true);
+        transform = calculateRelativeMatrix(transform, root.mtxWorld);
+        coSys[_which].cmpTransform.local = transform;
     }
     function createUI(_which) {
         let fieldset;
