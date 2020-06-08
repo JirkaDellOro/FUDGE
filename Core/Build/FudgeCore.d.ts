@@ -3340,8 +3340,8 @@ declare namespace FudgeCore {
          */
         private parseVectorData;
         /**
-         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue.
-         *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
+         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue,
+         * e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
          * @param _data The closure data to parse recursively
          * @param _undefinedValue The number which will be returned by the function if _data is undefined
          */
@@ -3447,7 +3447,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class RenderParticles extends RenderManager {
-        static drawParticles(_node: Node, _finalTransform: Matrix4x4, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
     }
 }
 declare namespace FudgeCore {

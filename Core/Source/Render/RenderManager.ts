@@ -111,7 +111,7 @@ namespace FudgeCore {
       // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       if (cmpParticleSystem)
-        RenderParticles.drawParticles(_node, finalTransform, _cmpCamera, _drawNode);
+        RenderParticles.drawParticles(_node, _node.mtxWorld, _cmpCamera, _drawNode);
       else
         _drawNode(_node, finalTransform, projection);
 
@@ -121,6 +121,7 @@ namespace FudgeCore {
         RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
       }
 
+      // TODO: this should also be done per particle
       Recycler.store(projection);
       if (finalTransform != _node.mtxWorld)
         Recycler.store(finalTransform);

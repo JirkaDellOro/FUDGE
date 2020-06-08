@@ -1,23 +1,18 @@
 namespace FudgeCore {
+  
   // data structure
-
   export interface ParticleEffectData {
-    // storage?: ParticleStorageData;
+    // storage
     system?: ParticleStorageData;
     update?: ParticleStorageData;
     particle?: ParticleStorageData;
+    // transformation
     translation?: ParticleVectorData;
     rotation?: ParticleVectorData;
     translationWorld?: ParticleVectorData;
     scaling?: ParticleVectorData;
     color?: ParticleColorData;
   }
-
-  // export interface ParticleStorageData {
-  //   system?: ParticleData;
-  //   update?: ParticleData;
-  //   particle?: ParticleData;
-  // }
 
   export interface ParticleStorageData {
     [key: string]: ClosureData;
@@ -39,13 +34,11 @@ namespace FudgeCore {
   export interface ClosureDataFunction {
     function: string;
     parameters: ClosureData[];
-    // preEvaluate?: boolean;
   }
 
   export type ClosureData = ClosureDataFunction | string | number;
 
   // effect structure
-
   export interface ParticleEffectDefinition {
     // storage
     system?: ClosureStorage;
@@ -184,8 +177,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue.
-     *  e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
+     * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue,
+     * e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
      * @param _data The closure data to parse recursively
      * @param _undefinedValue The number which will be returned by the function if _data is undefined
      */

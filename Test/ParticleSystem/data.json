@@ -31,16 +31,7 @@
             "index"
           ]
         },
-        {
-          "function": "linear",
-          "parameters": [
-            "inNormTime",
-            0,
-            1,
-            0,
-            1
-          ]
-        }
+        "inNormTime"
       ]
     }
   },
