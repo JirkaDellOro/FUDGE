@@ -20,7 +20,7 @@ var MutatorGeneration;
          * @returns a definition of the particle effect containing the closure for translation, rotation etc.
          */
         parseFile(_data) {
-            console.log(_data);
+            // console.log(_data);
             // pre parse storage and initialize stored values
             this.preParseStorage(_data["Storage"]);
             this.parseDataRecursively(_data);

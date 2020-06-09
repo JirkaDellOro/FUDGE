@@ -70,7 +70,7 @@ var MutatorGeneration;
         function update(_event = null) {
             storedValues["time"] = f.Time.game.get() / 1000;
             // particleSystem.updateParticleEffect(time);
-            console.log(particle.getComponent(f.ComponentTransform).getMutator());
+            // console.log(particle.getComponent(f.ComponentTransform).getMutator());
             // evalute update storage
             let storage = functionData["Storage"];
             let update = storage["update"];

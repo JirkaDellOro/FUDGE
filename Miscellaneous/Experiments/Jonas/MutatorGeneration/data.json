@@ -13,8 +13,13 @@
   "ComponentTransform": {
     "local": {
       "rotation": {
-        "x": "normTime",
-        "z": "normTime"
+        "z": {
+          "function": "multiplication",
+          "parameters": [
+            "normTime",
+            360
+          ]
+        }
       },
       "scaling": {
         "x": "normTime",

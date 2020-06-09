@@ -83,7 +83,7 @@ namespace MutatorGeneration {
     function update(_event: f.Eventƒ = null): void {
       storedValues["time"] = f.Time.game.get() / 1000;
       // particleSystem.updateParticleEffect(time);
-      console.log(particle.getComponent(f.ComponentTransform).getMutator());
+      // console.log(particle.getComponent(f.ComponentTransform).getMutator());
 
       // evalute update storage
       let storage: Data = <Data>functionData["Storage"];
