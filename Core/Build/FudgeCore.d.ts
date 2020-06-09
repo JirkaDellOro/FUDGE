@@ -3425,7 +3425,7 @@ declare namespace FudgeCore {
         /**
          * The standard render function for drawing a single node
          */
-        protected static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void;
+        private static drawNode;
         /**
          * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
          */
@@ -3447,7 +3447,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class RenderParticles extends RenderManager {
-        static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera): void;
     }
 }
 declare namespace FudgeCore {

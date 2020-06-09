@@ -6,6 +6,10 @@ namespace FudgeCore {
       let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
       let materialMutator: Mutator = cmpMaterial.getMutator();
 
+      let shader: typeof Shader = cmpMaterial.material.getShader();
+      let coat: Coat = cmpMaterial.material.getCoat();
+      shader.useProgram();
+
       // let saved: Mutator[] = [];
       // let components: Component[] = _node.getAllComponents();
       // let componentsLength: number = components.length;
@@ -16,13 +20,10 @@ namespace FudgeCore {
       let storedValues: StoredValues = cmpParticleSystem.storedValues;
       let effectDefinition: ParticleEffectDefinition = cmpParticleSystem.effectDefinition;
 
-
       // evaluate update storage
       cmpParticleSystem.evaluateClosureStorage(effectDefinition.update);
 
-      // TODO: ask if creating particle node is necessary
-      // let particle: Node = new Node("Particle");
-
+      //TODO: USE MUTATORS ONLY!
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
 
@@ -60,8 +61,10 @@ namespace FudgeCore {
 
         let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
-        RenderManager.draw(mesh, cmpMaterial, finalTransform, projection);
-        // this increases fps
+        mesh.useRenderBuffers(shader, finalTransform, projection);
+        coat.useRenderData(shader, cmpMaterial);
+        RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+
         Recycler.store(projection);
         Recycler.store(finalTransform);
       }
