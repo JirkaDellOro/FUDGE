@@ -83,6 +83,8 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
+      RenderManager.setupPhysicalTransform(_node);
+
       RenderManager.setupTransformAndLights(_node, matrix);
 
       RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
@@ -198,7 +200,7 @@ namespace FudgeCore {
      * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
      * collects all lights and feeds all shaders used in the graph with these lights
      */
-    private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
@@ -273,6 +275,36 @@ namespace FudgeCore {
             direction.transform(cmpLight.pivot, false);
             direction.transform(cmpLight.getContainer().mtxWorld);
             RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+          }
+        }
+      }
+    }
+    //#endregion
+
+    //#region Physics
+    /**
+    * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from 
+    * the rb component, which is the new "local" WORLD position.
+    */
+    private static setupPhysicalTransform(_node: Node): void {
+      if (Physics.world != null) {
+        for (let name in _node.getChildren()) {
+          let childNode: Node = _node.getChildren()[name];
+          RenderManager.setupPhysicalTransform(childNode);
+          let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
+          if (childNode.mtxLocal != null && cmpRigidbody != null) {
+            cmpRigidbody.checkCollisionEvents();
+            cmpRigidbody.checkTriggerEvents();
+            if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
+              let mutator: Mutator = {};   //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+              mutator["rotation"] = cmpRigidbody.getRotation();
+              mutator["translation"] = cmpRigidbody.getPosition();
+              childNode.mtxLocal.mutate(mutator);
+            }
+            if (cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+              cmpRigidbody.setPosition(childNode.mtxWorld.translation);
+              cmpRigidbody.setRotation(childNode.mtxWorld.rotation);
+            }
           }
         }
       }
