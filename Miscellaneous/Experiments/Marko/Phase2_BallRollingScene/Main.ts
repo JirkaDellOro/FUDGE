@@ -26,7 +26,6 @@ namespace FudgePhysics_Communication {
     hierarchy = new f.Node("Scene");
 
     document.addEventListener("keypress", hndKey);
-
     let ground: f.Node = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), "Cube", 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
     let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
     cmpGroundMesh.local.scale(new f.Vector3(10, 0.3, 10));

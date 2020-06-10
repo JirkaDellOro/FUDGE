@@ -92,4 +92,84 @@ namespace FudgeCore {
       this.hitNormal = Vector3.ZERO();
     }
   }
+
+  export class PhysicsSettings {
+    /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
+    get disableSleeping(): boolean {
+      return OIMO.Setting.disableSleeping;
+    }
+    set disableSleeping(_value: boolean) {
+      OIMO.Setting.disableSleeping = _value;
+    }
+    /** Sleeping Threshold for Movement Veloctiy. */
+    get sleepingVelocityThreshold(): number {
+      return OIMO.Setting.sleepingVelocityThreshold;
+    }
+    set sleepingVelocityThreshold(_value: number) {
+      OIMO.Setting.sleepingVelocityThreshold = _value;
+    }
+
+    /** Sleeping Threshold for Rotation Velocity. */
+    get sleepingAngularVelocityThreshold(): number {
+      return OIMO.Setting.sleepingAngularVelocityThreshold;
+    }
+    set sleepingAngularVelocityThreshold(_value: number) {
+      OIMO.Setting.sleepingAngularVelocityThreshold = _value;
+    }
+
+    /** Threshold how long the Rigidbody must be below/above the threshold to count as sleeping. */
+    get sleepingTimeThreshold(): number {
+      return OIMO.Setting.sleepingTimeThreshold;
+    }
+    set sleepingTimeThreshold(_value: number) {
+      OIMO.Setting.sleepingTimeThreshold = _value;
+    }
+
+    /** Error threshold. Default is 0.05. The higher the more likely collisions get detected before actual impact at high speeds but it's visually less accurate. */
+    get defaultCollisionMargin(): number {
+      return OIMO.Setting.defaultGJKMargin;
+    }
+    set defaultCollisionMargin(_thickness: number) {
+      OIMO.Setting.defaultGJKMargin = _thickness;
+    }
+
+    /** The default applied friction between two rigidbodies with the default value. How much velocity is slowed down when moving accross this surface. */
+    get defaultFriction(): number {
+      return OIMO.Setting.defaultFriction;
+    }
+    set defaultFriction(_value: number) {
+      OIMO.Setting.defaultFriction = _value;
+    }
+
+    /** Bounciness of rigidbodies. How much of the impact is restituted. */
+    get defaultRestitution(): number {
+      return OIMO.Setting.defaultRestitution;
+    }
+    set defaultRestitution(_value: number) {
+      OIMO.Setting.defaultRestitution = _value;
+    }
+
+    /** Groups the default rigidbody will collide with. Set it like: (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3) 
+     * to collide with multiple groups. Default is collision with everything but triggers.
+    */
+    get defaultCollisionMask(): number {
+      return OIMO.Setting.defaultCollisionMask;
+    }
+    set defaultCollisionMask(_value: number) {
+      OIMO.Setting.defaultCollisionMask = _value;
+    }
+
+    /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
+    get defaultCollisionGroup(): number {
+      return OIMO.Setting.defaultCollisionGroup;
+    }
+    set defaultCollisionGroup(_value: number) {
+      OIMO.Setting.defaultCollisionGroup = _value;
+    }
+
+    constructor(_defGroup: number, _defMask: number) {
+      this.defaultCollisionGroup = _defGroup;
+      this.defaultCollisionMask = _defMask;
+    }
+  }
 }

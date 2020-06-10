@@ -8,7 +8,10 @@ namespace FudgeCore {
   */
   export class Physics {
 
+    /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
     public static world: Physics;
+    /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
+    public static settings: PhysicsSettings;
 
     private oimoWorld: OIMO.World;
     private bodyList: ComponentRigidbody[] = new Array();
@@ -24,6 +27,7 @@ namespace FudgeCore {
     public static initializePhysics(): void {
       if (this.world == null) {
         this.world = new Physics();
+        this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld();
       }
 

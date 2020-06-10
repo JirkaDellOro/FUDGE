@@ -84,6 +84,7 @@ namespace FudgeCore {
         this.rigidbody.setMassData(this.massData);
     }
 
+    /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
     get linearDamping(): number {
       return this.rigidbody.getLinearDamping();
     }
@@ -92,6 +93,7 @@ namespace FudgeCore {
       this.rigidbody.setLinearDamping(_value);
     }
 
+    /** Air resistance, when rotating. */
     get angularDamping(): number {
       return this.rigidbody.getAngularDamping();
     }
@@ -100,12 +102,22 @@ namespace FudgeCore {
       this.rigidbody.setAngularDamping(_value);
     }
 
+    /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
     get rotationInfluenceFactor(): Vector3 {
       return this.rotationalInfluenceFactor;
     }
     set rotationInfluenceFactor(_influence: Vector3) {
       this.rotationalInfluenceFactor = _influence;
       this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
+    }
+
+    /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
+    get gravityScale(): number {
+      return this.gravityInfluenceFactor;
+    }
+    set gravityScale(_influence: number) {
+      this.gravityInfluenceFactor = _influence;
+      if (this.rigidbody != null) this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
     }
 
     public collisions: ComponentRigidbody[] = new Array();
@@ -120,19 +132,23 @@ namespace FudgeCore {
     private rbType: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC;
     private colType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
     private colGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT;
-    private colMask: number = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4;
-    private restitution: number = 0.2;
-    private friction: number = 0.5;
+    private colMask: number;
+    private restitution: number;
+    private friction: number;
     private linDamping: number = 0.1;
     private angDamping: number = 0.1;
     private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
+    private gravityInfluenceFactor: number = 1;
 
-    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT, _transform: Matrix4x4 = null) {
+    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null) {
       super();
       this.rbType = _type;
       this.collisionGroup = _group;
       this.colliderType = _colliderType;
       this.mass = _mass;
+      this.restitution = Physics.settings.defaultRestitution;
+      this.friction = Physics.settings.defaultFriction;
+      this.colMask = Physics.settings.defaultCollisionMask;
       this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
       this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
@@ -432,6 +448,15 @@ namespace FudgeCore {
       this.rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
     }
 
+    /** Stops the rigidbody from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results */
+    public deactivateAutoSleep(): void {
+      this.rigidbody.setAutoSleep(false);
+    }
+
+    public activateAutoSleep(): void {
+      this.rigidbody.setAutoSleep(true);
+    }
+
     //#endregion
 
     //#events
@@ -504,6 +529,7 @@ namespace FudgeCore {
       this.rigidbody.getShapeList().setFriction(this.friction);
       this.rigidbody.setLinearDamping(this.linDamping);
       this.rigidbody.setAngularDamping(this.angDamping);
+      this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
       this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
     }
 

@@ -3946,12 +3946,18 @@ declare namespace FudgeCore {
       * Setting the physical weight of the [[Node]] in kg
       */
         set mass(_value: number);
+        /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
         get linearDamping(): number;
         set linearDamping(_value: number);
+        /** Air resistance, when rotating. */
         get angularDamping(): number;
         set angularDamping(_value: number);
+        /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
         get rotationInfluenceFactor(): Vector3;
         set rotationInfluenceFactor(_influence: Vector3);
+        /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
+        get gravityScale(): number;
+        set gravityScale(_influence: number);
         collisions: ComponentRigidbody[];
         triggers: ComponentRigidbody[];
         bodiesInTrigger: ComponentRigidbody[];
@@ -3969,6 +3975,7 @@ declare namespace FudgeCore {
         private linDamping;
         private angDamping;
         private rotationalInfluenceFactor;
+        private gravityInfluenceFactor;
         constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4);
         /**
         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
@@ -4065,6 +4072,9 @@ declare namespace FudgeCore {
        * Changing the VELOCITY of the RIGIDBODY. Only influencing the angular speed not the linear
        */
         addAngularVelocity(_value: Vector3): void;
+        /** Stops the rigidbody from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results */
+        deactivateAutoSleep(): void;
+        activateAutoSleep(): void;
         /**
          * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
          * returning info about the hit.
@@ -4090,7 +4100,10 @@ declare namespace FudgeCore {
     * @author Marko Fehrenbach, HFU, 2020
     */
     class Physics {
+        /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
         static world: Physics;
+        /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
+        static settings: PhysicsSettings;
         private oimoWorld;
         private bodyList;
         private triggerBodyList;
@@ -4235,6 +4248,38 @@ declare namespace FudgeCore {
         rayOrigin: Vector3;
         rayEnd: Vector3;
         constructor();
+    }
+    class PhysicsSettings {
+        /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
+        get disableSleeping(): boolean;
+        set disableSleeping(_value: boolean);
+        /** Sleeping Threshold for Movement Veloctiy. */
+        get sleepingVelocityThreshold(): number;
+        set sleepingVelocityThreshold(_value: number);
+        /** Sleeping Threshold for Rotation Velocity. */
+        get sleepingAngularVelocityThreshold(): number;
+        set sleepingAngularVelocityThreshold(_value: number);
+        /** Threshold how long the Rigidbody must be below/above the threshold to count as sleeping. */
+        get sleepingTimeThreshold(): number;
+        set sleepingTimeThreshold(_value: number);
+        /** Error threshold. Default is 0.05. The higher the more likely collisions get detected before actual impact at high speeds but it's visually less accurate. */
+        get defaultCollisionMargin(): number;
+        set defaultCollisionMargin(_thickness: number);
+        /** The default applied friction between two rigidbodies with the default value. How much velocity is slowed down when moving accross this surface. */
+        get defaultFriction(): number;
+        set defaultFriction(_value: number);
+        /** Bounciness of rigidbodies. How much of the impact is restituted. */
+        get defaultRestitution(): number;
+        set defaultRestitution(_value: number);
+        /** Groups the default rigidbody will collide with. Set it like: (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3)
+         * to collide with multiple groups. Default is collision with everything but triggers.
+        */
+        get defaultCollisionMask(): number;
+        set defaultCollisionMask(_value: number);
+        /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
+        get defaultCollisionGroup(): number;
+        set defaultCollisionGroup(_value: number);
+        constructor(_defGroup: number, _defMask: number);
     }
 }
 declare namespace FudgeCore {
