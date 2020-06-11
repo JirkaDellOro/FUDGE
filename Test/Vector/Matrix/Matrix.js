@@ -45,17 +45,37 @@ var MatrixTest;
         // coSys[_which].mtxLocal.rotate(rotate, false);
         // scale.add(ƒ.Vector3.ONE());
         // coSys[_which].mtxLocal.scale(scale);
-        let transform = coSys[_which].mtxLocal.copy;
-        if (_which == 1)
-            transform = calculateRelativeMatrix(transform, coSys[0].mtxWorld);
+        let transform = ƒ.Matrix4x4.IDENTITY();
         transform.translate(translate, false);
         transform.rotate(rotate, false);
         scale.add(ƒ.Vector3.ONE());
         transform.scale(scale);
-        if (_which == 1)
-            transform.multiply(coSys[0].mtxLocal, true);
-        transform = calculateRelativeMatrix(transform, root.mtxWorld);
-        coSys[_which].cmpTransform.local = transform;
+        let move = coSys[_which].mtxLocal.copy;
+        if (_which == 1) {
+            // move = calculateRelativeMatrix(move, coSys[0].mtxWorld);
+            // move.multiply(transform);
+            // move.multiply(coSys[0].mtxLocal, true);
+            // move = calculateRelativeMatrix(move, root.mtxWorld);
+            transformRelative(transform, coSys[1].cmpTransform, coSys[0].cmpTransform);
+        }
+        else {
+            move.multiply(transform);
+            coSys[_which].cmpTransform.local = move;
+        }
+    }
+    function transformRelative(_transform, _move, _relativeTo) {
+        let mtxMove = _move.local.copy;
+        let containerRelative = _relativeTo.getContainer();
+        let containerMove = _move.getContainer();
+        if (containerRelative)
+            mtxMove = calculateRelativeMatrix(mtxMove, containerRelative.mtxWorld);
+        else
+            mtxMove = calculateRelativeMatrix(mtxMove, _relativeTo.local);
+        mtxMove.multiply(_transform);
+        mtxMove.multiply(_relativeTo.local, true);
+        // if (containerMove)
+        //   mtxMove = calculateRelativeMatrix(mtxMove, containerMove.mtxWorld);
+        _move.local = mtxMove;
     }
     function createUI(_which) {
         let fieldset;
