@@ -21,8 +21,6 @@ namespace FudgePhysics_Communication {
 
   function init(_event: Event): void {
     f.Debug.log(app);
-    f.RenderManager.initialize();
-    f.Physics.initializePhysics();
     hierarchy = new f.Node("Scene");
 
     document.addEventListener("keypress", hndKey);

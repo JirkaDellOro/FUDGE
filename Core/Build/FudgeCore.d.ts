@@ -4095,86 +4095,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-    * Main Physics Class to hold information about the physical representation of the scene
-    * @author Marko Fehrenbach, HFU, 2020
-    */
-    class Physics {
-        /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-        static world: Physics;
-        /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
-        static settings: PhysicsSettings;
-        private oimoWorld;
-        private bodyList;
-        private triggerBodyList;
-        private jointList;
-        /**
-       * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
-       * rigidbodies.
-       */
-        static initializePhysics(): void;
-        /**
-      * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
-      * hit point.
-      */
-        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
-        /**
-      * Starts the physical world by checking that each body has the correct values from the Scene Tree
-      */
-        static start(_sceneTree: Node): void;
-        private static getRayEndPoint;
-        private static getRayDistance;
-        getBodyList(): ComponentRigidbody[];
-        getTriggerList(): ComponentRigidbody[];
-        /**
-      * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-      */
-        getSolverIterations(): number;
-        /**
-      * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-      */
-        setSolverIterations(_value: number): void;
-        /**
-      * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-      */
-        getGravity(): Vector3;
-        /**
-      * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-      */
-        setGravity(_value: Vector3): void;
-        /**
-      * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
-      */
-        addRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-      * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
-      */
-        removeRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
-    */
-        addJoint(_cmpJoint: ComponentJoint): void;
-        /**
-        * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
-        */
-        removeJoint(_cmpJoint: ComponentJoint): void;
-        /**
-      * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
-      */
-        simulate(_deltaTime?: number): void;
-        registerTrigger(_rigidbody: ComponentRigidbody): void;
-        unregisterTrigger(_rigidbody: ComponentRigidbody): void;
-        connectJoints(): void;
-        /**
-        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-        * be recreated.
-        */
-        changeJointStatus(_cmpJoint: ComponentJoint): void;
-        private updateWorldFromWorldMatrix;
-        private createWorld;
-    }
-}
-declare namespace FudgeCore {
     const enum EVENT_PHYSICS {
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
         TRIGGER_ENTER = "TriggerEnteredCollision",
@@ -4280,6 +4200,86 @@ declare namespace FudgeCore {
         get defaultCollisionGroup(): number;
         set defaultCollisionGroup(_value: number);
         constructor(_defGroup: number, _defMask: number);
+    }
+}
+declare namespace FudgeCore {
+    /**
+    * Main Physics Class to hold information about the physical representation of the scene
+    * @author Marko Fehrenbach, HFU, 2020
+    */
+    class Physics {
+        /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
+        static world: Physics;
+        /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
+        static settings: PhysicsSettings;
+        private oimoWorld;
+        private bodyList;
+        private triggerBodyList;
+        private jointList;
+        /**
+       * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+       * rigidbodies.
+       */
+        static initializePhysics(): Physics;
+        /**
+      * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
+      * hit point.
+      */
+        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
+        /**
+      * Starts the physical world by checking that each body has the correct values from the Scene Tree
+      */
+        static start(_sceneTree: Node): void;
+        private static getRayEndPoint;
+        private static getRayDistance;
+        getBodyList(): ComponentRigidbody[];
+        getTriggerList(): ComponentRigidbody[];
+        /**
+      * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+      */
+        getSolverIterations(): number;
+        /**
+      * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+      */
+        setSolverIterations(_value: number): void;
+        /**
+      * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+      */
+        getGravity(): Vector3;
+        /**
+      * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+      */
+        setGravity(_value: Vector3): void;
+        /**
+      * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+      */
+        addRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+      * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+      */
+        removeRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+    */
+        addJoint(_cmpJoint: ComponentJoint): void;
+        /**
+        * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+        */
+        removeJoint(_cmpJoint: ComponentJoint): void;
+        /**
+      * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
+      */
+        simulate(_deltaTime?: number): void;
+        registerTrigger(_rigidbody: ComponentRigidbody): void;
+        unregisterTrigger(_rigidbody: ComponentRigidbody): void;
+        connectJoints(): void;
+        /**
+        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+        * be recreated.
+        */
+        changeJointStatus(_cmpJoint: ComponentJoint): void;
+        private updateWorldFromWorldMatrix;
+        private createWorld;
     }
 }
 declare namespace FudgeCore {

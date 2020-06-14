@@ -9,7 +9,7 @@ namespace FudgeCore {
   export class Physics {
 
     /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-    public static world: Physics;
+    public static world: Physics = Physics.initializePhysics();
     /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
     public static settings: PhysicsSettings;
 
@@ -24,13 +24,13 @@ namespace FudgeCore {
    * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
    * rigidbodies.
    */
-    public static initializePhysics(): void {
+    public static initializePhysics(): Physics {
       if (this.world == null) {
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld();
       }
-
+      return this.world;
     }
 
     /**
@@ -82,15 +82,13 @@ namespace FudgeCore {
     public static start(_sceneTree: Node): void {
       RenderManager.setupTransformAndLights(_sceneTree);
       this.world.updateWorldFromWorldMatrix();
-      //this.world.connectJoints();
     }
 
     private static getRayEndPoint(start: OIMO.Vec3, direction: Vector3, length: number): OIMO.Vec3 {
-      let endpoint: Vector3 = Vector3.ZERO();
-      endpoint.add(new Vector3(start.x, start.y, start.z));
-      let endDirection: Vector3 = direction;
-      endDirection.scale(length);
-      endpoint.add(endDirection);
+      let origin: Vector3 = new Vector3(start.x, start.y, start.z); //Raycast Endpoint equals Startpoint + Direction*Length
+      let scaledDirection: Vector3 = direction;
+      scaledDirection.scale(length);
+      let endpoint: Vector3 = Vector3.SUM(origin, scaledDirection);
       return new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z);
     }
 

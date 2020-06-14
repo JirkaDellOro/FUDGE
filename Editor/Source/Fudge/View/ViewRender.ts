@@ -34,7 +34,6 @@ namespace Fudge {
       let container: HTMLDivElement = document.createElement("div");
       container.style.borderWidth = "0px";
       document.body.appendChild(this.canvas);
-
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
@@ -42,6 +41,8 @@ namespace Fudge {
       this.content.append(this.canvas);
 
       ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+      ƒ.Physics.start(this.graph); //recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
+
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
@@ -67,10 +68,13 @@ namespace Fudge {
      */
     private animate = (_e: Event) => {
       this.viewport.setGraph(this.graph);
-      if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
+      if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0) {
         this.viewport.draw();
+        if (ƒ.Physics.world.getBodyList().length >= 1)
+          ƒ.Physics.world.simulate(); //added for physics, but should only be called when there is at least 1 RB @author Marko Fehrenbach | HFU 2020
+      }
     }
-    
+
     private activeViewport = (_event: MouseEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
       this.parentPanel.dispatchEvent(event);

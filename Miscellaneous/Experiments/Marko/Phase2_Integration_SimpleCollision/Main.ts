@@ -27,8 +27,8 @@ namespace FudgePhysics_Communication {
 
   function init(_event: Event): void {
     f.Debug.log(app);
-    f.RenderManager.initialize();
-    f.Physics.initializePhysics();
+    //f.RenderManager.initialize();
+    //f.Physics.initializePhysics();
     hierarchy = new f.Node("Scene");
 
     document.addEventListener("keypress", hndKey);
@@ -143,9 +143,6 @@ namespace FudgePhysics_Communication {
     }
     if (_event.code == f.KEYBOARD_CODE.W) {
       vertical -= 1 * stepWidth;
-    }
-    if (_event.code == f.KEYBOARD_CODE.S) {
-      vertical += 1 * stepWidth;
     }
     if (_event.code == f.KEYBOARD_CODE.S) {
       vertical += 1 * stepWidth;

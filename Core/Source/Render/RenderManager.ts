@@ -287,16 +287,17 @@ namespace FudgeCore {
     * the rb component, which is the new "local" WORLD position.
     */
     private static setupPhysicalTransform(_node: Node): void {
-      if (Physics.world != null) {
+      if (Physics.world != null && Physics.world.getBodyList().length >= 1) {
+        let mutator: Mutator = {};
         for (let name in _node.getChildren()) {
           let childNode: Node = _node.getChildren()[name];
           RenderManager.setupPhysicalTransform(childNode);
           let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
-          if (childNode.mtxLocal != null && cmpRigidbody != null) {
+          if (childNode.getComponent(ComponentTransform) != null && cmpRigidbody != null) {
             cmpRigidbody.checkCollisionEvents();
             cmpRigidbody.checkTriggerEvents();
             if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
-              let mutator: Mutator = {};   //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+              //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
               mutator["rotation"] = cmpRigidbody.getRotation();
               mutator["translation"] = cmpRigidbody.getPosition();
               childNode.mtxLocal.mutate(mutator);
