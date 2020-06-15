@@ -1798,6 +1798,7 @@ declare namespace FudgeCore {
          * Set the graph to be drawn in the viewport.
          */
         setGraph(_graph: Node): void;
+        getGraph(): Node;
         /**
          * Logs this viewports scenegraph to the console.
          */

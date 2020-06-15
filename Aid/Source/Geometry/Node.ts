@@ -18,10 +18,6 @@ namespace FudgeAid {
       return "ƒAidNode_" + Node.count++;
     }
 
-    public get local(): ƒ.Matrix4x4 {
-      return this.cmpTransform ? this.mtxLocal : null;
-    }
-
     public get pivot(): ƒ.Matrix4x4 {
       let cmpMesh: ƒ.ComponentMesh = this.getComponent(ƒ.ComponentMesh);
       return cmpMesh ? cmpMesh.pivot : null;
