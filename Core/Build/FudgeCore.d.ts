@@ -177,7 +177,7 @@ declare namespace FudgeCore {
      * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
      */
     interface Mutator {
-        [attribute: string]: Object;
+        [attribute: string]: General;
     }
     interface MutatorForAnimation extends Mutator {
         readonly forAnimation: null;
