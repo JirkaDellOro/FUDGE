@@ -1,93 +1,92 @@
 {
-  "update": {
-    "inNormTime": {
-      "function": "modulo",
-      "parameters": [
-        "time",
-        1
-      ]
-    },
-    "inNormTime-1": {
-      "function": "multiplication",
-      "parameters": [
-        {
-          "function": "addition",
+  "storage": {
+    "update": {
+      "inNormTime": {
+        "function": "modulo",
+        "parameters": [
+          "time",
+          1
+        ]
+      }
+    }
+  },
+  "transformations": [
+    {
+      "translate": {
+        "y": {
+          "function": "polynomial",
           "parameters": [
             "inNormTime",
-            -1
+            0,
+            -2.5,
+            0,
+            0
           ]
-        },
-        0.1
-      ]
-    }
-  },
-  "translation": {
-    "y": {
-      "function": "multiplication",
-      "parameters": [
-        {
-          "function": "random",
-          "parameters": [
-            "index"
-          ]
-        },
-        "inNormTime"
-      ]
-    }
-  },
-  "rotation": {
-    "z": {
-      "function": "multiplication",
-      "parameters": [
-        {
-          "function": "random",
-          "parameters": [
-            {
-              "function": "addition",
-              "parameters": [
-                "index",
-                1
-              ]
-            }
-          ]
-        },
-        360
-      ]
-    }
-  },
-  "translationWorld": {
-    "y": {
-      "function": "polynomial",
-      "parameters": [
-        "inNormTime",
-        0,
-        -2.5,
-        0,
-        0
-      ]
-    }
-  },
-  "scaling": {
-    "x": 0.1,
-    "y": 0.1,
-    "z": 0.1
-  },
-  "color": {
-    "r": 1,
-    "g": 0.2,
-    "b": 0.1,
-    "a": {
-      "function": "addition",
-      "parameters": [
-        1,
-        {
+        }
+      }
+    },
+    {
+      "rotate": {
+        "z": {
           "function": "multiplication",
           "parameters": [
-            -1,
+            {
+              "function": "random",
+              "parameters": [
+                {
+                  "function": "addition",
+                  "parameters": [
+                    "index",
+                    1
+                  ]
+                }
+              ]
+            },
+            360
+          ]
+        }
+      },
+      "translate": {
+        "y": {
+          "function": "multiplication",
+          "parameters": [
+            {
+              "function": "random",
+              "parameters": [
+                "index"
+              ]
+            },
             "inNormTime"
           ]
         }
-      ]
+      },
+      "scale": {
+        "x": 0.1,
+        "y": 0.1,
+        "z": 0.1
+      }
+    }
+  ],
+  "components": {
+    "ComponentMaterial": {
+      "clrPrimary": {
+        "r": 1,
+        "b": 0.2,
+        "g": 0.2,
+        "a": {
+          "function": "addition",
+          "parameters": [
+            1,
+            {
+              "function": "multiplication",
+              "parameters": [
+                -1,
+                "inNormTime"
+              ]
+            }
+          ]
+        }
+      }
     }
   }
 }

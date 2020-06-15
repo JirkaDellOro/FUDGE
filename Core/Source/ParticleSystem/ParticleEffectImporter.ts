@@ -1,86 +1,24 @@
 namespace FudgeCore {
-  
-  // data structure
   export interface ParticleEffectData {
-    // storage
-    system?: ParticleStorageData;
-    update?: ParticleStorageData;
-    particle?: ParticleStorageData;
-    // transformation
-    translation?: ParticleVectorData;
-    rotation?: ParticleVectorData;
-    translationWorld?: ParticleVectorData;
-    scaling?: ParticleVectorData;
-    color?: ParticleColorData;
+    [identifier: string]: Object;
   }
 
-  export interface ParticleStorageData {
-    [key: string]: ClosureData;
-  }
-
-  export interface ParticleVectorData {
-    x?: ClosureData;
-    y?: ClosureData;
-    z?: ClosureData;
-  }
-
-  export interface ParticleColorData {
-    r?: ClosureData;
-    g?: ClosureData;
-    b?: ClosureData;
-    a?: ClosureData;
-  }
-
-  export interface ClosureDataFunction {
+  interface ClosureDataFunction {
     function: string;
     parameters: ClosureData[];
   }
-
-  export type ClosureData = ClosureDataFunction | string | number;
-
-  // effect structure
-  export interface ParticleEffectDefinition {
-    // storage
-    system?: ClosureStorage;
-    update?: ClosureStorage;
-    particle?: ClosureStorage;
-
-    // transformation
-    translation?: ClosureVector;
-    rotation?: ClosureVector;
-    translationWorld?: ClosureVector;
-    scaling?: ClosureVector;
-    color?: ClosureColor;
-  }
-
-  export interface ClosureStorage {
-    [key: string]: Function;
-  }
-
-  export interface ClosureVector {
-    x?: Function;
-    y?: Function;
-    z?: Function;
-  }
-
-  export interface ClosureColor {
-    r?: Function;
-    g?: Function;
-    b?: Function;
-    a?: Function;
-  }
+  type ClosureData = ClosureDataFunction | string | number;
 
   export class ParticleEffectImporter {
-    private storedValues: StoredValues;
+    private storedValues: FudgeCore.StoredValues;
     private randomNumbers: number[];
-    private definition: ParticleEffectDefinition = {};
 
-    constructor(_storedValues: StoredValues, _randomNumbers: number[]) {
+    constructor(_storedValues: FudgeCore.StoredValues, _randomNumbers: number[]) {
       this.storedValues = _storedValues;
       this.randomNumbers = _randomNumbers;
     }
 
-    public importFile(_filename: string): ParticleEffectDefinition {
+    public importFile(_filename: string): ParticleEffectData {
       //TODO: import file
       let file: XMLHttpRequest = new XMLHttpRequest();
       file.open("GET", _filename, false);
@@ -94,86 +32,44 @@ namespace FudgeCore {
      * @param _data the data to parse
      * @returns a definition of the particle effect containing the closure for translation, rotation etc.
      */
-    private parseFile(_data: ParticleEffectData): ParticleEffectDefinition {
+    private parseFile(_data: ParticleEffectData): ParticleEffectData {
+      // console.log(_data);
 
       // pre parse storage and initialize stored values
-      this.preParseParticleData(_data.system);
-      this.preParseParticleData(_data.update);
-      this.preParseParticleData(_data.particle);
+      this.preParseStorage(<ParticleEffectData>_data["storage"]);
 
-      // parse storage
-      this.definition.system = this.parsePaticleData(_data.system);
-      this.definition.update = this.parsePaticleData(_data.update);
-      this.definition.particle = this.parsePaticleData(_data.particle);
+      this.parseDataRecursively(_data);
 
-      // parse translation locale
-      this.definition.translation = this.parseVectorData(_data.translation);
-
-      // parse rotation
-      this.definition.rotation = this.parseVectorData(_data.rotation);
-
-      // parse translation world
-      this.definition.translationWorld = this.parseVectorData(_data.translationWorld);
-
-      // parse scaling
-      this.definition.scaling = this.parseVectorData(_data.scaling, 1);
-
-      // parse color
-      //TODO: Refactor color and vector because code duplication?
-      if (!_data.color)
-        _data.color = {};
-      this.definition.color = {
-        r: this.parseClosure(_data.color.r),
-        g: this.parseClosure(_data.color.g),
-        b: this.parseClosure(_data.color.b),
-        a: this.parseClosure(_data.color.a, 1)
-      };
-
-      return this.definition;
+      return _data;
     }
-
+    
     /**
      * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
      * @param _data The paticle data to parse
      */
-    private preParseParticleData(_data: ParticleStorageData): void {
-      for (const key in _data) {
-        if (key in this.storedValues) {
-          // Debug.error(`"${key}" is already defined`);
-          throw `"${key}" is already defined`;
+    private preParseStorage(_data: ParticleEffectData): void {
+      for (const storagePartition in _data) {
+        let storage: ParticleEffectData = <ParticleEffectData>_data[storagePartition];
+        for (const storageValue in <ParticleEffectData>storage) {
+          if (storageValue in this.storedValues) {
+            throw `"${storageValue}" is already defined`;
+          }
+          else
+            this.storedValues[storageValue] = 0;
         }
-        else
-          this.storedValues[key] = 0;
       }
     }
 
-    /**
-     * Parse the given particle storage data, create a closure storage and return it
-     * @param _data The storage data to parse
-     * @param _closureStorage The closure storage to add to
-     */
-    private parsePaticleData(_data: ParticleStorageData): ClosureStorage {
-      let closureStorage: ClosureStorage = {};
+    // TODO: COMMENT
+    private parseDataRecursively(_data: ParticleEffectData): void {
       for (const key in _data) {
-        closureStorage[key] = this.parseClosure(_data[key]);
+        let value: Object = _data[key];
+        if (typeof value === "string" || typeof value === "number" || "function" in <ParticleEffectData>value)
+          _data[key] = this.parseClosure(<ClosureData>value);
+        else {
+          this.parseDataRecursively(<ParticleEffectData>value);
+        }
       }
-      return closureStorage;
-    }
-
-    /**
-     * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _undefinedValue.
-     * @param _data The paticle vector data to parse
-     * @param _undefinedValue The number which will be returned by each function if the respective closure data is undefined
-     */
-    private parseVectorData(_data: ParticleVectorData, _undefinedValue: number = 0): ClosureVector {
-      if (!_data) {
-        _data = {};
-      }
-      return {
-        x: this.parseClosure(_data.x, _undefinedValue),
-        y: this.parseClosure(_data.y, _undefinedValue),
-        z: this.parseClosure(_data.z, _undefinedValue)
-      };
     }
 
     /**
@@ -182,13 +78,8 @@ namespace FudgeCore {
      * @param _data The closure data to parse recursively
      * @param _undefinedValue The number which will be returned by the function if _data is undefined
      */
-    private parseClosure(_data: ClosureData, _undefinedValue: number = 0): Function {
+    private parseClosure(_data: ClosureData): Function {
       switch (typeof _data) {
-        case "undefined":
-          return () => {
-            return _undefinedValue;
-          };
-
         case "object":
           let parameters: Function[] = [];
           for (let param of _data.parameters) {
@@ -202,34 +93,24 @@ namespace FudgeCore {
             });
           }
 
-          let closure: Function = ClosureFactory.getClosure(_data.function, parameters);
+          let closure: Function = FudgeCore.ClosureFactory.getClosure(_data.function, parameters);
 
-          // pre evaluate closure so that only the result will be saved
-          // if (_data.preEvaluate) {
-          //   Debug.log("PreEvaluate");
-          //   let result: number = closure();
-          //   closure = () => {
-          //     Debug.log("preEvaluated", result);
-          //     return result;
-          //   };
-          // }
           return closure;
 
         case "string":
           if (_data in this.storedValues) {
             return () => {
-              Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
+              FudgeCore.Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
               return this.storedValues[<string>_data];
             };
           }
           else {
-            Debug.error(`"${_data}" is not defined`);
-            return null;
+            throw `"${_data}" is not defined`;
           }
 
         case "number":
           return function (): number {
-            Debug.log("Constant", _data);
+            FudgeCore.Debug.log("Constant", _data);
             return <number>_data;
           };
       }

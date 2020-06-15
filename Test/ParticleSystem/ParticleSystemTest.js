@@ -26,12 +26,6 @@ var ParticleSystemTest;
         // enable unlimited mouse-movement (user needs to click on canvas first)
         canvas.addEventListener("mousedown", canvas.requestPointerLock);
         canvas.addEventListener("mouseup", () => document.exitPointerLock());
-        // set lights
-        // let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-        // cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
-        // game.addComponent(cmpLight);
-        // let cmpLightAmbient: f.ComponentLight = new f.ComponentLight(new f.LightAmbient(new f.Color(0.25, 0.25, 0.25, 1)));
-        // root.addComponent(cmpLightAmbient);
         // setup orbiting camera
         camera = new fAid.CameraOrbit(new f.ComponentCamera(), 4);
         camera.component.backgroundColor = f.Color.CSS("black");

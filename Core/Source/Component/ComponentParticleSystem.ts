@@ -7,7 +7,7 @@ namespace FudgeCore {
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
     public storedValues: StoredValues = {}; // TODO: make privat
-    public effectDefinition: ParticleEffectDefinition;
+    public effectData: ParticleEffectData;
     private randomNumbers: number[] = [];
     // color
 
@@ -25,25 +25,20 @@ namespace FudgeCore {
       };
 
       let effectImporter: ParticleEffectImporter = new ParticleEffectImporter(this.storedValues, this.randomNumbers);
-      this.effectDefinition = effectImporter.importFile(_filename);
+      this.effectData = effectImporter.importFile(_filename);
 
       // evaluate system storage
-      this.evaluateClosureStorage(this.effectDefinition.system);
+      this.evaluateClosureStorage(<ParticleEffectData>(<ParticleEffectData>this.effectData["storage"])["system"]);
     }
 
     public updateParticleEffect(_time: number): void {
       this.storedValues["time"] = _time;
     }
 
-    public evaluateClosureStorage(_closureStorage: ClosureStorage): void {
-      for (const key in _closureStorage) {
-        this.storedValues[key] = _closureStorage[key]();
+    public evaluateClosureStorage(_storageData: ParticleEffectData): void {
+      for (const key in _storageData) {
+        this.storedValues[key] = (<Function>_storageData[key])();
       }
-    }
-
-    public evaluateClosureVector(_closureVector: ClosureVector): Vector3 {
-      return new Vector3(
-        _closureVector.x(), _closureVector.y(), _closureVector.z());
     }
   }
 }

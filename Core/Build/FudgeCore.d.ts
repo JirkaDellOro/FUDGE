@@ -1440,12 +1440,11 @@ declare namespace FudgeCore {
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
         storedValues: StoredValues;
-        effectDefinition: ParticleEffectDefinition;
+        effectData: ParticleEffectData;
         private randomNumbers;
         constructor(_filename?: string, _numberOfParticles?: number);
         updateParticleEffect(_time: number): void;
-        evaluateClosureStorage(_closureStorage: ClosureStorage): void;
-        evaluateClosureVector(_closureVector: ClosureVector): Vector3;
+        evaluateClosureStorage(_storageData: ParticleEffectData): void;
     }
 }
 declare namespace FudgeCore {
@@ -3258,64 +3257,13 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface ParticleEffectData {
-        system?: ParticleStorageData;
-        update?: ParticleStorageData;
-        particle?: ParticleStorageData;
-        translation?: ParticleVectorData;
-        rotation?: ParticleVectorData;
-        translationWorld?: ParticleVectorData;
-        scaling?: ParticleVectorData;
-        color?: ParticleColorData;
-    }
-    interface ParticleStorageData {
-        [key: string]: ClosureData;
-    }
-    interface ParticleVectorData {
-        x?: ClosureData;
-        y?: ClosureData;
-        z?: ClosureData;
-    }
-    interface ParticleColorData {
-        r?: ClosureData;
-        g?: ClosureData;
-        b?: ClosureData;
-        a?: ClosureData;
-    }
-    interface ClosureDataFunction {
-        function: string;
-        parameters: ClosureData[];
-    }
-    type ClosureData = ClosureDataFunction | string | number;
-    interface ParticleEffectDefinition {
-        system?: ClosureStorage;
-        update?: ClosureStorage;
-        particle?: ClosureStorage;
-        translation?: ClosureVector;
-        rotation?: ClosureVector;
-        translationWorld?: ClosureVector;
-        scaling?: ClosureVector;
-        color?: ClosureColor;
-    }
-    interface ClosureStorage {
-        [key: string]: Function;
-    }
-    interface ClosureVector {
-        x?: Function;
-        y?: Function;
-        z?: Function;
-    }
-    interface ClosureColor {
-        r?: Function;
-        g?: Function;
-        b?: Function;
-        a?: Function;
+        [identifier: string]: Object;
     }
     class ParticleEffectImporter {
         private storedValues;
         private randomNumbers;
-        private definition;
-        constructor(_storedValues: StoredValues, _randomNumbers: number[]);
-        importFile(_filename: string): ParticleEffectDefinition;
+        constructor(_storedValues: FudgeCore.StoredValues, _randomNumbers: number[]);
+        importFile(_filename: string): ParticleEffectData;
         /**
          * Parse the data from json file and return a particle effect definition
          * @param _data the data to parse
@@ -3326,19 +3274,8 @@ declare namespace FudgeCore {
          * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
          * @param _data The paticle data to parse
          */
-        private preParseParticleData;
-        /**
-         * Parse the given particle storage data, create a closure storage and return it
-         * @param _data The storage data to parse
-         * @param _closureStorage The closure storage to add to
-         */
-        private parsePaticleData;
-        /**
-         * Parse the given paticle vector. If _data is undefined return a closure vector which functions return the given _undefinedValue.
-         * @param _data The paticle vector data to parse
-         * @param _undefinedValue The number which will be returned by each function if the respective closure data is undefined
-         */
-        private parseVectorData;
+        private preParseStorage;
+        private parseDataRecursively;
         /**
          * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue,
          * e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
@@ -3346,21 +3283,6 @@ declare namespace FudgeCore {
          * @param _undefinedValue The number which will be returned by the function if _data is undefined
          */
         private parseClosure;
-    }
-}
-declare namespace FudgeCore {
-    class ParticleSystem extends Component {
-        static readonly iSubclass: number;
-        private particles;
-        private randomNumbers;
-        private storedValues;
-        private effectDefinition;
-        constructor(_filename?: string, _numberOfParticles?: number);
-        updateParticleEffect(_time: number): void;
-        createParticles(_mesh: Mesh, _material: Material): void;
-        private evaluateClosureStorage;
-        private evaluateClosureVector;
-        private createParticle;
     }
 }
 declare namespace FudgeCore {
@@ -3448,6 +3370,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     abstract class RenderParticles extends RenderManager {
         static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera): void;
+        private static getMutatorFor;
+        private static evaluateMutator;
     }
 }
 declare namespace FudgeCore {

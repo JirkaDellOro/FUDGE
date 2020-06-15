@@ -4,44 +4,47 @@ namespace FudgeCore {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-      let materialMutator: Mutator = cmpMaterial.getMutator();
 
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
 
-      // let saved: Mutator[] = [];
-      // let components: Component[] = _node.getAllComponents();
-      // let componentsLength: number = components.length;
-      // for (let i: number = 0; i < componentsLength; i++) {
-      //   saved.push(components[i].getMutator());
-      // }
+      let components: Component[] = _node.getAllComponents();
+      // TODO: only get components that will be manipulated?
+      let componentsLength: number = components.length;
+      let componentMutators: Mutator[] = [];
+      for (let i: number = 0; i < componentsLength; i++) {
+        componentMutators.push(components[i].getMutator());
+      }
 
       let storedValues: StoredValues = cmpParticleSystem.storedValues;
-      let effectDefinition: ParticleEffectDefinition = cmpParticleSystem.effectDefinition;
+      let effectData: ParticleEffectData = cmpParticleSystem.effectData;
+
+      let storageData: ParticleEffectData = <ParticleEffectData>effectData["storage"];
+      let transformData: ParticleEffectData[] = <ParticleEffectData[]>effectData["transformations"];
+      let componentsData: ParticleEffectData = <ParticleEffectData>effectData["components"];
 
       // evaluate update storage
-      cmpParticleSystem.evaluateClosureStorage(effectDefinition.update);
+      cmpParticleSystem.evaluateClosureStorage(<ParticleEffectData>storageData["update"]);
+      // console.log(effectData);
 
-      //TODO: USE MUTATORS ONLY!
+      let particleStorage: ParticleEffectData = <ParticleEffectData>storageData["particle"];
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
 
         // evaluate index storage
-        cmpParticleSystem.evaluateClosureStorage(effectDefinition.particle);
+        cmpParticleSystem.evaluateClosureStorage(particleStorage);
 
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
 
-        // calculate local translation
-        finalTransform.translate(cmpParticleSystem.evaluateClosureVector(effectDefinition.translation));
-        // transformation.translation = cmpParticleSystem.evaluateClosureVector(effectDefinition.translation);
-
-        // calculate rotation
-        finalTransform.rotate(cmpParticleSystem.evaluateClosureVector(effectDefinition.rotation), true);
-        // transformation.rotation = cmpParticleSystem.evaluateClosureVector(effectDefinition.rotation);
-
-        // calculate world translation
-        finalTransform.translate(cmpParticleSystem.evaluateClosureVector(effectDefinition.translationWorld), false);
+        for (const data of transformData) {
+          for (const key in data) {
+            let transformVector: Vector3 = Vector3.ZERO();
+            transformVector.mutate(this.getMutatorFor(<Mutator>data[key]));
+            (<any>finalTransform)[key](transformVector);
+            Recycler.store(transformVector);
+          }  
+        }
 
         // apply system transformation
         finalTransform.multiply(_systemTransform, true);
@@ -49,15 +52,10 @@ namespace FudgeCore {
         // TODO: optimize
         // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
 
-        // calculate scaling
-        finalTransform.scale(cmpParticleSystem.evaluateClosureVector(effectDefinition.scaling));
-        // transformation.scaling = cmpParticleSystem.evaluateClosureVector(effectDefinition.scaling);
-
-        //calculate color
-        cmpMaterial.clrPrimary.r = effectDefinition.color.r();
-        cmpMaterial.clrPrimary.g = effectDefinition.color.g();
-        cmpMaterial.clrPrimary.b = effectDefinition.color.b();
-        cmpMaterial.clrPrimary.a = effectDefinition.color.a();
+        // evaluate component data
+        for (let i: number = 0; i < componentsLength; i++) {
+          components[i].mutate(this.getMutatorFor(<ParticleEffectData>componentsData[components[i].type]));
+        }
 
         let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
@@ -70,10 +68,34 @@ namespace FudgeCore {
       }
 
       // restore
-      // for (let i: number = 0; i < componentsLength; i++) {
-      //   components[i].mutate(saved[i]);
-      // }
-      cmpMaterial.mutate(materialMutator);
+      for (let i: number = 0; i < componentsLength; i++) {
+        components[i].mutate(componentMutators[i]);
+      }
+    }
+
+    // TODO: don't create new Mutators all the time
+    private static getMutatorFor(_effectData: ParticleEffectData): Mutator {
+      let mutator: Mutator = {};
+      for (const attribute in _effectData) {
+        let value: Object = <ParticleEffectData>_effectData[attribute];
+        if (typeof value === "function") {
+          mutator[attribute] = (<Function>value)();
+        } else {
+          mutator[attribute] = this.getMutatorFor(<ParticleEffectData>value);
+        }
+      }
+      return mutator;
+    }
+
+    private static evaluateMutator(_effectData: ParticleEffectData, _mutator: Mutator): void {
+      for (const attribute in _effectData) {
+        let value: Object = <ParticleEffectData>_effectData[attribute];
+        if (typeof value === "function") {
+          _mutator[attribute] = (<Function>value)();
+        } else {
+          this.evaluateMutator(<ParticleEffectData>value, <Mutator>_mutator[attribute]);
+        }
+      }
     }
   }
 }
