@@ -9,14 +9,6 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
 
-      let components: Component[] = _node.getAllComponents();
-      // TODO: only get components that will be manipulated?
-      let componentsLength: number = components.length;
-      let componentMutators: Mutator[] = [];
-      for (let i: number = 0; i < componentsLength; i++) {
-        componentMutators.push(components[i].getMutator());
-      }
-
       let storedValues: StoredValues = cmpParticleSystem.storedValues;
       let effectData: ParticleEffectData = cmpParticleSystem.effectData;
 
@@ -24,23 +16,40 @@ namespace FudgeCore {
       let transformData: ParticleEffectData[] = <ParticleEffectData[]>effectData["transformations"];
       let componentsData: ParticleEffectData = <ParticleEffectData>effectData["components"];
 
-      // evaluate update storage
-      cmpParticleSystem.evaluateClosureStorage(<ParticleEffectData>storageData["update"]);
-      // console.log(effectData);
+      // get relevant components TODO: cache these?
+      let components: Component[] = [];
+      for (const componentClass in componentsData) {
+        components.push(_node.getComponent((<any>globalThis["FudgeCore"])[componentClass]));
+      }
+      let componentsLength: number = components.length;
+      // save their state
+      // let componentMutators: Mutator[] = [];
+      // for (let i: number = 0; i < componentsLength; i++) {
+      //   componentMutators.push(components[i].getMutator());
+      // }
 
-      let particleStorage: ParticleEffectData = <ParticleEffectData>storageData["particle"];
+      let particleStorage: ParticleEffectData;
+      // evaluate update storage
+      if (storageData) {
+        cmpParticleSystem.evaluateClosureStorage(<ParticleEffectData>storageData["update"]);
+        particleStorage = <ParticleEffectData>storageData["particle"];
+      }
+
+      let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
+
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
 
-        // evaluate index storage
+        // evaluate particle storage
         cmpParticleSystem.evaluateClosureStorage(particleStorage);
 
+        // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
-
         for (const data of transformData) {
           for (const key in data) {
             let transformVector: Vector3 = Vector3.ZERO();
-            transformVector.mutate(this.getMutatorFor(<Mutator>data[key]));
+            // transformVector.mutate(<Mutator>data[key]);
+            transformVector.mutate(this.getMutatorFor(<ParticleEffectData>data[key]));
             (<any>finalTransform)[key](transformVector);
             Recycler.store(transformVector);
           }  
@@ -54,10 +63,12 @@ namespace FudgeCore {
 
         // evaluate component data
         for (let i: number = 0; i < componentsLength; i++) {
+          // components[i].mutate(<Mutator>componentsData[components[i].type]);
           components[i].mutate(this.getMutatorFor(<ParticleEffectData>componentsData[components[i].type]));
         }
 
-        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+        // render
+        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(cameraViewProjectionMatrix, finalTransform);
 
         mesh.useRenderBuffers(shader, finalTransform, projection);
         coat.useRenderData(shader, cmpMaterial);
@@ -67,10 +78,10 @@ namespace FudgeCore {
         Recycler.store(finalTransform);
       }
 
-      // restore
-      for (let i: number = 0; i < componentsLength; i++) {
-        components[i].mutate(componentMutators[i]);
-      }
+      // restore component state TODO: is this even necessary? Ask Jirka
+      // for (let i: number = 0; i < componentsLength; i++) {
+      //   components[i].mutate(componentMutators[i]);
+      // }
     }
 
     // TODO: don't create new Mutators all the time

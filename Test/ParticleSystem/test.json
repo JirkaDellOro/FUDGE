@@ -1,0 +1,21 @@
+{
+  "transformations": [
+    {
+      "translate": {
+        "y": {
+          "function": "multiplication",
+          "parameters": [
+            "time",
+            {
+              "function": "addition",
+              "parameters": [
+                1,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

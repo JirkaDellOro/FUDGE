@@ -10,10 +10,10 @@ namespace FudgeCore {
   type ClosureData = ClosureDataFunction | string | number;
 
   export class ParticleEffectImporter {
-    private storedValues: FudgeCore.StoredValues;
+    private storedValues: StoredValues;
     private randomNumbers: number[];
 
-    constructor(_storedValues: FudgeCore.StoredValues, _randomNumbers: number[]) {
+    constructor(_storedValues: StoredValues, _randomNumbers: number[]) {
       this.storedValues = _storedValues;
       this.randomNumbers = _randomNumbers;
     }
@@ -60,7 +60,10 @@ namespace FudgeCore {
       }
     }
 
-    // TODO: COMMENT
+    /**
+     * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
+     * @param _data The effect data to parse recursivley
+     */
     private parseDataRecursively(_data: ParticleEffectData): void {
       for (const key in _data) {
         let value: Object = _data[key];
@@ -73,10 +76,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue,
-     * e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
+     * Parse the given closure data recursivley. Returns a function depending on the closure data.
      * @param _data The closure data to parse recursively
-     * @param _undefinedValue The number which will be returned by the function if _data is undefined
      */
     private parseClosure(_data: ClosureData): Function {
       switch (typeof _data) {
@@ -93,14 +94,14 @@ namespace FudgeCore {
             });
           }
 
-          let closure: Function = FudgeCore.ClosureFactory.getClosure(_data.function, parameters);
+          let closure: Function = ClosureFactory.getClosure(_data.function, parameters);
 
           return closure;
 
         case "string":
           if (_data in this.storedValues) {
             return () => {
-              FudgeCore.Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
+              Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
               return this.storedValues[<string>_data];
             };
           }
@@ -110,7 +111,7 @@ namespace FudgeCore {
 
         case "number":
           return function (): number {
-            FudgeCore.Debug.log("Constant", _data);
+            Debug.log("Constant", _data);
             return <number>_data;
           };
       }

@@ -201,7 +201,7 @@ declare namespace FudgeCore {
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
          */
-        get type(): string;
+        readonly type: string;
         /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object
          */
@@ -417,18 +417,16 @@ declare namespace FudgeCore {
     class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
-        get x(): number;
-        get y(): number;
-        set x(_x: number);
-        set y(_y: number);
+        x: number;
+        y: number;
         /**
          * Returns the length of the vector
          */
-        get magnitude(): number;
+        readonly magnitude: number;
         /**
          * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
          */
-        get magnitudeSquared(): number;
+        readonly magnitudeSquared: number;
         /**
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
@@ -542,7 +540,7 @@ declare namespace FudgeCore {
         /**
          * @returns A deep copy of the vector.
          */
-        get copy(): Vector2;
+        readonly copy: Vector2;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
          * Adds a z-component to the vector and returns a new Vector3
@@ -585,35 +583,27 @@ declare namespace FudgeCore {
          */
         setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
         pointToRect(_point: Vector2, _target: Rectangle): Vector2;
-        get x(): number;
-        get y(): number;
-        get width(): number;
-        get height(): number;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
         /**
          * Return the leftmost expansion, respecting also negative values of width
          */
-        get left(): number;
+        left: number;
         /**
          * Return the topmost expansion, respecting also negative values of height
          */
-        get top(): number;
+        top: number;
         /**
          * Return the rightmost expansion, respecting also negative values of width
          */
-        get right(): number;
+        right: number;
         /**
          * Return the lowest expansion, respecting also negative values of height
          */
-        get bottom(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set width(_width: number);
-        set height(_height: number);
-        set left(_value: number);
-        set top(_value: number);
-        set right(_value: number);
-        set bottom(_value: number);
-        get copy(): Rectangle;
+        bottom: number;
+        readonly copy: Rectangle;
         /**
          * Returns true if the given point is inside of this rectangle or on the border
          * @param _point
@@ -763,9 +753,8 @@ declare namespace FudgeCore {
          * @param _name name of the event to remove.
          */
         removeEvent(_name: string): void;
-        get getLabels(): Enumerator;
-        get fps(): number;
-        set fps(_fps: number);
+        readonly getLabels: Enumerator;
+        fps: number;
         /**
          * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
          */
@@ -879,8 +868,8 @@ declare namespace FudgeCore {
          * @returns the value at the given time
          */
         evaluate(_time: number): number;
-        set setKeyIn(_keyIn: AnimationKey);
-        set setKeyOut(_keyOut: AnimationKey);
+        setKeyIn: AnimationKey;
+        setKeyOut: AnimationKey;
         /**
          * (Re-)Calculates the parameters of the cubic function.
          * See https://math.stackexchange.com/questions/3173469/calculate-cubic-equation-from-two-points-and-two-slopes-variably
@@ -908,16 +897,11 @@ declare namespace FudgeCore {
         private slopeIn;
         private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
-        get Time(): number;
-        set Time(_time: number);
-        get Value(): number;
-        set Value(_value: number);
-        get Constant(): boolean;
-        set Constant(_constant: boolean);
-        get SlopeIn(): number;
-        set SlopeIn(_slope: number);
-        get SlopeOut(): number;
-        set SlopeOut(_slope: number);
+        Time: number;
+        Value: number;
+        Constant: boolean;
+        SlopeIn: number;
+        SlopeOut: number;
         /**
          * Static comparation function to use in an array sort function to sort the keys by their time.
          * @param _a the animation key to check
@@ -967,7 +951,7 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
-        get length(): number;
+        readonly length: number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1006,11 +990,10 @@ declare namespace FudgeCore {
         /**
          * Set the master volume
          */
-        set volume(_value: number);
         /**
-         * Get the master volume
-         */
-        get volume(): number;
+        * Get the master volume
+        */
+        volume: number;
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
@@ -1094,11 +1077,11 @@ declare namespace FudgeCore {
         private active;
         protected static registerSubclass(_subclass: typeof Component): number;
         activate(_on: boolean): void;
-        get isActive(): boolean;
+        readonly isActive: boolean;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
-        get isSingleton(): boolean;
+        readonly isSingleton: boolean;
         /**
          * Retrieves the node, this component is currently attached to
          * @returns The container node or null, if the component is not attached to
@@ -1153,7 +1136,7 @@ declare namespace FudgeCore {
         private speedScale;
         private lastTime;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
-        set speed(_s: number);
+        speed: number;
         /**
          * Jumps to a certain time in the animation to play from there.
          * @param _time The time to jump to
@@ -1242,10 +1225,8 @@ declare namespace FudgeCore {
         private playing;
         private listened;
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
-        set audio(_audio: Audio);
-        get audio(): Audio;
-        set volume(_value: number);
-        get volume(): number;
+        audio: Audio;
+        volume: number;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */
@@ -1259,9 +1240,9 @@ declare namespace FudgeCore {
          * Start or stop playing the audio
          */
         play(_on: boolean): void;
-        get isPlaying(): boolean;
-        get isAttached(): boolean;
-        get isListened(): boolean;
+        readonly isPlaying: boolean;
+        readonly isAttached: boolean;
+        readonly isListened: boolean;
         /**
          * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
          * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -1359,7 +1340,7 @@ declare namespace FudgeCore {
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
-        get ViewProjectionMatrix(): Matrix4x4;
+        readonly ViewProjectionMatrix: Matrix4x4;
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1865,7 +1846,7 @@ declare namespace FudgeCore {
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
-        get hasFocus(): boolean;
+        readonly hasFocus: boolean;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
@@ -2319,20 +2300,17 @@ declare namespace FudgeCore {
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
          */
-        get translation(): Vector2;
-        set translation(_translation: Vector2);
+        translation: Vector2;
         /**
          * - get: a copy of the calculated rotation vector
          * - set: effect the matrix
          */
-        get rotation(): number;
-        set rotation(_rotation: number);
+        rotation: number;
         /**
          * - get: a copy of the calculated scale vector
          * - set: effect the matrix
          */
-        get scaling(): Vector2;
-        set scaling(_scaling: Vector2);
+        scaling: Vector2;
         static PROJECTION(_width: number, _height: number): Matrix3x3;
         static IDENTITY(): Matrix3x3;
         /**
@@ -2397,7 +2375,7 @@ declare namespace FudgeCore {
         /**
          * Return a copy of this
          */
-        get copy(): Matrix3x3;
+        readonly copy: Matrix3x3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         getMutator(): Mutator;
@@ -2428,20 +2406,17 @@ declare namespace FudgeCore {
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
          */
-        get translation(): Vector3;
-        set translation(_translation: Vector3);
+        translation: Vector3;
         /**
          * - get: a copy of the calculated rotation vector
          * - set: effect the matrix
          */
-        get rotation(): Vector3;
-        set rotation(_rotation: Vector3);
+        rotation: Vector3;
         /**
          * - get: a copy of the calculated scale vector
          * - set: effect the matrix
          */
-        get scaling(): Vector3;
-        set scaling(_scaling: Vector3);
+        scaling: Vector3;
         /**
          * Retrieve a new identity matrix
          */
@@ -2614,7 +2589,7 @@ declare namespace FudgeCore {
         /**
          * Return a copy of this
          */
-        get copy(): Matrix4x4;
+        readonly copy: Matrix4x4;
         getTranslationTo(_target: Matrix4x4): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
@@ -2705,20 +2680,17 @@ declare namespace FudgeCore {
     class Vector3 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        get x(): number;
-        get y(): number;
-        get z(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set z(_z: number);
+        x: number;
+        y: number;
+        z: number;
         /**
          * Returns the length of the vector
          */
-        get magnitude(): number;
+        readonly magnitude: number;
         /**
          * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
          */
-        get magnitudeSquared(): number;
+        readonly magnitudeSquared: number;
         /**
          * Creates and returns a vector with the given length pointing in x-direction
          */
@@ -2821,7 +2793,7 @@ declare namespace FudgeCore {
         /**
          * Returns a copy of this vector
          */
-        get copy(): Vector3;
+        readonly copy: Vector3;
         /**
          * Transforms this vector by the given matrix, including or exluding the translation.
          * Including is the default, excluding will only rotate and scale this vector.
@@ -3029,16 +3001,16 @@ declare namespace FudgeCore {
          */
         constructor(_name: string);
         activate(_on: boolean): void;
-        get isActive(): boolean;
+        readonly isActive: boolean;
         /**
          * Shortcut to retrieve this nodes [[ComponentTransform]]
          */
-        get cmpTransform(): ComponentTransform;
+        readonly cmpTransform: ComponentTransform;
         /**
          * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
          * Fails if no [[ComponentTransform]] is attached
          */
-        get mtxLocal(): Matrix4x4;
+        readonly mtxLocal: Matrix4x4;
         /**
          * Returns a reference to this nodes parent node
          */
@@ -3050,7 +3022,7 @@ declare namespace FudgeCore {
         /**
          * Returns the number of children attached to this
          */
-        get nChildren(): number;
+        readonly nChildren: number;
         /**
          * Returns child at the given index in the list of children
          */
@@ -3092,7 +3064,7 @@ declare namespace FudgeCore {
         /**
          * Generator yielding the node and all decendants in the graph below for iteration
          */
-        get graph(): IterableIterator<Node>;
+        readonly graph: IterableIterator<Node>;
         isUpdated(_timestampUpdate: number): boolean;
         isDescendantOf(_ancestor: Node): boolean;
         /**
@@ -3262,7 +3234,7 @@ declare namespace FudgeCore {
     class ParticleEffectImporter {
         private storedValues;
         private randomNumbers;
-        constructor(_storedValues: FudgeCore.StoredValues, _randomNumbers: number[]);
+        constructor(_storedValues: StoredValues, _randomNumbers: number[]);
         importFile(_filename: string): ParticleEffectData;
         /**
          * Parse the data from json file and return a particle effect definition
@@ -3690,11 +3662,11 @@ declare namespace FudgeCore {
         /**
          * Returns the window-id of the timer, which was returned by setInterval
          */
-        get id(): number;
+        readonly id: number;
         /**
          * Returns the time-intervall for calls to the handler
          */
-        get lapse(): number;
+        readonly lapse: number;
         /**
          * Attaches a copy of this at its current state to the same [[Time]]-instance. Used internally when rescaling [[Time]]
          */

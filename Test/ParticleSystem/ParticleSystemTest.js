@@ -52,6 +52,8 @@ var ParticleSystemTest;
         // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         let mesh = new f.MeshQuad();
         particles = new fAid.Node("Paritcles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 1, 0)), material, mesh);
+        particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.1, 0.1));
+        particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.2, 0.2);
         particleSystem = new f.ComponentParticleSystem("data.json", input.valueAsNumber);
         particles.addComponent(particleSystem);
         root.addChild(particles);
