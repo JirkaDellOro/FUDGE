@@ -2627,8 +2627,8 @@ declare namespace FudgeCore {
         private generate;
         /**
          * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
-         * @param _ownGenerator
-         * @param _seed
+         * @param _ownGenerator Default is false
+         * @param _seed Default is Math.random()
          */
         constructor(_ownGenerator?: boolean, _seed?: number);
         /**
