@@ -12,21 +12,23 @@ namespace FudgeCore {
       let storedValues: StoredValues = cmpParticleSystem.storedValues;
       let effectData: ParticleEffectData = cmpParticleSystem.effectData;
 
-      let storageData: ParticleEffectData = <ParticleEffectData>effectData["storage"];
-      let transformData: ParticleEffectData[] = <ParticleEffectData[]>effectData["transformations"];
-      let componentsData: ParticleEffectData = <ParticleEffectData>effectData["components"];
+      let storageData: ParticleEffectData = effectData["storage"];
+      let transformData: ParticleEffectData = effectData["transformations"];
+      let transformDataLocal: ParticleEffectData = transformData["local"];
+      let transformDataWorld: ParticleEffectData = transformData["world"];
+      let componentsData: ParticleEffectData = effectData["components"];
 
       // get relevant components TODO: cache these?
       let components: Component[] = [];
       for (const componentClass in componentsData) {
-        components.push(_node.getComponent((<any>globalThis["FudgeCore"])[componentClass]));
+        components.push(_node.getComponent((<General>globalThis["FudgeCore"])[componentClass]));
       }
       let componentsLength: number = components.length;
       // save their state
-      // let componentMutators: Mutator[] = [];
-      // for (let i: number = 0; i < componentsLength; i++) {
-      //   componentMutators.push(components[i].getMutator());
-      // }
+      let componentMutators: Mutator[] = [];
+      for (let i: number = 0; i < componentsLength; i++) {
+        componentMutators.push(components[i].getMutator());
+      }
 
       let particleStorage: ParticleEffectData;
       // evaluate update storage
@@ -45,18 +47,27 @@ namespace FudgeCore {
 
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
-        for (const data of transformData) {
-          for (const key in data) {
-            let transformVector: Vector3 = Vector3.ZERO();
-            // transformVector.mutate(<Mutator>data[key]);
-            transformVector.mutate(this.getMutatorFor(<ParticleEffectData>data[key]));
-            (<any>finalTransform)[key](transformVector);
-            Recycler.store(transformVector);
-          }  
+
+        // finalTransform.mutate(this.getMutatorFor(transformDataLocal));
+        for (const key in transformDataLocal) {
+          // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
+          let transformVector: Vector3 = key == "scale" ? _systemTransform.scaling : Vector3.ZERO();
+          transformVector.mutate(this.getMutatorFor(<ParticleEffectData>transformDataLocal[key]));
+          (<General>finalTransform)[key](transformVector);
+          Recycler.store(transformVector);
+        }
+
+        let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY();
+        for (const key in transformDataWorld) {
+          let transformVector: Vector3 = Vector3.ZERO();
+          transformVector.mutate(this.getMutatorFor(<ParticleEffectData>transformDataWorld[key]));
+          (<General>worldTransform)[key](transformVector);
+          Recycler.store(transformVector);
         }
 
         // apply system transformation
         finalTransform.multiply(_systemTransform, true);
+        finalTransform.multiply(worldTransform, true);
 
         // TODO: optimize
         // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
@@ -75,13 +86,14 @@ namespace FudgeCore {
         RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         Recycler.store(projection);
+        Recycler.store(worldTransform);
         Recycler.store(finalTransform);
       }
 
-      // restore component state TODO: is this even necessary? Ask Jirka
-      // for (let i: number = 0; i < componentsLength; i++) {
-      //   components[i].mutate(componentMutators[i]);
-      // }
+      // restore component state
+      for (let i: number = 0; i < componentsLength; i++) {
+        components[i].mutate(componentMutators[i]);
+      }
     }
 
     // TODO: don't create new Mutators all the time

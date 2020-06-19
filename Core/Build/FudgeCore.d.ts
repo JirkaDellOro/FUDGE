@@ -3229,7 +3229,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface ParticleEffectData {
-        [identifier: string]: Object;
+        [identifier: string]: General;
     }
     class ParticleEffectImporter {
         private storedValues;
@@ -3247,12 +3247,14 @@ declare namespace FudgeCore {
          * @param _data The paticle data to parse
          */
         private preParseStorage;
+        /**
+         * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
+         * @param _data The effect data to parse recursivley
+         */
         private parseDataRecursively;
         /**
-         * Parse the given closure data recursivley. If _data is undefined return a function which returns the given _undefinedValue,
-         * e.g. undefined scaling data (x,y,z values) should be set to 1 instead of 0.
+         * Parse the given closure data recursivley. Returns a function depending on the closure data.
          * @param _data The closure data to parse recursively
-         * @param _undefinedValue The number which will be returned by the function if _data is undefined
          */
         private parseClosure;
     }

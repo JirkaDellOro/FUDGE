@@ -10,22 +10,9 @@
       }
     }
   },
-  "transformations": [
-    {
-      "translate": {
-        "y": {
-          "function": "polynomial",
-          "parameters": [
-            "inNormTime",
-            0,
-            -2.5,
-            0,
-            0
-          ]
-        }
-      }
-    },
-    {
+  "transformations": 
+   {
+    "local": {
       "rotate": {
         "z": {
           "function": "multiplication",
@@ -61,18 +48,27 @@
         }
       },
       "scale": {
-        "x": 0.2,
-        "y": 0.2,
-        "z": 0.2
+        "x": 1.5
+      }
+    },
+    "world": {
+      "translate": {
+        "y": {
+          "function": "polynomial",
+          "parameters": [
+            "inNormTime",
+            0,
+            -2.5,
+            0,
+            0
+          ]
+        }
       }
     }
-  ],
+   },
   "components": {
     "ComponentMaterial": {
       "clrPrimary": {
-        "r": 1,
-        "b": 0.2,
-        "g": 0.2,
         "a": {
           "function": "addition",
           "parameters": [

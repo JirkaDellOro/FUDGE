@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export interface ParticleEffectData {
-    [identifier: string]: Object;
+    [identifier: string]: General;
   }
 
   interface ClosureDataFunction {
