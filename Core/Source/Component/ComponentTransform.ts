@@ -16,20 +16,32 @@ namespace FudgeCore {
       super();
       this.local = _matrix;
     }
-    
+
+    //#region Transformations respecting the hierarchy
     public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
-      let mtxWorld: Matrix4x4 = this.getContainer().mtxWorld;
+      let container: Node = this.getContainer();
+      if (!container && !container.getParent())
+        return this.local.lookAt(_targetWorld, _up);
+
+      // component is attached to a child node -> transform respecting the hierarchy
+      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
       mtxWorld.lookAt(_targetWorld, _up, true);
-      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, this.getContainer().getParent().mtxWorldInverse);
+      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.local = local;
     }
     
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
-      let mtxWorld: Matrix4x4 = this.getContainer().mtxWorld;
+      let container: Node = this.getContainer();
+      if (!container && !container.getParent())
+      return this.local.showTo(_targetWorld, _up);
+      
+      // component is attached to a child node -> transform respecting the hierarchy
+      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
       mtxWorld.showTo(_targetWorld, _up, true);
-      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, this.getContainer().getParent().mtxWorldInverse);
+      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.local = local;
     }
+    //#endregion
 
     //#region Transfer
     public serialize(): Serialization {
