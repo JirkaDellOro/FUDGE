@@ -209,7 +209,7 @@ namespace FudgeCore {
       if (cmpTransform)
         world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
 
-      _node.mtxWorld = world;
+      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
       _node.timestampUpdate = RenderManager.timestampUpdate;
 
       let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);

@@ -10,7 +10,7 @@ namespace FudgeCore {
    */
   export class Node extends EventTargetƒ implements Serializable {
     public name: string; // The name to call this node by.
-    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
+    public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
 
     private parent: Node | null = null; // The parent of this node.
@@ -21,6 +21,9 @@ namespace FudgeCore {
     private listeners: MapEventTypeToListener = {};
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
+
+    private worldInverseUpdated: number;
+    private worldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -54,6 +57,14 @@ namespace FudgeCore {
      */
     public get mtxLocal(): Matrix4x4 {
             return this.cmpTransform.local;
+    }
+    
+    public get mtxWorldInverse(): Matrix4x4 {
+      if (this.worldInverseUpdated != this.timestampUpdate)
+        this.worldInverse = Matrix4x4.INVERSION(this.mtxWorld);
+
+      this.worldInverseUpdated = this.timestampUpdate;
+      return this.worldInverse;
     }
 
     // #region Scenetree

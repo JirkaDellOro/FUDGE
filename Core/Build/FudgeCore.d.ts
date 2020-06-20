@@ -3005,7 +3005,7 @@ declare namespace FudgeCore {
      */
     class Node extends EventTargetƒ implements Serializable {
         name: string;
-        mtxWorld: Matrix4x4;
+        readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
         private parent;
         private children;
@@ -3013,6 +3013,8 @@ declare namespace FudgeCore {
         private listeners;
         private captures;
         private active;
+        private worldInverseUpdated;
+        private worldInverse;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -3029,6 +3031,7 @@ declare namespace FudgeCore {
          * Fails if no [[ComponentTransform]] is attached
          */
         get mtxLocal(): Matrix4x4;
+        get mtxWorldInverse(): Matrix4x4;
         /**
          * Returns a reference to this nodes parent node
          */
