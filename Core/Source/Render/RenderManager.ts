@@ -199,6 +199,8 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights
      */
     private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+      RenderManager.timestampUpdate = performance.now();
+      
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];

@@ -1447,6 +1447,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum BASE {
+        SELF = 0,
+        PARENT = 1,
+        WORLD = 2,
+        OTHER = 3
+    }
     /**
      * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1455,6 +1461,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         local: Matrix4x4;
         constructor(_matrix?: Matrix4x4);
+        lookAt(_targetWorld: Vector3, _up?: Vector3): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
@@ -2479,6 +2486,11 @@ declare namespace FudgeCore {
          */
         static SCALING(_scalar: Vector3): Matrix4x4;
         /**
+         * Returns a representation of the given matrix relative to the given base.
+         * If known, pass the inverse of the base to avoid unneccesary calculation
+         */
+        static RELATIVE(_matrix: Matrix4x4, _base: Matrix4x4, _inverse?: Matrix4x4): Matrix4x4;
+        /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
@@ -2520,6 +2532,7 @@ declare namespace FudgeCore {
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
          * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
