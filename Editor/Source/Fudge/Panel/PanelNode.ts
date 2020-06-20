@@ -25,12 +25,14 @@ namespace Fudge {
     public setNode(_node: ƒ.Node): void {
       this.node = _node;
       for (let view of this.views) {
-        if (view instanceof ViewGraph) {
-          (<ViewGraph>view).setRoot(this.node);
-        }
-        else if (view instanceof ViewRender) {
-          (<ViewRender>view).setRoot(this.node);
-        }
+        // if (view instanceof ViewGraph) {
+        //   (<ViewGraph>view).setRoot(this.node);
+        // }
+        // else if (view instanceof ViewRender) {
+        //   (<ViewRender>view).setRoot(this.node);
+        // }
+        if (view["setRoot"])
+          view["setRoot"](this.node);
       }
     }
 
