@@ -1462,6 +1462,7 @@ declare namespace FudgeCore {
         local: Matrix4x4;
         constructor(_matrix?: Matrix4x4);
         lookAt(_targetWorld: Vector3, _up?: Vector3): void;
+        showTo(_targetWorld: Vector3, _up?: Vector3): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
