@@ -4095,6 +4095,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class PhysicsDebugDraw {
+        oimoDebugDraw: OIMO.DebugDraw;
+        style: OIMO.DebugDrawStyle;
+        drawAabbs: boolean;
+        drawJoints: boolean;
+        constructor();
+        private initializeOverride;
+    }
+}
+declare namespace FudgeCore {
     const enum EVENT_PHYSICS {
         /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
         TRIGGER_ENTER = "TriggerEnteredCollision",
@@ -4216,6 +4226,7 @@ declare namespace FudgeCore {
         private bodyList;
         private triggerBodyList;
         private jointList;
+        debugDraw: PhysicsDebugDraw;
         /**
        * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
        * rigidbodies.

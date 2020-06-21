@@ -135,6 +135,7 @@ namespace FudgeCore {
       } catch (_error) {
         // Debug.error(_error);
       }
+      //DRAW PHYSICS DEBUG
     }
     //#endregion
 

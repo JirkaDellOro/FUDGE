@@ -93,6 +93,7 @@ namespace FudgePhysics_Communication {
     if (hitInfo.hit == true && hitInfo.rigidbodyComponent.getContainer().name == "Cube_1") {
       f.Debug.log(hitInfo);
     }
+
     viewPort.draw();
     measureFPS();
   }

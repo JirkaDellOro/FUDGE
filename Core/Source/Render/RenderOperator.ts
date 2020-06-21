@@ -157,5 +157,9 @@ namespace FudgeCore {
       coat.useRenderData(shader, cmpMaterial);
       RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
+
+    /**
+     * Drawing a physics debug buffer
+     */
   }
 }

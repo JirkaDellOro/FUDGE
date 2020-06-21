@@ -17,6 +17,7 @@ namespace FudgeCore {
     private bodyList: ComponentRigidbody[] = new Array();
     private triggerBodyList: ComponentRigidbody[] = new Array();
     private jointList: ComponentJoint[] = new Array();
+    public debugDraw: PhysicsDebugDraw;
 
 
 
@@ -25,10 +26,13 @@ namespace FudgeCore {
    * rigidbodies.
    */
     public static initializePhysics(): Physics {
-      if (this.world == null) {
+      if (typeof OIMO !== 'undefined' && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld();
+
+        this.world.debugDraw = new PhysicsDebugDraw(); //Create custom Debug Draw - none OIMO
+        this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw); //Set it as OIMO.DebugDraw
       }
       return this.world;
     }
@@ -178,6 +182,7 @@ namespace FudgeCore {
       if (this.jointList.length > 0)
         this.connectJoints();
       Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());
+      Physics.world.oimoWorld.debugDraw();
     }
 
     public registerTrigger(_rigidbody: ComponentRigidbody): void {
