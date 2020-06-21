@@ -53,10 +53,11 @@
   <div>
     <fieldset id="Hierarchy">
       <legend>Hierarchy</legend>
-      <input type="radio" name="Hierarchy" value="-1" id="hNone"></input><label for="hNone">none </label>
-      <input type="radio" name="Hierarchy" value="0" id="h01"></input><label for="h01">0 parent of 1 </label>
-      <input type="radio" name="Hierarchy" value="1" id="h10"></input><label for="h10">1 parent of 0 </label>
-      <input type="checkbox" name="Result" checked="false" id="result"></input><label for="result">preserve result  </label>
+      <input type="radio" name="Hierarchy" value="none" id="hNone"></input><label for="hNone">none </label>
+      <input type="radio" name="Hierarchy" value="01" id="h01"></input><label for="h01">0 parent of 1 </label>
+      <input type="radio" name="Hierarchy" value="10" id="h10"></input><label for="h10">1 parent of 0 </label>
+      <input type="checkbox" name="Preserve" checked="false" id="preserve"></input>
+      <label for="preserve">preserve world transform </label>
     </fieldset>
   </div>
 
@@ -66,7 +67,14 @@
     </fieldset>
     <fieldset id="Interact0">
       <legend>Interact0</legend>
+      <form>
+        Base: <input type="radio" name="Base" value="self" id="self" checked="true"></input><label
+          for="self">self</label>
+        <input type="radio" name="Base" value="parent" id="parent"></input><label for="parent">parent </label>
+        <input type="radio" name="Base" value="world" id="world"></input><label for="world">world </label>
+        <input type="radio" name="Base" value="other" id="other"></input><label for="other">other </label>
     </fieldset>
+    </form>
   </div>
 
   <div>
@@ -75,6 +83,13 @@
     </fieldset>
     <fieldset id="Interact1">
       <legend>Interact1</legend>
+      <form>
+        Base: <input type="radio" name="Base" value="self" id="self" checked="true"></input><label
+          for="self">self</label>
+        <input type="radio" name="Base" value="parent" id="parent"></input><label for="parent">parent </label>
+        <input type="radio" name="Base" value="world" id="world"></input><label for="world">world </label>
+        <input type="radio" name="Base" value="other" id="other"></input><label for="other">other </label>
+      </form>
     </fieldset>
   </div>
 </body>

@@ -26,51 +26,38 @@ var MatrixTest;
             move(i);
         }
         viewport.draw();
-        // let relative: ƒ.Matrix4x4 = calculateRelativeMatrix(coSys[1].mtxWorld, coSys[0].mtxWorld);
-        // console.log("Relative", relative.toString());
-        // console.log("Local", coSys[1].mtxLocal.toString());
-        // coSys[1].cmpTransform.local = relative;
     }
     function move(_which) {
         let fieldset = document.querySelector("fieldset#Interact" + _which);
         let formData = new FormData(fieldset.querySelector("form"));
-        // console.log(formData.get("t").valueOf(), formData.get("tValue"), formData.get("tDirection"));
-        // console.log(formData.get("r"), formData.get("rValue"), formData.get("rDirection"));
-        // console.log(formData.get("s"), formData.get("sValue"), formData.get("sDirection"));
+        let base = formData.get("Base");
         let translate = calcVector(String(formData.get("t")), Number(formData.get("tValue")), Number(formData.get("tDirection")));
         let rotate = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
         let scale = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
-        // let transform: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
-        // coSys[_which].mtxLocal.translate(translate, false);
-        // coSys[_which].mtxLocal.rotate(rotate, false);
-        // scale.add(ƒ.Vector3.ONE());
-        // coSys[_which].mtxLocal.scale(scale);
         let transform = ƒ.Matrix4x4.IDENTITY();
         transform.translate(translate, false);
         transform.rotate(rotate, false);
         scale.add(ƒ.Vector3.ONE());
         transform.scale(scale);
         let move = coSys[_which].mtxLocal.copy;
-        if (_which == 1) {
-            // move = calculateRelativeMatrix(move, coSys[0].mtxWorld);
-            // move.multiply(transform);
-            // move.multiply(coSys[0].mtxLocal, true);
-            // move = calculateRelativeMatrix(move, root.mtxWorld);
-            transformRelative(transform, coSys[1].cmpTransform, coSys[0].cmpTransform);
-        }
-        else {
-            move.multiply(transform);
-            coSys[_which].cmpTransform.local = move;
+        switch (base) {
+            case "other":
+                transformRelative(transform, coSys[1].cmpTransform, coSys[0].cmpTransform);
+                break;
+            default:
+                move.multiply(transform);
+                coSys[_which].cmpTransform.local = move;
+                break;
         }
     }
     function transformRelative(_transform, _move, _relativeTo) {
         let mtxMove = _move.local.copy;
         let containerRelative = _relativeTo.getContainer();
-        let containerMove = _move.getContainer();
+        // let containerMove: ƒ.Node = _move.getContainer();
         if (containerRelative)
-            mtxMove = calculateRelativeMatrix(mtxMove, containerRelative.mtxWorld);
+            mtxMove = ƒ.Matrix4x4.RELATIVE(mtxMove, containerRelative.mtxWorld);
         else
-            mtxMove = calculateRelativeMatrix(mtxMove, _relativeTo.local);
+            mtxMove = ƒ.Matrix4x4.RELATIVE(mtxMove, _relativeTo.local);
         mtxMove.multiply(_transform);
         mtxMove.multiply(_relativeTo.local, true);
         // if (containerMove)
@@ -88,7 +75,8 @@ var MatrixTest;
                     fieldset.innerHTML += "<br />";
             }
         fieldset = document.querySelector("fieldset#Interact" + _which);
-        let table = "<form><table>";
+        let form = fieldset.querySelector("form");
+        let table = "<table>";
         for (let transform of ["t", "r", "s"]) {
             let step = transform == "r" ? 1 : 0.1;
             let value = transform == "r" ? 5 : 0.1;
@@ -103,9 +91,9 @@ var MatrixTest;
             table += `<td><input type="range" name="${transform}Direction" step="1" value="0" min="-1" max="1"></input></td>`;
             table += "</tr>";
         }
-        table += "</table></form>";
+        table += "</table>";
         console.log(table);
-        fieldset.innerHTML += table;
+        form.innerHTML += table;
         fieldset.addEventListener("keyup", hndKey);
         fieldset.addEventListener("keydown", hndKey);
     }
@@ -128,13 +116,22 @@ var MatrixTest;
         ƒ.Loop.continue();
     }
     function hndHierarchy(_event) {
-        let hierarchy = Number(_event.target.value);
+        let hierarchy = _event.target.value;
+        let preserve = document.querySelector("input#preserve").checked;
+        if (preserve) {
+            coSys[0].cmpTransform.rebase(null);
+            coSys[1].cmpTransform.rebase(null);
+        }
         switch (hierarchy) {
-            case 0:
+            case "01":
+                if (preserve)
+                    coSys[1].cmpTransform.rebase(coSys[0]);
                 root.appendChild(coSys[0]);
                 coSys[0].appendChild(coSys[1]);
                 break;
-            case 1:
+            case "10":
+                if (preserve)
+                    coSys[0].cmpTransform.rebase(coSys[1]);
                 root.appendChild(coSys[1]);
                 coSys[1].appendChild(coSys[0]);
                 break;
@@ -156,12 +153,6 @@ var MatrixTest;
             let input = fieldset.querySelector("#m" + index);
             input.value = data[index].toFixed(2);
         }
-    }
-    function calculateRelativeMatrix(_matrix, _relativeTo) {
-        let result;
-        result = ƒ.Matrix4x4.INVERSION(_relativeTo);
-        result = ƒ.Matrix4x4.MULTIPLICATION(result, _matrix);
-        return result;
     }
 })(MatrixTest || (MatrixTest = {}));
 //# sourceMappingURL=Matrix.js.map
