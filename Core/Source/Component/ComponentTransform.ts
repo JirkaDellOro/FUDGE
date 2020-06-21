@@ -29,17 +29,29 @@ namespace FudgeCore {
       let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.local = local;
     }
-    
+
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
       let container: Node = this.getContainer();
       if (!container && !container.getParent())
-      return this.local.showTo(_targetWorld, _up);
-      
+        return this.local.showTo(_targetWorld, _up);
+
       // component is attached to a child node -> transform respecting the hierarchy
       let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
       mtxWorld.showTo(_targetWorld, _up, true);
       let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.local = local;
+    }
+
+    public rebase(_node: Node = null): void {
+      let mtxResult: Matrix4x4 = this.local;
+      let container: Node = this.getContainer();
+      if (container)
+        mtxResult = container.mtxWorld;
+
+      if (_node)
+        mtxResult = Matrix4x4.RELATIVE(mtxResult, null, _node.mtxWorldInverse);
+
+      this.local = mtxResult;
     }
     //#endregion
 
