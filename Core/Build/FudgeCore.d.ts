@@ -3184,6 +3184,11 @@ declare namespace FudgeCore {
          */
         private static createClosureAddition;
         /**
+     * Calculates the sum of the given parameters.
+     *  i.e. parameter[0] + ... + parameter[n]
+     */
+        private static createClosureSubtraction;
+        /**
           * Calculates the product of the given parameters.
           *   i.e. parameter[0] * ... * parameter[n]
           */

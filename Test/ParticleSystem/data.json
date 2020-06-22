@@ -7,6 +7,13 @@
           "time",
           1
         ]
+      },
+      "reverseInNormTime": {
+        "function": "subtraction",
+        "parameters": [
+          1.5,
+          "inNormTime"
+        ]
       }
     }
   },
@@ -48,7 +55,8 @@
         }
       },
       "scale": {
-        "x": 1.5
+        "x": "reverseInNormTime",
+        "y": "reverseInNormTime"
       }
     },
     "world": {

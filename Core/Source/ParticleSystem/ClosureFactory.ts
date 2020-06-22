@@ -13,7 +13,8 @@ namespace FudgeCore {
       "polynomial": ClosureFactory.createClosurePolynomial3,
       "squareRoot": ClosureFactory.createClosureSquareRoot,
       "random": ClosureFactory.createClosureRandom,
-      "identity": ClosureFactory.createClosureIdentity
+      "identity": ClosureFactory.createClosureIdentity,
+      "subtraction": ClosureFactory.createClosureSubtraction
     };
 
     /**
@@ -55,6 +56,19 @@ namespace FudgeCore {
         for (const param of _parameters) {
           result += param();
         }
+        Debug.groupEnd();
+        return result;
+      };
+    }
+
+        /**
+     * Calculates the sum of the given parameters.
+     *  i.e. parameter[0] + ... + parameter[n]
+     */
+    private static createClosureSubtraction(_parameters: Function[]): Function {
+      return function (): number {
+        Debug.group("ClosureSubtraction");
+        let result: number = _parameters[0]() - _parameters[1]();
         Debug.groupEnd();
         return result;
       };

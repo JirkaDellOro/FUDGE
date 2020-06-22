@@ -3,7 +3,8 @@ namespace FudgeCore {
     public static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera): void {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
-      let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+      let mesh: Mesh = cmpMesh.mesh;
 
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
@@ -18,7 +19,7 @@ namespace FudgeCore {
       let transformDataWorld: ParticleEffectData = transformData["world"];
       let componentsData: ParticleEffectData = effectData["components"];
 
-      // get relevant components TODO: cache these?
+      // get relevant components
       let components: Component[] = [];
       for (const componentClass in componentsData) {
         components.push(_node.getComponent((<General>globalThis["FudgeCore"])[componentClass]));
@@ -33,11 +34,12 @@ namespace FudgeCore {
       let particleStorage: ParticleEffectData;
       // evaluate update storage
       if (storageData) {
-        cmpParticleSystem.evaluateClosureStorage(<ParticleEffectData>storageData["update"]);
-        particleStorage = <ParticleEffectData>storageData["particle"];
+        cmpParticleSystem.evaluateClosureStorage(storageData["update"]);
+        particleStorage = storageData["particle"];
       }
 
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
+      // let meshPivotScaling: Vector3 = cmpMesh.pivot.scaling;
 
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
@@ -48,11 +50,21 @@ namespace FudgeCore {
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
 
-        // finalTransform.mutate(this.getMutatorFor(transformDataLocal));
+        // for (const key in transformDataLocal) {
+        //   // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
+        //   let transformMatrix: Matrix4x4 = Matrix4x4.IDENTITY();
+        //   let mutator: Mutator = {};
+        //   mutator[key] = this.getMutatorFor(transformDataLocal[key]);
+        //   transformMatrix.mutate(mutator);
+        //   finalTransform.multiply(transformMatrix);
+        //   Recycler.store(transformMatrix);
+        // }
+
+        finalTransform.mutate(this.getMutatorFor(transformDataLocal));
         for (const key in transformDataLocal) {
           // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
           let transformVector: Vector3 = key == "scale" ? _systemTransform.scaling : Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(<ParticleEffectData>transformDataLocal[key]));
+          transformVector.mutate(this.getMutatorFor(transformDataLocal[key]));
           (<General>finalTransform)[key](transformVector);
           Recycler.store(transformVector);
         }
@@ -60,12 +72,14 @@ namespace FudgeCore {
         let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY();
         for (const key in transformDataWorld) {
           let transformVector: Vector3 = Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(<ParticleEffectData>transformDataWorld[key]));
+          transformVector.mutate(this.getMutatorFor(transformDataWorld[key]));
           (<General>worldTransform)[key](transformVector);
           Recycler.store(transformVector);
         }
 
         // apply system transformation
+        // finalTransform.scale(meshPivotScaling); // this is slower than matrix multiplication
+        finalTransform.multiply(cmpMesh.pivot);
         finalTransform.multiply(_systemTransform, true);
         finalTransform.multiply(worldTransform, true);
 
@@ -74,8 +88,7 @@ namespace FudgeCore {
 
         // evaluate component data
         for (let i: number = 0; i < componentsLength; i++) {
-          // components[i].mutate(<Mutator>componentsData[components[i].type]);
-          components[i].mutate(this.getMutatorFor(<ParticleEffectData>componentsData[components[i].type]));
+          components[i].mutate(this.getMutatorFor(componentsData[components[i].type]));
         }
 
         // render
@@ -100,11 +113,11 @@ namespace FudgeCore {
     private static getMutatorFor(_effectData: ParticleEffectData): Mutator {
       let mutator: Mutator = {};
       for (const attribute in _effectData) {
-        let value: Object = <ParticleEffectData>_effectData[attribute];
+        let value: Object = _effectData[attribute];
         if (typeof value === "function") {
           mutator[attribute] = (<Function>value)();
         } else {
-          mutator[attribute] = this.getMutatorFor(<ParticleEffectData>value);
+          mutator[attribute] = this.getMutatorFor(value);
         }
       }
       return mutator;
@@ -112,11 +125,11 @@ namespace FudgeCore {
 
     private static evaluateMutator(_effectData: ParticleEffectData, _mutator: Mutator): void {
       for (const attribute in _effectData) {
-        let value: Object = <ParticleEffectData>_effectData[attribute];
+        let value: Object = _effectData[attribute];
         if (typeof value === "function") {
           _mutator[attribute] = (<Function>value)();
         } else {
-          this.evaluateMutator(<ParticleEffectData>value, <Mutator>_mutator[attribute]);
+          this.evaluateMutator(value, <Mutator>_mutator[attribute]);
         }
       }
     }

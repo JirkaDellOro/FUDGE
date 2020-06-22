@@ -64,6 +64,7 @@ namespace ParticleSystemTest {
     let mesh: f.Mesh = new f.MeshQuad();
     particles = new fAid.Node("Paritcles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 1, 0)), material, mesh);
     
+    particles.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(1, 0, 0));
     particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.1, 0.1));
     particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.2, 0.2);
 
