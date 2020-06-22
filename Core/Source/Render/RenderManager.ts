@@ -86,8 +86,8 @@ namespace FudgeCore {
       RenderManager.setupPhysicalTransform(_node);
 
       RenderManager.setupTransformAndLights(_node, matrix);
-
-      RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+      Physics.world.debugDraw.drawTestTriangle(_cmpCamera);
+      //RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
     }
 
     /**
@@ -108,7 +108,6 @@ namespace FudgeCore {
 
       // multiply camera matrix
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
       // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       _drawNode(_node, finalTransform, projection);
       // RenderParticles.drawParticles();
@@ -121,12 +120,13 @@ namespace FudgeCore {
       Recycler.store(projection);
       if (finalTransform != _node.mtxWorld)
         Recycler.store(finalTransform);
+
     }
 
     /**
      * The standard render function for drawing a single node
      */
-    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
+    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList, _cmpCamera: ComponentCamera): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
@@ -135,7 +135,6 @@ namespace FudgeCore {
       } catch (_error) {
         // Debug.error(_error);
       }
-      //DRAW PHYSICS DEBUG
     }
     //#endregion
 

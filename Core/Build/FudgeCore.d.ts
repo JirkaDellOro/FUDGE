@@ -4095,13 +4095,22 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class PhysicsDebugDraw {
+    class PhysicsDebugDraw extends RenderOperator {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
         drawAabbs: boolean;
         drawJoints: boolean;
+        triangleBuffer: WebGLBuffer;
+        program: WebGLProgram;
+        private vertShader;
+        private fragmentShader;
         constructor();
+        drawTestTriangle(_cmpCamera: ComponentCamera): void;
         private initializeOverride;
+        private vertexShaderSource;
+        private fragmentShaderSource;
+        private vertexShaderTestSource;
+        private fragmentShaderTestSource;
     }
 }
 declare namespace FudgeCore {
