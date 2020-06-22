@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>RenderManager | Fudge Core</title>
+	<title>RenderParticles | Fudge Core</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,36 +59,24 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.rendermanager.html">RenderManager</a>
+					<a href="fudgecore.renderparticles.html">RenderParticles</a>
 				</li>
 			</ul>
-			<h1>Class RenderManager</h1>
+			<h1>Class RenderParticles</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>The main interface to the render engine, here WebGL, which is used mainly in the superclass <a href="fudgecore.renderoperator.html">RenderOperator</a></p>
-					</div>
-				</div>
-			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudgecore.renderoperator.html" class="tsd-signature-type">RenderOperator</a>
+						<a href="fudgecore.rendermanager.html" class="tsd-signature-type">RenderManager</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">RenderManager</span>
-								<ul class="tsd-hierarchy">
-									<li>
-										<a href="fudgecore.renderparticles.html" class="tsd-signature-type">RenderParticles</a>
-									</li>
-								</ul>
+								<span class="target">RenderParticles</span>
 							</li>
 						</ul>
 					</li>
@@ -98,43 +86,45 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#assert" class="tsd-kind-icon">assert</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#clear" class="tsd-kind-icon">clear</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#initialize" class="tsd-kind-icon">initialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.rendermanager.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.rendermanager.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#assert" class="tsd-kind-icon">assert</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#clear" class="tsd-kind-icon">clear</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.renderparticles.html#drawparticles" class="tsd-kind-icon">draw<wbr>Particles</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="rectclip" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> rect<wbr>Clip</h3>
 					<div class="tsd-signature tsd-kind-icon">rect<wbr>Clip<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol"> =&nbsp;new Rectangle(-1, 1, 2, -2)</span></div>
 					<aside class="tsd-sources">
+						<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#rectclip">rectClip</a></p>
 						<ul>
 							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L17">Render/RenderManager.ts:17</a></li>
 						</ul>
@@ -187,15 +177,16 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="clear" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> clear</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#clear">clear</a></p>
 								<ul>
 									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L24">Render/RenderManager.ts:24</a></li>
 								</ul>
@@ -215,15 +206,16 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="drawgraph" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Graph</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">draw<wbr>Graph<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _drawNode<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#drawgraph">drawGraph</a></p>
 								<ul>
 									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L81">Render/RenderManager.ts:81</a></li>
 								</ul>
@@ -250,15 +242,16 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="drawgraphforraycast" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.pickbuffer.html" class="tsd-signature-type">PickBuffer</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#drawgraphforraycast">drawGraphForRayCast</a></p>
 								<ul>
 									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L40">Render/RenderManager.ts:40</a></li>
 								</ul>
@@ -278,6 +271,23 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.pickbuffer.html" class="tsd-signature-type">PickBuffer</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="drawparticles" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Particles</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">draw<wbr>Particles<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderParticles.ts#L3">Render/RenderParticles.ts:3</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -405,22 +415,23 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="picknodeat" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Node<wbr>At</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">pick<wbr>Node<wbr>At<span class="tsd-signature-symbol">(</span>_pos<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _pickBuffers<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.pickbuffer.html" class="tsd-signature-type">PickBuffer</a><span class="tsd-signature-symbol">[]</span>, _rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rayhit.html" class="tsd-signature-type">RayHit</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#picknodeat">pickNodeAt</a></p>
 								<ul>
 									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L55">Render/RenderManager.ts:55</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Browses through the buffers (previously created with <a href="fudgecore.rendermanager.html#drawgraphforraycast">drawGraphForRayCast</a>) of the size given
+									<p>Browses through the buffers (previously created with <a href="fudgecore.renderparticles.html#drawgraphforraycast">drawGraphForRayCast</a>) of the size given
 									and returns an unsorted list of the values at the given position, representing node-ids and depth information as <a href="fudgecore.rayhit.html">RayHit</a>s</p>
 								</div>
 							</div>
@@ -440,15 +451,16 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="resetframebuffer" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> reset<wbr>Frame<wbr>Buffer</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.rendermanager.html">RenderManager</a>.<a href="fudgecore.rendermanager.html#resetframebuffer">resetFrameBuffer</a></p>
 								<ul>
 									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a9a0886d/Core/Source/Render/RenderManager.ts#L32">Render/RenderManager.ts:32</a></li>
 								</ul>
@@ -635,58 +647,61 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="fudgecore.rendermanager.html" class="tsd-kind-icon">Render<wbr>Manager</a>
+						<a href="fudgecore.renderparticles.html" class="tsd-kind-icon">Render<wbr>Particles</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#assert" class="tsd-kind-icon">assert</a>
+								<a href="fudgecore.renderparticles.html#assert" class="tsd-kind-icon">assert</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#clear" class="tsd-kind-icon">clear</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#clear" class="tsd-kind-icon">clear</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#drawgraph" class="tsd-kind-icon">draw<wbr>Graph</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#drawgraphforraycast" class="tsd-kind-icon">draw<wbr>Graph<wbr>For<wbr>Ray<wbr>Cast</a>
+								<a href="fudgecore.renderparticles.html#drawparticles" class="tsd-kind-icon">draw<wbr>Particles</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a>
+								<a href="fudgecore.renderparticles.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a>
+								<a href="fudgecore.renderparticles.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a>
+								<a href="fudgecore.renderparticles.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a>
+								<a href="fudgecore.renderparticles.html#getviewportrectangle" class="tsd-kind-icon">get<wbr>Viewport<wbr>Rectangle</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#initialize" class="tsd-kind-icon">initialize</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.rendermanager.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a>
+								<a href="fudgecore.renderparticles.html#initialize" class="tsd-kind-icon">initialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a>
+								<a href="fudgecore.renderparticles.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a>
+								<a href="fudgecore.renderparticles.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a>
+								<a href="fudgecore.renderparticles.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a>
+								<a href="fudgecore.renderparticles.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.rendermanager.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a>
+								<a href="fudgecore.renderparticles.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#setviewportrectangle" class="tsd-kind-icon">set<wbr>Viewport<wbr>Rectangle</a>
 							</li>
 						</ul>
 					</li>
