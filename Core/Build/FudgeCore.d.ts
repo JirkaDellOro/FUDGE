@@ -1461,9 +1461,24 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         local: Matrix4x4;
         constructor(_matrix?: Matrix4x4);
+        /**
+         * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
+         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
+         */
         lookAt(_targetWorld: Vector3, _up?: Vector3): void;
+        /**
+         * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
+         */
         showTo(_targetWorld: Vector3, _up?: Vector3): void;
+        /**
+         * recalculates this local matrix to yield the identical world matrix based on the given node.
+         * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
+         */
         rebase(_node?: Node): void;
+        /**
+         * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
+         */
         transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
@@ -2530,7 +2545,7 @@ declare namespace FudgeCore {
          */
         rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+         * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
          * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */

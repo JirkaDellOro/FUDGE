@@ -501,7 +501,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+     * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
      * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */

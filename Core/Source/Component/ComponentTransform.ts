@@ -18,6 +18,11 @@ namespace FudgeCore {
     }
 
     //#region Transformations respecting the hierarchy
+
+    /**
+     * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
+     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
+     */
     public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
       let container: Node = this.getContainer();
       if (!container && !container.getParent())
@@ -30,6 +35,10 @@ namespace FudgeCore {
       this.local = local;
     }
 
+    /**
+     * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
+     */
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
       let container: Node = this.getContainer();
       if (!container && !container.getParent())
@@ -42,6 +51,10 @@ namespace FudgeCore {
       this.local = local;
     }
 
+    /**
+     * recalculates this local matrix to yield the identical world matrix based on the given node.
+     * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
+     */
     public rebase(_node: Node = null): void {
       let mtxResult: Matrix4x4 = this.local;
       let container: Node = this.getContainer();
@@ -54,6 +67,9 @@ namespace FudgeCore {
       this.local = mtxResult;
     }
 
+    /**
+     * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
+     */
     public transform(_transform: Matrix4x4, _base: BASE = BASE.SELF, _node: Node = null): void {
       switch (_base) {
         case BASE.SELF:
