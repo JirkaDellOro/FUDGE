@@ -45,21 +45,11 @@ var MatrixTest;
         switch (base) {
             case "other":
                 // transformRelative(transform, node.cmpTransform, coSys[other].cmpTransform);
-                console.group("Other");
                 node.cmpTransform.rebase(other);
-                console.log("transform", transform.toString());
-                console.log("local before", node.mtxLocal.toString());
                 node.mtxLocal.multiply(transform, true);
-                console.log("local after", node.mtxLocal.toString());
-                console.log("parent world", node.getParent().mtxWorld.toString());
-                console.log("node world before", node.mtxWorld.toString());
                 node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(other.mtxWorld, node.mtxLocal));
-                console.log("node world after", node.mtxWorld.toString());
                 node.cmpTransform.rebase(node.getParent());
-                console.log("local rebased", node.mtxLocal.toString());
                 node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal));
-                console.log("world rebased", node.mtxWorld.toString());
-                console.groupEnd();
                 break;
             default:
                 move.multiply(transform);
@@ -99,7 +89,7 @@ var MatrixTest;
             let value = transform == "r" ? 5 : 0.1;
             table += `<tr><th>${transform}</th>`;
             for (let dimension of ["x", "y", "z"]) {
-                let id = transform + dimension;
+                let id = transform + dimension + _which;
                 // fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' step='0.1'/><button>+</button><button>-</button></span>`;
                 table += `<td><input type="radio" name="${transform}" value="${dimension}" id="${id}" ${dimension == "x" ? "checked" : ""}></input>`;
                 table += `<label for="${id}">${dimension}</label></td>`;
