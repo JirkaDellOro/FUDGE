@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   export enum BASE {
-    SELF, PARENT, WORLD, OTHER
+    SELF, PARENT, WORLD, NODE
   }
 
   /**
@@ -52,15 +52,38 @@ namespace FudgeCore {
         mtxResult = Matrix4x4.RELATIVE(mtxResult, null, _node.mtxWorldInverse);
 
       this.local = mtxResult;
+    }
 
-      // the following should be nonsense, since the world matrix of the container should stay constant anyway
-      // if (container) {
-      //   let parent: Node = container.getParent();
-      //   if (parent)
-      //     container.mtxWorld.set(Matrix4x4.MULTIPLICATION(parent.mtxWorld, mtxResult));
-      //   else
-      //     container.mtxWorld.set(mtxResult);
-      // }
+    public transform(_transform: Matrix4x4, _base: BASE = BASE.SELF, _node: Node = null): void {
+      switch (_base) {
+        case BASE.SELF:
+          this.local.multiply(_transform);
+          break;
+        case BASE.PARENT:
+          this.local.multiply(_transform, true);
+          break;
+        case BASE.NODE:
+          if (!_node)
+            throw new Error("BASE.NODE requires a node given as base");
+        case BASE.WORLD:
+          this.rebase(_node);
+          this.local.multiply(_transform, true);
+
+          let container: Node = this.getContainer();
+          if (container) {
+            if (_base == BASE.NODE)
+              // fix mtxWorld of container for subsequent rebasing 
+              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(_node.mtxWorld, container.mtxLocal));
+
+            let parent: Node = container.getParent();
+            if (parent) {
+              // fix mtxLocal for current parent
+              this.rebase(container.getParent());
+              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(container.getParent().mtxWorld, container.mtxLocal));
+            }
+          }
+          break;
+      }
     }
     //#endregion
 

@@ -43,33 +43,21 @@ var MatrixTest;
         let other = coSys[_which ? 0 : 1];
         let move = node.mtxLocal.copy;
         switch (base) {
+            case "self":
+                node.cmpTransform.transform(transform, ƒ.BASE.SELF);
+                break;
+            case "parent":
+                node.cmpTransform.transform(transform, ƒ.BASE.PARENT);
+                break;
+            case "world":
+                node.cmpTransform.transform(transform, ƒ.BASE.WORLD);
+                break;
             case "other":
-                // transformRelative(transform, node.cmpTransform, coSys[other].cmpTransform);
-                node.cmpTransform.rebase(other);
-                node.mtxLocal.multiply(transform, true);
-                node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(other.mtxWorld, node.mtxLocal));
-                node.cmpTransform.rebase(node.getParent());
-                node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal));
+                node.cmpTransform.transform(transform, ƒ.BASE.NODE, other);
                 break;
             default:
-                move.multiply(transform);
-                node.cmpTransform.local = move;
                 break;
         }
-    }
-    function transformRelative(_transform, _move, _relativeTo) {
-        let mtxMove = _move.local.copy;
-        let containerRelative = _relativeTo.getContainer();
-        // let containerMove: ƒ.Node = _move.getContainer();
-        if (containerRelative)
-            mtxMove = ƒ.Matrix4x4.RELATIVE(mtxMove, containerRelative.mtxWorld);
-        else
-            mtxMove = ƒ.Matrix4x4.RELATIVE(mtxMove, _relativeTo.local);
-        mtxMove.multiply(_transform);
-        mtxMove.multiply(_relativeTo.local, true);
-        // if (containerMove)
-        //   mtxMove = calculateRelativeMatrix(mtxMove, containerMove.mtxWorld);
-        _move.local = mtxMove;
     }
     function createUI(_which) {
         let fieldset;

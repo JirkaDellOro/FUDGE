@@ -1451,7 +1451,7 @@ declare namespace FudgeCore {
         SELF = 0,
         PARENT = 1,
         WORLD = 2,
-        OTHER = 3
+        NODE = 3
     }
     /**
      * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
@@ -1464,6 +1464,7 @@ declare namespace FudgeCore {
         lookAt(_targetWorld: Vector3, _up?: Vector3): void;
         showTo(_targetWorld: Vector3, _up?: Vector3): void;
         rebase(_node?: Node): void;
+        transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
