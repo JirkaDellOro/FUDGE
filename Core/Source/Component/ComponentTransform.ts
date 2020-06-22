@@ -52,6 +52,15 @@ namespace FudgeCore {
         mtxResult = Matrix4x4.RELATIVE(mtxResult, null, _node.mtxWorldInverse);
 
       this.local = mtxResult;
+
+      // the following should be nonsense, since the world matrix of the container should stay constant anyway
+      // if (container) {
+      //   let parent: Node = container.getParent();
+      //   if (parent)
+      //     container.mtxWorld.set(Matrix4x4.MULTIPLICATION(parent.mtxWorld, mtxResult));
+      //   else
+      //     container.mtxWorld.set(mtxResult);
+      // }
     }
     //#endregion
 

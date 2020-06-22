@@ -49,15 +49,33 @@ namespace MatrixTest {
     transform.rotate(rotate, false);
     scale.add(ƒ.Vector3.ONE());
     transform.scale(scale);
-    let move: ƒ.Matrix4x4 = coSys[_which].mtxLocal.copy;
+
+    let node: ƒ.Node = coSys[_which];
+    let other: ƒ.Node = coSys[_which ? 0 : 1];
+    let move: ƒ.Matrix4x4 = node.mtxLocal.copy;
 
     switch (base) {
       case "other":
-        transformRelative(transform, coSys[1].cmpTransform, coSys[0].cmpTransform);
+        // transformRelative(transform, node.cmpTransform, coSys[other].cmpTransform);
+        console.group("Other");
+        node.cmpTransform.rebase(other);
+        console.log("transform", transform.toString());
+        console.log("local before", node.mtxLocal.toString());
+        node.mtxLocal.multiply(transform, true);
+        console.log("local after", node.mtxLocal.toString());
+        console.log("parent world", node.getParent().mtxWorld.toString());
+        console.log("node world before", node.mtxWorld.toString());
+        node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(other.mtxWorld, node.mtxLocal));
+        console.log("node world after", node.mtxWorld.toString());
+        node.cmpTransform.rebase(node.getParent());
+        console.log("local rebased", node.mtxLocal.toString());
+        node.mtxWorld.set(ƒ.Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal));
+        console.log("world rebased", node.mtxWorld.toString());
+        console.groupEnd();
         break;
       default:
         move.multiply(transform);
-        coSys[_which].cmpTransform.local = move;
+        node.cmpTransform.local = move;
         break;
     }
   }
