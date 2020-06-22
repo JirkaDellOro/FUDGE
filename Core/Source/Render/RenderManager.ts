@@ -99,7 +99,7 @@ namespace FudgeCore {
       let finalTransform: Matrix4x4;
 
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh)
+      if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
         finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
       else
         finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
@@ -107,7 +107,9 @@ namespace FudgeCore {
       // multiply camera matrix
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
 
+      // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       _drawNode(_node, finalTransform, projection);
+      // RenderParticles.drawParticles();
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
@@ -124,12 +126,10 @@ namespace FudgeCore {
      */
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
       try {
-        let material: Material = _node.getComponent(ComponentMaterial).material;
-        let coat: Coat = material.getCoat();
-        let shader: typeof Shader = material.getShader();
+        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
-        RenderManager.draw(shader, mesh, coat, _finalTransform, _projection); //, _lights);
+        RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
@@ -199,6 +199,8 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights
      */
     private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+      RenderManager.timestampUpdate = performance.now();
+      
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
@@ -209,7 +211,7 @@ namespace FudgeCore {
       if (cmpTransform)
         world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
 
-      _node.mtxWorld = world;
+      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
       _node.timestampUpdate = RenderManager.timestampUpdate;
 
       let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);
@@ -270,7 +272,7 @@ namespace FudgeCore {
             let cmpLight: ComponentLight = cmpLights[i];
             RenderOperator.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.pivot);
+            direction.transform(cmpLight.pivot, false);
             direction.transform(cmpLight.getContainer().mtxWorld);
             RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }

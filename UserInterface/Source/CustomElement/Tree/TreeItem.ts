@@ -245,7 +245,7 @@ namespace FudgeUserInterface {
           target.dispatchEvent(new Event(EVENT_TREE.RENAME, { bubbles: true }));
           break;
         case "default":
-          console.log(target);
+          // console.log(target);
           break;
       }
     }

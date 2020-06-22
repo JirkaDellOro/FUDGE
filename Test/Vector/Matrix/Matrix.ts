@@ -1,177 +1,176 @@
 namespace MatrixTest {
   import ƒ = FudgeCore;
-  
+  import ƒAid = FudgeAid;
 
-  let coSys: ƒ.Node;
+
+  let coSys: ƒ.Node[] = [];
   let viewport: ƒ.Viewport = new ƒ.Viewport();
+  let root: ƒ.Node = new ƒ.Node("Root");
+
   window.addEventListener("load", init);
-  let anim: ƒ.Vector3[] = [ƒ.Vector3.ZERO(), new ƒ.Vector3(1, 1, 1), new ƒ.Vector3(0, 0, 0)];
 
   function init(_event: Event): void {
-    createUI();
-    coSys = Scenes.createCoordinateSystem();
-    coSys.addComponent(new ƒ.ComponentTransform());
+    for (let i: number = 0; i < 2; i++) {
+      coSys.push(new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.IDENTITY()));
+      root.addChild(coSys[i]);
+      createUI(i);
+    }
+    document.querySelector("fieldset#Hierarchy").addEventListener("change", hndHierarchy);
 
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    viewport.initialize("Viewport", root, cmpCamera, document.querySelector("canvas"));
 
-    let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 2)); //, new ƒ.Vector3(0, 0, 0));
-    viewport.initialize("Viewport", coSys, cmpCamera, document.querySelector("canvas"));
-
-    update();
-    displayVectors(coSys.mtxLocal);
-
-    animate();
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
+    ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 5);
   }
 
   function animate(): void {
-    window.setInterval(
-      function (): void {
-        let local: ƒ.Matrix4x4 = coSys.mtxLocal;
-
-        anim = [local.translation, local.rotation, local.scaling];
-        // anim[2].x += 1;
-        // anim[2].y += 1;
-        // anim[2].z += 1;
-        setTransform(anim);
-
-        update();
-      },
-      20);
-  }
-
-  function update(): void {
+    for (let i: number = 0; i < 2; i++) {
+      displayMatrix(i, coSys[i].mtxLocal);
+      move(i);
+    }
     viewport.draw();
-    let local: ƒ.Matrix4x4 = coSys.mtxLocal;
-    displayMatrix(local);
-    displayVectors(local);
   }
 
-  function createUI(): void {
+
+  function move(_which: number): void {
+    let fieldset: HTMLFieldSetElement = document.querySelector("fieldset#Interact" + _which);
+    let formData: FormData = new FormData(fieldset.querySelector("form"));
+
+    let base: string = <string>formData.get("Base");
+    let translate: ƒ.Vector3 = calcVector(String(formData.get("t")), Number(formData.get("tValue")), Number(formData.get("tDirection")));
+    let rotate: ƒ.Vector3 = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
+    let scale: ƒ.Vector3 = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
+
+    let transform: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
+    transform.translate(translate, false);
+    transform.rotate(rotate, false);
+    scale.add(ƒ.Vector3.ONE());
+    transform.scale(scale);
+
+    let node: ƒ.Node = coSys[_which];
+    let other: ƒ.Node = coSys[_which ? 0 : 1];
+    let move: ƒ.Matrix4x4 = node.mtxLocal.copy;
+
+    switch (base) {
+      case "self":
+        node.cmpTransform.transform(transform, ƒ.BASE.SELF);
+        break;
+      case "parent":
+        node.cmpTransform.transform(transform, ƒ.BASE.PARENT);
+        break;
+      case "world":
+        node.cmpTransform.transform(transform, ƒ.BASE.WORLD);
+        break;
+      case "other":
+        node.cmpTransform.transform(transform, ƒ.BASE.NODE, other);
+        break;
+      default:
+        break;
+    }
+  }
+
+  function createUI(_which: number): void {
     let fieldset: HTMLFieldSetElement;
-    fieldset = document.querySelector("#Matrix");
-    for (let element: number = 0; element < 16;) {
-      fieldset.innerHTML += `<span>${element} <input id='m${element}' type='number' disabled /></span>`;
-      if (++element % 4 == 0)
-        fieldset.innerHTML += "<br />";
-    }
-
-    fieldset = document.querySelector("#Vectors");
-    for (let transform of ["t", "r", "s"]) {
-      for (let dimension of ["x", "y", "z"]) {
-        let id: string = transform + dimension;
-        fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' lastValue='0' stepped='0'/></span>`;
+    fieldset = document.querySelector("fieldset#Matrix" + _which);
+    let element: number = 0;
+    for (let prefix of ["X", "Y", "Z", "T"])
+      for (let postfix of ["x", "y", "z", "w"]) {
+        fieldset.innerHTML += `<span>${prefix}${postfix}&nbsp;<input id='m${element}' type='number' disabled /></span>`;
+        if (++element % 4 == 0)
+          fieldset.innerHTML += "<br />";
       }
-      fieldset.innerHTML += "<br />";
-    }
 
-    fieldset.addEventListener("input", hndInteraction);
+    fieldset = document.querySelector("fieldset#Interact" + _which);
+    let form: HTMLFormElement = fieldset.querySelector("form");
+    let table: string = "<table>";
+    for (let transform of ["t", "r", "s"]) {
+      let step: number = transform == "r" ? 1 : 0.1;
+      let value: number = transform == "r" ? 5 : 0.1;
+      table += `<tr><th>${transform}</th>`;
+      for (let dimension of ["x", "y", "z"]) {
+        let id: string = transform + dimension + _which;
+        // fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' step='0.1'/><button>+</button><button>-</button></span>`;
+        table += `<td><input type="radio" name="${transform}" value="${dimension}" id="${id}" ${dimension == "x" ? "checked" : ""}></input>`;
+        table += `<label for="${id}">${dimension}</label></td>`;
+      }
+      table += `<td><input type="number" name="${transform}Value" step="${step}" value="${value}"></input></td>`;
+      table += `<td><input type="range" name="${transform}Direction" step="1" value="0" min="-1" max="1"></input></td>`;
+      table += "</tr>";
+    }
+    table += "</table>";
+    console.log(table);
+    form.innerHTML += table;
+
+
+    fieldset.addEventListener("keyup", hndKey);
+    fieldset.addEventListener("keydown", hndKey);
   }
 
-  function hndInteraction(_event: Event): void {
-    let input: HTMLInputElement = <HTMLInputElement>_event.target;
-    if (input.name == "Interact") {
-      let local: ƒ.Matrix4x4 = coSys.mtxLocal;
-      displayVectors(local);
+  async function hndKey(_event: ƒ.EventKeyboard): Promise<void> {
+    let slider: HTMLInputElement = <HTMLInputElement>_event.target;
+    if (slider.type != "range")
       return;
+    if (_event.code != ƒ.KEYBOARD_CODE.ARROW_LEFT && _event.code != ƒ.KEYBOARD_CODE.ARROW_RIGHT)
+      return;
+
+    if (_event.type == "keyup")
+      slider.value = "0";
+    else {
+      ƒ.Loop.stop();
+      window.setTimeout(tick, 10);
     }
-    let stepped: number = parseFloat(input.value) - parseFloat(input.getAttribute("lastValue"));
-    input.setAttribute("stepped", stepped.toString());
-
-    if (isAbsolute())
-      interactAbsolute(input);
-    else
-      interactRelative(input);
-
-    update();
-    input.setAttribute("lastValue", input.value);
   }
 
-  function isAbsolute(): boolean {
-    return (<HTMLInputElement>document.querySelector("#absolute")).checked;
+  async function tick(): Promise<void> {
+    animate();
+    await ƒ.Time.game.delay(100);
+    ƒ.Loop.continue();
   }
 
-  function interactAbsolute(_input: HTMLInputElement): void {
-    let vectors: ƒ.Vector3[] = [];
-    for (let transform of ["t", "r", "s"]) {
-      let vector: ƒ.Vector3 = new ƒ.Vector3();
-      for (let dimension of ["x", "y", "z"]) {
-        let id: string = transform + dimension;
-        let input: HTMLInputElement = <HTMLInputElement>document.querySelector("#" + id);
-        vector[dimension] = parseFloat(input.value);
-      }
-      vectors.push(vector);
+  function hndHierarchy(_event: Event): void {
+    let hierarchy: string = (<HTMLInputElement>_event.target).value;
+    let preserve: boolean = (<HTMLInputElement>document.querySelector("input#preserve")).checked;
+
+    if (preserve) {
+      coSys[0].cmpTransform.rebase(null);
+      coSys[1].cmpTransform.rebase(null);
     }
-    setTransform(vectors);
-  }
 
-  function setTransform(_vectors: ƒ.Vector3[]): void {
-    let matrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
-    matrix.translate(_vectors[0]);
-    matrix.rotateZ(_vectors[1].z);
-    matrix.rotateY(_vectors[1].y);
-    matrix.rotateX(_vectors[1].x);
-    matrix.scale(_vectors[2]);
-
-    coSys.mtxLocal.set(matrix);
-  }
-
-  function interactRelative(_input: HTMLInputElement): void {
-
-    switch (_input.id[0]) {
-      case "t":
-        translate(_input);
+    switch (hierarchy) {
+      case "01":
+        if (preserve)
+          coSys[1].cmpTransform.rebase(coSys[0]);
+        root.appendChild(coSys[0]);
+        coSys[0].appendChild(coSys[1]);
         break;
-      case "s":
-        scale(_input);
+      case "10":
+        if (preserve)
+          coSys[0].cmpTransform.rebase(coSys[1]);
+        root.appendChild(coSys[1]);
+        coSys[1].appendChild(coSys[0]);
         break;
-      case "r":
-        rotate(_input);
+      default:
+        root.appendChild(coSys[0]);
+        root.appendChild(coSys[1]);
         break;
     }
   }
 
-  function translate(_input: HTMLInputElement): void {
-    let vector: ƒ.Vector3 = calcInputVector(_input);
-    vector.scale(0.1);
-    coSys.mtxLocal.translate(vector);
-  }
-  function scale(_input: HTMLInputElement): void {
-    let vector: ƒ.Vector3 = calcInputVector(_input);
-    vector.scale(0.1);
-    vector.add(new ƒ.Vector3(1, 1, 1));
-    coSys.mtxLocal.scale(vector);
-  }
-  function rotate(_input: HTMLInputElement): void {
-    let vector: ƒ.Vector3 = calcInputVector(_input);
-    vector.scale(5);
-    coSys.mtxLocal.rotateY(vector.y);
-    coSys.mtxLocal.rotateX(vector.x);
-    coSys.mtxLocal.rotateZ(vector.z);
-  }
-
-  function calcInputVector(_input: HTMLInputElement): ƒ.Vector3 {
-    let dimension: string = _input.id[1];
+  function calcVector(_dimension: string, _value: number, _factor: number): ƒ.Vector3 {
     let vector: ƒ.Vector3 = new ƒ.Vector3();
-    let stepdown: boolean = 0 > parseFloat(_input.getAttribute("stepped"));
-    vector[dimension] = stepdown ? -1 : 1;
+    vector[_dimension] = _factor * _value;
     return vector;
   }
 
-  function displayMatrix(_matrix: ƒ.Matrix4x4): void {
+  function displayMatrix(_which: number, _matrix: ƒ.Matrix4x4): void {
+    let fieldset: HTMLFieldSetElement = document.querySelector("fieldset#Matrix" + _which);
     let data: Float32Array = _matrix.get();
     for (let index in data) {
-      let input: HTMLInputElement = document.querySelector("#m" + index);
+      let input: HTMLInputElement = fieldset.querySelector("#m" + index);
       input.value = data[index].toFixed(2);
-    }
-  }
-  function displayVectors(_matrix: ƒ.Matrix4x4): void {
-    let vectors: ƒ.Vector3[] = [_matrix.translation, _matrix.rotation, _matrix.scaling];
-    for (let transform of ["t", "r", "s"]) {
-      let vector: ƒ.Vector3 = vectors.shift();
-      for (let dimension of ["x", "y", "z"]) {
-        let id: string = transform + dimension;
-        let input: HTMLInputElement = document.querySelector("#" + id);
-        input.value = vector[dimension].toFixed(2);
-      }
     }
   }
 }

@@ -111,6 +111,13 @@ namespace FudgeCore {
       Debug.fudge("Loop stopped!");
     }
 
+    public static continue(): void {
+      if (Loop.running)
+        return;
+
+      Loop.start(Loop.mode, Loop.fpsDesired, Loop.syncWithAnimationFrame);
+    }
+
     public static getFpsGameAverage(): number {
       return 1000 / Loop.timeLastFrameGameAvg;
     }

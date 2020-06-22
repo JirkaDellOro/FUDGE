@@ -24,11 +24,11 @@ namespace RenderManagerRendering {
     }
 
     function hndChange(_event: Event): void {
-        let target: UI.FieldSet<null> = <UI.FieldSet<null>>_event.currentTarget;
+        let target: UI.FieldSet = <UI.FieldSet>_event.currentTarget;
         setValues(target);
     }
 
-    function setValues(_uiSet: UI.FieldSet<null>): void {
+    function setValues(_uiSet: UI.FieldSet): void {
         let type: string = _uiSet.constructor.name;
         if (type == "Rectangle") {
             frame = <ƒ.Rectangle>_uiSet.get();

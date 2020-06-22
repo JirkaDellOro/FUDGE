@@ -7,6 +7,10 @@
 namespace FudgeCore {
   export declare let fudgeConfig: General;
 
+  export enum BLEND {
+    OPAQUE, TRANSPARENT, PARTICLE
+  }
+
   export interface BufferSpecification {
     size: number;   // The size of the datasample.
     dataType: number; // The datatype of the sample (e.g. gl.FLOAT, gl.BYTE, etc.)
@@ -61,15 +65,14 @@ namespace FudgeCore {
         canvas.getContext("webgl2", contextAttributes),
         "WebGL-context couldn't be created"
       );
+      RenderOperator.crc3 = crc3;
       // Enable backface- and zBuffer-culling.
       crc3.enable(WebGL2RenderingContext.CULL_FACE);
       crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
       crc3.enable(WebGL2RenderingContext.BLEND);
       crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
-      crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
-      // RenderOperator.crc3.enable(WebGL2RenderingContext.);
+      RenderOperator.setBlendMode(BLEND.TRANSPARENT);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
-      RenderOperator.crc3 = crc3;
       RenderOperator.rectViewport = RenderOperator.getCanvasRect();
       return crc3;
     }
@@ -120,13 +123,38 @@ namespace FudgeCore {
       return RenderOperator.rectViewport;
     }
 
+    public static setDepthTest(_test: boolean): void {
+      if (_test)
+        RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+      else
+        RenderOperator.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
+    }
+
+    public static setBlendMode(_mode: BLEND): void {
+      switch (_mode) {
+        case BLEND.OPAQUE:
+          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ZERO);
+          break;
+        case BLEND.TRANSPARENT:
+          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+          break;
+        case BLEND.PARTICLE:
+          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          break;
+        default:
+          break;
+      }
+    }
+
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static draw(_shader: typeof Shader, _mesh: Mesh, _coat: Coat, _final: Matrix4x4, _projection: Matrix4x4): void {
-      _shader.useProgram();
-      _mesh.useRenderBuffers(_shader, _final, _projection);
-      _coat.useRenderData(_shader);
+    protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void {
+      let shader: typeof Shader = cmpMaterial.material.getShader();
+      let coat: Coat = cmpMaterial.material.getCoat();
+      shader.useProgram();
+      _mesh.useRenderBuffers(shader, _final, _projection);
+      coat.useRenderData(shader, cmpMaterial);
       RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
   }

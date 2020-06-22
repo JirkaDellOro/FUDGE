@@ -1,5 +1,5 @@
 namespace FudgeUserInterface {
-  // import ƒ = FudgeCore;
+  import ƒ = FudgeCore;
 
   /**
    * Structure for the attributes to set in a CustomElement.
@@ -67,7 +67,7 @@ namespace FudgeUserInterface {
     }
 
     private static map(_type: string, _typeCustomElement: typeof CustomElement): void {
-      console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+      ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
     

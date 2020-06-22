@@ -470,12 +470,14 @@ var Fudge;
         setNode(_node) {
             this.node = _node;
             for (let view of this.views) {
-                if (view instanceof Fudge.ViewGraph) {
-                    view.setRoot(this.node);
-                }
-                else if (view instanceof Fudge.ViewRender) {
-                    view.setRoot(this.node);
-                }
+                // if (view instanceof ViewGraph) {
+                //   (<ViewGraph>view).setRoot(this.node);
+                // }
+                // else if (view instanceof ViewRender) {
+                //   (<ViewRender>view).setRoot(this.node);
+                // }
+                if (view["setRoot"])
+                    view["setRoot"](this.node);
             }
         }
         getNode() {
@@ -1360,16 +1362,13 @@ var Fudge;
         }
         fillContent() {
             if (this.data) {
-                let cntHeader = document.createElement("span");
-                let lblNodeName = document.createElement("label");
-                lblNodeName.textContent = "Name";
-                cntHeader.append(lblNodeName);
-                this.content.append(cntHeader);
                 if (this.data instanceof ƒ.Node) {
-                    let txtNodeName = document.createElement("input");
-                    txtNodeName.addEventListener("input", this.changeNodeName);
-                    txtNodeName.value = this.data.name;
-                    cntHeader.append(txtNodeName);
+                    // let txtNodeName: HTMLInputElement = document.createElement("input");
+                    // txtNodeName.addEventListener("input", this.changeNodeName);
+                    // cntHeader.append(txtNodeName);
+                    let cntHeader = document.createElement("span");
+                    cntHeader.textContent = this.data.name;
+                    this.content.appendChild(cntHeader);
                     let nodeComponents = this.data.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
@@ -1441,24 +1440,17 @@ var Fudge;
                 }
             };
             if (_parent instanceof Fudge.PanelNode && _parent.getNode() != null)
-                this.graph = _parent.getNode();
+                this.setRoot(_parent.getNode());
             else
-                this.graph = new ƒ.Node("Node");
-            this.selectedNode = null;
+                this.setRoot(new ƒ.Node("Node"));
             this.parentPanel.addEventListener("select" /* SELECT */, this.setSelectedNode);
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
-            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
-            //TODO: examine if tree should fire common UI-EVENT for selection instead
-            this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
-            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            this.fillContent();
             this.contextMenu = Fudge.ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
         }
         deconstruct() {
             //TODO: desconstruct
         }
         fillContent() {
-            this.content.append(this.tree);
+            // remove?
         }
         /**
          * Display structure of node
@@ -1467,7 +1459,16 @@ var Fudge;
         setRoot(_node) {
             if (!_node)
                 return;
+            if (this.tree)
+                this.content.removeChild(this.tree);
             this.graph = _node;
+            this.selectedNode = null;
+            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
+            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
+            //TODO: examine if tree should fire common UI-EVENT for selection instead
+            this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.content.append(this.tree);
         }
     }
     Fudge.ViewGraph = ViewGraph;

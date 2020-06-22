@@ -1,8 +1,8 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var FudgeTest;
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (FudgeTest) {
     window.addEventListener("DOMContentLoaded", init);
     let pm = FudgeTest.PanelManager.instance;

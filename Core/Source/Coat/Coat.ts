@@ -12,7 +12,7 @@ namespace FudgeCore {
             super.mutate(_mutator);
         }
 
-        public useRenderData(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
+        public useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
         
         //#region Transfer
         public serialize(): Serialization {
@@ -47,13 +47,13 @@ namespace FudgeCore {
     @RenderInjectorCoat.decorate
     export class CoatMatCap extends Coat {
         public texture: TextureImage = null;
-        public tintColor: Color = new Color(0.5, 0.5, 0.5, 1);
+        public color: Color = new Color(0.5, 0.5, 0.5, 1);
         public shadeSmooth: number;
 
-        constructor(_texture?: TextureImage, _tintcolor?: Color, _shadeSmooth?: number) {
+        constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number) {
             super();
             this.texture = _texture || new TextureImage();
-            this.tintColor = _tintcolor || new Color(0.5, 0.5, 0.5, 1);
+            this.color = _color || new Color(0.5, 0.5, 0.5, 1);
             this.shadeSmooth = _shadeSmooth || 0;
         }
     }

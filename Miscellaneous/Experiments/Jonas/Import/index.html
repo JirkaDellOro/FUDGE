@@ -4,10 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inport</title>
-  <script src="test.js"></script>
-  <script src="ImportJP.js"></script>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../../Aid/Build/FudgeAid.js"></script>
+  <script src="TestData.js"></script>
+  <script src="ClosureFactory.js"></script>
+  <script src="ParticleEffectImporter.js"></script>
+  <script src="ParticleSystem.js"></script>
+  <!-- <script src="Test.js"></script> -->
+  <script src="Main.js"></script>
 </head>
 <body>
-  
+  <img hidden src="spark.png" alt="yadda yadda">
+  <canvas id="canvas" width="600" height="400"></canvas>
+  <br>
+  <label for="particleNum">Number of particles:</label>
+  <input type="number" min="1" step="1" name="particleNum" value="10" id="particleNum">
 </body>
 </html>

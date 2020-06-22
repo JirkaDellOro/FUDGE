@@ -81,6 +81,11 @@ namespace FudgeCore {
         this.graph.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
     }
+
+    public getGraph(): Node {
+      return this.graph;
+    }
+
     /**
      * Logs this viewports scenegraph to the console.
      */

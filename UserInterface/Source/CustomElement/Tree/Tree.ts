@@ -182,7 +182,7 @@ namespace FudgeUserInterface {
     }
 
     private hndCopyPaste = (_event: Event): void => {
-      console.log(_event);
+      // console.log(_event);
       _event.stopPropagation();
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       switch (_event.type) {

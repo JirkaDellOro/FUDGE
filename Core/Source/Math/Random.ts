@@ -11,8 +11,8 @@ namespace FudgeCore {
 
     /**
      * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
-     * @param _ownGenerator
-     * @param _seed 
+     * @param _ownGenerator Default is false
+     * @param _seed Default is Math.random()
      */
     constructor(_ownGenerator: boolean = false, _seed: number = Math.random()) {
       if (_ownGenerator)
@@ -72,7 +72,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns removes a randomly selected element from the given array and returns it
+     * Removes a randomly selected element from the given array and returns it
      */
     public splice<T>(_array: Array<T>): T {
       return _array.splice(this.getIndex(_array), 1)[0];

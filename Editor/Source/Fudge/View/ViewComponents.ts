@@ -23,17 +23,14 @@ namespace Fudge {
 
     fillContent(): void {
       if (this.data) {
-        let cntHeader: HTMLElement = document.createElement("span");
-        let lblNodeName: HTMLElement = document.createElement("label");
-        lblNodeName.textContent = "Name";
-        cntHeader.append(lblNodeName);
-        this.content.append(cntHeader);
-        
         if (this.data instanceof ƒ.Node) {
-          let txtNodeName: HTMLInputElement = document.createElement("input");
-          txtNodeName.addEventListener("input", this.changeNodeName);
-          txtNodeName.value = this.data.name;
-          cntHeader.append(txtNodeName);
+          // let txtNodeName: HTMLInputElement = document.createElement("input");
+          // txtNodeName.addEventListener("input", this.changeNodeName);
+          // cntHeader.append(txtNodeName);
+          let cntHeader: HTMLElement = document.createElement("span");
+          cntHeader.textContent = this.data.name;
+          this.content.appendChild(cntHeader);
+
           let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
@@ -41,9 +38,8 @@ namespace Fudge {
             this.content.append(uiComponent.domElement);
           }
         }
-
       }
-      else {  
+      else {
         let cntEmpty: HTMLDivElement = document.createElement("div");
         this.content.append(cntEmpty);
       }

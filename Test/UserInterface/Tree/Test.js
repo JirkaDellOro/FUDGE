@@ -1,10 +1,10 @@
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var UI_Tree;
 ///<reference types="../../../Core/Build/FudgeCore"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUI"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (UI_Tree) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;

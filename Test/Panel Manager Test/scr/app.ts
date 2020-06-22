@@ -1,5 +1,5 @@
 /// <reference types="../../../Core/Build/FudgeCore"/>
-/// <reference types="../../../UserInterface/Build/FudgeUI"/>
+/// <reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 
 
 
