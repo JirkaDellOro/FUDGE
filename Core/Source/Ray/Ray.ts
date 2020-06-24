@@ -17,7 +17,7 @@ namespace FudgeCore {
          */
         public intersectPlane(_origin: Vector3, _normal: Vector3): Vector3 {
           let difference: Vector3 = Vector3.DIFFERENCE(_origin, this.origin);
-          let factor: number = - Vector3.DOT(difference, _normal) / Vector3.DOT(this.direction, _normal);
+          let factor: number = Vector3.DOT(difference, _normal) / Vector3.DOT(this.direction, _normal);
           let intersect: Vector3 = Vector3.SUM(this.origin, Vector3.SCALE(this.direction, factor));
           return intersect;
         }

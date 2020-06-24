@@ -47,9 +47,23 @@ namespace MouseToRay {
   }
 
   function positionCube(): void {
+    let modifiers: Map<ƒ.KEYBOARD_CODE, ƒ.Vector3> = new Map([
+      [ƒ.KEYBOARD_CODE.X, ƒ.Vector3.X()],
+      [ƒ.KEYBOARD_CODE.Y, ƒ.Vector3.Y()],
+      [ƒ.KEYBOARD_CODE.Z, ƒ.Vector3.Z()]
+    ]);
+
+    let normal: ƒ.Vector3;
+    for (let entry of modifiers)
+      if (ƒ.Keyboard.isPressedOne([entry[0]]))
+        normal = entry[1];
+
     let pos: ƒ.Vector3;
-    pos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
-    // pos = ray.intersectPlane(ƒ.Vector3.ZERO(), ƒ.Vector3.X());
+
+    if (normal)
+      pos = ray.intersectPlane(ƒ.Vector3.ZERO(), normal);
+    else
+      pos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
     root.getChildrenByName("Cube")[0].mtxLocal.translation = pos;
     viewport.draw();
 
