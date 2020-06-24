@@ -35,7 +35,7 @@ namespace MouseToRay {
   }
 
   function hndPointerMove(_event: ƒ.EventPointer): void {
-    ray = viewport.getRayFromScreenPoint(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+    ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
     positionCube();
   }
 

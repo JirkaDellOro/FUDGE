@@ -171,7 +171,11 @@ namespace FudgeCore {
     }
     // #endregion
 
-    public getRayFromScreenPoint(_point: Vector2): Ray {
+    //#region Points
+    /**
+     * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+     */
+    public getRayFromClient(_point: Vector2): Ray {
       let posProjection: Vector2 = this.pointClientToProjection(_point);
       let ray: Ray = new Ray(new Vector3(-posProjection.x, posProjection.y, 1));
 
@@ -186,7 +190,6 @@ namespace FudgeCore {
       return ray;
     }
 
-    //#region Points
     /**
      * Returns a point on the source-rectangle matching the given point on the client rectangle
      */

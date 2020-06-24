@@ -1845,7 +1845,10 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
-        getRayFromScreenPoint(_point: Vector2): Ray;
+        /**
+         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+         */
+        getRayFromClient(_point: Vector2): Ray;
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
          */

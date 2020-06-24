@@ -27,7 +27,7 @@ var MouseToRay;
         viewport.draw();
     }
     function hndPointerMove(_event) {
-        ray = viewport.getRayFromScreenPoint(new ƒ.Vector2(_event.pointerX, _event.pointerY));
+        ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
         positionCube();
     }
     function hndWheelMove(_event) {
