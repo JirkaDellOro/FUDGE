@@ -545,9 +545,9 @@ declare namespace FudgeCore {
         get copy(): Vector2;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
-         * Adds a z-component to the vector and returns a new Vector3
+         * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
          */
-        toVector3(): Vector3;
+        toVector3(_z?: number): Vector3;
         toString(): string;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1845,6 +1845,7 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        getRayFromScreenPoint(_point: Vector2): Ray;
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
          */
@@ -3223,6 +3224,12 @@ declare namespace FudgeCore {
         direction: Vector3;
         length: number;
         constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
+        /**
+         * Returns the point of intersection of this ray with a plane defined by
+         * the given point of origin and the planes normal. All values and calculations
+         * must be relative to the same coordinate system, preferably the world
+         */
+        intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
     }
 }
 declare namespace FudgeCore {

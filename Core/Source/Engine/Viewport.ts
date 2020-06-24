@@ -171,6 +171,21 @@ namespace FudgeCore {
     }
     // #endregion
 
+    public getRayFromScreenPoint(_point: Vector2): Ray {
+      let posProjection: Vector2 = this.pointClientToProjection(_point);
+      let ray: Ray = new Ray(new Vector3(-posProjection.x, posProjection.y, 1));
+
+      // ray.direction.scale(camera.distance);
+      ray.origin.transform(this.camera.pivot);
+      ray.direction.transform(this.camera.pivot, false);
+      let cameraNode: Node = this.camera.getContainer()
+      if (cameraNode) {
+        ray.origin.transform(cameraNode.mtxWorld);
+        ray.direction.transform(cameraNode.mtxWorld, false);
+      }
+      return ray;
+    }
+
     //#region Points
     /**
      * Returns a point on the source-rectangle matching the given point on the client rectangle
@@ -383,7 +398,7 @@ namespace FudgeCore {
     }
     // #endregion
 
-  
+
     /**
      * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
      * @param _fudgeNode The node to create a scenegraphentry for.
