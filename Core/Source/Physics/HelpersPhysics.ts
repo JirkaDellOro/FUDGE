@@ -94,6 +94,9 @@ namespace FudgeCore {
   }
 
   export class PhysicsSettings {
+
+    public debugDraw: boolean = true;
+
     /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
     get disableSleeping(): boolean {
       return OIMO.Setting.disableSleeping;

@@ -25,8 +25,6 @@ namespace FudgePhysics_Communication {
 
   function init(_event: Event): void {
     f.Debug.log(app);
-    f.RenderManager.initialize();
-    f.Physics.initializePhysics();
     hierarchy = new f.Node("Scene");
 
     let ground: f.Node = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);

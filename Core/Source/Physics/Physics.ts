@@ -18,6 +18,7 @@ namespace FudgeCore {
     private triggerBodyList: ComponentRigidbody[] = new Array();
     private jointList: ComponentJoint[] = new Array();
     public debugDraw: PhysicsDebugDraw;
+    public mainCam: ComponentCamera;
 
 
 
@@ -182,7 +183,10 @@ namespace FudgeCore {
       if (this.jointList.length > 0)
         this.connectJoints();
       Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());
-      Physics.world.oimoWorld.debugDraw();
+      if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) {
+        Physics.world.debugDraw.begin();
+        Physics.world.oimoWorld.debugDraw();
+      }
     }
 
     public registerTrigger(_rigidbody: ComponentRigidbody): void {

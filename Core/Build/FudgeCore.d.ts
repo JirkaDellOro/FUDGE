@@ -4095,22 +4095,88 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** Internal class for holding data about physics debug */
+    class PhysicsDebugVertexBuffer {
+        gl: WebGL2RenderingContext;
+        numVertices: number;
+        attribs: Array<PhysicsDebugVertexAttribute>;
+        indices: Array<number>;
+        offsets: Array<number>;
+        stride: number;
+        buffer: WebGLBuffer;
+        dataLength: number;
+        constructor(_renderingContext: WebGL2RenderingContext);
+        setData(array: Array<number>): void;
+        updateData(array: Array<number>): void;
+        updateDataFloat32Array(array: Float32Array): void;
+        setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
+        loadAttribIndices(_program: PhysicsDebugShader): void;
+        bindAttribs(): void;
+    }
+    /** Internal class for holding data about PhysicsDebugVertexBuffers */
+    class PhysicsDebugIndexBuffer {
+        gl: WebGL2RenderingContext;
+        buffer: WebGLBuffer;
+        count: number;
+        constructor(_renderingContext: WebGL2RenderingContext);
+        setData(array: Array<number>): void;
+        updateData(array: Array<number>): void;
+        updateDataInt16Array(array: Int16Array): void;
+        /** The actual DrawCall for physicsDebugDraw Buffers */
+        draw(_mode?: number, _count?: number): void;
+    }
+    /** Internal class for managing data about webGL Attributes */
+    class PhysicsDebugVertexAttribute {
+        float32Count: number;
+        name: string;
+        constructor(_float32Count: number, _name: string);
+    }
+    /** Internal class for Shaders only used by the physics debugDraw */
+    class PhysicsDebugShader {
+        gl: WebGL2RenderingContext;
+        program: WebGLProgram;
+        vertexShader: WebGLShader;
+        fragmentShader: WebGLShader;
+        uniformLocationMap: Map<string, WebGLUniformLocation>;
+        constructor(_renderingContext: WebGL2RenderingContext);
+        compile(vertexSource: string, fragmentSource: string): void;
+        getAttribIndex(_name: string): number;
+        getUniformLocation(_name: string): WebGLUniformLocation;
+        getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number>;
+        use(): void;
+        compileShader(shader: WebGLShader, source: string): void;
+    }
+    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. @author Marko Fehrenbach | HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
     class PhysicsDebugDraw extends RenderOperator {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
-        drawAabbs: boolean;
-        drawJoints: boolean;
+        gl: WebGL2RenderingContext;
         triangleBuffer: WebGLBuffer;
         program: WebGLProgram;
-        private vertShader;
-        private fragmentShader;
+        pointVBO: PhysicsDebugVertexBuffer;
+        pointIBO: PhysicsDebugIndexBuffer;
+        lineVBO: PhysicsDebugVertexBuffer;
+        lineIBO: PhysicsDebugIndexBuffer;
+        triVBO: PhysicsDebugVertexBuffer;
+        triIBO: PhysicsDebugIndexBuffer;
+        pointBufferSize: number;
+        pointData: Float32Array;
+        numPointData: number;
+        lineBufferSize: number;
+        lineData: Float32Array;
+        numLineData: number;
+        triBufferSize: number;
+        triData: Float32Array;
+        numTriData: number;
+        shader: PhysicsDebugShader;
         constructor();
-        drawTestTriangle(_cmpCamera: ComponentCamera): void;
+        initializeBuffers(): void;
+        private initFloatArray;
         private initializeOverride;
+        begin(): void;
+        end(): void;
         private vertexShaderSource;
         private fragmentShaderSource;
-        private vertexShaderTestSource;
-        private fragmentShaderTestSource;
     }
 }
 declare namespace FudgeCore {
@@ -4189,6 +4255,7 @@ declare namespace FudgeCore {
         constructor();
     }
     class PhysicsSettings {
+        debugDraw: boolean;
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
         get disableSleeping(): boolean;
         set disableSleeping(_value: boolean);
@@ -4236,6 +4303,7 @@ declare namespace FudgeCore {
         private triggerBodyList;
         private jointList;
         debugDraw: PhysicsDebugDraw;
+        mainCam: ComponentCamera;
         /**
        * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
        * rigidbodies.
