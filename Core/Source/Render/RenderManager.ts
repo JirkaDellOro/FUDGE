@@ -131,11 +131,12 @@ namespace FudgeCore {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
-        RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
+        if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach
+          RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
-      //Should be drawn only once, last after anything else, which i believe it does because graphic card only draws each pixel in a certain depth once
+      //Should be drawn only once, last after anything else, which i believe it does because graphic card only draws each pixel in a certain depth once | Marko Fehrenbach
       if (Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
       }

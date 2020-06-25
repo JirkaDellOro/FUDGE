@@ -209,12 +209,9 @@ namespace FudgeCore {
 
     constructor() {
       super();
+
       this.style = new OIMO.DebugDrawStyle();
       this.oimoDebugDraw = new OIMO.DebugDraw();
-
-      this.oimoDebugDraw.drawAabbs = true;
-      this.oimoDebugDraw.drawShapes = true;
-      this.oimoDebugDraw.drawBases = true;
       this.oimoDebugDraw.wireframe = true;
 
       this.gl = RenderOperator.crc3;
@@ -222,6 +219,38 @@ namespace FudgeCore {
       this.shader = new PhysicsDebugShader(this.gl);
       this.shader.compile(this.vertexShaderSource(), this.fragmentShaderSource());
       this.initializeBuffers();
+    }
+
+    public getDebugModeFromSettings() {
+      let mode: PHYSICS_DEBUGMODE = Physics.settings.debugMode;
+      let elementsToDraw: boolean[] = new Array();
+      switch (mode) {
+        case 0: //Colliders and Bases
+          elementsToDraw = [false, true, false, false, false, false, false, false, true];
+          break;
+        case 1: //Colliders and joints
+          elementsToDraw = [false, false, false, false, false, true, true, false, true];
+          break;
+        case 2: //Bounding Box / Broadphase Bvh / Bases
+          elementsToDraw = [true, true, true, false, false, false, false, false, false];
+          break;
+        case 3: //Contacts
+          elementsToDraw = [false, true, false, true, true, false, false, true, true];
+          break;
+        case 4: //Physics Objects only, shows same as Collider / Joints but also hiding every other fudge object
+          elementsToDraw = [false, true, false, false, false, true, true, false, true];
+          break;
+      }
+      this.oimoDebugDraw.drawAabbs = elementsToDraw[0];
+      this.oimoDebugDraw.drawBases = elementsToDraw[1];
+      this.oimoDebugDraw.drawBvh = elementsToDraw[2];
+      this.oimoDebugDraw.drawContactBases = elementsToDraw[3];
+      this.oimoDebugDraw.drawContacts = elementsToDraw[4];
+      this.oimoDebugDraw.drawJointLimits = elementsToDraw[5];
+      this.oimoDebugDraw.drawJoints = elementsToDraw[6];
+      this.oimoDebugDraw.drawPairs = elementsToDraw[7];
+      this.oimoDebugDraw.drawShapes = elementsToDraw[8];
+
     }
 
     public initializeBuffers() {
@@ -464,6 +493,7 @@ namespace FudgeCore {
     }
 
     public begin() {
+      this.getDebugModeFromSettings();
       //this.gl.lineWidth(2.0); //Does not seem to affect anythign
 
       let projection: Float32Array = Physics.world.mainCam.ViewProjectionMatrix.get();

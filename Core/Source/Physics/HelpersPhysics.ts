@@ -76,6 +76,16 @@ namespace FudgeCore {
     CONVEX
   }
 
+  /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. debugDraw in the settings must be active to see anything. */
+  export enum PHYSICS_DEBUGMODE {
+    COLLIDERS = 0,
+    JOINTS_AND_COLLIDER = 1,
+    BOUNDING_BOXES = 2,
+    CONTACTS = 3,
+    PHYSIC_OBJECTS_ONLY = 4
+  }
+
+  /** Info about Raycasts shot from the physics system. */
   export class RayHitInfo {
     public hit: boolean;
     public hitDistance: number;
@@ -93,9 +103,19 @@ namespace FudgeCore {
     }
   }
 
+  /** General settings for the physic simulation and the debug of it. */
   export class PhysicsSettings {
 
-    public debugDraw: boolean = true;
+    public debugDraw: boolean = false;
+
+    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+
+    get debugMode(): PHYSICS_DEBUGMODE {
+      return this.physicsDebugMode;
+    }
+    set debugMode(_value: PHYSICS_DEBUGMODE) {
+      this.physicsDebugMode = _value;
+    }
 
     /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
     get disableSleeping(): boolean {

@@ -31,9 +31,8 @@ namespace FudgeCore {
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld();
-
-        this.world.debugDraw = new PhysicsDebugDraw(); //Create custom Debug Draw - none OIMO
-        this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw); //Set it as OIMO.DebugDraw
+        this.world.debugDraw = new PhysicsDebugDraw();
+        this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw);
       }
       return this.world;
     }
