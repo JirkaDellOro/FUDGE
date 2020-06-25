@@ -1,20 +1,24 @@
 namespace FudgeCore {
 
+  // TODO: try symbols
   export interface StoredValues {
     [key: string]: number;
   }
 
+  // export type StoredValues = Record<symbol, number>;
+
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public storedValues: StoredValues = {}; // TODO: make private
-    public effectData: ParticleEffectData;
+    public readonly storedValues: StoredValues = {};
+    public readonly effectData: ParticleEffectData;
     private randomNumbers: number[] = [];
     // color
 
+    // TODO: aufräumen: import von außen, effect statt filename übergeben
     constructor(_filename: string = null, _numberOfParticles: number = null) {
       super();
 
-      for (let i: number = 0; i < 2000 /* TODO: don't hardcode this number, number should be bigger than number of particles */; i++) {
+      for (let i: number = 0; i < _numberOfParticles; i++) {
         this.randomNumbers.push(Math.random());
       }
 
@@ -30,10 +34,6 @@ namespace FudgeCore {
       // evaluate system storage
       if (<ParticleEffectData>this.effectData["storage"])
         this.evaluateClosureStorage(<ParticleEffectData>(<ParticleEffectData>this.effectData["storage"])["system"]);
-    }
-
-    public updateParticleEffect(_time: number): void {
-      this.storedValues["time"] = _time;
     }
 
     public evaluateClosureStorage(_storageData: ParticleEffectData): void {

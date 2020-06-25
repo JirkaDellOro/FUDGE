@@ -62,8 +62,8 @@ namespace FudgeCore {
     }
 
         /**
-     * Calculates the sum of the given parameters.
-     *  i.e. parameter[0] + ... + parameter[n]
+     * Calculates the subtraction of the given parameters.
+     *  i.e. parameter[0] - parameter[n]
      */
     private static createClosureSubtraction(_parameters: Function[]): Function {
       return function (): number {
@@ -139,7 +139,7 @@ namespace FudgeCore {
     /**
      * Creates a polynomial of third degree.
      *  parameter[0] will be the input value for the function.
-     *  parameter[1] - parameter[4] representing a,b,c,d
+     *  parameter[1] - parameter[4] representing a,b,c,d. These will be evaluated while parsing.
      */
     private static createClosurePolynomial3(_parameters: Function[]): Function {
       let a: number = _parameters[1]();

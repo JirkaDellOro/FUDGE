@@ -9,6 +9,7 @@ namespace FudgeCore {
   }
   type ClosureData = ClosureDataFunction | string | number;
 
+  // Create Particle Effect Class, importer is only a method of this
   export class ParticleEffectImporter {
     private storedValues: StoredValues;
     private randomNumbers: number[];
@@ -19,7 +20,7 @@ namespace FudgeCore {
     }
 
     public importFile(_filename: string): ParticleEffectData {
-      //TODO: import file
+      //TODO: import file use fetch
       let file: XMLHttpRequest = new XMLHttpRequest();
       file.open("GET", _filename, false);
       file.send();
@@ -33,8 +34,6 @@ namespace FudgeCore {
      * @returns a definition of the particle effect containing the closure for translation, rotation etc.
      */
     private parseFile(_data: ParticleEffectData): ParticleEffectData {
-      // console.log(_data);
-
       // pre parse storage and initialize stored values
       this.preParseStorage(<ParticleEffectData>_data["storage"]);
 

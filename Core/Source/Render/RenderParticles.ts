@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export abstract class RenderParticles extends RenderManager {
-    public static drawParticles(_node: Node, _systemTransform: Matrix4x4, _cmpCamera: ComponentCamera): void {
+    public static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpCamera: ComponentCamera): void {
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
@@ -13,6 +13,9 @@ namespace FudgeCore {
       let storedValues: StoredValues = cmpParticleSystem.storedValues;
       let effectData: ParticleEffectData = cmpParticleSystem.effectData;
 
+      storedValues["time"] = Time.game.get() / 1000;
+
+      // TODO: names 
       let storageData: ParticleEffectData = effectData["storage"];
       let transformData: ParticleEffectData = effectData["transformations"];
       let transformDataLocal: ParticleEffectData = transformData["local"];
@@ -39,7 +42,6 @@ namespace FudgeCore {
       }
 
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
-      // let meshPivotScaling: Vector3 = cmpMesh.pivot.scaling;
 
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
@@ -50,26 +52,16 @@ namespace FudgeCore {
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
 
-        // for (const key in transformDataLocal) {
-        //   // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
-        //   let transformMatrix: Matrix4x4 = Matrix4x4.IDENTITY();
-        //   let mutator: Mutator = {};
-        //   mutator[key] = this.getMutatorFor(transformDataLocal[key]);
-        //   transformMatrix.mutate(mutator);
-        //   finalTransform.multiply(transformMatrix);
-        //   Recycler.store(transformMatrix);
-        // }
-
         finalTransform.mutate(this.getMutatorFor(transformDataLocal));
         for (const key in transformDataLocal) {
           // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
-          let transformVector: Vector3 = key == "scale" ? _systemTransform.scaling : Vector3.ZERO();
+          let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
           transformVector.mutate(this.getMutatorFor(transformDataLocal[key]));
           (<General>finalTransform)[key](transformVector);
           Recycler.store(transformVector);
         }
 
-        let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY();
+        let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY(); // only if world is set in json
         for (const key in transformDataWorld) {
           let transformVector: Vector3 = Vector3.ZERO();
           transformVector.mutate(this.getMutatorFor(transformDataWorld[key]));
@@ -78,12 +70,11 @@ namespace FudgeCore {
         }
 
         // apply system transformation
-        // finalTransform.scale(meshPivotScaling); // this is slower than matrix multiplication
         finalTransform.multiply(cmpMesh.pivot);
-        finalTransform.multiply(_systemTransform, true);
+        finalTransform.multiply(_nodeTransform, true);
         finalTransform.multiply(worldTransform, true);
 
-        // TODO: optimize
+        // TODO: optimize check component mesh
         // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
 
         // evaluate component data
