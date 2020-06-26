@@ -182,7 +182,7 @@ namespace FudgeCore {
       if (this.jointList.length > 0)
         this.connectJoints();
       Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());
-      if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) {
+      if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) { //Get Cam from viewport instead of setting it for physics
         Physics.world.debugDraw.begin();
         Physics.world.oimoWorld.debugDraw();
       }

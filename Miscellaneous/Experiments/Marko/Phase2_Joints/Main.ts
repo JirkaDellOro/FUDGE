@@ -167,6 +167,11 @@ namespace FudgePhysics_Communication {
     hierarchy.appendChild(bodies[2]);
     cmpCubeTransform3.local.translate(new f.Vector3(0.5, 3, 0.5));
 
+    bodies[40] = createCompleteMeshNode("Cube_NonePhysics", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[40].removeComponent(bodies[40].getComponent(f.ComponentRigidbody));
+    hierarchy.appendChild(bodies[40]);
+    bodies[40].mtxLocal.translate(new f.Vector3(-4.5, 3.5, 0.5));
+
     //Kinematic
     bodies[3] = createCompleteMeshNode("PlayerControlledCube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
     moveableTransform = bodies[3].getComponent(f.ComponentTransform);

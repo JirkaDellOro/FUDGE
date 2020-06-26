@@ -539,8 +539,6 @@ namespace FudgeCore {
 			varying vec3 vNormal;
 			varying vec3 vColor;
 			uniform mat4 u_projection;
-			uniform mat4 viewMat;
-			uniform mat4 projMat;
 
 			void main() {
 				vPosition = aPosition;

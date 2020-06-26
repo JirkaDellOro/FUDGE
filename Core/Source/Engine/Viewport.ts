@@ -378,7 +378,7 @@ namespace FudgeCore {
     }
     // #endregion
 
-  
+
     /**
      * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
      * @param _fudgeNode The node to create a scenegraphentry for.

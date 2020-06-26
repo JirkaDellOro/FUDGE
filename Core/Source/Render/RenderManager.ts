@@ -83,12 +83,17 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
+      if (Physics.world.mainCam != _cmpCamera) Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
       RenderManager.setupPhysicalTransform(_node);
 
       RenderManager.setupTransformAndLights(_node, matrix);
-      if (Physics.world.mainCam != _cmpCamera) Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand
-      RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
 
+      if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
+        RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+
+      if (Physics.settings.debugDraw == true) {
+        Physics.world.debugDraw.end();
+      }
     }
 
     /**
@@ -131,15 +136,14 @@ namespace FudgeCore {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
-        if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach
-          RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
+        RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
       //Should be drawn only once, last after anything else, which i believe it does because graphic card only draws each pixel in a certain depth once | Marko Fehrenbach
-      if (Physics.settings.debugDraw == true) {
-        Physics.world.debugDraw.end();
-      }
+      // if (Physics.settings.debugDraw == true) {
+      //   Physics.world.debugDraw.end();
+      // }
     }
     //#endregion
 
