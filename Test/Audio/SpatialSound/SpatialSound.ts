@@ -52,11 +52,11 @@ namespace AudioSpace {
     rotator.addChild(speaker);
     translator.addChild(rotator);
 
-    mtxRotatorX = speaker.local;
-    mtxRotatorY = rotator.local;
-    mtxTranslator = translator.local;
-    mtxInner = inner.local;
-    mtxOuter = outer.local;
+    mtxRotatorX = speaker.mtxLocal;
+    mtxRotatorY = rotator.mtxLocal;
+    mtxTranslator = translator.mtxLocal;
+    mtxInner = inner.mtxLocal;
+    mtxOuter = outer.mtxLocal;
 
     // audio setup
     const audio: ƒ.Audio = await ƒ.Audio.load("hypnotic.mp3");

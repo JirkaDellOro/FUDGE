@@ -1849,6 +1849,7 @@ declare namespace FudgeCore {
          * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
          */
         getRayFromClient(_point: Vector2): Ray;
+        pointWorldToClient(_position: Vector3): Vector2;
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
          */

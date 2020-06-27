@@ -37,6 +37,15 @@ namespace MouseToRay {
   function hndPointerMove(_event: ƒ.EventPointer): void {
     ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
     positionCube();
+
+    let rayDistance: ƒ.Vector3 = ray.getDistance(ƒ.Vector3.ZERO());
+    let posCenter: ƒ.Vector2 = viewport.pointWorldToClient(ƒ.Vector3.ZERO());
+    let posCube: ƒ.Vector2 = viewport.pointWorldToClient(ƒ.Vector3.SCALE(rayDistance, -1));
+    let crc2: CanvasRenderingContext2D = viewport.getContext();
+    crc2.moveTo(posCube.x, posCube.y);
+    crc2.lineTo(posCenter.x, posCenter.y);
+    crc2.strokeStyle = "white";
+    crc2.stroke();
   }
 
 
@@ -66,7 +75,6 @@ namespace MouseToRay {
       pos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
     root.getChildrenByName("Cube")[0].mtxLocal.translation = pos;
     viewport.draw();
-
   }
 
   function createScene(): void {

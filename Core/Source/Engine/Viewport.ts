@@ -190,6 +190,12 @@ namespace FudgeCore {
       return ray;
     }
 
+    public pointWorldToClient(_position: Vector3): Vector2 {
+      let projection: Vector3 = this.camera.project(_position);
+      let posClient: Vector2 = this.pointClipToClient(projection.toVector2());
+      return posClient;
+    }
+
     /**
      * Returns a point on the source-rectangle matching the given point on the client rectangle
      */

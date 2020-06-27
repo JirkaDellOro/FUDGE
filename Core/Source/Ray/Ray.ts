@@ -24,10 +24,11 @@ namespace FudgeCore {
 
     public getDistance(_target: Vector3): Vector3 {
       let originToTarget: Vector3 = Vector3.DIFFERENCE(_target, this.origin);
-      let directionNormal: Vector3 = Vector3.NORMALIZATION(this.direction, 1);
-      let projectedLength: number = Vector3.DOT(originToTarget, directionNormal);
-      directionNormal.scale(projectedLength);
-      let distance: Vector3 = Vector3.DIFFERENCE(_target, directionNormal);
+      let raySection: Vector3 = Vector3.NORMALIZATION(this.direction, 1);
+      let projectedLength: number = Vector3.DOT(originToTarget, raySection);
+      raySection.scale(projectedLength);
+      raySection.add(this.origin);
+      let distance: Vector3 = Vector3.DIFFERENCE(_target, raySection);
       return distance;
     }
   }

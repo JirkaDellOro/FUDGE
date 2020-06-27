@@ -29,6 +29,14 @@ var MouseToRay;
     function hndPointerMove(_event) {
         ray = viewport.getRayFromClient(new ƒ.Vector2(_event.pointerX, _event.pointerY));
         positionCube();
+        let rayDistance = ray.getDistance(ƒ.Vector3.ZERO());
+        let posCenter = viewport.pointWorldToClient(ƒ.Vector3.ZERO());
+        let posCube = viewport.pointWorldToClient(ƒ.Vector3.SCALE(rayDistance, -1));
+        let crc2 = viewport.getContext();
+        crc2.moveTo(posCube.x, posCube.y);
+        crc2.lineTo(posCenter.x, posCenter.y);
+        crc2.strokeStyle = "white";
+        crc2.stroke();
     }
     function hndWheelMove(_event) {
         distance -= _event.deltaY * 0.01;
