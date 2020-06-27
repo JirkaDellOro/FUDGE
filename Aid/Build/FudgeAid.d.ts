@@ -98,7 +98,6 @@ declare namespace FudgeAid {
         private static count;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
-        get local(): ƒ.Matrix4x4;
         get pivot(): ƒ.Matrix4x4;
         deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
     }
@@ -121,6 +120,64 @@ declare namespace FudgeAid {
     /** Three Point Light setup that by default illuminates the Scene from +Z */
     class NodeThreePointLights extends Node {
         constructor(_name: string, _rotationY?: number);
+    }
+}
+declare namespace FudgeAid {
+    /**
+     * Handles the animation cycle of a sprite on a [[Node]]
+     */
+    class NodeSprite extends ƒ.Node {
+        private cmpMesh;
+        private cmpMaterial;
+        private sprite;
+        private frameCurrent;
+        private direction;
+        constructor(_name: string, _sprite: Sprite);
+        /**
+         * Show a specific frame of the sequence
+         */
+        showFrame(_index: number): void;
+        /**
+         * Show the next frame of the sequence or start anew when the end or the start was reached, according to the direction of playing
+         */
+        showFrameNext(): void;
+        /**
+         *
+         * @param _direction
+         */
+        setFrameDirection(_direction: number): void;
+    }
+}
+declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    /**
+     * Describes a single frame of a sprite animation
+     */
+    class SpriteFrame {
+        rectTexture: ƒ.Rectangle;
+        pivot: ƒ.Matrix4x4;
+        material: ƒ.Material;
+        timeScale: number;
+    }
+    /**
+     * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+     */
+    class Sprite {
+        private static mesh;
+        frames: SpriteFrame[];
+        name: string;
+        constructor(_name: string);
+        static getMesh(): ƒ.MeshSprite;
+        /**
+         * Creates a series of frames for this [[Sprite]] resulting in pivot matrices and materials to use on a sprite node
+         */
+        generate(_spritesheet: ƒ.TextureImage, _rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        /**
+         * Generate sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
+         * the size of the borders of the grid and more
+         */
+        generateByGrid(_texture: ƒ.TextureImage, _startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        private createFrame;
     }
 }
 declare namespace FudgeAid {
