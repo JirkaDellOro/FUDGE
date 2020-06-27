@@ -36,7 +36,7 @@ A collection of various other helpful documents and resources
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
 - Importer for standard file formats
-- Light and Shadpw
+- Light and Shadow
 - Diegetic User-Interface
 - Runtime-Recording for Replay
 - Grapheditor/Wiring for Shader and Animation
