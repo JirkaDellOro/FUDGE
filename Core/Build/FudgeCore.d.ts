@@ -1070,7 +1070,6 @@ declare namespace FudgeCore {
     class CoatTextured extends Coat {
         color: Color;
         texture: TextureImage;
-        pivot: Matrix3x3;
         tilingX: number;
         tilingY: number;
         repetition: boolean;
@@ -1413,6 +1412,7 @@ declare namespace FudgeCore {
         material: Material;
         clrPrimary: Color;
         clrSecondary: Color;
+        pivot: Matrix3x3;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;

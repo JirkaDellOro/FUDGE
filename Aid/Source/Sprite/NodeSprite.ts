@@ -3,18 +3,20 @@ namespace FudgeAid {
    * Handles the animation cycle of a sprite on a [[Node]]
    */
   export class NodeSprite extends ƒ.Node {
+    private static mesh: ƒ.MeshSprite = new ƒ.MeshSprite();
     private cmpMesh: ƒ.ComponentMesh;
     private cmpMaterial: ƒ.ComponentMaterial;
-    private sprite: Sprite;
+    private sprite: SpriteSheetAnimation;
     private frameCurrent: number = 0;
     private direction: number = 1;
 
-    constructor(_name: string, _sprite: Sprite) {
+    constructor(_name: string, _sprite: SpriteSheetAnimation) {
       super(_name);
       this.sprite = _sprite;
 
-      this.cmpMesh = new ƒ.ComponentMesh(Sprite.getMesh());
-      this.cmpMaterial = new ƒ.ComponentMaterial();
+      this.cmpMesh = new ƒ.ComponentMesh(NodeSprite.mesh);
+      // Define coat from the SpriteSheet to use when rendering
+      this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderTexture, null));
       this.addComponent(this.cmpMesh);
       this.addComponent(this.cmpMaterial);
 
@@ -26,8 +28,9 @@ namespace FudgeAid {
      */
     public showFrame(_index: number): void {
       let spriteFrame: SpriteFrame = this.sprite.frames[_index];
-      this.cmpMesh.pivot = spriteFrame.pivot;
-      this.cmpMaterial.material = spriteFrame.material;
+      this.cmpMesh.pivot = spriteFrame.mtxPivot;
+      this.cmpMaterial.pivot = spriteFrame.mtxTexture;
+      this.cmpMaterial.material.setCoat(this.sprite.spritesheet);
       this.frameCurrent = _index;
     }
 

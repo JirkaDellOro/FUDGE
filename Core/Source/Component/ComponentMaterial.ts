@@ -8,6 +8,7 @@ namespace FudgeCore {
     public material: Material;
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
+    public pivot: Matrix3x3 = Matrix3x3.IDENTITY();
     // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {

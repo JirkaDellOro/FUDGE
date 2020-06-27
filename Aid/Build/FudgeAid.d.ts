@@ -127,12 +127,13 @@ declare namespace FudgeAid {
      * Handles the animation cycle of a sprite on a [[Node]]
      */
     class NodeSprite extends ƒ.Node {
+        private static mesh;
         private cmpMesh;
         private cmpMaterial;
         private sprite;
         private frameCurrent;
         private direction;
-        constructor(_name: string, _sprite: Sprite);
+        constructor(_name: string, _sprite: SpriteSheetAnimation);
         /**
          * Show a specific frame of the sequence
          */
@@ -155,28 +156,34 @@ declare namespace FudgeAid {
      */
     class SpriteFrame {
         rectTexture: ƒ.Rectangle;
-        pivot: ƒ.Matrix4x4;
-        material: ƒ.Material;
+        mtxPivot: ƒ.Matrix4x4;
+        mtxTexture: ƒ.Matrix3x3;
         timeScale: number;
     }
     /**
-     * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+     * Extends [[CoatTextured]] for the ease of use of spritesheets and reusability
      */
-    class Sprite {
-        private static mesh;
+    class SpriteSheet extends ƒ.CoatTextured {
+        constructor(_name: string, _image: HTMLImageElement);
+    }
+    /**
+     * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+     * Contains the [[MeshSprite]], the [[Material]] and the spritesheet-texture
+     */
+    class SpriteSheetAnimation {
         frames: SpriteFrame[];
         name: string;
-        constructor(_name: string);
-        static getMesh(): ƒ.MeshSprite;
+        spritesheet: SpriteSheet;
+        constructor(_name: string, _spritesheet: SpriteSheet);
         /**
-         * Creates a series of frames for this [[Sprite]] resulting in pivot matrices and materials to use on a sprite node
+         * Stores a series of frames in this [[Sprite]], calculating the matrices to use in the components of a [[NodeSprite]]
          */
-        generate(_spritesheet: ƒ.TextureImage, _rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        generate(_rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
         /**
-         * Generate sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
+         * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
          * the size of the borders of the grid and more
          */
-        generateByGrid(_texture: ƒ.TextureImage, _startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
         private createFrame;
     }
 }

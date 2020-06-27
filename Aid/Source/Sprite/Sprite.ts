@@ -6,91 +6,98 @@ namespace FudgeAid {
    */
   export class SpriteFrame {
     rectTexture: ƒ.Rectangle;
-    pivot: ƒ.Matrix4x4;
-    material: ƒ.Material;
+    mtxPivot: ƒ.Matrix4x4;
+    mtxTexture: ƒ.Matrix3x3;
     timeScale: number;
   }
 
   /**
-   * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+   * Extends [[CoatTextured]] for the ease of use of spritesheets and reusability 
    */
-  export class Sprite {
-    private static mesh: ƒ.MeshSprite = new ƒ.MeshSprite();
+  export class SpriteSheet extends ƒ.CoatTextured {
+    constructor(_name: string, _image: HTMLImageElement) {
+      super();
+      this.name = _name;
+      this.texture = new ƒ.TextureImage();
+      this.texture.image = _image;
+    }
+  }
+  /**
+   * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+   * Contains the [[MeshSprite]], the [[Material]] and the spritesheet-texture
+   */
+  export class SpriteSheetAnimation {
     public frames: SpriteFrame[] = [];
     public name: string;
+    public spritesheet: SpriteSheet;
 
-    constructor(_name: string) {
+    constructor(_name: string, _spritesheet: SpriteSheet) {
       this.name = _name;
-    }
-
-    public static getMesh(): ƒ.MeshSprite {
-      return Sprite.mesh;
+      this.spritesheet = _spritesheet;
     }
 
     /**
-     * Creates a series of frames for this [[Sprite]] resulting in pivot matrices and materials to use on a sprite node
+     * Stores a series of frames in this [[Sprite]], calculating the matrices to use in the components of a [[NodeSprite]]
      */
-    public generate(_spritesheet: ƒ.TextureImage, _rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
+    public generate(_rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
+      let img: HTMLImageElement = this.spritesheet.texture.image;
       this.frames = [];
       let framing: ƒ.FramingScaled = new ƒ.FramingScaled();
-      framing.setScale(1 / _spritesheet.image.width, 1 / _spritesheet.image.height);
-
+      framing.setScale(1 / img.width, 1 / img.height);
+      
       let count: number = 0;
       for (let rect of _rects) {
-        let frame: SpriteFrame = this.createFrame(this.name + `${count}`, _spritesheet, framing, rect, _resolutionQuad, _origin);
+        let frame: SpriteFrame = this.createFrame(this.name + `${count}`, framing, rect, _resolutionQuad, _origin);
         frame.timeScale = 1;
         this.frames.push(frame);
-
+        
         count++;
       }
     }
-
+    
     /**
-     * Generate sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
+     * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
      * the size of the borders of the grid and more
      */
-    public generateByGrid(_texture: ƒ.TextureImage, _startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
+    public generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
+      let img: HTMLImageElement = this.spritesheet.texture.image;
       let rect: ƒ.Rectangle = _startRect.copy;
       let rects: ƒ.Rectangle[] = [];
       while (_frames--) {
         rects.push(rect.copy);
         rect.position.x += _startRect.size.x + _borderSize.x;
-
-        if (rect.right < _texture.image.width)
-          continue;
-
+        
+        if (rect.right < img.width)
+        continue;
+        
         _startRect.position.y += _startRect.size.y + _borderSize.y;
         rect = _startRect.copy;
-        if (rect.bottom > _texture.image.height)
-          break;
+        if (rect.bottom > img.height)
+        break;
       }
-
+      
       rects.forEach((_rect: ƒ.Rectangle) => ƒ.Debug.log(_rect.toString()));
-      this.generate(_texture, rects, _resolutionQuad, _origin);
+      this.generate(rects, _resolutionQuad, _origin);
     }
-
-    private createFrame(_name: string, _texture: ƒ.TextureImage, _framing: ƒ.FramingScaled, _rect: ƒ.Rectangle, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): SpriteFrame {
-      let rectTexture: ƒ.Rectangle = new ƒ.Rectangle(0, 0, _texture.image.width, _texture.image.height);
+    
+    private createFrame(_name: string, _framing: ƒ.FramingScaled, _rect: ƒ.Rectangle, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): SpriteFrame {
+      let img: HTMLImageElement = this.spritesheet.texture.image;
+      let rectTexture: ƒ.Rectangle = new ƒ.Rectangle(0, 0, img.width, img.height);
       let frame: SpriteFrame = new SpriteFrame();
 
       frame.rectTexture = _framing.getRect(_rect);
       frame.rectTexture.position = _framing.getPoint(_rect.position, rectTexture);
 
       let rectQuad: ƒ.Rectangle = new ƒ.Rectangle(0, 0, _rect.width / _resolutionQuad, _rect.height / _resolutionQuad, _origin);
-      frame.pivot = ƒ.Matrix4x4.IDENTITY();
-      frame.pivot.translate(new ƒ.Vector3(rectQuad.position.x + rectQuad.size.x / 2, -rectQuad.position.y - rectQuad.size.y / 2, 0));
-      frame.pivot.scaleX(rectQuad.size.x);
-      frame.pivot.scaleY(rectQuad.size.y);
+      frame.mtxPivot = ƒ.Matrix4x4.IDENTITY();
+      frame.mtxPivot.translate(new ƒ.Vector3(rectQuad.position.x + rectQuad.size.x / 2, -rectQuad.position.y - rectQuad.size.y / 2, 0));
+      frame.mtxPivot.scaleX(rectQuad.size.x);
+      frame.mtxPivot.scaleY(rectQuad.size.y);
       // ƒ.Debug.log(rectQuad.toString());
 
-      //TODO: instead of creating many materials, the shader could calculate the texturing
-      let coat: ƒ.CoatTextured = new ƒ.CoatTextured();
-      coat.pivot.translate(frame.rectTexture.position);
-      coat.pivot.scale(frame.rectTexture.size);
-      coat.name = _name;
-      coat.texture = _texture;
-
-      frame.material = new ƒ.Material(_name, ƒ.ShaderTexture, coat);
+      frame.mtxTexture = ƒ.Matrix3x3.IDENTITY();
+      frame.mtxTexture.translate(frame.rectTexture.position);
+      frame.mtxTexture.scale(frame.rectTexture.size);
 
       return frame;
     }
