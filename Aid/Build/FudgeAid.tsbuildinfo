@@ -12,7 +12,7 @@
       "../Source/Geometry/NodeCoordinateSystem.ts",
       "../Source/Light/NodeLightSetup.ts",
       "../Source/Sprite/NodeSprite.ts",
-      "../Source/Sprite/Sprite.ts",
+      "../Source/Sprite/SpriteSheetAnimation.ts",
       "../Source/StateMachine/ComponentStateMachine.ts",
       "../Source/StateMachine/StateMachine.ts"
     ],
@@ -26,7 +26,7 @@
         },
         {
           "pos": 15,
-          "end": 23825,
+          "end": 23855,
           "kind": "text"
         }
       ],
@@ -66,7 +66,7 @@
         },
         {
           "pos": 112,
-          "end": 11298,
+          "end": 11506,
           "kind": "text"
         }
       ]

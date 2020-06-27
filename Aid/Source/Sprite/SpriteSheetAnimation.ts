@@ -12,16 +12,23 @@ namespace FudgeAid {
   }
 
   /**
-   * Extends [[CoatTextured]] for the ease of use of spritesheets and reusability 
+   * Convenience for creating a [[CoatTexture]] to use as spritesheet
    */
-  export class SpriteSheet extends ƒ.CoatTextured {
-    constructor(_name: string, _image: HTMLImageElement) {
-      super();
-      this.name = _name;
-      this.texture = new ƒ.TextureImage();
-      this.texture.image = _image;
-    }
+  export function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured {
+    let coat: ƒ.CoatTextured = new ƒ.CoatTextured();
+    coat.name = _name;
+    coat.texture = new ƒ.TextureImage();
+    coat.texture.image = _image;
+    return coat;
   }
+  
+  /**
+   * Holds SpriteSheetAnimations in an associative hierarchical array
+   */
+  export interface SpriteSheetAnimations {
+    [key: string]: SpriteSheetAnimation | SpriteSheetAnimations;
+  }
+
   /**
    * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
    * Contains the [[MeshSprite]], the [[Material]] and the spritesheet-texture
@@ -29,9 +36,9 @@ namespace FudgeAid {
   export class SpriteSheetAnimation {
     public frames: SpriteFrame[] = [];
     public name: string;
-    public spritesheet: SpriteSheet;
+    public spritesheet: ƒ.CoatTextured;
 
-    constructor(_name: string, _spritesheet: SpriteSheet) {
+    constructor(_name: string, _spritesheet: ƒ.CoatTextured) {
       this.name = _name;
       this.spritesheet = _spritesheet;
     }

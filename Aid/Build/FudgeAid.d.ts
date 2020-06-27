@@ -130,10 +130,11 @@ declare namespace FudgeAid {
         private static mesh;
         private cmpMesh;
         private cmpMaterial;
-        private sprite;
+        private animation;
         private frameCurrent;
         private direction;
-        constructor(_name: string, _sprite: SpriteSheetAnimation);
+        constructor(_name: string);
+        setAnimation(_animation: SpriteSheetAnimation): void;
         /**
          * Show a specific frame of the sequence
          */
@@ -161,10 +162,14 @@ declare namespace FudgeAid {
         timeScale: number;
     }
     /**
-     * Extends [[CoatTextured]] for the ease of use of spritesheets and reusability
+     * Convenience for creating a [[CoatTexture]] to use as spritesheet
      */
-    class SpriteSheet extends ƒ.CoatTextured {
-        constructor(_name: string, _image: HTMLImageElement);
+    function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured;
+    /**
+     * Holds SpriteSheetAnimations in an associative hierarchical array
+     */
+    interface SpriteSheetAnimations {
+        [key: string]: SpriteSheetAnimation | SpriteSheetAnimations;
     }
     /**
      * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
@@ -173,8 +178,8 @@ declare namespace FudgeAid {
     class SpriteSheetAnimation {
         frames: SpriteFrame[];
         name: string;
-        spritesheet: SpriteSheet;
-        constructor(_name: string, _spritesheet: SpriteSheet);
+        spritesheet: ƒ.CoatTextured;
+        constructor(_name: string, _spritesheet: ƒ.CoatTextured);
         /**
          * Stores a series of frames in this [[Sprite]], calculating the matrices to use in the components of a [[NodeSprite]]
          */
