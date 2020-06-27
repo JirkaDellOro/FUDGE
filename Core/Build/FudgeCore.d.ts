@@ -3233,6 +3233,7 @@ declare namespace FudgeCore {
          * must be relative to the same coordinate system, preferably the world
          */
         intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
+        getDistance(_target: Vector3): Vector3;
     }
 }
 declare namespace FudgeCore {
