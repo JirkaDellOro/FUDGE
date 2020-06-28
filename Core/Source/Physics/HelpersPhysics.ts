@@ -63,8 +63,9 @@ namespace FudgeCore {
   * SPHERE = Vector3(diameter, x, x), CAPSULE = Vector3(diameter, height, x), CYLINDER = Vector3(diameter, height, x),
   * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
   * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
-  * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce errors if vertices
-  * exist multiple times within a mesh.
+  * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
+  * are too close to one another and the given vertices do not form a in itself closed shape. Vertices in the ComponentMesh can be scaled differently 
+  * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.  
   */
   export enum COLLIDER_TYPE {
     CUBE,

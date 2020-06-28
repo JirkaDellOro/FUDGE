@@ -14,7 +14,6 @@ namespace FudgePhysics_Communication {
 
   let bodies: f.Node[] = new Array();
   let origin: f.Vector3 = new f.Vector3(-5, 0.25, 0);
-  let direction: f.Vector3 = new f.Vector3(1, 0, 0);
   let hitInfo: f.RayHitInfo = new f.RayHitInfo();
   let ground: f.Node;
 
@@ -67,16 +66,6 @@ namespace FudgePhysics_Communication {
     bodies[4].mtxLocal.scale(new f.Vector3(0.3, 0.3, 2));
     bodies[3].appendChild(bodies[4]);
 
-    bodies[7] = createCompleteMeshNode("RayBeginning", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.7, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
-    bodies[7].removeComponent(bodies[7].getComponent(f.ComponentRigidbody));
-    hierarchy.appendChild(bodies[7]);
-
-    bodies[8] = createCompleteMeshNode("RayEnd", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.7, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
-    bodies[8].removeComponent(bodies[8].getComponent(f.ComponentRigidbody));
-    hierarchy.appendChild(bodies[8]);
-
-
-
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
     cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     hierarchy.addComponent(cmpLight);
@@ -92,10 +81,12 @@ namespace FudgePhysics_Communication {
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
     viewPort.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
     viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
-    viewPort.activatePointerEvent(f.EVENT_POINTER.DOWN, true);
-    viewPort.addEventListener(f.EVENT_POINTER.DOWN, hndPointerDown);
+    //viewPort.activatePointerEvent(f.EVENT_POINTER.DOWN, true);
+    //viewPort.addEventListener(f.EVENT_POINTER.DOWN, hndPointerDown);
 
     viewPort.showSceneGraph();
+    f.Physics.settings.debugDraw = true;
+
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Physics.start(hierarchy);
     f.Loop.start();
@@ -103,6 +94,7 @@ namespace FudgePhysics_Communication {
 
   function update(): void {
     f.Physics.world.simulate();
+    hndPointerDown();
     viewPort.draw();
     measureFPS();
   }
@@ -156,30 +148,22 @@ namespace FudgePhysics_Communication {
     let pos: f.Vector3 = new f.Vector3(horizontal, 0, vertical);
 
     moveableTransform.local.translate(pos, true);
-
-    // let translation: Matrix4x4 = Matrix4x4.TRANSLATION(_by);
-    // this.multiply(translation);
   }
 
   function hndPointerMove(_event: f.EventPointer): void {
     moveableTransform.local.rotateY(_event.movementX * speedCameraRotation);
   }
 
-  function hndPointerDown(_event: f.EventPointer): void {
+  function hndPointerDown(): void {//_event: f.EventPointer): void {
     origin = bodies[4].mtxWorld.translation;
     let forward: f.Vector3;
 
     forward = f.Vector3.Z();
     forward.transform(bodies[4].mtxWorld, false);
 
-    hitInfo = f.Physics.raycast(origin, forward, 30);
+    hitInfo = f.Physics.raycast(origin, forward, 10);
     if (hitInfo.hit == true && hitInfo.rigidbodyComponent.getContainer().name == "Target") {
       f.Debug.log("hit");
     }
-    let mutator: f.Mutator = {};
-    mutator["translation"] = hitInfo.rayOrigin;
-    bodies[7].mtxLocal.mutate(mutator);
-    mutator["translation"] = hitInfo.rayEnd;
-    bodies[8].mtxLocal.mutate(mutator);
   }
 }

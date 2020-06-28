@@ -529,6 +529,13 @@ namespace FudgeCore {
       }
     }
 
+    /** Draw the ray into the debugDraw Call */
+    public debugRay(_origin: Vector3, _end: Vector3, _color: Color) {
+      this.oimoDebugDraw.line(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(_end.x, _end.y, _end.z), new OIMO.Vec3(_color.r, _color.g, _color.b));
+      this.oimoDebugDraw.point(new OIMO.Vec3(_end.x, _end.y, _end.z), new OIMO.Vec3(_color.r, _color.g, _color.b));
+
+    }
+
     private vertexShaderSource(): string {
       return `
 			precision mediump float;

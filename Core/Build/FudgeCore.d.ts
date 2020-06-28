@@ -3921,8 +3921,10 @@ declare namespace FudgeCore {
        */
     class ComponentRigidbody extends Component {
         static readonly iSubclass: number;
+        /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
         pivot: Matrix4x4;
-        convexMesh: Mesh;
+        /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
+        convexMesh: Float32Array;
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a [[Node]] that is using physics but can be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -3976,7 +3978,7 @@ declare namespace FudgeCore {
         private angDamping;
         private rotationalInfluenceFactor;
         private gravityInfluenceFactor;
-        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4);
+        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /**
         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
         * is not provided through the FUDGE Integration.
@@ -4082,7 +4084,9 @@ declare namespace FudgeCore {
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
         private createRigidbody;
         private createCollider;
+        /** Creating a shape that represents a in itself closed form, out of the given vertices. */
         private createConvexGeometryCollider;
+        /** Internal implementation of vertices that construct a pyramid. The vertices of the implemented pyramid mesh can be used too. But they are halfed and double sided, so it's more performant to use this. */
         private createPyramidVertices;
         private addRigidbodyToWorld;
         private removeRigidbodyFromWorld;
@@ -4176,6 +4180,8 @@ declare namespace FudgeCore {
         private initializeOverride;
         begin(): void;
         end(): void;
+        /** Draw the ray into the debugDraw Call */
+        debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
         private vertexShaderSource;
         private fragmentShaderSource;
     }
@@ -4233,8 +4239,9 @@ declare namespace FudgeCore {
     * SPHERE = Vector3(diameter, x, x), CAPSULE = Vector3(diameter, height, x), CYLINDER = Vector3(diameter, height, x),
     * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
     * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
-    * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce errors if vertices
-    * exist multiple times within a mesh.
+    * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
+    * are too close to one another and the given vertices do not form a in itself closed shape. Vertices in the ComponentMesh can be scaled differently
+    * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.
     */
     enum COLLIDER_TYPE {
         CUBE = 0,

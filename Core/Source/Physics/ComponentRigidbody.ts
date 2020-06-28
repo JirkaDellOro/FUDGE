@@ -8,9 +8,12 @@ namespace FudgeCore {
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
+
+    /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
-    public convexMesh: Mesh;
+    /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
+    public convexMesh: Float32Array;
 
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
      * reacting to a [[Node]] that is using physics but can be controlled by animation or transform. And STATIC means its immovable.
@@ -140,8 +143,9 @@ namespace FudgeCore {
     private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
     private gravityInfluenceFactor: number = 1;
 
-    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null) {
+    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
+      this.convexMesh = _convexMesh;
       this.rbType = _type;
       this.collisionGroup = _group;
       this.colliderType = _colliderType;
@@ -488,6 +492,9 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.rayEnd = endpoint;
       }
+      if (Physics.settings.debugDraw) {
+        Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
+      }
       return hitInfo;
     }
 
@@ -558,13 +565,14 @@ namespace FudgeCore {
           geometry = this.createConvexGeometryCollider(this.createPyramidVertices(), _scale);
           break;
         case COLLIDER_TYPE.CONVEX:
-          geometry = this.createConvexGeometryCollider(this.convexMesh.vertices, _scale);
+          geometry = this.createConvexGeometryCollider(this.convexMesh, _scale);
           break;
       }
       shapeConf.geometry = geometry;
       this.colliderInfo = shapeConf;
     }
 
+    /** Creating a shape that represents a in itself closed form, out of the given vertices. */
     private createConvexGeometryCollider(_vertices: Float32Array, _scale: OIMO.Vec3): OIMO.ConvexHullGeometry {
       let verticesAsVec3: OIMO.Vec3[] = new Array();
       for (let i: number = 0; i < _vertices.length; i += 3) {
@@ -573,6 +581,7 @@ namespace FudgeCore {
       return new OIMO.ConvexHullGeometry(verticesAsVec3);
     }
 
+    /** Internal implementation of vertices that construct a pyramid. The vertices of the implemented pyramid mesh can be used too. But they are halfed and double sided, so it's more performant to use this. */
     private createPyramidVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array([
         /*0*/-1, 0, 1, /*1*/ 1, 0, 1,  /*2*/ 1, 0, -1, /*3*/ -1, 0, -1,

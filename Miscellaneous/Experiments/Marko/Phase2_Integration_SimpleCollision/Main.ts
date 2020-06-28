@@ -85,6 +85,7 @@ namespace FudgePhysics_Communication {
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Physics.start(hierarchy);
     f.Loop.start();
+    f.Physics.settings.debugDraw = true;
   }
 
   function update(): void {
@@ -116,9 +117,7 @@ namespace FudgePhysics_Communication {
     let cmpMaterial: f.ComponentMaterial = new f.ComponentMaterial(_material);
 
     let cmpTransform: f.ComponentTransform = new f.ComponentTransform();
-
-
-    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group);
+    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group, null);
     cmpRigidbody.setRestitution(0.2);
     cmpRigidbody.setFriction(0.8);
     node.addComponent(cmpMesh);
