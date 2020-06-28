@@ -258,7 +258,7 @@ namespace FudgeCore {
      * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
      */
     public toVector3(_z: number = 0): Vector3 {
-      return new Vector3(this.x, this.y, z);
+      return new Vector3(this.x, this.y, _z);
     }
 
     public toString(): string {

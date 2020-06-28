@@ -3,6 +3,10 @@
 namespace FudgeAid {
   import ƒ = FudgeCore;
 
+  /**
+   * Adds a light setup to the node given, consisting of an ambient light, a directional key light and a directional back light.
+   * Exept of the node to become the container, all parameters are optional and provided default values for general purpose. 
+   */
   export function addStandardLightComponents(
     _node: ƒ.Node,
     _clrAmbient: ƒ.Color = new ƒ.Color(0.2, 0.2, 0.2), _clrKey: ƒ.Color = new ƒ.Color(0.9, 0.9, 0.9), _clrBack: ƒ.Color = new ƒ.Color(0.6, 0.6, 0.6),
