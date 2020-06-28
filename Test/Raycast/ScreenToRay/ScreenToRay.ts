@@ -144,6 +144,8 @@ namespace ScreenToRay {
     setUiPoint("Projection", posProjection);
 
     let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
+
+    // ray = viewport.getRayFromScreenPoint(posMouse);
     return ray;
   }
 

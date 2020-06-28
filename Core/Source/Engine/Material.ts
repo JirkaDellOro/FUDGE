@@ -37,7 +37,10 @@ namespace FudgeCore {
      */
     public setCoat(_coat: Coat): void {
       if (_coat.constructor != this.shaderType.getCoat())
-        throw (new Error("Shader and coat don't match"));
+        if (_coat instanceof this.shaderType.getCoat())
+          Debug.fudge("Coat is extension of Coat required by shader");
+        else
+          throw (new Error("Shader and coat don't match"));
       this.coat = _coat;
     }
 

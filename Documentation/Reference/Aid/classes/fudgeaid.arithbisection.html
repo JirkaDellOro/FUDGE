@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ArithIntervalSolver | Fudge Aid</title>
+	<title>ArithBisection | Fudge Aid</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgeaid.html">FudgeAid</a>
 				</li>
 				<li>
-					<a href="fudgeaid.arithintervalsolver.html">ArithIntervalSolver</a>
+					<a href="fudgeaid.arithbisection.html">ArithBisection</a>
 				</li>
 			</ul>
-			<h1>Class ArithIntervalSolver&lt;Parameter, Epsilon&gt;</h1>
+			<h1>Class ArithBisection&lt;Parameter, Epsilon&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>Within a given precision, an object of this class finds the parameter value at which a given function
-							switches its boolean return value using interval splitting.
+							switches its boolean return value using interval splitting (bisection).
 						Pass the type of the parameter and the type the precision is measured in.</p>
 					</div>
 				</div>
@@ -93,7 +93,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">ArithIntervalSolver</span>
+						<span class="target">ArithBisection</span>
 					</li>
 				</ul>
 			</section>
@@ -104,23 +104,23 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#left" class="tsd-kind-icon">left</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#leftvalue" class="tsd-kind-icon">left<wbr>Value</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#right" class="tsd-kind-icon">right</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#rightvalue" class="tsd-kind-icon">right<wbr>Value</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#left" class="tsd-kind-icon">left</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#leftvalue" class="tsd-kind-icon">left<wbr>Value</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#right" class="tsd-kind-icon">right</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#rightvalue" class="tsd-kind-icon">right<wbr>Value</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#solve" class="tsd-kind-icon">solve</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.arithintervalsolver.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#solve" class="tsd-kind-icon">solve</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeaid.arithbisection.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
 							</ul>
 						</section>
 					</div>
@@ -132,13 +132,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Arith<wbr>Interval<wbr>Solver<span class="tsd-signature-symbol">(</span>_function<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span>, _divide<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span>, _isSmaller<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeaid.arithintervalsolver.html" class="tsd-signature-type">ArithIntervalSolver</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Arith<wbr>Bisection<span class="tsd-signature-symbol">(</span>_function<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span>, _divide<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span>, _isSmaller<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeaid.arithbisection.html" class="tsd-signature-type">ArithBisection</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L19">Arithmetic/ArithIntervalSolver.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L19">Arithmetic/ArithBisection.ts:19</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -236,7 +236,7 @@
 									</ul>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgeaid.arithintervalsolver.html" class="tsd-signature-type">ArithIntervalSolver</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgeaid.arithbisection.html" class="tsd-signature-type">ArithBisection</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -249,7 +249,7 @@
 					<div class="tsd-signature tsd-kind-icon">left<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Parameter</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L9">Arithmetic/ArithIntervalSolver.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L9">Arithmetic/ArithBisection.ts:9</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -264,7 +264,7 @@
 					<div class="tsd-signature tsd-kind-icon">left<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L13">Arithmetic/ArithIntervalSolver.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L13">Arithmetic/ArithBisection.ts:13</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -279,7 +279,7 @@
 					<div class="tsd-signature tsd-kind-icon">right<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Parameter</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L11">Arithmetic/ArithIntervalSolver.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L11">Arithmetic/ArithBisection.ts:11</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -294,7 +294,7 @@
 					<div class="tsd-signature tsd-kind-icon">right<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L15">Arithmetic/ArithIntervalSolver.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L15">Arithmetic/ArithBisection.ts:15</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -316,7 +316,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L46">Arithmetic/ArithIntervalSolver.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L46">Arithmetic/ArithBisection.ts:46</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -377,7 +377,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/a437f12e/Aid/Source/Arithmetic/ArithIntervalSolver.ts#L66">Arithmetic/ArithIntervalSolver.ts:66</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/d5630a2d/Aid/Source/Arithmetic/ArithBisection.ts#L66">Arithmetic/ArithBisection.ts:66</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -402,31 +402,34 @@
 					<li class=" tsd-kind-enum tsd-parent-kind-module">
 						<a href="../enums/fudgeaid.image_rendering.html" class="tsd-kind-icon">IMAGE_<wbr>RENDERING</a>
 					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.arith.html" class="tsd-kind-icon">Arith</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
-						<a href="fudgeaid.arithintervalsolver.html" class="tsd-kind-icon">Arith<wbr>Interval<wbr>Solver</a>
+						<a href="fudgeaid.arithbisection.html" class="tsd-kind-icon">Arith<wbr>Bisection</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgeaid.arithbisection.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#left" class="tsd-kind-icon">left</a>
+								<a href="fudgeaid.arithbisection.html#left" class="tsd-kind-icon">left</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#leftvalue" class="tsd-kind-icon">left<wbr>Value</a>
+								<a href="fudgeaid.arithbisection.html#leftvalue" class="tsd-kind-icon">left<wbr>Value</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#right" class="tsd-kind-icon">right</a>
+								<a href="fudgeaid.arithbisection.html#right" class="tsd-kind-icon">right</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#rightvalue" class="tsd-kind-icon">right<wbr>Value</a>
+								<a href="fudgeaid.arithbisection.html#rightvalue" class="tsd-kind-icon">right<wbr>Value</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#solve" class="tsd-kind-icon">solve</a>
+								<a href="fudgeaid.arithbisection.html#solve" class="tsd-kind-icon">solve</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgeaid.arithintervalsolver.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+								<a href="fudgeaid.arithbisection.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
 							</li>
 						</ul>
 					</li>
@@ -451,13 +454,25 @@
 						<a href="fudgeaid.nodecoordinatesystem.html" class="tsd-kind-icon">Node<wbr>Coordinate<wbr>System</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.nodesprite.html" class="tsd-kind-icon">Node<wbr>Sprite</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
 						<a href="fudgeaid.nodethreepointlights.html" class="tsd-kind-icon">Node<wbr>Three<wbr>Point<wbr>Lights</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.spriteframe.html" class="tsd-kind-icon">Sprite<wbr>Frame</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="fudgeaid.spritesheetanimation.html" class="tsd-kind-icon">Sprite<wbr>Sheet<wbr>Animation</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="fudgeaid.statemachine.html" class="tsd-kind-icon">State<wbr>Machine</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
 						<a href="fudgeaid.statemachineinstructions.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Instructions</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/fudgeaid.spritesheetanimations.html" class="tsd-kind-icon">Sprite<wbr>Sheet<wbr>Animations</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="../interfaces/fudgeaid.statemachinemapstatetomethods.html" class="tsd-kind-icon">State<wbr>Machine<wbr>Map<wbr>State<wbr>ToMethods</a>
@@ -467,6 +482,12 @@
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter tsd-is-not-exported">
 						<a href="../modules/fudgeaid.html#statemachinemethod" class="tsd-kind-icon">State<wbr>Machine<wbr>Method</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/fudgeaid.html#addstandardlightcomponents" class="tsd-kind-icon">add<wbr>Standard<wbr>Light<wbr>Components</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/fudgeaid.html#createspritesheet" class="tsd-kind-icon">create<wbr>Sprite<wbr>Sheet</a>
 					</li>
 				</ul>
 			</nav>
