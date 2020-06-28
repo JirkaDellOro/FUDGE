@@ -132,11 +132,13 @@ declare namespace FudgeAid {
      */
     class NodeSprite extends ƒ.Node {
         private static mesh;
+        framerate: number;
         private cmpMesh;
         private cmpMaterial;
         private animation;
         private frameCurrent;
         private direction;
+        private timer;
         constructor(_name: string);
         setAnimation(_animation: SpriteSheetAnimation): void;
         /**
@@ -146,10 +148,9 @@ declare namespace FudgeAid {
         /**
          * Show the next frame of the sequence or start anew when the end or the start was reached, according to the direction of playing
          */
-        showFrameNext(): void;
+        showFrameNext: (_event: ƒ.EventTimer) => void;
         /**
-         *
-         * @param _direction
+         * Sets the direction for animation playback, negativ numbers make it play backwards.
          */
         setFrameDirection(_direction: number): void;
     }

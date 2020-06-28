@@ -3520,7 +3520,7 @@ declare namespace FudgeCore {
         private offset;
         private lastCallToElapsed;
         private timers;
-        private idTimerNext;
+        private idTimerAddedLast;
         constructor();
         /**
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
@@ -3579,6 +3579,10 @@ declare namespace FudgeCore {
          */
         setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
         /**
+         * This method is called internally by [[Time]] and [[Timer]] and must not be called otherwise
+         */
+        addTimer(_timer: Timer): number;
+        /**
          * Deletes the timer with the id given by this time object
          */
         deleteTimer(_id: number): void;
@@ -3628,6 +3632,8 @@ declare namespace FudgeCore {
          * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
          * @param _handler The [[TimerHandler]] instance to call
          * @param _arguments Additional arguments to pass to _handler
+         *
+         * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
          */
         constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]);
         /**
