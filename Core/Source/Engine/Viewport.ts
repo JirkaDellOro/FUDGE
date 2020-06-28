@@ -285,7 +285,7 @@ namespace FudgeCore {
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
      * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
-     *  
+     * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
      * @param _on 
      */
     public setFocus(_on: boolean): void {
@@ -395,7 +395,7 @@ namespace FudgeCore {
     }
 
     private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
-      _type = _type.slice(1); // chip the ƒlorentin
+      _type = _type.slice(1); // chip the ƒlorin
       if (_on)
         _target.addEventListener(_type, _handler);
       else
