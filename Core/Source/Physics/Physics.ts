@@ -44,7 +44,7 @@ namespace FudgeCore {
     public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): RayHitInfo {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let ray: OIMO.RayCastClosest = new OIMO.RayCastClosest();
-      let begin: OIMO.Vec3 = new OIMO.Vec3(_origin.x, _origin.y, _origin.y);
+      let begin: OIMO.Vec3 = new OIMO.Vec3(_origin.x, _origin.y, _origin.z);
       let end: OIMO.Vec3 = this.getRayEndPoint(begin, new Vector3(_direction.x, _direction.y, _direction.z), _length);
       ray.clear();
       if (_group == PHYSICS_GROUP.DEFAULT) { //Case 1: Raycasting the whole world, normal mode
@@ -92,27 +92,31 @@ namespace FudgeCore {
       this.world.updateWorldFromWorldMatrix();
     }
 
+    /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin. 
+     * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
+     */
     private static getRayEndPoint(start: OIMO.Vec3, direction: Vector3, length: number): OIMO.Vec3 {
-      let origin: Vector3 = new Vector3(start.x, start.y, start.z); //Raycast Endpoint equals Startpoint + Direction*Length
+      let origin: Vector3 = new Vector3(start.x, start.y, start.z);
       let scaledDirection: Vector3 = direction;
       scaledDirection.scale(length);
-      let endpoint: Vector3 = Vector3.SUM(origin, scaledDirection);
+      let endpoint: Vector3 = Vector3.SUM(scaledDirection, origin);
       return new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z);
     }
 
+    /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
     private static getRayDistance(origin: Vector3, hitPoint: Vector3): number {
       let dx: number = origin.x - hitPoint.x;
       let dy: number = origin.y - hitPoint.y;
       let dz: number = origin.z - hitPoint.z;
-
       return Math.sqrt(dx * dx + dy * dy + dz * dz);
     }
 
-
+    /** Returns all the ComponentRigidbodies that are known to the physical space. */
     public getBodyList(): ComponentRigidbody[] {
       return this.bodyList;
     }
 
+    /** Returns all the ComponentRigidbodies that are in the specific group of triggers. */
     public getTriggerList(): ComponentRigidbody[] {
       return this.triggerBodyList;
     }

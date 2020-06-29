@@ -149,6 +149,25 @@ var Fudge;
         Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("UpdateViewNode");
         });
+        //Physics Menu Items | Marko Fehrenbach, HFU 2020
+        Fudge.ipcRenderer.on("togglePhysicsDebugView", (_event, _args) => {
+            ƒ.Physics.settings.debugDraw = !ƒ.Physics.settings.debugDraw;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_1", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_2", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_3", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.BOUNDING_BOXES;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_4", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.CONTACTS;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_5", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY;
+        });
     }
     function openViewNode() {
         node = new ƒAid.NodeCoordinateSystem("WorldCooSys");

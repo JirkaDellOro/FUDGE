@@ -1,7 +1,8 @@
 namespace FudgeCore {
   /**
     * Storing and manipulating rotations in the form of quaternions.
-    * Constructed out of the 4 components x,y,z,w.
+    * Constructed out of the 4 components x,y,z,w. Commonly used to calculate rotations in physics engines.
+    * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
     * @authors Marko Fehrenbach, HFU, 2020
     */
   export class Quaternion extends Mutable {
@@ -18,30 +19,33 @@ namespace FudgeCore {
       this.w = _w;
     }
 
+    /** Get/Set the X component of the Quaternion. Real Part */
     get X(): number {
       return this.x;
     }
-    get Y(): number {
-      return this.y;
-    }
-    get Z(): number {
-      return this.z;
-    }
-
-    get W(): number {
-      return this.w;
-    }
-
     set X(_x: number) {
       this.x = _x;
     }
+    /** Get/Set the Y component of the Quaternion. Real Part */
+    get Y(): number {
+      return this.y;
+    }
     set Y(_y: number) {
       this.y = _y;
+    }
+
+    /** Get/Set the Z component of the Quaternion. Real Part */
+    get Z(): number {
+      return this.z;
     }
     set Z(_z: number) {
       this.z = _z;
     }
 
+    /** Get/Set the Y component of the Quaternion. Imaginary Part */
+    get W(): number {
+      return this.w;
+    }
     set W(_w: number) {
       this.w = _w;
     }
@@ -50,14 +54,12 @@ namespace FudgeCore {
      * Create quaternion from vector3 angles in degree
      */
     public setFromVector3(rollX: number, pitchY: number, yawZ: number): void {
-
       let cy: number = Math.cos(yawZ * 0.5);
       let sy: number = Math.sin(yawZ * 0.5);
       let cp: number = Math.cos(pitchY * 0.5);
       let sp: number = Math.sin(pitchY * 0.5);
       let cr: number = Math.cos(rollX * 0.5);
       let sr: number = Math.sin(rollX * 0.5);
-
 
       this.w = cr * cp * cy + sr * sp * sy;
       this.x = sr * cp * cy - cr * sp * sy;
@@ -66,7 +68,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Return euler angles in vector3 from quaterion
+     * Returns the euler angles in radians as Vector3 from this quaternion.
      */
     public toEulerangles(): Vector3 { //Singularities possible
       let angles: Vector3 = new Vector3();
@@ -89,11 +91,10 @@ namespace FudgeCore {
       angles.z = Math.atan2(sinycosp, cosycosp);
 
       return angles;
-
     }
 
     /**
-     * Return angles in degrees as vector3 from quaterion
+     * Return angles in degrees as vector3 from this. quaterion
      */
     public toDegrees(): Vector3 {
       let angles: Vector3 = this.toEulerangles();
@@ -111,9 +112,9 @@ namespace FudgeCore {
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
 
+    /** Copying the sign of a to b */
     private copysign(a: number, b: number): number {
       return b < 0 ? -Math.abs(a) : Math.abs(a);
     }
-
   }
 }

@@ -53,12 +53,12 @@ namespace FudgePhysics_Communication {
     bodies[2].mtxLocal.translate(new f.Vector3(10, 2, 0), true);
     bodies[2].mtxLocal.scale(new f.Vector3(3, 5, 5));
 
-    bodies[3] = createCompleteMeshNode("Cube_3", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
+    bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
     moveableTransform = bodies[3].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[3]);
     moveableTransform.local.scale(new f.Vector3(1, 2, 1));
     moveableTransform.local.rotateY(180);
-    moveableTransform.local.translate(new f.Vector3(-4, 0.5, 0));
+    moveableTransform.local.translate(new f.Vector3(0, 0.5, 0));
 
     bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
     bodies[4].removeComponent(bodies[4].getComponent(f.ComponentRigidbody));
@@ -81,8 +81,6 @@ namespace FudgePhysics_Communication {
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
     viewPort.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
     viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
-    //viewPort.activatePointerEvent(f.EVENT_POINTER.DOWN, true);
-    //viewPort.addEventListener(f.EVENT_POINTER.DOWN, hndPointerDown);
 
     viewPort.showSceneGraph();
     f.Physics.settings.debugDraw = true;
@@ -94,7 +92,7 @@ namespace FudgePhysics_Communication {
 
   function update(): void {
     f.Physics.world.simulate();
-    hndPointerDown();
+    continousRaycast();
     viewPort.draw();
     measureFPS();
   }
@@ -146,7 +144,6 @@ namespace FudgePhysics_Communication {
       vertical -= 1 * stepWidth;
     }
     let pos: f.Vector3 = new f.Vector3(horizontal, 0, vertical);
-
     moveableTransform.local.translate(pos, true);
   }
 
@@ -154,14 +151,14 @@ namespace FudgePhysics_Communication {
     moveableTransform.local.rotateY(_event.movementX * speedCameraRotation);
   }
 
-  function hndPointerDown(): void {//_event: f.EventPointer): void {
+  function continousRaycast(): void {//_event: f.EventPointer): void {
     origin = bodies[4].mtxWorld.translation;
     let forward: f.Vector3;
-
     forward = f.Vector3.Z();
     forward.transform(bodies[4].mtxWorld, false);
 
-    hitInfo = f.Physics.raycast(origin, forward, 10);
+    hitInfo = f.Physics.raycast(origin, forward, 20);
+
     if (hitInfo.hit == true && hitInfo.rigidbodyComponent.getContainer().name == "Target") {
       f.Debug.log("hit");
     }

@@ -67,7 +67,73 @@ namespace FudgePhysics_Communication {
     bodies[4].mtxLocal.scale(new f.Vector3(1.5, 1.5, 1.5));
     bodies[4].mtxLocal.rotateY(120, false);
 
+    //#region  CompoundCollider Workaround
+    //Compound Collider Workaround, through making ONE convex collider on a main object that has the shape of the result object instead of having multiple shapes on a rigidbody
+    let colVertices: Float32Array = new Float32Array
+      ([
+        1, -1, 1,
+        0, -2, 0,
+        1, 1, 1,
+        - 1, 1, 1,
+        - 1, -1, 1,
+        -2, 0, 0,
+        1, 1, -1,
+        - 1, 1, -1,
+        - 1, -1, -1,
+        0, 0, -2,
+        1, -1, -1,
+        2, 0, 0,
+        0, 2, 0,
+        0, 0, 2
+      ]);
 
+    //Main Shape
+    bodies[5] = createCompleteMeshNode("Compound", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshCube, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CONVEX, colVertices);
+    hierarchy.appendChild(bodies[5]);
+    bodies[5].mtxLocal.translate(new f.Vector3(2.5, 4, 3.5));
+    bodies[5].mtxLocal.rotateX(27);
+    bodies[5].mtxLocal.rotateY(32);
+    //Components
+    bodies[6] = createCompleteMeshNode("CompoundUpper", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[6].removeComponent(bodies[6].getComponent(f.ComponentRigidbody));
+    bodies[6].mtxLocal.translateY(0.5);
+    bodies[6].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[6]);
+    bodies[7] = createCompleteMeshNode("CompoundLower", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[7].removeComponent(bodies[7].getComponent(f.ComponentRigidbody));
+    bodies[7].mtxLocal.rotateX(180);
+    bodies[7].mtxLocal.translateY(0.5);
+    bodies[7].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[7]);
+    bodies[8] = createCompleteMeshNode("CompoundLeft", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[8].removeComponent(bodies[8].getComponent(f.ComponentRigidbody));
+    bodies[8].mtxLocal.rotateZ(90);
+    bodies[8].mtxLocal.translateY(0.5);
+    bodies[8].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[8]);
+    bodies[9] = createCompleteMeshNode("CompoundRight", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[9].removeComponent(bodies[9].getComponent(f.ComponentRigidbody));
+    bodies[9].mtxLocal.rotateZ(-90);
+    bodies[9].mtxLocal.translateY(0.5);
+    bodies[9].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[9]);
+    bodies[10] = createCompleteMeshNode("CompoundFront", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[10].removeComponent(bodies[10].getComponent(f.ComponentRigidbody));
+    bodies[10].mtxLocal.rotateX(90);
+    bodies[10].mtxLocal.translateY(0.5);
+    bodies[10].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[10]);
+    bodies[11] = createCompleteMeshNode("CompoundBack", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.3, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[11].removeComponent(bodies[11].getComponent(f.ComponentRigidbody));
+    bodies[11].mtxLocal.rotateX(-90);
+    bodies[11].mtxLocal.translateY(0.5);
+    bodies[11].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
+    bodies[5].appendChild(bodies[11]);
+    bodies[5].getComponent(f.ComponentRigidbody).setRestitution(2);
+    //#endregion
+
+
+    //Rest initialization
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
     cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     hierarchy.addComponent(cmpLight);
@@ -111,13 +177,13 @@ namespace FudgePhysics_Communication {
     });
   }
 
-  function createCompleteMeshNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
+  function createCompleteMeshNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE, _convexMesh: Float32Array = null): f.Node {
     let node: f.Node = new f.Node(_name);
     let cmpMesh: f.ComponentMesh = new f.ComponentMesh(_mesh);
     let cmpMaterial: f.ComponentMaterial = new f.ComponentMaterial(_material);
 
     let cmpTransform: f.ComponentTransform = new f.ComponentTransform();
-    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group, null);
+    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group, null, _convexMesh);
     cmpRigidbody.setRestitution(0.2);
     cmpRigidbody.setFriction(0.8);
     node.addComponent(cmpMesh);

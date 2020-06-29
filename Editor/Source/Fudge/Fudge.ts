@@ -54,6 +54,26 @@ namespace Fudge {
       ƒ.Debug.log("UpdateViewNode");
 
     });
+
+    //Physics Menu Items | Marko Fehrenbach, HFU 2020
+    ipcRenderer.on("togglePhysicsDebugView", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugDraw = !ƒ.Physics.settings.debugDraw;
+    });
+    ipcRenderer.on("PhysicsViewMode_1", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+    });
+    ipcRenderer.on("PhysicsViewMode_2", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+    });
+    ipcRenderer.on("PhysicsViewMode_3", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.BOUNDING_BOXES;
+    });
+    ipcRenderer.on("PhysicsViewMode_4", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.CONTACTS;
+    });
+    ipcRenderer.on("PhysicsViewMode_5", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY;
+    });
   }
 
   function openViewNode(): void {

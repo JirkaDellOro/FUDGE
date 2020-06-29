@@ -4079,7 +4079,7 @@ declare namespace FudgeCore {
         activateAutoSleep(): void;
         /**
          * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
-         * returning info about the hit.
+         * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
          */
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
         private createRigidbody;
@@ -4339,9 +4339,15 @@ declare namespace FudgeCore {
       * Starts the physical world by checking that each body has the correct values from the Scene Tree
       */
         static start(_sceneTree: Node): void;
+        /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
+         * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
+         */
         private static getRayEndPoint;
+        /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
+        /** Returns all the ComponentRigidbodies that are known to the physical space. */
         getBodyList(): ComponentRigidbody[];
+        /** Returns all the ComponentRigidbodies that are in the specific group of triggers. */
         getTriggerList(): ComponentRigidbody[];
         /**
       * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
@@ -4394,7 +4400,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
       * Storing and manipulating rotations in the form of quaternions.
-      * Constructed out of the 4 components x,y,z,w.
+      * Constructed out of the 4 components x,y,z,w. Commonly used to calculate rotations in physics engines.
+      * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
       * @authors Marko Fehrenbach, HFU, 2020
       */
     class Quaternion extends Mutable {
@@ -4403,28 +4410,33 @@ declare namespace FudgeCore {
         private z;
         private w;
         constructor(_x?: number, _y?: number, _z?: number, _w?: number);
+        /** Get/Set the X component of the Quaternion. Real Part */
         get X(): number;
-        get Y(): number;
-        get Z(): number;
-        get W(): number;
         set X(_x: number);
+        /** Get/Set the Y component of the Quaternion. Real Part */
+        get Y(): number;
         set Y(_y: number);
+        /** Get/Set the Z component of the Quaternion. Real Part */
+        get Z(): number;
         set Z(_z: number);
+        /** Get/Set the Y component of the Quaternion. Imaginary Part */
+        get W(): number;
         set W(_w: number);
         /**
          * Create quaternion from vector3 angles in degree
          */
         setFromVector3(rollX: number, pitchY: number, yawZ: number): void;
         /**
-         * Return euler angles in vector3 from quaterion
+         * Returns the euler angles in radians as Vector3 from this quaternion.
          */
         toEulerangles(): Vector3;
         /**
-         * Return angles in degrees as vector3 from quaterion
+         * Return angles in degrees as vector3 from this. quaterion
          */
         toDegrees(): Vector3;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
+        /** Copying the sign of a to b */
         private copysign;
     }
 }
