@@ -68,14 +68,16 @@ namespace ParticleSystemTest {
     particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.1, 0.1));
     particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.2, 0.2);
 
-    particleSystem = new f.ComponentParticleSystem("data.json", input.valueAsNumber);
+    let particleEffect: f.ParticleEffect = new f.ParticleEffect("data.json", input.valueAsNumber);
+
+    particleSystem = new f.ComponentParticleSystem(particleEffect);
     particles.addComponent(particleSystem);
     root.addChild(particles);
-    console.log(particleSystem.effectData);
 
     // setup input
     input.addEventListener("input", (_event: Event) => {
-      let newParticleSystem: f.ComponentParticleSystem = new f.ComponentParticleSystem("data.json", input.valueAsNumber);
+      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect("data.json", input.valueAsNumber);
+      let newParticleSystem: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
       particles.removeComponent(particleSystem);
       particles.addComponent(newParticleSystem);
       particleSystem = newParticleSystem;
@@ -87,8 +89,6 @@ namespace ParticleSystemTest {
     f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
 
     function update(_event: f.Eventƒ): void {
-      let time: number = f.Time.game.get() / 1000;
-      particleSystem.updateParticleEffect(time);
       // console.log(particles.getComponent(f.ComponentTransform).local);
       viewport.draw();
     }

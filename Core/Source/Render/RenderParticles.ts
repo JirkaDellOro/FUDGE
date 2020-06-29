@@ -10,21 +10,20 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
 
-      let storedValues: StoredValues = cmpParticleSystem.storedValues;
-      let effectData: ParticleEffectData = cmpParticleSystem.effectData;
+      let particleEffect: ParticleEffect = cmpParticleSystem.particleEffect;
+
+      let storedValues: StoredValues = particleEffect.storedValues;
 
       storedValues["time"] = Time.game.get() / 1000;
 
-      // TODO: names 
-      let storageData: ParticleEffectData = effectData["storage"];
-      let transformData: ParticleEffectData = effectData["transformations"];
-      let transformDataLocal: ParticleEffectData = transformData["local"];
-      let transformDataWorld: ParticleEffectData = transformData["world"];
-      let componentsData: ParticleEffectData = effectData["components"];
+      // TODO: names
+      let transformLocal: ParticleEffectData = particleEffect.transformLocal;
+      let transformWorld: ParticleEffectData = particleEffect.transformWorld;
+      let mutationComponents: ParticleEffectData = particleEffect.mutationComponents;
 
       // get relevant components
       let components: Component[] = [];
-      for (const componentClass in componentsData) {
+      for (const componentClass in mutationComponents) {
         components.push(_node.getComponent((<General>globalThis["FudgeCore"])[componentClass]));
       }
       let componentsLength: number = components.length;
@@ -34,12 +33,11 @@ namespace FudgeCore {
         componentMutators.push(components[i].getMutator());
       }
 
-      let particleStorage: ParticleEffectData;
       // evaluate update storage
-      if (storageData) {
-        cmpParticleSystem.evaluateClosureStorage(storageData["update"]);
-        particleStorage = storageData["particle"];
-      }
+      cmpParticleSystem.evaluateClosureStorage(particleEffect.storageUpdate);
+
+      let storageParticle: ParticleEffectData;
+      storageParticle = particleEffect.storageParticle;
 
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
@@ -47,24 +45,24 @@ namespace FudgeCore {
         storedValues["index"] = i;
 
         // evaluate particle storage
-        cmpParticleSystem.evaluateClosureStorage(particleStorage);
+        cmpParticleSystem.evaluateClosureStorage(storageParticle);
 
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
 
-        finalTransform.mutate(this.getMutatorFor(transformDataLocal));
-        for (const key in transformDataLocal) {
+        finalTransform.mutate(this.getMutatorFor(transformLocal));
+        for (const key in transformLocal) {
           // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
           let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(transformDataLocal[key]));
+          transformVector.mutate(this.getMutatorFor(transformLocal[key]));
           (<General>finalTransform)[key](transformVector);
           Recycler.store(transformVector);
         }
 
         let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY(); // only if world is set in json
-        for (const key in transformDataWorld) {
+        for (const key in transformWorld) {
           let transformVector: Vector3 = Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(transformDataWorld[key]));
+          transformVector.mutate(this.getMutatorFor(transformWorld[key]));
           (<General>worldTransform)[key](transformVector);
           Recycler.store(transformVector);
         }
@@ -79,7 +77,7 @@ namespace FudgeCore {
 
         // evaluate component data
         for (let i: number = 0; i < componentsLength; i++) {
-          components[i].mutate(this.getMutatorFor(componentsData[components[i].type]));
+          components[i].mutate(this.getMutatorFor(mutationComponents[components[i].type]));
         }
 
         // render
