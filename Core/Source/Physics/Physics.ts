@@ -13,14 +13,15 @@ namespace FudgeCore {
     /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
     public static settings: PhysicsSettings;
 
+    /** The rendering of physical debug informations. Used internally no interaction needed.*/
+    public debugDraw: PhysicsDebugDraw;
+    /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
+    public mainCam: ComponentCamera;
+
     private oimoWorld: OIMO.World;
     private bodyList: ComponentRigidbody[] = new Array();
     private triggerBodyList: ComponentRigidbody[] = new Array();
     private jointList: ComponentJoint[] = new Array();
-    public debugDraw: PhysicsDebugDraw;
-    public mainCam: ComponentCamera;
-
-
 
     /**
    * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
@@ -30,16 +31,16 @@ namespace FudgeCore {
       if (typeof OIMO !== 'undefined' && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
-        this.world.createWorld();
-        this.world.debugDraw = new PhysicsDebugDraw();
-        this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw);
+        this.world.createWorld(); //create the actual oimoPhysics World
+        this.world.debugDraw = new PhysicsDebugDraw();  //Create a Fudge Physics debugging handling object
+        this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
       }
       return this.world;
     }
 
     /**
   * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
-  * hit point.
+  * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
   */
     public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): RayHitInfo {
       let hitInfo: RayHitInfo = new RayHitInfo();
@@ -49,7 +50,7 @@ namespace FudgeCore {
       ray.clear();
       if (_group == PHYSICS_GROUP.DEFAULT) { //Case 1: Raycasting the whole world, normal mode
         Physics.world.oimoWorld.rayCast(begin, end, ray);
-      } else { //Raycasting on each body in a specific group
+      } else { //Case2: Raycasting on each body in a specific group
         let allHits: RayHitInfo[] = new Array();
         this.world.bodyList.forEach(function (value: ComponentRigidbody): void {
           if (value.collisionGroup == _group) {
@@ -65,7 +66,7 @@ namespace FudgeCore {
           }
         });
       }
-      if (ray.hit) {
+      if (ray.hit) { //Fill in informations on the hit
         hitInfo.hit = true;
         hitInfo.hitPoint = new Vector3(ray.position.x, ray.position.y, ray.position.z);
         hitInfo.hitNormal = new Vector3(ray.normal.x, ray.normal.y, ray.normal.z);
@@ -77,7 +78,7 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.hitPoint = new Vector3(end.x, end.y, end.z);
       }
-      if (Physics.settings.debugDraw) {
+      if (Physics.settings.debugDraw) { //Handle debugging
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
@@ -188,26 +189,31 @@ namespace FudgeCore {
   */
     public simulate(_deltaTime: number = 1 / 60): void {
       if (this.jointList.length > 0)
-        this.connectJoints();
-      Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());
+        this.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
+      Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
       if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) { //Get Cam from viewport instead of setting it for physics
-        Physics.world.debugDraw.begin();
-        Physics.world.oimoWorld.debugDraw();
+        Physics.world.debugDraw.begin();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
+        Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
       }
     }
 
+    /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
     public registerTrigger(_rigidbody: ComponentRigidbody): void {
       if (this.triggerBodyList.indexOf(_rigidbody) == -1)
         this.triggerBodyList.push(_rigidbody);
     }
 
+    /** Remove the given ComponentRigidbody the world as viable triggeringBody. Used internally no interaction needed. */
     public unregisterTrigger(_rigidbody: ComponentRigidbody): void {
       let id: number = this.bodyList.indexOf(_rigidbody);
       this.bodyList.splice(id, 1);
     }
 
+    /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+     * if any of the two paired ComponentRigidbodies change.
+     */
     public connectJoints(): void { //Try to connect dirty joints until they are connected
-      let jointsToConnect: ComponentJoint[] = new Array(); //Copy Array because removing/readding in the connecting
+      let jointsToConnect: ComponentJoint[] = new Array(); //Copy original Array because removing/readding in the connecting process
       this.jointList.forEach(function (value: ComponentJoint): void {
         jointsToConnect.push(value);
       });
@@ -227,17 +233,14 @@ namespace FudgeCore {
       this.jointList.push(_cmpJoint);
     }
 
+    /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
     private updateWorldFromWorldMatrix(): void {
-      let bodiesToUpdate: ComponentRigidbody[] = new Array(); //Copy Array because removing/readding in the updateFromworld
       this.bodyList.forEach(function (value: ComponentRigidbody): void {
-        bodiesToUpdate.push(value);
-      });
-
-      bodiesToUpdate.forEach(function (value: ComponentRigidbody): void {
         value.updateFromWorld();
       });
     }
 
+    /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
     private createWorld(): void {
       Physics.world.oimoWorld = new OIMO.World();
     }

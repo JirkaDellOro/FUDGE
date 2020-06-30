@@ -3966,7 +3966,7 @@ declare namespace FudgeCore {
         /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
         convexMesh: Float32Array;
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-         * reacting to a [[Node]] that is using physics but can be controlled by animation or transform. And STATIC means its immovable.
+         * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
         get physicsType(): PHYSICS_TYPE;
         set physicsType(_value: PHYSICS_TYPE);
@@ -4000,8 +4000,11 @@ declare namespace FudgeCore {
         /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
         get gravityScale(): number;
         set gravityScale(_influence: number);
+        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
         collisions: ComponentRigidbody[];
+        /** Triggers that are currently triggering this body */
         triggers: ComponentRigidbody[];
+        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
         bodiesInTrigger: ComponentRigidbody[];
         private rigidbody;
         private massData;
@@ -4018,6 +4021,7 @@ declare namespace FudgeCore {
         private angDamping;
         private rotationalInfluenceFactor;
         private gravityInfluenceFactor;
+        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /**
         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
@@ -4122,15 +4126,21 @@ declare namespace FudgeCore {
          * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
          */
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
+        /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
+        /** Creates a collider a shape that represents the object in the physical world.  */
         private createCollider;
         /** Creating a shape that represents a in itself closed form, out of the given vertices. */
         private createConvexGeometryCollider;
         /** Internal implementation of vertices that construct a pyramid. The vertices of the implemented pyramid mesh can be used too. But they are halfed and double sided, so it's more performant to use this. */
         private createPyramidVertices;
+        /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
         private addRigidbodyToWorld;
+        /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
         private removeRigidbodyFromWorld;
+        /** Check if two OimoPhysics Shapes collide with each other. By overlapping their approximations */
         private collidesWith;
+        /** Find the approximated entry point of a trigger event. To give the event a approximated information where to put something in the world when a triggerEvent has happened */
         private getTriggerEnterPoint;
         /**
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
@@ -4252,6 +4262,7 @@ declare namespace FudgeCore {
         binomalImpulse: number;
         /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
         collisionPoint: Vector3;
+        /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
         constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3);
     }
     /**
@@ -4313,6 +4324,7 @@ declare namespace FudgeCore {
     }
     /** General settings for the physic simulation and the debug of it. */
     class PhysicsSettings {
+        /** Whether the debug informations of the physics should be displayed or not (default = false) */
         debugDraw: boolean;
         private physicsDebugMode;
         get debugMode(): PHYSICS_DEBUGMODE;
@@ -4359,12 +4371,14 @@ declare namespace FudgeCore {
         static world: Physics;
         /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
         static settings: PhysicsSettings;
+        /** The rendering of physical debug informations. Used internally no interaction needed.*/
+        debugDraw: PhysicsDebugDraw;
+        /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
+        mainCam: ComponentCamera;
         private oimoWorld;
         private bodyList;
         private triggerBodyList;
         private jointList;
-        debugDraw: PhysicsDebugDraw;
-        mainCam: ComponentCamera;
         /**
        * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
        * rigidbodies.
@@ -4372,7 +4386,7 @@ declare namespace FudgeCore {
         static initializePhysics(): Physics;
         /**
       * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
-      * hit point.
+      * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
       */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
         /**
@@ -4425,15 +4439,22 @@ declare namespace FudgeCore {
       * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
       */
         simulate(_deltaTime?: number): void;
+        /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
         registerTrigger(_rigidbody: ComponentRigidbody): void;
+        /** Remove the given ComponentRigidbody the world as viable triggeringBody. Used internally no interaction needed. */
         unregisterTrigger(_rigidbody: ComponentRigidbody): void;
+        /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+         * if any of the two paired ComponentRigidbodies change.
+         */
         connectJoints(): void;
         /**
         * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
         * be recreated.
         */
         changeJointStatus(_cmpJoint: ComponentJoint): void;
+        /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
         private updateWorldFromWorldMatrix;
+        /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
         private createWorld;
     }
 }

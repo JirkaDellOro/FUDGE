@@ -26,6 +26,7 @@ namespace FudgeCore {
     /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
     public collisionPoint: Vector3;
 
+    /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
     constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint: Vector3 = null) {
       super(_type);
       this.cmpRigidbody = _hitRigidbody;
@@ -107,6 +108,7 @@ namespace FudgeCore {
   /** General settings for the physic simulation and the debug of it. */
   export class PhysicsSettings {
 
+    /** Whether the debug informations of the physics should be displayed or not (default = false) */
     public debugDraw: boolean = false;
 
     private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;

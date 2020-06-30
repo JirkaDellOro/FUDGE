@@ -494,8 +494,7 @@ namespace FudgeCore {
 
     public begin() {
       this.getDebugModeFromSettings();
-      //this.gl.lineWidth(2.0); //Does not seem to affect anythign
-
+      //this.gl.lineWidth(2.0); //Does not affect anything because lineWidth is currently only supported by Microsoft Edge and Fudge is optimized for Chrome
       let projection: Float32Array = Physics.world.mainCam.ViewProjectionMatrix.get();
       this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_projection"), false, projection);
 

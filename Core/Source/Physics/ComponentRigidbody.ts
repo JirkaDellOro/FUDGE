@@ -16,7 +16,7 @@ namespace FudgeCore {
     public convexMesh: Float32Array;
 
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-     * reacting to a [[Node]] that is using physics but can be controlled by animation or transform. And STATIC means its immovable.
+     * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
      */
     get physicsType(): PHYSICS_TYPE {
       return this.rbType;
@@ -53,7 +53,7 @@ namespace FudgeCore {
       return this.colGroup;
     }
     set collisionGroup(_value: PHYSICS_GROUP) {
-      if (_value != PHYSICS_GROUP.TRIGGER && this.colGroup == PHYSICS_GROUP.TRIGGER)
+      if (_value != PHYSICS_GROUP.TRIGGER && this.colGroup == PHYSICS_GROUP.TRIGGER) //Register/unregister triggers form the world
         Physics.world.unregisterTrigger(this);
       if (_value == PHYSICS_GROUP.TRIGGER)
         Physics.world.registerTrigger(this);
@@ -123,10 +123,14 @@ namespace FudgeCore {
       if (this.rigidbody != null) this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
     }
 
+    /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
     public collisions: ComponentRigidbody[] = new Array();
+    /** Triggers that are currently triggering this body */
     public triggers: ComponentRigidbody[] = new Array();
+    /** Bodies that trigger this "trigger", only happening if this body is a trigger */
     public bodiesInTrigger: ComponentRigidbody[] = new Array();
 
+    //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
     private rigidbody: OIMO.RigidBody;
     private massData: OIMO.MassData = new OIMO.MassData();
     private collider: OIMO.Shape;
@@ -143,8 +147,10 @@ namespace FudgeCore {
     private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
     private gravityInfluenceFactor: number = 1;
 
+    /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
     constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
+      //Setting up all incoming values to be internal values
       this.convexMesh = _convexMesh;
       this.rbType = _type;
       this.collisionGroup = _group;
@@ -153,7 +159,9 @@ namespace FudgeCore {
       this.restitution = Physics.settings.defaultRestitution;
       this.friction = Physics.settings.defaultFriction;
       this.colMask = Physics.settings.defaultCollisionMask;
+      //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
+      //Handling adding/removing the component
       this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
     }
@@ -171,42 +179,41 @@ namespace FudgeCore {
    * Automatically called in the RenderManager, no interaction needed.
    */
     public checkCollisionEvents(): void {
-      let list: OIMO.ContactLink = this.rigidbody.getContactLinkList();
-      let objHit: ComponentRigidbody;
+      let list: OIMO.ContactLink = this.rigidbody.getContactLinkList(); //all physical contacts between colliding bodies on this rb
+      let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
       let objHit2: ComponentRigidbody;
-      let event: EventPhysics;
+      let event: EventPhysics;  //The event that will be send and the informations added to it
       let normalImpulse: number = 0;
       let binormalImpulse: number = 0;
       let tangentImpulse: number = 0;
       let colPoint: Vector3;
-      //ADD
+      //ADD NEW Collision - That just happened
       for (let i: number = 0; i < this.rigidbody.getNumContectLinks(); i++) {
-        let collisionManifold: OIMO.Manifold = list.getContact().getManifold();
-        objHit = list.getContact().getShape1().userData;
+        let collisionManifold: OIMO.Manifold = list.getContact().getManifold(); //Manifold = Additional informations about the contact
+        objHit = list.getContact().getShape1().userData;  //Userdata is used to transfer the ƒ.ComponentRigidbody, it's an empty OimoPhysics Variable
         //Only register the collision on the actual touch, not on "shadowCollide", to register in the moment of impulse calculation
-        if (objHit == null || list.getContact().isTouching() == false)
+        if (objHit == null || list.getContact().isTouching() == false) // only act if the collision is actual touching, so right at the moment when a impulse is happening, not when shapes overlap
           return;
         objHit2 = list.getContact().getShape2().userData;
         if (objHit2 == null || list.getContact().isTouching() == false)
           return;
-        let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints();
+        let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints(); //All points in the collision where the two bodies are touching, used to calculate the full impact
         normalImpulse = 0;
         binormalImpulse = 0;
         tangentImpulse = 0;
-        if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) {
-          let colPos: OIMO.Vec3 = points[0].getPosition2();
+        if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) { //Fire, if the hit object is not the Body itself but another and it's not already fired.
+          let colPos: OIMO.Vec3 = points[0].getPosition2(); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
-          points.forEach((value: OIMO.ManifoldPoint): void => {
+          points.forEach((value: OIMO.ManifoldPoint): void => { //The impact of the collision involving all touching points
             normalImpulse += value.getNormalImpulse();
             binormalImpulse += value.getBinormalImpulse();
             tangentImpulse += value.getTangentImpulse();
           });
-
-          this.collisions.push(objHit);
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint);
-          this.dispatchEvent(event);
+          this.collisions.push(objHit); //Tell the object that the event for this object does not need to be fired again
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint); //Building the actual event, with what object did collide and informations about it
+          this.dispatchEvent(event); //Sending the given event
         }
-        if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) {
+        if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) { //Same as the above but for the case the SECOND hit object is not the body itself
           let colPos: OIMO.Vec3 = points[0].getPosition2();
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
           points.forEach((value: OIMO.ManifoldPoint): void => {
@@ -219,23 +226,23 @@ namespace FudgeCore {
           event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint);
           this.dispatchEvent(event);
         }
-        list = list.getNext();
+        list = list.getNext(); //Start the same routine with the next collision in the list
       }
-      //REMOVE
+      //REMOVE OLD Collisions - That do not happen anymore
       this.collisions.forEach((value: ComponentRigidbody) => { //Every Collider in the list is checked if the collision is still happening
         let isColliding: boolean = false;
         list = this.rigidbody.getContactLinkList();
         for (let i: number = 0; i < this.rigidbody.getNumContectLinks(); i++) {
           objHit = list.getContact().getShape1().userData;
           objHit2 = list.getContact().getShape2().userData;
-          if (value == objHit || value == objHit2) {
+          if (value == objHit || value == objHit2) { //If the given object in the collisions list is still one of the objHit the collision is not CollisionEXIT
             isColliding = true;
           }
           list = list.getNext();
         }
-        if (isColliding == false) {
-          let index: number = this.collisions.indexOf(value);
-          this.collisions.splice(index);
+        if (isColliding == false) { //The collision is exiting but was in the collision list, then EXIT Event needs to be fired
+          let index: number = this.collisions.indexOf(value); //Find object in the array
+          this.collisions.splice(index); //remove it from the array
           event = new EventPhysics(EVENT_PHYSICS.COLLISION_EXIT, value, 0, 0, 0);
           this.dispatchEvent(event);
         }
@@ -247,11 +254,11 @@ namespace FudgeCore {
       * or triggered [[Node]]. Automatically called in the RenderManager, no interaction needed.
       */
     public checkTriggerEvents(): void {
-      let possibleTriggers: ComponentRigidbody[] = Physics.world.getTriggerList();
+      let possibleTriggers: ComponentRigidbody[] = Physics.world.getTriggerList(); //Get the array from the world that contains every trigger existing and check it with this body
       let event: EventPhysics;
-      //ADD
+      //ADD - Similar to collision events but with overlapping instead of an actual collision
       possibleTriggers.forEach((value: ComponentRigidbody) => {
-        let overlapping: boolean = this.collidesWith(this.getOimoRigidbody(), value.getOimoRigidbody());
+        let overlapping: boolean = this.collidesWith(this.getOimoRigidbody(), value.getOimoRigidbody()); //Check if the two colliders are overlapping
         if (overlapping && this.triggers.indexOf(value) == -1) {
           this.triggers.push(value);
           let enterPoint: Vector3 = this.getTriggerEnterPoint(this.getOimoRigidbody(), value.getOimoRigidbody());
@@ -269,7 +276,7 @@ namespace FudgeCore {
           this.dispatchEvent(event);
         }
       });
-      if (this.colGroup == PHYSICS_GROUP.TRIGGER) {
+      if (this.colGroup == PHYSICS_GROUP.TRIGGER) { //In case this is a trigger, it does not only need to send a trigger to everyone else but also receive a triggering for itself.
         this.checkBodiesInTrigger();
       }
     }
@@ -278,8 +285,8 @@ namespace FudgeCore {
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
     public updateFromWorld(): void {
-      let worldTransform: Matrix4x4 = super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY();
-      let position: Vector3 = worldTransform.translation;
+      let worldTransform: Matrix4x4 = super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+      let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
       position.add(this.pivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
       rotation.add(this.pivot.rotation);
@@ -287,23 +294,23 @@ namespace FudgeCore {
       scaling.x *= this.pivot.scaling.x;
       scaling.y *= this.pivot.scaling.y;
       scaling.z *= this.pivot.scaling.z;
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType);
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType); //recreate the collider
       this.collider = new OIMO.Shape(this.colliderInfo);
       let oldCollider: OIMO.Shape = this.rigidbody.getShapeList();
-      this.rigidbody.addShape(this.collider);
-      this.rigidbody.removeShape(oldCollider);
-      this.collider.userData = this;
+      this.rigidbody.addShape(this.collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
+      this.rigidbody.removeShape(oldCollider); //remove the old collider
+      this.collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
       this.collider.setCollisionGroup(this.collisionGroup);
-      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER)
+      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER) //Trigger not collidering with anythign so their mask is only colliding with trigger
         this.collider.setCollisionMask(PHYSICS_GROUP.TRIGGER);
       else
         this.collider.setCollisionMask(this.colMask);
-      if (this.rigidbody.getShapeList() != null) {
+      if (this.rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
         this.rigidbody.getShapeList().setRestitution(this.restitution);
         this.rigidbody.getShapeList().setFriction(this.friction);
       }
       this.rigidbody.setMassData(this.massData);
-      this.setPosition(position);
+      this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);
     }
 
@@ -477,18 +484,21 @@ namespace FudgeCore {
       scaledDirection.scale(length);
       let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin);
       let oimoRay: OIMO.RayCastHit;
-      let hit: boolean = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay);
-      if (hit) {
+      let hit: boolean = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay); //the actual OimoPhysics Raycast
+      if (hit) {  //If hit return a bunch of informations about the hit
         hitInfo.hit = true;
         hitInfo.hitPoint = new Vector3(oimoRay.position.x, oimoRay.position.y, oimoRay.position.z);
         hitInfo.hitNormal = new Vector3(oimoRay.normal.x, oimoRay.normal.y, oimoRay.normal.z);
-        let dx: number = _origin.x - hitInfo.hitPoint.x;
+        let dx: number = _origin.x - hitInfo.hitPoint.x;  //calculate hit distance
         let dy: number = _origin.y - hitInfo.hitPoint.y;
         let dz: number = _origin.z - hitInfo.hitPoint.z;
         hitInfo.hitDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
         hitInfo.rigidbodyComponent = this;
         hitInfo.rayOrigin = _origin;
         hitInfo.rayEnd = endpoint;
+      } else { //Only tell the origin, and the hit point is the end of the ray.
+        hitInfo.rayOrigin = _origin;
+        hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
       if (Physics.settings.debugDraw) {
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
@@ -496,8 +506,9 @@ namespace FudgeCore {
       return hitInfo;
     }
 
+    /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
     private createRigidbody(_mass: number, _type: PHYSICS_TYPE, _colliderType: COLLIDER_TYPE, _transform: Matrix4x4, _collisionGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): void {
-      let oimoType: number; //Need the conversion from simple enum to oimo because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
+      let oimoType: number; //Need the conversion from simple enum to number because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
       switch (_type) {
         case PHYSICS_TYPE.DYNAMIC:
           oimoType = OIMO.RigidBodyType.DYNAMIC;
@@ -509,19 +520,21 @@ namespace FudgeCore {
           oimoType = OIMO.RigidBodyType.KINEMATIC;
           break;
       }
-      let tmpTransform: Matrix4x4 = _transform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _transform;
-
+      let tmpTransform: Matrix4x4 = _transform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _transform; //Get transform informations from the world, since physics does not care about hierarchy
+      //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
       let scale: OIMO.Vec3 = new OIMO.Vec3((tmpTransform.scaling.x * this.pivot.scaling.x) / 2, (tmpTransform.scaling.y * this.pivot.scaling.y) / 2, (tmpTransform.scaling.z * this.pivot.scaling.z) / 2);
       let position: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.translation.x + this.pivot.translation.x, tmpTransform.translation.y + this.pivot.translation.y, tmpTransform.translation.z + this.pivot.translation.z);
       let rotation: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.rotation.x + this.pivot.rotation.x, tmpTransform.rotation.y + this.pivot.rotation.y, tmpTransform.rotation.z + this.pivot.rotation.z);
       this.createCollider(scale, _colliderType);
-
-      this.massData.mass = _type != PHYSICS_TYPE.STATIC ? _mass : 0;
+      //Setting informations about mass, position/rotation and physical reaction type
+      this.massData.mass = _mass; //_type != PHYSICS_TYPE.STATIC ? _mass : 0; //If a object is static it acts as if it has no mass
       this.rigidbodyInfo.type = oimoType;
       this.rigidbodyInfo.position = position;
-      this.rigidbodyInfo.rotation.fromEulerXyz(new OIMO.Vec3(rotation.x, rotation.y, rotation.z));
+      this.rigidbodyInfo.rotation.fromEulerXyz(new OIMO.Vec3(rotation.x, rotation.y, rotation.z)); //Convert eulerAngles in degree to the internally used quaternions
+      //Creating the actual rigidbody and it's collider
       this.rigidbody = new OIMO.RigidBody(this.rigidbodyInfo);
       this.collider = new OIMO.Shape(this.colliderInfo);
+      //Filling the additional settings and informations the rigidbody needs. Who is colliding, how is the collision handled (damping, influence factors)
       this.collider.userData = this;
       this.collider.setCollisionGroup(_collisionGroup);
       if (_collisionGroup == PHYSICS_GROUP.TRIGGER)
@@ -538,12 +551,13 @@ namespace FudgeCore {
       this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
     }
 
+    /** Creates a collider a shape that represents the object in the physical world.  */
     private createCollider(_scale: OIMO.Vec3, _colliderType: COLLIDER_TYPE): void {
-      let shapeConf: OIMO.ShapeConfig = new OIMO.ShapeConfig();
+      let shapeConf: OIMO.ShapeConfig = new OIMO.ShapeConfig(); //Collider with geometry and infos like friction/restitution and more
       let geometry: OIMO.Geometry;
-      if (this.colliderType != _colliderType)
+      if (this.colliderType != _colliderType) //If the collider type was changed set the internal one new, else don't so there is not infinite set calls
         this.colliderType = _colliderType;
-      switch (_colliderType) {
+      switch (_colliderType) {  //Create a different OimoPhysics geometry based on the given type. That is only the mathematical shape of the collider
         case COLLIDER_TYPE.CUBE:
           geometry = new OIMO.BoxGeometry(_scale);
           break;
@@ -567,16 +581,16 @@ namespace FudgeCore {
           break;
       }
       shapeConf.geometry = geometry;
-      this.colliderInfo = shapeConf;
+      this.colliderInfo = shapeConf; //the configuration informations that are used to add an actual collider to the rigidbody in createRigidbody
     }
 
     /** Creating a shape that represents a in itself closed form, out of the given vertices. */
     private createConvexGeometryCollider(_vertices: Float32Array, _scale: OIMO.Vec3): OIMO.ConvexHullGeometry {
-      let verticesAsVec3: OIMO.Vec3[] = new Array();
-      for (let i: number = 0; i < _vertices.length; i += 3) {
+      let verticesAsVec3: OIMO.Vec3[] = new Array(); //Convert Fudge Vector3 to OimoVec3
+      for (let i: number = 0; i < _vertices.length; i += 3) { //3 Values for one point
         verticesAsVec3.push(new OIMO.Vec3(_vertices[i] * _scale.x, _vertices[i + 1] * _scale.y, _vertices[i + 2] * _scale.z));
       }
-      return new OIMO.ConvexHullGeometry(verticesAsVec3);
+      return new OIMO.ConvexHullGeometry(verticesAsVec3); //Tell OimoPhysics to create a hull that involves all points but close it of. A convex shape can not have a hole in it.
     }
 
     /** Internal implementation of vertices that construct a pyramid. The vertices of the implemented pyramid mesh can be used too. But they are halfed and double sided, so it's more performant to use this. */
@@ -588,16 +602,19 @@ namespace FudgeCore {
       return vertices;
     }
 
+    /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
     private addRigidbodyToWorld(): void {
       Physics.world.addRigidbody(this);
     }
 
+    /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld(): void {
       Physics.world.removeRigidbody(this);
     }
 
 
     //#region private EVENT functions
+    /** Check if two OimoPhysics Shapes collide with each other. By overlapping their approximations */
     private collidesWith(triggerRigidbody: OIMO.RigidBody, secondRigidbody: OIMO.RigidBody): boolean {
       let shape1: OIMO.Aabb = triggerRigidbody.getShapeList().getAabb();
       let shape2: OIMO.Aabb = secondRigidbody.getShapeList().getAabb();
@@ -605,10 +622,11 @@ namespace FudgeCore {
       let colliding: boolean = shape1.overlap(shape2);
       return colliding;
     }
+    /** Find the approximated entry point of a trigger event. To give the event a approximated information where to put something in the world when a triggerEvent has happened */
     private getTriggerEnterPoint(triggerRigidbody: OIMO.RigidBody, secondRigidbody: OIMO.RigidBody): Vector3 {
       let shape1: OIMO.Aabb = triggerRigidbody.getShapeList().getAabb();
       let shape2: OIMO.Aabb = secondRigidbody.getShapeList().getAabb();
-      //Center of a intersection should be the origion of the collision
+      //Center of a intersection should be the origion of the collision, because the triggering just happened so one or two touching points the center of it is the entry point
       let intersect: OIMO.Vec3 = shape1.getIntersection(shape2).getCenter();
       return new Vector3(intersect.x, intersect.y, intersect.z);
     }
@@ -617,7 +635,7 @@ namespace FudgeCore {
      * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
      */
     private checkBodiesInTrigger(): void {
-      let possibleBodies: ComponentRigidbody[] = Physics.world.getBodyList();
+      let possibleBodies: ComponentRigidbody[] = Physics.world.getBodyList(); //Since this is a trigger it checks itself against everybody in the world
       let event: EventPhysics;
       //ADD
       possibleBodies.forEach((value: ComponentRigidbody) => {
